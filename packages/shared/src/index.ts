@@ -132,6 +132,7 @@ export type VerificationApplication = {
   decidedAt: string | null; rationale: string | null;
 };
 export type ReviewApplication = Omit<VerificationApplication, "decidedAt" | "rationale"> & {
+  assignedToMe: boolean;
   organizationHandle: string | null; applicantName: string | null; applicantUsername: string | null; applicantId: string;
   evidence: string[];
   reviews: { decision: ReviewDecision; rationale: string; createdAt: string; isSelf: boolean }[];
@@ -176,3 +177,36 @@ export type AffiliationManagement = {
   requests: (AffiliationPersonPreview & { id: string; affiliationType: AffiliationType; message: string | null; createdAt: string })[];
   invitations: (AffiliationInvitation & { username: string | null })[];
 };
+export const platformRoles = ["administrator", "moderator", "verification_reviewer"] as const;
+export type PlatformRole = (typeof platformRoles)[number];
+export type AccountStatus = "active" | "suspended" | "banned";
+export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: boolean };
+export type AdminOverview = Record<"members" | "organizations" | "recentMembershipEvents" | "pendingVerifications" | "restrictedAccounts" | "recentAdminActions", number>;
+export interface AdminAccount {
+  id: string;
+  username: string | null;
+  displayName: string | null;
+  createdAt: string;
+  confirmed: boolean;
+  authBanned: boolean;
+  status: AccountStatus;
+  reason: string | null;
+  restrictionUpdatedAt: string | null;
+  totp: boolean;
+  roles: PlatformRole[];
+}
+export type AdminAccountAction =
+  | { action: "status"; value: AccountStatus; reason: string }
+  | { action: "grant" | "revoke"; value: PlatformRole; reason: string };
+export interface AdminAuditEvent {
+  id: string;
+  actorId: string | null;
+  subjectId: string | null;
+  organizationId: string | null;
+  event: string;
+  role: PlatformRole | null;
+  reason: string | null;
+  occurredAt: string;
+}
+export const reviewQueueModes = ["pending", "assigned", "approved", "rejected", "revoked"] as const;
+export type ReviewQueueMode = (typeof reviewQueueModes)[number];

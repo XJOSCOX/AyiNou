@@ -124,11 +124,17 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
     });
     api.register(async (reviewer) => {
       reviewer.addHook("preHandler", async (request) => {
-        if (!await auth?.verify(request.authToken!, true)) throw new InstitutionError("FORBIDDEN", 403);
+        if (await auth?.verify(request.authToken!, true) !== request.authUserId) throw new InstitutionError("MFA_REQUIRED", 403);
       });
       reviewer.get("/api/v1/verification/review", async (request) => {
-        const { status } = z.object({ status: z.enum(["pending", "approved"]).default("pending") }).parse(request.query);
+        const { status } = z.object({ status: z.enum(["pending", "assigned", "approved", "rejected", "revoked"]).default("pending") }).parse(request.query);
         return { applications: await service.rpc<ReviewApplication[]>("verification_queue_for_api", { p_actor: request.authUserId, p_status: status }) };
+      });
+      reviewer.patch("/api/v1/verification/review/:id/work", { bodyLimit: 256 }, async (request, reply) => {
+        const { id } = resource.parse(request.params);
+        const { claim } = z.strictObject({ claim: z.boolean() }).parse(request.body);
+        await service.rpc("verification_work_for_api", { p_actor: request.authUserId, p_application: id, p_claim: claim });
+        return reply.code(204).send();
       });
       reviewer.post("/api/v1/verification/review/:id", { bodyLimit: 4096 }, async (request) => {
         const { id } = resource.parse(request.params);

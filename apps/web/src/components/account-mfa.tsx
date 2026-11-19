@@ -97,7 +97,7 @@ export function AccountMfa() {
             <AuthenticatorCode busy={busy} submitCode={(code) => { void run(() => verify(code)); }} />
             <button type="button" disabled={busy} className="mt-3 text-sm underline" onClick={() => { void run(() => remove(setup.id)); }}>{t.cancel}</button>
           </div>
-        ) : factors.verified.length ? (
+        ) : (
           <div className="mt-3 space-y-2">
             {factors.verified.map((id, index) => (
               <div key={id}>
@@ -112,8 +112,9 @@ export function AccountMfa() {
                 </button>}
               </div>
             ))}
+            <button type="button" disabled={busy} className={mfaActionClass} onClick={() => { void run(enroll); }}>{t.mfaEnable}</button>
           </div>
-        ) : <button type="button" disabled={busy} className={`${mfaActionClass} mt-3`} onClick={() => { void run(enroll); }}>{t.mfaEnable}</button>}
+        )}
         {failed && <p role="alert" className="mt-3 text-sm text-[var(--theme-error-text)]">{t.mfaError}</p>}
       </>}
     </div>

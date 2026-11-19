@@ -101,6 +101,14 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Keep official institutions invitation-only and require consent for public directory entries.
 - [x] Add localized membership and management controls to the existing responsive institution pages.
 
+## Phase 2E — Platform administration and account security
+
+- [x] Add the MFA-gated platform workspace, operational metrics, scoped account search, restrictions, roles, and audit history.
+- [x] Enforce live session and account eligibility in Fastify and owner-facing database access.
+- [x] Extend independent verification review with assigned work and decision history.
+- [x] Add password change with reauthentication, sign-out everywhere, and administrator authenticator protection.
+- [ ] Provision the first operational administrator through the controlled bootstrap and agree on audit retention, escalation, reviewer assignments, and appeals before public use.
+
 ## Phase 3 — Social network MVP
 
 - [ ] Create/edit/delete text posts; read feed; pagination.

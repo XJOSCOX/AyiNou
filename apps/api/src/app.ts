@@ -10,6 +10,7 @@ import { createCommunityRepository, type CommunityRepository } from "./services/
 import { registerCommunityRoutes } from "./routes/community.js";
 import { registerInstitutionRoutes } from "./routes/institutions.js";
 import { createInstitutionRepository, type InstitutionRepository } from "./services/institutions.js";
+import { registerAdminRoutes } from "./routes/admin.js";
 
 export function createApp(config: ApiConfig, overrides?: {
   auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository; institutions?: InstitutionRepository;
@@ -33,6 +34,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerMemberRoutes(instance, auth, members));
   app.register((instance) => registerCommunityRoutes(instance, community));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
+  app.register((instance) => registerAdminRoutes(instance, auth, institutions));
   app.addHook("onClose", async () => { await members?.close(); });
 
   app.setNotFoundHandler((_request, reply) => {

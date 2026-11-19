@@ -23,6 +23,8 @@
     "test:hosted:institutions:sql": "node scripts/check-phase2d-sql.mjs",
     "test:hosted:institutions": "node --import tsx scripts/check-phase2d-hosted.mjs",
     "test:hosted:affiliations:sql": "node scripts/check-affiliations-sql.mjs",
+    "test:hosted:admin:sql": "node scripts/check-admin-sql.mjs",
+    "test:hosted:admin": "node --import tsx scripts/check-admin-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",
     "test": "npm run test -ws --if-present",

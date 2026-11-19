@@ -1,6 +1,6 @@
 # Ayinou master database plan
 
-**Status:** Forward-looking architecture, 2026-11-19. Twenty-five application tables are deployed through Phase 2D.1, including the private account, institutional, and affiliation tables. This plan uses the database blueprint, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
+**Status:** Forward-looking architecture. Twenty-eight application tables are deployed through Phase 2E, including the private account, institutional, affiliation, and administration tables. This plan uses the database blueprint, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
 
 ## Verified baseline and design rules
 
@@ -81,6 +81,16 @@ All eight tables have RLS and no direct anon, member, or service-role grants. Fa
 | `organization_affiliation_events` | `id uuid PK`, `organization_id uuid! FK→organizations.id CASCADE`, `user_id uuid? FK→auth.users.id CASCADE`, `actor_id uuid? FK→auth.users.id SET NULL`, `affiliation_id uuid?` opaque history pointer, `event text!`, `affiliation_type text?`, `occurred_at timestamptz! DEFAULT now()` | IX subject/date/ID and organization/date. |
 
 Ordinary affiliation states are pending, active, suspended, removed, and left. Admission records distinguish self-join, manager approval, and ordinary invitation. RLS is enabled and direct table access is denied for all client and API service roles. An owner or administrator may manage memberships. An owner alone may set policy. Members may view their own status and history and control directory consent. The public endpoint exposes only consented, eligible members' display names and affiliation types. Earlier representative and verification permissions remain independent.
+
+### Phase 2E platform administration
+
+| Private table | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `account_restrictions` | `user_id uuid PK FK→auth.users.id CASCADE`, `status text!` active/suspended/banned, `reason text!` 10–500 characters, `changed_by uuid? FK→auth.users.id SET NULL`, `ua` | IX status/updated descending |
+| `platform_admin_audit` | `id uuid PK`, `actor_id uuid? FK→auth.users.id SET NULL`, `subject_id uuid? FK→auth.users.id SET NULL`, `event text!`, `role text?` for role events only, `reason text!` 10–500 characters, `occurred_at timestamptz!` default now() | IX occurred descending plus ID |
+| `verification_review_work` | Composite PK `(application_id,reviewer_id)`, `application_id uuid! FK→verification_applications.id CASCADE`, `reviewer_id uuid! FK→verification_reviewers.user_id CASCADE`, `assigned_at timestamptz!` default now() | IX reviewer/assigned descending |
+
+All three tables deny direct application and service-role access. Fastify derives identity from a live session and passes it to narrow RPCs. The database checks current roles and writes restriction/role changes and audit records atomically. Auth factor protection guards the last eligible administrator. Platform administration and evidence review use independent assignments. Two eligible reviewers must approve a verification even if someone has already picked it up from the queue. Audit actor and subject UUIDs are cleared when the related Auth account is hard-deleted. The audit reason remains subject to the operator retention policy.
 
 ## Planned schema by domain and implementation phase
 
@@ -222,8 +232,8 @@ Published claim summaries must pass separate safety and evidence checks. No live
 | `moderation_cases` / 3 | `id uuid PK`, `report_id uuid? FK→content_reports.id`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `subject_user_id uuid? FK→profiles.user_id`, `state text!`, `assigned_reviewer_id uuid? FK→auth.users.id`, `opened_at timestamptz!`, `closed_at timestamptz?`, `ua` | CHECK exactly one primary subject; IX `(state,assigned_reviewer_id,opened_at)`; report may point to same subject |
 | `moderation_actions` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `actor_id uuid! FK→auth.users.id`, `action text!`, `reason text!`, `ca` | IX `(case_id,created_at)`; append-only |
 | `moderation_appeals` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `appellant_id uuid! FK→profiles.user_id`, `reason text!`, `status text!`, `adjudicator_id uuid? FK→auth.users.id`, `resolved_at timestamptz?`, `ca`, `ua` | IX `(case_id,status)`, `(appellant_id,created_at DESC)`; distinct adjudicator |
-| `user_restrictions` / 3 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `starts_at timestamptz!`, `ends_at timestamptz?`, `issuer_id uuid! FK→auth.users.id`, `case_id uuid? FK→moderation_cases.id`, `ca` | IX `(user_id,kind,ends_at)`; CHECK end>start |
-| `audit_events` / with first privileged workflow | `id uuid PK`, `actor_id uuid? FK→auth.users.id`, `event_kind text!`, `subject_kind text!`, `subject_id uuid?`, `safe_metadata jsonb!`, `occurred_at timestamptz!` | IX `(occurred_at DESC)`, `(subject_kind,subject_id,occurred_at DESC)`; append-only, restricted; subject reference resolved by API and review because cross-domain FK impossible here |
+| `user_restrictions` / 3 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `starts_at timestamptz!`, `ends_at timestamptz?`, `issuer_id uuid! FK→auth.users.id`, `case_id uuid? FK→moderation_cases.id`, `ca` | IX `(user_id,kind,ends_at)`; CHECK end>start. Scope to future content restrictions and reuse Phase 2E for whole-account restrictions. |
+| `audit_events` / future cross-domain audit | `id uuid PK`, `actor_id uuid? FK→auth.users.id`, `event_kind text!`, `subject_kind text!`, `subject_id uuid?`, `safe_metadata jsonb!`, `occurred_at timestamptz!` | IX `(occurred_at DESC)`, `(subject_kind,subject_id,occurred_at DESC)`. Extend the Phase 2E audit projection where feasible and preserve the original events. |
 | `consent_records` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `policy_version text!`, `consent_kind text!`, `granted_at timestamptz!`, `revoked_at timestamptz?`; UQ `(user_id,policy_version,consent_kind)` | IX `(user_id,granted_at DESC)`; preserve withdrawal history |
 | `feature_flags` / common | `key text PK`, `enabled boolean!`, `rules jsonb!`, `updated_by uuid? FK→auth.users.id`, `ca`, `ua` | Server-only mutation; validated schema for rules |
 | `system_outbox` / later | `id uuid PK`, `event_kind text!`, `payload_minimized jsonb!`, `status text!`, `attempt_count integer!`, `next_attempt_at timestamptz!`, `ca`, `ua` | IX `(status,next_attempt_at)`; CHECK attempts≥0; idempotent worker |
@@ -270,6 +280,10 @@ erDiagram
     organizations ||--o{ verification_applications : subject
     verification_applications ||--o{ verification_evidence : references
     verification_applications ||--o{ verification_reviews : receives
+    verification_applications ||--o{ verification_review_work : assigned
+    verification_reviewers ||--o{ verification_review_work : tracks
+    auth_users ||--o| account_restrictions : status
+    auth_users o|--o{ platform_admin_audit : acts
     organizations ||--o{ projects : owns
     projects ||--o{ project_milestones : tracks
     projects ||--o{ project_needs : requests
@@ -296,6 +310,8 @@ erDiagram
 | Existing departments / visible profiles | Read | Read + own profile fields | Same | Same | Reference/visibility changes only via trusted action |
 | Existing private member data | — | Own read/edit | Same | — | Exceptional audited support |
 | Existing roles / verification records | — | — | — | — | Audited grants/reviews only |
+| Phase 2E account restrictions and platform audit | — | — | — | — | Recent TOTP administrator through scoped RPCs |
+| Phase 2E review work | — | — | — | Own conflict-filtered work with recent TOTP | Audit projection only |
 | Settings, blocks, mutes, export/deletion requests | — | Own read/write | Same | — | Rights-processing workflow |
 | Countries/communes; aggregate metrics | Safe read | Safe read | Same | Same | Reference/metric computation; raw activity restricted |
 | Posts, comments, reactions, follows, bookmarks | Published public read | Eligibility-scoped read/create | Own edit/delete request | Assigned moderation action | Restricted repair/audit |
@@ -325,8 +341,8 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 
 ## Dependencies and migration order
 
-1. **Existing through 2D.1.** Keep all seven applied migration files. Check remote history before each future migration. Private account and institutional tables depend on Auth. Ordinary affiliations depend on institutional profiles and scoped representative roles. Challenge activation depends on an audited proof channel configuration and retention policy.
-2. **Common hardening:** Decide privacy/retention rules; add `audit_events` before the first privileged workflow, `countries` and optional validated residence FK only after existing values are checked, then settings/flags. Handle user rights before public launch. Any profile handle/avatar/bio is additive and must not break current API clients.
+1. **Existing through 2E.** Keep all eight applied migration files. Check remote history before each future migration. Phase 2E depends on Auth, institutions, ordinary affiliations, and the existing role assignments. Challenge activation depends on an audited proof channel configuration and retention policy.
+2. **Common hardening** sets privacy and retention rules, extends the existing audit projection as needed, and adds `countries` and optional validated residence FK after existing values are checked. Handle user rights before public launch. Future profile changes must preserve current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
 4. **Phase 3 base:** Create media metadata/Storage rules, blocks/mutes, `posts`, `comments`, split reactions, follows, reports, moderation cases/actions/appeals/restrictions, notifications. Create `posts` **without** `community_id` in the first phase-3 migration; add the nullable column and FK in phase 4 after `communities` exists. Require moderation and abuse gates before opening posting.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.

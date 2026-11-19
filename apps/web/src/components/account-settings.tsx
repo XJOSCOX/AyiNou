@@ -8,6 +8,7 @@ import { fetchAccountCodes } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AccountMfa } from "./account-mfa";
+import { AccountSecurity } from "./account-security";
 import { MemberShell } from "./member-shell";
 
 const card = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
@@ -74,8 +75,7 @@ export function AccountSettings() {
         </div>
         <section className={card}>
           <h2 className="text-xl font-semibold">{a.security}</h2>
-          <p className="mt-3 text-sm leading-6 text-[var(--theme-body)]">{a.passwordHelp}</p>
-          <Link href="/forgot-password" className="mt-2 inline-block font-semibold text-[var(--theme-link)] underline underline-offset-4">{a.changePassword}</Link>
+          <AccountSecurity />
           <AccountMfa />
         </section>
         {failed ? (

@@ -6,7 +6,7 @@ Next.js runs at `http://localhost:4000` and Fastify at `http://127.0.0.1:3000`. 
 
 Install Node.js 20.9+ and npm, then run `npm install` for the pinned `supabase@3.2.0` CLI. Sign in with `npx supabase login` if needed. Copy values from [.env.example](../.env.example) to ignored `apps/api/.env` and `apps/web/.env.local`. The hosted URL and publishable key are used in both apps. Put the secret key **only** in the API file. No database password is needed to run the apps.
 
-The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds the profile RPCs. `20261119210000_phase2_community_stats.sql` adds the metric tables and aggregate RPC. `20261119220000_phase2b_membership.sql` adds profile details, settings, interests, private avatar storage, and the membership breakdown. `20261119230000_phase2c_accounts.sql` adds account codes, referrals, and profile write hardening. `20261120010000_phase2d_institutions.sql` adds institutions, delegated access, and verification. `20261120020000_phase2d1_affiliations.sql` adds ordinary organization membership. All seven are applied to the confirmed project.
+The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds the profile RPCs. `20261119210000_phase2_community_stats.sql` adds the metric tables and aggregate RPC. `20261119220000_phase2b_membership.sql` adds profile details, settings, interests, private avatar storage, and the membership breakdown. `20261119230000_phase2c_accounts.sql` adds account codes, referrals, and profile write hardening. `20261120010000_phase2d_institutions.sql` adds institutions, delegated access, and verification. `20261120020000_phase2d1_affiliations.sql` adds ordinary organization membership. `20261120030000_phase2e_administration.sql` adds platform administration and live session enforcement. All eight are applied to the confirmed project.
 
 ```bash
 npx supabase link --project-ref hcbxulyfmdmuyccgrujs
@@ -102,7 +102,7 @@ Invitations are in-app, expire after seven days, and can only be accepted by the
 
 The private `institution-logos` bucket blocks direct client access. The API decodes and reencodes accepted logo images and returns a five-minute signed URL for the current published derivative. Institutional reference URLs are HTTPS without query strings or fragments. The app does not fetch evidence URLs or store uploaded identity documents. Evidence and written decisions are visible only through the authorized workflow. Receipts expose status and decision reason to the applicant.
 
-Reviewer access starts closed. A separately authorized database operator must approve and record provisioning of the platform administrator role and the private reviewer assignment. The reviewer must already have enrolled verified Supabase MFA. Fastify requires current AAL2, and the database enforces assignment and conflict rules for each action. Reviewers attest that they have no conflict. Applicants, founders, and current or former institutional delegates are excluded by database checks. Two distinct currently eligible reviewers must approve. An independent reviewer may reject or revoke with a written reason. Individual and notable approvals write the preserved `verification_records`. Institutional approval updates public institution status. Representative approval marks only the current membership. No identity challenge, real reviewer, SMTP, SMS, or identity provider is provisioned here.
+Reviewer access starts closed. An authorized platform administrator can appoint a separate verification reviewer after that account enrolls verified TOTP. Fastify requires recent TOTP-backed AAL2 and the database enforces assignment and conflict rules for each action. Reviewers attest that they have no conflict. Applicants, founders, current or former institutional delegates, and members who have joined the organization are excluded by database checks. Two distinct currently eligible reviewers must approve. An independent reviewer may reject or revoke with a written reason. Individual and notable approvals write the preserved `verification_records`. Institutional approval updates public institution status. Representative approval marks only the current membership. No identity challenge, real reviewer, SMTP, SMS, or identity provider is provisioned here.
 
 | Endpoints | Purpose |
 | --- | --- |
@@ -137,6 +137,29 @@ Private messages are visible to the institution's authorized reviewers. The requ
 | `PATCH /api/v1/institutions/:id/affiliations/members/:affiliationId` | Suspend, reinstate, remove, or change affiliation type |
 | `POST /api/v1/institutions/:id/affiliations/invitations` | Issue an ordinary membership invitation |
 | `POST /api/v1/affiliation-invitations/:id/:action` | Accept or revoke an ordinary invitation |
+
+## Phase 2E platform administration and account security
+
+The migration adds `private.account_restrictions`, `private.platform_admin_audit`, and `private.verification_review_work`. RLS is enabled and application actors have zero direct table grants. The existing `public.role_assignments` holds administrators and moderators. The existing `private.verification_reviewers` holds independent reviewer assignments. Direct service-role writes to platform roles are revoked. The moderator role is reserved for future moderation and grants no administration or reviewer access.
+
+Suspended and banned accounts are blocked from protected Ayinou operations immediately, including direct PostgREST access to owner profile data and writes. The application records the restriction separately from any Supabase Auth ban. Reinstatement removes the application restriction. It leaves Auth bans in effect. Public pages remain accessible. Supabase continues to own credentials and recovery. Global sign-out revokes Auth sessions and protected Ayinou access checks each session against the live managed session row.
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/v1/me/platform-access` | Current account’s administrator, reviewer, and TOTP status |
+| `GET /api/v1/admin/overview` | Privileged member, organization, activity, restriction, and verification totals |
+| `GET /api/v1/admin/accounts?q=&offset=` | 25 accounts per page, searched by public name, handle, or exact UUID |
+| `PATCH /api/v1/admin/accounts/:id` | Change application status, grant or revoke a role, with written reason |
+| `GET /api/v1/admin/audit` | Latest 100 account, role, verification, and institutional ownership events |
+| `GET /api/v1/verification/review?status=` | Eligible applications in pending, assigned, approved, rejected, or revoked views |
+| `PATCH /api/v1/verification/review/:id/work` | Claim or release own review work with `{ "claim": true/false }` |
+| `POST /api/v1/verification/review/:id` | Record an independent decision with written rationale |
+
+Platform administrators can view public name, handle, account UUID, confirmation and restriction status, creation date, TOTP state, and platform roles. Account email, residence, private names, private profile fields, and evidence do not appear in account search. Reviewers see evidence only through the separate conflict-filtered review queue. Review assignment never changes decision eligibility. The database checks both reviewers again before final approval. Write a short reason without placing personal documents or unnecessary personal details in it. Supabase Auth retains authentication activity in its own administrative logs.
+
+For the first real administrator, use a controlled database-owner operation after confirming the intended project, account UUID, confirmed identity, and verified TOTP. Insert an `administrator` record into `public.role_assignments` for that exact UUID and record a `role_granted` event in `private.platform_admin_audit` in the same transaction. Leave the actor ID empty for a database-owner bootstrap and identify the operator in the separate access log. Subsequent grants and revocations use the audited application workflow. Plan recovery access and a second eligible administrator before public use. Application role and restriction changes cannot disable the last eligible administrator. The managed MFA guard also protects that administrator’s final verified TOTP factor. Supabase project-owner operations such as deleting an Auth account remain outside the application workflow.
+
+Run `npm run test:hosted:admin:sql -- --preflight` before first applying the migration and `npm run test:hosted:admin:sql` afterward. Run `npm run test:hosted:admin` for live synthetic Auth, TOTP, restriction, reviewer, audit, and sign-out checks. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` first. The SQL suite rolls back, and the Auth suite removes its exact synthetic fixtures. Custom SMTP remains required to test public email recovery reliably.
 
 ## Testing and optional local stack
 

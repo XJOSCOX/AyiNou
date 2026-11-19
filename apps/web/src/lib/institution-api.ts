@@ -1,4 +1,4 @@
-import type { Institution, InstitutionAccounts, InstitutionInput, InstitutionManagement, OrganizationRole, ReviewApplication,
+import type { Institution, InstitutionAccounts, InstitutionInput, InstitutionManagement, OrganizationRole, ReviewApplication, ReviewQueueMode,
   ReviewDecision, VerificationApplication, VerificationKind } from "@ayinou/shared";
 import { authorizedRequest, encodeProfileImage } from "./api";
 
@@ -50,8 +50,11 @@ export const loadApplications = async (signal?: AbortSignal): Promise<Verificati
 export const submitVerification = (kind: VerificationKind, organizationId: string | null, evidence: string[]) =>
   post(verify, { kind, organizationId, evidence });
 
-export const loadReviewQueue = async (status: "pending" | "approved", signal?: AbortSignal): Promise<ReviewApplication[]> =>
+export const loadReviewQueue = async (status: ReviewQueueMode, signal?: AbortSignal): Promise<ReviewApplication[]> =>
   (await authorizedRequest(`/api/v1/verification/review?status=${status}`, { signal })).applications;
+
+export const setReviewWork = (id: string, claim: boolean) =>
+  authorizedRequest(`/api/v1/verification/review/${id}/work`, { method: "PATCH", body: JSON.stringify({ claim }) });
 
 export const decideApplication = (id: string, decision: ReviewDecision, rationale: string) =>
   post(`/api/v1/verification/review/${id}`, { decision, rationale, conflictFree: true });

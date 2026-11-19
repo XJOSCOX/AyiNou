@@ -39,7 +39,7 @@
 - One owner manages institutional identity and may invite administrators, editors, and viewers. Administrators may invite editors and viewers. Active invitations belong to their named recipient. Representative terms are optional and expire without a scheduled job.
 - Owners and administrators can see private contact email. Public profiles carry an explicit verification status, and sanitized logos are served through short-lived signed URLs.
 - A reviewed claim transfers ownership and invalidates prior delegation. Institution verification is a separate application. Pending identity fields and verified identity fields are locked against edits.
-- Review requires a platform administrator with an explicit reviewer assignment, verified MFA, a current AAL2 token, and no detected conflict. Two eligible reviewers must approve. Signup and claim submissions grant no badge. Application intake, evidence references, receipt of written decisions, and revocation are active; temporary proof challenges, SMTP/SMS delivery, and identity-provider integration remain separate.
+- Review requires an explicit reviewer assignment, recent TOTP-backed AAL2, and no detected conflict. Two eligible reviewers must approve. Signup and claim submissions grant no badge. Application intake, evidence references, receipt of written decisions, and revocation are active. Temporary proof challenges, SMTP/SMS delivery, and identity-provider integration remain separate.
 - Provision no reviewer automatically. Before production review, decide who can receive reviewer assignments, how to handle indirect conflicts and appeals, and how long to retain evidence links and review history.
 
 ## Ordinary affiliations
@@ -48,6 +48,12 @@
 - Start all institutions as invitation-only. Owners of eligible institutions can enable open or approval-required membership. Government institutions and other institutions marked sensitive stay invitation-only by database constraint.
 - Open organizations admit members, volunteers, and supporters directly. A staff request still needs approval or an invitation. An organization can invite a person it previously removed. Direct re-entry after a removal is blocked.
 - The directory starts disabled. Member consent covers only the current public display name and affiliation type. Suspension, removal, leaving, or an affiliation type change clears prior consent. Requests and decisions stay private.
+
+## Platform administration
+
+- Reuse the platform role and reviewer tables. Administrator privileges and reviewer appointments are independent. The moderator role reserves a future permission boundary.
+- Require a verified TOTP factor for privileged role grants and a live TOTP-backed AAL2 session verified within the prior 15 minutes for administration and review. Protect the last eligible administrator through application role and restriction controls and final-factor removal checks.
+- Record application restrictions separately from Supabase Auth bans. Use authentication logs for credential changes and an append-only application audit for administration, reviews, and ownership decisions. Establish retention and appeals before public launch.
 
 ## Open before public launch
 

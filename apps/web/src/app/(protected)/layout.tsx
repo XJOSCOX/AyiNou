@@ -6,6 +6,8 @@ export default async function ProtectedLayout({ children }: Readonly<{ children:
   const supabase = await serverSupabase();
   const { data, error } = await supabase.auth.getClaims();
   if (error || !data?.claims?.sub || data.claims.is_anonymous === true) redirect("/login");
+  const active = await supabase.rpc("account_session_active");
+  if (active.error || active.data !== true) redirect("/account-access");
   if (data.claims.aal !== "aal2") {
     const user = await supabase.auth.getUser();
     if (user.error || !user.data.user) redirect("/login");

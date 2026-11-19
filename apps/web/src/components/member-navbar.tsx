@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -17,11 +18,19 @@ export function MemberNavbar() {
   const settings = accountMessages[locale].settings;
   const menuLabel = displayName || settings;
   const router = useRouter();
+  const [logoutFailed, setLogoutFailed] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   async function logout() {
-    await browserSupabase().auth.signOut();
-    router.replace("/login");
-    router.refresh();
+    setSigningOut(true);
+    setLogoutFailed(false);
+    try {
+      const { error } = await browserSupabase().auth.signOut({ scope: "local" });
+      if (error) throw error;
+      router.replace("/login");
+      router.refresh();
+    } catch { setLogoutFailed(true); }
+    finally { setSigningOut(false); }
   }
 
   return (
@@ -46,9 +55,10 @@ export function MemberNavbar() {
           </summary>
           <div className="absolute end-0 z-30 mt-2 grid w-48 max-w-[calc(100vw-2rem)] gap-0.5 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg">
             <Link href="/settings" className="rounded px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">{settings}</Link>
-            <button type="button" onClick={logout} className="rounded px-3 py-2 text-start text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
+            <button type="button" onClick={logout} disabled={signingOut} className="rounded px-3 py-2 text-start text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
               {authMessages[locale].logout}
             </button>
+            {logoutFailed && <p role="alert" className="px-3 text-xs text-[var(--theme-error-text)]">{authMessages[locale].loadError}</p>}
           </div>
         </details>
         <div className="col-span-2 flex min-w-0 items-center justify-between gap-2 border-t border-[var(--theme-border)] pt-2 sm:col-span-1 sm:border-t-0 sm:pt-0">

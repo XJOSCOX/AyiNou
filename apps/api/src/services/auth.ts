@@ -8,7 +8,11 @@ export interface AuthVerifier {
 
 export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
   if (!config.SUPABASE_URL || !config.SUPABASE_PUBLISHABLE_KEY) return null;
+  if (!config.SUPABASE_SECRET_KEY) return null;
   const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  const security = createClient(config.SUPABASE_URL, config.SUPABASE_SECRET_KEY, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   });
   const issuer = `${config.SUPABASE_URL.replace(/\/$/, "")}/auth/v1`;
@@ -26,13 +30,21 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
           claims.is_anonymous === true ||
           (requireMfa && claims.aal !== "aal2") ||
           typeof claims.exp !== "number" || claims.exp <= Date.now() / 1000 ||
+          !z.uuid().safeParse(claims.session_id).success ||
           !z.uuid().safeParse(claims.sub).success
         ) return null;
-        if (claims.aal !== "aal2") {
-          const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel(token);
-          if (assurance.error || assurance.data.nextLevel === "aal2") return null;
+        if (requireMfa) {
+          const now = Date.now() / 1000;
+          const recentTotp = Array.isArray(claims.amr) && claims.amr.some((entry) =>
+            typeof entry === "object" && entry !== null && (entry.method === "totp" || entry.method === "mfa/totp") &&
+            typeof entry.timestamp === "number" && entry.timestamp <= now + 30 && entry.timestamp >= now - 900,
+          );
+          if (!recentTotp) return null;
         }
-        return claims.sub;
+        const session = await security.rpc("account_session_for_api", {
+          p_user: claims.sub, p_session: claims.session_id, p_aal2: claims.aal === "aal2", p_privileged: requireMfa,
+        });
+        return !session.error && session.data === true ? claims.sub : null;
       } catch {
         return null;
       }
