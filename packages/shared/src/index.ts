@@ -88,3 +88,6 @@ export interface CommunityStats {
   diasporaCountries: CommunityCountryCount[] | null;
   membership?: { haitian: number; internationalSupporter: number; unspecified: number } | null;
 }
+export const referralCodePattern = /^R1-[0-9A-F]{16}$/;
+
+export type ReferralSummary = { confirmedCount: number };

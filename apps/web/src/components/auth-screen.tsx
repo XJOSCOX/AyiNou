@@ -3,7 +3,11 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import type { Factor } from "@supabase/supabase-js";
+import { referralCodePattern } from "@ayinou/shared";
 import { AuthShell } from "./auth-shell";
+import { accountMessages } from "@/lib/account-i18n";
+import { validateReferralCode } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { browserSupabase } from "@/lib/supabase/browser";
@@ -17,16 +21,20 @@ const fieldClass = "block w-full rounded-md border border-[var(--theme-border)] 
 const floatingFieldClass = `${fieldClass} ${styles.floatingInput} pb-2 pt-6`;
 const primaryActionClass = "w-full rounded-md bg-[var(--theme-primary)] px-6 py-3.5 font-semibold text-[var(--theme-on-primary)] hover:bg-[var(--theme-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]";
 
-export function AuthScreen({ mode, invalidLink = false }: { mode: AuthMode; invalidLink?: boolean }) {
+export function AuthScreen({ mode, invalidLink = false, initialReferral = "" }: {
+  mode: AuthMode; invalidLink?: boolean; initialReferral?: string;
+}) {
   const [locale, setLocale] = useLocale();
   const t = authMessages[locale];
   const m = membershipMessages[locale];
+  const account = accountMessages[locale];
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [referral, setReferral] = useState(initialReferral);
   const [visiblePassword, setVisiblePassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -67,11 +75,19 @@ export function AuthScreen({ mode, invalidLink = false }: { mode: AuthMode; inva
     try {
       const supabase = browserSupabase();
       if (mode === "register") {
+        const code = referral.trim().toUpperCase();
+        if (code && (!referralCodePattern.test(code) || !await validateReferralCode(code))) {
+          setError(account.invalidReferral);
+          return;
+        }
         const { error: authError } = await supabase.auth.signUp({
           email: email.trim(), password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-            data: { display_name: displayName.trim(), preferred_locale: locale, first_name: firstName.trim(), last_name: lastName.trim() },
+            data: {
+              display_name: displayName.trim(), preferred_locale: locale, first_name: firstName.trim(), last_name: lastName.trim(),
+              ...(code ? { referral_code: code } : {}),
+            },
           },
         });
         if (authError?.code === "email_address_not_authorized") {
@@ -101,6 +117,12 @@ export function AuthScreen({ mode, invalidLink = false }: { mode: AuthMode; inva
       } else if (mode === "reset") {
         const { data: userData, error: userError } = await supabase.auth.getUser();
         if (userError || !userData.user) { setError(t.sessionNeeded); return; }
+        const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (assurance.error) throw assurance.error;
+        if (userData.user.factors?.some((factor: Factor) => factor.status === "verified") && assurance.data.currentLevel !== "aal2") {
+          router.replace("/mfa?next=/reset-password");
+          return;
+        }
         const { error: resetError } = await supabase.auth.updateUser({ password });
         if (resetError) throw resetError;
         await supabase.auth.signOut();
@@ -109,7 +131,8 @@ export function AuthScreen({ mode, invalidLink = false }: { mode: AuthMode; inva
       }
     } catch (cause) {
       const status = typeof cause === "object" && cause && "status" in cause ? Number(cause.status) : 0;
-      setError(status === 429 ? m.rateLimited : !status || status >= 500 ? m.serviceError : t.genericError);
+      setError(status === 429 || (cause instanceof Error && cause.message === "RATE_LIMITED")
+        ? m.rateLimited : !status || status >= 500 ? m.serviceError : t.genericError);
     } finally {
       setLoading(false);
     }
@@ -185,6 +208,13 @@ export function AuthScreen({ mode, invalidLink = false }: { mode: AuthMode; inva
               </div>
               {mode !== "login" && <p id="password-hint" className="mt-2 text-xs text-[var(--theme-body)]">{t.passwordHint}</p>}
             </div>
+          )}
+          {mode === "register" && (
+            <label className="relative block">
+              <input value={referral} onChange={(event) => setReferral(event.target.value)} className={floatingFieldClass}
+                placeholder=" " autoComplete="off" autoCapitalize="characters" maxLength={64} spellCheck={false} />
+              <span className={styles.fieldLabel}>{account.optionalReferral}</span>
+            </label>
           )}
           {(error || showLinkError) && <p role="alert" className="rounded-md bg-[var(--theme-error-bg)] p-3 text-sm text-[var(--theme-error-text)]">{error || t.sessionNeeded}</p>}
           {success && <p role="status" className="rounded-md bg-[var(--theme-control)] p-3 text-sm text-[var(--theme-link)]">{success}</p>}

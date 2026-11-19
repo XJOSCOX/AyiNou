@@ -77,6 +77,18 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 - Member privacy settings, a public profile preview, and privacy-filtered membership statistics.
 - External email delivery remains unverified. Synthetic confirmed accounts cover the hosted profile and authorization flows.
 
+## Phase 2C — Account settings and referrals
+
+- [x] Harden profile writes at the database boundary and keep both profile RPCs compatible.
+- [x] Generate stable private member codes and separate, shareable referral codes.
+- [x] Capture optional referral attribution at account creation and confirm it after email confirmation.
+- [x] Add localized account settings, Supabase Authenticator MFA, and a full-width responsive dashboard.
+- [x] Document the future identity verification challenge model.
+
+## Phase 2D — Planned verification challenge activation
+
+Prepare application binding, approved proof channels, one-time redemption, audit, and retention before enabling identity or public-figure verification challenges. Public badge decisions require a separate authorized review workflow. Email, SMS, and identity-provider integrations require separate setup.
+
 ## Phase 3 — Social network MVP
 
 - [ ] Create/edit/delete text posts; read feed; pagination.

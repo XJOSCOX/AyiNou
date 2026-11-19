@@ -1,10 +1,10 @@
 # Ayinou master database plan
 
-**Status:** Forward-looking architecture, 2026-11-19. Ten application tables are deployed through Phase 2B. It uses the supplied `DATABASE_BLUEPRINT.md`, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
+**Status:** Forward-looking architecture, 2026-11-19. Thirteen application tables are deployed through Phase 2C, including three private-schema account tables. This plan uses the database blueprint, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
 
 ## Verified baseline and design rules
 
-Hosted migration history contains `20261119160000_initial_schema`, `20261119173400_hosted_profile_rpc`, and `20261119210000_phase2_community_stats`. The first five application tables, their grants, RLS policies, constraints, indexes, and profile functions were confirmed by schema dump; Phase 2 adds two service-only tables and an aggregate function. Guarded hosted checks cover account/profile behavior and Phase 2 privacy-safe metrics. Public registration, delivered confirmation/recovery mail, and natural token expiry remain unverified. Later-phase tables do not exist yet.
+Hosted migration history includes `20261119160000_initial_schema`, `20261119173400_hosted_profile_rpc`, `20261119210000_phase2_community_stats`, `20261119220000_phase2b_membership`, and `20261119230000_phase2c_accounts`. Guarded hosted checks cover profile behavior, privacy-safe metrics, referral setup and confirmation, and Supabase TOTP. Public registration, delivered confirmation and recovery mail, and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Keep original `ht`/`fr`/`en` content and label translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -18,9 +18,9 @@ Phase 2B adds `member_private.first_name`, `last_name`, `membership_category`, a
 
 | Table | Fields and keys | Access |
 | --- | --- | --- |
-| `user_settings` | `user_id uuid PK FK→profiles.user_id ON DELETE CASCADE`, `discoverable boolean! DEFAULT false`, `show_membership_category boolean! DEFAULT false` | Owner read, insert, and update |
+| `user_settings` | `user_id uuid PK FK→profiles.user_id ON DELETE CASCADE`, `discoverable boolean! DEFAULT false`, `show_membership_category boolean! DEFAULT false` | Owner read, writes through the profile RPC |
 | `interest_catalog` | `code text PK` | Authenticated read |
-| `member_interests` | `user_id uuid! FK→profiles.user_id ON DELETE CASCADE`, `interest_code text! FK→interest_catalog.code`, PK `(user_id,interest_code)` | Owner read, insert, and delete |
+| `member_interests` | `user_id uuid! FK→profiles.user_id ON DELETE CASCADE`, `interest_code text! FK→interest_catalog.code`, PK `(user_id,interest_code)` | Owner read, writes through the profile RPC |
 
 | Table / phase | Columns and constraints | Existing indexes |
 | --- | --- | --- |
@@ -32,7 +32,25 @@ Phase 2B adds `member_private.first_name`, `last_name`, `membership_category`, a
 | `member_metric_exclusions` / 2 | `user_id uuid PK FK→auth.users.id ON DELETE CASCADE`, `reason text! CHECK (synthetic_test/disqualified)`, `ca`. | PK; service-only, no client policies |
 | `user_activity_daily` / 2 | `user_id uuid! FK→auth.users.id ON DELETE CASCADE`, `activity_day date!`; PK `(user_id,activity_day)`. | PK; `user_activity_daily_day_idx(activity_day,user_id)`; service-only |
 
-All seven have RLS. Anonymous/authenticated roles read departments; anonymous reads only visible profiles; owners read/edit allowed profile columns and their private row. Neither client role can insert/delete those records or access role, verification, exclusion, or activity tables. `private.initialize_member(uuid)` is the preserved atomic, retry-safe initializer. `public.initialize_member_for_api(uuid)` is service-role-only; `public.update_my_profile(...)` is an authenticated atomic update. Phase 2 adds service-only `private.build_community_stats()` and `public.community_stats_for_api()` with complementary geographic suppression. An existing `verification_records` row is **user-scoped**; organizational verification below is separate. Later profile handle/avatar/bio fields require an additive migration and privacy review.
+All application tables have RLS. Anonymous and authenticated roles can read departments and profiles that satisfy both trusted visibility and discoverability. Profile owners can read their own rows and make validated edits through the two profile RPCs. Direct client mutation and access to role, verification, exclusion, and activity tables are denied. Private reads and edits require `aal2` for users with a verified Supabase factor. The service-only initializer remains atomic and retry-safe. An existing `verification_records` row is **user-scoped**.
+
+### Phase 2C account schema
+
+| Table | Columns and constraints | Indexes |
+| --- | --- | --- |
+| `private.member_codes` | `user_id uuid PK FK→auth.users.id ON DELETE CASCADE`, `code text! UQ` matching `^M1-[0-9A-F]{32}$`, `ca` | PK and code UQ |
+| `private.referral_codes` | `code text PK` matching `^R1-[0-9A-F]{16}$`, `user_id uuid! FK→auth.users.id ON DELETE CASCADE`, `ca`, `retired_at timestamptz?` at or after creation, UQ `(code,user_id)` | Partial UQ `(user_id)` while active, IX `(user_id)` |
+| `private.referrals` | `referred_user_id uuid PK FK→auth.users.id ON DELETE CASCADE`, `referring_user_id uuid!`, `referral_code text!`, `ca`, `confirmed_at timestamptz?` at or after creation, composite FK `(referral_code,referring_user_id)→referral_codes(code,user_id) ON DELETE CASCADE`, CHECK distinct account IDs | IX `(referring_user_id,confirmed_at)`, `(referral_code,referring_user_id)` |
+
+| Phase 2C operation | Anonymous | Member | API server |
+| --- | --- | --- | --- |
+| Read private reference and own invitation code | Denied | Own code through authenticated Fastify | Narrow RPC with verified subject |
+| Validate invitation | Boolean via rate-limited Fastify | Boolean via the same endpoint | Service-only lookup of active code |
+| Capture or confirm attribution | Auth account insertion with optional code | Confirm own captured attribution via Fastify | Insert trigger and service-only confirmation by subject |
+| Read attribution summary | Denied | Own confirmed outbound count via Fastify | Narrow RPC, no referred identities returned |
+| Direct table access | Denied | Denied | Denied. Security-definer routines perform scoped operations. |
+
+Existence of a code carries no authority. Member codes use 128 random bits with a permanent owner mapping. Referral codes use 64 random bits and support historical attribution when a future rotation workflow retires the old code. Deleting the account or its referrer removes the associated referral at hard deletion. An unconfirmed referral remains attached to the pending Auth account. Confirmed summaries expose no identity or contact data.
 
 ## Planned schema by domain and implementation phase
 
@@ -41,6 +59,33 @@ The proposed tables below are **not deployed**. Column sets are implementation t
 The blueprint's polymorphic `reactions` proposal is represented by `post_reactions` and `comment_reactions` so each target has a real FK and a simple unique key.
 
 ### Identity, account rights, geography — common wave / phases 2–3 and before launch
+
+#### Verification challenges — planned for Phase 2D
+
+`private.verification_challenges` will bind each challenge to an Auth account and a verification application. Dependencies are the application, authorized proof adapter configuration, `audit_events`, and an explicit retention and reviewer policy. The table and issuing endpoints are deferred. Supabase Authenticator MFA, the permanent member reference, and the shareable referral code remain separate.
+
+| Column | Type and constraint |
+| --- | --- |
+| `id` | `uuid PK DEFAULT gen_random_uuid()`. This identifier is separate from the secret. |
+| `user_id`, `application_id` | `uuid!` FKs to `auth.users.id` and `verification_applications.id`, each with `ON DELETE CASCADE` during approved deletion. Require the account to match the application's bound subject in the issue and redeem transactions. Application closure revokes pending challenges. |
+| `purpose` | `text!` constrained to `identity_control` or `public_figure_control`. |
+| `channel` | `text!` constrained to `official_social`, `approved_email`, `approved_phone`, or `identity_provider`. |
+| `proof_binding` | `bytea!` keyed digest of the approved provider identity or destination. Store neither the address nor raw provider evidence in this table. |
+| `secret_digest`, `key_version` | `bytea?` with a CHECK requiring a 32-byte HMAC-SHA-256 digest only while pending, `smallint!` positive key version. Clear the digest in terminal states. |
+| `created_at`, `expires_at` | `timestamptz!`, creation defaults to now. Require expiry after creation, with an issuance-time channel-specific cap. |
+| `max_attempts`, `attempt_count` | `smallint!`; bound maximum to a reviewed small range, default attempts to 0, require attempts between 0 and the maximum. |
+| `state`, `closed_at` | `text!` constrained to `pending`, `used`, `revoked`, `expired`. `closed_at timestamptz?` required only in terminal states. Expiry is checked at redemption even if the cleanup job has yet to update the state. |
+| `issue_audit_id`, `close_audit_id` | `uuid!` and `uuid?` FKs to `audit_events.id ON DELETE RESTRICT`. Require one issue event and one close event for a terminal transition. Retention reviews access and FK deletion order. |
+
+Add IX `(application_id,created_at DESC)`, `(user_id,purpose,created_at DESC)`, and partial IX `(expires_at)` for pending rows. Use partial UQ `(application_id,user_id,purpose,channel)` for pending rows; the issuing transaction first expires or revokes older rows. Index audit FKs where deletion or audit lookup requires them. Revoke ordinary role access and enable RLS. The owner can view minimal challenge status and submit proof through Fastify. The issuance and redemption service accesses the digest. A reviewer sees only audited evidence status, and a separate authorized decision updates a badge. No other member or anonymous client can issue, redeem, or read challenges.
+
+Generate secrets with a CSPRNG and bind the keyed digest to the challenge ID, subject, purpose, and channel. Keep HMAC keys in backend secret storage. Redeem under a row lock with constant-time digest comparison, expiry and channel binding checks, an atomic attempt increment on failure, and one successful state transition. Apply issuance and redemption rate limits per account, destination digest, and IP. Return generic failure responses, redact request bodies and secrets from logs, and record only safe audit events. Revoke on account/application changes, erase digests when closed, and propose a 30-day closed-row retention period pending privacy review.
+
+- **Official social account.** Bind to an approved platform and stable provider account ID. A signed callback from an approved OAuth flow or provider-authorized attestation supplies proof of control. A public proof nonce, if required by the provider, is separate from the secret and can only satisfy the bound application.
+- **Approved email or phone.** Deliver an expiring code only to a vetted destination that was bound before issuance. This depends on configured SMTP or SMS delivery and a policy for who may add destinations.
+- **Identity provider.** Match a signed callback, expected provider, application-bound nonce, and a verified provider event ID. Record the outcome and a minimized provider reference. Raw ID documents stay with the provider when possible.
+
+Challenge completion supplies a proof event only. Authorized reviewers remain responsible for identity and public-figure status. Application intake, evidence collection, approval, and email/SMS delivery remain out of scope for Phase 2C.
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
@@ -171,6 +216,12 @@ erDiagram
     departments ||--o{ member_private : residence_or_connection
     auth_users ||--o{ role_assignments : holds
     auth_users ||--o{ verification_records : subject
+    auth_users ||--o| member_codes : owns
+    auth_users ||--o{ referral_codes : issues
+    auth_users ||--o| referrals : referred_account
+    referral_codes ||--o{ referrals : captured_code
+    auth_users ||--o{ verification_challenges : planned_subject
+    verification_applications ||--o{ verification_challenges : planned_application
     profiles ||--o{ posts : writes
     profiles ||--o{ comments : writes
     posts ||--o{ comments : contains
@@ -238,7 +289,7 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 
 ## Dependencies and migration order
 
-1. **Existing 1A/1B/2:** Keep all three applied migrations and seven tables/functions unchanged. Check remote history before each future migration.
+1. **Existing through 2C.** Keep all five applied migration files. Check remote history before each future migration. The private code and referral tables depend on Auth. Phase 2D challenge activation depends on a reviewed application and audit schema, a supported proof channel, and retention policy.
 2. **Common hardening:** Decide privacy/retention rules; add `audit_events` before the first privileged workflow, `countries` and optional validated residence FK only after existing values are checked, then settings/flags. Handle user rights before public launch. Any profile handle/avatar/bio is additive and must not break current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
 4. **Phase 3 base:** Create media metadata/Storage rules, blocks/mutes, `posts`, `comments`, split reactions, follows, reports, moderation cases/actions/appeals/restrictions, notifications. Create `posts` **without** `community_id` in the first phase-3 migration; add the nullable column and FK in phase 4 after `communities` exists. Require moderation and abuse gates before opening posting.

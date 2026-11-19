@@ -95,3 +95,48 @@ test("department endpoint remains public and auth service fails closed when unco
     assert.equal(closed.statusCode, 503);
   } finally { await app.close(); await unconfigured.close(); }
 });
+
+test("account references are not bearer tokens and referral attribution only uses the verified subject", async () => {
+  const deps = services();
+  const privateCode = `M1-${"A".repeat(32)}`;
+  const referralCode = "R1-0123456789ABCDEF";
+  deps.members.accounts = {
+    async memberCode(userId) { assert.equal(userId, ownerId); return privateCode; },
+    async referralCode(userId) { assert.equal(userId, ownerId); return referralCode; },
+    async referralSummary(userId) { assert.equal(userId, ownerId); return { confirmedCount: 0 }; },
+    async recordReferral(userId) { deps.calls.push(userId); return true; },
+    async validateReferral(code) { return code === referralCode; },
+  };
+  const app = createApp(config, deps);
+  try {
+    for (const token of [privateCode, referralCode, "123456"]) {
+      const denied = await app.inject({ url: "/api/v1/me/member-code", headers: { authorization: `Bearer ${token}` } });
+      assert.equal(denied.statusCode, 401);
+    }
+    const headers = { authorization: "Bearer valid" };
+    const read = await app.inject({ url: "/api/v1/me/member-code", headers });
+    assert.equal(read.statusCode, 200);
+    assert.equal(read.headers["cache-control"], "private, no-store");
+    assert.deepEqual(read.json(), { memberCode: privateCode });
+    const other = await app.inject({ url: "/api/v1/me/referral-code", headers });
+    assert.deepEqual(other.json(), { referralCode });
+    const summary = await app.inject({ url: "/api/v1/me/referrals", headers });
+    assert.deepEqual(summary.json(), { summary: { confirmedCount: 0 } });
+    const url = "/api/v1/me/referrals/attribution";
+    for (const payload of [{ userId: ownerId }, { code: referralCode }]) {
+      assert.equal((await app.inject({ method: "POST", url, headers, payload })).statusCode, 400);
+    }
+    assert.deepEqual(deps.calls, []);
+    assert.deepEqual((await app.inject({ method: "POST", url, headers })).json(), { attributed: true });
+    assert.deepEqual(deps.calls, [ownerId]);
+
+    const validate = (code: string) => app.inject({ method: "POST", url: "/api/v1/referrals/validate", payload: { code } });
+    assert.deepEqual((await validate(referralCode.toLowerCase())).json(), { valid: true });
+    assert.deepEqual((await validate(privateCode)).json(), { valid: false });
+    assert.deepEqual((await validate("123456")).json(), { valid: false });
+    for (let i = 0; i < 7; i++) assert.equal((await validate("bad")).statusCode, 200);
+    const limited = await validate(referralCode);
+    assert.equal(limited.statusCode, 429);
+    assert.ok(limited.headers["retry-after"]);
+  } finally { await app.close(); }
+});

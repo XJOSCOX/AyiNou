@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { interestCodes, type ApiErrorResponse, type UpdateMemberProfile } from "@ayinou/shared";
+import { interestCodes, referralCodePattern, type ApiErrorResponse, type UpdateMemberProfile } from "@ayinou/shared";
 import type { AuthVerifier } from "../services/auth.js";
 import { MemberError, type MemberRepository } from "../services/members.js";
 
@@ -36,6 +36,7 @@ const profileChanges = z.object({
     .transform((values) => [...new Set(values)]),
 }).partial().strict().refine((value) => Object.keys(value).length > 0);
 const avatarInput = z.object({ image: z.base64().max(2_796_204) }).strict();
+const referralInput = z.object({ code: z.string().max(64).trim().toUpperCase() }).strict();
 
 function error(code: string, message: string): ApiErrorResponse {
   return { error: { code, message } };
@@ -46,6 +47,33 @@ export async function registerMemberRoutes(
   auth: AuthVerifier | null,
   members: MemberRepository | null,
 ): Promise<void> {
+  const accounts = members?.accounts;
+  const validationAttempts = new Map<string, number>();
+  let validationWindow = 0;
+  let validationTotal = 0;
+
+  app.post("/api/v1/referrals/validate", { bodyLimit: 512 }, async (request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    const now = Date.now();
+    if (now >= validationWindow) {
+      validationAttempts.clear();
+      validationTotal = 0;
+      validationWindow = now + 60_000;
+    }
+    const attempts = validationAttempts.get(request.ip) ?? 0;
+    if (attempts >= 10 || validationTotal >= 300) {
+      return reply.header("Retry-After", String(Math.ceil((validationWindow - now) / 1000)))
+        .code(429).send(error("RATE_LIMITED", "Try again shortly"));
+    }
+    validationAttempts.set(request.ip, attempts + 1);
+    validationTotal++;
+    const input = referralInput.safeParse(request.body);
+    if (!input.success) return reply.code(400).send(error("INVALID_REFERRAL", "Referral details are invalid"));
+    if (!referralCodePattern.test(input.data.code)) return { valid: false };
+    if (!accounts) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Referral service unavailable"));
+    return { valid: await accounts.validateReferral(input.data.code) };
+  });
+
   app.get("/api/v1/departments", async (_request, reply) => {
     if (!members) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Database unavailable"));
     return { departments: await members.departments() };
@@ -74,6 +102,26 @@ export async function registerMemberRoutes(
       if (!userId) return reply.code(401).send(error("UNAUTHORIZED", "Invalid or expired session"));
       request.authUserId = userId;
       request.authToken = match[1];
+    });
+
+    protectedApp.get("/api/v1/me/member-code", async (request, reply) => {
+      if (!accounts || !request.authUserId) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account service unavailable"));
+      return { memberCode: await accounts.memberCode(request.authUserId) };
+    });
+    protectedApp.get("/api/v1/me/referral-code", async (request, reply) => {
+      if (!accounts || !request.authUserId) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account service unavailable"));
+      return { referralCode: await accounts.referralCode(request.authUserId) };
+    });
+    protectedApp.get("/api/v1/me/referrals", async (request, reply) => {
+      if (!accounts || !request.authUserId) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account service unavailable"));
+      return { summary: await accounts.referralSummary(request.authUserId) };
+    });
+    protectedApp.post("/api/v1/me/referrals/attribution", { bodyLimit: 512 }, async (request, reply) => {
+      if (request.body !== undefined && !z.object({}).strict().safeParse(request.body).success) {
+        return reply.code(400).send(error("INVALID_REFERRAL", "Referral attribution is set during registration"));
+      }
+      if (!accounts || !request.authUserId) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account service unavailable"));
+      return { attributed: await accounts.recordReferral(request.authUserId) };
     });
 
     protectedApp.get("/api/v1/me/profile", async (request, reply) => {

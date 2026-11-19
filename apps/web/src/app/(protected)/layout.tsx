@@ -4,6 +4,11 @@ import { serverSupabase } from "@/lib/supabase/server";
 export default async function ProtectedLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const supabase = await serverSupabase();
   const { data, error } = await supabase.auth.getClaims();
-  if (error || !data?.claims?.sub) redirect("/login");
+  if (error || !data?.claims?.sub || data.claims.is_anonymous === true) redirect("/login");
+  if (data.claims.aal !== "aal2") {
+    const user = await supabase.auth.getUser();
+    if (user.error || !user.data.user) redirect("/login");
+    if (user.data.user.factors?.some((factor) => factor.status === "verified")) redirect("/mfa");
+  }
   return children;
 }

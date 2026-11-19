@@ -1,4 +1,4 @@
-import type { ApiErrorResponse, CommunityStats, Department, MemberProfile, ProfileChanges, StatusResponse } from "@ayinou/shared";
+import type { ApiErrorResponse, CommunityStats, Department, MemberProfile, ProfileChanges, ReferralSummary, StatusResponse } from "@ayinou/shared";
 import { browserSupabase } from "./supabase/browser";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
@@ -44,6 +44,29 @@ async function authorizedRequest(path: string, init?: RequestInit) {
 export async function fetchMyProfile(): Promise<MemberProfile> {
   const result: { profile: MemberProfile } = await authorizedRequest("/api/v1/me/profile");
   return result.profile;
+}
+
+export async function fetchAccountCodes(signal: AbortSignal) {
+  const [member, referral, referrals]: [{ memberCode: string }, { referralCode: string }, { summary: ReferralSummary }] =
+    await Promise.all([
+      authorizedRequest("/api/v1/me/member-code", { signal }),
+      authorizedRequest("/api/v1/me/referral-code", { signal }),
+      authorizedRequest("/api/v1/me/referrals", { signal }),
+    ]);
+  return { ...member, ...referral, ...referrals.summary };
+}
+
+export async function validateReferralCode(code: string): Promise<boolean> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/referrals/validate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify({ code }),
+  });
+  if (response.status === 429) throw new Error("RATE_LIMITED");
+  if (!response.ok) throw new Error("API_ERROR");
+  const result: { valid: boolean } = await response.json();
+  return result.valid;
 }
 
 export async function updateMyProfile(input: ProfileChanges): Promise<MemberProfile> {

@@ -3,8 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
 import type { Department, MemberProfile, ProfileChanges, ProfilePreview, UpdateMemberProfile } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
+import { accountRepository, type AccountRepository } from "./accounts.js";
 
 export interface MemberRepository {
+  accounts?: AccountRepository;
   get(userId: string, token: string): Promise<MemberProfile>;
   update(userId: string, token: string, input: UpdateMemberProfile): Promise<MemberProfile>;
   saveDetails?(userId: string, token: string, input: ProfileChanges): Promise<MemberProfile>;
@@ -49,7 +51,7 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
   const url = config.SUPABASE_URL;
   const publicKey = config.SUPABASE_PUBLISHABLE_KEY;
   const options = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } };
-  // This client never accepts a member session; only the initializer uses it.
+  // This client never accepts a member session.
   const admin = createClient(url, config.SUPABASE_SECRET_KEY, options);
   const publicClient = createClient(url, publicKey, options);
 
@@ -110,6 +112,7 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
   }
 
   return {
+    accounts: accountRepository(admin),
     async get(userId, token) {
       await initialize(userId);
       const profile = await readProfile(userId, token);

@@ -59,6 +59,11 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
     return () => { cancelled = true; };
   }, [retry, router]);
 
+  useEffect(() => {
+    if (!loaded || onboarding) return;
+    document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
+  }, [loaded, onboarding]);
+
   return (
     <MemberShell>
       <div className="mx-auto max-w-3xl rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-9">
@@ -203,7 +208,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
           className={`rounded-lg px-3 py-2 ${index === step ? "bg-[var(--theme-selected)]" : "bg-[var(--theme-control)]"}`}>{title}</li>)}
       </ol>}
       <form className="mt-6 space-y-7" onSubmit={submit} aria-busy={busy || uploading} noValidate>
-        {(all || step === 0) && <fieldset className="space-y-4">
+        {(all || step === 0) && <fieldset id="personal" className="space-y-4">
           <legend className="text-lg font-bold">{m.connectionQuestion}</legend>
           <p className="mt-2 text-sm text-[var(--theme-body)]">{m.membershipNote}</p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -250,7 +255,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
           <p className="text-xs text-[var(--theme-body)]">{t.privateNote}</p>
         </fieldset>}
 
-        {(all || step === 2) && <fieldset className="space-y-4">
+        {(all || step === 2) && <fieldset id="public-profile" className="space-y-4">
           <legend className="text-lg font-bold">{m.publicProfile}</legend>
           <label className="mt-3 block">{t.displayName}<input className={input} autoComplete="nickname" maxLength={80} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></label>
           <label className="block">{m.username}<input className={input} autoComplete="username" autoCapitalize="none" spellCheck={false} aria-describedby="username-hint" maxLength={24} value={username} onChange={(e) => setUsername(e.target.value)} required /></label>
@@ -269,7 +274,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
           </div>
           <fieldset className="space-y-2 rounded-xl border border-[var(--theme-border)] p-3">
             <legend className="px-1 font-semibold">{m.privacy}</legend>
-            <label className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={discoverable} onChange={(e) => setDiscoverable(e.target.checked)} />{m.discoverable}</label>
+            <label id="privacy" className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={discoverable} onChange={(e) => setDiscoverable(e.target.checked)} />{m.discoverable}</label>
             <label className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={showCategory} onChange={(e) => setShowCategory(e.target.checked)} />{m.showCategory}</label>
           </fieldset>
         </fieldset>}

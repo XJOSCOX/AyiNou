@@ -23,9 +23,14 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
           claims.iss !== issuer ||
           !(claims.aud === "authenticated" || (Array.isArray(claims.aud) && claims.aud.includes("authenticated"))) ||
           claims.role !== "authenticated" ||
+          claims.is_anonymous === true ||
           typeof claims.exp !== "number" || claims.exp <= Date.now() / 1000 ||
           !z.uuid().safeParse(claims.sub).success
         ) return null;
+        if (claims.aal !== "aal2") {
+          const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel(token);
+          if (assurance.error || assurance.data.nextLevel === "aal2") return null;
+        }
         return claims.sub;
       } catch {
         return null;

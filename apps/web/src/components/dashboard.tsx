@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { CommunityStats, MemberProfile } from "@ayinou/shared";
 import { fetchCommunityStats, fetchMyProfile } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
+import { accountMessages } from "@/lib/account-i18n";
 import { communityMessages } from "@/lib/community-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { membershipMessages } from "@/lib/membership-i18n";
@@ -15,6 +16,7 @@ export function Dashboard() {
   const [locale] = useLocale();
   const t = communityMessages[locale];
   const auth = authMessages[locale];
+  const account = accountMessages[locale];
   const m = membershipMessages[locale];
   const router = useRouter();
   const [profile, setProfile] = useState<MemberProfile | null>(null);
@@ -54,18 +56,18 @@ export function Dashboard() {
 
   return <MemberShell>
     <div className="space-y-9">
-      <section className="relative overflow-hidden rounded-[2rem] bg-[var(--theme-primary)] px-6 py-9 text-[var(--theme-on-primary)] shadow-[0_20px_60px_-30px_var(--theme-primary)] sm:px-10 sm:py-12">
+      <section className="relative overflow-hidden rounded-[14px] bg-[var(--theme-primary)] px-5 py-7 text-[var(--theme-on-primary)] sm:px-10 sm:py-10">
         <div aria-hidden="true" className="absolute -right-16 -top-24 h-72 w-72 rounded-full border-[42px] border-[var(--theme-chart)]/30" />
         <div aria-hidden="true" className="absolute -bottom-36 right-28 h-72 w-72 rounded-full border-[36px] border-[var(--theme-on-primary-accent)]/15" />
         <div className="relative max-w-3xl">
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--theme-on-primary-accent)]">{t.eyebrow}</p>
-          <h1 className="mt-5 font-serif text-4xl leading-tight sm:text-6xl">{t.title}</h1>
+          <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">{t.title}</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--theme-on-primary-muted)] sm:text-lg">{t.intro}</p>
           {profile && <p className="mt-6 text-sm text-[var(--theme-on-primary-muted)]">{auth.dashboardTitle.replace("{name}", profile.displayName ?? "")}</p>}
           {profileError && <p role="alert" className="mt-6 text-sm text-[var(--theme-on-primary-error)]">{auth.loadError}</p>}
           <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/profile" className="inline-flex rounded-full bg-[var(--theme-button)] px-5 py-2.5 text-sm font-bold text-[var(--theme-text)] transition hover:bg-[var(--theme-button-hover)]">{auth.myProfile} ↗</Link>
-            {profile?.onboardingStep === 0 && <Link href="/onboarding" className="rounded-full border border-current px-5 py-2.5 text-sm font-bold">{m.finish}</Link>}
+            {profile?.onboardingStep === 0 && <Link href="/onboarding" className="rounded-md border border-current px-4 py-2.5 text-sm font-bold">{m.finish}</Link>}
+            <button type="button" disabled className="cursor-not-allowed rounded-md border border-current px-4 py-2.5 text-sm font-semibold opacity-75">{account.comingSoon}</button>
           </div>
         </div>
       </section>
@@ -78,21 +80,21 @@ export function Dashboard() {
 
       {stats && <>
         {stats.registered === 0 && <p role="status" className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-6 text-[var(--theme-body)]">{t.empty}</p>}
-        <section aria-label={t.eyebrow} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section aria-label={t.eyebrow} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {([
             [t.registered, stats.registered, "var(--theme-hero)"],
             [t.haiti, stats.haiti, "var(--theme-selected)"],
             [t.diaspora, stats.diaspora, "var(--theme-control)"],
             [t.represented, stats.representedDepartments, "var(--theme-hero)"],
-          ] as const).map(([label, value, color]) => <article key={label} className="min-h-40 rounded-[1.5rem] border border-[var(--theme-border)] p-6" style={{ backgroundColor: color }}>
+          ] as const).map(([label, value, color]) => <article key={label} className="rounded-[10px] border border-[var(--theme-border)] p-5 sm:min-h-36 sm:p-6" style={{ backgroundColor: color }}>
             <p className="text-sm font-semibold text-[var(--theme-body)]">{label}</p>
-            <p className={`mt-5 font-serif ${value == null ? "text-base leading-6" : "text-4xl"} text-[var(--theme-text)]`}>{count(value)}{label === t.represented && value != null && <span className="ml-2 font-sans text-sm font-semibold text-[var(--theme-body)]">{t.ofTen}</span>}</p>
+            <p className={`mt-3 font-semibold ${value == null ? "text-base leading-6" : "text-4xl tabular-nums"}`}>{count(value)}{label === t.represented && value != null && <span className="ml-2 text-sm font-semibold text-[var(--theme-body)]">{t.ofTen}</span>}</p>
           </article>)}
         </section>
 
         <section className="grid gap-4 sm:grid-cols-3">
-          {([[t.active, stats.active], [t.verified, stats.verified], [t.unknown, stats.unknown]] as const).map(([label, value]) => <article key={label} className="rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-surface)] px-6 py-5">
-            <p className="text-sm text-[var(--theme-body)]">{label}</p><p className={`mt-2 font-serif ${value == null ? "text-sm" : "text-3xl"} text-[var(--theme-link)]`}>{count(value)}</p>
+          {([[t.active, stats.active], [t.verified, stats.verified], [t.unknown, stats.unknown]] as const).map(([label, value]) => <article key={label} className="rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] px-6 py-5">
+            <p className="text-sm text-[var(--theme-body)]">{label}</p><p className={`mt-2 font-semibold ${value == null ? "text-sm" : "text-3xl tabular-nums"} text-[var(--theme-link)]`}>{count(value)}</p>
           </article>)}
         </section>
 
@@ -103,7 +105,7 @@ export function Dashboard() {
 
         {stats.geographyAvailable && <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-[1.5rem] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-6 sm:p-8">
-            <h2 className="font-serif text-2xl text-[var(--theme-text)]">{t.departmentTitle}</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">{t.departmentTitle}</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{t.departmentIntro}</p>
             <div className="mt-7 space-y-4">
               {visibleDepartments.map((item) => <div key={item.code}>
@@ -113,7 +115,7 @@ export function Dashboard() {
             </div>
           </section>
           <section className="rounded-[1.5rem] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-6 sm:p-8">
-            <h2 className="font-serif text-2xl text-[var(--theme-text)]">{t.diasporaTitle}</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">{t.diasporaTitle}</h2>
             <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{t.diasporaIntro}</p>
             {visibleCountries.length === 0 ? <p className="mt-7 text-sm text-[var(--theme-body)]">0 {t.members}</p> : <div className="mt-7 space-y-4">
               {visibleCountries.map((item) => <div key={item.code}>
@@ -133,11 +135,11 @@ export function Dashboard() {
           </dl> : <p className="mt-4 text-sm">{m.membershipHidden}</p>}
         </section>}
 
-        <footer className="border-t border-[var(--theme-border)] pt-5 text-sm leading-6 text-[var(--theme-body)]">
+        <div className="border-t border-[var(--theme-border)] pt-5 text-sm leading-6 text-[var(--theme-body)]">
           <p>{t.updated}: <time dateTime={stats.updatedAt}>{new Intl.DateTimeFormat(locale === "ht" ? "ht-HT" : locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(stats.updatedAt))}</time></p>
           <p className="mt-2">{t.definition}</p>
           <p className="mt-2">{t.footnote}</p>
-        </footer>
+        </div>
       </>}
     </div>
   </MemberShell>;

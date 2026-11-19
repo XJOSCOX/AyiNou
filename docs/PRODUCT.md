@@ -22,6 +22,8 @@ Membership is open to Haitians, including the diaspora, and international suppor
 
 A new user selects Creole/French/English, signs up, chooses public display name, sets optional broad residency details, and enters a welcoming feed. The first useful actions are: explore department communities, meet other members, and join a constructive initiative.
 
+The current member dashboard presents privacy-filtered community statistics. Account Settings groups personal and public profile editing, privacy preferences, recovery and authenticator controls, the private member reference, and referrals. Members can share an invitation link. A new member may use one code at signup, with attribution confirmed after email confirmation and a signed-in request. Referrals carry no payment, reward, role, or badge.
+
 ## Dashboard terminology
 
 - `Registered members`: non-deleted user accounts, excluding known spam/test accounts in production metrics.
@@ -34,6 +36,8 @@ A new user selects Creole/French/English, signs up, chooses public display name,
 ## Public figures and ambassadors
 
 Invite media hosts, musicians, artists, athletes, educators, business/community leaders, and others from varied regions. Invitations and platform amplification must follow objective, documented, nonpartisan standards. Authenticity verification should be distinct from being selected as an ambassador.
+
+Future identity verification will use time-bound proof of control through an approved channel. Proof supports a verification application. Badge approval requires a separate authorized review. Supabase sign-in MFA only protects account access.
 
 ## User safety
 

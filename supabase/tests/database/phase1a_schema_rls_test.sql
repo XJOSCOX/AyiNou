@@ -50,19 +50,14 @@ set local request.jwt.claim.sub = '11111111-1111-4111-8111-111111111111';
 select is((select count(*)::int from public.profiles), 1, 'owner reads own hidden profile');
 select is((select count(*)::int from public.member_private), 1, 'owner reads own private data');
 select results_eq(
-  $$with changed as (update public.profiles set display_name = 'Owner' where user_id =
-    '11111111-1111-4111-8111-111111111111' returning 1)
-    select count(*)::int from changed$$,
-  $$values (1)$$,
-  'owner can update permitted public field'
+  $$select display_name from public.update_my_profile('Owner', 'ht', null, null, null)$$,
+  $$values ('Owner'::text)$$,
+  'owner can update public information through the profile RPC'
 );
 select results_eq(
-  $$with changed as (update public.member_private set residence_country_code = 'HT',
-    residence_department_code = 'HT-OU' where user_id =
-    '11111111-1111-4111-8111-111111111111' returning 1)
-    select count(*)::int from changed$$,
-  $$values (1)$$,
-  'owner can update permitted private fields'
+  $$select residence_department_code from public.update_my_profile('Owner', 'ht', 'HT', 'HT-OU', null)$$,
+  $$values ('HT-OU'::text)$$,
+  'owner can update private information through the profile RPC'
 );
 select throws_ok($$update public.profiles set is_visible = true$$,
   '42501');
@@ -85,20 +80,10 @@ select is((select count(*)::int from public.member_private where user_id =
   '11111111-1111-4111-8111-111111111111'), 0, 'other user cannot read owner private data');
 select is((select count(*)::int from public.profiles where user_id =
   '11111111-1111-4111-8111-111111111111'), 0, 'other user cannot read owner hidden profile');
-select results_eq(
-  $$with changed as (update public.member_private set residence_country_code = 'US'
-    where user_id = '11111111-1111-4111-8111-111111111111' returning 1)
-    select count(*)::int from changed$$,
-  $$values (0)$$,
-  'other user cannot update owner private data'
-);
-select results_eq(
-  $$with changed as (update public.profiles set display_name = 'Impostor'
-    where user_id = '11111111-1111-4111-8111-111111111111' returning 1)
-    select count(*)::int from changed$$,
-  $$values (0)$$,
-  'other user cannot update owner public profile'
-);
+select throws_ok($$update public.member_private set residence_country_code = 'US'
+    where user_id = '11111111-1111-4111-8111-111111111111'$$, '42501');
+select throws_ok($$update public.profiles set display_name = 'Impostor'
+    where user_id = '11111111-1111-4111-8111-111111111111'$$, '42501');
 reset role;
 
 select * from finish();
