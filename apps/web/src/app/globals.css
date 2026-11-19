@@ -2,26 +2,27 @@
 
 :root {
   color-scheme: light;
-  --theme-bg: #ebf7fc;
-  --theme-surface: #f8fcfd;
-  --theme-hero: #d1edfb;
-  --theme-text: #153246;
-  --theme-body: #365a70;
-  --theme-link: #1d5d80;
-  --theme-border: #b9dfef;
-  --theme-control: #edf8fc;
-  --theme-selected: #d2eefb;
-  --theme-button: #a7dff4;
-  --theme-button-hover: #c2eafa;
-  --theme-button-border: #5893ad;
-  --theme-primary: #16658b;
-  --theme-on-primary: #fff;
-  --theme-chart: #2585ad;
+  --theme-bg: #e9f2fa;
+  --theme-surface: #f9fcff;
+  --theme-hero: #dcecfb;
+  --theme-text: #142d49;
+  --theme-body: #3f5873;
+  --theme-link: #1d5a99;
+  --theme-border: #bfd5e9;
+  --theme-control: #eff6fc;
+  --theme-selected: #d4e8fa;
+  --theme-button: #e0effc;
+  --theme-button-hover: #cde5fa;
+  --theme-button-border: #accbe7;
+  --theme-primary: #2164ac;
+  --theme-primary-hover: #174e8d;
+  --theme-on-primary: #f8fbff;
+  --theme-grid: #7d9fbe;
+  --theme-chart: #2878c4;
   --theme-chart-secondary: #927148;
   --theme-error-bg: #fff0eb;
   --theme-error-text: #822d28;
-  --theme-primary-hover: #154e70;
-  --theme-on-primary-muted: #e3f3fc;
+  --theme-on-primary-muted: #e0efff;
   --theme-on-primary-accent: #ffe0a4;
   --theme-on-primary-error: #ffe0cf;
   --theme-brand-blue: #3aa6cc;
@@ -30,28 +31,45 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --theme-bg: #111f2b;
-  --theme-surface: #142532;
-  --theme-hero: #1d384a;
-  --theme-text: #e8f6fd;
-  --theme-body: #b8d3e2;
-  --theme-link: #a5ddf8;
-  --theme-border: #375365;
-  --theme-control: #1a3141;
-  --theme-selected: #2b5268;
-  --theme-button: #234e65;
-  --theme-button-hover: #325e73;
-  --theme-button-border: #6699b0;
-  --theme-primary: #27688a;
-  --theme-on-primary: #fff;
-  --theme-chart: #66c4e9;
+  --theme-bg: #101b2c;
+  --theme-surface: #17263d;
+  --theme-hero: #203755;
+  --theme-text: #edf6ff;
+  --theme-body: #b9cfe5;
+  --theme-link: #9bcfff;
+  --theme-border: #385574;
+  --theme-control: #1e3049;
+  --theme-selected: #2c4c70;
+  --theme-button: #233d5c;
+  --theme-button-hover: #2c5077;
+  --theme-button-border: #4f7398;
+  --theme-primary: #8ec7ff;
+  --theme-primary-hover: #b4dbff;
+  --theme-on-primary: #102e4c;
+  --theme-grid: #527ca4;
+  --theme-chart: #6fb2f4;
   --theme-chart-secondary: #dfad71;
   --theme-error-bg: #442b32;
   --theme-error-text: #ffc3bb;
-  --theme-primary-hover: #347ca0;
+  --theme-on-primary-muted: #244667;
+  --theme-on-primary-accent: #54360e;
+  --theme-on-primary-error: #6f2526;
+  --theme-brand-blue: #527ef0;
+  --theme-brand-red: #ca4b61;
 }
 
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--theme-bg); color: var(--theme-text); font-family: Arial, Helvetica, sans-serif; }
+body { position: relative; isolation: isolate; min-height: 100dvh; margin: 0; background: var(--theme-bg); color: var(--theme-text); font-family: "DM Sans Variable", Arial, Helvetica, sans-serif; }
 button { cursor: pointer; }
 ::selection { background: var(--theme-selected); color: var(--theme-text); }
+
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--theme-grid);
+  mask-image: url("/site-grid.png");
+  opacity: 0.48;
+}

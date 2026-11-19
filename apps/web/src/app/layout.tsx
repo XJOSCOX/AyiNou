@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "@fontsource-variable/dm-sans";
 import { darkThemeQuery, themeStorageKey } from "@/lib/theme";
 import "./globals.css";
 

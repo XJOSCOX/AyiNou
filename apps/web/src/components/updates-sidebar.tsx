@@ -10,9 +10,9 @@ export function UpdatesSidebar() {
   const t = messages[locale];
   const auth = authMessages[locale];
   return (
-    <aside aria-labelledby="updates-heading" className="order-last rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 lg:order-first lg:rounded-none lg:border-y-0 lg:border-l-0 lg:py-9 lg:pl-0 lg:pr-5 lg:shadow-[-100vmax_0_0_100vmax_var(--theme-surface)] lg:[clip-path:inset(0_0_0_-100vmax)] xl:pr-6">
+    <aside aria-labelledby="updates-heading" className="self-start rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-hero)] p-5">
       <h2 id="updates-heading" className="text-lg font-extrabold tracking-tight">{t.updates}</h2>
-      <div className="mt-4 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-bg)] p-4">
+      <div className="mt-4 border-y border-[var(--theme-border)] py-4">
         <h3 className="font-bold">{t.memberAccess}</h3>
         <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{t.memberUpdate}</p>
         <Link href="/login" className="mt-3 inline-block text-sm font-bold text-[var(--theme-link)] hover:underline">{auth.login}</Link>

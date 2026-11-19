@@ -1,0 +1,4 @@
+.splitPanel {
+  background: var(--theme-surface);
+  box-shadow: 0 24px 64px -32px color-mix(in srgb, var(--theme-text) 38%, transparent);
+}

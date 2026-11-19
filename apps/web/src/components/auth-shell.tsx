@@ -3,45 +3,40 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { authMessages } from "@/lib/auth-i18n";
-import { locales } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
+import { LanguageSwitch } from "./language-switch";
 import { SiteBrand } from "./site-brand";
 import { ThemeToggle } from "./theme-toggle";
+import styles from "./auth-shell.module.css";
 
 export function AuthShell({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useLocale();
+  const [locale] = useLocale();
   const t = authMessages[locale];
+
   return (
-    <div className="min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)]">
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-6 sm:px-8">
-        <SiteBrand href="/" />
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1" role="group" aria-label={t.language}>
-            {locales.map((option) => (
-              <button key={option} type="button" onClick={() => setLocale(option)} aria-pressed={locale === option}
-                className={`rounded-full px-3 py-1.5 text-xs font-bold uppercase ${locale === option ? "bg-[var(--theme-primary)] text-[var(--theme-on-primary)]" : "bg-[var(--theme-surface)] text-[var(--theme-body)]"}`}>
-                {option}
-              </button>
-            ))}
+    <main className="grid min-h-dvh items-center p-3 text-[var(--theme-text)] sm:p-6 lg:p-10">
+      <div className={`${styles.splitPanel} mx-auto grid w-full max-w-[1120px] gap-1 rounded-[14px] border border-[var(--theme-border)] p-2 sm:p-3 md:min-h-[610px] md:grid-cols-[1.05fr_1fr]`}>
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-hero)]">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6 md:py-4">
+            <SiteBrand href="/" />
+            <Link href="/" className="rounded-md bg-[var(--theme-surface)] px-3 py-2 text-xs font-semibold text-[var(--theme-link)] hover:underline sm:text-sm">
+              {t.backHome} <span aria-hidden="true">↗</span>
+            </Link>
           </div>
-          <ThemeToggle />
-        </div>
-      </header>
-      <main className="mx-auto grid max-w-6xl gap-8 px-5 pb-12 pt-4 sm:px-8 md:grid-cols-[0.95fr_1.05fr] md:items-start md:pt-9">
-        <div className="hidden overflow-hidden rounded-[2rem] border border-[var(--theme-border)] bg-[var(--theme-hero)] md:block">
-          <div className="h-64 bg-[url('/ayinou-coast.webp')] bg-cover bg-center lg:h-80" aria-hidden="true" />
-          <div className="px-7 py-8 lg:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--theme-link)]">{t.brandEyebrow}</p>
-            <p className="mt-3 text-4xl font-extrabold leading-tight tracking-tight">{t.brandTitle}</p>
+          <div aria-hidden="true" className="min-h-28 flex-1 bg-[url('/ayinou-coast.webp')] bg-cover bg-[center_58%] sm:min-h-40 md:min-h-0" />
+          <div className="px-4 py-3 sm:px-6 md:py-6">
+            <p className="hidden text-xs font-semibold uppercase tracking-[0.14em] text-[var(--theme-link)] md:block">{t.brandEyebrow}</p>
+            <p className="text-xl font-semibold leading-tight tracking-tight md:mt-2 md:text-3xl">{t.brandTitle}</p>
           </div>
         </div>
-        <div className="w-full max-w-xl rounded-[2rem] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-6 shadow-xl shadow-[var(--theme-primary)]/10 sm:p-10">
-          {children}
+        <div className="flex min-w-0 flex-col px-4 pb-7 pt-3 sm:px-8 md:px-9 lg:px-14">
+          <div className="flex items-center justify-end gap-2 md:pt-4">
+            <LanguageSwitch />
+            <ThemeToggle />
+          </div>
+          <div className="my-auto w-full py-5 md:py-8">{children}</div>
         </div>
-      </main>
-      <footer className="mx-auto max-w-6xl px-5 pb-10 text-sm text-[var(--theme-body)] sm:px-8">
-        <Link href="/" className="underline underline-offset-4">← {t.backHome}</Link>
-      </footer>
-    </div>
+      </div>
+    </main>
   );
 }
