@@ -2,10 +2,12 @@ import { redirect } from "next/navigation";
 import { MfaChallenge } from "@/components/mfa-challenge";
 import { serverSupabase } from "@/lib/supabase/server";
 
-export default async function MfaPage({ searchParams }: { searchParams: Promise<{ next?: string; claim?: string }> }) {
+export default async function MfaPage({ searchParams }: { searchParams: Promise<{ next?: string; claim?: string; join?: string }> }) {
   const search = await searchParams;
   const claim = typeof search.claim === "string" && /^[a-z0-9][a-z0-9-]{2,39}$/.test(search.claim) ? search.claim : null;
-  const next = search.next === "/reset-password" ? "/reset-password" : claim ? `/verification?claim=${claim}` : "/dashboard";
+  const join = typeof search.join === "string" && /^[a-z0-9][a-z0-9-]{2,39}$/.test(search.join) ? search.join : null;
+  const next = search.next === "/reset-password" ? "/reset-password" : claim ? `/verification?claim=${claim}`
+    : join ? `/organization/${join}` : "/dashboard";
   const supabase = await serverSupabase();
   const claims = await supabase.auth.getClaims();
   if (claims.error || !claims.data?.claims.sub || claims.data.claims.is_anonymous === true) redirect("/login");

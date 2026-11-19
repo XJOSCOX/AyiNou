@@ -136,3 +136,43 @@ export type ReviewApplication = Omit<VerificationApplication, "decidedAt" | "rat
   evidence: string[];
   reviews: { decision: ReviewDecision; rationale: string; createdAt: string; isSelf: boolean }[];
 };
+
+export const affiliationTypes = ["member", "volunteer", "staff", "supporter"] as const;
+export const membershipPolicies = ["open", "approval_required", "invitation_only"] as const;
+export const affiliationActions = ["suspend", "reinstate", "remove", "change_type"] as const;
+export type AffiliationType = typeof affiliationTypes[number];
+export type MembershipPolicy = typeof membershipPolicies[number];
+export type AffiliationAction = typeof affiliationActions[number];
+export type AffiliationStatus = "pending" | "active" | "suspended" | "removed" | "left";
+export type AffiliationAdmission = "self_joined" | "approved" | "invited";
+export type AffiliationEvent = "requested" | "joined" | "approved" | "rejected" | "withdrawn" | "suspended" |
+  "reinstated" | "removed" | "left" | "type_changed" | "directory_changed" | "policy_changed" | "invited" | "invitation_revoked";
+
+export type Affiliation = {
+  id: string; organizationId: string; affiliationType: AffiliationType; status: AffiliationStatus;
+  admission: AffiliationAdmission | null; listed: boolean; joinedAt: string | null; updatedAt: string;
+};
+
+type AffiliationInvitation = { id: string; affiliationType: AffiliationType; expiresAt: string };
+type AffiliationOrganization = { organizationName: string; handle: string };
+
+export type MyAffiliations = {
+  affiliations: (Affiliation & AffiliationOrganization)[];
+  invitations: (AffiliationInvitation & AffiliationOrganization)[];
+  history: { id: string; event: AffiliationEvent; affiliationType: AffiliationType | null;
+    occurredAt: string; organizationName: string; reason: string | null }[];
+};
+
+export type AffiliationDirectory = {
+  membershipPolicy: MembershipPolicy;
+  directoryEnabled: boolean;
+  members: { displayName: string; affiliationType: AffiliationType }[];
+};
+
+type AffiliationPersonPreview = { displayName: string | null; username: string | null; isSelf: boolean };
+export type AffiliationManagement = {
+  membershipPolicy: MembershipPolicy; directoryEnabled: boolean; policyLocked: boolean; canSetPolicy: boolean;
+  members: (Affiliation & AffiliationPersonPreview)[];
+  requests: (AffiliationPersonPreview & { id: string; affiliationType: AffiliationType; message: string | null; createdAt: string })[];
+  invitations: (AffiliationInvitation & { username: string | null })[];
+};

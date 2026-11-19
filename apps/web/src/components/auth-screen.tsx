@@ -21,8 +21,8 @@ const fieldClass = "block w-full rounded-md border border-[var(--theme-border)] 
 const floatingFieldClass = `${fieldClass} ${styles.floatingInput} pb-2 pt-6`;
 const primaryActionClass = "w-full rounded-md bg-[var(--theme-primary)] px-6 py-3.5 font-semibold text-[var(--theme-on-primary)] hover:bg-[var(--theme-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]";
 
-export function AuthScreen({ mode, invalidLink = false, initialReferral = "", claimHandle }: {
-  mode: AuthMode; invalidLink?: boolean; initialReferral?: string; claimHandle?: string;
+export function AuthScreen({ mode, invalidLink = false, initialReferral = "", claimHandle, joinHandle }: {
+  mode: AuthMode; invalidLink?: boolean; initialReferral?: string; claimHandle?: string; joinHandle?: string;
 }) {
   const [locale, setLocale] = useLocale();
   const t = authMessages[locale];
@@ -104,10 +104,12 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           }
           throw authError;
         }
-        if (claimHandle) {
+        if (claimHandle || joinHandle) {
           const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          const next = claimHandle ? `/verification?claim=${claimHandle}` : `/organization/${joinHandle}`;
+          const challenge = claimHandle ? `/mfa?claim=${claimHandle}` : `/mfa?join=${joinHandle}`;
           router.replace(assurance.data?.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2"
-            ? `/mfa?claim=${claimHandle}` : `/verification?claim=${claimHandle}`);
+            ? challenge : next);
         } else router.replace("/dashboard");
         router.refresh();
       } else if (mode === "forgot") {

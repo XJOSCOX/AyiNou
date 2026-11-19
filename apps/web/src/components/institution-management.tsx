@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useState, type FormEvent } from "react";
 import { governmentKinds, invitedRoles, type InstitutionManagement } from "@ayinou/shared";
 import { accountMessages } from "@/lib/account-i18n";
+import { affiliationMessages } from "@/lib/affiliation-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { inviteRepresentative, loadInstitution, resolveInvitation, revokeRepresentative, saveInstitution, uploadInstitutionLogo } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
@@ -87,6 +88,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
         <div className="flex flex-wrap items-center gap-3">
           <InstitutionStatus status={org.verificationStatus} />
           <Link href={`/organization/${org.handle}`} className={institutionLink}>{t.publicProfile}</Link>
+          {manageTeam && <Link href={`/institutions/${org.id}/affiliations`} className={institutionLink}>{affiliationMessages[locale].management}</Link>}
         </div>
       </header>
       {failed !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failed)}</p>}

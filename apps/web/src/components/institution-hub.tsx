@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { InstitutionInput } from "@ayinou/shared";
 import { accountMessages } from "@/lib/account-i18n";
+import { affiliationMessages } from "@/lib/affiliation-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { createInstitution, loadInstitutionAccounts, resolveInvitation } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
@@ -12,6 +13,7 @@ import { useLocale } from "@/lib/locale-store";
 import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionStatus, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { MyAffiliationsPanel } from "./my-affiliations-panel";
 
 export function InstitutionHub() {
   const [locale] = useLocale();
@@ -60,7 +62,7 @@ export function InstitutionHub() {
         </div> : !accounts.data ? <p role="status">{auth.working}</p> : (
           <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(17rem,2fr)]">
             <section className={institutionCard}>
-              <h2 className="text-xl font-semibold">{t.institutionProfile}</h2>
+              <h2 className="text-xl font-semibold">{affiliationMessages[locale].manage}</h2>
               {accounts.data.organizations.length === 0 ? <p className="mt-3 text-[var(--theme-body)]">{t.none}</p> : (
                 <ul className="mt-3 divide-y divide-[var(--theme-border)]">
                   {accounts.data.organizations.map((org) => <li key={org.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
@@ -91,6 +93,7 @@ export function InstitutionHub() {
             </section>
           </div>
         )}
+        <MyAffiliationsPanel />
       </div>
     </MemberShell>
   );

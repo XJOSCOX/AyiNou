@@ -4,6 +4,7 @@ import { invitedRoles, organizationKinds, reviewDecisions, verificationKinds, ty
 import { z } from "zod";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
+import { registerAffiliationDirectory, registerAffiliationRoutes } from "./affiliations.js";
 
 const handle = z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9-]{2,39}$/);
 const resource = z.object({ id: z.uuid() });
@@ -47,6 +48,7 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
     return reply.code(status).send({ error: { code: status === 503 ? "SERVICE_UNAVAILABLE" : "INVALID_INPUT", message: "Institution request could not be completed" } });
   });
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
+  registerAffiliationDirectory(app, repo);
 
   app.get("/api/v1/institutions/by-handle/:handle", async (request, reply) => {
     if (!repo) throw new InstitutionError("SERVICE_UNAVAILABLE", 503);
@@ -69,6 +71,7 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
     });
 
     const service = repo!;
+    registerAffiliationRoutes(api, service);
     const base = "/api/v1/institutions";
     api.get("/api/v1/me/institution-accounts", async (request) => service.accounts(request.authUserId!));
     api.get(`${base}/:id`, async (request) => service.manage(request.authUserId!, resource.parse(request.params).id));

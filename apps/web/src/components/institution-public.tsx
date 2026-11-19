@@ -8,6 +8,7 @@ import { InstitutionLogo, InstitutionStatus, institutionAction, institutionCard,
 import { LanguageSwitch } from "./language-switch";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
+import { PublicAffiliationPanel } from "./public-affiliation-panel";
 import { ThemeToggle } from "./theme-toggle";
 
 export function InstitutionPublic({ organization: org, signedIn }: { organization: Institution; signedIn: boolean }) {
@@ -39,6 +40,7 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
           {org.description && <p className="mt-3 max-w-4xl whitespace-pre-line break-words leading-7 text-[var(--theme-body)]">{org.description}</p>}
           {org.website && <a href={org.website} target="_blank" rel="noreferrer" className={`${institutionLink} mt-4 inline-block`}>{t.website} <span aria-hidden="true">↗</span></a>}
         </section>
+        <PublicAffiliationPanel organization={org} signedIn={signedIn} />
         {org.verificationStatus !== "verified" && <div>
           <Link href={claim} className={institutionAction}>{t.claimProfile}</Link>
           {!signedIn && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.claimInstructions}</p>}

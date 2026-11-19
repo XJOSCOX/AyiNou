@@ -42,6 +42,13 @@
 - Review requires a platform administrator with an explicit reviewer assignment, verified MFA, a current AAL2 token, and no detected conflict. Two eligible reviewers must approve. Signup and claim submissions grant no badge. Application intake, evidence references, receipt of written decisions, and revocation are active; temporary proof challenges, SMTP/SMS delivery, and identity-provider integration remain separate.
 - Provision no reviewer automatically. Before production review, decide who can receive reviewer assignments, how to handle indirect conflicts and appeals, and how long to retain evidence links and review history.
 
+## Ordinary affiliations
+
+- Keep ordinary affiliation and authorized representation in separate tables and workflows. Roles, credentials, and verification continue to use the existing Phase 2D boundaries.
+- Start all institutions as invitation-only. Owners of eligible institutions can enable open or approval-required membership. Government institutions and other institutions marked sensitive stay invitation-only by database constraint.
+- Open organizations admit members, volunteers, and supporters directly. A staff request still needs approval or an invitation. An organization can invite a person it previously removed. Direct re-entry after a removal is blocked.
+- The directory starts disabled. Member consent covers only the current public display name and affiliation type. Suspension, removal, leaving, or an affiliation type change clears prior consent. Requests and decisions stay private.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

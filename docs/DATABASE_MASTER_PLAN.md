@@ -1,10 +1,10 @@
 # Ayinou master database plan
 
-**Status:** Forward-looking architecture, 2026-11-19. Twenty-one application tables are deployed through Phase 2D, including the private account and institutional tables. This plan uses the database blueprint, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
+**Status:** Forward-looking architecture, 2026-11-19. Twenty-five application tables are deployed through Phase 2D.1, including the private account, institutional, and affiliation tables. This plan uses the database blueprint, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
 
 ## Verified baseline and design rules
 
-Hosted migration history includes `20261119160000_initial_schema`, `20261119173400_hosted_profile_rpc`, `20261119210000_phase2_community_stats`, `20261119220000_phase2b_membership`, `20261119230000_phase2c_accounts`, and `20261120010000_phase2d_institutions`. Guarded hosted checks cover profile behavior, privacy-safe metrics, referral setup, Supabase TOTP, and institutional authorization and verification. Public registration, delivered confirmation and recovery mail, and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120020000_phase2d1_affiliations`. Guarded hosted checks cover profile behavior, privacy-safe metrics, referral setup, Supabase TOTP, institutional authorization and verification, and ordinary affiliation. Public registration, delivered confirmation and recovery mail, and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Keep original `ht`/`fr`/`en` content and label translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -68,6 +68,19 @@ The following tables are in `private`. `auth.users` always identifies a person. 
 | `institution_audit` | `id uuid PK`, `actor_id uuid? FK→auth.users.id SET NULL`, `organization_id uuid?`, `subject_id uuid?`, `event text!`, `occurred_at timestamptz!` | IX organization/date and subject/date. Opaque subject pointers intentionally survive deletion. |
 
 All eight tables have RLS and no direct anon, member, or service-role grants. Fastify exposes a limited public projection and scoped protected operations. Owners manage identity and delegation. Administrators manage lower roles, editorial content, and the private contact. Editors can update description and logo. Viewers can read scoped details. An institutional membership cannot self-elevate. A reviewer must hold an explicit assignment and independent AAL2 session. Two reviewers must approve a badge or ownership transfer. Review evidence and audit references remain private. Deletion and retention policy must be reviewed before production use, including the interaction between existing personal verification records and reviewer-account deletion.
+
+### Phase 2D.1 ordinary affiliation schema
+
+`private.organizations` adds `membership_policy text! DEFAULT 'invitation_only'`, `membership_policy_locked boolean! DEFAULT false`, and `member_directory_enabled boolean! DEFAULT false`. The invitation-only constraint covers governmental kinds and institutions marked sensitive.
+
+| Private table | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `organization_affiliations` | `id uuid PK`, `organization_id uuid! FK→organizations.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, `affiliation_type text!`, `status text!`, `admission text?`, `listed boolean! DEFAULT false`, `joined_at timestamptz?`, `approved_by uuid? FK→auth.users.id SET NULL`, `ended_at timestamptz?`, `ca`, `ua`, UQ `(id,organization_id,user_id)` | Partial UQ organization/user for pending, active or suspended. IX user/updated date and active opted-in directory. |
+| `organization_join_requests` | `id uuid PK`, `organization_id uuid!`, `requester_id uuid!`, `affiliation_id uuid! UQ`, composite FK to affiliation ID/org/user CASCADE, `affiliation_type text!`, `message text?`, `status text! DEFAULT 'pending'`, `reviewer_id uuid? FK→auth.users.id SET NULL`, `reason text?`, `ca`, `decided_at timestamptz?` | Partial pending UQ organization/requester and pending queue IX organization/date/ID. IX requester/date. |
+| `organization_affiliation_invitations` | `id uuid PK`, `organization_id uuid! FK→organizations.id CASCADE`, `recipient_id uuid! FK→auth.users.id CASCADE`, `invited_by uuid? FK→auth.users.id SET NULL`, `affiliation_type text!`, `status text! DEFAULT 'pending'`, `ca`, `expires_at timestamptz! DEFAULT now()+7 days`, `closed_at timestamptz?` | Partial pending UQ organization/recipient. IX recipient/expiry and organization/date. |
+| `organization_affiliation_events` | `id uuid PK`, `organization_id uuid! FK→organizations.id CASCADE`, `user_id uuid? FK→auth.users.id CASCADE`, `actor_id uuid? FK→auth.users.id SET NULL`, `affiliation_id uuid?` opaque history pointer, `event text!`, `affiliation_type text?`, `occurred_at timestamptz! DEFAULT now()` | IX subject/date/ID and organization/date. |
+
+Ordinary affiliation states are pending, active, suspended, removed, and left. Admission records distinguish self-join, manager approval, and ordinary invitation. RLS is enabled and direct table access is denied for all client and API service roles. An owner or administrator may manage memberships. An owner alone may set policy. Members may view their own status and history and control directory consent. The public endpoint exposes only consented, eligible members' display names and affiliation types. Earlier representative and verification permissions remain independent.
 
 ## Planned schema by domain and implementation phase
 
@@ -248,6 +261,12 @@ erDiagram
     organizations ||--o{ organization_memberships : represented_by
     auth_users ||--o{ organization_memberships : serves
     organizations ||--o{ organization_invitations : issues
+    organizations ||--o{ organization_affiliations : includes
+    auth_users ||--o{ organization_affiliations : belongs
+    organization_affiliations ||--o| organization_join_requests : originates_from
+    organizations ||--o{ organization_affiliation_invitations : offers
+    organization_affiliations o|--o{ organization_affiliation_invitations : accepted_as
+    organizations ||--o{ organization_affiliation_events : records
     organizations ||--o{ verification_applications : subject
     verification_applications ||--o{ verification_evidence : references
     verification_applications ||--o{ verification_reviews : receives
@@ -306,7 +325,7 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 
 ## Dependencies and migration order
 
-1. **Existing through 2D.** Keep all six applied migration files. Check remote history before each future migration. Private account and institutional tables depend on Auth. Challenge activation depends on an audited proof channel configuration and retention policy.
+1. **Existing through 2D.1.** Keep all seven applied migration files. Check remote history before each future migration. Private account and institutional tables depend on Auth. Ordinary affiliations depend on institutional profiles and scoped representative roles. Challenge activation depends on an audited proof channel configuration and retention policy.
 2. **Common hardening:** Decide privacy/retention rules; add `audit_events` before the first privileged workflow, `countries` and optional validated residence FK only after existing values are checked, then settings/flags. Handle user rights before public launch. Any profile handle/avatar/bio is additive and must not break current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
 4. **Phase 3 base:** Create media metadata/Storage rules, blocks/mutes, `posts`, `comments`, split reactions, follows, reports, moderation cases/actions/appeals/restrictions, notifications. Create `posts` **without** `community_id` in the first phase-3 migration; add the nullable column and FK in phase 4 after `communities` exists. Require moderation and abuse gates before opening posting.

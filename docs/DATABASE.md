@@ -6,7 +6,7 @@ Next.js runs at `http://localhost:4000` and Fastify at `http://127.0.0.1:3000`. 
 
 Install Node.js 20.9+ and npm, then run `npm install` for the pinned `supabase@3.2.0` CLI. Sign in with `npx supabase login` if needed. Copy values from [.env.example](../.env.example) to ignored `apps/api/.env` and `apps/web/.env.local`. The hosted URL and publishable key are used in both apps. Put the secret key **only** in the API file. No database password is needed to run the apps.
 
-The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds the profile RPCs. `20261119210000_phase2_community_stats.sql` adds the metric tables and aggregate RPC. `20261119220000_phase2b_membership.sql` adds profile details, settings, interests, private avatar storage, and the membership breakdown. `20261119230000_phase2c_accounts.sql` adds account codes, referrals, and profile write hardening. `20261120010000_phase2d_institutions.sql` adds institutions, delegated access, and verification. All six are applied to the confirmed project.
+The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds the profile RPCs. `20261119210000_phase2_community_stats.sql` adds the metric tables and aggregate RPC. `20261119220000_phase2b_membership.sql` adds profile details, settings, interests, private avatar storage, and the membership breakdown. `20261119230000_phase2c_accounts.sql` adds account codes, referrals, and profile write hardening. `20261120010000_phase2d_institutions.sql` adds institutions, delegated access, and verification. `20261120020000_phase2d1_affiliations.sql` adds ordinary organization membership. All seven are applied to the confirmed project.
 
 ```bash
 npx supabase link --project-ref hcbxulyfmdmuyccgrujs
@@ -115,13 +115,36 @@ Reviewer access starts closed. A separately authorized database operator must ap
 | `GET/POST /api/v1/me/verification` | Own applications and submission, including ownership claims |
 | `GET /api/v1/verification/review`, `POST /api/v1/verification/review/:id` | Restricted pending or approved queue and decisions |
 
+## Phase 2D.1 ordinary affiliations
+
+Ordinary membership records live in `private.organization_affiliations`, separate from the representative roles in `private.organization_memberships`. The other new private tables are `organization_join_requests`, `organization_affiliation_invitations`, and `organization_affiliation_events`. All four have RLS and no direct grants to anonymous, authenticated, or service roles. Fastify calls narrowly scoped SQL functions that verify account eligibility and, for management writes, current owner or administrator authority. Only an owner can change membership or directory policy. Managers cannot decide their own requests or modify their own affiliation type or moderation status. Ordinary affiliations never appear in the account switcher and give no access to institutional contacts, editing, privileged invitations, or verification.
+
+Every institution starts invitation-only. Eligible owners may choose open admission or approval required. Government kinds and institutions marked sensitive remain invitation-only. Open policies allow members, volunteers, and supporters to join directly. Staff affiliations still require approval or invitation. One current affiliation and one pending request are allowed per account and institution. Owners and administrators can suspend, reinstate, remove, or change a member's type. Members may leave or withdraw a pending request. Removed members require a new invitation to return.
+
+Ordinary invitations use separate, recipient-bound IDs. They are visible in the recipient's Institutions inbox for seven days, can be revoked, and recheck the inviter's authority at acceptance. A successful acceptance can occur only once. Email and SMS are outside this workflow.
+
+Private messages are visible to the institution's authorized reviewers. The requester can read the reason for a rejection in their private history. History exposes the latest 100 events to the affected member. The public directory is disabled by default. When enabled, it returns up to 100 eligible, active members who consented, with display name and affiliation type only. A change of type or participation clears consent. No admission path provides a verified badge. Private rows cascade on institution or subject deletion, while actor references can be cleared. No retention job was added.
+
+| Fastify route | Purpose |
+| --- | --- |
+| `GET /api/v1/institutions/by-handle/:handle/affiliations` | Public policy and consent-filtered directory |
+| `GET /api/v1/me/affiliations` | Own current memberships, pending invitations, and private history |
+| `POST /api/v1/institutions/:id/affiliations` | Join or request membership under the current policy |
+| `PATCH /api/v1/institutions/:id/affiliations/me` | Leave, withdraw, or change directory consent |
+| `GET /api/v1/institutions/:id/affiliations/manage` | Scoped roster, pending requests, and outgoing invitations |
+| `PATCH /api/v1/institutions/:id/affiliations/policy` | Owner-only membership and directory settings |
+| `PATCH /api/v1/institutions/:id/affiliations/requests/:requestId` | Approve or reject an application |
+| `PATCH /api/v1/institutions/:id/affiliations/members/:affiliationId` | Suspend, reinstate, remove, or change affiliation type |
+| `POST /api/v1/institutions/:id/affiliations/invitations` | Issue an ordinary membership invitation |
+| `POST /api/v1/affiliation-invitations/:id/:action` | Accept or revoke an ordinary invitation |
+
 ## Testing and optional local stack
 
 Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:aggregation`. The guard must match the API URL. The scripts create uniquely named, confirmed synthetic Auth users, mark them excluded from public metrics, check API/RLS and aggregate cases, then delete only those returned IDs. The aggregation script requires the pinned CLI's hosted SQL access and an empty eligible-member baseline; its SQL assertions roll back each transaction. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by these scripts.
 
 Run `npm run test:hosted:accounts` for concurrent allocation, Auth-time referral capture, subsequent metadata changes, code separation, direct PostgREST permissions, and Supabase TOTP assurance checks. The test uses service-created synthetic accounts and does not send mail. `npm run test:hosted:accounts:preflight` is a rollback-only SQL and backfill rehearsal for the selected project **before** applying Phase 2C. After applying, inspect the version with `npm run db:migrations`.
 
-Run `npm run test:hosted:institutions:sql` after applying Phase 2D to test grants, expiry, review separation, revocation, and ownership transfer in a rollback-only transaction. Use `-- --preflight` only before applying Phase 2D. Run `npm run test:hosted:institutions` for hosted Auth, PostgREST and API integration with disposable users, organizations, and logo objects.
+Run `npm run test:hosted:institutions:sql` and `npm run test:hosted:affiliations:sql` to test authorization and lifecycle behavior in rollback-only transactions. Each runner accepts `-- --preflight` before applying its migration. Run `npm run test:hosted:institutions` for hosted Auth, PostgREST and API integration covering institutions and affiliations, with disposable users, organizations, and logo objects.
 
 The existing pgTAP suite is optional and isolated to a local Docker stack:
 

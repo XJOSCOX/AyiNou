@@ -94,6 +94,13 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 
 Activation of temporary proof challenges and external evidence delivery remains deferred. Prospective reviewers must be provisioned separately after conflict, retention, and operational policies are approved.
 
+## Phase 2D.1 — Ordinary institutional affiliations
+
+- [x] Separate member, volunteer, staff, and supporter affiliations from authorized representation.
+- [x] Support direct joins, approvals, recipient-bound invitations, member actions, and private history.
+- [x] Keep official institutions invitation-only and require consent for public directory entries.
+- [x] Add localized membership and management controls to the existing responsive institution pages.
+
 ## Phase 3 — Social network MVP
 
 - [ ] Create/edit/delete text posts; read feed; pagination.

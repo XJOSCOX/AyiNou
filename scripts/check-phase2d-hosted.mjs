@@ -23,6 +23,8 @@ const run = randomUUID().slice(0, 12);
 const password = `AyinouSynthetic9-${randomUUID()}`;
 const handle = `institution-hosted-${run}`;
 let org;
+let ordinaryOrg;
+const ordinaryHandle = `affiliate-hosted-${run}`;
 
 async function fixture(label) {
   const email = `institution-${run}-${label}@example.invalid`;
@@ -103,6 +105,57 @@ try {
   await send("GET", "/api/v1/verification/review", 403, owner);
   assert.equal((await send("GET", publicRoute, 200)).organization.verificationStatus, "unverified");
   console.log("Application privacy, restricted review, and no automatic badge: pass");
+
+  const affiliations = `${detail}/affiliations`;
+  await send("PATCH", `${affiliations}/policy`, 400, owner, { membershipPolicy: "open", directoryEnabled: false });
+  await send("POST", affiliations, 403, editor, { affiliationType: "member" });
+  const ordinaryInvite = await send("POST", `${affiliations}/invitations`, 201, owner, { username: editor.username, affiliationType: "staff" });
+  const ordinaryAccept = `/api/v1/affiliation-invitations/${ordinaryInvite.id}/accept`;
+  await send("POST", ordinaryAccept, 403, stranger);
+  await send("POST", ordinaryAccept, 204, editor);
+  await send("POST", ordinaryAccept, 409, editor);
+  await send("GET", detail, 403, editor);
+  await send("GET", `${affiliations}/manage`, 403, editor);
+  assert.ok((await editor.client.rpc("affiliation_manage_for_api", { p_actor: owner.id, p_org: org })).error);
+  assert.ok((await editor.client.schema("private").from("organization_affiliation_events").update({ event: "approved" }).eq("organization_id", org)).error);
+  assert.equal((await send("GET", "/api/v1/me/institution-accounts", 200, editor)).organizations.length, 0);
+
+  ordinaryOrg = (await send("POST", root, 201, editor, {
+    name: "Synthetic nonprofit", handle: ordinaryHandle, kind: "nonprofit", countryCode: "HT", departmentCode: null,
+    description: null, website: null, contactEmail: null,
+  })).id;
+  assert.match(ordinaryOrg, /^[0-9a-f-]{36}$/);
+  const own = await send("GET", "/api/v1/me/affiliations", 200, editor);
+  assert.equal(own.affiliations[0]?.organizationId, org);
+  assert.equal((await send("GET", "/api/v1/me/institution-accounts", 200, editor)).organizations[0]?.id, ordinaryOrg);
+  const ordinary = `${root}/${ordinaryOrg}/affiliations`;
+  const directory = `${root}/by-handle/${ordinaryHandle}/affiliations`;
+  await send("PATCH", `${ordinary}/policy`, 204, editor, { membershipPolicy: "open", directoryEnabled: true });
+  const attempts = await Promise.all([1, 2].map(() => app.inject({
+    method: "POST", url: ordinary, headers: stranger.headers, payload: { affiliationType: "volunteer" },
+  })));
+  assert.deepEqual(attempts.map(({ statusCode }) => statusCode).sort(), [201, 409]);
+  assert.deepEqual((await send("GET", directory, 200)).members, []);
+  await send("PATCH", `${ordinary}/me`, 204, stranger, { action: "set_directory", listed: true });
+  assert.deepEqual((await send("GET", directory, 200)).members, [{ displayName: "Synthetic institution member", affiliationType: "volunteer" }]);
+  const listedMember = (await send("GET", `${ordinary}/manage`, 200, editor)).members[0];
+  await send("PATCH", `${affiliations}/members/${listedMember.id}`, 403, owner, { action: "suspend" });
+  await send("PATCH", `${ordinary}/members/${listedMember.id}`, 204, editor, { action: "suspend" });
+  assert.deepEqual((await send("GET", directory, 200)).members, []);
+  await send("PATCH", `${ordinary}/members/${listedMember.id}`, 204, editor, { action: "reinstate" });
+  assert.deepEqual((await send("GET", directory, 200)).members, []);
+  await send("PATCH", `${ordinary}/me`, 204, stranger, { action: "leave" });
+  await send("PATCH", `${ordinary}/policy`, 204, editor, { membershipPolicy: "approval_required", directoryEnabled: false });
+  assert.equal((await send("POST", ordinary, 201, stranger, { affiliationType: "supporter", message: "Private synthetic message" })).status, "pending");
+  const pending = (await send("GET", `${ordinary}/manage`, 200, editor)).requests[0];
+  assert.equal(pending.message, "Private synthetic message");
+  await send("PATCH", `${ordinary}/requests/${pending.id}`, 403, stranger, { decision: "approve" });
+  await send("PATCH", `${ordinary}/requests/${pending.id}`, 204, editor, { decision: "approve" });
+  const history = (await send("GET", "/api/v1/me/affiliations", 200, stranger)).history;
+  assert.ok(history.some((entry) => entry.event === "approved"));
+  assert.ok(!JSON.stringify(await send("GET", directory, 200)).includes("Private synthetic message"));
+  assert.equal((await send("GET", publicRoute, 200)).organization.verificationStatus, "unverified");
+  console.log("Ordinary affiliation scope, concurrent join, approval, consent, invitations and audit history: pass");
 } finally {
   await app.close();
   assert.ok(users.every((id) => /^[0-9a-f-]{36}$/.test(id)));
@@ -112,8 +165,12 @@ try {
     assert.ifError(listed.error);
     const paths = listed.data.map(({ name }) => `${org}/${name}`);
     if (paths.length) assert.ifError((await bucket.remove(paths)).error);
-    const sql = `begin; delete from private.institution_audit where organization_id='${org}';
-      delete from private.organizations where id='${org}' and handle='${handle}' and created_by='${users[0]}'; commit;`;
+    const fixtures = [{ id: org, handle, owner: users[0] }];
+    if (ordinaryOrg) fixtures.push({ id: ordinaryOrg, handle: ordinaryHandle, owner: users[1] });
+    assert.ok(fixtures.every((fixture) => /^[0-9a-f-]{36}$/.test(fixture.id) && /^[a-z0-9-]+$/.test(fixture.handle)));
+    const cleanup = fixtures.map((fixture) => `delete from private.institution_audit where organization_id='${fixture.id}';
+      delete from private.organizations where id='${fixture.id}' and handle='${fixture.handle}' and created_by='${fixture.owner}';`).join("\n");
+    const sql = `begin; ${cleanup} commit;`;
     const cleared = spawnSync(process.execPath, ["node_modules/supabase/dist/supabase.js", "db", "query", "--remote", "--yes", sql],
       { encoding: "utf8", timeout: 30_000 });
     assert.equal(cleared.status, 0, "fixture organization cleanup failed");

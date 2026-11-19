@@ -43,6 +43,8 @@ Haitian and international organizations, NGOs, businesses, schools, media, and g
 
 Members can submit a manual application for personal identity, public-figure status, an organization, a government institution, or a representative position. AyiNou accepts links to official public sources. Do not submit government IDs or private evidence files. The workspaces and personal profile editor adapt to phones and use the available width above the mobile breakpoint.
 
+People can manage one institution and belong to others as members, volunteers, staff, or supporters. An ordinary affiliation shows how the person joined, such as a direct join, manager approval, or invitation. It does not establish verified employment or authority to act for the institution. Institutions choose whether to list active members publicly. A member must separately consent to listing their display name and affiliation type.
+
 ## User safety
 
 - Enforce anti-harassment, anti-threat and anti-impersonation rules.
