@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 0 and Phase 1A database foundation implemented; local development only
+**Status:** Phase 0, Phase 1A, and Phase 1B implemented; local development only
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -31,13 +31,13 @@ All interface strings are translated from day one; user-generated posts remain i
 - Independent Node.js, Fastify, TypeScript API with Zod environment validation (`apps/api`)
 - Shared API response contracts (`packages/shared`)
 - Haitian Creole, French, and English translation dictionaries; Creole by default
-- Local Supabase PostgreSQL schema with Auth identity references, migrations, and RLS tests. The apps are not connected to Supabase yet.
+- Local Supabase Auth and PostgreSQL with versioned schema, RLS, confirmation email testing, and authenticated Fastify profile routes.
 
 We start with a responsive web app to validate UX and product flows. Android/iOS clients are later phases and can reuse Supabase-backed services.
 
 ## First milestone
 
-**Phase 0: Foundation** (see [ROADMAP.md](ROADMAP.md)). The web and API applications run independently, and the web status indicator checks the API. No account or social features are active yet.
+**Phase 1B: Accounts and profiles** (see [ROADMAP.md](ROADMAP.md)). The web and API run independently; Auth handles credentials, while Fastify handles member profiles. Social features are not active.
 
 ## Key features by phase
 
@@ -67,9 +67,9 @@ npm run build
 
 API: `http://127.0.0.1:3000/health` and `http://127.0.0.1:3000/api/v1/status`. Web: `http://127.0.0.1:4000`. Run `npm run dev:api` or `npm run dev:web` to start only one app. The API binds to localhost. The web app displays an unavailable message if the API is offline.
 
-Copy `.env.example` to `.env.local` only when overriding defaults. `API_HOST`, `API_PORT`, and comma-separated `WEB_ORIGINS` configure the API; `NEXT_PUBLIC_API_URL` configures the browser client. The API accepts cross-origin requests only from the listed web origins. Never put secrets in `NEXT_PUBLIC_` variables. For a different web hostname or port, update both URL variables together.
+Copy the server variables from [.env.example](.env.example) to `apps/api/.env` and browser variables plus `WEB_ORIGIN` to `apps/web/.env.local`, filling in the local values reported by `npx supabase status -o json`. Both files are ignored by Git. `DATABASE_URL` must exist only in the API file. `NEXT_PUBLIC_` variables are browser-readable and must contain only the local API URL, Supabase URL, and publishable key. `API_HOST`, `API_PORT`, and `WEB_ORIGINS` configure the API; `WEB_ORIGIN` sets the canonical callback redirect host. Use `127.0.0.1` consistently for Supabase email redirects and the web app.
 
-On Windows, if npm scripts fail while launching Git Bash, set `npm_config_script_shell` to `C:\Windows\System32\cmd.exe` in that terminal. If the Next.js build encounters a Windows sandbox permission error, run the build in a normal local terminal. No Supabase service is required for Phase 0.
+On Windows, if npm scripts fail while launching Git Bash, set `npm_config_script_shell` to `C:\Windows\System32\cmd.exe` in that terminal. Docker Desktop must be running for Auth and profile development.
 
 Do not put real credentials, production database dumps, identity documents, or sensitive user content in source control.
 
@@ -85,9 +85,11 @@ npm run db:test    # pgTAP schema, constraint, and RLS tests
 npm run db:stop
 ```
 
-The local Supabase API defaults to `http://127.0.0.1:54321`, PostgreSQL to port `54322`, and Studio to `http://127.0.0.1:54323`. Run `npx supabase status` to inspect local service URLs. Avoid copying the printed secret or service-role keys into source files, browser code, or `NEXT_PUBLIC_` variables. The existing web and Fastify apps still use ports 4000 and 3000 and do not require the database to start.
+The local Supabase API defaults to `http://127.0.0.1:54321`, PostgreSQL to port `54322`, Studio to `http://127.0.0.1:54323`, and Mailpit to `http://127.0.0.1:54324`. Run `npx supabase status` to inspect local service URLs. Never copy secret or service-role keys into source files, browser code, or `NEXT_PUBLIC_` variables. Start Supabase before the apps for Phase 1B.
 
-Migrations are in `supabase/migrations/`; create the next one with `npx supabase migration new descriptive_name`, then reset and test locally. The initial department reference rows are inserted by the migration. `db:reset` discards local database data; it does not target a linked or hosted project. Never pass `--linked`, `--remote`, or a production URL to a reset command for this development workflow. See [docs/DATABASE.md](docs/DATABASE.md) for the schema, access matrix, and future profile initialization strategy.
+Migrations are in `supabase/migrations/`; create the next one with `npx supabase migration new descriptive_name`, then reset and test locally. The initial department reference rows are inserted by the migration. `db:reset` discards local database data, including local Auth users; it does not target a linked or hosted project. Never pass `--linked`, `--remote`, or a production URL to a reset command for this workflow. See [docs/DATABASE.md](docs/DATABASE.md) for schema and profile initialization.
+
+For a full local account flow, run `npm run db:start`, set both app environment files, then `npm run dev`. Open [register](http://127.0.0.1:4000/register), submit a disposable email address, open [Mailpit](http://127.0.0.1:54324), and follow the confirmation link. Onboarding saves the public display name and optional broad residence/connection information. The [login](http://127.0.0.1:4000/login), [forgot password](http://127.0.0.1:4000/forgot-password), [profile](http://127.0.0.1:4000/profile), and [dashboard](http://127.0.0.1:4000/dashboard) pages complete this phase. If signup remains disabled after changing `supabase/config.toml`, run `npm run db:stop` and `npm run db:start` to reload Auth settings.
 
 ## GitHub workflow: main only
 

@@ -7,6 +7,9 @@ const environmentSchema = z.object({
     .transform((value) => value.split(",").map((origin) => origin.trim()))
     .pipe(z.array(z.url()).min(1)),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
+  SUPABASE_URL: z.url().optional(),
+  SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
+  DATABASE_URL: z.string().min(1).optional(),
 });
 
 export type ApiConfig = z.infer<typeof environmentSchema>;

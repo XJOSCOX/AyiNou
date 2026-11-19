@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fetchApiStatus } from "@/lib/api";
 import { locales, messages, type Locale } from "@/lib/i18n";
+import { useLocale } from "@/lib/locale-store";
+import { authMessages } from "@/lib/auth-i18n";
 
 type Connection = "checking" | "online" | "offline";
 
 const cardMarks = ["01", "02", "03", "04"];
 
 export function HomePage() {
-  const [locale, setLocale] = useState<Locale>("ht");
+  const [locale, setLocale] = useLocale();
   const [connection, setConnection] = useState<Connection>("checking");
   const t = messages[locale];
-
-  useEffect(() => {
-    document.documentElement.lang = locale;
-  }, [locale]);
+  const a = authMessages[locale];
 
   useEffect(() => {
     const controller = new AbortController();
@@ -45,7 +45,7 @@ export function HomePage() {
             <a href="#spaces" className="hover:text-[#a6642e]">{t.nav.spaces}</a>
             <a href="#about" className="hover:text-[#a6642e]">{t.nav.about}</a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <span className="hidden text-xs font-semibold uppercase tracking-widest text-[#58756b] sm:block">{t.languageLabel}</span>
             <div className="flex rounded-full border border-[#b8c8b9] bg-white/80 p-1" role="group" aria-label={t.languageLabel}>
               {locales.map((option) => (
@@ -55,6 +55,8 @@ export function HomePage() {
                 </button>
               ))}
             </div>
+            <Link href="/login" className="rounded-full px-3 py-2 text-xs font-bold text-[#155746] hover:bg-white">{a.login}</Link>
+            <Link href="/register" className="rounded-full bg-[#155746] px-3 py-2 text-xs font-bold text-white hover:bg-[#0c3d31]">{a.register}</Link>
           </div>
         </div>
       </header>

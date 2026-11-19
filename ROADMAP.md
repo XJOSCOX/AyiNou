@@ -35,15 +35,15 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 
 **Gate:** Local migration reset, RLS tests, typecheck, lint, API tests, and builds pass. No signup or login is implemented.
 
-## Phase 1B — Registration, login, onboarding, profiles
+## Phase 1B — Registration, login, onboarding, profiles (COMPLETE)
 
-- [ ] Supabase Auth: email/password or email OTP, email verification, password recovery, session handling and logout.
-- [ ] Registration: display name; email; optional real name/phone (only if necessary and consented); preferred language.
-- [ ] Ask residence country and, for those living in Haiti, optional department; diaspora can optionally choose a department of connection separately.
-- [ ] Never require GPS. Location permission is opt-in; no precise coordinates stored by default.
-- [ ] User can edit profile, privacy settings, and location; include deletion/export planning.
-- [ ] Connect the Phase 1A profile tables to authenticated API workflows without exposing private data.
-- [ ] Anti-spam rate limits and appropriate verification for signups.
+- [x] Supabase Auth: email/password, email confirmation, password recovery, session refresh/restoration, and logout.
+- [x] Registration: display name, email, password, and preferred language; no real name or phone collected.
+- [x] Ask optional residence country and Haiti department, or diaspora department of connection.
+- [x] Never require GPS or store precise coordinates.
+- [x] Edit profile and broad location; document future account deletion and export lifecycle. Public visibility remains under a trusted future workflow.
+- [x] Connect Phase 1A tables to authenticated Fastify API routes with token verification and RLS.
+- [x] Use Supabase Auth rate limits and email confirmation for the local flow.
 
 **Gate:** Signup → verification → onboarding → session refresh → editing → logout works in three languages; RLS blocks access to another user's private fields.
 

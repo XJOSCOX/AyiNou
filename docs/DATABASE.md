@@ -1,6 +1,6 @@
-# Local Database Foundation (Phase 1A)
+# Local Database and Auth (Phases 1A–1B)
 
-This phase defines data and access rules. Neither the Next.js app nor the Fastify API connects to Supabase yet. There is no signup, login, onboarding, or protected API route. Local Auth signups are disabled in `supabase/config.toml` until Phase 1B.
+Phase 1A defined data and access rules; Phase 1B connects Supabase Auth and the Fastify profile API without changing the schema. Local email/password signup and email confirmation are enabled in `supabase/config.toml`.
 
 ## Prerequisites and commands
 
@@ -17,6 +17,10 @@ npm run db:stop
 ```
 
 `db:start` starts the local stack and applies migrations. `db:reset` recreates **only the local** database, reapplies all `supabase/migrations/*.sql` files, and discards any local data. `db:test` runs the pgTAP files under `supabase/tests/database/`. No seed file is used; the ten departments are reference data in the first migration. To add a migration, use `npx supabase migration new descriptive_name`, write SQL in the generated file, then reset and test. Do not run remote or linked resets as part of this workflow.
+
+After `db:start`, use `npx supabase status -o json` to obtain the local `API_URL`, `PUBLISHABLE_KEY`, and `DB_URL`. Place API URL, publishable key, and DB URL in `apps/api/.env` as `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `DATABASE_URL`. Place API URL and publishable key in `apps/web/.env.local` as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and set `WEB_ORIGIN=http://127.0.0.1:4000` for the callback redirect. See the root `.env.example` for port settings. These local files are ignored. Never expose `DB_URL`, secret keys, or service-role keys to the browser or Git. Start the apps with `npm run dev` on ports 3000 and 4000. If Auth config changes while Supabase is running, stop and restart the local stack.
+
+Mailpit at `http://127.0.0.1:54324` captures local confirmation and password-reset messages. Register at `http://127.0.0.1:4000/register`, open the message in Mailpit, and follow its link to `/auth/callback`. Use `127.0.0.1` throughout so PKCE cookies and redirects share the same host. Password reset uses the same callback and sends the member to `/reset-password`. The Auth server enforces the configured password and request-rate rules; production abuse controls, CAPTCHA, and real email delivery need separate deployment configuration.
 
 ## Tables
 
@@ -44,11 +48,11 @@ All five tables have RLS enabled. The migration revokes Supabase's possible defa
 
 The 30 pgTAP assertions exercise the department seed, schema checks, initializer retry and failure behavior, anonymous access, owner access and allowed updates, other-user denial, and privilege escalation denial. The tests run in a transaction and roll back their synthetic Auth users. An RLS policy is never a substitute for an API authorization check.
 
-## Future profile creation
+## Profile creation and retries
 
-Phase 1B should verify the caller's Supabase access token in Fastify, derive the user UUID from its trusted `sub` claim, and call `private.initialize_member(uuid)` through a **server-only privileged database connection**. Never accept the UUID for initialization from request input. The function inserts a hidden public profile and a private row in one database transaction. `ON CONFLICT DO NOTHING` makes retries safe and preserves existing edits. A missing Auth user fails the foreign key check and leaves no partial profile. If initialization fails after Auth created a user, the Auth account remains; the backend should report a recoverable error and retry initialization on the next authenticated request. Do not place this function on an `auth.users` trigger that could block account creation.
+Fastify verifies the caller's Supabase access token, derives the UUID from its trusted `sub` claim, and calls `private.initialize_member(uuid)` through a **server-only privileged database connection** on profile GET/PATCH. Never accept the UUID for initialization from request input. The function inserts a hidden public profile and a private row in one transaction. `ON CONFLICT DO NOTHING` makes retries safe and preserves existing edits. A missing Auth user fails the foreign key check and leaves no partial profile. If initialization fails after Auth created a user, the Auth account remains; the API reports a recoverable error and retries initialization on the next authenticated request. There is no `auth.users` trigger that could block account creation.
 
-For ordinary future protected routes, Fastify should send a verified user token to Supabase so PostgreSQL RLS runs as that user. Privileged credentials must remain in server-only environment variables and never be sent to browsers, native apps, logs, or Git. Validate issuer, audience, signature, expiration, and subject before using a token. Read roles and verification state from trusted database tables, not user-editable JWT metadata.
+For current profile operations, Fastify uses `SET LOCAL ROLE authenticated` and a transaction-local verified JWT subject so PostgreSQL RLS evaluates `auth.uid()` for that user. Privileged credentials remain in server-only environment variables and are never sent to browsers, native apps, logs, or Git. Role and verification state comes from trusted database tables, not user-editable JWT metadata. Account deletion and data export are planned future workflows: they must authenticate the requester, account for dependent data and retention obligations, and supply an auditable export or deletion result before public launch.
 
 ## References
 

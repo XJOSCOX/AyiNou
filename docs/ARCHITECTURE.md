@@ -1,15 +1,18 @@
-# Technical Architecture — Phase 1A Database Foundation
+# Technical Architecture — Phase 1B Accounts and Profiles
 
 ## Local-first system
 
 ```text
 Browser → Next.js App Router (port 4000, ht/fr/en)
-             │ direct HTTP GET from dedicated API client
-             ▼
-          Fastify API (port 3000, /api/v1)
-             │ future verified access token + user-scoped DB requests
-             ▼
-          Supabase Auth + PostgreSQL (local schema; not connected to apps yet)
+      │                │ Supabase SSR cookies and PKCE callback
+      │                ▼
+      │            Supabase Auth (port 54321)
+      │ bearer access token
+      ▼
+Fastify API (port 3000, /api/v1)
+      │ verified subject; server-only PostgreSQL connection
+      ▼
+Supabase PostgreSQL (port 54322, RLS)
 
 Shared TypeScript response contracts: packages/shared
 Local environment: independent Next.js and Fastify processes; Supabase in Docker for database tests
@@ -18,9 +21,11 @@ Git: local main → validated commits → GitHub main
 
 The browser calls the versioned Fastify endpoint using `NEXT_PUBLIC_API_URL`. The API binds to localhost by default, validates configuration with Zod, logs structured events, allows only the configured web origins through CORS, and returns safe JSON errors. `GET /health` is a local health check; `GET /api/v1/status` is the web and future mobile client contract. Neither requires authentication.
 
-Phase 1A adds the database schema without connecting either app to it. There are no signup, login, protected API, or registration routes. See [DATABASE.md](DATABASE.md) for tables, grants, policies, and local commands.
+Phase 1B connects Supabase Auth to the web client and Fastify to the existing database. Supabase owns email/password credentials, email confirmation, refresh tokens, and password recovery. The Next.js SSR client uses cookies and PKCE; its proxy refreshes sessions on protected routes. Protected layouts check claims server-side, while the browser supplies the access token to Fastify. See [DATABASE.md](DATABASE.md) for tables, grants, policies, and local commands.
 
-When Supabase Auth is introduced, web and native clients should obtain an access token from Supabase Auth and send it to the independent Fastify API. Fastify must verify the signature through the project JWKS (or validate with the Auth server for a symmetric signing configuration), issuer, audience, expiration, and subject before treating the request as authenticated. Authorization must use trusted database records, not user-controlled metadata or request fields. Normal database access should carry the verified user's token so RLS evaluates `auth.uid()` for that user. A server-only privileged connection is reserved for account initialization and audited administration; never expose a service-role/secret key to the browser or mobile client. PostgreSQL grants and RLS are defense in depth, including if a future route has a mistake.
+Web and future native clients obtain an access token from Supabase Auth and send it to Fastify. The reusable API verifier uses Supabase `getClaims` for signature validation (JWKS or Auth-server fallback for symmetric signing), then checks issuer, `authenticated` audience and role, expiration, and UUID subject. It never accepts a user ID from profile request bodies. On each authenticated profile operation, the server calls `private.initialize_member(subject)` in a transaction, switches to PostgreSQL's `authenticated` role, sets the transaction-local JWT subject, and runs allowed queries under existing grants and RLS. A failed initialization rolls back and can be retried on the next request without losing the Auth account. This privileged database connection and any secret or service-role key remain server-only. Database role and verification records are never sourced from user-editable metadata.
+
+`GET /api/v1/departments` is public. `GET` and `PATCH /api/v1/me/profile` require a verified bearer token; PATCH accepts only display name, preferred locale, and optional broad location fields. The public profile remains hidden until a future trusted visibility workflow. The API returns no email or private fields to anonymous callers. These versioned contracts are reusable by Android and iOS clients.
 
 ## Current project layout
 
