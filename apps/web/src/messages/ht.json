@@ -1,30 +1,35 @@
 {
   "languageLabel": "Lang",
   "skip": "Ale nan kontni an",
-  "nav": {"mission": "Misyon nou", "spaces": "Espas yo", "about": "Konsènan"},
-  "eyebrow": "YON ESPAS POU NOU TOUT",
-  "heroTitle": "Ansanm, nou ka bati yon lòt demen.",
-  "heroBody": "AYINOU se yon espas k ap grandi pou Ayisyen ann Ayiti ak nan dyaspora a konekte, pataje lide, epi travay ansanm pou chanjman pozitif.",
-  "explore": "Dekouvri espas yo",
-  "missionLink": "Li misyon nou",
-  "heroNote": "Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.",
-  "missionEyebrow": "SA KI RASANBLE NOU",
-  "missionTitle": "Yon kominote ki chita sou respè ak aksyon.",
+  "home": "Akèy",
+  "about": "Konsènan AyiNou",
+  "updates": "Nouvèl AyiNou",
+  "memberAccess": "Aksè pou manm",
+  "memberUpdate": "Manm yo ka konekte, ranpli pwofil yo, epi gade tablo kominote a.",
+  "heroTitle": "Yon kote pou Ayisyen kenbe kontak.",
+  "heroBody": "N ap bati AyiNou pou Ayisyen ann Ayiti ak nan dyaspora a. Se yon kote pou nou kenbe kontak, pataje sa k ap pase nan kominote nou yo, epi travay ansanm.",
+  "building": "Sa n ap bati",
+  "topics": {
+    "communities": {
+      "name": "Kominote ann Ayiti ak aletranje",
+      "description": "N ap prepare espas pou nou jwenn moun ki gen lyen ak menm depatman ann Ayiti oswa menm kominote nan dyaspora a."
+    },
+    "conversations": {
+      "name": "Pale sou sa ki itil",
+      "description": "Nou vle moun ka poze kesyon, bay sous enfòmasyon yo pataje, epi pale ak respè sou sa k ap pase kote yo rete."
+    },
+    "projects": {
+      "name": "Pwojè nou ka fè ansanm",
+      "description": "Nou vle fè li pi fasil pou moun pwopoze lide, jwenn moun ki ka ede, epi travay ansanm sou pwojè lokal."
+    }
+  },
   "missionBody": "Nou kwè nan dyalòg pasifik, konfyans ki baze sou prèv, ak pwojè ki pote bon rezilta pou kominote yo. Tout moun gen yon plas bò tab la.",
-  "spacesEyebrow": "ESPAS K AP VINI YO",
-  "spacesTitle": "Plizyè fason pou n avanse ansanm.",
-  "spacesBody": "Seksyon sa yo an preparasyon. N ap louvri yo etap pa etap, ak atansyon pou sekirite ak bezwen kominote a.",
-  "cards": [
-    {"name": "Kominote", "description": "Rankontre moun, pataje lide, epi bati lyen ki dire."},
-    {"name": "Pwojè", "description": "Mete tèt ansanm sou inisyativ ki itil kominote yo."},
-    {"name": "Rapò", "description": "Pataje enfòmasyon ak prèv avèk responsabilite."},
-    {"name": "Radyo", "description": "Dekouvri vwa ak emisyon kominote ayisyen an."}
-  ],
-  "comingSoon": "An preparasyon",
   "statusLabel": "Koneksyon API",
   "checking": "N ap verifye...",
   "online": "Disponib",
   "offline": "Pa disponib kounye a",
   "offlineHelp": "Sèvis la pa konekte. Eseye ankò pita oswa lanse API lokal la.",
-  "footer": "Fèt pou konekte nou, avèk swen."
+  "footer": "Yon pwojè pou Ayisyen ann Ayiti ak nan dyaspora a.",
+  "switchToLight": "Chanje pou tèm klè",
+  "switchToDark": "Chanje pou tèm fonse"
 }

@@ -28,7 +28,7 @@ const password = `AyinouFixture${randomUUID().replaceAll("-", "").slice(0, 16)}9
 function assertNoError(result, label) { assert.ifError(result.error, label); }
 
 function runScenario(label, expected) {
-  const { departmentCode, departmentMembers, countryCode, countryMembers, ...fields } = expected;
+  const { departmentCode, departmentMembers, countryCode, countryMembers, membership, ...fields } = expected;
   const quotedIds = ids.map((id) => {
     assert.match(id, /^[0-9a-f-]{36}$/);
     return `'${id}'::uuid`;
@@ -41,11 +41,12 @@ function runScenario(label, expected) {
   const groupChecks = [
     departmentCode ? `if (select (value->>'members')::bigint from jsonb_array_elements(s->'departments') value where value->>'code' = '${departmentCode}') <> ${departmentMembers} then raise exception '${label}: department grouping'; end if;` : "",
     countryCode ? `if (select (value->>'members')::bigint from jsonb_array_elements(s->'diasporaCountries') value where value->>'code' = '${countryCode}') <> ${countryMembers} then raise exception '${label}: country grouping'; end if;` : "",
+    membership !== undefined ? `if s->'membership' is distinct from '${JSON.stringify(membership)}'::jsonb then raise exception '${label}: membership grouping'; end if;` : "",
   ].join("\n");
   const sql = `begin;
 delete from public.member_metric_exclusions where user_id in (${quotedIds});
 do $$ declare s jsonb; begin
-  s := private.build_community_stats();
+  s := public.community_stats_v2_for_api();
   ${checks}
   ${groupChecks}
   if s->>'geographyAvailable' = 'true' then
@@ -85,22 +86,27 @@ try {
     registered: 10, haiti: 10, diaspora: 0, unknown: 0,
     representedDepartments: 1, geographyAvailable: true, active: null, verified: 0,
     departmentCode: "HT-OU", departmentMembers: 10,
+    membership: { haitian: 0, internationalSupporter: 0, unspecified: 10 },
   });
 
   assertNoError(await admin.from("user_activity_daily").insert(ids.slice(1).map((id) => ({ user_id: id, activity_day: new Date().toISOString().slice(0, 10) }))), "record remaining active users");
   assertNoError(await admin.from("verification_records").insert(ids.map((id) => ({
     user_id: id, verification_type: "identity", status: "verified", reviewed_by: ids[0], verified_at: new Date().toISOString(),
   }))), "create synthetic approved records");
-  runScenario("active and approved verification", {
+  assertNoError(await admin.from("member_private").update({ membership_category: "international_supporter" }).in("user_id", ids), "set synthetic supporter categories");
+  runScenario("active, approved verification and membership", {
     registered: 10, haiti: 10, diaspora: 0, unknown: 0,
     representedDepartments: 1, geographyAvailable: true, active: 10, verified: 10,
+    membership: { haitian: 0, internationalSupporter: 10, unspecified: 0 },
   });
 
   assertNoError(await admin.from("member_private").update({ residence_country_code: "US", residence_department_code: null }).in("user_id", ids), "set diaspora residence");
-  runScenario("diaspora country grouping", {
+  assertNoError(await admin.from("member_private").update({ membership_category: "haitian" }).eq("user_id", ids[0]), "create small membership cohort");
+  runScenario("diaspora grouping with hidden membership breakdown", {
     registered: 10, haiti: 0, diaspora: 10, unknown: 0,
     representedDepartments: 0, geographyAvailable: true, active: 10, verified: 10,
     countryCode: "US", countryMembers: 10,
+    membership: null,
   });
 
   assertNoError(await admin.from("member_private").update({ residence_country_code: null, residence_department_code: null }).in("user_id", ids), "clear residence");

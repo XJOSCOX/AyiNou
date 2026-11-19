@@ -70,6 +70,13 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 
 **Gate:** Hosted synthetic fixtures verify grouping, exclusions, zero state, and suppression; no user-level location or private profile disclosure. Email delivery remains outside this phase.
 
+## Phase 2B — Welcome and member profiles (COMPLETE)
+
+- Multilingual welcome, sign-in, registration, and resumable onboarding.
+- Private names and self-declared membership with a username, optional photo, biography, and interests.
+- Member privacy settings, a public profile preview, and privacy-filtered membership statistics.
+- External email delivery remains unverified. Synthetic confirmed accounts cover the hosted profile and authorization flows.
+
 ## Phase 3 — Social network MVP
 
 - [ ] Create/edit/delete text posts; read feed; pagination.

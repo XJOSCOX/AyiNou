@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 2 community dashboard implemented; local apps use hosted Supabase for development
+**Status:** Phase 2B welcome and member profiles with hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -37,7 +37,7 @@ We start with a responsive web app to validate UX and product flows. Android/iOS
 
 ## First milestone
 
-**Phase 2: National community dashboard** (see [ROADMAP.md](ROADMAP.md)). The web and API run independently; Auth handles credentials, while Fastify serves member profiles and privacy-safe community statistics. Social features are not active.
+**Phase 2B: Welcome, registration, and member profiles** (see [ROADMAP.md](ROADMAP.md)). The welcome page shows privacy-filtered community statistics, and members can resume onboarding from their last saved stage. Haitian members and international supporters can both join. The shared light and dark themes are available across the web app.
 
 ## Key features by phase
 

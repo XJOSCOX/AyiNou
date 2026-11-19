@@ -18,6 +18,8 @@ Verification does not elevate voting privileges or make a person's statements au
 
 ## Launch experience
 
+Membership is open to Haitians, including the diaspora, and international supporters. Members choose a self-declared category during onboarding. First and last names are private. Members choose a public username and may add a biography, photo, residence, or interests. They can resume from the last saved stage and preview which fields may be published.
+
 A new user selects Creole/French/English, signs up, chooses public display name, sets optional broad residency details, and enters a welcoming feed. The first useful actions are: explore department communities, meet other members, and join a constructive initiative.
 
 ## Dashboard terminology

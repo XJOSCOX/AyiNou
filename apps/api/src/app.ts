@@ -22,7 +22,7 @@ export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; 
 
   app.register(cors, {
     origin: config.WEB_ORIGINS,
-    methods: ["GET", "PATCH"],
+    methods: ["GET", "PATCH", "POST"],
   });
   app.register(statusRoutes);
   app.register((instance) => registerMemberRoutes(instance, auth, members));

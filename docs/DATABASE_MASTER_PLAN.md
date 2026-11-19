@@ -1,6 +1,6 @@
 # Ayinou master database plan
 
-**Status:** Forward-looking architecture, 2026-11-19. The seven tables marked **existing** are deployed; later-phase tables remain proposals. It uses the supplied `DATABASE_BLUEPRINT.md`, product/roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
+**Status:** Forward-looking architecture, 2026-11-19. Ten application tables are deployed through Phase 2B. It uses the supplied `DATABASE_BLUEPRINT.md`, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
 
 ## Verified baseline and design rules
 
@@ -13,6 +13,14 @@ Hosted migration history contains `20261119160000_initial_schema`, `202611191734
 Every column is listed below; `PK` means primary key, `FK→` names a referenced column, `UQ` means unique constraint, and `IX(...)` means a proposed index (the PK/UQ already supply their own indexes). `id uuid PK` means `DEFAULT gen_random_uuid()`. `ca timestamptz` means `created_at timestamptz NOT NULL DEFAULT now()`; `ua timestamptz` means `updated_at timestamptz NOT NULL DEFAULT now()` with a trigger. Other `timestamptz` columns are nullable unless marked `!`. `!` means NOT NULL; `?` means nullable. All proposed status/kind/locale values need named CHECK constraints or stable reference tables; examples below are controlled values, not client-writable free text. Every FK needs an explicit `ON DELETE` choice during migration review; default to `RESTRICT` for audit/financial history, `CASCADE` for pure membership/joins, and `SET NULL` for optional actors. Do not cascade-delete evidence or audit history without retention review.
 
 ## Existing schema — applied contract
+
+Phase 2B adds `member_private.first_name`, `last_name`, `membership_category`, and `onboarding_step`, plus `profiles.username`, `biography`, and `avatar_asset`. The `member-avatars` bucket stores only sanitized private derivatives. The exact definitions are in `20261119220000_phase2b_membership.sql`.
+
+| Table | Fields and keys | Access |
+| --- | --- | --- |
+| `user_settings` | `user_id uuid PK FK→profiles.user_id ON DELETE CASCADE`, `discoverable boolean! DEFAULT false`, `show_membership_category boolean! DEFAULT false` | Owner read, insert, and update |
+| `interest_catalog` | `code text PK` | Authenticated read |
+| `member_interests` | `user_id uuid! FK→profiles.user_id ON DELETE CASCADE`, `interest_code text! FK→interest_catalog.code`, PK `(user_id,interest_code)` | Owner read, insert, and delete |
 
 | Table / phase | Columns and constraints | Existing indexes |
 | --- | --- | --- |
@@ -36,7 +44,6 @@ The blueprint's polymorphic `reactions` proposal is represented by `post_reactio
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `user_settings` / common | `user_id uuid PK FK→profiles.user_id`, `profile_discovery boolean!`, `default_post_visibility text!`, `translation_opt_in boolean!`, `ca`, `ua` | CHECK visibility; owner-only |
 | `user_blocks` / 3 | `blocker_id uuid! FK→profiles.user_id`, `blocked_id uuid! FK→profiles.user_id`, `ca`; PK `(blocker_id,blocked_id)` | CHECK blocker≠blocked; IX `(blocked_id,blocker_id)` |
 | `user_mutes` / 3 | `user_id uuid! FK→profiles.user_id`, `muted_user_id uuid! FK→profiles.user_id`, `ca`; PK `(user_id,muted_user_id)` | CHECK users differ |
 | `user_sessions_audit` / conditional | `id uuid PK`, `user_id uuid? FK→auth.users.id`, `event_kind text!`, `device_class text?`, `coarse_region text?`, `occurred_at timestamptz!` | IX `(user_id,occurred_at DESC)`; no tokens/IP by default |

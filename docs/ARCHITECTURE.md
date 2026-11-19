@@ -26,6 +26,8 @@ Fastify's verifier calls Supabase `getClaims` to validate the token signature th
 
 ## Current layout
 
+Phase 2B keeps Auth credential handling in Supabase. `PATCH /api/v1/me/profile/details` accepts owner-scoped partial updates and saves related fields atomically through `save_member_profile_v2`. `POST /api/v1/me/profile/avatar` validates and reencodes images before the server writes to private Storage. `GET /api/v1/profiles/:username` returns a limited public projection when trusted visibility and owner discoverability both permit it. `GET /api/v1/me/profile` returns saved onboarding progress and owner details. Stage completion, the public projection, and storage handling are available through Fastify for future native clients.
+
 ```text
 apps/
   api/src/{config.ts,app.ts,server.ts,routes/,services/}
@@ -36,7 +38,7 @@ scripts/check-hosted.mjs
 supabase/{config.toml,migrations/,tests/}
 ```
 
-The seven current tables are `departments`, `profiles`, `member_private`, `role_assignments`, `verification_records`, `member_metric_exclusions`, and `user_activity_daily`. Member UUIDs reference `auth.users.id`. No passwords or raw identity documents are stored in application tables. Phase 2 adds a service-only aggregate RPC; Fastify returns only cohort-safe results through versioned read-only routes. Future phases may add posts/moderation, groups, verification review, projects, evidence-based reports, radio listings, and partner-mediated contributions.
+The database includes `departments`, `profiles`, `member_private`, `role_assignments`, `verification_records`, `member_metric_exclusions`, `user_activity_daily`, `user_settings`, `interest_catalog`, and `member_interests`. Member UUIDs reference `auth.users.id`. Fastify serves cohort-safe aggregates through versioned read-only routes.
 
 Residence country and optional Haiti department are separate from an optional diaspora department of connection. Location is voluntary and self-reported; no precise coordinate is retained. Future public counts require suppression for small cohorts. Required locales are `ht` (default), `fr`, and `en`; future user-generated translations must be labeled. Public launch still requires retention/deletion rules, moderation governance, abuse controls, custom email delivery, monitoring, and privacy review.
 

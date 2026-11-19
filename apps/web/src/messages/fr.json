@@ -1,30 +1,35 @@
 {
   "languageLabel": "Langue",
   "skip": "Aller au contenu",
-  "nav": {"mission": "Notre mission", "spaces": "Les espaces", "about": "À propos"},
-  "eyebrow": "UN ESPACE POUR NOUS TOUS",
-  "heroTitle": "Ensemble, construisons un autre avenir.",
-  "heroBody": "AYINOU est un espace en devenir où les Haïtiens d'Haïti et de la diaspora pourront échanger, partager des idées et agir ensemble pour un changement positif.",
-  "explore": "Découvrir les espaces",
-  "missionLink": "Lire notre mission",
-  "heroNote": "Un seul peuple. Un seul avenir. Ensemble pour Haïti.",
-  "missionEyebrow": "CE QUI NOUS RASSEMBLE",
-  "missionTitle": "Une communauté fondée sur le respect et l'action.",
+  "home": "Accueil",
+  "about": "À propos d’AyiNou",
+  "updates": "L’actualité d’AyiNou",
+  "memberAccess": "Accès des membres",
+  "memberUpdate": "Les membres peuvent se connecter, compléter leur profil et consulter le tableau de bord de la communauté.",
+  "heroTitle": "Un espace pour garder le lien entre Haïtiens.",
+  "heroBody": "Nous créons AyiNou pour les Haïtiens d’Haïti et de la diaspora. C’est un espace pour garder le contact, partager ce qui se passe dans nos communautés et travailler ensemble.",
+  "building": "Ce que nous construisons",
+  "topics": {
+    "communities": {
+      "name": "Des communautés en Haïti et à l’étranger",
+      "description": "Nous préparons des espaces pour retrouver des personnes liées au même département haïtien ou à la même communauté de la diaspora."
+    },
+    "conversations": {
+      "name": "Des échanges utiles",
+      "description": "Nous voulons que chacun puisse poser des questions, partager des informations avec leurs sources et discuter avec respect de ce qui se passe près de chez lui."
+    },
+    "projects": {
+      "name": "Des projets à réaliser ensemble",
+      "description": "Nous voulons faciliter le partage d’idées, la recherche de personnes prêtes à aider et la réalisation de projets locaux."
+    }
+  },
   "missionBody": "Nous croyons au dialogue pacifique, à la confiance fondée sur des preuves et aux projets qui apportent des résultats concrets aux communautés. Chacun a sa place à la table.",
-  "spacesEyebrow": "ESPACES À VENIR",
-  "spacesTitle": "Plusieurs façons d'avancer ensemble.",
-  "spacesBody": "Ces sections sont en préparation. Nous les ouvrirons progressivement, avec attention à la sécurité et aux besoins des communautés.",
-  "cards": [
-    {"name": "Communauté", "description": "Rencontrer des personnes, partager des idées et créer des liens durables."},
-    {"name": "Projets", "description": "Collaborer à des initiatives utiles aux communautés."},
-    {"name": "Rapports", "description": "Partager des informations et des preuves de façon responsable."},
-    {"name": "Radio", "description": "Découvrir les voix et les émissions de la communauté haïtienne."}
-  ],
-  "comingSoon": "En préparation",
   "statusLabel": "Connexion API",
   "checking": "Vérification...",
   "online": "Disponible",
   "offline": "Indisponible actuellement",
   "offlineHelp": "Le service n'est pas connecté. Réessayez plus tard ou démarrez l'API locale.",
-  "footer": "Conçu pour nous rapprocher, avec soin."
+  "footer": "Un projet pour les Haïtiens d’Haïti et de la diaspora.",
+  "switchToLight": "Passer au thème clair",
+  "switchToDark": "Passer au thème sombre"
 }

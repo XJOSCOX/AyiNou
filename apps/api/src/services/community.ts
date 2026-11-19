@@ -17,6 +17,7 @@ const statsSchema = z.object({
   representedDepartments: count.nullable(),
   departments: z.array(z.object({ code: z.string(), name: z.string(), members: count })).nullable(),
   diasporaCountries: z.array(z.object({ code: z.string(), members: count })).nullable(),
+  membership: z.object({ haitian: count, internationalSupporter: count, unspecified: count }).nullable(),
 }).strict();
 
 export interface CommunityRepository { stats(): Promise<CommunityStats> }
@@ -28,7 +29,7 @@ export function createCommunityRepository(config: ApiConfig): CommunityRepositor
   });
   return {
     async stats() {
-      const { data, error } = await client.rpc("community_stats_for_api");
+      const { data, error } = await client.rpc("community_stats_v2_for_api");
       if (error) throw new Error("Community statistics unavailable");
       return statsSchema.parse(data);
     },

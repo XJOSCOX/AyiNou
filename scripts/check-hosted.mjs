@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import dotenv from "dotenv";
+import sharp from "sharp";
 import { createClient } from "@supabase/supabase-js";
 import { createApp } from "../apps/api/src/app.ts";
 import { readConfig } from "../apps/api/src/config.ts";
@@ -20,6 +21,7 @@ const publicClient = createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHAB
 const app = createApp(config);
 const createdIds = [];
 const cleanupErrors = [];
+const avatarPaths = [];
 const runId = randomUUID().slice(0, 12);
 const password = `AyinouTest${randomUUID().replaceAll("-", "").slice(0, 16)}9`;
 
@@ -164,6 +166,80 @@ try {
   assert.deepEqual(verifications.data, []);
   console.log("RLS, private data, and privilege escalation: pass");
 
+  const patchDetails = (body, headers = bearer) => app.inject({
+    method: "PATCH", url: "/api/v1/me/profile/details", headers, payload: body,
+  });
+  const ownProfile = () => app.inject({ method: "GET", url: "/api/v1/me/profile", headers: bearer });
+  const username = `fixture_${runId.replaceAll("-", "")}`;
+  const firstStage = { firstName: "  Amélie  ", lastName: "Pierre", membershipCategory: "haitian", onboardingStep: 1 };
+  assert.equal((await patchDetails({ ...firstStage, firstName: " " })).statusCode, 400);
+  assert.equal((await patchDetails({ ...firstStage, lastName: "x".repeat(81) })).statusCode, 400);
+  assert.equal((await patchDetails({ ...firstStage, membershipCategory: "administrator" })).statusCode, 400);
+  assert.equal((await patchDetails({ ...firstStage, onboardingStep: 4 })).statusCode, 400);
+  const stageA = await patchDetails(firstStage);
+  assert.equal(stageA.statusCode, 200, stageA.body);
+  assert.equal(stageA.json().profile.firstName, "Amélie");
+  const resumed = (await ownProfile()).json().profile;
+  assert.equal(resumed.onboardingStep, 1);
+  assert.equal(resumed.membershipCategory, "haitian");
+  assert.deepEqual((await clients[1].from("member_private").select("first_name,last_name").eq("user_id", ids[0])).data, []);
+
+  assert.equal((await patchDetails({ onboardingStep: 2, residenceCountryCode: null, residenceDepartmentCode: null, diasporaDepartmentCode: null })).statusCode, 200);
+  assert.equal((await patchDetails({ onboardingStep: 3, username: "AdMiN" })).statusCode, 400);
+  const stageC = await patchDetails({ onboardingStep: 3, username: username.toUpperCase(), biography: "Synthetic profile", discoverable: true });
+  assert.equal(stageC.statusCode, 200, stageC.body);
+  assert.equal(stageC.json().profile.username, username);
+  const otherBearer = { authorization: `Bearer ${sessions[1].access_token}` };
+  const duplicate = await patchDetails({ username }, otherBearer);
+  assert.equal(duplicate.statusCode, 409, duplicate.body);
+  assert.equal(duplicate.json().error.code, "USERNAME_TAKEN");
+  assert.equal((await patchDetails({ onboardingStep: 4, interests: ["education", "culture"] })).statusCode, 200);
+  const completed = (await ownProfile()).json().profile;
+  assert.equal(completed.onboardingStep, 4);
+  assert.deepEqual(completed.interests, ["culture", "education"]);
+  assert.deepEqual((await clients[1].from("user_settings").select("user_id").eq("user_id", ids[0])).data, []);
+  assert.deepEqual((await clients[1].from("member_interests").select("user_id").eq("user_id", ids[0])).data, []);
+  expectDenied(await publicClient.rpc("save_member_profile_v2", { p_changes: { username } }), "anonymous profile edit");
+  expectDenied(await publicClient.rpc("find_public_profile_for_api", { p_username: username }), "anonymous privileged profile projection");
+  expectDenied(await clients[0].from("profiles").update({ avatar_asset: randomUUID() }).eq("user_id", ids[0]), "client avatar reference write");
+  console.log("Phase 2B: validation, normalized username collision, owner privacy, resume and completion: pass");
+
+  const publicProfilePath = `/api/v1/profiles/${username}`;
+  assert.equal((await app.inject(publicProfilePath)).statusCode, 404);
+  const avatarRequest = (image, headers = bearer) => app.inject({
+    method: "POST", url: "/api/v1/me/profile/avatar", headers, payload: { image },
+  });
+  assert.equal((await avatarRequest(Buffer.from("invalid image").toString("base64"))).statusCode, 400);
+  const image = await sharp({ create: { width: 50, height: 50, channels: 3, background: "#537792" } })
+    .withMetadata().jpeg().toBuffer();
+  assert.equal((await avatarRequest(image.toString("base64"), {})).statusCode, 401);
+  const uploaded = await avatarRequest(image.toString("base64"));
+  assert.equal(uploaded.statusCode, 200, "server avatar upload failed");
+  const { data: photo, error: photoError } = await admin.from("profiles").select("avatar_asset").eq("user_id", ids[0]).single();
+  assert.ifError(photoError);
+  const path = `${ids[0]}/${photo.avatar_asset}.webp`;
+  avatarPaths.push(path);
+  expectDenied(await clients[0].storage.from("member-avatars").upload(`${ids[0]}/direct.webp`, image, { contentType: "image/webp" }), "direct upload including by owner");
+  expectDenied(await clients[1].storage.from("member-avatars").download(path), "cross-user avatar download");
+  const served = await fetch(uploaded.json().avatarUrl);
+  assert.equal(served.status, 200);
+  const metadata = await sharp(Buffer.from(await served.arrayBuffer())).metadata();
+  assert.equal(metadata.format, "webp");
+  assert.equal(metadata.width, 384);
+  assert.equal(metadata.exif, undefined);
+  assert.ifError((await admin.from("profiles").update({ is_visible: true }).eq("user_id", ids[0])).error);
+  const safeProfile = await app.inject(publicProfilePath);
+  assert.equal(safeProfile.statusCode, 200);
+  assert.deepEqual(Object.keys(safeProfile.json().profile).sort(), ["avatarUrl", "biography", "displayName", "membershipCategory", "username"]);
+  assert.equal(safeProfile.json().profile.membershipCategory, null);
+  assert.equal((await patchDetails({ showMembershipCategory: true })).statusCode, 200);
+  assert.equal((await app.inject(publicProfilePath)).json().profile.membershipCategory, "haitian");
+  assert.equal((await patchDetails({ discoverable: false })).statusCode, 200);
+  assert.equal((await app.inject(publicProfilePath)).statusCode, 404);
+  assert.deepEqual((await publicClient.from("profiles").select("username").eq("username", username)).data, []);
+  assert.deepEqual((await app.inject("/api/v1/community/stats")).json().stats.membership, baseline.membership);
+  console.log("Phase 2B: private avatar bucket, metadata stripped, public opt-ins and metric exclusions: pass");
+
   const restoredClient = memberClient();
   const { data: restored, error: restoreError } = await restoredClient.auth.setSession({
     access_token: sessions[0].access_token,
@@ -189,11 +265,13 @@ try {
   expectDenied(revoked, "revoked refresh token");
   console.log("session refresh / logout revocation: pass");
 
-  const languageFiles = ["ht", "fr", "en"].map((locale) => JSON.parse(readFileSync(`apps/web/src/messages/auth/${locale}.json`, "utf8")));
-  const keys = Object.keys(languageFiles[0]).sort();
-  for (const messages of languageFiles) {
-    assert.deepEqual(Object.keys(messages).sort(), keys);
-    assert.ok(Object.values(messages).every((value) => typeof value === "string" && value.length > 0));
+  for (const folder of ["auth", "membership"]) {
+    const languageFiles = ["ht", "fr", "en"].map((locale) => JSON.parse(readFileSync(`apps/web/src/messages/${folder}/${locale}.json`, "utf8")));
+    const keys = Object.keys(languageFiles[0]).sort();
+    for (const messages of languageFiles) {
+      assert.deepEqual(Object.keys(messages).sort(), keys);
+      assert.ok(Object.values(messages).every((value) => typeof value === "string" && value.length > 0));
+    }
   }
   console.log("ht/fr/en auth dictionaries: pass");
 
@@ -201,6 +279,10 @@ try {
   console.log("real token expiry: not executed (hosted JWT lifetime not shortened)");
 } finally {
   await app.close();
+  if (avatarPaths.length) {
+    const { error } = await admin.storage.from("member-avatars").remove(avatarPaths);
+    if (error) cleanupErrors.push("Synthetic avatar cleanup failed");
+  }
   for (const id of createdIds.reverse()) {
     const { error } = await admin.auth.admin.deleteUser(id);
     if (error) cleanupErrors.push(`Synthetic user ${id}: ${error.message}`);

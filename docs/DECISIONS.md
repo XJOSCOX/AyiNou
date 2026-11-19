@@ -35,6 +35,8 @@
 
 ## Open before public launch
 
+Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.
+
 - Confirm domain registration, branding/trademark and legal entity.
 - Define community rules, privacy notice and retention/deletion policy.
 - Decide member eligibility and how diaspora/non-Haitian supporters participate.

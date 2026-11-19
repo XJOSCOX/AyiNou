@@ -17,6 +17,9 @@ export interface ApiErrorResponse {
 }
 
 export type Locale = "ht" | "fr" | "en";
+export type MembershipCategory = "haitian" | "international_supporter";
+export const interestCodes = ["education", "peace", "healthcare", "agriculture", "technology", "entrepreneurship", "employment", "environment", "infrastructure", "culture"] as const;
+export type InterestCode = typeof interestCodes[number];
 
 export interface Department {
   code: string;
@@ -31,7 +34,27 @@ export interface MemberProfile {
   residenceCountryCode: string | null;
   residenceDepartmentCode: string | null;
   diasporaDepartmentCode: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  membershipCategory?: MembershipCategory | null;
+  onboardingStep?: number;
+  username?: string | null;
+  biography?: string | null;
+  avatarUrl?: string | null;
+  discoverable?: boolean;
+  showMembershipCategory?: boolean;
+  interests?: InterestCode[];
 }
+
+export interface ProfilePreview {
+  displayName: string | null;
+  username: string | null;
+  biography: string | null;
+  avatarUrl: string | null;
+  membershipCategory: MembershipCategory | null;
+}
+
+export type ProfileChanges = Partial<Omit<MemberProfile, "userId" | "isVisible" | "avatarUrl">>;
 
 export interface UpdateMemberProfile {
   displayName: string;
@@ -63,4 +86,5 @@ export interface CommunityStats {
   representedDepartments: number | null;
   departments: CommunityDepartmentCount[] | null;
   diasporaCountries: CommunityCountryCount[] | null;
+  membership?: { haitian: number; internationalSupporter: number; unspecified: number } | null;
 }
