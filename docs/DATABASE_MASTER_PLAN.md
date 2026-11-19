@@ -1,10 +1,10 @@
 # Ayinou master database plan
 
-**Status:** Architecture proposal, 2026-11-19. Only the five tables marked **existing** are deployed. This document creates no schema objects. It uses the supplied `DATABASE_BLUEPRINT.md`, current product/roadmap documents, both applied migrations, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
+**Status:** Forward-looking architecture, 2026-11-19. The seven tables marked **existing** are deployed; later-phase tables remain proposals. It uses the supplied `DATABASE_BLUEPRINT.md`, product/roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
 
 ## Verified baseline and design rules
 
-Hosted migration history contains `20261119160000_initial_schema` and `20261119173400_hosted_profile_rpc`; a remote dry-run reports no pending migrations. The hosted schema dump confirms the five application tables below, their grants, RLS policies, constraints and indexes, and the profile functions. Guarded hosted integration checks passed for Auth login, profile initialization/edit in all three locales, RLS owner isolation, role/badge denial, session restoration, refresh, and logout. Public registration, delivered confirmation/recovery mail, and natural token expiry remain unverified. No future table in this document exists yet.
+Hosted migration history contains `20261119160000_initial_schema`, `20261119173400_hosted_profile_rpc`, and `20261119210000_phase2_community_stats`. The first five application tables, their grants, RLS policies, constraints, indexes, and profile functions were confirmed by schema dump; Phase 2 adds two service-only tables and an aggregate function. Guarded hosted checks cover account/profile behavior and Phase 2 privacy-safe metrics. Public registration, delivered confirmation/recovery mail, and natural token expiry remain unverified. Later-phase tables do not exist yet.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Keep original `ht`/`fr`/`en` content and label translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -12,7 +12,7 @@ Hosted migration history contains `20261119160000_initial_schema` and `202611191
 
 Every column is listed below; `PK` means primary key, `FK→` names a referenced column, `UQ` means unique constraint, and `IX(...)` means a proposed index (the PK/UQ already supply their own indexes). `id uuid PK` means `DEFAULT gen_random_uuid()`. `ca timestamptz` means `created_at timestamptz NOT NULL DEFAULT now()`; `ua timestamptz` means `updated_at timestamptz NOT NULL DEFAULT now()` with a trigger. Other `timestamptz` columns are nullable unless marked `!`. `!` means NOT NULL; `?` means nullable. All proposed status/kind/locale values need named CHECK constraints or stable reference tables; examples below are controlled values, not client-writable free text. Every FK needs an explicit `ON DELETE` choice during migration review; default to `RESTRICT` for audit/financial history, `CASCADE` for pure membership/joins, and `SET NULL` for optional actors. Do not cascade-delete evidence or audit history without retention review.
 
-## Existing schema — exact applied contract
+## Existing schema — applied contract
 
 | Table / phase | Columns and constraints | Existing indexes |
 | --- | --- | --- |
@@ -21,8 +21,10 @@ Every column is listed below; `PK` means primary key, `FK→` names a referenced
 | `member_private` / 1A | `user_id uuid PK FK→profiles.user_id ON DELETE CASCADE`, `residence_country_code text?` (two uppercase letters), `residence_department_code text? FK→departments.code` (requires residence HT), `diaspora_department_code text? FK→departments.code` (disallowed for residence HT), `ca`, `ua`. | PK; partial `member_private_residence_idx(residence_country_code,residence_department_code)` when country set; partial `member_private_diaspora_idx(diaspora_department_code)` when set |
 | `role_assignments` / 1A | `user_id uuid! FK→auth.users.id ON DELETE CASCADE`, `role text! CHECK (administrator/moderator)`, `granted_by uuid? FK→auth.users.id ON DELETE SET NULL`, `ca`; composite PK `(user_id,role)`. **No updated_at**. | PK; `role_assignments_role_idx(role,user_id)` |
 | `verification_records` / 1A | `id uuid PK DEFAULT gen_random_uuid()`, `user_id uuid! FK→auth.users.id ON DELETE CASCADE`, `verification_type text! CHECK (identity/notable_person/organization)`, `status text! DEFAULT pending CHECK (pending/verified/revoked)`, `reviewed_by uuid? FK→auth.users.id ON DELETE SET NULL`, `verified_at timestamptz?`, `ca`, `ua`; UQ `(user_id,verification_type)`; reviewer/date combination constrained by status. | PK, UQ, `verification_records_user_idx(user_id)` |
+| `member_metric_exclusions` / 2 | `user_id uuid PK FK→auth.users.id ON DELETE CASCADE`, `reason text! CHECK (synthetic_test/disqualified)`, `ca`. | PK; service-only, no client policies |
+| `user_activity_daily` / 2 | `user_id uuid! FK→auth.users.id ON DELETE CASCADE`, `activity_day date!`; PK `(user_id,activity_day)`. | PK; `user_activity_daily_day_idx(activity_day,user_id)`; service-only |
 
-All five have RLS. Anonymous/authenticated roles read departments; anonymous reads only visible profiles; owners read/edit allowed profile columns and their private row. Neither client role can insert/delete these records or access role/verification tables. `private.initialize_member(uuid)` is the preserved atomic, retry-safe security-definer initializer. `public.initialize_member_for_api(uuid)` is service-role-only; `public.update_my_profile(...)` is an authenticated security-invoker atomic update. Keep these contracts and current Fastify routes. An existing `verification_records` row is **user-scoped**; organizational verification below is a separate model. Any later profile handle/avatar/bio fields require a separate additive migration and privacy review.
+All seven have RLS. Anonymous/authenticated roles read departments; anonymous reads only visible profiles; owners read/edit allowed profile columns and their private row. Neither client role can insert/delete those records or access role, verification, exclusion, or activity tables. `private.initialize_member(uuid)` is the preserved atomic, retry-safe initializer. `public.initialize_member_for_api(uuid)` is service-role-only; `public.update_my_profile(...)` is an authenticated atomic update. Phase 2 adds service-only `private.build_community_stats()` and `public.community_stats_for_api()` with complementary geographic suppression. An existing `verification_records` row is **user-scoped**; organizational verification below is separate. Later profile handle/avatar/bio fields require an additive migration and privacy review.
 
 ## Planned schema by domain and implementation phase
 
@@ -42,8 +44,7 @@ The blueprint's polymorphic `reactions` proposal is represented by `post_reactio
 | `account_data_exports` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `status text!`, `private_object_path text?`, `expires_at timestamptz?`, `ca`, `ua` | IX `(user_id,created_at DESC)`; private signed retrieval |
 | `countries` / common | `code text PK` (ISO alpha-2), `name_ht text!`, `name_fr text!`, `name_en text!`, `active boolean!`, `ca`, `ua` | CHECK uppercase two-letter code; optional FK on `member_private.residence_country_code` only after backfill/validation |
 | `communes` / later | `id uuid PK`, `department_code text! FK→departments.code`, `official_code text! UQ`, `name text!`, `active boolean!`, `ca`, `ua` | IX `(department_code,name)`; source/version required |
-| `analytics_daily_aggregates` / 2 | `day date!`, `metric text!`, `scope_kind text!`, `scope_code text!`, `value bigint!`, `definition_version integer!`, `computed_at timestamptz!`; PK `(day,metric,scope_kind,scope_code,definition_version)` | CHECK value≥0; server-only; suppress small cohorts at API |
-| `user_activity_daily` / 2–3 | `user_id uuid! FK→auth.users.id`, `day date!`, `qualifying_actions integer!`; PK `(user_id,day)` | CHECK count≥0; IX `(day,user_id)`; bounded retention |
+| `analytics_daily_aggregates` / later, if needed | `day date!`, `metric text!`, `scope_kind text!`, `scope_code text!`, `value bigint!`, `definition_version integer!`, `computed_at timestamptz!`; PK `(day,metric,scope_kind,scope_code,definition_version)` | CHECK value≥0; server-only; not needed for current live aggregate API |
 
 ### Social feed, media, notifications — phase 3 (later rows marked)
 
@@ -230,9 +231,9 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 
 ## Dependencies and migration order
 
-1. **Existing 1A/1B:** Keep both applied migrations and all five tables/functions unchanged. Check remote history before each future migration.
+1. **Existing 1A/1B/2:** Keep all three applied migrations and seven tables/functions unchanged. Check remote history before each future migration.
 2. **Common hardening:** Decide privacy/retention rules; add `audit_events` before the first privileged workflow, `countries` and optional validated residence FK only after existing values are checked, then settings/flags. Handle user rights before public launch. Any profile handle/avatar/bio is additive and must not break current API clients.
-3. **Phase 2:** Define registered/active/verified metrics and test/spam exclusions. Create private activity and aggregate structures; publish only suppressed read APIs. Do not derive residence from diaspora connection.
+3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
 4. **Phase 3 base:** Create media metadata/Storage rules, blocks/mutes, `posts`, `comments`, split reactions, follows, reports, moderation cases/actions/appeals/restrictions, notifications. Create `posts` **without** `community_id` in the first phase-3 migration; add the nullable column and FK in phase 4 after `communities` exists. Require moderation and abuse gates before opening posting.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
 6. **Phase 5:** Create organizations and representatives before organization verification, applications/reviews/evidence, ambassadors. Evidence depends on media assets; radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.

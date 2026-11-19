@@ -32,6 +32,19 @@ function expectDenied(result, label) {
 }
 
 try {
+  const beforeStats = await app.inject({ method: "GET", url: "/api/v1/community/stats" });
+  assert.equal(beforeStats.statusCode, 200, beforeStats.body);
+  const baseline = beforeStats.json().stats;
+  assert.equal(baseline.minimumCohort, 10);
+  if (baseline.registered === 0) {
+    assert.equal(baseline.geographyAvailable, true);
+    assert.equal(baseline.haiti, 0);
+    assert.equal(baseline.diaspora, 0);
+    assert.equal(baseline.unknown, 0);
+    assert.equal(baseline.departments.length, 10);
+  }
+  console.log("community empty-state/contract: pass");
+
   const health = await app.inject({ method: "GET", url: "/health" });
   const status = await app.inject({ method: "GET", url: "/api/v1/status" });
   const departments = await app.inject({ method: "GET", url: "/api/v1/departments" });
@@ -53,6 +66,10 @@ try {
     assert.ok(created.user?.id);
     createdIds.push(created.user.id);
     ids.push(created.user.id);
+    const { error: exclusionError } = await admin.from("member_metric_exclusions").insert({
+      user_id: created.user.id, reason: "synthetic_test",
+    });
+    assert.ifError(exclusionError);
     const client = memberClient();
     const { data: login, error: loginError } = await client.auth.signInWithPassword({ email, password });
     assert.ifError(loginError);
@@ -88,6 +105,10 @@ try {
   assert.equal(saved.json().profile.displayName, input.displayName);
   const reloaded = await app.inject({ method: "GET", url: "/api/v1/me/profile", headers: bearer });
   assert.equal(reloaded.json().profile.residenceDepartmentCode, "HT-OU");
+  const { data: activity, error: activityError } = await admin.from("user_activity_daily")
+    .select("user_id,activity_day").eq("user_id", ids[0]);
+  assert.ifError(activityError);
+  assert.equal(activity.length, 1);
   for (const locale of ["ht", "fr", "en"]) {
     const localized = await app.inject({
       method: "PATCH", url: "/api/v1/me/profile", headers: bearer,
@@ -97,6 +118,24 @@ try {
     assert.equal(localized.json().profile.preferredLocale, locale);
   }
   console.log("profile initialization / atomic update / department / ht-fr-en: pass");
+
+  const afterStats = await app.inject({ method: "GET", url: "/api/v1/community/stats" });
+  assert.equal(afterStats.statusCode, 200, afterStats.body);
+  const after = afterStats.json().stats;
+  for (const key of ["registered", "haiti", "diaspora", "unknown", "active", "verified", "representedDepartments", "geographyAvailable"]) {
+    assert.deepEqual(after[key], baseline[key], `synthetic users changed ${key}`);
+  }
+  assert.deepEqual(after.departments, baseline.departments);
+  assert.deepEqual(after.diasporaCountries, baseline.diasporaCountries);
+  const [publicDepartments, publicDiaspora] = await Promise.all([
+    app.inject({ method: "GET", url: "/api/v1/community/departments" }),
+    app.inject({ method: "GET", url: "/api/v1/community/diaspora" }),
+  ]);
+  assert.equal(publicDepartments.statusCode, 200);
+  assert.equal(publicDiaspora.statusCode, 200);
+  assert.deepEqual(publicDepartments.json().departments, baseline.departments);
+  assert.deepEqual(publicDiaspora.json().countries, baseline.diasporaCountries);
+  console.log("synthetic exclusions / active marker / public aggregates: pass");
 
   const [foreignPublic, foreignPrivate, anonymousPublic, anonymousPrivate] = await Promise.all([
     clients[1].from("profiles").select("user_id").eq("user_id", ids[0]),
@@ -114,6 +153,9 @@ try {
   expectDenied(await clients[0].from("role_assignments").insert({ user_id: ids[0], role: "administrator" }), "self role assignment");
   expectDenied(await clients[0].from("verification_records").insert({ user_id: ids[0], verification_type: "identity", status: "verified" }), "self verification");
   expectDenied(await publicClient.rpc("initialize_member_for_api", { p_user_id: ids[0] }), "anonymous initialization");
+  expectDenied(await publicClient.rpc("community_stats_for_api"), "anonymous statistics RPC");
+  expectDenied(await clients[0].from("member_metric_exclusions").select("user_id"), "member metric exclusions read");
+  expectDenied(await clients[0].from("user_activity_daily").insert({ user_id: ids[0], activity_day: "2026-11-19" }), "member activity write");
   const [roles, verifications] = await Promise.all([
     admin.from("role_assignments").select("user_id").eq("user_id", ids[0]),
     admin.from("verification_records").select("user_id").eq("user_id", ids[0]),

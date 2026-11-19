@@ -36,11 +36,11 @@ scripts/check-hosted.mjs
 supabase/{config.toml,migrations/,tests/}
 ```
 
-The five current tables are `departments`, `profiles`, `member_private`, `role_assignments`, and `verification_records`. Member UUIDs reference `auth.users.id`. No passwords or raw identity documents are stored in application tables. Future phases may add aggregate counts, posts/moderation, groups, verification review, projects, evidence-based reports, radio listings, and partner-mediated contributions.
+The seven current tables are `departments`, `profiles`, `member_private`, `role_assignments`, `verification_records`, `member_metric_exclusions`, and `user_activity_daily`. Member UUIDs reference `auth.users.id`. No passwords or raw identity documents are stored in application tables. Phase 2 adds a service-only aggregate RPC; Fastify returns only cohort-safe results through versioned read-only routes. Future phases may add posts/moderation, groups, verification review, projects, evidence-based reports, radio listings, and partner-mediated contributions.
 
 Residence country and optional Haiti department are separate from an optional diaspora department of connection. Location is voluntary and self-reported; no precise coordinate is retained. Future public counts require suppression for small cohorts. Required locales are `ht` (default), `fr`, and `en`; future user-generated translations must be labeled. Public launch still requires retention/deletion rules, moderation governance, abuse controls, custom email delivery, monitoring, and privacy review.
 
-The pinned Supabase CLI manages hosted migration history. Docker and pgTAP remain optional for isolated local checks. Hosted integration tests use identifiable synthetic records and targeted cleanup. No hosted reset or destructive test workflow is used.
+The pinned Supabase CLI manages hosted migration history. Docker and pgTAP remain optional for isolated local checks. Hosted integration tests use identifiable synthetic records, exclusion from public metrics, transaction rollback for aggregate assertions, and targeted cleanup. No hosted reset or destructive test workflow is used.
 
 ## References
 

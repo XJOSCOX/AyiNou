@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 1B implemented; local apps use hosted Supabase for development
+**Status:** Phase 2 community dashboard implemented; local apps use hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -37,7 +37,7 @@ We start with a responsive web app to validate UX and product flows. Android/iOS
 
 ## First milestone
 
-**Phase 1B: Accounts and profiles** (see [ROADMAP.md](ROADMAP.md)). The web and API run independently; Auth handles credentials, while Fastify handles member profiles. Social features are not active.
+**Phase 2: National community dashboard** (see [ROADMAP.md](ROADMAP.md)). The web and API run independently; Auth handles credentials, while Fastify serves member profiles and privacy-safe community statistics. Social features are not active.
 
 ## Key features by phase
 
@@ -84,9 +84,11 @@ npm run db:push:dry
 npm run db:push       # review the CLI prompt before applying
 ```
 
-The hosted database has the Phase 1A schema plus a small Phase 1B API RPC migration. Remote migration commands never reset, drop, or seed the hosted database. Do not run `db reset --remote`. The SQL files and optional local pgTAP tests remain in `supabase/`; see [docs/DATABASE.md](docs/DATABASE.md).
+The hosted database has the Phase 1A schema, the Phase 1B API RPC migration, and the additive Phase 2 statistics migration. Remote migration commands never reset, drop, or seed the hosted database. Do not run `db reset --remote`. The SQL files and optional local pgTAP tests remain in `supabase/`; see [docs/DATABASE.md](docs/DATABASE.md).
 
-For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted`. The script creates two uniquely named, confirmed synthetic Auth users, checks API and RLS boundaries, then deletes only their returned user IDs. It does not run pgTAP or reset the hosted database. Do not run it against an unrelated project.
+For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:aggregation`. These scripts create uniquely named, confirmed synthetic Auth users, mark them excluded from public metrics, check API/RLS and aggregate behavior, then delete only their returned user IDs. Aggregation assertions run in SQL transactions that roll back. Do not run them against an unrelated project.
+
+The dashboard is at `http://localhost:4000/dashboard` after login. Public API routes are `GET /api/v1/community/stats`, `/api/v1/community/departments`, and `/api/v1/community/diaspora`. Geographic data is hidden together when any nonempty underlying location group has fewer than 10 members. Zero, suppressed, and unavailable are distinct states. See [docs/DATABASE.md](docs/DATABASE.md) for exact metric definitions.
 
 Hosted Auth has email/password signup and confirmation enabled. Its site URL is `http://localhost:4000`, with `http://localhost:4000/auth/callback` and `http://localhost:4000/reset-password` allowed as redirects. The hosted default email sender reaches only organization team addresses and allows very few messages per hour; use a controlled team mailbox for limited testing or configure custom SMTP for reliable signup and password-reset testing. Do not turn off confirmation to bypass this. Local Mailpit is available only with the optional Docker stack; it is not the hosted project's inbox. See [docs/DATABASE.md](docs/DATABASE.md) for testing limits and troubleshooting.
 

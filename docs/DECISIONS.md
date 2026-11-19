@@ -30,6 +30,8 @@
 - Validate the Supabase access token in Fastify, derive the subject from verified claims, and use that token for member-scoped database access. Never trust profile IDs or roles from a request body.
 - Store publishable credentials in web/API environment files and the secret key only in the ignored API environment file. Do not store a database password locally for normal development.
 - Keep hosted email confirmation enabled. Use a controlled mailbox or custom SMTP for complete registration and recovery testing; do not use the hosted database for destructive reset or pgTAP workflows.
+- Phase 2 counts non-deleted, non-anonymous, currently unbanned Auth users unless explicitly excluded as synthetic or disqualified. Active means a successful authenticated profile GET/PATCH within 30 UTC days; verified requires approved identity or notable-person status.
+- Phase 2 hides all geographic figures together if any nonempty atomic residence group has fewer than 10 members. No member-level location or raw metric table is available to client roles.
 
 ## Open before public launch
 

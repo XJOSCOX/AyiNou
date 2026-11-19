@@ -41,7 +41,7 @@ export function MemberShell({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-5 py-12 sm:px-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-12">{children}</main>
     </div>
   );
 }

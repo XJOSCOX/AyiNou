@@ -54,6 +54,17 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
     if (error) throw unavailable();
   }
 
+  async function recordActivity(userId: string) {
+    // A successful authenticated profile request counts once per UTC day.
+    // Metrics must never make the profile endpoint unavailable.
+    try {
+      await admin.from("user_activity_daily").upsert(
+        { user_id: userId, activity_day: new Date().toISOString().slice(0, 10) },
+        { onConflict: "user_id,activity_day", ignoreDuplicates: true },
+      );
+    } catch { /* Metrics must not block profile use. */ }
+  }
+
   return {
     async get(userId, token) {
       await initialize(userId);
@@ -63,7 +74,9 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
         member.from("member_private").select("residence_country_code,residence_department_code,diaspora_department_code").eq("user_id", userId).single(),
       ]);
       if (publicResult.error || privateResult.error || !publicResult.data || !privateResult.data) throw unavailable();
-      return toProfile({ ...publicResult.data, ...privateResult.data } as ProfileRow);
+      const profile = toProfile({ ...publicResult.data, ...privateResult.data } as ProfileRow);
+      await recordActivity(userId);
+      return profile;
     },
     async update(userId, token, input) {
       await initialize(userId);
@@ -77,6 +90,7 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       }).single();
       const row = data as ProfileRow | null;
       if (error || !row || row.user_id !== userId) throw unavailable();
+      await recordActivity(userId);
       return toProfile(row);
     },
     async departments() {

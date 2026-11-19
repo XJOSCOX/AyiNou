@@ -17,6 +17,7 @@
     "db:local:reset": "supabase db reset",
     "db:local:test": "supabase test db",
     "test:hosted": "node --import tsx scripts/check-hosted.mjs",
+    "test:hosted:aggregation": "node --import tsx scripts/check-phase2-aggregation.mjs",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",
     "test": "npm run test -ws --if-present",

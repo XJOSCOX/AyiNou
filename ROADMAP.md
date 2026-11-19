@@ -58,17 +58,17 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 
 **Gate:** Hosted schema, API, RLS, profile edits, refresh and logout checks pass; typecheck, lint, unit tests, and builds pass. End-to-end registration, email confirmation, password reset, and real token expiry remain unverified until controlled mailbox testing is available.
 
-## Phase 2 — Community dashboard and member counts
+## Phase 2 — Community dashboard and member counts (COMPLETE)
 
-- [ ] Count authenticated, non-deleted members without exposing identifiable data.
-- [ ] Count users who self-report residence in each of Haiti's ten departments.
-- [ ] Count diaspora members by country and separate department-of-origin/connection metrics.
-- [ ] Display 'Unknown / undisclosed' as needed; never conflate voluntary location with verified residency.
-- [ ] Protect small groups from re-identification (minimum display thresholds, grouped statistics).
-- [ ] Separate total registered, active, and verified users with documented definitions.
-- [ ] Add telemetry/analytics only with clear privacy notices and retention limits.
+- [x] Count eligible registered, non-deleted members without exposing identifiable data.
+- [x] Count self-reported residence in Haiti and its ten departments.
+- [x] Group diaspora members by current residence country; never count department of connection as residence.
+- [x] Distinguish unknown/undisclosed location from zero or suppressed values.
+- [x] Suppress all geography together when any nonempty atomic location group is below 10.
+- [x] Define registered, active (profile activity in 30 UTC days), and approved verified counts separately.
+- [x] Store only one daily activity marker per member and document its purpose and retention requirement.
 
-**Gate:** Dashboard totals are accurate against seeded test data; no user-level location or private profile disclosure.
+**Gate:** Hosted synthetic fixtures verify grouping, exclusions, zero state, and suppression; no user-level location or private profile disclosure. Email delivery remains outside this phase.
 
 ## Phase 3 — Social network MVP
 

@@ -1,4 +1,4 @@
-import type { Department, MemberProfile, StatusResponse, UpdateMemberProfile } from "@ayinou/shared";
+import type { CommunityStats, Department, MemberProfile, StatusResponse, UpdateMemberProfile } from "@ayinou/shared";
 import { browserSupabase } from "./supabase/browser";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
@@ -55,4 +55,13 @@ export async function fetchDepartments(): Promise<Department[]> {
   if (!response.ok) throw new Error("API_ERROR");
   const result: { departments: Department[] } = await response.json();
   return result.departments;
+}
+
+export async function fetchCommunityStats(signal?: AbortSignal): Promise<CommunityStats> {
+  const response = await fetch(`${apiBaseUrl}/api/v1/community/stats`, {
+    headers: { Accept: "application/json" }, cache: "no-store", signal,
+  });
+  if (!response.ok) throw new Error("API_ERROR");
+  const result: { stats: CommunityStats } = await response.json();
+  return result.stats;
 }

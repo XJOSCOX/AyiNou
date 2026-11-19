@@ -40,3 +40,27 @@ export interface UpdateMemberProfile {
   residenceDepartmentCode: string | null;
   diasporaDepartmentCode: string | null;
 }
+
+export interface CommunityDepartmentCount extends Department {
+  members: number;
+}
+
+export interface CommunityCountryCount {
+  code: string;
+  members: number;
+}
+
+export interface CommunityStats {
+  updatedAt: string;
+  minimumCohort: 10;
+  registered: number | null;
+  active: number | null;
+  verified: number | null;
+  geographyAvailable: boolean;
+  haiti: number | null;
+  diaspora: number | null;
+  unknown: number | null;
+  representedDepartments: number | null;
+  departments: CommunityDepartmentCount[] | null;
+  diasporaCountries: CommunityCountryCount[] | null;
+}

@@ -6,7 +6,7 @@ Next.js runs at `http://localhost:4000` and Fastify at `http://127.0.0.1:3000`. 
 
 Install Node.js 20.9+ and npm, then run `npm install` for the pinned `supabase@3.2.0` CLI. Sign in with `npx supabase login` if needed. Copy values from [.env.example](../.env.example) to ignored `apps/api/.env` and `apps/web/.env.local`. The hosted URL and publishable key are used in both apps. Put the secret key **only** in the API file. No database password is needed to run the apps.
 
-The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds a service-only initialization RPC and an authenticated profile-update RPC. Both are applied to the confirmed project. For future changes, inspect the project reference and migration history, review SQL, dry-run, then push only pending migrations:
+The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds a service-only initialization RPC and an authenticated profile-update RPC. `20261119210000_phase2_community_stats.sql` adds two service-only metric tables and a privacy-safe aggregate RPC. All three are applied to the confirmed project. For future changes, inspect the project reference and migration history, review SQL, dry-run, then push only pending migrations:
 
 ```bash
 npx supabase link --project-ref hcbxulyfmdmuyccgrujs
@@ -32,8 +32,26 @@ Supabase's default hosted email sender is limited to organization team addresses
 | `public.member_private` | Optional residence country and Haiti department, separate diaspora connection | Owner read and edit only |
 | `public.role_assignments` | Future administrator/moderator roles | No client grants or policies |
 | `public.verification_records` | Future identity/organization review state | No client grants or policies |
+| `public.member_metric_exclusions` | Explicit synthetic-test and disqualified-account exclusions | Service role only; RLS enabled, no client policies |
+| `public.user_activity_daily` | One marker per user and UTC day for qualifying profile activity | Service role only; RLS enabled, no client policies |
 
-All five tables have RLS, least-privilege grants, UUID/foreign-key relationships, timestamps, constraints, and indexes. `auth.users` is the source of identity. No application table stores a password, raw identification document, phone number, or precise GPS location. Clients cannot insert/delete profiles, set visibility, assign roles, or award verification. Locations are self-reported and private.
+All seven application tables have RLS and least-privilege grants. `auth.users` is the source of identity. No application table stores a password, raw identification document, phone number, or precise GPS location. Clients cannot insert/delete profiles, set visibility, assign roles, or award verification. Locations are self-reported and private.
+
+## Phase 2 community statistics
+
+`GET /api/v1/community/stats`, `/api/v1/community/departments`, and `/api/v1/community/diaspora` are public, read-only Fastify routes. The database computes one aggregate snapshot in `private.build_community_stats()`, exposed only through service-role `public.community_stats_for_api()`. The public response contains no member IDs, emails, or private rows. No direct client role can read or write the two metric tables or call the aggregate RPC. Each route has a per-instance 60-requests-per-minute IP limit and a 30-second public cache header; clients cannot choose arbitrary filters or dates.
+
+- **Registered:** non-anonymous `auth.users` rows not deleted or currently banned, excluding explicitly marked synthetic-test or disqualified accounts. A confirmed email is not required for this count.
+- **Living in Haiti:** eligible members with `member_private.residence_country_code = 'HT'`, including those who did not select a department.
+- **Department distribution:** those Haiti residents grouped by `residence_department_code`; all ten reference departments appear, including zero rows when geography is safe. `diaspora_department_code` is never used as residence.
+- **Diaspora:** eligible members with a non-null residence country other than `HT`, grouped by that self-reported two-letter country code. Country names are localized by the client; a country reference table is not yet needed.
+- **Unknown:** eligible members with no declared residence country, including Auth users whose profile has not been initialized.
+- **Active:** eligible members with at least one successful authenticated profile GET/PATCH on a UTC day within the current day and preceding 29 days. This is a narrow product-activity measure, not general site usage. A service-only daily marker is recorded once per user/day; failed requests do not qualify.
+- **Verified:** eligible members with at least one `verification_records.status = 'verified'` row of type `identity` or `notable_person`. Pending, revoked, and organization-only records do not count.
+
+The provisional public minimum is **10**. A zero count is shown as zero; a nonzero count from 1–9 is returned as `null` and labeled suppressed. Geographic atomic groups are unknown country, Haiti without department, each Haiti department, and each diaspora residence country. If **any** nonempty group is under 10, the API returns `null` for all geography totals and distributions, including represented departments. This complementary suppression prevents deriving a hidden cell from totals or sibling groups. Country codes are omitted entirely while geography is suppressed. The response uses `updatedAt` for the calculation time. An unavailable service returns HTTP 503, never invented zeros.
+
+Synthetic accounts are marked in `member_metric_exclusions` immediately after server-admin creation; hosted fixture SQL temporarily removes their exclusions only inside transactions that roll back. Account deletion cascades remove activity/exclusion rows. Daily activity markers need a reviewed retention job before public launch (the master plan proposes 90 days), and aggregates must not be treated as a census. No GPS or exact location is collected.
 
 ## API boundary and profile creation
 
@@ -43,7 +61,7 @@ Fastify reads member data using the caller's access token, so grants and RLS enf
 
 ## Testing and optional local stack
 
-Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted`. The guard must match the API URL. The script creates two uniquely named, confirmed synthetic Auth users, checks API, RLS, privilege denials, profile edits and all three locales, session restoration, refresh and logout, then deletes only those returned user IDs. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by this script.
+Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:aggregation`. The guard must match the API URL. The scripts create uniquely named, confirmed synthetic Auth users, mark them excluded from public metrics, check API/RLS and aggregate cases, then delete only those returned IDs. The aggregation script requires the pinned CLI's hosted SQL access and an empty eligible-member baseline; its SQL assertions roll back each transaction. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by these scripts.
 
 The existing pgTAP suite is optional and isolated to a local Docker stack:
 

@@ -6,8 +6,10 @@ import { statusRoutes } from "./routes/status.js";
 import { registerMemberRoutes } from "./routes/members.js";
 import { createAuthVerifier, type AuthVerifier } from "./services/auth.js";
 import { createMemberRepository, type MemberRepository } from "./services/members.js";
+import { createCommunityRepository, type CommunityRepository } from "./services/community.js";
+import { registerCommunityRoutes } from "./routes/community.js";
 
-export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; members?: MemberRepository }) {
+export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository }) {
   const app = Fastify({
     logger: {
       level: config.LOG_LEVEL,
@@ -16,6 +18,7 @@ export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; 
   });
   const auth = overrides?.auth ?? createAuthVerifier(config);
   const members = overrides?.members ?? createMemberRepository(config);
+  const community = overrides?.community ?? createCommunityRepository(config);
 
   app.register(cors, {
     origin: config.WEB_ORIGINS,
@@ -23,6 +26,7 @@ export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; 
   });
   app.register(statusRoutes);
   app.register((instance) => registerMemberRoutes(instance, auth, members));
+  app.register((instance) => registerCommunityRoutes(instance, community));
   app.addHook("onClose", async () => { await members?.close(); });
 
   app.setNotFoundHandler((_request, reply) => {
