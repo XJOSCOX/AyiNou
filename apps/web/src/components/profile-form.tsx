@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { interestCodes, type Department, type InterestCode, type MemberProfile, type MembershipCategory, type ProfileChanges } from "@ayinou/shared";
 import { fetchDepartments, fetchMyProfile, updateMyProfile, uploadAvatar } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
+import { accountMessages } from "@/lib/account-i18n";
 import { isLocale, type Locale } from "@/lib/i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -16,6 +17,7 @@ import { MemberShell } from "./member-shell";
 const input = "mt-2 w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-control)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]";
 const action = "rounded-xl bg-[var(--theme-primary)] px-5 py-3 font-semibold text-[var(--theme-on-primary)] disabled:opacity-60";
 const errorBox = "rounded-xl bg-[var(--theme-error-bg)] p-3 text-sm text-[var(--theme-error-text)]";
+const profileCard = "min-w-0 scroll-mt-4 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
 const countryOptions = ["HT", "US", "CA", "FR"];
 const reserved = ["admin", "support", "ayinou", "system", "root", "moderator", "administrator"];
 const validName = (value: string) => value.trim().length >= 1 && value.trim().length <= 80 && !/\p{Cc}/u.test(value.trim());
@@ -66,7 +68,7 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
 
   return (
     <MemberShell>
-      <div className="mx-auto max-w-3xl rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-9">
+      <div className={onboarding ? "mx-auto max-w-3xl rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-9" : "min-w-0"}>
         {loaded ? <ProfileEditor {...loaded} onboarding={onboarding} /> : failed ? (
           <>
             <p role="alert" className={errorBox}>{t.loadError}</p>
@@ -83,6 +85,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
 }) {
   const [locale, setLocale] = useLocale();
   const t = authMessages[locale];
+  const account = accountMessages[locale];
   const m = membershipMessages[locale];
   const router = useRouter();
   const [saved, setSaved] = useState(profile);
@@ -186,6 +189,38 @@ function ProfileEditor({ profile, departments, onboarding }: {
       </p>}
     </section>
   );
+  const profileSections = [
+    ["public-profile", m.publicProfile],
+    ["personal", account.personal],
+    ["location", m.location],
+    ["privacy", m.privacy],
+    ["interests", m.interests],
+  ] as const;
+  const display = displayName.trim();
+  const initials = display.split(/\s+/).slice(0, 2).map((part) => Array.from(part)[0]).join("").toLocaleUpperCase(locale);
+  const visible = saved.isVisible && saved.discoverable && saved.username;
+  const draftPreview = (
+    <aside>
+      <section aria-label={m.preview} className="overflow-hidden rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+        <div className="h-16 bg-[var(--theme-hero)] sm:h-20" aria-hidden="true" />
+        <div className="px-5 pb-5 sm:px-6 sm:pb-6">
+          <div className="-mt-9 grid size-[4.5rem] place-items-center overflow-hidden rounded-full border-4 border-[var(--theme-surface)] bg-[var(--theme-selected)] text-lg font-semibold text-[var(--theme-link)]">
+            {avatar ? <Image src={avatar} alt="" width={72} height={72} className="size-full object-cover" unoptimized />
+              : <span aria-hidden="true">{initials || "·"}</span>}
+          </div>
+          <h2 className="mt-3 text-sm font-semibold text-[var(--theme-link)]">{m.preview}</h2>
+          <p className="mt-1 break-words text-2xl font-semibold leading-tight tracking-tight">{display || t.displayName}</p>
+          {username.trim() && <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{username.trim().toLowerCase()}</p>}
+          {biography.trim() && <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[var(--theme-body)]">{biography.trim()}</p>}
+          {showCategory && category && <p className="mt-3 text-sm text-[var(--theme-link)]">{category === "haitian" ? m.haitianCount : m.supporterCount}</p>}
+          <p className="mt-4 border-t border-[var(--theme-border)] pt-3 text-sm text-[var(--theme-body)]">{visible ? m.profilePublished : m.profileHidden}</p>
+        </div>
+      </section>
+      <nav aria-label={t.profileTitle} className="mt-4 flex flex-wrap gap-2 xl:flex-col">
+        {profileSections.map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">{label}</a>)}
+      </nav>
+    </aside>
+  );
 
   if (onboarding && step >= 4) return (
     <>
@@ -200,105 +235,139 @@ function ProfileEditor({ profile, departments, onboarding }: {
     </>
   );
 
+  const privacyFields = (
+    <fieldset className={all ? "space-y-3" : "space-y-2 rounded-xl border border-[var(--theme-border)] p-3"}>
+      <legend className={all ? "sr-only" : "px-1 font-semibold"}>{m.privacy}</legend>
+      <label className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={discoverable} onChange={(e) => setDiscoverable(e.target.checked)} />{m.discoverable}</label>
+      <label className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={showCategory} onChange={(e) => setShowCategory(e.target.checked)} />{m.showCategory}</label>
+    </fieldset>
+  );
+
+  const personalFields = (
+    <fieldset className="space-y-4">
+      <legend className={all ? "text-sm font-semibold" : "text-lg font-bold"}>{m.connectionQuestion}</legend>
+      <p className="mt-2 text-sm text-[var(--theme-body)]">{m.membershipNote}</p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {([["haitian", m.haitian], ["international_supporter", m.supporter]] as const).map(([value, label]) => (
+          <label key={value} className="flex items-center gap-2 rounded-xl border border-[var(--theme-border)] p-3">
+            <input type="radio" name="membership" value={value} checked={category === value} onChange={() => setCategory(value)} required />{label}
+          </label>
+        ))}
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label>{m.firstName}<input className={input} autoComplete="given-name" maxLength={80} value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></label>
+        <label>{m.lastName}<input className={input} autoComplete="family-name" maxLength={80} value={lastName} onChange={(e) => setLastName(e.target.value)} required /></label>
+      </div>
+      <p className="text-xs text-[var(--theme-body)]">{m.privateNames}</p>
+      <label className="block">{t.preferredLanguage}
+        <select className={input} value={preferredLocale} onChange={(e) => { if (isLocale(e.target.value)) setPreferredLocale(e.target.value); }}>
+          <option value="ht">Kreyòl ayisyen</option><option value="fr">Français</option><option value="en">English</option>
+        </select>
+      </label>
+    </fieldset>
+  );
+
+  const locationFields = (
+    <fieldset className="space-y-4">
+      <legend className={all ? "sr-only" : "text-lg font-bold"}>{m.location}</legend>
+      <label className="mt-3 block">{t.country}
+        <select className={input} value={countryOption} onChange={(e) => {
+          const value = e.target.value;
+          setCountryOption(value);
+          setCountry(value === "other" ? "" : value);
+        }}>
+          <option value="">{t.countryPlaceholder}</option>
+          {countryOptions.map((value, index) => <option value={value} key={value}>{[t.haiti, t.unitedStates, t.canada, t.france][index]}</option>)}
+          <option value="other">{t.otherCountry}</option>
+        </select>
+      </label>
+      {countryOption === "other" && <label className="block">{t.otherCountry}<input className={input} value={country} maxLength={2} onChange={(e) => setCountry(e.target.value.toUpperCase())} /></label>}
+      {country && <label className="block">{country === "HT" ? t.departmentResidence : t.departmentConnection}
+        <select className={input} value={country === "HT" ? department : connection} onChange={(e) => {
+          if (country === "HT") setDepartment(e.target.value); else setConnection(e.target.value);
+        }}>
+          <option value="">{t.departmentPlaceholder}</option>
+          {departments.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}
+        </select>
+      </label>}
+      <p className="text-xs text-[var(--theme-body)]">{t.privateNote}</p>
+    </fieldset>
+  );
+
+  const publicFields = (
+    <fieldset className="space-y-4">
+      <legend className={all ? "sr-only" : "text-lg font-bold"}>{m.publicProfile}</legend>
+      <div className={all ? "grid gap-4 sm:grid-cols-2" : "space-y-4"}>
+        <label className="block">{t.displayName}<input className={input} autoComplete="nickname" maxLength={80} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></label>
+        <label className="block">{m.username}<input className={input} autoComplete="username" autoCapitalize="none" spellCheck={false} aria-describedby="username-hint" maxLength={24} value={username} onChange={(e) => setUsername(e.target.value)} required /></label>
+      </div>
+      <p id="username-hint" className="text-xs text-[var(--theme-body)]">{m.usernameHint}</p>
+      <button type="button" className="text-sm font-semibold text-[var(--theme-link)] underline" onClick={() => setUsername(usernameSuggestion(displayName))}>{m.suggestion}</button>
+      <label className="block">{m.biography}<textarea className={input} rows={3} value={biography} onChange={(e) => setBiography(e.target.value)} maxLength={320} /></label>
+      <div>
+        <label className="block">{m.photo}
+          <input type="file" className={input} accept="image/jpeg,image/png,image/webp" disabled={uploading || busy}
+            aria-label={m.addPhoto} aria-describedby="avatar-hint" onChange={(e) => { void changePhoto(e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+        <p id="avatar-hint" className="mt-1 text-xs text-[var(--theme-body)]">{m.photoHint}</p>
+        {uploading && <p role="status">{t.working}</p>}
+        {photoError && <p role="alert" className={`mt-2 ${errorBox}`}>{photoError}</p>}
+        {avatar && <Image src={avatar} width={56} height={56} alt={m.photoAlt} className="mt-3 rounded-full" unoptimized />}
+      </div>
+      {onboarding && privacyFields}
+    </fieldset>
+  );
+
+  const interestFields = (
+    <fieldset>
+      <legend className={all ? "sr-only" : "text-lg font-bold"}>{m.interests}</legend>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        {interestCodes.map((code) => <label className="flex items-center gap-2 rounded-lg bg-[var(--theme-control)] p-3" key={code}>
+          <input type="checkbox" checked={interests.includes(code)} onChange={(e) =>
+            setInterests(e.target.checked ? [...interests, code] : interests.filter((item) => item !== code))} />
+          {m[code]}
+        </label>)}
+      </div>
+    </fieldset>
+  );
+  const sectionFields = {
+    "public-profile": publicFields,
+    personal: personalFields,
+    location: locationFields,
+    privacy: privacyFields,
+    interests: interestFields,
+  };
+
   return (
     <>
-      <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{onboarding ? t.onboardingTitle : t.profileTitle}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{onboarding ? t.onboardingTitle : t.profileTitle}</h1>
+      {all && <p className="mt-2 text-[var(--theme-body)]">{t.profileIntro}</p>}
       {onboarding && <ol className="my-5 grid grid-cols-2 gap-2 text-xs font-semibold sm:grid-cols-4">
         {titles.map((title, index) => <li key={title} aria-current={index === step ? "step" : undefined}
           className={`rounded-lg px-3 py-2 ${index === step ? "bg-[var(--theme-selected)]" : "bg-[var(--theme-control)]"}`}>{title}</li>)}
       </ol>}
-      <form className="mt-6 space-y-7" onSubmit={submit} aria-busy={busy || uploading} noValidate>
-        {(all || step === 0) && <fieldset id="personal" className="space-y-4">
-          <legend className="text-lg font-bold">{m.connectionQuestion}</legend>
-          <p className="mt-2 text-sm text-[var(--theme-body)]">{m.membershipNote}</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {([["haitian", m.haitian], ["international_supporter", m.supporter]] as const).map(([value, label]) => (
-              <label key={value} className="flex items-center gap-2 rounded-xl border border-[var(--theme-border)] p-3">
-                <input type="radio" name="membership" value={value} checked={category === value} onChange={() => setCategory(value)} required />{label}
-              </label>
-            ))}
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label>{m.firstName}<input className={input} autoComplete="given-name" maxLength={80} value={firstName} onChange={(e) => setFirstName(e.target.value)} required /></label>
-            <label>{m.lastName}<input className={input} autoComplete="family-name" maxLength={80} value={lastName} onChange={(e) => setLastName(e.target.value)} required /></label>
-          </div>
-          <p className="text-xs text-[var(--theme-body)]">{m.privateNames}</p>
-          <label className="block">{t.preferredLanguage}
-            <select className={input} value={preferredLocale} onChange={(e) => { if (isLocale(e.target.value)) setPreferredLocale(e.target.value); }}>
-              <option value="ht">Kreyòl ayisyen</option><option value="fr">Français</option><option value="en">English</option>
-            </select>
-          </label>
-        </fieldset>}
+      <div className={all ? "mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)]" : ""}>
+        {all && <div className="self-start xl:col-start-2 xl:row-start-1 xl:sticky xl:top-5">{draftPreview}</div>}
+        <form className={all ? "min-w-0 space-y-4 xl:col-start-1 xl:row-start-1" : "mt-6 space-y-7"} onSubmit={submit}
+          onChange={() => { if (success) setSuccess(false); }} aria-busy={busy || uploading} noValidate>
+          {all ? profileSections.map(([id, label]) => (
+            <section key={id} id={id} className={profileCard}>
+              <h2 className="mb-4 text-xl font-semibold tracking-tight">{label}</h2>
+              {sectionFields[id]}
+            </section>
+          )) : [personalFields, locationFields, publicFields, interestFields][step]}
 
-        {(all || step === 1) && <fieldset className="space-y-4">
-          <legend className="text-lg font-bold">{m.location}</legend>
-          <label className="mt-3 block">{t.country}
-            <select className={input} value={countryOption} onChange={(e) => {
-              const value = e.target.value;
-              setCountryOption(value);
-              setCountry(value === "other" ? "" : value);
-            }}>
-              <option value="">{t.countryPlaceholder}</option>
-              {countryOptions.map((value, index) => <option value={value} key={value}>{[t.haiti, t.unitedStates, t.canada, t.france][index]}</option>)}
-              <option value="other">{t.otherCountry}</option>
-            </select>
-          </label>
-          {countryOption === "other" && <label className="block">{t.otherCountry}<input className={input} value={country} maxLength={2} onChange={(e) => setCountry(e.target.value.toUpperCase())} /></label>}
-          {country && <label className="block">{country === "HT" ? t.departmentResidence : t.departmentConnection}
-            <select className={input} value={country === "HT" ? department : connection} onChange={(e) => {
-              if (country === "HT") setDepartment(e.target.value); else setConnection(e.target.value);
-            }}>
-              <option value="">{t.departmentPlaceholder}</option>
-              {departments.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}
-            </select>
-          </label>}
-          <p className="text-xs text-[var(--theme-body)]">{t.privateNote}</p>
-        </fieldset>}
-
-        {(all || step === 2) && <fieldset id="public-profile" className="space-y-4">
-          <legend className="text-lg font-bold">{m.publicProfile}</legend>
-          <label className="mt-3 block">{t.displayName}<input className={input} autoComplete="nickname" maxLength={80} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></label>
-          <label className="block">{m.username}<input className={input} autoComplete="username" autoCapitalize="none" spellCheck={false} aria-describedby="username-hint" maxLength={24} value={username} onChange={(e) => setUsername(e.target.value)} required /></label>
-          <p id="username-hint" className="text-xs text-[var(--theme-body)]">{m.usernameHint}</p>
-          <button type="button" className="text-sm font-semibold text-[var(--theme-link)] underline" onClick={() => setUsername(usernameSuggestion(displayName))}>{m.suggestion}</button>
-          <label className="block">{m.biography}<textarea className={input} rows={3} value={biography} onChange={(e) => setBiography(e.target.value)} maxLength={320} /></label>
-          <div>
-            <label className="block">{m.photo}
-              <input type="file" className={input} accept="image/jpeg,image/png,image/webp" disabled={uploading || busy}
-                aria-label={m.addPhoto} aria-describedby="avatar-hint" onChange={(e) => { void changePhoto(e.target.files?.[0]); e.target.value = ""; }} />
-            </label>
-            <p id="avatar-hint" className="mt-1 text-xs text-[var(--theme-body)]">{m.photoHint}</p>
-            {uploading && <p role="status">{t.working}</p>}
-            {photoError && <p role="alert" className={`mt-2 ${errorBox}`}>{photoError}</p>}
-            {avatar && <Image src={avatar} width={56} height={56} alt={m.photoAlt} className="mt-3 rounded-full" unoptimized />}
+          <div className={all ? "sticky bottom-0 space-y-3 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-3 shadow-sm sm:p-4" : "space-y-4"}>
+            {error && <p role="alert" className={errorBox}>{error}</p>}
+            {success && <p role="status" className="text-[var(--theme-link)]">{t.saved}</p>}
+            <div className="flex flex-wrap items-center gap-4">
+              <button type="submit" disabled={busy || uploading} className={action}>{busy ? t.working : all ? t.saveProfile : step === 3 ? m.finish : m.continue}</button>
+              {onboarding && (step === 1 || step === 3) && <button type="button" disabled={busy || uploading} className="font-semibold underline" onClick={() => { void submit(undefined, true); }}>{m.skip}</button>}
+              {onboarding && step > 0 && <button type="button" disabled={busy || uploading} className="font-semibold underline" onClick={() => { setError(""); setStep(step - 1); }}>{m.back}</button>}
+            </div>
           </div>
-          <fieldset className="space-y-2 rounded-xl border border-[var(--theme-border)] p-3">
-            <legend className="px-1 font-semibold">{m.privacy}</legend>
-            <label id="privacy" className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={discoverable} onChange={(e) => setDiscoverable(e.target.checked)} />{m.discoverable}</label>
-            <label className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={showCategory} onChange={(e) => setShowCategory(e.target.checked)} />{m.showCategory}</label>
-          </fieldset>
-        </fieldset>}
-
-        {(all || step === 3) && <fieldset>
-          <legend className="text-lg font-bold">{m.interests}</legend>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            {interestCodes.map((code) => <label className="flex items-center gap-2 rounded-lg bg-[var(--theme-control)] p-3" key={code}>
-              <input type="checkbox" checked={interests.includes(code)} onChange={(e) =>
-                setInterests(e.target.checked ? [...interests, code] : interests.filter((item) => item !== code))} />
-              {m[code]}
-            </label>)}
-          </div>
-        </fieldset>}
-
-        {error && <p role="alert" className={errorBox}>{error}</p>}
-        {success && <p role="status" className="text-[var(--theme-link)]">{t.saved}</p>}
-        <div className="flex flex-wrap items-center gap-4">
-          <button type="submit" disabled={busy || uploading} className={action}>{busy ? t.working : all ? t.saveProfile : step === 3 ? m.finish : m.continue}</button>
-          {onboarding && (step === 1 || step === 3) && <button type="button" disabled={busy || uploading} className="font-semibold underline" onClick={() => { void submit(undefined, true); }}>{m.skip}</button>}
-          {onboarding && step > 0 && <button type="button" disabled={busy || uploading} className="font-semibold underline" onClick={() => { setError(""); setStep(step - 1); }}>{m.back}</button>}
-        </div>
-      </form>
-      {all && preview}
+        </form>
+      </div>
     </>
   );
 }

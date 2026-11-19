@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import sharp from "sharp";
 import type { Department, MemberProfile, ProfileChanges, ProfilePreview, UpdateMemberProfile } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { accountRepository, type AccountRepository } from "./accounts.js";
+import { safeProfileImage } from "./profile-image.js";
 
 export interface MemberRepository {
   accounts?: AccountRepository;
@@ -146,10 +146,7 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
     async saveAvatar(userId, bytes) {
       let image: Buffer;
       try {
-        const source = sharp(bytes, { limitInputPixels: 16_000_000 });
-        const { format, pages } = await source.metadata();
-        if (!format || !["jpeg", "png", "webp"].includes(format) || (pages ?? 1) > 1) throw new Error();
-        image = await source.autoOrient().resize(384, 384, { fit: "cover" }).webp({ quality: 80 }).toBuffer();
+        image = await safeProfileImage(bytes);
       } catch {
         throw new MemberError("INVALID_AVATAR", 400);
       }

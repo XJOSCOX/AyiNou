@@ -39,6 +39,10 @@ Invite media hosts, musicians, artists, athletes, educators, business/community 
 
 Future identity verification will use time-bound proof of control through an approved channel. Proof supports a verification application. Badge approval requires a separate authorized review. Supabase sign-in MFA only protects account access.
 
+Haitian and international organizations, NGOs, businesses, schools, media, and government institutions can create an AyiNou institutional profile. One person may represent multiple institutions through their own login. A profile can be published with an unverified label while its identity awaits review. A person claiming an institution must submit official references for independent ownership review. Institutions can invite members to defined roles and set a term where appropriate. Neither an invitation nor an accepted claim awards identity or institution verification.
+
+Members can submit a manual application for personal identity, public-figure status, an organization, a government institution, or a representative position. AyiNou accepts links to official public sources. Do not submit government IDs or private evidence files. The workspaces and personal profile editor adapt to phones and use the available width above the mobile breakpoint.
+
 ## User safety
 
 - Enforce anti-harassment, anti-threat and anti-impersonation rules.

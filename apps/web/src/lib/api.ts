@@ -20,7 +20,7 @@ export async function fetchApiStatus(signal?: AbortSignal): Promise<StatusRespon
   return data as StatusResponse;
 }
 
-async function authorizedRequest(path: string, init?: RequestInit) {
+export async function authorizedRequest(path: string, init?: RequestInit) {
   const { data, error } = await browserSupabase().auth.getSession();
   const token = data.session?.access_token;
   if (error || !token) throw new Error("UNAUTHORIZED");
@@ -38,7 +38,7 @@ async function authorizedRequest(path: string, init?: RequestInit) {
     const result: ApiErrorResponse | null = await response.json().catch(() => null);
     throw new Error(result?.error?.code ?? "API_ERROR");
   }
-  return response.json();
+  return response.status === 204 ? undefined : response.json();
 }
 
 export async function fetchMyProfile(): Promise<MemberProfile> {
@@ -77,16 +77,20 @@ export async function updateMyProfile(input: ProfileChanges): Promise<MemberProf
   return result.profile;
 }
 
-export async function uploadAvatar(file: File): Promise<string> {
+export async function encodeProfileImage(file: File): Promise<string> {
   if (file.size > 2_097_152 || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
     throw new Error("INVALID_AVATAR");
   }
-  const data = await new Promise<string>((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result).split(",", 2)[1]);
     reader.onerror = () => reject(new Error("INVALID_AVATAR"));
     reader.readAsDataURL(file);
   });
+}
+
+export async function uploadAvatar(file: File): Promise<string> {
+  const data = await encodeProfileImage(file);
   const result: { avatarUrl: string } = await authorizedRequest("/api/v1/me/profile/avatar", {
     method: "POST", body: JSON.stringify({ image: data }),
   });

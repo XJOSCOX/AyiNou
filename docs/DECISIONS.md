@@ -33,6 +33,15 @@
 - Phase 2 counts non-deleted, non-anonymous, currently unbanned Auth users unless explicitly excluded as synthetic or disqualified. Active means a successful authenticated profile GET/PATCH within 30 UTC days; verified requires approved identity or notable-person status.
 - Phase 2 hides all geographic figures together if any nonempty atomic residence group has fewer than 10 members. No member-level location or raw metric table is available to client roles.
 
+## Institutional accounts and review
+
+- Keep one Supabase identity per person. Institution context is a resource selection checked against active authorization on every action.
+- One owner manages institutional identity and may invite administrators, editors, and viewers. Administrators may invite editors and viewers. Active invitations belong to their named recipient. Representative terms are optional and expire without a scheduled job.
+- Owners and administrators can see private contact email. Public profiles carry an explicit verification status, and sanitized logos are served through short-lived signed URLs.
+- A reviewed claim transfers ownership and invalidates prior delegation. Institution verification is a separate application. Pending identity fields and verified identity fields are locked against edits.
+- Review requires a platform administrator with an explicit reviewer assignment, verified MFA, a current AAL2 token, and no detected conflict. Two eligible reviewers must approve. Signup and claim submissions grant no badge. Application intake, evidence references, receipt of written decisions, and revocation are active; temporary proof challenges, SMTP/SMS delivery, and identity-provider integration remain separate.
+- Provision no reviewer automatically. Before production review, decide who can receive reviewer assignments, how to handle indirect conflicts and appeals, and how long to retain evidence links and review history.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

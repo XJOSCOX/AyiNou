@@ -1,0 +1,105 @@
+"use client";
+
+import { useCallback, useState, type FormEvent } from "react";
+import { reviewDecisions, type ReviewApplication } from "@ayinou/shared";
+import { authMessages } from "@/lib/auth-i18n";
+import { decideApplication, loadReviewQueue } from "@/lib/institution-api";
+import { institutionError, institutionMessages } from "@/lib/institution-i18n";
+import { useLocale } from "@/lib/locale-store";
+import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { MemberShell } from "./member-shell";
+
+export function VerificationReview() {
+  const [locale] = useLocale();
+  const t = institutionMessages[locale];
+  const auth = authMessages[locale];
+  const [mode, setMode] = useState<"pending" | "approved">("pending");
+  const loader = useCallback((signal: AbortSignal) => loadReviewQueue(mode, signal), [mode]);
+  const queue = useInstitutionResource(loader);
+  const current = queue.data?.filter((application) => application.status === mode);
+
+  return (
+    <MemberShell>
+      <div className="grid gap-5">
+        <header>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.review}</h1>
+          <p className="mt-2 max-w-3xl text-[var(--theme-body)]">{t.reviewIntro}</p>
+        </header>
+        <div className="flex gap-2" role="group" aria-label={t.applications}>
+          {(["pending", "approved"] as const).map((status) => <button key={status} type="button" aria-pressed={mode === status}
+            className="rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]"
+            onClick={() => setMode(status)}>{t[status]}</button>)}
+        </div>
+        {queue.error ? <p role="alert" className={institutionErrorBox}>{institutionError(t, queue.error)}</p>
+          : !current ? <p role="status">{auth.working}</p>
+          : current.length ? current.map((item) => <ReviewCard key={item.id} item={item} refresh={queue.refresh} />)
+          : <p className={institutionCard}>{t.emptyQueue}</p>}
+      </div>
+    </MemberShell>
+  );
+}
+
+function ReviewCard({ item, refresh }: { item: ReviewApplication; refresh: () => void }) {
+  const [locale] = useLocale();
+  const t = institutionMessages[locale];
+  const [busy, setBusy] = useState(false);
+  const [failed, setFailed] = useState<unknown>(null);
+  const [saved, setSaved] = useState(false);
+  const didApprove = item.reviews.some((review) => review.decision === "approve" && review.isSelf);
+  const actions = item.status === "approved" ? reviewDecisions.filter((action) => action === "revoke")
+    : reviewDecisions.filter((action) => action === "reject" || (action === "approve" && !didApprove));
+
+  async function decide(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy) return;
+    const form = event.currentTarget;
+    const input = new FormData(form);
+    const action = actions.find((value) => value === input.get("decision"));
+    if (!action || !input.get("conflictFree")) return;
+    setBusy(true);
+    setFailed(null);
+    setSaved(false);
+    try {
+      await decideApplication(item.id, action, String(input.get("rationale") ?? ""));
+      form.reset();
+      setSaved(true);
+      refresh();
+    } catch (cause) { setFailed(cause); }
+    finally { setBusy(false); }
+  }
+
+  return (
+    <article className={institutionCard}>
+      <h2 className="text-xl font-semibold">{t[item.kind]}{item.organizationName && ` · ${item.organizationName}`}</h2>
+      <p className="mt-1 break-words text-sm text-[var(--theme-body)]">
+        {item.applicantName ?? item.applicantUsername ?? item.applicantId}{item.organizationHandle && ` · @${item.organizationHandle}`}
+      </p>
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div>
+          <h3 className="font-semibold">{t.evidence}</h3>
+          <ul className="mt-2 space-y-1">{item.evidence.map((url) => <li key={url} className="break-all">
+            <a href={url} target="_blank" rel="noreferrer" className={institutionLink}>{url}</a>
+          </li>)}</ul>
+          {item.reviews.length > 0 && <ul className="mt-4 space-y-2 border-t border-[var(--theme-border)] pt-3">
+            {item.reviews.map((review, index) => <li key={`${review.createdAt}-${index}`} className="text-sm">
+              <p className="font-semibold">{t[review.decision]}{review.isSelf && ` · ${t.you}`}</p>
+              <p className="whitespace-pre-line break-words text-[var(--theme-body)]">{review.rationale}</p>
+            </li>)}
+          </ul>}
+        </div>
+        <form onSubmit={decide} className="space-y-3" aria-busy={busy}>
+          <label className="block text-sm font-semibold">{t.verification}<select name="decision" className={institutionField} disabled={busy}>
+            {actions.map((action) => <option key={action} value={action}>{t[action]}</option>)}
+          </select></label>
+          <label className="block text-sm font-semibold">{t.rationale}
+            <textarea rows={3} name="rationale" className={institutionField} minLength={10} maxLength={1000} required disabled={busy} />
+          </label>
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" className="mt-0.5" name="conflictFree" required disabled={busy} />{t.conflictFree}</label>
+          {failed !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failed)}</p>}
+          {saved && <p role="status" className="text-sm">{t.reviewRecorded}</p>}
+          <button type="submit" disabled={busy} className={institutionAction}>{t.submitDecision}</button>
+        </form>
+      </div>
+    </article>
+  );
+}

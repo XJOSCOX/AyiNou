@@ -21,8 +21,8 @@ const fieldClass = "block w-full rounded-md border border-[var(--theme-border)] 
 const floatingFieldClass = `${fieldClass} ${styles.floatingInput} pb-2 pt-6`;
 const primaryActionClass = "w-full rounded-md bg-[var(--theme-primary)] px-6 py-3.5 font-semibold text-[var(--theme-on-primary)] hover:bg-[var(--theme-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]";
 
-export function AuthScreen({ mode, invalidLink = false, initialReferral = "" }: {
-  mode: AuthMode; invalidLink?: boolean; initialReferral?: string;
+export function AuthScreen({ mode, invalidLink = false, initialReferral = "", claimHandle }: {
+  mode: AuthMode; invalidLink?: boolean; initialReferral?: string; claimHandle?: string;
 }) {
   const [locale, setLocale] = useLocale();
   const t = authMessages[locale];
@@ -104,7 +104,11 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "" }: 
           }
           throw authError;
         }
-        router.replace("/dashboard");
+        if (claimHandle) {
+          const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          router.replace(assurance.data?.nextLevel === "aal2" && assurance.data.currentLevel !== "aal2"
+            ? `/mfa?claim=${claimHandle}` : `/verification?claim=${claimHandle}`);
+        } else router.replace("/dashboard");
         router.refresh();
       } else if (mode === "forgot") {
         const { error: recoveryError } = await supabase.auth.resetPasswordForEmail(email.trim(), {

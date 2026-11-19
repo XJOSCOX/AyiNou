@@ -84,13 +84,17 @@ npm run db:push:dry
 npm run db:push       # review the CLI prompt before applying
 ```
 
-The hosted database has versioned migrations through Phase 2C. Remote migration commands never reset, drop, or seed the hosted database. Do not run `db reset --remote`. The SQL files and optional local pgTAP tests remain in `supabase/`; see [docs/DATABASE.md](docs/DATABASE.md).
+The hosted database has versioned migrations through Phase 2D. Remote migration commands never reset, drop, or seed the hosted database. Do not run `db reset --remote`. The SQL files and optional local pgTAP tests remain in `supabase/`. See [docs/DATABASE.md](docs/DATABASE.md).
 
 For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:accounts`. These scripts create uniquely named, confirmed synthetic Auth users, exclude them from public metrics, and delete only their returned IDs. The optional `npm run test:hosted:aggregation` requires an empty eligible-member baseline and rolls back its SQL assertions. Do not run the scripts against an unrelated project.
 
 The dashboard is at `http://localhost:4000/dashboard` after login. Public API routes are `GET /api/v1/community/stats`, `/api/v1/community/departments`, and `/api/v1/community/diaspora`. Geographic data is hidden together when any nonempty underlying location group has fewer than 10 members. Zero, suppressed, and unavailable are distinct states. See [docs/DATABASE.md](docs/DATABASE.md) for exact metric definitions.
 
 The dashboard uses a full-width member layout with a navbar, navigation sidebar, and shared footer. At smaller widths, navigation moves above the content. Open **Account settings** from the sidebar or avatar to manage profile preferences, request a password reset, configure an authenticator app, view your private member reference, or share a referral link. Referral attribution is set at signup and counted after email confirmation and a signed-in request. Member and referral codes never grant access or verification.
+
+**My Profile** uses the full member workspace, with a live public preview beside the editor on wide displays and above it on phones. **Institutions** lets one personal account create an institutional profile, accept invitations, or switch between personal and institutional workspaces. New institutional profiles display **Unverified**. **Verification** accepts public evidence references and shows the applicant their status. Restricted reviewers use an MFA-elevated session. Approval requires two independent reviewers. No real reviewers are provisioned by the migration.
+
+Phase 2D hosted checks are `npm run test:hosted:institutions:sql` and `npm run test:hosted:institutions`. Use the same explicit linked project guard as the account checks. SQL fixtures roll back. The API fixtures remove only the test organization, its logo files, and the synthetic members created by that run.
 
 Hosted Auth has email/password signup and confirmation enabled. Its site URL is `http://localhost:4000`, with `http://localhost:4000/auth/callback` and `http://localhost:4000/reset-password` allowed as redirects. The hosted default email sender reaches only organization team addresses and allows very few messages per hour; use a controlled team mailbox for limited testing or configure custom SMTP for reliable signup and password-reset testing. Do not turn off confirmation to bypass this. Local Mailpit is available only with the optional Docker stack; it is not the hosted project's inbox. See [docs/DATABASE.md](docs/DATABASE.md) for testing limits and troubleshooting.
 

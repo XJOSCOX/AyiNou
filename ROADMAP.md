@@ -85,9 +85,14 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 - [x] Add localized account settings, Supabase Authenticator MFA, and a full-width responsive dashboard.
 - [x] Document the future identity verification challenge model.
 
-## Phase 2D — Planned verification challenge activation
+## Phase 2D — Institutional accounts and manual verification
 
-Prepare application binding, approved proof channels, one-time redemption, audit, and retention before enabling identity or public-figure verification challenges. Public badge decisions require a separate authorized review workflow. Email, SMS, and identity-provider integrations require separate setup.
+- [x] Create institutional profiles with separate public and private contact fields, sanitized logos, unique handles, broad geography and explicit verification status.
+- [x] Add in-app invitations, scoped representation, expiry, revocation, and an account switcher using the same personal session.
+- [x] Add pending evidence-reference applications, ownership claims, restricted two-reviewer approvals, written decisions, and audit history.
+- [x] Rework My Profile to use the full responsive member workspace.
+
+Activation of temporary proof challenges and external evidence delivery remains deferred. Prospective reviewers must be provisioned separately after conflict, retention, and operational policies are approved.
 
 ## Phase 3 — Social network MVP
 

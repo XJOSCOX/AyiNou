@@ -8,8 +8,12 @@ import { createAuthVerifier, type AuthVerifier } from "./services/auth.js";
 import { createMemberRepository, type MemberRepository } from "./services/members.js";
 import { createCommunityRepository, type CommunityRepository } from "./services/community.js";
 import { registerCommunityRoutes } from "./routes/community.js";
+import { registerInstitutionRoutes } from "./routes/institutions.js";
+import { createInstitutionRepository, type InstitutionRepository } from "./services/institutions.js";
 
-export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository }) {
+export function createApp(config: ApiConfig, overrides?: {
+  auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository; institutions?: InstitutionRepository;
+}) {
   const app = Fastify({
     logger: {
       level: config.LOG_LEVEL,
@@ -19,6 +23,7 @@ export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; 
   const auth = overrides?.auth ?? createAuthVerifier(config);
   const members = overrides?.members ?? createMemberRepository(config);
   const community = overrides?.community ?? createCommunityRepository(config);
+  const institutions = overrides?.institutions ?? createInstitutionRepository(config);
 
   app.register(cors, {
     origin: config.WEB_ORIGINS,
@@ -27,6 +32,7 @@ export function createApp(config: ApiConfig, overrides?: { auth?: AuthVerifier; 
   app.register(statusRoutes);
   app.register((instance) => registerMemberRoutes(instance, auth, members));
   app.register((instance) => registerCommunityRoutes(instance, community));
+  app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.addHook("onClose", async () => { await members?.close(); });
 
   app.setNotFoundHandler((_request, reply) => {

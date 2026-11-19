@@ -1,0 +1,47 @@
+"use client";
+
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import type { Institution } from "@ayinou/shared";
+import { institutionMessages } from "@/lib/institution-i18n";
+import { useLocale } from "@/lib/locale-store";
+
+export const institutionCard = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
+export const institutionField = "mt-1.5 block min-h-11 w-full rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-3 py-2 text-[var(--theme-text)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]";
+export const institutionAction = "inline-flex min-h-10 items-center justify-center rounded-md bg-[var(--theme-primary)] px-4 py-2 text-sm font-semibold text-[var(--theme-on-primary)] hover:bg-[var(--theme-primary-hover)] disabled:opacity-60";
+export const institutionLink = "text-sm font-semibold text-[var(--theme-link)] underline underline-offset-4 hover:no-underline";
+export const institutionErrorBox = "rounded-md bg-[var(--theme-error-bg)] p-3 text-sm text-[var(--theme-error-text)]";
+
+export function useInstitutionResource<T>(loader: (signal: AbortSignal) => Promise<T>) {
+  const [data, setData] = useState<T | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    loader(controller.signal).then((value) => {
+      if (!controller.signal.aborted) { setData(value); setError(null); }
+    }).catch((cause) => {
+      if (!controller.signal.aborted) { setData(null); setError(cause); }
+    });
+    return () => controller.abort();
+  }, [loader, version]);
+  return { data, error, refresh: () => setVersion((value) => value + 1) };
+}
+
+export function InstitutionStatus({ status }: { status: Institution["verificationStatus"] }) {
+  const [locale] = useLocale();
+  const t = institutionMessages[locale];
+  return <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-bold ${status === "revoked"
+    ? "bg-[var(--theme-error-bg)] text-[var(--theme-error-text)]"
+    : "bg-[var(--theme-selected)] text-[var(--theme-link)]"}`}>{t[status]}</span>;
+}
+
+export function InstitutionLogo({ organization }: { organization: Pick<Institution, "name" | "logoUrl"> }) {
+  return (
+    <span className="grid size-14 shrink-0 place-items-center overflow-hidden rounded-lg bg-[var(--theme-hero)] text-xl font-bold text-[var(--theme-link)]">
+      {organization.logoUrl
+        ? <Image src={organization.logoUrl} width={56} height={56} alt="" unoptimized className="size-full object-cover" />
+        : <span aria-hidden="true">{Array.from(organization.name)[0]?.toUpperCase() ?? ""}</span>}
+    </span>
+  );
+}

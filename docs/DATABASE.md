@@ -6,7 +6,7 @@ Next.js runs at `http://localhost:4000` and Fastify at `http://127.0.0.1:3000`. 
 
 Install Node.js 20.9+ and npm, then run `npm install` for the pinned `supabase@3.2.0` CLI. Sign in with `npx supabase login` if needed. Copy values from [.env.example](../.env.example) to ignored `apps/api/.env` and `apps/web/.env.local`. The hosted URL and publishable key are used in both apps. Put the secret key **only** in the API file. No database password is needed to run the apps.
 
-The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds the profile RPCs. `20261119210000_phase2_community_stats.sql` adds the metric tables and aggregate RPC. `20261119220000_phase2b_membership.sql` adds profile details, settings, interests, private avatar storage, and the membership breakdown. `20261119230000_phase2c_accounts.sql` adds account codes, referrals, and profile write hardening. All five are applied to the confirmed project.
+The initial migration `20261119160000_initial_schema.sql` creates five tables, RLS, grants, an initializer, and ten departments. `20261119173400_hosted_profile_rpc.sql` adds the profile RPCs. `20261119210000_phase2_community_stats.sql` adds the metric tables and aggregate RPC. `20261119220000_phase2b_membership.sql` adds profile details, settings, interests, private avatar storage, and the membership breakdown. `20261119230000_phase2c_accounts.sql` adds account codes, referrals, and profile write hardening. `20261120010000_phase2d_institutions.sql` adds institutions, delegated access, and verification. All six are applied to the confirmed project.
 
 ```bash
 npx supabase link --project-ref hcbxulyfmdmuyccgrujs
@@ -85,11 +85,43 @@ Fastify reads member data using the caller's access token and RLS. Both profile 
 
 The registration URL uses `/register?ref=<code>`. Neither code confers access, allows password recovery, or conveys verification. Supabase Auth handles passwords, sessions, and authenticator app TOTP. Future identity verification challenges are a separate design in the [master plan](DATABASE_MASTER_PLAN.md) and have no database table, issuance endpoint, delivery integration, or badge workflow in Phase 2C.
 
+## Phase 2D institutions and verification
+
+Eight new private-schema tables cover institutions, memberships, invitations, reviewer assignments, applications, evidence references, decisions, and an audit ledger. RLS is enabled on each. Anonymous, authenticated, and API service roles have no direct table grants. The API service uses narrow functions that recheck the signed-in actor's scope against the database. The public projection never returns contact email or internal team or review data.
+
+| Role | Institution actions |
+| --- | --- |
+| Owner | Edit identity while unlocked, description, contact, and logo. Invite administrators, editors, and viewers. Revoke non-owner access. Submit institution verification. |
+| Administrator | Edit description, contact, and logo. Invite and revoke editors and viewers. |
+| Editor | Edit description and logo. |
+| Viewer | Read scoped workspace details without private contact email. |
+| Any active representative | Apply to verify their own current representative position. |
+| Eligible outsider | Apply to claim an unverified or revoked profile. Two independent reviewers must authorize an ownership transfer. |
+
+Invitations are in-app, expire after seven days, and can only be accepted by the exact account named by username. Acceptance rechecks the inviter's current authority and cannot be repeated. Optional membership terms run from acceptance for 1–730 days. New institutions are public with an **Unverified** label. Review locks identity fields while an institution application is pending and after verification. Ownership review binds to the initial institution snapshot and does not verify the institution. A completed transfer revokes prior access and pending invitations.
+
+The private `institution-logos` bucket blocks direct client access. The API decodes and reencodes accepted logo images and returns a five-minute signed URL for the current published derivative. Institutional reference URLs are HTTPS without query strings or fragments. The app does not fetch evidence URLs or store uploaded identity documents. Evidence and written decisions are visible only through the authorized workflow. Receipts expose status and decision reason to the applicant.
+
+Reviewer access starts closed. A separately authorized database operator must approve and record provisioning of the platform administrator role and the private reviewer assignment. The reviewer must already have enrolled verified Supabase MFA. Fastify requires current AAL2, and the database enforces assignment and conflict rules for each action. Reviewers attest that they have no conflict. Applicants, founders, and current or former institutional delegates are excluded by database checks. Two distinct currently eligible reviewers must approve. An independent reviewer may reject or revoke with a written reason. Individual and notable approvals write the preserved `verification_records`. Institutional approval updates public institution status. Representative approval marks only the current membership. No identity challenge, real reviewer, SMTP, SMS, or identity provider is provisioned here.
+
+| Endpoints | Purpose |
+| --- | --- |
+| `GET /api/v1/institutions/by-handle/:handle` | Public institutional projection |
+| `GET /api/v1/me/institution-accounts` | Own active institutions and invitation inbox |
+| `POST /api/v1/institutions`, `GET/PATCH /api/v1/institutions/:id` | Create, load, or edit a scoped workspace |
+| `POST /api/v1/institutions/:id/logo` | Upload a sanitized logo |
+| `POST /api/v1/institutions/:id/invitations`, `POST /api/v1/institution-invitations/:id/:action` | Invite, accept, or revoke |
+| `POST /api/v1/institutions/:id/representatives/:member/revoke` | Revoke a representative's access |
+| `GET/POST /api/v1/me/verification` | Own applications and submission, including ownership claims |
+| `GET /api/v1/verification/review`, `POST /api/v1/verification/review/:id` | Restricted pending or approved queue and decisions |
+
 ## Testing and optional local stack
 
 Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:aggregation`. The guard must match the API URL. The scripts create uniquely named, confirmed synthetic Auth users, mark them excluded from public metrics, check API/RLS and aggregate cases, then delete only those returned IDs. The aggregation script requires the pinned CLI's hosted SQL access and an empty eligible-member baseline; its SQL assertions roll back each transaction. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by these scripts.
 
 Run `npm run test:hosted:accounts` for concurrent allocation, Auth-time referral capture, subsequent metadata changes, code separation, direct PostgREST permissions, and Supabase TOTP assurance checks. The test uses service-created synthetic accounts and does not send mail. `npm run test:hosted:accounts:preflight` is a rollback-only SQL and backfill rehearsal for the selected project **before** applying Phase 2C. After applying, inspect the version with `npm run db:migrations`.
+
+Run `npm run test:hosted:institutions:sql` after applying Phase 2D to test grants, expiry, review separation, revocation, and ownership transfer in a rollback-only transaction. Use `-- --preflight` only before applying Phase 2D. Run `npm run test:hosted:institutions` for hosted Auth, PostgREST and API integration with disposable users, organizations, and logo objects.
 
 The existing pgTAP suite is optional and isolated to a local Docker stack:
 

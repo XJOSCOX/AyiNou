@@ -1,0 +1,89 @@
+import { randomUUID } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
+import type { Institution, InstitutionAccounts, InstitutionManagement } from "@ayinou/shared";
+import type { ApiConfig } from "../config.js";
+import { safeProfileImage } from "./profile-image.js";
+
+export class InstitutionError extends Error {
+  constructor(readonly code: string, readonly statusCode: number) { super(code); }
+}
+
+type DbInstitution = Omit<Institution, "logoUrl"> & { logoAsset: string | null };
+type DbManagement = Omit<InstitutionManagement, "organization"> & { organization: DbInstitution };
+type DbAccounts = Omit<InstitutionAccounts, "organizations"> & {
+  organizations: Omit<InstitutionAccounts["organizations"][number], "logoUrl">[];
+};
+
+export interface InstitutionRepository {
+  rpc<T>(name: string, input: Record<string, unknown>): Promise<T>;
+  publicProfile(handle: string): Promise<Institution | null>;
+  accounts(actor: string): Promise<InstitutionAccounts>;
+  manage(actor: string, org: string): Promise<InstitutionManagement>;
+  logo(actor: string, org: string, bytes: Buffer): Promise<void>;
+}
+
+export function createInstitutionRepository(config: ApiConfig): InstitutionRepository | null {
+  if (!config.SUPABASE_URL || !config.SUPABASE_SECRET_KEY) return null;
+  const client = createClient(config.SUPABASE_URL, config.SUPABASE_SECRET_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  const logos = client.storage.from("institution-logos");
+
+  async function rpc<T>(name: string, input: Record<string, unknown>): Promise<T> {
+    const { data, error } = await client.rpc(name, input);
+    if (error) {
+      if (error.code === "42501") throw new InstitutionError("FORBIDDEN", 403);
+      if (error.code === "23505" || error.code === "55000") throw new InstitutionError("CONFLICT", 409);
+      if (["23502", "23503", "23514", "22P02"].includes(error.code)) throw new InstitutionError("INVALID_INPUT", 400);
+      if (error.code === "54000") throw new InstitutionError("LIMIT_REACHED", 429);
+      throw new Error("Institution service unavailable");
+    }
+    return data as T;
+  }
+
+  function readManagement(actor: string, org: string) {
+    return rpc<DbManagement>("institution_manage_for_api", { p_actor: actor, p_org: org });
+  }
+
+  async function publishedProfile(row: DbInstitution): Promise<Institution> {
+    const { logoAsset, ...data } = row;
+    const result = logoAsset ? await logos.createSignedUrl(`${row.id}/${logoAsset}.webp`, 300) : null;
+    return { ...data, logoUrl: result?.data?.signedUrl ?? null };
+  }
+
+  return {
+    rpc,
+    async publicProfile(handle) {
+      const row = await rpc<DbInstitution | null>("institution_public_for_api", { p_handle: handle });
+      return row ? publishedProfile(row) : null;
+    },
+    async accounts(actor) {
+      const result = await rpc<DbAccounts>("institution_accounts_for_api", { p_actor: actor });
+      return { ...result, organizations: result.organizations.map((org) => ({ ...org, logoUrl: null })) };
+    },
+    async manage(actor, org) {
+      const result = await readManagement(actor, org);
+      return { ...result, organization: await publishedProfile(result.organization) };
+    },
+    async logo(actor, org, bytes) {
+      const existing = await readManagement(actor, org);
+      if (existing.role === "viewer") throw new InstitutionError("FORBIDDEN", 403);
+      let data: Buffer;
+      try { data = await safeProfileImage(bytes); }
+      catch { throw new InstitutionError("INVALID_IMAGE", 400); }
+      const asset = randomUUID();
+      const path = `${org}/${asset}.webp`;
+      const uploaded = await logos.upload(path, data, { contentType: "image/webp" });
+      if (uploaded.error) throw new Error("Institution logo unavailable");
+      try {
+        await rpc("institution_logo_for_api", { p_actor: actor, p_org: org, p_asset: asset, p_expected: existing.organization.logoAsset });
+      } catch (error) {
+        // A known rollback permits deleting the new derivative. An ambiguous
+        // network result is left for reconciliation so it cannot break a committed logo.
+        if (error instanceof InstitutionError) await logos.remove([path]);
+        throw error;
+      }
+      if (existing.organization.logoAsset) await logos.remove([`${org}/${existing.organization.logoAsset}.webp`]);
+    },
+  };
+}

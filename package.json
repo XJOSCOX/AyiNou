@@ -20,6 +20,8 @@
     "test:hosted:aggregation": "node --import tsx scripts/check-phase2-aggregation.mjs",
     "test:hosted:accounts": "node --import tsx scripts/check-phase2c-hosted.mjs",
     "test:hosted:accounts:preflight": "node scripts/check-phase2c-migration.mjs",
+    "test:hosted:institutions:sql": "node scripts/check-phase2d-sql.mjs",
+    "test:hosted:institutions": "node --import tsx scripts/check-phase2d-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",
     "test": "npm run test -ws --if-present",

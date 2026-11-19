@@ -1,10 +1,10 @@
 # Ayinou master database plan
 
-**Status:** Forward-looking architecture, 2026-11-19. Thirteen application tables are deployed through Phase 2C, including three private-schema account tables. This plan uses the database blueprint, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
+**Status:** Forward-looking architecture, 2026-11-19. Twenty-one application tables are deployed through Phase 2D, including the private account and institutional tables. This plan uses the database blueprint, product and roadmap documents, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
 
 ## Verified baseline and design rules
 
-Hosted migration history includes `20261119160000_initial_schema`, `20261119173400_hosted_profile_rpc`, `20261119210000_phase2_community_stats`, `20261119220000_phase2b_membership`, and `20261119230000_phase2c_accounts`. Guarded hosted checks cover profile behavior, privacy-safe metrics, referral setup and confirmation, and Supabase TOTP. Public registration, delivered confirmation and recovery mail, and natural token expiry remain unverified.
+Hosted migration history includes `20261119160000_initial_schema`, `20261119173400_hosted_profile_rpc`, `20261119210000_phase2_community_stats`, `20261119220000_phase2b_membership`, `20261119230000_phase2c_accounts`, and `20261120010000_phase2d_institutions`. Guarded hosted checks cover profile behavior, privacy-safe metrics, referral setup, Supabase TOTP, and institutional authorization and verification. Public registration, delivered confirmation and recovery mail, and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Keep original `ht`/`fr`/`en` content and label translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -52,6 +52,23 @@ All application tables have RLS. Anonymous and authenticated roles can read depa
 
 Existence of a code carries no authority. Member codes use 128 random bits with a permanent owner mapping. Referral codes use 64 random bits and support historical attribution when a future rotation workflow retires the old code. Deleting the account or its referrer removes the associated referral at hard deletion. An unconfirmed referral remains attached to the pending Auth account. Confirmed summaries expose no identity or contact data.
 
+### Phase 2D institutional schema
+
+The following tables are in `private`. `auth.users` always identifies a person. FK actions and bounded states are in `20261120010000_phase2d_institutions.sql`.
+
+| Table | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `organizations` | `id uuid PK`, `handle text! UQ`, `name text!`, `kind text!`, `description text?`, `country_code text!`, `department_code text? FK→departments.code`, `website text?`, `contact_email text?`, `logo_asset uuid?`, `status text!`, `verification_status text!`, `created_by uuid? FK→auth.users.id SET NULL`, `ca`, `ua` | IX creator and creation, partial department |
+| `organization_memberships` | `id uuid PK`, `organization_id uuid! FK→organizations.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, `role text!`, `granted_by uuid? FK→auth.users.id SET NULL`, `ca`, `expires_at timestamptz?`, `revoked_at timestamptz?`, `verified_at timestamptz?` | Partial UQ one non-revoked role per user/organization and one non-revoked owner per organization. IX user/organization. |
+| `organization_invitations` | `id uuid PK`, `organization_id uuid! FK→organizations.id CASCADE`, `recipient_id uuid! FK→auth.users.id CASCADE`, `invited_by uuid? FK→auth.users.id SET NULL`, `role text!`, `ca`, `expires_at timestamptz!`, `term_days integer?`, `state text!`, `closed_at timestamptz?` | Partial UQ pending organization/recipient. IX recipient and date. |
+| `verification_reviewers` | `user_id uuid PK FK→auth.users.id CASCADE`, `ca` | PK only |
+| `verification_applications` | `id uuid PK`, `applicant_id uuid! FK→auth.users.id CASCADE`, `organization_id uuid? FK→organizations.id CASCADE`, `membership_id uuid? FK→organization_memberships.id CASCADE`, `organization_subject jsonb?` claim snapshot, `kind text!`, `status text!`, `ca`, `decided_at timestamptz?` | Partial UQs for open personal, institutional, representative and claim cases. IX applicant/date, org/date, membership, status/date/ID. |
+| `verification_evidence` | `id uuid PK`, `application_id uuid! FK→verification_applications.id CASCADE`, `url text!`, `ca`, UQ application/URL | UQ also indexes application |
+| `verification_reviews` | `id uuid PK`, `application_id uuid! FK→verification_applications.id CASCADE`, `reviewer_id uuid? FK→auth.users.id SET NULL`, `decision text!`, `rationale text!`, `ca` | Partial UQ one approval per reviewer/application. IX application/date. |
+| `institution_audit` | `id uuid PK`, `actor_id uuid? FK→auth.users.id SET NULL`, `organization_id uuid?`, `subject_id uuid?`, `event text!`, `occurred_at timestamptz!` | IX organization/date and subject/date. Opaque subject pointers intentionally survive deletion. |
+
+All eight tables have RLS and no direct anon, member, or service-role grants. Fastify exposes a limited public projection and scoped protected operations. Owners manage identity and delegation. Administrators manage lower roles, editorial content, and the private contact. Editors can update description and logo. Viewers can read scoped details. An institutional membership cannot self-elevate. A reviewer must hold an explicit assignment and independent AAL2 session. Two reviewers must approve a badge or ownership transfer. Review evidence and audit references remain private. Deletion and retention policy must be reviewed before production use, including the interaction between existing personal verification records and reviewer-account deletion.
+
 ## Planned schema by domain and implementation phase
 
 The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
@@ -60,9 +77,9 @@ The blueprint's polymorphic `reactions` proposal is represented by `post_reactio
 
 ### Identity, account rights, geography — common wave / phases 2–3 and before launch
 
-#### Verification challenges — planned for Phase 2D
+#### Verification challenges — planned, activation deferred
 
-`private.verification_challenges` will bind each challenge to an Auth account and a verification application. Dependencies are the application, authorized proof adapter configuration, `audit_events`, and an explicit retention and reviewer policy. The table and issuing endpoints are deferred. Supabase Authenticator MFA, the permanent member reference, and the shareable referral code remain separate.
+`private.verification_challenges` will bind each challenge to an Auth account and a verification application. Dependencies are `private.verification_applications`, authorized proof adapter configuration, a challenge audit schema or extension of `private.institution_audit`, and an explicit retention and reviewer policy. The table and issuing endpoints are deferred. Supabase Authenticator MFA, the permanent member reference, and the shareable referral code remain separate.
 
 | Column | Type and constraint |
 | --- | --- |
@@ -85,7 +102,7 @@ Generate secrets with a CSPRNG and bind the keyed digest to the challenge ID, su
 - **Approved email or phone.** Deliver an expiring code only to a vetted destination that was bound before issuance. This depends on configured SMTP or SMS delivery and a policy for who may add destinations.
 - **Identity provider.** Match a signed callback, expected provider, application-bound nonce, and a verified provider event ID. Record the outcome and a minimized provider reference. Raw ID documents stay with the provider when possible.
 
-Challenge completion supplies a proof event only. Authorized reviewers remain responsible for identity and public-figure status. Application intake, evidence collection, approval, and email/SMS delivery remain out of scope for Phase 2C.
+Challenge completion supplies a proof event only. Authorized reviewers remain responsible for identity and public-figure status. Phase 2D adds manual application intake, public evidence references, and review records. Challenge delivery and evidence-file collection remain deferred.
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
@@ -127,18 +144,13 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 | `community_join_requests` / later | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `status text!`, `ca`, `ua` | Partial UQ one pending `(community_id,user_id)`; IX `(community_id,status,created_at)` |
 | `community_bans` | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `issued_by uuid! FK→auth.users.id`, `reason_code text!`, `expires_at timestamptz?`, `revoked_at timestamptz?`, `ca` | Partial UQ one active ban `(community_id,user_id)`; IX `(user_id,expires_at)` |
 
-### Organizations, verification, ambassadors — phase 5
+### Ambassador and evidence extensions — phase 5
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `organizations` | `id uuid PK`, `slug text! UQ`, `name text!`, `kind text!`, `description text?`, `status text!`, `ca`, `ua` | IX `(status,kind,name)`; no automatic user badge |
-| `organization_members` | `organization_id uuid! FK→organizations.id`, `user_id uuid! FK→profiles.user_id`, `role text!`, `status text!`, `ca`, `ua`; PK `(organization_id,user_id)` | IX `(user_id,status)`; representative grants audited |
-| `verification_applications` | `id uuid PK`, `applicant_id uuid! FK→profiles.user_id`, `subject_user_id uuid? FK→profiles.user_id`, `organization_id uuid? FK→organizations.id`, `requested_type text!`, `status text!`, `ca`, `ua` | CHECK exactly one subject; IX `(applicant_id,created_at DESC)`, `(status,created_at)`; applicant must have subject authority |
-| `verification_reviews` | `id uuid PK`, `application_id uuid! FK→verification_applications.id`, `reviewer_id uuid! FK→auth.users.id`, `decision text!`, `rationale text!`, `ca` | IX `(application_id,created_at)`; forbid self/conflicted review |
-| `organization_verifications` | `organization_id uuid PK FK→organizations.id`, `status text!`, `reviewed_by uuid? FK→auth.users.id`, `verified_at timestamptz?`, `revoked_at timestamptz?`, `ca`, `ua` | CHECK status/date consistency; no client writes |
 | `ambassador_invitations` | `id uuid PK`, `invitee_email_ciphertext bytea?`, `invitee_user_id uuid? FK→profiles.user_id`, `sponsor_id uuid! FK→auth.users.id`, `status text!`, `expires_at timestamptz!`, `ca`, `ua` | CHECK one invitee reference; IX `(sponsor_id,status)`; private contact only |
 | `ambassador_assignments` | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `scope text!`, `status text!`, `starts_at timestamptz!`, `ends_at timestamptz?`, `ca`, `ua` | IX `(user_id,status)`; partial UQ active `(user_id,scope)`; no admin power |
-| `verification_evidence` | `id uuid PK`, `application_id uuid! FK→verification_applications.id`, `media_asset_id uuid! FK→media_assets.id`, `evidence_kind text!`, `retention_deadline timestamptz!`, `ca` | UQ `(application_id,media_asset_id)`; private bucket, no public URL |
+| `verification_evidence_files` / conditional | `id uuid PK`, `application_id uuid! FK→verification_applications.id`, `media_asset_id uuid! FK→media_assets.id`, `evidence_kind text!`, `retention_deadline timestamptz!`, `ca` | UQ `(application_id,media_asset_id)`; private bucket, no public URL |
 
 ### Projects and volunteering — phase 6
 
@@ -233,7 +245,12 @@ erDiagram
     profiles ||--o{ community_members : joins
     communities ||--o{ community_members : contains
     communities ||--o{ posts : hosts
-    organizations ||--o{ organization_members : represented_by
+    organizations ||--o{ organization_memberships : represented_by
+    auth_users ||--o{ organization_memberships : serves
+    organizations ||--o{ organization_invitations : issues
+    organizations ||--o{ verification_applications : subject
+    verification_applications ||--o{ verification_evidence : references
+    verification_applications ||--o{ verification_reviews : receives
     organizations ||--o{ projects : owns
     projects ||--o{ project_milestones : tracks
     projects ||--o{ project_needs : requests
@@ -289,12 +306,12 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 
 ## Dependencies and migration order
 
-1. **Existing through 2C.** Keep all five applied migration files. Check remote history before each future migration. The private code and referral tables depend on Auth. Phase 2D challenge activation depends on a reviewed application and audit schema, a supported proof channel, and retention policy.
+1. **Existing through 2D.** Keep all six applied migration files. Check remote history before each future migration. Private account and institutional tables depend on Auth. Challenge activation depends on an audited proof channel configuration and retention policy.
 2. **Common hardening:** Decide privacy/retention rules; add `audit_events` before the first privileged workflow, `countries` and optional validated residence FK only after existing values are checked, then settings/flags. Handle user rights before public launch. Any profile handle/avatar/bio is additive and must not break current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
 4. **Phase 3 base:** Create media metadata/Storage rules, blocks/mutes, `posts`, `comments`, split reactions, follows, reports, moderation cases/actions/appeals/restrictions, notifications. Create `posts` **without** `community_id` in the first phase-3 migration; add the nullable column and FK in phase 4 after `communities` exists. Require moderation and abuse gates before opening posting.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
-6. **Phase 5:** Create organizations and representatives before organization verification, applications/reviews/evidence, ambassadors. Evidence depends on media assets; radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
+6. **Phase 5:** Extend the delivered institutional and review foundation with ambassador assignments and reviewed proof channels. Any evidence files depend on private media assets and retention approval. Radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
 7. **Phase 6:** Create projects after organizations, then members/milestones/needs/updates/reviews/outcomes and offers. Validate cross-table project/need ownership in trusted write workflows.
 8. **Phase 7:** Create claims, sources, evidence, attestations, reviews, history, appeals, safety actions only with a crisis-publication policy and trained review process.
 9. **Phase 8:** Create stations, streams, programs, schedules, and later episodes after rights verification and media infrastructure.
