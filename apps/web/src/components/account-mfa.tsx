@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Factor } from "@supabase/supabase-js";
 import { accountMessages } from "@/lib/account-i18n";
@@ -9,7 +10,7 @@ import { browserSupabase } from "@/lib/supabase/browser";
 import { AuthenticatorCode, mfaActionClass } from "./authenticator-code";
 
 type MfaState = { verified: string[]; pending: string[] };
-type Setup = { id: string; key: string };
+type Setup = { id: string; key: string; qr: string | null };
 
 async function readFactors(): Promise<MfaState> {
   const { data, error } = await browserSupabase().auth.mfa.listFactors();
@@ -57,7 +58,11 @@ export function AccountMfa() {
     }
     const { data, error } = await mfa.enroll({ factorType: "totp", issuer: "AyiNou" });
     if (error) throw error;
-    setSetup({ id: data.id, key: data.totp.secret });
+    const prefix = "data:image/svg+xml;utf-8,";
+    const image = data.totp.qr_code;
+    const svg = image?.startsWith(prefix) ? image.slice(prefix.length).trim() : "";
+    const qr = svg ? `${prefix}${svg.startsWith("<") ? encodeURIComponent(svg) : svg}` : null;
+    setSetup({ id: data.id, key: data.totp.secret, qr });
   }
 
   async function verify(code: string) {
@@ -92,8 +97,20 @@ export function AccountMfa() {
         <p className="mt-2 text-sm text-[var(--theme-body)]">{factors.verified.length ? t.mfaOn : t.mfaOff}</p>
         {setup ? (
           <div className="mt-3 rounded-md bg-[var(--theme-control)] p-3">
-            <p className="text-sm text-[var(--theme-body)]">{t.mfaSetup}</p>
-            <code className="mt-2 block break-all font-semibold">{setup.key}</code>
+            {setup.qr && <>
+              <p className="text-sm text-[var(--theme-body)]">{t.mfaScan}</p>
+              <div className="my-3 w-fit max-w-full rounded-md bg-white p-2">
+                <Image src={setup.qr} alt={t.mfaQrAlt} width={208} height={208} unoptimized className="h-auto max-w-full" />
+              </div>
+            </>}
+            {setup.qr ? <details className="mt-2 text-sm">
+              <summary className="cursor-pointer font-semibold text-[var(--theme-link)]">{t.mfaManual}</summary>
+              <p className="mt-2 text-[var(--theme-body)]">{t.mfaSetup}</p>
+              <code className="mt-2 block break-all font-semibold">{setup.key}</code>
+            </details> : <>
+              <p className="text-sm text-[var(--theme-body)]">{t.mfaSetup}</p>
+              <code className="mt-2 block break-all font-semibold">{setup.key}</code>
+            </>}
             <AuthenticatorCode busy={busy} submitCode={(code) => { void run(() => verify(code)); }} />
             <button type="button" disabled={busy} className="mt-3 text-sm underline" onClick={() => { void run(() => remove(setup.id)); }}>{t.cancel}</button>
           </div>
