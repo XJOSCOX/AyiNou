@@ -5,7 +5,7 @@ import type { AuthVerifier } from "../services/auth.js";
 import type { MemberRepository } from "../services/members.js";
 
 declare module "fastify" {
-  interface FastifyRequest { authUserId: string | null }
+  interface FastifyRequest { authUserId: string | null; authToken: string | null }
 }
 
 const updateProfileSchema = z.object({
@@ -35,6 +35,7 @@ export async function registerMemberRoutes(
 
   app.register(async (protectedApp) => {
     protectedApp.decorateRequest("authUserId", null);
+    protectedApp.decorateRequest("authToken", null);
     protectedApp.addHook("preHandler", async (request: FastifyRequest, reply) => {
       if (!auth || !members) {
         return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account service unavailable"));
@@ -44,18 +45,19 @@ export async function registerMemberRoutes(
       const userId = await auth.verify(match[1]);
       if (!userId) return reply.code(401).send(error("UNAUTHORIZED", "Invalid or expired session"));
       request.authUserId = userId;
+      request.authToken = match[1];
     });
 
     protectedApp.get("/api/v1/me/profile", async (request, reply) => {
-      if (!members || !request.authUserId) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
-      return { profile: await members.get(request.authUserId) };
+      if (!members || !request.authUserId || !request.authToken) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
+      return { profile: await members.get(request.authUserId, request.authToken) };
     });
 
     protectedApp.patch("/api/v1/me/profile", async (request, reply) => {
-      if (!members || !request.authUserId) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
+      if (!members || !request.authUserId || !request.authToken) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
       const parsed = updateProfileSchema.safeParse(request.body);
       if (!parsed.success) return reply.code(400).send(error("INVALID_PROFILE", "Profile details are invalid"));
-      return { profile: await members.update(request.authUserId, parsed.data as UpdateMemberProfile) };
+      return { profile: await members.update(request.authUserId, request.authToken, parsed.data as UpdateMemberProfile) };
     });
   });
 }

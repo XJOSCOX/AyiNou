@@ -94,7 +94,8 @@ export function AuthScreen({ mode }: { mode: AuthMode }) {
       {mode === "verify" ? (
         <div className="mt-8 space-y-5">
           <p className="rounded-xl bg-[#edf4eb] p-4 text-sm text-[#155746]" role="status">{t.checkMail}</p>
-          {process.env.NODE_ENV === "development" && (
+          {process.env.NODE_ENV === "development" &&
+            process.env.NEXT_PUBLIC_SUPABASE_URL === "http://127.0.0.1:54321" && (
             <a href="http://127.0.0.1:54324" target="_blank" rel="noreferrer" className="inline-block font-semibold underline underline-offset-4">{t.mailpit} ↗</a>
           )}
           <p><Link href="/login" className="font-semibold text-[#155746] underline underline-offset-4">{t.backLogin}</Link></p>

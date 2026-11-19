@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const code = url.searchParams.get("code");
   const next = url.searchParams.get("next");
   const safeNext = next === "/reset-password" ? next : "/onboarding";
-  const webOrigin = process.env.WEB_ORIGIN ?? "http://127.0.0.1:4000";
+  const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:4000";
   const authUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!code || !authUrl || !key) return NextResponse.redirect(new URL("/login?error=verification", webOrigin));

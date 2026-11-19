@@ -1,7 +1,7 @@
 # Ayinou — Roadmap and Phase Gates
 
 **Updated:** 2026-11-19
-**Development mode:** Local only
+**Development mode:** Local Next.js/Fastify with hosted Supabase Auth/PostgreSQL
 **Repository strategy:** One `main` branch, direct commit + push; no PRs
 
 **Rule:** Work on one phase at a time. Each phase is complete only when its acceptance checklist is met, documentation is updated, and local quality checks pass. Do not use calendar deadlines as a substitute for testing.
@@ -46,6 +46,17 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 - [x] Use Supabase Auth rate limits and email confirmation for the local flow.
 
 **Gate:** Signup → verification → onboarding → session refresh → editing → logout works in three languages; RLS blocks access to another user's private fields.
+
+## Hosted Supabase transition — Phase 1B infrastructure (IMPLEMENTED; email flow validation pending)
+
+- [x] Confirm the owner's AyiNou project reference `hcbxulyfmdmuyccgrujs` before remote changes.
+- [x] Preserve the Phase 1A schema and policies; apply its migration and the versioned API RPC migration to the hosted project.
+- [x] Make hosted Supabase the default development service while keeping Next.js on port 4000 and Fastify on port 3000.
+- [x] Keep privileged keys only in Fastify; retain Docker/pgTAP as optional isolated checks.
+- [x] Configure hosted email confirmation and localhost callback/reset redirects without weakening Auth protections.
+- [x] Add guarded synthetic-account integration checks with targeted cleanup.
+
+**Gate:** Hosted schema, API, RLS, profile edits, refresh and logout checks pass; typecheck, lint, unit tests, and builds pass. End-to-end registration, email confirmation, password reset, and real token expiry remain unverified until controlled mailbox testing is available.
 
 ## Phase 2 — Community dashboard and member counts
 

@@ -1,33 +1,30 @@
-# Technical Architecture — Phase 1B Accounts and Profiles
-
-## Local-first system
+# Technical Architecture — Hosted Supabase Development
 
 ```text
-Browser → Next.js App Router (port 4000, ht/fr/en)
-      │                │ Supabase SSR cookies and PKCE callback
-      │                ▼
-      │            Supabase Auth (port 54321)
-      │ bearer access token
-      ▼
-Fastify API (port 3000, /api/v1)
-      │ verified subject; server-only PostgreSQL connection
-      ▼
-Supabase PostgreSQL (port 54322, RLS)
+Browser → Next.js App Router (localhost:4000, ht/fr/en)
+   │         │ Supabase SSR cookies, PKCE callback, refresh
+   │         ▼
+   │    Hosted Supabase Auth
+   │ bearer access token
+   ▼
+Fastify API (127.0.0.1:3000, /api/v1)
+   │ verified subject; caller token for RLS; server-only secret for initialization
+   ▼
+Hosted Supabase PostgreSQL (five application tables, RLS)
 
-Shared TypeScript response contracts: packages/shared
-Local environment: independent Next.js and Fastify processes; Supabase in Docker for database tests
-Git: local main → validated commits → GitHub main
+Shared TypeScript contracts: packages/shared
+Local main → checks → GitHub main
 ```
 
-The browser calls the versioned Fastify endpoint using `NEXT_PUBLIC_API_URL`. The API binds to localhost by default, validates configuration with Zod, logs structured events, allows only the configured web origins through CORS, and returns safe JSON errors. `GET /health` is a local health check; `GET /api/v1/status` is the web and future mobile client contract. Neither requires authentication.
+Next.js and Fastify remain independent local processes; hosted Supabase provides Auth and PostgreSQL. The browser uses the publishable key. The secret key exists only in ignored API environment settings and is never sent to browser or mobile clients. `GET /health` and `GET /api/v1/status` are public; `GET /api/v1/departments` exposes the ten reference departments. The API validates configuration with Zod, limits CORS to configured origins, and returns safe JSON errors.
 
-Phase 1B connects Supabase Auth to the web client and Fastify to the existing database. Supabase owns email/password credentials, email confirmation, refresh tokens, and password recovery. The Next.js SSR client uses cookies and PKCE; its proxy refreshes sessions on protected routes. Protected layouts check claims server-side, while the browser supplies the access token to Fastify. See [DATABASE.md](DATABASE.md) for tables, grants, policies, and local commands.
+Supabase Auth owns passwords, email confirmation, recovery, refresh tokens, and logout. Next.js uses Supabase SSR cookies and a PKCE callback. Protected layouts check claims, and the browser supplies an access token to Fastify. Future Android and iOS clients can use the same Auth and versioned Fastify API contract. Hosted Site URL and redirects use `http://localhost:4000`; see [DATABASE.md](DATABASE.md) for setup and email delivery limits.
 
-Web and future native clients obtain an access token from Supabase Auth and send it to Fastify. The reusable API verifier uses Supabase `getClaims` for signature validation (JWKS or Auth-server fallback for symmetric signing), then checks issuer, `authenticated` audience and role, expiration, and UUID subject. It never accepts a user ID from profile request bodies. On each authenticated profile operation, the server calls `private.initialize_member(subject)` in a transaction, switches to PostgreSQL's `authenticated` role, sets the transaction-local JWT subject, and runs allowed queries under existing grants and RLS. A failed initialization rolls back and can be retried on the next request without losing the Auth account. This privileged database connection and any secret or service-role key remain server-only. Database role and verification records are never sourced from user-editable metadata.
+Fastify's verifier calls Supabase `getClaims` to validate the token signature through JWKS or the Auth-server fallback, then checks issuer, `authenticated` audience/role, expiry, and UUID subject. It does not accept a user ID from a profile request body. Before protected profile reads or edits, Fastify calls narrow service-only `initialize_member_for_api` using that verified subject. The preserved private initializer creates public and private records atomically and idempotently; a failure is retryable. Profile reads and `update_my_profile` use the caller's bearer token, least-privilege grants, and RLS. The update RPC is security-invoker and updates both profile tables in one transaction. The secret key is not used for ordinary member reads or edits.
 
-`GET /api/v1/departments` is public. `GET` and `PATCH /api/v1/me/profile` require a verified bearer token; PATCH accepts only display name, preferred locale, and optional broad location fields. The public profile remains hidden until a future trusted visibility workflow. The API returns no email or private fields to anonymous callers. These versioned contracts are reusable by Android and iOS clients.
+`GET` and `PATCH /api/v1/me/profile` require verified bearer tokens. PATCH accepts only display name, language, and broad optional location fields. The public profile remains hidden until a future trusted visibility workflow. The API never publishes private location to anonymous callers. Roles and verification records are server-managed future workflows and are not based on user-editable metadata.
 
-## Current project layout
+## Current layout
 
 ```text
 apps/
@@ -35,56 +32,18 @@ apps/
   api/test/
   web/src/{app/,components/,lib/,messages/}
 packages/shared/src/
+scripts/check-hosted.mjs
 supabase/{config.toml,migrations/,tests/}
 ```
 
-Feature modules will be added when their phase begins. The web has no fake authentication or social actions.
+The five current tables are `departments`, `profiles`, `member_private`, `role_assignments`, and `verification_records`. Member UUIDs reference `auth.users.id`. No passwords or raw identity documents are stored in application tables. Future phases may add aggregate counts, posts/moderation, groups, verification review, projects, evidence-based reports, radio listings, and partner-mediated contributions.
 
-## Data entities planned (introduce only when needed)
+Residence country and optional Haiti department are separate from an optional diaspora department of connection. Location is voluntary and self-reported; no precise coordinate is retained. Future public counts require suppression for small cohorts. Required locales are `ht` (default), `fr`, and `en`; future user-generated translations must be labeled. Public launch still requires retention/deletion rules, moderation governance, abuse controls, custom email delivery, monitoring, and privacy review.
 
-**Phase 1A:** `departments`, `profiles` (public-safe fields), `member_private` (private location), `role_assignments`, and `verification_records`. Member identity keys reference `auth.users.id`. No passwords or raw identity documents are stored in application tables.
+The pinned Supabase CLI manages hosted migration history. Docker and pgTAP remain optional for isolated local checks. Hosted integration tests use identifiable synthetic records and targeted cleanup. No hosted reset or destructive test workflow is used.
 
-**Phase 2:** aggregated views/functions for counts of resident members by department, diaspora by country, and missing/undisclosed region. Membership is self-reported; no claim of official population coverage.
+## References
 
-**Phase 3–4:** `posts`, `comments`, `reactions`, `follows`, `content_reports`, `moderation_actions`, `communities`, `community_members`.
-
-**Phase 5:** `verification_requests`, `verification_reviews`, `verified_entities`, `ambassador_invitations`.
-
-**Phase 6:** `projects`, `project_milestones`, `project_roles`, `volunteer_offers`, `project_updates`.
-
-**Phase 7:** `community_claims`, `claim_evidence`, `claim_reviews`, `claim_appeals`, `claim_status_history`.
-
-**Phase 8:** `radio_stations`, `radio_streams`, `radio_programs`.
-
-**Phase 9:** partner-mediated contribution records and opportunity listings as required by compliance review.
-
-## Location handling
-
-- Ask current country of residence; in Haiti, optionally select one of ten departments.
-- Ask a separate optional 'department of connection/origin' from diaspora members.
-- Never silently infer a resident's department from coarse IP or a one-time GPS reading.
-- Geolocation permission should be optional, purpose-specific, and coarse by default; don't retain raw GPS coordinates for member analytics.
-- Public dashboard uses aggregation, suppression of small cohorts, and no exact household-level location.
-
-## Internationalization
-
-- Required locales: `ht` default, `fr`, `en`.
-- Localize routes/labels, form errors, onboarding, accessibility strings and notifications.
-- Preserve original text for community posts; future translations must be marked as machine-generated when appropriate.
-- Avoid machine-translating legal/safety notices without human review.
-
-## Security baseline
-
-- All exposed tables: least-privilege grants and RLS with positive and negative tests.
-- Future clients authenticate through Supabase Auth; Fastify verifies access tokens and applies route authorization before user-scoped database access.
-- Rate-limit registration, posting, verification submissions and report APIs.
-- Separate untrusted uploads from privileged admin processes; restrict file size/type and signed URL lifetime.
-- Moderators/verification staff use narrowly scoped admin authorization and auditable actions.
-- Encrypt sensitive information, define retention/deletion, and do not expose reviewer evidence by default.
-- No secrets, production dumps or personal identity documents in GitHub.
-
-## External references
-
-- Supabase Next.js quickstart: https://supabase.com/docs/guides/auth/quickstarts/nextjs
-- Supabase Row Level Security: https://supabase.com/docs/guides/database/postgres/row-level-security
-- Supabase local development: https://supabase.com/docs/guides/local-development
+- [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)
+- [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Supabase database migrations](https://supabase.com/docs/guides/deployment/database-migrations)

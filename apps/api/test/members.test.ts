@@ -20,9 +20,9 @@ const profile: MemberProfile = {
 function services() {
   const calls: string[] = [];
   const members: MemberRepository = {
-    async get(userId) { calls.push(`get:${userId}`); return profile; },
-    async update(userId, input: UpdateMemberProfile) {
-      calls.push(`update:${userId}`);
+    async get(userId, token) { calls.push(`get:${userId}:${token}`); return profile; },
+    async update(userId, token, input: UpdateMemberProfile) {
+      calls.push(`update:${userId}:${token}`);
       return { ...profile, ...input };
     },
     async departments() { return [{ code: "HT-OU", name: "Ouest" }]; },
@@ -51,7 +51,7 @@ test("current-user endpoint derives identity from token and rejects privilege fi
     const read = await app.inject({ method: "GET", url: "/api/v1/me/profile", headers });
     assert.equal(read.statusCode, 200);
     assert.equal(read.json().profile.userId, ownerId);
-    assert.deepEqual(deps.calls, [`get:${ownerId}`]);
+    assert.deepEqual(deps.calls, [`get:${ownerId}:valid`]);
 
     const input: UpdateMemberProfile = {
       displayName: "Ayinou Member", preferredLocale: "fr", residenceCountryCode: "HT",
@@ -60,11 +60,11 @@ test("current-user endpoint derives identity from token and rejects privilege fi
     const update = await app.inject({ method: "PATCH", url: "/api/v1/me/profile", headers, payload: input });
     assert.equal(update.statusCode, 200);
     assert.equal(update.json().profile.displayName, "Ayinou Member");
-    assert.deepEqual(deps.calls, [`get:${ownerId}`, `update:${ownerId}`]);
+    assert.deepEqual(deps.calls, [`get:${ownerId}:valid`, `update:${ownerId}:valid`]);
 
     const forged = await app.inject({ method: "PATCH", url: "/api/v1/me/profile", headers, payload: { ...input, role: "administrator" } });
     assert.equal(forged.statusCode, 400);
-    assert.deepEqual(deps.calls, [`get:${ownerId}`, `update:${ownerId}`]);
+    assert.deepEqual(deps.calls, [`get:${ownerId}:valid`, `update:${ownerId}:valid`]);
   } finally { await app.close(); }
 });
 

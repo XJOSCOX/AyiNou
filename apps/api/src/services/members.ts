@@ -1,10 +1,10 @@
-import { Pool, type PoolClient } from "pg";
+import { createClient } from "@supabase/supabase-js";
 import type { Department, MemberProfile, UpdateMemberProfile } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 
 export interface MemberRepository {
-  get(userId: string): Promise<MemberProfile>;
-  update(userId: string, input: UpdateMemberProfile): Promise<MemberProfile>;
+  get(userId: string, token: string): Promise<MemberProfile>;
+  update(userId: string, token: string, input: UpdateMemberProfile): Promise<MemberProfile>;
   departments(): Promise<Department[]>;
   close(): Promise<void>;
 }
@@ -31,65 +31,59 @@ function toProfile(row: ProfileRow): MemberProfile {
   };
 }
 
-const profileQuery = `
-  select p.user_id, p.display_name, p.preferred_locale, p.is_visible,
-    m.residence_country_code, m.residence_department_code, m.diaspora_department_code
-  from public.profiles p
-  join public.member_private m on m.user_id = p.user_id
-  where p.user_id = $1::uuid
-`;
+function unavailable() { return new Error("Profile unavailable"); }
 
 export function createMemberRepository(config: ApiConfig): MemberRepository | null {
-  if (!config.DATABASE_URL) return null;
-  const pool = new Pool({ connectionString: config.DATABASE_URL, max: 5 });
+  if (!config.SUPABASE_URL || !config.SUPABASE_PUBLISHABLE_KEY || !config.SUPABASE_SECRET_KEY) return null;
+  const url = config.SUPABASE_URL;
+  const publicKey = config.SUPABASE_PUBLISHABLE_KEY;
+  const options = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } };
+  // This client never accepts a member session; only the initializer uses it.
+  const admin = createClient(url, config.SUPABASE_SECRET_KEY, options);
+  const publicClient = createClient(url, publicKey, options);
 
-  async function withMember<T>(userId: string, action: (client: PoolClient) => Promise<T>): Promise<T> {
-    const client = await pool.connect();
-    try {
-      await client.query("begin");
-      await client.query("select private.initialize_member($1::uuid)", [userId]);
-      await client.query("set local role authenticated");
-      await client.query("select set_config('request.jwt.claim.sub', $1, true)", [userId]);
-      const result = await action(client);
-      await client.query("commit");
-      return result;
-    } catch (error) {
-      await client.query("rollback");
-      throw error;
-    } finally {
-      client.release();
-    }
+  function asMember(token: string) {
+    return createClient(url, publicKey, {
+      ...options,
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+  }
+
+  async function initialize(userId: string) {
+    const { error } = await admin.rpc("initialize_member_for_api", { p_user_id: userId });
+    if (error) throw unavailable();
   }
 
   return {
-    async get(userId) {
-      return withMember(userId, async (client) => {
-        const result = await client.query<ProfileRow>(profileQuery, [userId]);
-        if (!result.rows[0]) throw new Error("Profile unavailable");
-        return toProfile(result.rows[0]);
-      });
+    async get(userId, token) {
+      await initialize(userId);
+      const member = asMember(token);
+      const [publicResult, privateResult] = await Promise.all([
+        member.from("profiles").select("user_id,display_name,preferred_locale,is_visible").eq("user_id", userId).single(),
+        member.from("member_private").select("residence_country_code,residence_department_code,diaspora_department_code").eq("user_id", userId).single(),
+      ]);
+      if (publicResult.error || privateResult.error || !publicResult.data || !privateResult.data) throw unavailable();
+      return toProfile({ ...publicResult.data, ...privateResult.data } as ProfileRow);
     },
-    async update(userId, input) {
-      return withMember(userId, async (client) => {
-        await client.query(
-          "update public.profiles set display_name = $2, preferred_locale = $3 where user_id = $1::uuid",
-          [userId, input.displayName, input.preferredLocale],
-        );
-        await client.query(
-          `update public.member_private set residence_country_code = $2,
-           residence_department_code = $3, diaspora_department_code = $4
-           where user_id = $1::uuid`,
-          [userId, input.residenceCountryCode, input.residenceDepartmentCode, input.diasporaDepartmentCode],
-        );
-        const result = await client.query<ProfileRow>(profileQuery, [userId]);
-        if (!result.rows[0]) throw new Error("Profile unavailable");
-        return toProfile(result.rows[0]);
-      });
+    async update(userId, token, input) {
+      await initialize(userId);
+      const member = asMember(token);
+      const { data, error } = await member.rpc("update_my_profile", {
+        p_display_name: input.displayName,
+        p_preferred_locale: input.preferredLocale,
+        p_residence_country_code: input.residenceCountryCode,
+        p_residence_department_code: input.residenceDepartmentCode,
+        p_diaspora_department_code: input.diasporaDepartmentCode,
+      }).single();
+      const row = data as ProfileRow | null;
+      if (error || !row || row.user_id !== userId) throw unavailable();
+      return toProfile(row);
     },
     async departments() {
-      const result = await pool.query<Department>("select code, name from public.departments order by name");
-      return result.rows;
+      const { data, error } = await publicClient.from("departments").select("code,name").order("name");
+      if (error || !data) throw new Error("Departments unavailable");
+      return data as Department[];
     },
-    async close() { await pool.end(); },
+    async close() {},
   };
 }

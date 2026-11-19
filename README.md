@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 0, Phase 1A, and Phase 1B implemented; local development only
+**Status:** Phase 1B implemented; local apps use hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -31,7 +31,7 @@ All interface strings are translated from day one; user-generated posts remain i
 - Independent Node.js, Fastify, TypeScript API with Zod environment validation (`apps/api`)
 - Shared API response contracts (`packages/shared`)
 - Haitian Creole, French, and English translation dictionaries; Creole by default
-- Local Supabase Auth and PostgreSQL with versioned schema, RLS, confirmation email testing, and authenticated Fastify profile routes.
+- Hosted Supabase Auth and PostgreSQL for development, with versioned migrations, RLS, and authenticated Fastify profile routes.
 
 We start with a responsive web app to validate UX and product flows. Android/iOS clients are later phases and can reuse Supabase-backed services.
 
@@ -54,7 +54,7 @@ We start with a responsive web app to validate UX and product flows. Android/iOS
 
 ## Local development
 
-Requires Node.js 20.9+ and npm 10+. From the repository root:
+Requires Node.js 20.9+, npm 10+, and access to the hosted AyiNou Supabase project. Docker is not required. From the repository root:
 
 ```bash
 npm install
@@ -65,31 +65,30 @@ npm test
 npm run build
 ```
 
-API: `http://127.0.0.1:3000/health` and `http://127.0.0.1:3000/api/v1/status`. Web: `http://127.0.0.1:4000`. Run `npm run dev:api` or `npm run dev:web` to start only one app. The API binds to localhost. The web app displays an unavailable message if the API is offline.
+API: `http://127.0.0.1:3000/health` and `http://127.0.0.1:3000/api/v1/status`. Web: `http://localhost:4000`. Run `npm run dev:api` or `npm run dev:web` to start only one app. The API binds to localhost. The web app displays an unavailable message if the API is offline.
 
-Copy the server variables from [.env.example](.env.example) to `apps/api/.env` and browser variables plus `WEB_ORIGIN` to `apps/web/.env.local`, filling in the local values reported by `npx supabase status -o json`. Both files are ignored by Git. `DATABASE_URL` must exist only in the API file. `NEXT_PUBLIC_` variables are browser-readable and must contain only the local API URL, Supabase URL, and publishable key. `API_HOST`, `API_PORT`, and `WEB_ORIGINS` configure the API; `WEB_ORIGIN` sets the canonical callback redirect host. Use `127.0.0.1` consistently for Supabase email redirects and the web app.
+Copy the relevant values from [.env.example](.env.example) to `apps/api/.env` and `apps/web/.env.local`. Use the project URL and publishable key from the [AyiNou dashboard](https://supabase.com/dashboard/project/hcbxulyfmdmuyccgrujs); put the **secret key only in the API file**. Both files are ignored by Git. `NEXT_PUBLIC_` variables are browser-readable. `API_HOST`, `API_PORT`, and `WEB_ORIGINS` configure Fastify; `WEB_ORIGIN=http://localhost:4000` sets the canonical Auth callback host. Start the apps with `npm run dev`, then open `http://localhost:4000`. The API remains on `http://127.0.0.1:3000`.
 
-On Windows, if npm scripts fail while launching Git Bash, set `npm_config_script_shell` to `C:\Windows\System32\cmd.exe` in that terminal. Docker Desktop must be running for Auth and profile development.
+On Windows, if npm scripts fail while launching Git Bash, set `npm_config_script_shell` to `C:\Windows\System32\cmd.exe` in that terminal.
 
 Do not put real credentials, production database dumps, identity documents, or sensitive user content in source control.
 
-## Local database (Phase 1A)
+## Hosted Supabase database
 
-Requires Docker Desktop with its Linux engine running, plus Node.js and npm. `npm install` installs the exact Supabase CLI version pinned in `package.json`; no global CLI is required. From the repository root:
+The pinned Supabase CLI is installed by `npm install`. The confirmed hosted project is **AyiNou** (`hcbxulyfmdmuyccgrujs`). To inspect and apply future versioned migrations, verify the target in CLI output and use:
 
 ```bash
-npm install
-npm run db:start   # first run downloads local images and applies migrations
-npm run db:reset   # rebuilds only the local database and reapplies every migration
-npm run db:test    # pgTAP schema, constraint, and RLS tests
-npm run db:stop
+npx supabase link --project-ref hcbxulyfmdmuyccgrujs
+npm run db:migrations
+npm run db:push:dry
+npm run db:push       # review the CLI prompt before applying
 ```
 
-The local Supabase API defaults to `http://127.0.0.1:54321`, PostgreSQL to port `54322`, Studio to `http://127.0.0.1:54323`, and Mailpit to `http://127.0.0.1:54324`. Run `npx supabase status` to inspect local service URLs. Never copy secret or service-role keys into source files, browser code, or `NEXT_PUBLIC_` variables. Start Supabase before the apps for Phase 1B.
+The hosted database has the Phase 1A schema plus a small Phase 1B API RPC migration. Remote migration commands never reset, drop, or seed the hosted database. Do not run `db reset --remote`. The SQL files and optional local pgTAP tests remain in `supabase/`; see [docs/DATABASE.md](docs/DATABASE.md).
 
-Migrations are in `supabase/migrations/`; create the next one with `npx supabase migration new descriptive_name`, then reset and test locally. The initial department reference rows are inserted by the migration. `db:reset` discards local database data, including local Auth users; it does not target a linked or hosted project. Never pass `--linked`, `--remote`, or a production URL to a reset command for this workflow. See [docs/DATABASE.md](docs/DATABASE.md) for schema and profile initialization.
+For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted`. The script creates two uniquely named, confirmed synthetic Auth users, checks API and RLS boundaries, then deletes only their returned user IDs. It does not run pgTAP or reset the hosted database. Do not run it against an unrelated project.
 
-For a full local account flow, run `npm run db:start`, set both app environment files, then `npm run dev`. Open [register](http://127.0.0.1:4000/register), submit a disposable email address, open [Mailpit](http://127.0.0.1:54324), and follow the confirmation link. Onboarding saves the public display name and optional broad residence/connection information. The [login](http://127.0.0.1:4000/login), [forgot password](http://127.0.0.1:4000/forgot-password), [profile](http://127.0.0.1:4000/profile), and [dashboard](http://127.0.0.1:4000/dashboard) pages complete this phase. If signup remains disabled after changing `supabase/config.toml`, run `npm run db:stop` and `npm run db:start` to reload Auth settings.
+Hosted Auth has email/password signup and confirmation enabled. Its site URL is `http://localhost:4000`, with `http://localhost:4000/auth/callback` and `http://localhost:4000/reset-password` allowed as redirects. The hosted default email sender reaches only organization team addresses and allows very few messages per hour; use a controlled team mailbox for limited testing or configure custom SMTP for reliable signup and password-reset testing. Do not turn off confirmation to bypass this. Local Mailpit is available only with the optional Docker stack; it is not the hosted project's inbox. See [docs/DATABASE.md](docs/DATABASE.md) for testing limits and troubleshooting.
 
 ## GitHub workflow: main only
 
@@ -107,7 +106,7 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for local Git commands and validation c
 
 - [ROADMAP.md](ROADMAP.md) — ordered development phases and acceptance gates
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design and data boundaries
-- [docs/DATABASE.md](docs/DATABASE.md) — local migrations, RLS, and profile initialization
+- [docs/DATABASE.md](docs/DATABASE.md) — hosted migrations, RLS, and profile initialization
 - [docs/PRODUCT.md](docs/PRODUCT.md) — MVP scope, users, roles, and privacy
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) — branch-free Git process and quality gates
 - [docs/DECISIONS.md](docs/DECISIONS.md) — agreed decisions and open questions

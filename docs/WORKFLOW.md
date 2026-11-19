@@ -41,7 +41,7 @@ Use specific paths for staging instead of `git add .` when possible. Never force
 - [ ] Tests, typecheck, lint, build pass
 - [ ] Auth, RLS, moderation and privacy tests pass when relevant (future phases)
 - [ ] Locale strings work in `ht`, `fr`, `en`
-- [ ] Migrations tested against local database
+- [ ] Hosted migration history and dry-run reviewed; isolated local pgTAP tests run when available
 - [ ] Document changes and update roadmap checkbox status
 - [ ] Review staged diff, then commit and push directly to `main`
 
