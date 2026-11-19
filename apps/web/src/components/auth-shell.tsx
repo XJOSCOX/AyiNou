@@ -4,9 +4,8 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { LanguageSwitch } from "./language-switch";
+import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
-import { ThemeToggle } from "./theme-toggle";
 import styles from "./auth-shell.module.css";
 
 export function AuthShell({ children }: { children: ReactNode }) {
@@ -31,8 +30,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
         </div>
         <div className="flex min-w-0 flex-col px-4 pb-7 pt-3 sm:px-8 md:px-9 lg:px-14">
           <div className="flex items-center justify-end gap-2 md:pt-4">
-            <LanguageSwitch />
-            <ThemeToggle />
+            <DisplayControls />
           </div>
           <div className="my-auto w-full py-5 md:py-8">{children}</div>
         </div>

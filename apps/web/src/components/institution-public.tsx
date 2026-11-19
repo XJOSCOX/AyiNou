@@ -5,11 +5,10 @@ import type { Institution } from "@ayinou/shared";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { InstitutionLogo, InstitutionStatus, institutionAction, institutionCard, institutionLink } from "./institution-ui";
-import { LanguageSwitch } from "./language-switch";
+import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
 import { PublicAffiliationPanel } from "./public-affiliation-panel";
-import { ThemeToggle } from "./theme-toggle";
 
 export function InstitutionPublic({ organization: org, signedIn }: { organization: Institution; signedIn: boolean }) {
   const [locale] = useLocale();
@@ -21,7 +20,7 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
     <div id="top" className="flex min-h-dvh flex-col">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--theme-border)] bg-[var(--theme-surface)] px-4 py-3 sm:px-8">
         <SiteBrand />
-        <div className="flex gap-2"><LanguageSwitch /><ThemeToggle /></div>
+        <DisplayControls />
       </header>
       <main className="grid flex-1 content-start gap-4 px-4 py-5 sm:px-8 sm:py-8">
         <header className={`${institutionCard} flex flex-wrap items-center justify-between gap-4`}>

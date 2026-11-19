@@ -153,6 +153,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
       if (changes.preferredLocale && changes.preferredLocale !== locale) setLocale(changes.preferredLocale);
       if (onboarding) setStep(step + 1);
       else setSuccess(true);
+      if (changes.displayName !== undefined) router.refresh();
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "";
       if (code === "UNAUTHORIZED") router.replace("/login");

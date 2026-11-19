@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { MemberDisplayNameProvider } from "@/lib/member-display-name";
 import { serverSupabase } from "@/lib/supabase/server";
 
 export default async function ProtectedLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -10,5 +11,7 @@ export default async function ProtectedLayout({ children }: Readonly<{ children:
     if (user.error || !user.data.user) redirect("/login");
     if (user.data.user.factors?.some((factor) => factor.status === "verified")) redirect("/mfa");
   }
-  return children;
+  const { data: profile } = await supabase.from("profiles")
+    .select("display_name").eq("user_id", data.claims.sub).maybeSingle();
+  return <MemberDisplayNameProvider name={profile?.display_name ?? null}>{children}</MemberDisplayNameProvider>;
 }

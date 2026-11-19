@@ -5,9 +5,8 @@ import { useSyncExternalStore } from "react";
 import { authMessages } from "@/lib/auth-i18n";
 import { messages } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
-import { LanguageSwitch } from "./language-switch";
+import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
-import { ThemeToggle } from "./theme-toggle";
 
 function subscribeToHash(onChange: () => void) {
   window.addEventListener("hashchange", onChange);
@@ -52,8 +51,7 @@ export function Navbar() {
           ))}
         </nav>
         <div className="col-span-2 flex flex-wrap items-center gap-2 border-t border-[var(--theme-border)] pt-2 lg:col-span-1 lg:flex-nowrap lg:justify-self-end lg:border-t-0 lg:pt-0">
-          <LanguageSwitch />
-          <ThemeToggle />
+          <DisplayControls />
           <Link href="/login" className="ml-auto inline-flex min-h-10 items-center gap-2 whitespace-nowrap rounded-md bg-[var(--theme-primary)] px-3 text-sm font-bold text-[var(--theme-on-primary)] transition-colors hover:bg-[var(--theme-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)] sm:px-4 lg:ml-1">
             {auth.login}
             <span aria-hidden="true" className="hidden min-[360px]:inline">→</span>

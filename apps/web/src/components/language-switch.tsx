@@ -1,24 +1,22 @@
 "use client";
 
-import { locales, messages } from "@/lib/i18n";
+import { isLocale, locales, messages } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
+
+const languageNames = { ht: "Kreyòl ayisyen", fr: "Français", en: "English" };
 
 export function LanguageSwitch() {
   const [locale, setLocale] = useLocale();
 
   return (
-    <div role="group" aria-label={messages[locale].languageLabel} className="flex rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] p-0.5">
-      {locales.map((option) => (
-        <button
-          key={option}
-          type="button"
-          onClick={() => setLocale(option)}
-          aria-pressed={locale === option}
-          className="grid size-8 place-items-center rounded-sm text-xs font-bold uppercase text-[var(--theme-body)] transition-colors hover:text-[var(--theme-link)] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]"
-        >
-          {option}
-        </button>
-      ))}
+    <div className="relative flex min-h-9 items-center gap-1.5 rounded-s-md px-2.5 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-selected)] focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-[var(--theme-link)]">
+      <span aria-hidden="true" className="uppercase">{locale}</span>
+      <span aria-hidden="true" className="size-1.5 -translate-y-px rotate-45 border-e border-b border-current" />
+      <select aria-label={messages[locale].languageLabel} value={locale}
+        className="absolute inset-0 size-full cursor-pointer opacity-0"
+        onChange={(event) => { if (isLocale(event.target.value)) setLocale(event.target.value); }}>
+        {locales.map((option) => <option key={option} value={option} lang={option}>{languageNames[option]}</option>)}
+      </select>
     </div>
   );
 }
