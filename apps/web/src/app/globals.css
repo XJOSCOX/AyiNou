@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --ink: #142b27;
+  --cream: #f8f6ef;
+  --green: #134f43;
+}
+
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--cream); color: var(--ink); font-family: Arial, Helvetica, sans-serif; }
+button { cursor: pointer; }
+::selection { background: #e9bd73; color: var(--ink); }

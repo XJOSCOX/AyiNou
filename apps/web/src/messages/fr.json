@@ -1,0 +1,30 @@
+{
+  "languageLabel": "Langue",
+  "skip": "Aller au contenu",
+  "nav": {"mission": "Notre mission", "spaces": "Les espaces", "about": "À propos"},
+  "eyebrow": "UN ESPACE POUR NOUS TOUS",
+  "heroTitle": "Ensemble, construisons un autre avenir.",
+  "heroBody": "AYINOU est un espace en devenir où les Haïtiens d'Haïti et de la diaspora pourront échanger, partager des idées et agir ensemble pour un changement positif.",
+  "explore": "Découvrir les espaces",
+  "missionLink": "Lire notre mission",
+  "heroNote": "Un seul peuple. Un seul avenir. Ensemble pour Haïti.",
+  "missionEyebrow": "CE QUI NOUS RASSEMBLE",
+  "missionTitle": "Une communauté fondée sur le respect et l'action.",
+  "missionBody": "Nous croyons au dialogue pacifique, à la confiance fondée sur des preuves et aux projets qui apportent des résultats concrets aux communautés. Chacun a sa place à la table.",
+  "spacesEyebrow": "ESPACES À VENIR",
+  "spacesTitle": "Plusieurs façons d'avancer ensemble.",
+  "spacesBody": "Ces sections sont en préparation. Nous les ouvrirons progressivement, avec attention à la sécurité et aux besoins des communautés.",
+  "cards": [
+    {"name": "Communauté", "description": "Rencontrer des personnes, partager des idées et créer des liens durables."},
+    {"name": "Projets", "description": "Collaborer à des initiatives utiles aux communautés."},
+    {"name": "Rapports", "description": "Partager des informations et des preuves de façon responsable."},
+    {"name": "Radio", "description": "Découvrir les voix et les émissions de la communauté haïtienne."}
+  ],
+  "comingSoon": "En préparation",
+  "statusLabel": "Connexion API",
+  "checking": "Vérification...",
+  "online": "Disponible",
+  "offline": "Indisponible actuellement",
+  "offlineHelp": "Le service n'est pas connecté. Réessayez plus tard ou démarrez l'API locale.",
+  "footer": "Conçu pour nous rapprocher, avec soin."
+}

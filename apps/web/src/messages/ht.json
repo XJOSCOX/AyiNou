@@ -1,0 +1,30 @@
+{
+  "languageLabel": "Lang",
+  "skip": "Ale nan kontni an",
+  "nav": {"mission": "Misyon nou", "spaces": "Espas yo", "about": "Konsènan"},
+  "eyebrow": "YON ESPAS POU NOU TOUT",
+  "heroTitle": "Ansanm, nou ka bati yon lòt demen.",
+  "heroBody": "AYINOU se yon espas k ap grandi pou Ayisyen ann Ayiti ak nan dyaspora a konekte, pataje lide, epi travay ansanm pou chanjman pozitif.",
+  "explore": "Dekouvri espas yo",
+  "missionLink": "Li misyon nou",
+  "heroNote": "Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.",
+  "missionEyebrow": "SA KI RASANBLE NOU",
+  "missionTitle": "Yon kominote ki chita sou respè ak aksyon.",
+  "missionBody": "Nou kwè nan dyalòg pasifik, konfyans ki baze sou prèv, ak pwojè ki pote bon rezilta pou kominote yo. Tout moun gen yon plas bò tab la.",
+  "spacesEyebrow": "ESPAS K AP VINI YO",
+  "spacesTitle": "Plizyè fason pou n avanse ansanm.",
+  "spacesBody": "Seksyon sa yo an preparasyon. N ap louvri yo etap pa etap, ak atansyon pou sekirite ak bezwen kominote a.",
+  "cards": [
+    {"name": "Kominote", "description": "Rankontre moun, pataje lide, epi bati lyen ki dire."},
+    {"name": "Pwojè", "description": "Mete tèt ansanm sou inisyativ ki itil kominote yo."},
+    {"name": "Rapò", "description": "Pataje enfòmasyon ak prèv avèk responsabilite."},
+    {"name": "Radyo", "description": "Dekouvri vwa ak emisyon kominote ayisyen an."}
+  ],
+  "comingSoon": "An preparasyon",
+  "statusLabel": "Koneksyon API",
+  "checking": "N ap verifye...",
+  "online": "Disponib",
+  "offline": "Pa disponib kounye a",
+  "offlineHelp": "Sèvis la pa konekte. Eseye ankò pita oswa lanse API lokal la.",
+  "footer": "Fèt pou konekte nou, avèk swen."
+}

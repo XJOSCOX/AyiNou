@@ -1,0 +1,30 @@
+{
+  "languageLabel": "Language",
+  "skip": "Skip to content",
+  "nav": {"mission": "Our mission", "spaces": "Explore spaces", "about": "About"},
+  "eyebrow": "A SPACE FOR ALL OF US",
+  "heroTitle": "Together, we can build a different tomorrow.",
+  "heroBody": "AYINOU is a growing space for Haitians in Haiti and across the diaspora to connect, share ideas, and work together for positive change.",
+  "explore": "Explore the spaces",
+  "missionLink": "Read our mission",
+  "heroNote": "One people. One future. Together for Haiti.",
+  "missionEyebrow": "WHAT BRINGS US TOGETHER",
+  "missionTitle": "A community built on respect and action.",
+  "missionBody": "We believe in peaceful dialogue, trust grounded in evidence, and projects that deliver real results for communities. Everyone has a place at the table.",
+  "spacesEyebrow": "SPACES ON THE WAY",
+  "spacesTitle": "Many ways to move forward together.",
+  "spacesBody": "These sections are in preparation. We will open them step by step, with care for safety and community needs.",
+  "cards": [
+    {"name": "Community", "description": "Meet people, share ideas, and build lasting connections."},
+    {"name": "Projects", "description": "Collaborate on initiatives that serve communities."},
+    {"name": "Reports", "description": "Share information and evidence responsibly."},
+    {"name": "Radio", "description": "Discover voices and programs from the Haitian community."}
+  ],
+  "comingSoon": "Coming soon",
+  "statusLabel": "API connection",
+  "checking": "Checking...",
+  "online": "Available",
+  "offline": "Currently unavailable",
+  "offlineHelp": "The service is not connected. Try again later or start the local API.",
+  "footer": "Made to bring us together, with care."
+}
