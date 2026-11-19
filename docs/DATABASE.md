@@ -43,7 +43,7 @@ Fastify reads member data using the caller's access token, so grants and RLS enf
 
 ## Testing and optional local stack
 
-Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted`. The guard must match the API URL. The script creates two uniquely named, confirmed synthetic Auth users, checks API, RLS, privilege denials, profile edits, refresh and logout, then deletes only those returned user IDs. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by this script.
+Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted`. The guard must match the API URL. The script creates two uniquely named, confirmed synthetic Auth users, checks API, RLS, privilege denials, profile edits and all three locales, session restoration, refresh and logout, then deletes only those returned user IDs. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by this script.
 
 The existing pgTAP suite is optional and isolated to a local Docker stack:
 

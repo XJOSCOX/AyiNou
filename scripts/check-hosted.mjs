@@ -88,7 +88,15 @@ try {
   assert.equal(saved.json().profile.displayName, input.displayName);
   const reloaded = await app.inject({ method: "GET", url: "/api/v1/me/profile", headers: bearer });
   assert.equal(reloaded.json().profile.residenceDepartmentCode, "HT-OU");
-  console.log("profile initialization / atomic update / reload: pass");
+  for (const locale of ["ht", "fr", "en"]) {
+    const localized = await app.inject({
+      method: "PATCH", url: "/api/v1/me/profile", headers: bearer,
+      payload: { ...input, preferredLocale: locale },
+    });
+    assert.equal(localized.statusCode, 200, localized.body);
+    assert.equal(localized.json().profile.preferredLocale, locale);
+  }
+  console.log("profile initialization / atomic update / department / ht-fr-en: pass");
 
   const [foreignPublic, foreignPrivate, anonymousPublic, anonymousPrivate] = await Promise.all([
     clients[1].from("profiles").select("user_id").eq("user_id", ids[0]),
@@ -113,6 +121,21 @@ try {
   assert.deepEqual(roles.data, []);
   assert.deepEqual(verifications.data, []);
   console.log("RLS, private data, and privilege escalation: pass");
+
+  const restoredClient = memberClient();
+  const { data: restored, error: restoreError } = await restoredClient.auth.setSession({
+    access_token: sessions[0].access_token,
+    refresh_token: sessions[0].refresh_token,
+  });
+  assert.ifError(restoreError);
+  assert.ok(restored.session?.access_token);
+  assert.equal((await restoredClient.auth.getSession()).data.session?.user.id, ids[0]);
+  const restoredRequest = await app.inject({
+    method: "GET", url: "/api/v1/me/profile",
+    headers: { authorization: `Bearer ${restored.session.access_token}` },
+  });
+  assert.equal(restoredRequest.statusCode, 200);
+  console.log("session restoration: pass");
 
   const { data: refreshed, error: refreshError } = await clients[0].auth.refreshSession(sessions[0]);
   assert.ifError(refreshError);
