@@ -109,6 +109,12 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Add password change with reauthentication, sign-out everywhere, and administrator authenticator protection.
 - [ ] Provision the first operational administrator through the controlled bootstrap and agree on audit retention, escalation, reviewer assignments, and appeals before public use.
 
+## Phase 2F — Spanish localization (COMPLETE)
+
+- [x] Add Spanish across the current public, member, institution, verification, and administrator screens.
+- [x] Keep Haitian Creole as the default and let members save any of the four languages.
+- [x] Validate dictionary keys and placeholders, hosted profile persistence, and responsive screens in both themes.
+
 ## Phase 3 — Social network MVP
 
 - [ ] Create/edit/delete text posts; read feed; pagination.

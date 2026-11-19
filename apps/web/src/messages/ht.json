@@ -1,4 +1,18 @@
 {
+  "pageTitle": "AYINOU — Ansanm pou Ayiti",
+  "pageDescription": "Ayinou rasanble Ayisyen atravè dyalòg pasifik, kolaborasyon ak aksyon kominotè.",
+  "notFound": "Paj la pa jwenn",
+  "pageError": "Nou pa t kapab chaje paj sa a.",
+  "validation": {
+    "required": "Ranpli chan sa a.",
+    "email": "Antre yon adrès imèl ki valab.",
+    "url": "Antre yon lyen ki valab.",
+    "tooShort": "Antre omwen {min} karaktè.",
+    "tooLong": "Pa antre plis pase {max} karaktè.",
+    "underMin": "Antre yon valè ki omwen {min}.",
+    "overMax": "Antre yon valè ki pa depase {max}.",
+    "invalid": "Tcheke fòma chan sa a."
+  },
   "languageLabel": "Lang",
   "skip": "Ale nan kontni an",
   "home": "Akèy",

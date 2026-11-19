@@ -1,4 +1,18 @@
 {
+  "pageTitle": "AYINOU — Ansanm pou Ayiti",
+  "pageDescription": "Ayinou brings Haitians together through peaceful dialogue, collaboration, and community action.",
+  "notFound": "Page not found",
+  "pageError": "This page could not be loaded.",
+  "validation": {
+    "required": "Complete this field.",
+    "email": "Enter a valid email address.",
+    "url": "Enter a valid URL.",
+    "tooShort": "Enter at least {min} characters.",
+    "tooLong": "Enter no more than {max} characters.",
+    "underMin": "Enter a value of at least {min}.",
+    "overMax": "Enter a value of no more than {max}.",
+    "invalid": "Check the format of this field."
+  },
   "languageLabel": "Language",
   "skip": "Skip to content",
   "home": "Home",

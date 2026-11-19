@@ -20,7 +20,7 @@ Verification does not elevate voting privileges or make a person's statements au
 
 Membership is open to Haitians, including the diaspora, and international supporters. Members choose a self-declared category during onboarding. First and last names are private. Members choose a public username and may add a biography, photo, residence, or interests. They can resume from the last saved stage and preview which fields may be published.
 
-A new user selects Creole/French/English, signs up, chooses public display name, sets optional broad residency details, and enters a welcoming feed. The first useful actions are: explore department communities, meet other members, and join a constructive initiative.
+New visitors start in Haitian Creole and can switch to French, English, or Spanish. Members can save their language preference during onboarding or in My Profile. The interface language leaves their community content and profile text as entered.
 
 The current member dashboard presents privacy-filtered community statistics. Account Settings groups personal and public profile editing, privacy preferences, recovery and authenticator controls, the private member reference, and referrals. Members can share an invitation link. A new member may use one code at signup, with attribution confirmed after email confirmation and a signed-in request. Referrals carry no payment, reward, role, or badge.
 
@@ -57,4 +57,4 @@ Platform administrators can search a minimal account projection, investigate imp
 
 ## Success metrics
 
-During initial local testing: completion of signup flows in three locales, correct access control, understandable onboarding, and responsive UI. After safe launch: retained members, diversity of department participation, verified projects completed, volunteer hours and documented outcomes; avoid optimizing solely for contentious engagement.
+Initial local testing covers the interface in four languages, access control, onboarding, and responsive layouts. After safe launch, measure retained members, diversity of department participation, verified projects completed, volunteer hours, and documented outcomes.

@@ -3,7 +3,9 @@ import en from "../messages/affiliation/en.json";
 import fr from "../messages/affiliation/fr.json";
 import ht from "../messages/affiliation/ht.json";
 
-export const affiliationMessages = { en, fr, ht };
+import type { Locale } from "@ayinou/shared";
+import es from "../messages/affiliation/es.json";
+export const affiliationMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
 export const affiliationEventLabels = {
   requested: "eventRequested", joined: "eventJoined", approved: "eventApproved", rejected: "eventRejected",

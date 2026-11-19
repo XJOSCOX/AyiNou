@@ -4,7 +4,7 @@
 
 - Name: **Ayinou**; intended domain **ayinou.com** (ownership/availability not verified here).
 - Purpose: Bring Haitians together in pursuit of peace, collaboration and concrete change in Haiti.
-- Languages: Haitian Creole, French, English.
+- Languages include Haitian Creole (default), French, English, and Spanish.
 - Backend: independent Fastify REST API with hosted Supabase PostgreSQL and Auth. Storage remains planned.
 - Development: local Next.js on port 4000 and Fastify on port 3000, backed by the owner's hosted AyiNou Supabase project (`hcbxulyfmdmuyccgrujs`). Docker is optional for isolated database tests.
 - Phase 1A: local Supabase PostgreSQL migrations and RLS tests, with Auth identity references; application integration waits for Phase 1B.
@@ -17,7 +17,7 @@
 ## Proposed defaults (not yet confirmed)
 
 - Next.js, TypeScript, Tailwind for responsive web-first application.
-- Creole as initial default language; allow immediate switching to French/English.
+- Keep the interface selection in the browser and allow members to save a separate profile preference for other devices.
 - The pinned Supabase CLI manages versioned remote migrations after project-reference and dry-run review; the local Docker stack remains optional for pgTAP tests.
 - Email-based account authentication first; add phone sign-in later if needed.
 - Voluntary current country/department instead of mandatory GPS tracking.

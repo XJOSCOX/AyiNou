@@ -1,0 +1,49 @@
+{
+  "pageTitle": "AYINOU — Juntos por Haití",
+  "pageDescription": "Ayinou reúne a los haitianos mediante el diálogo pacífico, la colaboración y la acción comunitaria.",
+  "notFound": "Página no encontrada",
+  "pageError": "No se pudo cargar esta página.",
+  "validation": {
+    "required": "Completa este campo.",
+    "email": "Ingresa un correo electrónico válido.",
+    "url": "Ingresa una URL válida.",
+    "tooShort": "Ingresa al menos {min} caracteres.",
+    "tooLong": "Ingresa como máximo {max} caracteres.",
+    "underMin": "Ingresa un valor de al menos {min}.",
+    "overMax": "Ingresa un valor de como máximo {max}.",
+    "invalid": "Revisa el formato de este campo."
+  },
+  "languageLabel": "Idioma",
+  "skip": "Ir al contenido",
+  "home": "Inicio",
+  "about": "Acerca de AyiNou",
+  "updates": "Novedades de AyiNou",
+  "memberAccess": "Acceso para miembros",
+  "memberUpdate": "Los miembros pueden iniciar sesión, configurar su perfil y consultar el panel de la comunidad.",
+  "heroTitle": "Un espacio para que los haitianos sigan en contacto.",
+  "heroBody": "Estamos creando AyiNou para los haitianos en el país y en el extranjero. Es un espacio para mantenernos en contacto, compartir lo que pasa en nuestras comunidades y trabajar juntos.",
+  "building": "Lo que estamos construyendo",
+  "topics": {
+    "communities": {
+      "name": "Comunidades en Haití y en el extranjero",
+      "description": "Estamos preparando espacios para encontrar a personas con vínculos con el mismo departamento de Haití o la misma comunidad de la diáspora."
+    },
+    "conversations": {
+      "name": "Conversaciones útiles",
+      "description": "Queremos que las personas hagan preguntas, compartan información con sus fuentes y conversen con respeto sobre lo que pasa donde viven."
+    },
+    "projects": {
+      "name": "Proyectos que podemos realizar juntos",
+      "description": "Queremos que sea más fácil proponer una idea, encontrar personas que puedan ayudar y colaborar en proyectos locales."
+    }
+  },
+  "missionBody": "Creemos en el diálogo pacífico, la confianza basada en evidencia y los proyectos que generan resultados concretos para las comunidades. Aquí hay lugar para todos.",
+  "statusLabel": "Conexión con la API",
+  "checking": "Comprobando…",
+  "online": "Disponible",
+  "offline": "No disponible en este momento",
+  "offlineHelp": "El servicio no está conectado. Inténtalo más tarde o inicia la API local.",
+  "footer": "Un proyecto para los haitianos en Haití y en toda la diáspora.",
+  "switchToLight": "Cambiar al tema claro",
+  "switchToDark": "Cambiar al tema oscuro"
+}

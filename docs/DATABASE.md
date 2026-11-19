@@ -17,6 +17,8 @@ npm run db:push
 
 Use `npx supabase migration new descriptive_name` to create another versioned migration. Never use `db reset --remote`, drops, or local pgTAP against the hosted project.
 
+Phase 2F migration `20261120060000_spanish_locale.sql` expands `public.profiles.preferred_locale` to accept `ht`, `fr`, `en`, and `es`. The default remains `ht`, and existing preferences are preserved. Both Fastify profile PATCH routes retain their existing shapes and accept the same shared locale values for web and future mobile clients. Both PostgreSQL profile RPCs rely on the profile constraint and retain their existing authorization.
+
 ## Auth settings
 
 Email/password signup and email confirmation are enabled. Site URL: `http://localhost:4000`. Allowed redirects: `http://localhost:4000/auth/callback` and `http://localhost:4000/reset-password`. Use `localhost` in the browser so PKCE cookies and callbacks share one host. Next.js restores and refreshes Supabase SSR sessions. Fastify validates bearer tokens before protected profile requests.

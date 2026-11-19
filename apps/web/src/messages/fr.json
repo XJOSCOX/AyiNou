@@ -1,4 +1,18 @@
 {
+  "pageTitle": "AYINOU — Ensemble pour Haïti",
+  "pageDescription": "Ayinou rassemble les Haïtiens autour du dialogue pacifique, de la collaboration et de l’action communautaire.",
+  "notFound": "Page introuvable",
+  "pageError": "Cette page n’a pas pu être chargée.",
+  "validation": {
+    "required": "Remplissez ce champ.",
+    "email": "Saisissez une adresse e-mail valide.",
+    "url": "Saisissez une URL valide.",
+    "tooShort": "Saisissez au moins {min} caractères.",
+    "tooLong": "Saisissez au maximum {max} caractères.",
+    "underMin": "Saisissez une valeur d’au moins {min}.",
+    "overMax": "Saisissez une valeur d’au plus {max}.",
+    "invalid": "Vérifiez le format de ce champ."
+  },
   "languageLabel": "Langue",
   "skip": "Aller au contenu",
   "home": "Accueil",

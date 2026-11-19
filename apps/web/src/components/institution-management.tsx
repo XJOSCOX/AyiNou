@@ -103,15 +103,19 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
             </> : <>
               <InstitutionForm initial={{ ...org, contactEmail: detail.contactEmail }} role={role} identityLocked={detail.identityLocked}
                 onSave={async (input) => { await saveInstitution(org.id, input); refresh(); }} />
-              <label className="mt-5 block border-t border-[var(--theme-border)] pt-4 text-sm font-semibold">{t.uploadLogo}
-                <input type="file" className={institutionField} accept="image/jpeg,image/png,image/webp" disabled={busy}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    event.target.value = "";
-                    if (file) void run(() => uploadInstitutionLogo(org.id, file), "saved");
-                  }} />
-                <small className="mt-1 block text-[var(--theme-body)]">{membershipMessages[locale].photoHint}</small>
-              </label>
+              <div className="mt-5 border-t border-[var(--theme-border)] pt-4">
+                <label className="inline-flex">
+                  <input type="file" className="peer sr-only" accept="image/jpeg,image/png,image/webp" disabled={busy}
+                    aria-describedby="institution-logo-hint"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      event.target.value = "";
+                      if (file) void run(() => uploadInstitutionLogo(org.id, file), "saved");
+                    }} />
+                  <span className={`${institutionAction} cursor-pointer peer-focus-visible:outline-2 peer-disabled:cursor-not-allowed peer-disabled:opacity-60`}>{t.uploadLogo}</span>
+                </label>
+                <small id="institution-logo-hint" className="mt-1 block text-[var(--theme-body)]">{membershipMessages[locale].photoHint}</small>
+              </div>
             </>}
           </section>
           <section className={institutionCard}>

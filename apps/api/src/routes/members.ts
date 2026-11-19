@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { interestCodes, referralCodePattern, type ApiErrorResponse, type UpdateMemberProfile } from "@ayinou/shared";
+import { interestCodes, locales, referralCodePattern, type ApiErrorResponse, type UpdateMemberProfile } from "@ayinou/shared";
 import type { AuthVerifier } from "../services/auth.js";
 import { MemberError, type MemberRepository } from "../services/members.js";
 
@@ -10,7 +10,7 @@ declare module "fastify" {
 
 const legacyFields = {
   displayName: z.string().trim().min(2).max(80),
-  preferredLocale: z.enum(["ht", "fr", "en"]),
+  preferredLocale: z.enum(locales),
   residenceCountryCode: z.union([z.string().regex(/^[A-Z]{2}$/), z.null()]),
   residenceDepartmentCode: z.union([z.string().regex(/^HT-[A-Z]{2}$/), z.null()]),
   diasporaDepartmentCode: z.union([z.string().regex(/^HT-[A-Z]{2}$/), z.null()]),

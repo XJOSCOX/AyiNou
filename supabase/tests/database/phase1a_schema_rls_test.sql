@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(30);
+select plan(31);
 
 select is((select count(*)::int from public.departments), 10, 'ten Haiti departments are seeded');
 select ok((select bool_and(relrowsecurity) from pg_class where oid in (
@@ -24,7 +24,9 @@ select throws_ok($$select private.initialize_member('33333333-3333-4333-8333-333
 select is((select count(*)::int from public.profiles where user_id =
   '33333333-3333-4333-8333-333333333333'), 0, 'failed initialization leaves no orphan profile');
 
-select throws_ok($$update public.profiles set preferred_locale = 'es'
+select lives_ok($$update public.profiles set preferred_locale = 'es'
+  where user_id = '11111111-1111-4111-8111-111111111111'$$, 'Spanish is a supported locale');
+select throws_ok($$update public.profiles set preferred_locale = 'de'
   where user_id = '11111111-1111-4111-8111-111111111111'$$,
   '23514');
 select throws_ok($$update public.member_private set residence_department_code = 'HT-OU'

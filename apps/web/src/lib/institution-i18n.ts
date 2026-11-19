@@ -2,7 +2,9 @@ import ht from "../messages/institution/ht.json";
 import fr from "../messages/institution/fr.json";
 import en from "../messages/institution/en.json";
 
-export const institutionMessages = { ht, fr, en };
+import type { Locale } from "@ayinou/shared";
+import es from "../messages/institution/es.json";
+export const institutionMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 export type InstitutionMessages = typeof en;
 
 export function institutionError(messages: InstitutionMessages, cause: unknown) {

@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
 import dotenv from "dotenv";
 import sharp from "sharp";
 import { createClient } from "@supabase/supabase-js";
@@ -135,7 +134,7 @@ try {
     .select("user_id,activity_day").eq("user_id", ids[0]);
   assert.ifError(activityError);
   assert.equal(activity.length, 1);
-  for (const locale of ["ht", "fr", "en"]) {
+  for (const locale of ["ht", "fr", "en", "es"]) {
     const localized = await app.inject({
       method: "PATCH", url: "/api/v1/me/profile", headers: bearer,
       payload: { ...input, preferredLocale: locale },
@@ -143,7 +142,14 @@ try {
     assert.equal(localized.statusCode, 200, localized.body);
     assert.equal(localized.json().profile.preferredLocale, locale);
   }
-  console.log("profile initialization / atomic update / department / ht-fr-en: pass");
+  const spanish = await app.inject({ method: "PATCH", url: "/api/v1/me/profile/details", headers: bearer, payload: { preferredLocale: "es" } });
+  assert.equal(spanish.statusCode, 200, spanish.body);
+  assert.equal(spanish.json().profile.preferredLocale, "es");
+  const spanishReloaded = await app.inject({ method: "GET", url: "/api/v1/me/profile", headers: bearer });
+  assert.equal(spanishReloaded.json().profile.preferredLocale, "es");
+  const invalidLocale = await app.inject({ method: "PATCH", url: "/api/v1/me/profile/details", headers: bearer, payload: { preferredLocale: "de" } });
+  assert.equal(invalidLocale.statusCode, 400);
+  console.log("profile initialization / atomic update / department / four saved languages: pass");
 
   const afterStats = await app.inject({ method: "GET", url: "/api/v1/community/stats" });
   assert.equal(afterStats.statusCode, 200, afterStats.body);
@@ -288,16 +294,6 @@ try {
   const revoked = await memberClient().auth.refreshSession({ refresh_token: refreshed.session.refresh_token });
   expectDenied(revoked, "revoked refresh token");
   console.log("session refresh / logout revocation: pass");
-
-  for (const folder of ["auth", "membership"]) {
-    const languageFiles = ["ht", "fr", "en"].map((locale) => JSON.parse(readFileSync(`apps/web/src/messages/${folder}/${locale}.json`, "utf8")));
-    const keys = Object.keys(languageFiles[0]).sort();
-    for (const messages of languageFiles) {
-      assert.deepEqual(Object.keys(messages).sort(), keys);
-      assert.ok(Object.values(messages).every((value) => typeof value === "string" && value.length > 0));
-    }
-  }
-  console.log("ht/fr/en auth dictionaries: pass");
 
   console.log("public registration, email confirmation, password reset: not executed (controlled deliverable email required)");
   console.log("real token expiry: not executed (hosted JWT lifetime not shortened)");

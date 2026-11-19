@@ -8,7 +8,7 @@ import { interestCodes, type Department, type InterestCode, type MemberProfile, 
 import { fetchDepartments, fetchMyProfile, updateMyProfile, uploadAvatar } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { accountMessages } from "@/lib/account-i18n";
-import { isLocale, type Locale } from "@/lib/i18n";
+import { isLocale, languageNames, locales, type Locale } from "@/lib/i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionMessages } from "@/lib/institution-i18n";
@@ -91,13 +91,18 @@ function ProfileEditor({ profile, departments, onboarding }: {
   const t = authMessages[locale];
   const account = accountMessages[locale];
   const m = membershipMessages[locale];
+  const errors = {
+    invalidPrivateNames: m.invalidPrivateNames, categoryRequired: m.categoryRequired, countryCodeHint: t.countryCodeHint,
+    usernameHint: m.usernameHint, invalidName: t.invalidName, usernameTaken: m.usernameTaken, saveError: t.saveError,
+  };
   const router = useRouter();
   const [saved, setSaved] = useState(profile);
   const [step, setStep] = useState(profile.onboardingStep ?? 0);
   const [firstName, setFirstName] = useState(profile.firstName ?? "");
   const [lastName, setLastName] = useState(profile.lastName ?? "");
   const [displayName, setDisplayName] = useState(profile.displayName ?? "");
-  const [preferredLocale, setPreferredLocale] = useState<Locale>(profile.preferredLocale);
+  const [preferredLocaleChoice, setPreferredLocale] = useState<Locale | null>(null);
+  const preferredLocale = preferredLocaleChoice ?? (onboarding && step === 0 ? locale : saved.preferredLocale);
   const [category, setCategory] = useState<MembershipCategory | "">(profile.membershipCategory ?? "");
   const [country, setCountry] = useState(profile.residenceCountryCode ?? "");
   const [countryOption, setCountryOption] = useState(country && !countryOptions.includes(country) ? "other" : country);
@@ -109,8 +114,8 @@ function ProfileEditor({ profile, departments, onboarding }: {
   const [discoverable, setDiscoverable] = useState(profile.discoverable ?? false);
   const [showCategory, setShowCategory] = useState(profile.showMembershipCategory ?? false);
   const [avatar, setAvatar] = useState(profile.avatarUrl);
-  const [error, setError] = useState("");
-  const [photoError, setPhotoError] = useState("");
+  const [error, setError] = useState<keyof typeof errors | "">("");
+  const [photoError, setPhotoError] = useState<"photoHint" | "avatarError" | "">("");
   const [success, setSuccess] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -124,13 +129,13 @@ function ProfileEditor({ profile, departments, onboarding }: {
     setSuccess(false);
     const changes: ProfileChanges = {};
     if (all || step === 0) {
-      if (!validName(firstName) || !validName(lastName)) { setError(m.invalidPrivateNames); return; }
-      if (!category) { setError(m.categoryRequired); return; }
+      if (!validName(firstName) || !validName(lastName)) { setError("invalidPrivateNames"); return; }
+      if (!category) { setError("categoryRequired"); return; }
       Object.assign(changes, { firstName: firstName.trim(), lastName: lastName.trim(), membershipCategory: category, preferredLocale });
     }
     if (all || step === 1) {
       const normalized = skip ? "" : country.trim().toUpperCase();
-      if (normalized && !/^[A-Z]{2}$/.test(normalized)) { setError(t.countryCodeHint); return; }
+      if (normalized && !/^[A-Z]{2}$/.test(normalized)) { setError("countryCodeHint"); return; }
       Object.assign(changes, {
         residenceCountryCode: normalized || null,
         residenceDepartmentCode: normalized === "HT" ? department || null : null,
@@ -139,8 +144,8 @@ function ProfileEditor({ profile, departments, onboarding }: {
     }
     if (all || step === 2) {
       const normalized = username.trim().toLowerCase();
-      if (!/^[a-z0-9][a-z0-9_]{2,23}$/.test(normalized) || reserved.includes(normalized)) { setError(m.usernameHint); return; }
-      if (displayName.trim().length < 2 || displayName.trim().length > 80) { setError(t.invalidName); return; }
+      if (!/^[a-z0-9][a-z0-9_]{2,23}$/.test(normalized) || reserved.includes(normalized)) { setError("usernameHint"); return; }
+      if (displayName.trim().length < 2 || displayName.trim().length > 80) { setError("invalidName"); return; }
       Object.assign(changes, { username: normalized, displayName: displayName.trim(), biography: biography.trim() || null, discoverable, showMembershipCategory: showCategory });
     }
     if (all || step === 3) changes.interests = skip ? [] : interests;
@@ -161,7 +166,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "";
       if (code === "UNAUTHORIZED") router.replace("/login");
-      else setError(code === "USERNAME_TAKEN" ? m.usernameTaken : t.saveError);
+      else setError(code === "USERNAME_TAKEN" ? "usernameTaken" : "saveError");
     } finally { setBusy(false); }
   }
 
@@ -173,7 +178,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
     catch (cause) {
       const code = cause instanceof Error ? cause.message : "";
       if (code === "UNAUTHORIZED") router.replace("/login");
-      else setPhotoError(code === "INVALID_AVATAR" ? m.photoHint : m.avatarError);
+      else setPhotoError(code === "INVALID_AVATAR" ? "photoHint" : "avatarError");
     } finally { setUploading(false); }
   }
 
@@ -268,7 +273,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
       <p className="text-xs text-[var(--theme-body)]">{m.privateNames}</p>
       <label className="block">{t.preferredLanguage}
         <select className={input} value={preferredLocale} onChange={(e) => { if (isLocale(e.target.value)) setPreferredLocale(e.target.value); }}>
-          <option value="ht">Kreyòl ayisyen</option><option value="fr">Français</option><option value="en">English</option>
+          {locales.map((option) => <option key={option} value={option} lang={option}>{languageNames[option]}</option>)}
         </select>
       </label>
     </fieldset>
@@ -312,13 +317,15 @@ function ProfileEditor({ profile, departments, onboarding }: {
       <button type="button" className="text-sm font-semibold text-[var(--theme-link)] underline" onClick={() => setUsername(usernameSuggestion(displayName))}>{m.suggestion}</button>
       <label className="block">{m.biography}<textarea className={input} rows={3} value={biography} onChange={(e) => setBiography(e.target.value)} maxLength={320} /></label>
       <div>
-        <label className="block">{m.photo}
-          <input type="file" className={input} accept="image/jpeg,image/png,image/webp" disabled={uploading || busy}
+        <p>{m.photo}</p>
+        <label className="mt-2 inline-flex">
+          <input type="file" className="peer sr-only" accept="image/jpeg,image/png,image/webp" disabled={uploading || busy}
             aria-label={m.addPhoto} aria-describedby="avatar-hint" onChange={(e) => { void changePhoto(e.target.files?.[0]); e.target.value = ""; }} />
+          <span className="cursor-pointer rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] peer-focus-visible:outline-2 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">{m.addPhoto}</span>
         </label>
         <p id="avatar-hint" className="mt-1 text-xs text-[var(--theme-body)]">{m.photoHint}</p>
         {uploading && <p role="status">{t.working}</p>}
-        {photoError && <p role="alert" className={`mt-2 ${errorBox}`}>{photoError}</p>}
+        {photoError && <p role="alert" className={`mt-2 ${errorBox}`}>{m[photoError]}</p>}
         {avatar && <Image src={avatar} width={56} height={56} alt={m.photoAlt} className="mt-3 rounded-full" unoptimized />}
       </div>
       {onboarding && privacyFields}
@@ -365,7 +372,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
           )) : [personalFields, locationFields, publicFields, interestFields][step]}
 
           <div className={all ? "sticky bottom-0 space-y-3 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-3 shadow-sm sm:p-4" : "space-y-4"}>
-            {error && <p role="alert" className={errorBox}>{error}</p>}
+            {error && <p role="alert" className={errorBox}>{errors[error]}</p>}
             {success && <p role="status" className="text-[var(--theme-link)]">{t.saved}</p>}
             <div className="flex flex-wrap items-center gap-4">
               <button type="submit" disabled={busy || uploading} className={action}>{busy ? t.working : all ? t.saveProfile : step === 3 ? m.finish : m.continue}</button>

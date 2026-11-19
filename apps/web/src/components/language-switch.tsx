@@ -1,9 +1,7 @@
 "use client";
 
-import { isLocale, locales, messages } from "@/lib/i18n";
+import { isLocale, languageNames, locales, messages } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
-
-const languageNames = { ht: "Kreyòl ayisyen", fr: "Français", en: "English" };
 
 export function LanguageSwitch() {
   const [locale, setLocale] = useLocale();

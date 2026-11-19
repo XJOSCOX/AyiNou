@@ -16,7 +16,8 @@ export interface ApiErrorResponse {
   };
 }
 
-export type Locale = "ht" | "fr" | "en";
+export const locales = ["ht", "fr", "en", "es"] as const;
+export type Locale = (typeof locales)[number];
 export type MembershipCategory = "haitian" | "international_supporter";
 export const interestCodes = ["education", "peace", "healthcare", "agriculture", "technology", "entrepreneurship", "employment", "environment", "infrastructure", "culture"] as const;
 export type InterestCode = typeof interestCodes[number];

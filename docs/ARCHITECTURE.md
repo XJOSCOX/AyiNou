@@ -1,7 +1,7 @@
 # Technical Architecture — Hosted Supabase Development
 
 ```text
-Browser → Next.js App Router (localhost:4000, ht/fr/en)
+Browser → Next.js App Router (localhost:4000, ht/fr/en/es)
    │         │ Supabase SSR cookies, PKCE callback, refresh
    │         ▼
    │    Hosted Supabase Auth
@@ -56,7 +56,13 @@ Phase 2D.1 keeps ordinary members, volunteers, staff, and supporters in `private
 
 After verifying JWT signature and claims, Fastify checks the active Supabase session row, account eligibility, application restrictions, and MFA requirements. Next.js checks its cookie session before rendering the protected shell. Owner-facing database policies and RPCs check their own authenticated session. Privileged API calls require AAL2, a TOTP authentication claim from the last 15 minutes, and a live session bound to a currently verified TOTP factor. Refreshing an access token does not extend the TOTP window. Admin and reviewer RPCs verify current assignments in PostgreSQL. Account state and role changes serialize together and write an audit event in the same transaction. Operational statistics use dedicated administrator-only queries. The account switcher never provides platform authority.
 
-Residence country and optional Haiti department are separate from an optional diaspora department of connection. Location is voluntary and self-reported; no precise coordinate is retained. Future public counts require suppression for small cohorts. Required locales are `ht` (default), `fr`, and `en`; future user-generated translations must be labeled. Public launch still requires retention/deletion rules, moderation governance, abuse controls, custom email delivery, monitoring, and privacy review.
+Residence country and optional Haiti department are separate from an optional diaspora department of connection. Location is voluntary and self-reported. Future public counts require suppression for small cohorts. Public launch still requires retention/deletion rules, moderation governance, abuse controls, custom email delivery, monitoring, and privacy review.
+
+### Localization
+
+The shared `locales` contract defines `ht` (default), `fr`, `en`, and `es` for web, Fastify, and future Android and iOS clients. Each web namespace contains one JSON dictionary per language. The registry types require every locale and the parity checker rejects missing, extra, empty, or interpolated keys that diverge from the reference. Fastify returns stable error codes for the client to translate. Member names, organizations, biographies, codes, and evidence stay as entered.
+
+Next.js renders the language from the browser cookie. The menu writes the cookie and a local storage fallback, updates the current screen, and reuses the active locale for native form feedback, time, and number formatting. Without a browser choice, a signed-in browser restores the saved profile preference when RLS grants access. During first onboarding, the confirmed signup selection can seed the interface. Saving the profile preference uses the existing authenticated Fastify endpoint and the database constraint.
 
 The pinned Supabase CLI manages hosted migration history. Docker and pgTAP remain optional for isolated local checks. Hosted integration tests use identifiable synthetic records, exclusion from public metrics, transaction rollback for aggregate assertions, and targeted cleanup. No hosted reset or destructive test workflow is used.
 

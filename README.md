@@ -22,15 +22,18 @@ Ayinou is a Haitian-first, multilingual community platform. It connects people a
 - Haitian Creole (`ht`) — default
 - French (`fr`)
 - English (`en`)
+- Spanish (`es`)
 
-All interface strings are translated from day one; user-generated posts remain in their original language. User-generated translations can be added as a separately labeled feature later. Use language selection during onboarding and make it changeable in settings.
+The language menu updates the current screen and remembers the choice in that browser. Members can save an account preference during onboarding or under My Profile. Ayinou restores that preference after sign-in in a browser without a language choice. User-generated text stays in its original language.
+
+Translation files live under `apps/web/src/messages`. Each namespace ships an `ht.json`, `fr.json`, `en.json`, and `es.json` with the same keys and interpolation placeholders. Run `npm run test:i18n` to check every dictionary. Normal `npm test` also runs this check.
 
 ## Current technology stack
 
 - Next.js App Router, React, TypeScript, Tailwind CSS (`apps/web`)
 - Independent Node.js, Fastify, TypeScript API with Zod environment validation (`apps/api`)
 - Shared API response contracts (`packages/shared`)
-- Haitian Creole, French, and English translation dictionaries; Creole by default
+- Haitian Creole, French, English, and Spanish translation dictionaries with Creole as the default
 - Hosted Supabase Auth and PostgreSQL for development, with versioned migrations, RLS, and authenticated Fastify profile routes.
 
 We start with a responsive web app to validate UX and product flows. Android/iOS clients are later phases and can reuse Supabase-backed services.
