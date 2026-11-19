@@ -1,0 +1,257 @@
+# Ayinou master database plan
+
+**Status:** Architecture proposal, 2026-11-19. Only the five tables marked **existing** are deployed. This document creates no schema objects. It uses the supplied `DATABASE_BLUEPRINT.md`, current product/roadmap documents, both applied migrations, and the hosted AyiNou project (`hcbxulyfmdmuyccgrujs`).
+
+## Verified baseline and design rules
+
+Hosted migration history contains `20261119160000_initial_schema` and `20261119173400_hosted_profile_rpc`; a remote dry-run reports no pending migrations. The hosted PostgREST catalog exposes exactly the five application tables below and the two profile RPCs. Guarded hosted integration checks passed for Auth login, profile initialization/edit, RLS owner isolation, role/badge denial, refresh, and logout. Public registration, delivered confirmation/recovery mail, and natural token expiry remain unverified. No future table in this document exists yet.
+
+`auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Keep original `ht`/`fr`/`en` content and label translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
+
+### Catalog notation
+
+Every column is listed below; `PK` means primary key, `FK→` names a referenced column, `UQ` means unique constraint, and `IX(...)` means a proposed index (the PK/UQ already supply their own indexes). `id uuid PK` means `DEFAULT gen_random_uuid()`. `ca timestamptz` means `created_at timestamptz NOT NULL DEFAULT now()`; `ua timestamptz` means `updated_at timestamptz NOT NULL DEFAULT now()` with a trigger. Other `timestamptz` columns are nullable unless marked `!`. `!` means NOT NULL; `?` means nullable. All proposed status/kind/locale values need named CHECK constraints or stable reference tables; examples below are controlled values, not client-writable free text. Every FK needs an explicit `ON DELETE` choice during migration review; default to `RESTRICT` for audit/financial history, `CASCADE` for pure membership/joins, and `SET NULL` for optional actors. Do not cascade-delete evidence or audit history without retention review.
+
+## Existing schema — exact applied contract
+
+| Table / phase | Columns and constraints | Existing indexes |
+| --- | --- | --- |
+| `departments` / 1A | `code text PK` (`^HT-[A-Z]{2}$`), `name text! UQ`. Seed: HT-AR, HT-CE, HT-GA, HT-NI, HT-ND, HT-NE, HT-NO, HT-OU, HT-SD, HT-SE. **No timestamps** in applied schema. | PK and name UQ |
+| `profiles` / 1A | `user_id uuid PK FK→auth.users.id ON DELETE CASCADE`, `display_name text?` (trimmed, 2–80 chars), `preferred_locale text! DEFAULT 'ht' CHECK (ht/fr/en)`, `is_visible boolean! DEFAULT false` (visible requires name), `ca`, `ua`. | PK |
+| `member_private` / 1A | `user_id uuid PK FK→profiles.user_id ON DELETE CASCADE`, `residence_country_code text?` (two uppercase letters), `residence_department_code text? FK→departments.code` (requires residence HT), `diaspora_department_code text? FK→departments.code` (disallowed for residence HT), `ca`, `ua`. | PK; partial `member_private_residence_idx(residence_country_code,residence_department_code)` when country set; partial `member_private_diaspora_idx(diaspora_department_code)` when set |
+| `role_assignments` / 1A | `user_id uuid! FK→auth.users.id ON DELETE CASCADE`, `role text! CHECK (administrator/moderator)`, `granted_by uuid? FK→auth.users.id ON DELETE SET NULL`, `ca`; composite PK `(user_id,role)`. **No updated_at**. | PK; `role_assignments_role_idx(role,user_id)` |
+| `verification_records` / 1A | `id uuid PK DEFAULT gen_random_uuid()`, `user_id uuid! FK→auth.users.id ON DELETE CASCADE`, `verification_type text! CHECK (identity/notable_person/organization)`, `status text! DEFAULT pending CHECK (pending/verified/revoked)`, `reviewed_by uuid? FK→auth.users.id ON DELETE SET NULL`, `verified_at timestamptz?`, `ca`, `ua`; UQ `(user_id,verification_type)`; reviewer/date combination constrained by status. | PK, UQ, `verification_records_user_idx(user_id)` |
+
+All five have RLS. Anonymous/authenticated roles read departments; anonymous reads only visible profiles; owners read/edit allowed profile columns and their private row. Neither client role can insert/delete these records or access role/verification tables. `private.initialize_member(uuid)` is the preserved atomic, retry-safe security-definer initializer. `public.initialize_member_for_api(uuid)` is service-role-only; `public.update_my_profile(...)` is an authenticated security-invoker atomic update. Keep these contracts and current Fastify routes. An existing `verification_records` row is **user-scoped**; organizational verification below is a separate model. Any later profile handle/avatar/bio fields require a separate additive migration and privacy review.
+
+## Planned schema by domain and implementation phase
+
+The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
+
+The blueprint's polymorphic `reactions` proposal is represented by `post_reactions` and `comment_reactions` so each target has a real FK and a simple unique key.
+
+### Identity, account rights, geography — common wave / phases 2–3 and before launch
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `user_settings` / common | `user_id uuid PK FK→profiles.user_id`, `profile_discovery boolean!`, `default_post_visibility text!`, `translation_opt_in boolean!`, `ca`, `ua` | CHECK visibility; owner-only |
+| `user_blocks` / 3 | `blocker_id uuid! FK→profiles.user_id`, `blocked_id uuid! FK→profiles.user_id`, `ca`; PK `(blocker_id,blocked_id)` | CHECK blocker≠blocked; IX `(blocked_id,blocker_id)` |
+| `user_mutes` / 3 | `user_id uuid! FK→profiles.user_id`, `muted_user_id uuid! FK→profiles.user_id`, `ca`; PK `(user_id,muted_user_id)` | CHECK users differ |
+| `user_sessions_audit` / conditional | `id uuid PK`, `user_id uuid? FK→auth.users.id`, `event_kind text!`, `device_class text?`, `coarse_region text?`, `occurred_at timestamptz!` | IX `(user_id,occurred_at DESC)`; no tokens/IP by default |
+| `account_deletion_requests` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `status text!`, `requested_at timestamptz!`, `processed_at timestamptz?`, `ca`, `ua` | IX `(user_id,requested_at DESC)`; partial UQ one open request/user |
+| `account_data_exports` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `status text!`, `private_object_path text?`, `expires_at timestamptz?`, `ca`, `ua` | IX `(user_id,created_at DESC)`; private signed retrieval |
+| `countries` / common | `code text PK` (ISO alpha-2), `name_ht text!`, `name_fr text!`, `name_en text!`, `active boolean!`, `ca`, `ua` | CHECK uppercase two-letter code; optional FK on `member_private.residence_country_code` only after backfill/validation |
+| `communes` / later | `id uuid PK`, `department_code text! FK→departments.code`, `official_code text! UQ`, `name text!`, `active boolean!`, `ca`, `ua` | IX `(department_code,name)`; source/version required |
+| `analytics_daily_aggregates` / 2 | `day date!`, `metric text!`, `scope_kind text!`, `scope_code text!`, `value bigint!`, `definition_version integer!`, `computed_at timestamptz!`; PK `(day,metric,scope_kind,scope_code,definition_version)` | CHECK value≥0; server-only; suppress small cohorts at API |
+| `user_activity_daily` / 2–3 | `user_id uuid! FK→auth.users.id`, `day date!`, `qualifying_actions integer!`; PK `(user_id,day)` | CHECK count≥0; IX `(day,user_id)`; bounded retention |
+
+### Social feed, media, notifications — phase 3 (later rows marked)
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `posts` | `id uuid PK`, `author_user_id uuid! FK→profiles.user_id`, `community_id uuid? FK→communities.id`, `body text!`, `content_language text!`, `visibility text!`, `status text!`, `ca`, `ua`, `deleted_at timestamptz?` | IX `(status,created_at DESC,id DESC)`, `(author_user_id,created_at DESC)`, `(community_id,created_at DESC)`; body length/language CHECK |
+| `comments` | `id uuid PK`, `post_id uuid! FK→posts.id`, `author_user_id uuid! FK→profiles.user_id`, `parent_comment_id uuid? FK→comments.id`, `body text!`, `content_language text!`, `status text!`, `ca`, `ua`, `deleted_at timestamptz?` | IX `(post_id,created_at,id)`, `(parent_comment_id)`; parent must belong to same post, bound depth |
+| `post_reactions` | `post_id uuid! FK→posts.id`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `ca`; PK `(post_id,user_id)` | IX `(user_id,created_at DESC)`; one active reaction/post/user |
+| `comment_reactions` | `comment_id uuid! FK→comments.id`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `ca`; PK `(comment_id,user_id)` | IX `(user_id,created_at DESC)` |
+| `follows` | `follower_id uuid! FK→profiles.user_id`, `followed_id uuid! FK→profiles.user_id`, `ca`; PK `(follower_id,followed_id)` | CHECK users differ; IX `(followed_id,follower_id)` |
+| `bookmarks` / later | `user_id uuid! FK→profiles.user_id`, `post_id uuid! FK→posts.id`, `ca`; PK `(user_id,post_id)` | Private owner-only |
+| `hashtags` / later | `id uuid PK`, `normalized_tag text! UQ`, `display_tag text!`, `ca` | CHECK normalized format/length |
+| `post_tags` / later | `post_id uuid! FK→posts.id`, `hashtag_id uuid! FK→hashtags.id`; PK `(post_id,hashtag_id)` | IX `(hashtag_id,post_id)` |
+| `media_assets` | `id uuid PK`, `owner_user_id uuid! FK→profiles.user_id`, `bucket text!`, `storage_path text!`, `mime_type text!`, `byte_size bigint!`, `moderation_state text!`, `ca`, `ua`, `deleted_at timestamptz?`; UQ `(bucket,storage_path)` | IX `(owner_user_id,created_at DESC)`; CHECK bytes>0, allowlisted type/bucket; bytes in Storage, private by default |
+| `post_media` | `post_id uuid! FK→posts.id`, `media_asset_id uuid! FK→media_assets.id`, `position smallint!`; PK `(post_id,media_asset_id)` | UQ `(post_id,position)`; ownership/permission validation |
+| `notifications` | `id uuid PK`, `recipient_id uuid! FK→profiles.user_id`, `actor_id uuid? FK→profiles.user_id`, `event_kind text!`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `read_at timestamptz?`, `ca` | IX `(recipient_id,read_at,created_at DESC)`; CHECK at most one object target; no private preview |
+| `notification_preferences` | `user_id uuid PK FK→profiles.user_id`, `in_app_enabled boolean!`, `email_enabled boolean!`, `push_enabled boolean!`, `ca`, `ua` | Owner-only; event-level preferences can be additive later |
+| `push_devices` / 10 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `platform text!`, `token_ciphertext bytea!`, `token_hash bytea! UQ`, `last_seen_at timestamptz!`, `revoked_at timestamptz?`, `ca`, `ua` | IX `(user_id,revoked_at)`; server-only token access |
+
+### Communities and groups — phase 4
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `communities` | `id uuid PK`, `slug text! UQ`, `name text!`, `description text?`, `kind text!`, `department_code text? FK→departments.code`, `visibility text!`, `status text!`, `ca`, `ua` | IX `(kind,department_code)`, `(status,visibility)`; department kind requires department FK |
+| `community_members` | `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `member_state text!`, `joined_at timestamptz!`; PK `(community_id,user_id)` | IX `(user_id,member_state)` |
+| `community_roles` | `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `role text!`, `granted_by uuid? FK→auth.users.id`, `ca`; PK `(community_id,user_id,role)` | FK `(community_id,user_id)`→`community_members`; IX `(user_id,role)`; trusted grants only |
+| `community_rules` | `id uuid PK`, `community_id uuid! FK→communities.id`, `rule_text text!`, `position smallint!`, `ca`, `ua` | UQ `(community_id,position)` |
+| `community_join_requests` / later | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `status text!`, `ca`, `ua` | Partial UQ one pending `(community_id,user_id)`; IX `(community_id,status,created_at)` |
+| `community_bans` | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `issued_by uuid! FK→auth.users.id`, `reason_code text!`, `expires_at timestamptz?`, `revoked_at timestamptz?`, `ca` | Partial UQ one active ban `(community_id,user_id)`; IX `(user_id,expires_at)` |
+
+### Organizations, verification, ambassadors — phase 5
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `organizations` | `id uuid PK`, `slug text! UQ`, `name text!`, `kind text!`, `description text?`, `status text!`, `ca`, `ua` | IX `(status,kind,name)`; no automatic user badge |
+| `organization_members` | `organization_id uuid! FK→organizations.id`, `user_id uuid! FK→profiles.user_id`, `role text!`, `status text!`, `ca`, `ua`; PK `(organization_id,user_id)` | IX `(user_id,status)`; representative grants audited |
+| `verification_applications` | `id uuid PK`, `applicant_id uuid! FK→profiles.user_id`, `subject_user_id uuid? FK→profiles.user_id`, `organization_id uuid? FK→organizations.id`, `requested_type text!`, `status text!`, `ca`, `ua` | CHECK exactly one subject; IX `(applicant_id,created_at DESC)`, `(status,created_at)`; applicant must have subject authority |
+| `verification_reviews` | `id uuid PK`, `application_id uuid! FK→verification_applications.id`, `reviewer_id uuid! FK→auth.users.id`, `decision text!`, `rationale text!`, `ca` | IX `(application_id,created_at)`; forbid self/conflicted review |
+| `organization_verifications` | `organization_id uuid PK FK→organizations.id`, `status text!`, `reviewed_by uuid? FK→auth.users.id`, `verified_at timestamptz?`, `revoked_at timestamptz?`, `ca`, `ua` | CHECK status/date consistency; no client writes |
+| `ambassador_invitations` | `id uuid PK`, `invitee_email_ciphertext bytea?`, `invitee_user_id uuid? FK→profiles.user_id`, `sponsor_id uuid! FK→auth.users.id`, `status text!`, `expires_at timestamptz!`, `ca`, `ua` | CHECK one invitee reference; IX `(sponsor_id,status)`; private contact only |
+| `ambassador_assignments` | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `scope text!`, `status text!`, `starts_at timestamptz!`, `ends_at timestamptz?`, `ca`, `ua` | IX `(user_id,status)`; partial UQ active `(user_id,scope)`; no admin power |
+| `verification_evidence` | `id uuid PK`, `application_id uuid! FK→verification_applications.id`, `media_asset_id uuid! FK→media_assets.id`, `evidence_kind text!`, `retention_deadline timestamptz!`, `ca` | UQ `(application_id,media_asset_id)`; private bucket, no public URL |
+
+### Projects and volunteering — phase 6
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `projects` | `id uuid PK`, `owner_user_id uuid? FK→profiles.user_id`, `owner_organization_id uuid? FK→organizations.id`, `title text!`, `description text!`, `department_code text? FK→departments.code`, `status text!`, `ca`, `ua`, `archived_at timestamptz?` | CHECK exactly one owner; IX `(status,department_code,created_at DESC)`, `(owner_user_id,status)` |
+| `project_members` | `project_id uuid! FK→projects.id`, `user_id uuid! FK→profiles.user_id`, `role text!`, `status text!`, `ca`, `ua`; PK `(project_id,user_id)` | IX `(user_id,status)`; organizer/reviewer separation |
+| `project_milestones` | `id uuid PK`, `project_id uuid! FK→projects.id`, `title text!`, `due_at timestamptz?`, `status text!`, `completed_at timestamptz?`, `ca`, `ua` | IX `(project_id,status,due_at)` |
+| `project_updates` | `id uuid PK`, `project_id uuid! FK→projects.id`, `author_id uuid! FK→profiles.user_id`, `body text!`, `status text!`, `ca`, `ua`, `supersedes_id uuid? FK→project_updates.id` | IX `(project_id,created_at DESC)`; corrections linked, history retained |
+| `project_needs` | `id uuid PK`, `project_id uuid! FK→projects.id`, `need_type text!`, `description text!`, `quantity numeric(12,2)?`, `unit text?`, `status text!`, `ca`, `ua` | IX `(project_id,status)`; CHECK quantity>0 when set |
+| `volunteer_offers` | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `project_id uuid! FK→projects.id`, `need_id uuid? FK→project_needs.id`, `offer_type text!`, `status text!`, `private_message text?`, `ca`, `ua` | IX `(project_id,status)`, `(user_id,created_at DESC)`; need must belong to project |
+| `project_outcomes` | `id uuid PK`, `project_id uuid! FK→projects.id`, `metric text!`, `value numeric(16,2)!`, `methodology text!`, `verification_state text!`, `verified_by uuid? FK→auth.users.id`, `ca`, `ua` | IX `(project_id,created_at DESC)`; CHECK value≥0 |
+| `project_reviews` | `id uuid PK`, `project_id uuid! FK→projects.id`, `reviewer_id uuid! FK→auth.users.id`, `decision text!`, `reason text!`, `ca` | IX `(project_id,created_at DESC)`; conflict checks |
+
+### Reports, claims, evidence, editorial review — phase 7
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `community_claims` | `id uuid PK`, `submitted_by uuid! FK→profiles.user_id`, `claim_kind text!`, `summary text!`, `content_language text!`, `broad_department_code text? FK→departments.code`, `risk_level text!`, `publish_state text!`, `review_status text!`, `ca`, `ua`, `deleted_at timestamptz?` | IX `(publish_state,created_at DESC)`, `(review_status,created_at DESC)`, `(broad_department_code,created_at DESC)` |
+| `claim_sources` | `id uuid PK`, `claim_id uuid! FK→community_claims.id`, `source_kind text!`, `source_url text?`, `citation_text text?`, `ca` | IX `(claim_id,created_at)`; CHECK URL/citation present; URL sanitization |
+| `claim_evidence` | `id uuid PK`, `claim_id uuid! FK→community_claims.id`, `submitter_id uuid! FK→profiles.user_id`, `media_asset_id uuid? FK→media_assets.id`, `private_text text?`, `evidence_kind text!`, `access_state text!`, `retention_deadline timestamptz!`, `ca` | IX `(claim_id,access_state)`, `(retention_deadline)`; CHECK content present; private by default |
+| `claim_attestations` | `id uuid PK`, `claim_id uuid! FK→community_claims.id`, `user_id uuid! FK→profiles.user_id`, `stance text!`, `firsthand boolean!`, `rationale text?`, `ca`, `ua`; UQ `(claim_id,user_id)` | IX `(user_id,created_at DESC)`; popularity never determines truth |
+| `claim_reviews` | `id uuid PK`, `claim_id uuid! FK→community_claims.id`, `reviewer_id uuid! FK→auth.users.id`, `assessment text!`, `explanation text!`, `ca` | IX `(claim_id,created_at DESC)`; append-only editorial decisions |
+| `claim_status_history` | `id uuid PK`, `claim_id uuid! FK→community_claims.id`, `old_status text?`, `new_status text!`, `actor_id uuid! FK→auth.users.id`, `reason text!`, `ca` | IX `(claim_id,created_at DESC)`; append-only |
+| `claim_appeals` | `id uuid PK`, `claim_id uuid! FK→community_claims.id`, `appellant_id uuid! FK→profiles.user_id`, `reason text!`, `status text!`, `resolved_by uuid? FK→auth.users.id`, `resolved_at timestamptz?`, `ca`, `ua` | IX `(claim_id,status)`, `(appellant_id,created_at DESC)`; independent adjudication |
+| `claim_safety_actions` | `id uuid PK`, `claim_id uuid! FK→community_claims.id`, `action text!`, `reviewer_id uuid! FK→auth.users.id`, `reason text!`, `ca` | IX `(claim_id,created_at DESC)`; append-only |
+
+Published claim summaries must pass separate safety and evidence checks. No live actionable location, witness identity, alleged perpetrator details, or unredacted evidence is public by default. Ayinou is not emergency dispatch.
+
+### Radio and media — phase 8
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `radio_stations` | `id uuid PK`, `organization_id uuid! FK→organizations.id`, `name text!`, `department_code text? FK→departments.code`, `description text?`, `languages text[]!`, `status text!`, `ca`, `ua` | UQ `(organization_id,name)`; IX `(status,department_code)`; languages subset ht/fr/en or reviewed extensions |
+| `radio_streams` | `id uuid PK`, `station_id uuid! FK→radio_stations.id`, `authorized_url text!`, `format text!`, `rights_confirmed_at timestamptz?`, `rights_expires_at timestamptz?`, `active boolean!`, `ca`, `ua` | IX `(station_id,active)`; server checks rights/URL safety |
+| `radio_programs` | `id uuid PK`, `station_id uuid! FK→radio_stations.id`, `title text!`, `description text?`, `content_language text!`, `status text!`, `ca`, `ua` | IX `(station_id,status,title)` |
+| `radio_schedules` | `id uuid PK`, `program_id uuid! FK→radio_programs.id`, `timezone_name text!`, `weekday smallint!`, `start_local time!`, `end_local time!`, `ends_next_day boolean!`, `ca`, `ua` | IX `(program_id,weekday,start_local)`; CHECK weekday 0–6; validate IANA timezone and overnight interval |
+| `radio_episodes` / later | `id uuid PK`, `program_id uuid! FK→radio_programs.id`, `media_asset_id uuid! FK→media_assets.id`, `title text!`, `rights_confirmed_at timestamptz!`, `published_at timestamptz?`, `ca`, `ua` | IX `(program_id,published_at DESC)`; recording/distribution rights required |
+
+### Opportunities and partner finance — phase 9 / finance conditional
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `opportunities` | `id uuid PK`, `organization_id uuid? FK→organizations.id`, `project_id uuid? FK→projects.id`, `kind text!`, `title text!`, `description text!`, `deadline_at timestamptz?`, `status text!`, `ca`, `ua` | CHECK exactly one owner; IX `(kind,status,deadline_at)` |
+| `opportunity_applications` | `id uuid PK`, `opportunity_id uuid! FK→opportunities.id`, `applicant_id uuid! FK→profiles.user_id`, `private_statement text?`, `status text!`, `ca`, `ua`; UQ `(opportunity_id,applicant_id)` | IX `(applicant_id,created_at DESC)`; private bounded retention |
+| `funding_campaigns` / conditional | `id uuid PK`, `project_id uuid! FK→projects.id`, `partner_code text!`, `currency char(3)!`, `goal_minor bigint!`, `status text!`, `ca`, `ua` | IX `(project_id,status)`; CHECK goal_minor>0; partner/legal gate |
+| `contribution_records` / conditional | `id uuid PK`, `campaign_id uuid! FK→funding_campaigns.id`, `processor_reference text! UQ`, `donor_id uuid? FK→profiles.user_id`, `amount_minor bigint!`, `currency char(3)!`, `state text!`, `ca`, `ua` | IX `(campaign_id,state,created_at)`, `(donor_id,created_at DESC)`; verified webhook only, CHECK amount>0 |
+| `campaign_financial_updates` / conditional | `id uuid PK`, `campaign_id uuid! FK→funding_campaigns.id`, `project_milestone_id uuid? FK→project_milestones.id`, `summary text!`, `amount_minor bigint?`, `currency char(3)?`, `reviewer_id uuid! FK→auth.users.id`, `private_receipt_asset_id uuid? FK→media_assets.id`, `ca` | IX `(campaign_id,created_at DESC)`; published summary distinct from receipt |
+| `payment_webhook_events` / conditional | `id uuid PK`, `provider text!`, `external_event_id text!`, `payload_digest bytea!`, `status text!`, `received_at timestamptz!`, `processed_at timestamptz?`; UQ `(provider,external_event_id)` | IX `(status,received_at)`; verify signature before insert, no card data |
+
+### Moderation, administration, privacy — phase 3, common, or before launch
+
+| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| --- | --- | --- |
+| `content_reports` / 3 | `id uuid PK`, `reporter_id uuid! FK→profiles.user_id`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `subject_user_id uuid? FK→profiles.user_id`, `reason_code text!`, `private_details text?`, `status text!`, `ca`, `ua` | CHECK exactly one target; IX `(status,created_at)`, `(reporter_id,created_at DESC)`; abuse/rate controls |
+| `moderation_cases` / 3 | `id uuid PK`, `report_id uuid? FK→content_reports.id`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `subject_user_id uuid? FK→profiles.user_id`, `state text!`, `assigned_reviewer_id uuid? FK→auth.users.id`, `opened_at timestamptz!`, `closed_at timestamptz?`, `ua` | CHECK exactly one primary subject; IX `(state,assigned_reviewer_id,opened_at)`; report may point to same subject |
+| `moderation_actions` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `actor_id uuid! FK→auth.users.id`, `action text!`, `reason text!`, `ca` | IX `(case_id,created_at)`; append-only |
+| `moderation_appeals` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `appellant_id uuid! FK→profiles.user_id`, `reason text!`, `status text!`, `adjudicator_id uuid? FK→auth.users.id`, `resolved_at timestamptz?`, `ca`, `ua` | IX `(case_id,status)`, `(appellant_id,created_at DESC)`; distinct adjudicator |
+| `user_restrictions` / 3 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `starts_at timestamptz!`, `ends_at timestamptz?`, `issuer_id uuid! FK→auth.users.id`, `case_id uuid? FK→moderation_cases.id`, `ca` | IX `(user_id,kind,ends_at)`; CHECK end>start |
+| `audit_events` / with first privileged workflow | `id uuid PK`, `actor_id uuid? FK→auth.users.id`, `event_kind text!`, `subject_kind text!`, `subject_id uuid?`, `safe_metadata jsonb!`, `occurred_at timestamptz!` | IX `(occurred_at DESC)`, `(subject_kind,subject_id,occurred_at DESC)`; append-only, restricted; subject reference resolved by API and review because cross-domain FK impossible here |
+| `consent_records` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `policy_version text!`, `consent_kind text!`, `granted_at timestamptz!`, `revoked_at timestamptz?`; UQ `(user_id,policy_version,consent_kind)` | IX `(user_id,granted_at DESC)`; preserve withdrawal history |
+| `feature_flags` / common | `key text PK`, `enabled boolean!`, `rules jsonb!`, `updated_by uuid? FK→auth.users.id`, `ca`, `ua` | Server-only mutation; validated schema for rules |
+| `system_outbox` / later | `id uuid PK`, `event_kind text!`, `payload_minimized jsonb!`, `status text!`, `attempt_count integer!`, `next_attempt_at timestamptz!`, `ca`, `ua` | IX `(status,next_attempt_at)`; CHECK attempts≥0; idempotent worker |
+
+Do not use a generic unchecked `target_type + target_id` for user-controlled content. Explicit nullable FKs plus exactly-one-target checks cover current report/reaction subjects; add future target columns through reviewed migrations. The `audit_events` subject is an internal append-only pointer, not an authorization path. The proposed `moderation_cases` subject check excludes `report_id`, which is only the originating report.
+
+## Entity relationships
+
+This Mermaid ERD shows the central FK graph; the catalog above is authoritative for all FK columns and join tables. Dashed conceptual dependencies are described in migration order below.
+
+```mermaid
+erDiagram
+    auth_users ||--|| profiles : identity
+    profiles ||--|| member_private : private_details
+    departments ||--o{ member_private : residence_or_connection
+    auth_users ||--o{ role_assignments : holds
+    auth_users ||--o{ verification_records : subject
+    profiles ||--o{ posts : writes
+    profiles ||--o{ comments : writes
+    posts ||--o{ comments : contains
+    posts ||--o{ post_media : attaches
+    media_assets ||--o{ post_media : used_by
+    posts ||--o{ post_reactions : receives
+    comments ||--o{ comment_reactions : receives
+    profiles ||--o{ follows : follows
+    profiles ||--o{ community_members : joins
+    communities ||--o{ community_members : contains
+    communities ||--o{ posts : hosts
+    organizations ||--o{ organization_members : represented_by
+    organizations ||--o{ projects : owns
+    projects ||--o{ project_milestones : tracks
+    projects ||--o{ project_needs : requests
+    project_needs ||--o{ volunteer_offers : meets
+    community_claims ||--o{ claim_evidence : supported_by
+    community_claims ||--o{ claim_attestations : receives
+    community_claims ||--o{ claim_reviews : reviewed_by
+    organizations ||--o{ radio_stations : operates
+    radio_stations ||--o{ radio_streams : broadcasts
+    radio_stations ||--o{ radio_programs : schedules
+    projects ||--o{ funding_campaigns : funds
+    funding_campaigns ||--o{ contribution_records : receives
+    moderation_cases ||--o{ moderation_actions : records
+```
+
+`auth_users` in the diagram denotes managed `auth.users`, not an application table. Every app subject ID is a UUID; no client supplies another member's ID as proof of authority.
+
+## RLS and Fastify permission matrix
+
+`A` anonymous, `M` authenticated ordinary member, `O` object owner/authorized organization or project member, `R` assigned moderator/reviewer, `S` restricted server/admin workflow. A cell is the maximum intended permission; each row requires explicit SQL grants plus RLS policy tests, and Fastify must independently check role, scope, status, blocks, and rate limits. `—` means no direct table privilege. Private tables should preferably reside in a non-exposed schema with server-mediated reads where owner RLS is insufficient. Service-role access does not by itself authorize a business action.
+
+| Domain / tables | A | M | O | R | S |
+| --- | --- | --- | --- | --- | --- |
+| Existing departments / visible profiles | Read | Read + own profile fields | Same | Same | Reference/visibility changes only via trusted action |
+| Existing private member data | — | Own read/edit | Same | — | Exceptional audited support |
+| Existing roles / verification records | — | — | — | — | Audited grants/reviews only |
+| Settings, blocks, mutes, export/deletion requests | — | Own read/write | Same | — | Rights-processing workflow |
+| Countries/communes; aggregate metrics | Safe read | Safe read | Same | Same | Reference/metric computation; raw activity restricted |
+| Posts, comments, reactions, follows, bookmarks | Published public read | Eligibility-scoped read/create | Own edit/delete request | Assigned moderation action | Restricted repair/audit |
+| Media metadata/Storage | Only approved public derivative | Signed permitted read | Own upload/management | Assigned evidence access | Storage policy/scan/retention |
+| Notifications/preferences/push devices | — | Own read/edit | Same | — | Delivery worker, no token exposure |
+| Communities/members/rules/bans | Public communities/rules | Eligible membership/read | Scoped member actions | Assigned community moderation | Audited role/bans |
+| Organizations/representatives/ambassadors | Approved public facts | Public read | Authorized representative proposals | Verification review | Audited approval/revocation |
+| Verification applications/evidence/reviews | — | Own application status | Own organization submission | Assigned review/evidence | Restricted disposition/audit |
+| Projects/needs/offers/outcomes | Published safe project read | Eligible offer/proposal | Team edits within status | Assigned review | Audited publish/close |
+| Claims/sources/attestations | Safety-approved summaries | Eligible submission/read | Own drafts/appeals | Assigned editorial review | Restricted publication control |
+| Claim evidence/safety actions | — | Own submission receipt | — | Assigned minimum-necessary access | Retention/redaction/audit |
+| Radio catalog/streams | Approved catalog read | Same | Representative proposals | Rights review | Approve/disable stream |
+| Opportunities/applications | Published listings | Own application | Listing owner sees authorized applicants | Fraud review | Restricted disposition |
+| Finance/webhooks/receipts | Published aggregate summaries only | Own contribution receipt if enabled | Approved campaign summary | Independent financial review | Verified provider-only ingest/audit |
+| Content reports/cases/actions/appeals/restrictions | — | Own report/appeal status | — | Assigned case-only access | Audited enforcement |
+| Audit/consent/feature flags/outbox | — | Own consent history | — | Assigned audit excerpts only | Restricted, append-only mutation |
+
+Tests per domain must exercise anonymous, owner, other member, blocked member, wrong community/organization scope, moderator outside assignment, suspended user, and forged role/badge metadata. RLS protects direct PostgREST access even when Fastify has a defect. Supabase Storage policies and short-lived signed URLs must be tested independently; table RLS does not protect object bytes.
+
+## Retention, deletion, auditing, privacy
+
+- **Policy before data:** Set a published privacy notice and concrete retention periods before collecting each category. Proposed starting limits for review: session audit 30 days, activity counters 90 days, delivery/outbox payloads 30 days after success, export files 7 days, rejected verification/claim evidence 90 days after final appeal, inactive push tokens 90 days. These are proposals, not current deployed jobs or legal conclusions.
+- **Account deletion:** Authenticate and confirm requests; revoke sessions/devices, halt notifications, remove private profile data and Storage objects, then delete or de-identify dependent social content according to a documented public-interest/appeal policy. Existing `auth.users` cascades remove profile and role rows; do not rely on that cascade for future evidence, finance, audit, or published content. Preserve only legally required minimal records with restricted access and a deletion receipt.
+- **Audit:** Privileged role grants, badge decisions, profile visibility, organization rights, moderation, claim publication, financial webhook handling, and retention deletion need append-only actor/time/reason records. Store safe metadata, not tokens or full private evidence. Reviewers cannot erase their own actions or adjudicate their own appeals.
+- **Privacy:** Private residence, applications, volunteer contact, claim witnesses, evidence, finance receipts, and push tokens are never in public profile responses. Use field-level minimization, encryption where needed, access logs, signed URLs, malware/metadata scanning, and redaction. Exclude test/spam/deleted accounts from metrics. Publish only aggregate location counts above a chosen small-cohort threshold; never equate diaspora connection with residence or crowd attestations with verified truth.
+- **Historical integrity:** Keep status/history and immutable review/action events. Snapshot or version the definition behind daily aggregates so editing a member's location does not silently rewrite historical published metrics. Corrections link to prior project/claim updates instead of overwriting the record.
+
+## Dependencies and migration order
+
+1. **Existing 1A/1B:** Keep both applied migrations and all five tables/functions unchanged. Check remote history before each future migration.
+2. **Common hardening:** Decide privacy/retention rules; add `audit_events` before the first privileged workflow, `countries` and optional validated residence FK only after existing values are checked, then settings/flags. Handle user rights before public launch. Any profile handle/avatar/bio is additive and must not break current API clients.
+3. **Phase 2:** Define registered/active/verified metrics and test/spam exclusions. Create private activity and aggregate structures; publish only suppressed read APIs. Do not derive residence from diaspora connection.
+4. **Phase 3 base:** Create media metadata/Storage rules, blocks/mutes, `posts`, `comments`, split reactions, follows, reports, moderation cases/actions/appeals/restrictions, notifications. Create `posts` **without** `community_id` in the first phase-3 migration; add the nullable column and FK in phase 4 after `communities` exists. Require moderation and abuse gates before opening posting.
+5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
+6. **Phase 5:** Create organizations and representatives before organization verification, applications/reviews/evidence, ambassadors. Evidence depends on media assets; radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
+7. **Phase 6:** Create projects after organizations, then members/milestones/needs/updates/reviews/outcomes and offers. Validate cross-table project/need ownership in trusted write workflows.
+8. **Phase 7:** Create claims, sources, evidence, attestations, reviews, history, appeals, safety actions only with a crisis-publication policy and trained review process.
+9. **Phase 8:** Create stations, streams, programs, schedules, and later episodes after rights verification and media infrastructure.
+10. **Phase 9:** Create opportunities/applications after owner checks. Create campaign/contribution/webhook tables **only** after legal/payment-partner review, signed webhook design, reconciliation, and refund/dispute policy. No platform cash custody.
+11. **Phase 10:** Add push devices, worker/outbox, and mobile scale indexes when clients and delivery operations need them. Keep the same Fastify resource IDs and authorization semantics across platforms.
+
+Each wave should be split into small additive SQL migrations: parent/reference tables, children/FKs, indexes, grants/RLS, then controlled backfill. Validate in an isolated database with pgTAP and in hosted development with non-destructive synthetic records. Deploy API code in a compatible sequence before tightening constraints. Never use remote reset or rewrite an applied migration.
+
+## Decisions still required
+
+1. Membership eligibility, pseudonymous display names, and representative verification standards.
+2. Exact active-member definition, test/spam exclusions, metric definition version, and public small-cohort threshold.
+3. Community privacy model, moderator scope/appeals, and multilingual moderation staffing.
+4. Who may handle sensitive incident reports, publication delay/redaction rules, and emergency escalation.
+5. Concrete retention periods, legal holds, account-deletion treatment of public contributions, and data-export format.
+6. Organization/station rights evidence, streaming licenses, and whether recorded episodes are permitted.
+7. Whether any financial campaign is lawful and partner-operated, plus refund, dispute, receipt, and reconciliation requirements.
+
+These decisions are gates for their respective migrations, not permission to deploy the whole proposed schema now.

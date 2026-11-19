@@ -107,6 +107,7 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for local Git commands and validation c
 - [ROADMAP.md](ROADMAP.md) — ordered development phases and acceptance gates
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design and data boundaries
 - [docs/DATABASE.md](docs/DATABASE.md) — hosted migrations, RLS, and profile initialization
+- [docs/DATABASE_MASTER_PLAN.md](docs/DATABASE_MASTER_PLAN.md) — proposed full database architecture and phased migration order
 - [docs/PRODUCT.md](docs/PRODUCT.md) — MVP scope, users, roles, and privacy
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) — branch-free Git process and quality gates
 - [docs/DECISIONS.md](docs/DECISIONS.md) — agreed decisions and open questions
