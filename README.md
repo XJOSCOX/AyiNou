@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 0 foundation implemented; local development only
+**Status:** Phase 0 and Phase 1A database foundation implemented; local development only
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -25,13 +25,13 @@ Ayinou is a Haitian-first, multilingual community platform. It connects people a
 
 All interface strings are translated from day one; user-generated posts remain in their original language. User-generated translations can be added as a separately labeled feature later. Use language selection during onboarding and make it changeable in settings.
 
-## Phase 0 technology stack
+## Current technology stack
 
 - Next.js App Router, React, TypeScript, Tailwind CSS (`apps/web`)
 - Independent Node.js, Fastify, TypeScript API with Zod environment validation (`apps/api`)
 - Shared API response contracts (`packages/shared`)
 - Haitian Creole, French, and English translation dictionaries; Creole by default
-- Supabase Auth, PostgreSQL, and Storage are planned for later phases and are not connected.
+- Local Supabase PostgreSQL schema with Auth identity references, migrations, and RLS tests. The apps are not connected to Supabase yet.
 
 We start with a responsive web app to validate UX and product flows. Android/iOS clients are later phases and can reuse Supabase-backed services.
 
@@ -73,6 +73,22 @@ On Windows, if npm scripts fail while launching Git Bash, set `npm_config_script
 
 Do not put real credentials, production database dumps, identity documents, or sensitive user content in source control.
 
+## Local database (Phase 1A)
+
+Requires Docker Desktop with its Linux engine running, plus Node.js and npm. `npm install` installs the exact Supabase CLI version pinned in `package.json`; no global CLI is required. From the repository root:
+
+```bash
+npm install
+npm run db:start   # first run downloads local images and applies migrations
+npm run db:reset   # rebuilds only the local database and reapplies every migration
+npm run db:test    # pgTAP schema, constraint, and RLS tests
+npm run db:stop
+```
+
+The local Supabase API defaults to `http://127.0.0.1:54321`, PostgreSQL to port `54322`, and Studio to `http://127.0.0.1:54323`. Run `npx supabase status` to inspect local service URLs. Avoid copying the printed secret or service-role keys into source files, browser code, or `NEXT_PUBLIC_` variables. The existing web and Fastify apps still use ports 4000 and 3000 and do not require the database to start.
+
+Migrations are in `supabase/migrations/`; create the next one with `npx supabase migration new descriptive_name`, then reset and test locally. The initial department reference rows are inserted by the migration. `db:reset` discards local database data; it does not target a linked or hosted project. Never pass `--linked`, `--remote`, or a production URL to a reset command for this development workflow. See [docs/DATABASE.md](docs/DATABASE.md) for the schema, access matrix, and future profile initialization strategy.
+
 ## GitHub workflow: main only
 
 - **One branch: `main`.** No pull requests, no feature/development branches, no automatic merges.
@@ -89,6 +105,7 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for local Git commands and validation c
 
 - [ROADMAP.md](ROADMAP.md) — ordered development phases and acceptance gates
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design and data boundaries
+- [docs/DATABASE.md](docs/DATABASE.md) — local migrations, RLS, and profile initialization
 - [docs/PRODUCT.md](docs/PRODUCT.md) — MVP scope, users, roles, and privacy
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) — branch-free Git process and quality gates
 - [docs/DECISIONS.md](docs/DECISIONS.md) — agreed decisions and open questions

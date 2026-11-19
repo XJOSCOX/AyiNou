@@ -7,6 +7,7 @@
 - Languages: Haitian Creole, French, English.
 - Backend: independent Fastify REST API. Supabase PostgreSQL, Auth, and Storage are planned integrations.
 - Initial development: local environment.
+- Phase 1A: local Supabase PostgreSQL migrations and RLS tests, with Auth identity references; application integration waits for Phase 1B.
 - Development method: add features incrementally in named phases.
 - GitHub: `main` only, no PRs; local commit and push to `main`.
 - Registration will collect basic info and optionally department/location to enable aggregated member statistics.
@@ -17,7 +18,7 @@
 
 - Next.js, TypeScript, Tailwind for responsive web-first application.
 - Creole as initial default language; allow immediate switching to French/English.
-- Supabase CLI and Docker are deferred beyond Phase 0; do not deploy publicly.
+- Supabase CLI and Docker are used locally in Phase 1A; do not deploy publicly.
 - Email-based account authentication first; add phone sign-in later if needed.
 - Voluntary current country/department instead of mandatory GPS tracking.
 - Nonpartisan governance, equal community participation and evidence-based claim assessment.

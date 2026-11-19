@@ -20,3 +20,4 @@ Thumbs.db
 *.log
 supabase/.branches/
 supabase/.temp/
+supabase/.profiles/

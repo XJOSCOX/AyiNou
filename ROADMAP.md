@@ -18,18 +18,31 @@
 - [x] Add typecheck, lint, API endpoint tests, and production build scripts.
 - [x] Update README, roadmap, architecture, and workflow documentation.
 
-Supabase setup, migrations, RLS, authentication, and registration are deferred to Phase 1 by the Phase 0 implementation brief. CI and abuse prevention will be planned with functional features.
+Supabase setup, migrations, RLS, authentication, and registration were deferred from Phase 0. CI and abuse prevention will be planned with functional features.
 
 **Gate:** Clean install works; all three languages display; API and web run locally; tests, lint, typecheck, and build pass; no secrets committed.
 
-## Phase 1 — Registration, login, onboarding, profiles
+## Phase 1A — Supabase database foundation (COMPLETE)
+
+- [x] Pin the Supabase CLI and add local Docker development configuration.
+- [x] Add a versioned migration for ten Haiti departments, public profiles, private member details, role assignments, and verification records.
+- [x] Reference `auth.users` for identity and distinguish residence from diaspora department of connection.
+- [x] Support `ht`, `fr`, and `en` preferences with Haitian Creole as the default.
+- [x] Enable RLS and explicit grants on every application table; deny client writes to roles and verification.
+- [x] Add an idempotent, server-only, atomic profile initialization function for later signup integration.
+- [x] Reset the local database and pass 30 pgTAP schema, constraint, and RLS assertions.
+- [x] Preserve the independent Fastify API and existing web behavior.
+
+**Gate:** Local migration reset, RLS tests, typecheck, lint, API tests, and builds pass. No signup or login is implemented.
+
+## Phase 1B — Registration, login, onboarding, profiles
 
 - [ ] Supabase Auth: email/password or email OTP, email verification, password recovery, session handling and logout.
 - [ ] Registration: display name; email; optional real name/phone (only if necessary and consented); preferred language.
 - [ ] Ask residence country and, for those living in Haiti, optional department; diaspora can optionally choose a department of connection separately.
 - [ ] Never require GPS. Location permission is opt-in; no precise coordinates stored by default.
 - [ ] User can edit profile, privacy settings, and location; include deletion/export planning.
-- [ ] Public profile is separate from private account data; secure all data using grants/RLS with deny tests.
+- [ ] Connect the Phase 1A profile tables to authenticated API workflows without exposing private data.
 - [ ] Anti-spam rate limits and appropriate verification for signups.
 
 **Gate:** Signup → verification → onboarding → session refresh → editing → logout works in three languages; RLS blocks access to another user's private fields.

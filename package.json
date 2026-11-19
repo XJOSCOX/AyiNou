@@ -1,16 +1,29 @@
 {
   "name": "ayinou",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "concurrently -k -n api,web -c blue,green \"npm run dev -w @ayinou/api\" \"npm run dev -w @ayinou/web\"",
     "dev:api": "npm run dev -w @ayinou/api",
     "dev:web": "npm run dev -w @ayinou/web",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:test": "supabase test db",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",
     "test": "npm run test -ws --if-present",
     "build": "npm run build -w @ayinou/api && npm run build -w @ayinou/web"
   },
-  "devDependencies": {"concurrently": "^9.2.1", "typescript": "^5.9.3"},
-  "engines": {"node": ">=20.9.0"}
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "supabase": "3.2.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
 }
