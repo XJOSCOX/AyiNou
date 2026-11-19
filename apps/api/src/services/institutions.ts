@@ -33,6 +33,7 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
     const { data, error } = await client.rpc(name, input);
     if (error) {
       if (error.code === "42501") throw new InstitutionError("FORBIDDEN", 403);
+      if (error.code === "PVE01") throw new InstitutionError("VERIFICATION_REQUIRED", 409);
       if (error.code === "23505" || error.code === "55000") throw new InstitutionError("CONFLICT", 409);
       if (["23502", "23503", "23514", "22P02"].includes(error.code)) throw new InstitutionError("INVALID_INPUT", 400);
       if (error.code === "54000") throw new InstitutionError("LIMIT_REACHED", 429);

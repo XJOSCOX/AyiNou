@@ -7,6 +7,7 @@ import { safeProfileImage } from "./profile-image.js";
 
 export interface MemberRepository {
   accounts?: AccountRepository;
+  hasPersonalVerification?(userId: string): Promise<boolean>;
   get(userId: string, token: string): Promise<MemberProfile>;
   update(userId: string, token: string, input: UpdateMemberProfile): Promise<MemberProfile>;
   saveDetails?(userId: string, token: string, input: ProfileChanges): Promise<MemberProfile>;
@@ -113,6 +114,12 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
 
   return {
     accounts: accountRepository(admin),
+    async hasPersonalVerification(userId) {
+      const { data, error } = await admin.from("verification_records").select("id")
+        .eq("user_id", userId).eq("status", "verified").in("verification_type", ["identity", "notable_person"]).limit(1);
+      if (error) throw new Error("Verification status unavailable");
+      return data.length > 0;
+    },
     async get(userId, token) {
       await initialize(userId);
       const profile = await readProfile(userId, token);

@@ -6,15 +6,17 @@ import { useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { useMemberDisplayName } from "@/lib/member-display-name";
+import { institutionMessages } from "@/lib/institution-i18n";
+import { useMemberIdentity } from "@/lib/member-display-name";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { DisplayControls } from "./display-controls";
 import { InstitutionSwitcher } from "./institution-switcher";
+import { VerifiedCheck } from "./institution-ui";
 import { SiteBrand } from "./site-brand";
 
 export function MemberNavbar() {
   const [locale] = useLocale();
-  const displayName = useMemberDisplayName();
+  const { displayName, verified } = useMemberIdentity();
   const settings = accountMessages[locale].settings;
   const menuLabel = displayName || settings;
   const router = useRouter();
@@ -51,6 +53,7 @@ export function MemberNavbar() {
               </svg>
             </span>
             <span className="line-clamp-2 min-w-0 break-words text-start leading-tight sm:line-clamp-none sm:truncate" title={menuLabel}>{menuLabel}</span>
+            {displayName && verified && <VerifiedCheck label={institutionMessages[locale].verified} />}
             <span aria-hidden="true" className="me-1 size-1.5 shrink-0 -translate-y-px rotate-45 border-e border-b border-current" />
           </summary>
           <div className="absolute end-0 z-30 mt-2 grid w-48 max-w-[calc(100vw-2rem)] gap-0.5 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg">

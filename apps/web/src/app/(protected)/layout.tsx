@@ -15,5 +15,5 @@ export default async function ProtectedLayout({ children }: Readonly<{ children:
   }
   const { data: profile } = await supabase.from("profiles")
     .select("display_name").eq("user_id", data.claims.sub).maybeSingle();
-  return <MemberDisplayNameProvider name={profile?.display_name ?? null}>{children}</MemberDisplayNameProvider>;
+  return <MemberDisplayNameProvider key={data.claims.sub} name={profile?.display_name ?? null}>{children}</MemberDisplayNameProvider>;
 }

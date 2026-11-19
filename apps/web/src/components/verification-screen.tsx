@@ -7,7 +7,7 @@ import { authMessages } from "@/lib/auth-i18n";
 import { loadApplications, loadInstitutionAccounts, readPublicInstitution, submitVerification } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
 export function VerificationScreen({ initialKind, institution, claim }: {
@@ -48,7 +48,10 @@ export function VerificationScreen({ initialKind, institution, claim }: {
               : <ol className="mt-3 divide-y divide-[var(--theme-border)]">
                 {applications.data.map((app) => <li key={app.id} className="py-3">
                   <p className="break-words font-semibold">{t[app.kind]}{app.organizationName && ` · ${app.organizationName}`}</p>
-                  <p className="mt-1 text-sm text-[var(--theme-link)]">{t[app.status]} · {new Date(app.createdAt).toLocaleDateString(locale)}</p>
+                  <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--theme-link)]">
+                    {app.status === "approved" ? <VerifiedBadge label={t.approved} /> : <span>{t[app.status]}</span>}
+                    <time dateTime={app.createdAt}>{new Date(app.createdAt).toLocaleDateString(locale)}</time>
+                  </p>
                   {app.rationale && <p className="mt-2 whitespace-pre-line break-words text-sm text-[var(--theme-body)]">{app.rationale}</p>}
                 </li>)}
               </ol>}

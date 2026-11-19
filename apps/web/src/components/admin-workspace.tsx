@@ -7,7 +7,7 @@ import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOvervie
 import { adminMessages } from "@/lib/admin-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
@@ -53,6 +53,7 @@ export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
   const t = adminMessages[locale];
   const code = error instanceof Error ? error.message : "";
   const message = code === "MFA_REQUIRED" ? (totp === false ? t.enrollRequired : t.mfaRequired)
+    : code === "VERIFICATION_REQUIRED" ? t.adminVerificationRequired
     : code === "FORBIDDEN" ? t.forbidden : code === "CONFLICT" ? t.conflict : code === "UNAUTHORIZED" ? t.unavailableSession : authMessages[locale].loadError;
   return <div className={institutionErrorBox}>
     <p role="alert">{message}</p>
@@ -93,7 +94,7 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
       : accounts.data.length ? accounts.data.map((account) => <article className={institutionCard} key={account.id}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}</h2>
+            <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{account.verified && <>{" "}<VerifiedCheck label={t.identityVerified} /></>}</h2>
             {account.username && <p className="break-all text-sm">@{account.username}</p>}
             <p className="break-all text-xs text-[var(--theme-body)]">{account.id}</p>
           </div>
@@ -155,11 +156,13 @@ function AccountAction({ account, onChange }: { account: AdminAccount; onChange:
         <option value="" disabled>{t.select}</option>
         {kind === "status" ? statuses.filter((status) => status !== account.status).map((status) =>
           <option key={status} value={status}>{t[status]}</option>) : platformRoles.map((role: PlatformRole) =>
-          <option key={role} value={role} disabled={!account.totp && !account.roles.includes(role)}>
+          <option key={role} value={role} disabled={!account.roles.includes(role) && (!account.totp || (role === "administrator" && !account.verified))}>
             {account.roles.includes(role) ? t.revoke : t.grant} · {t[role]}
           </option>)}
       </select>
     </label>
+    {kind === "roles" && !account.verified && !account.roles.includes("administrator") &&
+      <p className="text-sm text-[var(--theme-body)]">{t.adminVerificationRequired}</p>}
     <label className="text-sm font-semibold">{t.reason}
       <input name="reason" className={institutionField} required minLength={10} maxLength={500} disabled={busy} placeholder={t.reasonHelp} />
     </label>

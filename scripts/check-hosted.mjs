@@ -93,6 +93,30 @@ try {
   console.log("invalid credentials / missing or malformed token: pass");
 
   const bearer = { authorization: `Bearer ${sessions[0].access_token}` };
+  const badgeRoute = "/api/v1/me/verification-badge";
+  assert.equal((await app.inject(badgeRoute)).statusCode, 401);
+  const badge = async (headers) => {
+    const response = await app.inject({ url: badgeRoute, headers });
+    assert.equal(response.statusCode, 200, response.body);
+    return response.json();
+  };
+  assert.deepEqual(await badge(bearer), { verified: false });
+  const syntheticRecord = { user_id: ids[0], status: "verified", reviewed_by: ids[1], verified_at: new Date().toISOString() };
+  try {
+    assert.ifError((await admin.from("verification_records").insert({ ...syntheticRecord, verification_type: "organization" })).error);
+    assert.deepEqual(await badge(bearer), { verified: false });
+    assert.ifError((await admin.from("verification_records").insert({ ...syntheticRecord, verification_type: "identity" })).error);
+    assert.deepEqual(await badge(bearer), { verified: true });
+    assert.deepEqual(await badge({ authorization: `Bearer ${sessions[1].access_token}` }), { verified: false });
+    assert.ifError((await admin.from("verification_records").update({ status: "revoked", verified_at: null })
+      .eq("user_id", ids[0]).eq("verification_type", "identity")).error);
+    assert.deepEqual(await badge(bearer), { verified: false });
+  } finally {
+    // Non-pending records require a reviewer until the record is removed.
+    assert.ifError((await admin.from("verification_records").delete().eq("user_id", ids[0]).eq("reviewed_by", ids[1])
+      .in("verification_type", ["identity", "organization"])).error);
+  }
+  console.log("personal badge scope, active verification, and revocation: pass");
   const initial = await app.inject({ method: "GET", url: "/api/v1/me/profile", headers: bearer });
   assert.equal(initial.statusCode, 200, initial.body);
   assert.equal(initial.json().profile.userId, ids[0]);

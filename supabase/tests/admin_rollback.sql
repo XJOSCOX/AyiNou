@@ -59,6 +59,19 @@ begin
   perform public.admin_account_action_for_api(owner,ordinary,'grant','verification_reviewer','Synthetic reviewer appointment');
   if not private.institution_reviewer(ordinary) or private.platform_admin(ordinary)
   then raise exception 'reviewer assignment is coupled to platform administrator'; end if;
+  begin
+    perform public.admin_account_action_for_api(owner,ordinary,'grant','administrator','Synthetic admin promotion');
+    raise exception 'unverified administrator promotion allowed';
+  exception when sqlstate 'PVE01' then null; end;
+  insert into public.verification_records(user_id,verification_type,status,reviewed_by,verified_at)
+  values(ordinary,'identity','verified',delegate,now());
+  perform public.admin_account_action_for_api(owner,ordinary,'grant','administrator','Synthetic verified admin promotion');
+  perform public.admin_account_action_for_api(owner,ordinary,'revoke','administrator','Synthetic admin revocation');
+  update public.verification_records set status='revoked',verified_at=null where user_id=ordinary and verification_type='identity';
+  begin
+    perform public.admin_account_action_for_api(owner,ordinary,'grant','administrator','Synthetic admin promotion');
+    raise exception 'revoked verification allowed promotion';
+  exception when sqlstate 'PVE01' then null; end;
   if not exists(select 1 from jsonb_array_elements(public.admin_audit_for_api(owner,null)) e
     where e->>'subjectId'=ordinary::text and e->>'event'='role_granted' and e->>'role'='verification_reviewer')
   then raise exception 'scoped audit missing reviewer appointment'; end if;

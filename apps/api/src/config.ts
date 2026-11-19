@@ -10,6 +10,7 @@ const environmentSchema = z.object({
   SUPABASE_URL: z.url().optional(),
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
+  AYINOU_BOOTSTRAP_ADMIN_USER_ID: z.preprocess((value) => value === "" ? undefined : value, z.uuid().optional()),
 });
 
 export type ApiConfig = z.infer<typeof environmentSchema>;

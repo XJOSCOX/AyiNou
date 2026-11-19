@@ -12,7 +12,7 @@ import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, InstitutionLogo,
-  InstitutionStatus, useInstitutionResource } from "./institution-ui";
+  InstitutionStatus, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
 export function InstitutionManagementScreen({ id }: { id: string }) {
@@ -137,7 +137,10 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
               {detail.representatives.map((rep) => (
                 <li key={rep.id} className="space-y-1.5 py-3">
                   <p className="break-words font-medium">{rep.displayName ?? rep.username ?? t.representative}{rep.isSelf ? ` · ${t.you}` : ""}</p>
-                  <p className="text-sm text-[var(--theme-body)]">{t[rep.role]}{rep.verified && ` · ${t.verified}`}{rep.expiresAt && ` · ${t.expires} ${when(rep.expiresAt)}`}</p>
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--theme-body)]">
+                    <span>{t[rep.role]}{rep.expiresAt && ` · ${t.expires} ${when(rep.expiresAt)}`}</span>
+                    {rep.verified && <VerifiedBadge label={t.verified} />}
+                  </p>
                   {(role === "owner" && rep.role !== "owner" || role === "administrator" && ["viewer", "editor"].includes(rep.role)) && (
                     confirm === rep.id ? <div className="flex flex-wrap gap-2">
                       <button type="button" disabled={busy} className={institutionAction} onClick={() => { void run(() => revokeRepresentative(org.id, rep.id)); }}>{t.revokeAccess}</button>

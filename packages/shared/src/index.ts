@@ -189,6 +189,7 @@ export interface AdminAccount {
   createdAt: string;
   confirmed: boolean;
   authBanned: boolean;
+  verified: boolean;
   status: AccountStatus;
   reason: string | null;
   restrictionUpdatedAt: string | null;

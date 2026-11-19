@@ -8,8 +8,11 @@ import { join } from "node:path";
 const project = "hcbxulyfmdmuyccgrujs";
 assert.equal(process.env.AYINOU_HOSTED_TEST_PROJECT_REF, project);
 assert.equal(readFileSync("supabase/.temp/project-ref", "utf8").trim(), project);
-const migration = process.argv.includes("--preflight")
-  ? readFileSync("supabase/migrations/20261120030000_phase2e_administration.sql", "utf8") : "";
+const foundationalPreflight = process.argv.includes("--preflight");
+const promotionMigration = readFileSync("supabase/migrations/20261120040000_require_verified_administrators.sql", "utf8");
+const migration = foundationalPreflight
+  ? readFileSync("supabase/migrations/20261120030000_phase2e_administration.sql", "utf8") + "\n" + promotionMigration
+  : process.argv.includes("--promotion-preflight") ? promotionMigration : "";
 const verificationRegression = readFileSync("supabase/tests/institutions_rollback.sql", "utf8")
   .replace(/^begin;\s*/i, "").replace(/rollback;\s*$/i, "");
 const tests = readFileSync("supabase/tests/admin_rollback.sql", "utf8");

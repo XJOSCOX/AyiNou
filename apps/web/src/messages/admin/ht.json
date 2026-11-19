@@ -44,6 +44,8 @@
   "suspended": "Sispann",
   "banned": "Bani",
   "administrator": "Administratè platfòm",
+  "identityVerified": "Verifikasyon pèsonèl aktif",
+  "adminVerificationRequired": "Pou yon moun vin administratè, verifikasyon idantite li oswa estati pèsonalite piblik li dwe aktif.",
   "moderator": "Moderatè platfòm",
   "verification_reviewer": "Revizè verifikasyon",
   "actor": "Idantifyan moun ki aji a",
@@ -67,6 +69,7 @@
   "restrictedTitle": "Aksè nan kont lan pa disponib",
   "restrictedHelp": "Kont oswa sesyon sa a pa ka antre nan espas manm nan. Dekonekte epi kontakte Ayinou si ou panse gen yon erè sou restriksyon kont ou.",
   "events": {
+    "first_account_bootstrapped": "Premye kont administratè a inisyalize",
     "role_granted": "Wòl bay",
     "role_revoked": "Wòl retire",
     "account_suspended": "Kont sispann",

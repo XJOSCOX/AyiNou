@@ -123,11 +123,17 @@ try {
   await elevate(reviewer);
   await action(primary, reviewer, 204, { action: "grant", value: "moderator" });
   await action(primary, reviewer, 204, { action: "revoke", value: "moderator" });
+  await action(primary, reviewer, 204, { action: "grant", value: "verification_reviewer" });
+  assert.equal((await action(primary, reviewer, 409, { action: "grant", value: "administrator" })).error.code, "VERIFICATION_REQUIRED");
+  assert.equal((await send("GET", `${base}/accounts?q=${reviewer.id}`, 200, primary)).accounts[0].verified, false);
+  assert.ifError((await server.from("verification_records").insert({
+    user_id: reviewer.id, verification_type: "identity", status: "verified", reviewed_by: primary.id, verified_at: new Date().toISOString(),
+  })).error);
+  assert.equal((await send("GET", `${base}/accounts?q=${reviewer.id}`, 200, primary)).accounts[0].verified, true);
   await action(primary, reviewer, 204, { action: "grant", value: "administrator" });
   await send("GET", `${base}/overview`, 200, reviewer);
   await action(primary, reviewer, 204, { action: "revoke", value: "administrator" });
   await send("GET", `${base}/overview`, 403, reviewer);
-  await action(primary, reviewer, 204, { action: "grant", value: "verification_reviewer" });
   await send("GET", `${base}/overview`, 403, reviewer);
   await send("GET", "/api/v1/verification/review", 403, primary);
   const applicant = await send("POST", "/api/v1/me/verification", 201, target, {
@@ -155,6 +161,7 @@ try {
     const fixtureIds = users.map(({ id }) => `'${id}'`).join(",");
     const emailPattern = `ayinou-2e-${run}-%@example.invalid`;
     sql(`begin;
+      delete from public.verification_records where user_id in (select id from auth.users where id in (${fixtureIds}) and email like '${emailPattern}');
       delete from private.institution_audit where actor_id in (select id from auth.users where id in (${fixtureIds}) and email like '${emailPattern}');
       delete from private.platform_admin_audit where actor_id in (select id from auth.users where id in (${fixtureIds}) and email like '${emailPattern}');
       delete from public.role_assignments where user_id in (select id from auth.users where id in (${fixtureIds}) and email like '${emailPattern}');

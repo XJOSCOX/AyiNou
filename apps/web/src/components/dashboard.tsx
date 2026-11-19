@@ -9,11 +9,15 @@ import { authMessages } from "@/lib/auth-i18n";
 import { accountMessages } from "@/lib/account-i18n";
 import { communityMessages } from "@/lib/community-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { institutionMessages } from "@/lib/institution-i18n";
+import { useMemberIdentity } from "@/lib/member-display-name";
 import { membershipMessages } from "@/lib/membership-i18n";
+import { VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
 export function Dashboard() {
   const [locale] = useLocale();
+  const { verified } = useMemberIdentity();
   const t = communityMessages[locale];
   const auth = authMessages[locale];
   const account = accountMessages[locale];
@@ -63,7 +67,10 @@ export function Dashboard() {
           <p className="text-xs font-black uppercase tracking-[0.24em] text-[var(--theme-on-primary-accent)]">{t.eyebrow}</p>
           <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-5xl">{t.title}</h1>
           <p className="mt-5 max-w-2xl text-base leading-7 text-[var(--theme-on-primary-muted)] sm:text-lg">{t.intro}</p>
-          {profile && <p className="mt-6 text-sm text-[var(--theme-on-primary-muted)]">{auth.dashboardTitle.replace("{name}", profile.displayName ?? "")}</p>}
+          {profile && <p className="mt-6 text-sm text-[var(--theme-on-primary-muted)]">
+            {auth.dashboardTitle.replace("{name}", profile.displayName ?? "")}
+            {profile.displayName && verified && <>{" "}<VerifiedCheck label={institutionMessages[locale].verified} /></>}
+          </p>}
           {profileError && <p role="alert" className="mt-6 text-sm text-[var(--theme-on-primary-error)]">{auth.loadError}</p>}
           <div className="mt-7 flex flex-wrap gap-3">
             {profile?.onboardingStep === 0 && <Link href="/onboarding" className="rounded-md border border-current px-4 py-2.5 text-sm font-bold">{m.finish}</Link>}

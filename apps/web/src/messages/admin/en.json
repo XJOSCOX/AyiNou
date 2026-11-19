@@ -44,6 +44,8 @@
   "suspended": "Suspended",
   "banned": "Banned",
   "administrator": "Platform administrator",
+  "identityVerified": "Personally verified",
+  "adminVerificationRequired": "Administrator promotion requires active identity or public-figure verification.",
   "moderator": "Platform moderator",
   "verification_reviewer": "Verification reviewer",
   "actor": "Actor ID",
@@ -67,6 +69,7 @@
   "restrictedTitle": "Account access unavailable",
   "restrictedHelp": "This account or session cannot access the member workspace. Sign out and contact Ayinou if you believe your account is restricted in error.",
   "events": {
+    "first_account_bootstrapped": "First administrator account initialized",
     "role_granted": "Role granted",
     "role_revoked": "Role revoked",
     "account_suspended": "Account suspended",

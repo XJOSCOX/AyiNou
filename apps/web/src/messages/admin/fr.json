@@ -44,6 +44,8 @@
   "suspended": "Suspendu",
   "banned": "Banni",
   "administrator": "Administrateur de la plateforme",
+  "identityVerified": "Vérification personnelle active",
+  "adminVerificationRequired": "Pour devenir administrateur, le compte doit avoir une vérification active de son identité ou de son statut de personnalité publique.",
   "moderator": "Modérateur de la plateforme",
   "verification_reviewer": "Examinateur des vérifications",
   "actor": "Identifiant de l’auteur",
@@ -67,6 +69,7 @@
   "restrictedTitle": "Accès au compte indisponible",
   "restrictedHelp": "Ce compte ou cette session ne peut pas accéder à l’espace membre. Déconnectez-vous et contactez Ayinou si vous pensez que votre compte a été restreint par erreur.",
   "events": {
+    "first_account_bootstrapped": "Premier compte administrateur initialisé",
     "role_granted": "Rôle attribué",
     "role_revoked": "Rôle révoqué",
     "account_suspended": "Compte suspendu",

@@ -31,9 +31,26 @@ export function useInstitutionResource<T>(loader: (signal: AbortSignal) => Promi
 export function InstitutionStatus({ status }: { status: Institution["verificationStatus"] }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
+  if (status === "verified") return <VerifiedBadge label={t.verified} />;
   return <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-bold ${status === "revoked"
     ? "bg-[var(--theme-error-bg)] text-[var(--theme-error-text)]"
     : "bg-[var(--theme-selected)] text-[var(--theme-link)]"}`}>{t[status]}</span>;
+}
+
+export function VerifiedBadge({ label }: { label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md bg-[var(--theme-verified-bg)] px-2.5 py-1 text-xs font-bold text-[var(--theme-verified-text)]">
+      <VerifiedCheck />
+      {label}
+    </span>
+  );
+}
+
+export function VerifiedCheck({ label }: { label?: string }) {
+  return (
+    <Image src="/verified-badge.png" width={18} height={18} alt={label ?? ""} title={label} unoptimized
+      className="inline-block size-[18px] shrink-0 align-middle" />
+  );
 }
 
 export function InstitutionLogo({ organization }: { organization: Pick<Institution, "name" | "logoUrl"> }) {

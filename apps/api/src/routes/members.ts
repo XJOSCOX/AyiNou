@@ -124,6 +124,13 @@ export async function registerMemberRoutes(
       return { attributed: await accounts.recordReferral(request.authUserId) };
     });
 
+    protectedApp.get("/api/v1/me/verification-badge", async (request, reply) => {
+      if (!members?.hasPersonalVerification || !request.authUserId) {
+        return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Verification status unavailable"));
+      }
+      return { verified: await members.hasPersonalVerification(request.authUserId) };
+    });
+
     protectedApp.get("/api/v1/me/profile", async (request, reply) => {
       if (!members || !request.authUserId || !request.authToken) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
       return { profile: await members.get(request.authUserId, request.authToken) };
