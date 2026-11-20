@@ -118,3 +118,10 @@ Phase 2B uses self-declared membership categories. A category grants no verifica
 - Rank groups independently from For You with fixed versioned rules and caller-bound snapshots.
 - Use explicit topics, discoverable joined topics and real eligible public discussion. Institutional follow signals require an explicit group link before activation. The ranker does not use sensitive identity or geography.
 - Preserve the existing invitation inbox and approval workflow. Defer group notification types, archiving and membership-removal appeals until their read, write and evidence boundaries can be enforced together.
+
+### Phase 5A trust and governance
+
+- Operational bootstrap trust preserves first-administrator access and the original audit record. Public badges and ordinary administrator promotion require active, independently reviewed claims.
+- Verification appeals preserve the original decision and require an assigned reviewer uninvolved in the original review. A reconsideration result opens the path to a fresh application without badge restoration.
+- Impersonation reports require a written decision. A reviewer can hold the relevant badge publication while a dispute is reviewed. There is no automated sanction from report counts.
+- Independently deliverable proof-of-control challenges, raw-document handling, and a final evidence purge schedule remain deferred.

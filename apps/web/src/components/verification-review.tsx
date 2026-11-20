@@ -8,9 +8,12 @@ import { authMessages } from "@/lib/auth-i18n";
 import { decideApplication, loadReviewQueue, setReviewWork } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { trustMessages } from "@/lib/trust-i18n";
+import { localizedApiError } from "@/lib/error-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { AdminFeedback } from "./admin-workspace";
+import { VerificationAppealReview } from "./trust-workspace";
 
 export function VerificationReview() {
   const [locale] = useLocale();
@@ -40,6 +43,7 @@ export function VerificationReview() {
           : !current ? <p role="status">{auth.working}</p>
           : current.length ? current.map((item) => <ReviewCard key={item.id} item={item} refresh={queue.refresh} />)
           : <p className={institutionCard}>{t.emptyQueue}</p>}
+        {access.data?.reviewer && <VerificationAppealReview />}
       </div>
     </MemberShell>
   );
@@ -53,9 +57,10 @@ function ReviewCard({ item, refresh }: { item: ReviewApplication; refresh: () =>
   const [failed, setFailed] = useState<unknown>(null);
   const [saved, setSaved] = useState(false);
   const didApprove = item.reviews.some((review) => review.decision === "approve" && review.isSelf);
-  const actions = reviewDecisions.filter((action) =>
+  const actions = reviewDecisions.filter((action) => (!item.assignmentRequired || item.assignedToMe) &&
+    (
     (item.status === "approved" && action === "revoke") || (item.status === "pending" &&
-      (action === "reject" || (action === "approve" && !didApprove))));
+      (action === "reject" || (action === "approve" && !didApprove)))));
 
   async function updateWork() {
     if (busy) return;
@@ -91,12 +96,17 @@ function ReviewCard({ item, refresh }: { item: ReviewApplication; refresh: () =>
       <p className="mt-1 break-words text-sm text-[var(--theme-body)]">
         {item.applicantName ?? item.applicantUsername ?? item.applicantId}{item.organizationHandle && ` · @${item.organizationHandle}`}
       </p>
-      {item.status === "pending" && <button type="button" className={`${institutionLink} mt-2`} disabled={busy} onClick={() => { void updateWork(); }}>
+      {(item.status === "pending" || (item.status === "approved" && item.assignmentRequired)) &&
+        <button type="button" className={`${institutionLink} mt-2`} disabled={busy} onClick={() => { void updateWork(); }}>
         {item.assignedToMe ? admin.releaseWork : admin.claimWork}
       </button>}
       {failed !== null && (failed instanceof Error && failed.message === "MFA_REQUIRED"
         ? <AdminFeedback error={failed} next="/verification/review" />
-        : <p role="alert" className={institutionErrorBox}>{institutionError(t, failed)}</p>)}
+        : <p role="alert" className={institutionErrorBox}>{failed instanceof Error && failed.message === "VERIFICATION_ASSIGNMENT_REQUIRED"
+          ? localizedApiError(locale, failed) : institutionError(t, failed)}</p>)}
+      {item.assignmentRequired && !item.assignedToMe && <p className="mt-2 text-sm">{trustMessages[locale].assignmentRequired}</p>}
+      {item.eligibleReviewers != null && item.eligibleReviewers < 2 && item.status === "pending" &&
+        <p className="mt-2 text-sm">{trustMessages[locale].reviewersNeeded}</p>}
       <div className="mt-4 grid gap-4 xl:grid-cols-2">
         <div>
           <h3 className="font-semibold">{t.evidence}</h3>

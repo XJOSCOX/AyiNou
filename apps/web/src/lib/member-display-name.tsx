@@ -1,24 +1,27 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { personalClaims, type PersonalClaim } from "@ayinou/shared";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { authorizedRequest } from "./api";
 
-const MemberIdentity = createContext({ displayName: null as string | null, verified: false });
+const MemberIdentity = createContext({ displayName: null as string | null, claims: [] as PersonalClaim[] });
 
 export function MemberDisplayNameProvider({ name, children }: { name: string | null; children: ReactNode }) {
   const pathname = usePathname();
-  const [verified, setVerified] = useState(false);
+  const [claims, setClaims] = useState<PersonalClaim[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
     authorizedRequest("/api/v1/me/verification-badge", { signal: controller.signal })
-      .then((result) => { if (!controller.signal.aborted) setVerified(result.verified === true); })
-      .catch(() => { if (!controller.signal.aborted) setVerified(false); });
+      .then((result) => {
+        if (!controller.signal.aborted) setClaims(personalClaims.filter((claim) => result.personalClaims?.includes(claim)));
+      })
+      .catch(() => { if (!controller.signal.aborted) setClaims([]); });
     return () => controller.abort();
   }, [pathname]);
 
-  return <MemberIdentity.Provider value={{ displayName: name, verified }}>{children}</MemberIdentity.Provider>;
+  return <MemberIdentity.Provider value={{ displayName: name, claims }}>{children}</MemberIdentity.Provider>;
 }
 
 export function useMemberIdentity() {

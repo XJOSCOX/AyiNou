@@ -43,6 +43,9 @@ export function feedDatabaseError(code: string): ApiError {
     case "PCG07": return new ApiError(409, "GROUP_OWNER_REQUIRED", "Transfer ownership before leaving");
     case "PCR12": return new ApiError(409, "COMMUNITY_FEEDBACK_LIMIT", "Community feedback limit reached");
     case "PCR30": return new ApiError(409, "COMMUNITY_RECOMMENDATIONS_EXPIRED", "Refresh community recommendations");
+    case "PVT04": return new ApiError(404, "TRUST_CASE_UNAVAILABLE", "This case or review action is unavailable");
+    case "PVT09": return new ApiError(409, "VERIFICATION_APPEAL_EXISTS", "An appeal already exists for this decision");
+    case "PVT14": return new ApiError(410, "VERIFICATION_APPEAL_EXPIRED", "The verification appeal window has ended");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");

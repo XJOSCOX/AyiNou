@@ -154,3 +154,5 @@ Licensing, legal entity, official organization, trademark, and domain ownership 
 Member-created diaspora and interest groups reuse the department discussion engine. Open **Communities** after sign-in to browse, create and manage groups, or use [the public directory](http://localhost:4000/community-directory). [Group policies and integration checks](docs/DATABASE.md#phase-4b-member-created-communities)
 
 **Recommended** and **My Communities** are available in the signed-in community directory. Members can see why a space appears, dismiss a suggestion or reset group feedback. [Ranking and privacy](docs/DATABASE.md#phase-4c-community-discovery-and-recommendations)
+
+The Verification workspace separates reviewed personal, public-figure, organization and representative claims. Eligible applicants can appeal a written decision. Signed-in members can report impersonation privately from a public member profile. [Evidence standards and review governance](docs/DATABASE.md#phase-5a-reviewed-identity-and-verification-cases)

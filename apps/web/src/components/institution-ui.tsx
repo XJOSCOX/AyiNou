@@ -2,9 +2,10 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { Institution } from "@ayinou/shared";
+import type { Institution, PersonalClaim } from "@ayinou/shared";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { trustMessages } from "@/lib/trust-i18n";
 
 export const institutionCard = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
 export const institutionField = "mt-1.5 block min-h-11 w-full rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-3 py-2 text-[var(--theme-text)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]";
@@ -31,7 +32,7 @@ export function useInstitutionResource<T>(loader: (signal: AbortSignal) => Promi
 export function InstitutionStatus({ status }: { status: Institution["verificationStatus"] }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
-  if (status === "verified") return <VerifiedBadge label={t.verified} />;
+  if (status === "verified") return <VerifiedBadge label={trustMessages[locale].organization} />;
   return <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-bold ${status === "revoked"
     ? "bg-[var(--theme-error-bg)] text-[var(--theme-error-text)]"
     : "bg-[var(--theme-selected)] text-[var(--theme-link)]"}`}>{t[status]}</span>;
@@ -51,6 +52,11 @@ export function VerifiedCheck({ label }: { label?: string }) {
     <Image src="/verified-badge.png" width={18} height={18} alt={label ?? ""} title={label} unoptimized
       className="inline-block size-[18px] shrink-0 align-middle" />
   );
+}
+
+export function PersonalClaimChecks({ claims }: { claims: readonly PersonalClaim[] }) {
+  const [locale] = useLocale();
+  return claims.map((claim) => <VerifiedCheck key={claim} label={trustMessages[locale][claim]} />);
 }
 
 export function InstitutionLogo({ organization }: { organization: Pick<Institution, "name" | "logoUrl"> }) {

@@ -478,3 +478,39 @@ Archive and unarchive remain deferred. The existing system has no archive state.
 The proposed membership-removal appeal model allows the removed member to file once per recorded removal within 14 days. Access would be limited to the filer’s case status and the minimum evidence needed by an assigned platform reviewer with recent MFA. The staff member who removed the applicant, current group staff, and reviewers with a conflict would be ineligible to decide the case. Filing would leave membership unchanged. A written, audited decision and a fresh eligibility check would precede any separate reinstatement. Implementation remains deferred. Existing content-hide appeals continue through their current workflow.
 
 Run `npm run test:hosted:community-recommendations:sql -- --preflight` before applying Phase 4C to the named project, or omit `--preflight` afterward. The rollback suite checks ranking, authorization, feedback, snapshot behavior and a 1,200-group catalog. Run `npm run test:hosted:community-recommendations` for the synthetic Auth and Fastify integration check. Both require the configured hosted project reference and do not require Docker or SMTP.
+
+## Phase 5A reviewed identity and verification cases
+
+| Published claim | Review standard |
+| --- | --- |
+| Identity verified | A reviewer can connect the account to the claimed public identity through independently corroborated identity-control evidence or an approved independent channel. A self-submitted profile or URL alone is insufficient. |
+| Notable public figure | Establish the claimed identity and assess a sustained public role using at least two independent, credible public references. Evidence can include authoritative professional or institutional pages and established news coverage. |
+| Verified organization | Establish the identity or official standing of the specific institution through the existing institutional review. |
+| Verified representative | Establish the person’s current authority for the specific institution. The mark follows the active representative membership and ends when that authority expires or is revoked. |
+
+Reviewers treat references as evidence. Badge categories describe the reviewed claim and carry no endorsement of statements or posts. The application accepts public HTTPS URLs without credentials, query strings, or fragments. Reviewers should reject raw ID, private tokens, nonpublic documents, and claims that cannot be corroborated. The app does not fetch evidence or perform legal identity checks. A future challenge must use an independently approved channel with application and recipient binding, a short expiration, one-time consumption, secure secrets, rate limits and private audit. It cannot grant a badge directly. Challenge issuance and verification remain inactive pending such a channel.
+
+### Administrator bootstrap and independent decisions
+
+Phase 2D introduced applications, public evidence references, separate institution and representative verification, and approval by two eligible independent reviewers. Phase 2E added the reviewer allowlist, TOTP checks, role revocation and work assignments. Phase 5A preserves those paths. Personal applications require an explicit reviewer work assignment before accessing evidence or writing a decision. A qualified reviewer may claim their own work or an eligible administrator can assign or release it with an audit reason. Current roles, MFA and conflict checks apply before a write. Prior approvals from revoked or unassigned reviewers do not count toward personal approval. The queue exposes assignment and availability without showing case evidence to an administrator who lacks a reviewer assignment. Applications remain pending if a second eligible reviewer is unavailable.
+
+The hosted project had one consumed first-account bootstrap and one record with source `first_account_bootstrap`. That provenance and the existing administrator role remain. Only active, independently reviewed personal records can appear in public badges, discovery, or verified-member statistics and qualify for ordinary administrator promotion. The bootstrap account can submit an ordinary identity application. Phase 5A links new badges to the approving application to prevent superseded decisions from revoking a newer verification.
+
+### Impersonation, appeals, and privacy
+
+Signed-in members can report public profiles for suspected impersonation, misleading public-figure or badge claims, or false institutional affiliation. Each report accepts a written explanation and up to three public evidence references. The database permits one open report per reporter and target scope and up to five reports per day. The administrator queue excludes the reporter’s identity and requires recent TOTP. Staff assess one case at a time. A substantiated case can hide a specific disputed personal claim with a written rationale. Report volume alone never suspends accounts or hides badges. Re-review is required to publish a held claim again.
+
+An applicant can appeal an explicit rejection or revocation within 14 days, once per original written decision. The original application and decision stay in the private history. A platform administrator assigns the appeal to a currently eligible reviewer. The applicant, original reviewers and conflicted reviewers cannot decide it. Recent TOTP is required. A reconsideration decision permits a fresh application review. Filing, assignment, and reconsideration leave badges unchanged.
+
+Signed-in members receive generic in-app updates for completed application and appeal decisions. Notification rows are recipient-bound and deduplicated. They contain neither evidence, reviewer identities nor case excerpts. Existing notification cleanup applies. Access to open evidence stays limited to the current review assignment or eligible institutional reviewers under the existing policy. Delete sensitive evidence when its documented retention period ends, subject to an open appeal or explicit evidence hold. An operational purge process and final retention schedule remain launch prerequisites. No email, SMS or mobile push is sent.
+
+### Fastify additions
+
+- `GET/POST /api/v1/me/verification/appeals` lists the caller’s appeal status and accepts an eligible appeal.
+- `POST /api/v1/members/:username/impersonation-reports` accepts a private report.
+- `GET /api/v1/trust/application-assignments` and `PATCH /api/v1/trust/applications/:id/assignment` expose the administrator assignment view and audited action.
+- `GET /api/v1/trust/verification-appeals` gives administrators assignment metadata and assigned reviewers their case evidence. The `assignment` and `decision` subpaths change state under recent MFA.
+- `GET /api/v1/trust/impersonation` and `PATCH /api/v1/trust/impersonation/:id/decision` support private administrative review.
+- The existing personal badge response and member projections include typed reviewed claims. The older boolean remains a compatibility field.
+
+Run `npm run test:hosted:trust:sql -- --preflight` for the rollback rehearsal or omit `--preflight` after migration. Run `npm run test:hosted:trust` for the live Auth, TOTP, and Fastify checks. Both runners require the confirmed development project reference and use synthetic fixtures. No Docker, SMTP, identity provider or real identity document is needed.

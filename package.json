@@ -43,6 +43,8 @@
     "test:hosted:groups": "node --import tsx scripts/check-member-groups-hosted.mjs",
     "test:hosted:community-recommendations:sql": "node scripts/check-community-recommendations-sql.mjs",
     "test:hosted:community-recommendations": "node --import tsx scripts/check-community-recommendations-hosted.mjs",
+    "test:hosted:trust:sql": "node scripts/check-verification-trust-sql.mjs",
+    "test:hosted:trust": "node --import tsx scripts/check-verification-trust-hosted.mjs",
     "test:hosted:feed": "node --import tsx scripts/check-feed-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",

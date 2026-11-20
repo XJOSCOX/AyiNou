@@ -7,6 +7,7 @@ import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { safetyMessages } from "@/lib/safety-i18n";
+import { trustMessages } from "@/lib/trust-i18n";
 import { loadNotificationPreferences, loadNotifications, markNotifications, saveNotificationPreferences } from "@/lib/notification-api";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -16,6 +17,7 @@ function notificationTarget({ available, kind, actor, postId, commentId, appealI
   if (!available) return null;
   if (kind === "new_follower") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
   if (kind === "appeal_decided") return appealId ? `/settings/appeals#appeal-${appealId}` : null;
+  if (kind === "verification_decided" || kind === "verification_appeal_decided") return "/verification";
   if (!postId) return null;
   return `/posts/${postId}${commentId ? `?comment=${commentId}` : ""}`;
 }
@@ -47,6 +49,8 @@ export function NotificationCenter() {
       const newItem = item.available && !item.readAt && !read.has(item.id);
       const text = !item.available || !item.kind ? t.unavailable
         : item.kind === "appeal_decided" ? safetyMessages[locale].appeal_decided
+        : item.kind === "verification_decided" ? trustMessages[locale].verifyApplicationAlert
+        : item.kind === "verification_appeal_decided" ? trustMessages[locale].verifyAppealAlert
         : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
       return <li key={item.id} className={`${institutionCard} flex flex-wrap items-center justify-between gap-3`}>
         <div className="min-w-0"><p className={`break-words ${newItem ? "font-semibold" : ""}`}>{text}</p>

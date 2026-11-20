@@ -7,14 +7,17 @@ import { authMessages } from "@/lib/auth-i18n";
 import { loadApplications, loadInstitutionAccounts, readPublicInstitution, submitVerification } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { trustMessages } from "@/lib/trust-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { MyVerificationAppeals } from "./trust-workspace";
 
 export function VerificationScreen({ initialKind, institution, claim }: {
   initialKind: VerificationKind; institution: string; claim: string;
 }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
+  const trust = trustMessages[locale];
   const auth = authMessages[locale];
   const accounts = useInstitutionResource(loadInstitutionAccounts);
   const applications = useInstitutionResource(loadApplications);
@@ -29,6 +32,12 @@ export function VerificationScreen({ initialKind, institution, claim }: {
           </div>
           {accounts.data?.canReview && <Link className={institutionLink} href="/verification/review">{t.review}</Link>}
         </header>
+        <div className={`${institutionCard} grid gap-2 text-sm`}>
+          <ul className="flex flex-wrap gap-x-4 gap-y-2 font-semibold">
+            {(["identity", "notable_person", "organization", "representative"] as const).map((kind) => <li key={kind}>{trust[kind]}</li>)}
+          </ul>
+          <p className="text-[var(--theme-body)]">{trust.noEndorsement}</p>
+        </div>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(17rem,2fr)]">
           <section className={institutionCard}>
             <h2 className="mb-4 text-xl font-semibold">{t.request}</h2>
@@ -52,11 +61,15 @@ export function VerificationScreen({ initialKind, institution, claim }: {
                     {app.status === "approved" ? <VerifiedBadge label={t.approved} /> : <span>{t[app.status]}</span>}
                     <time dateTime={app.createdAt}>{new Date(app.createdAt).toLocaleDateString(locale)}</time>
                   </p>
+                  {app.status === "pending" && app.eligibleApprovals != null && <p className="mt-1 text-sm">
+                    {trust.approvalProgress.replace("{count}", String(app.eligibleApprovals))}
+                  </p>}
                   {app.rationale && <p className="mt-2 whitespace-pre-line break-words text-sm text-[var(--theme-body)]">{app.rationale}</p>}
                 </li>)}
               </ol>}
           </section>
         </div>
+        {applications.data && <MyVerificationAppeals applications={applications.data} />}
       </div>
     </MemberShell>
   );
@@ -89,7 +102,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, initialClaim, refr
     setFailed(null);
     try {
       const references = evidence.split("\n").map((value) => value.trim()).filter(Boolean);
-      if (references.length < 1 || references.length > 3) throw new Error("INVALID_INPUT");
+      if (references.length < (kind === "notable_person" ? 2 : 1) || references.length > 3) throw new Error("INVALID_INPUT");
       let id: string | null = null;
       if (kind === "claim") {
         try { id = (await readPublicInstitution(claimHandle.trim().toLowerCase())).id; }
@@ -134,7 +147,8 @@ function ApplicationForm({ accounts, initialKind, initialOrg, initialClaim, refr
         <textarea className={institutionField} value={evidence} rows={4} maxLength={905} required disabled={busy}
           onChange={(event) => setEvidence(event.target.value)} aria-describedby="verification-evidence-hint" />
       </label>
-      <p id="verification-evidence-hint" className="text-sm text-[var(--theme-body)]">{t.evidenceHelp}</p>
+      <p id="verification-evidence-hint" className="text-sm text-[var(--theme-body)]">{t.evidenceHelp} {trustMessages[locale].evidenceStandard}</p>
+      {kind === "notable_person" && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].notabilityReferences}</p>}
       {failed !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failed)}</p>}
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.submitted}</p>}
       <button type="submit" className={institutionAction} disabled={busy || (needsOrganization && !eligible.length)}>{busy ? auth.working : t.submit}</button>

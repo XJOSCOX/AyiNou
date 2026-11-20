@@ -47,6 +47,7 @@ export type PostInput = {
   body: string; language: Locale; visibility: PostVisibility; topics?: InterestCode[]; attachments?: AttachmentInput[];
 };
 export interface FeedAuthor {
+  personalClaims?: PersonalClaim[];
   displayName: string;
   username: string | null;
   avatarUrl: string | null;
@@ -95,7 +96,8 @@ export interface MemberNotification {
   createdAt: string;
   readAt: string | null;
   available: boolean;
-  kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "appeal_decided" | null;
+  kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "appeal_decided" |
+    "verification_decided" | "verification_appeal_decided" | null;
   appealId?: string | null;
   postId: string | null;
   commentId: string | null;
@@ -265,18 +267,39 @@ export type DiscoveryKind = "people" | "institutions";
 export type DiscoveryFilter = { kind: DiscoveryKind; q?: string; verified?: boolean; category?: OrganizationKind; country?: string; department?: string };
 type DiscoveryCardBase = { id: string; handle: string; name: string; verified: boolean; following: boolean };
 export type DiscoveryCard = DiscoveryCardBase & (
-  { kind: "member"; self: boolean }
+  { kind: "member"; self: boolean; personalClaims?: PersonalClaim[] }
   | { kind: "institution"; targetId: string; verificationStatus: "verified" | "unverified"; category: OrganizationKind;
       countryCode: string; departmentCode: string | null; description: string | null }
 );
 export type DiscoveryPage = { accounts: DiscoveryCard[]; nextCursor: string | null };
 export type FollowTarget = { kind: "member" | "institution"; key: string };
-export type FollowStatus = { following: boolean; canFollow: boolean; verified: boolean; followerCount: number; followingCount: number | null };
+export type FollowStatus = { following: boolean; canFollow: boolean; verified: boolean; personalClaims?: PersonalClaim[];
+  followerCount: number; followingCount: number | null };
 export type FollowList = "followers" | "following";
 export type OrganizationRole = "owner" | typeof invitedRoles[number];
 export type VerificationKind = typeof verificationKinds[number];
 export type ReviewDecision = typeof reviewDecisions[number];
 export type VerificationStatus = "pending" | "approved" | "rejected" | "revoked";
+export const personalClaims = ["identity", "notable_person"] as const;
+export type PersonalClaim = (typeof personalClaims)[number];
+export const impersonationKinds = ["profile", "public_figure", "badge", "affiliation"] as const;
+export type ImpersonationKind = (typeof impersonationKinds)[number];
+export const verificationAppealOutcomes = ["upheld", "reconsideration"] as const;
+export type VerificationAppealOutcome = (typeof verificationAppealOutcomes)[number];
+export type VerificationAppeal = {
+  id: string; applicationId: string; outcome: "pending" | VerificationAppealOutcome;
+  createdAt: string; decidedAt: string | null; rationale: string | null;
+  assigned?: boolean; explanation?: string; references?: string[]; originalRationale?: string;
+};
+export type VerificationAssignment = {
+  id: string; kind: VerificationKind; status: VerificationStatus; applicantUsername: string | null;
+  organizationName: string | null; createdAt: string; eligibleReviewers: number;
+  assigned: Array<{ handle: string | null; eligible: boolean }>;
+};
+export type ImpersonationReview = {
+  id: string; kind: ImpersonationKind; subjectHandle: string | null; organizationHandle: string | null;
+  explanation: string; references: string[]; createdAt: string;
+};
 export type InstitutionInput = {
   name: string; handle: string; kind: OrganizationKind; description: string | null; countryCode: string;
   departmentCode: string | null; website: string | null; contactEmail: string | null;
@@ -302,10 +325,12 @@ export type InstitutionManagement = {
 };
 export type VerificationApplication = {
   id: string; kind: VerificationKind; status: VerificationStatus; createdAt: string; organizationName: string | null;
-  decidedAt: string | null; rationale: string | null;
+  decidedAt: string | null; rationale: string | null; canAppeal?: boolean; eligibleApprovals?: number | null;
 };
 export type ReviewApplication = Omit<VerificationApplication, "decidedAt" | "rationale"> & {
   assignedToMe: boolean;
+  assignmentRequired?: boolean;
+  eligibleReviewers?: number | null;
   organizationHandle: string | null; applicantName: string | null; applicantUsername: string | null; applicantId: string;
   evidence: string[];
   reviews: { decision: ReviewDecision; rationale: string; createdAt: string; isSelf: boolean }[];
@@ -356,6 +381,7 @@ export type AccountStatus = "active" | "suspended" | "banned";
 export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: boolean };
 export type AdminOverview = Record<"members" | "organizations" | "recentMembershipEvents" | "pendingVerifications" | "restrictedAccounts" | "recentAdminActions", number>;
 export interface AdminAccount {
+  bootstrapTrust?: boolean;
   id: string;
   username: string | null;
   displayName: string | null;

@@ -80,3 +80,7 @@ Members can organize around diaspora communities or interests. They choose open 
 ### Community discovery
 
 Members can explore recommended communities, official departments, diaspora groups and interest groups in the same directory. Visible reasons explain recommendations and feedback stays private. My Communities brings existing memberships, group roles, requests and invitations together. Opening the public directory or a public group URL still works without signing in.
+
+### Reviewed identity and impersonation
+
+A member can request review of a personal identity or a public-figure claim. Institutions and their representatives use separate categories. Claim labels communicate the result of a review. They do not guarantee any post, statement or project. An eligible applicant can contest a rejection or revocation within 14 days. Members can report suspected impersonation privately. Staff must review the evidence and document any action.

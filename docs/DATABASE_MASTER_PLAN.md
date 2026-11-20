@@ -480,3 +480,16 @@ These decisions are gates for their respective migrations, not permission to dep
 | `feed_data.community_recommendation_snapshots` | `id uuid PK`, `user_id uuid! FK→auth.users.id CASCADE`, `version text! FK→community_recommendation_versions.version`, `created_at timestamptz!`, `expires_at timestamptz!`, `filters jsonb!`, `community_ids uuid[]!`, `reasons text[]!` | Per-user and expiry indexes. Max 60 IDs, four snapshots per member, ten-minute expiry. UUID arrays are rechecked against current authorization and may contain removed references until expiry. |
 
 The three tables use RLS with no direct client or service-role privileges. Authenticated RPCs use the caller’s identity and current membership eligibility. The My Communities function projects existing group rows and adds an index for the caller’s pending requests. The migration adds discoverable category, topic and country indexes. See [the ranking and privacy rules](DATABASE.md#phase-4c-community-discovery-and-recommendations).
+
+### Phase 5A identity cases
+
+| Existing table or addition | Key columns and retention |
+| --- | --- |
+| `public.verification_records` | `publication_held_at timestamptz?`, `review_application_id uuid? FK→private.verification_applications.id SET NULL`. Existing reviewed and bootstrap sources retain provenance. |
+| `private.verification_assignment_audit` | `id uuid PK`, `application_id uuid! FK CASCADE`, `actor_id uuid? FK auth.users`, `reviewer_id uuid? FK auth.users`, `assigned bool!`, `reason text!`, `created_at timestamptz!`. Index by application and creation. |
+| `private.verification_appeals` | `id uuid PK`, `application_id uuid! FK CASCADE`, `decision_id uuid! UQ FK→verification_reviews.id CASCADE`, `appellant_id uuid?`, `assigned_reviewer_id uuid?` both auth FKs set null, `explanation text!`, `reference_urls text[]!`, `outcome text!`, `rationale text?`, `created_at timestamptz!`, `decided_at timestamptz?`. One pending per application, indexes by appellant and assigned reviewer. |
+| `private.verification_appeal_assignments` | `id uuid PK`, `appeal_id uuid! FK CASCADE`, `administrator_id uuid?`, `reviewer_id uuid?` auth FKs set null, `reason text!`, `created_at timestamptz!`. Index by appeal and date. |
+| `private.impersonation_reports` | `id uuid PK`, `reporter_id uuid?`, `subject_id uuid?` auth FKs set null, `organization_id uuid? FK SET NULL`, `kind text!`, `explanation text!`, `reference_urls text[]!`, `outcome text!`, `rationale text?`, `reviewer_id uuid? FK auth.users SET NULL`, `claim_held text?`, `created_at timestamptz!`, `decided_at timestamptz?`. Unique open reporter/subject/kind/organization scope, queue and reporter rate indexes. |
+| `feed_data.notifications` | Optional application and appeal UUID FKs with cascade and partial reference indexes. Recipient-only visibility and existing deduplication. |
+
+All new private tables are RLS-enabled with explicit revocations from app roles. Subject access uses scoped RPC projections. Assignment, report and decision audits retain nullable actor IDs. Evidence has no public projection. Set a case retention and purge schedule before public launch.

@@ -30,7 +30,8 @@ const submission = z.object({
   kind: z.enum(verificationKinds),
   organizationId: z.uuid().nullable(),
   evidence: z.array(publicUrl).min(1).max(3),
-}).strict().refine(({ evidence }) => new Set(evidence).size === evidence.length);
+}).strict().refine(({ evidence, kind }) => new Set(evidence).size === evidence.length &&
+  (kind !== "notable_person" || evidence.length >= 2));
 const decision = z.object({
   decision: z.enum(reviewDecisions),
   rationale: z.string().trim().min(10).max(1000),
@@ -38,14 +39,14 @@ const decision = z.object({
 }).strict();
 
 export async function registerInstitutionRoutes(app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null) {
-  app.setErrorHandler((cause, _request, reply) => {
+  app.setErrorHandler((cause, request, reply) => {
     if (cause instanceof InstitutionError) {
-      return reply.code(cause.statusCode).send({ error: { code: cause.code, message: "Institution request could not be completed" } });
+      return reply.code(cause.statusCode).send({ error: { code: cause.code, message: "Institution request could not be completed", requestId: request.id } });
     }
-    if (cause instanceof z.ZodError) return reply.code(400).send({ error: { code: "INVALID_INPUT", message: "Check the submitted fields" } });
+    if (cause instanceof z.ZodError) return reply.code(400).send({ error: { code: "INVALID_INPUT", message: "Check the submitted fields", requestId: request.id } });
     const errorStatus = typeof cause === "object" && cause !== null && "statusCode" in cause ? cause.statusCode : null;
     const status = typeof errorStatus === "number" && errorStatus >= 400 && errorStatus < 500 ? errorStatus : 503;
-    return reply.code(status).send({ error: { code: status === 503 ? "SERVICE_UNAVAILABLE" : "INVALID_INPUT", message: "Institution request could not be completed" } });
+    return reply.code(status).send({ error: { code: status === 503 ? "SERVICE_UNAVAILABLE" : "INVALID_INPUT", message: "Institution request could not be completed", requestId: request.id } });
   });
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
   registerAffiliationDirectory(app, repo);

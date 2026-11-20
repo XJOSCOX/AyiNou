@@ -112,7 +112,10 @@ begin
     or (select state from private.organization_invitations where id=claim_invite) <> 'revoked'
     or public.institution_public_for_api(institute_handle)->>'verificationStatus' <> 'revoked'
   then raise exception 'ownership transfer leaked access or badge'; end if;
-  application := public.verification_submit_for_api(claimant,null,'notable_person',array['https://example.invalid/public-bio']);
+  application := public.verification_submit_for_api(claimant,null,'notable_person',
+    array['https://example.invalid/public-bio','https://publisher.invalid/independent-profile']);
+  perform public.verification_work_for_api(reviewer1,application,true);
+  perform public.verification_work_for_api(reviewer2,application,true);
   perform public.verification_decide_for_api(reviewer1,application,'approve','Synthetic first personal review.',true);
   perform public.verification_decide_for_api(reviewer2,application,'approve','Synthetic second personal review.',true);
   if not exists (select 1 from public.verification_records where user_id=claimant and verification_type='notable_person' and status='verified')

@@ -132,10 +132,14 @@ export async function registerMemberRoutes(
     });
 
     protectedApp.get("/api/v1/me/verification-badge", async (request, reply) => {
-      if (!members?.hasPersonalVerification || !request.authUserId) {
+      if (!request.authUserId || (!members?.personalVerification && !members?.hasPersonalVerification)) {
         return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Verification status unavailable"));
       }
-      return { verified: await members.hasPersonalVerification(request.authUserId) };
+      if (members.personalVerification) {
+        const personalClaims = await members.personalVerification(request.authUserId);
+        return { verified: personalClaims.length > 0, personalClaims };
+      }
+      return { verified: await members.hasPersonalVerification!(request.authUserId) };
     });
 
     protectedApp.get("/api/v1/me/profile", async (request, reply) => {

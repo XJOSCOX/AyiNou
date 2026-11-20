@@ -182,7 +182,15 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Show joined and managed communities, pending requests, and invitations in the existing workspace.
 - [ ] Add reversible archival, membership-removal appeal operations and recipient-safe group notification events.
 
-## Phase 5 — Verified identities and founding ambassadors
+## Phase 5A — Identity verification, impersonation and appeals
+
+- [x] Separate administrator bootstrap trust from public identity and public-figure badges.
+- [x] Extend reviewer assignment governance and the two-reviewer approval workflow from Phases 2D and 2E.
+- [x] Add private impersonation reports, independent verification appeals and in-app decision updates.
+- [ ] Establish an approved independent channel for proof-of-control challenges and an operational evidence-retention schedule.
+- [ ] Staff independent review before launch.
+
+## Later Phase 5 work — Founding ambassadors
 
 - [ ] Verification application process for public figures, radio stations, and organizations.
 - [ ] Manual review with reproducible evidence and audit history; do not sell authenticity badges.

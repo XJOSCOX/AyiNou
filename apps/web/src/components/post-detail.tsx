@@ -9,7 +9,7 @@ import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { loadLinkedComment, loadPostDetail } from "@/lib/notification-api";
 import { ApiErrorNotice } from "./api-error-notice";
 import { PostDiscussion, ReactionPicker } from "./feed-discussion";
-import { institutionCard, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
+import { institutionCard, institutionLink, useInstitutionResource, PersonalClaimChecks } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PostMediaGallery } from "./post-media";
 
@@ -28,7 +28,7 @@ export function PostDetail({ id, comment }: { id: string; comment?: string }) {
     {!post && resource.error === null && <p role="status">{t.working}</p>}
     {post && <article className={institutionCard}>
       <h1 className="break-words text-xl font-semibold">{post.author?.displayName ?? (post.own ? f.you : f.unknownAuthor)}
-        {post.author?.verified && <>{" "}<VerifiedCheck label={f.verified} /></>}
+        {!!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
       </h1>
       <time className="text-sm text-[var(--theme-body)]" dateTime={post.publishedAt ?? post.createdAt}>
         {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(post.publishedAt ?? post.createdAt))}

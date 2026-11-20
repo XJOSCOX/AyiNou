@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Institution } from "@ayinou/shared";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { trustMessages } from "@/lib/trust-i18n";
 import { InstitutionLogo, InstitutionStatus, institutionAction, institutionCard, institutionLink } from "./institution-ui";
 import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
@@ -37,6 +38,7 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
         </header>
         <section className={institutionCard} aria-label={t.institutionProfile}>
           <p className="font-semibold">{[org.departmentName, country].filter(Boolean).join(" · ")}</p>
+          {org.verificationStatus === "verified" && <p className="mt-2 text-sm text-[var(--theme-body)]">{trustMessages[locale].noEndorsement}</p>}
           {org.description && <p className="mt-3 max-w-4xl whitespace-pre-line break-words leading-7 text-[var(--theme-body)]">{org.description}</p>}
           {org.website && <a href={org.website} target="_blank" rel="noreferrer" className={`${institutionLink} mt-4 inline-block`}>{t.website} <span aria-hidden="true">↗</span></a>}
         </section>

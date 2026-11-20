@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import type { Department, MemberProfile, ProfileChanges, ProfilePreview, UpdateMemberProfile } from "@ayinou/shared";
+import type { Department, MemberProfile, PersonalClaim, ProfileChanges, ProfilePreview, UpdateMemberProfile } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { accountRepository, type AccountRepository } from "./accounts.js";
 import { safeProfileImage } from "./profile-image.js";
@@ -8,6 +8,7 @@ import { safeProfileImage } from "./profile-image.js";
 export interface MemberRepository {
   accounts?: AccountRepository;
   hasPersonalVerification?(userId: string): Promise<boolean>;
+  personalVerification?(userId: string): Promise<PersonalClaim[]>;
   get(userId: string, token: string): Promise<MemberProfile>;
   update(userId: string, token: string, input: UpdateMemberProfile): Promise<MemberProfile>;
   saveDetails?(userId: string, token: string, input: ProfileChanges): Promise<MemberProfile>;
@@ -114,11 +115,10 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
 
   return {
     accounts: accountRepository(admin),
-    async hasPersonalVerification(userId) {
-      const { data, error } = await admin.from("verification_records").select("id")
-        .eq("user_id", userId).eq("status", "verified").in("verification_type", ["identity", "notable_person"]).limit(1);
+    async personalVerification(userId) {
+      const { data, error } = await admin.rpc("personal_verification_for_api", { p_user: userId });
       if (error) throw new Error("Verification status unavailable");
-      return data.length > 0;
+      return data as PersonalClaim[];
     },
     async get(userId, token) {
       await initialize(userId);

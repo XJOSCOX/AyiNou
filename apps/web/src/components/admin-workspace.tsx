@@ -9,14 +9,16 @@ import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { apiErrorCode } from "@/lib/api-errors";
 import { localizedApiError } from "@/lib/error-i18n";
+import { trustMessages } from "@/lib/trust-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { SafetyOverviewPanel } from "./moderation-appeals";
+import { TrustAdministration } from "./trust-workspace";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
-type AdminTab = "overview" | "accounts" | "audit";
-const tabs: AdminTab[] = ["overview", "accounts", "audit"];
+type AdminTab = "overview" | "accounts" | "audit" | "trust";
+const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust"];
 
 export function AdminWorkspace() {
   const [locale] = useLocale();
@@ -33,7 +35,8 @@ export function AdminWorkspace() {
         : !overview.data ? <p role="status">{authMessages[locale].working}</p> : <>
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">
             {tabs.map((section) => <button key={section} type="button" aria-pressed={tab === section} onClick={() => setTab(section)}
-              className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">{t[section]}</button>)}
+              className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">
+              {section === "trust" ? trustMessages[locale].trustWorkspace : t[section]}</button>)}
             {access.data?.reviewer && <Link className={institutionLink} href="/verification/review">{t.reviewWorkspace}</Link>}
           </nav>
           {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -44,6 +47,7 @@ export function AdminWorkspace() {
           </dl><SafetyOverviewPanel /></>}
           {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
           {tab === "audit" && <AuditFeed />}
+          {tab === "trust" && <TrustAdministration />}
         </>}
     </div>
   </MemberShell>;
@@ -98,6 +102,7 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{account.verified && <>{" "}<VerifiedCheck label={t.identityVerified} /></>}</h2>
+            {account.bootstrapTrust && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].bootstrapTrust}</p>}
             {account.username && <p className="break-all text-sm">@{account.username}</p>}
             <p className="break-all text-xs text-[var(--theme-body)]">{account.id}</p>
           </div>

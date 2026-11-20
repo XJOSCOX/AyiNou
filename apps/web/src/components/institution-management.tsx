@@ -10,6 +10,7 @@ import { inviteRepresentative, loadInstitution, resolveInvitation, revokeReprese
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { trustMessages } from "@/lib/trust-i18n";
 import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, InstitutionLogo,
   InstitutionStatus, useInstitutionResource, VerifiedBadge } from "./institution-ui";
@@ -143,7 +144,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
                   <p className="break-words font-medium">{rep.displayName ?? rep.username ?? t.representative}{rep.isSelf ? ` · ${t.you}` : ""}</p>
                   <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--theme-body)]">
                     <span>{t[rep.role]}{rep.expiresAt && ` · ${t.expires} ${when(rep.expiresAt)}`}</span>
-                    {rep.verified && <VerifiedBadge label={t.verified} />}
+                    {rep.verified && <VerifiedBadge label={trustMessages[locale].representative} />}
                   </p>
                   {(role === "owner" && rep.role !== "owner" || role === "administrator" && ["viewer", "editor"].includes(rep.role)) && (
                     confirm === rep.id ? <div className="flex flex-wrap gap-2">
