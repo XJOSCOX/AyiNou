@@ -151,6 +151,17 @@ export type MemberGroup = Omit<DepartmentCommunity, "kind" | "departmentCode" | 
   requestStatus: "pending" | "approved" | "rejected" | "cancelled" | null;
 };
 export type Community = DepartmentCommunity | MemberGroup;
+export const communityKinds = ["department", ...groupKinds] as const;
+export const communityRecommendationFeedbackActions = ["not_interested", "hide", "restore"] as const;
+export type CommunityRecommendationFeedbackAction = (typeof communityRecommendationFeedbackActions)[number];
+export type CommunityRecommendationReason = "interest" | "related_topic" | "public_activity" | "explore";
+export type CommunityRecommendation = {
+  community: Community; reason: CommunityRecommendationReason; recentPublicActivity: boolean;
+};
+export type CommunityRecommendationPage = {
+  recommendations: CommunityRecommendation[]; nextCursor: string | null; algorithmVersion: string;
+};
+export type CommunityRecommendationSettings = { hidden: number; notInterested: number };
 export type GroupInvitation = { id: string; purpose: "membership" | "ownership"; expiresAt: string };
 type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
 export type FeedComment = CommentPosition & (

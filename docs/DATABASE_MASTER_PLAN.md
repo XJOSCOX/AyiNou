@@ -470,3 +470,13 @@ Each wave should be split into small additive SQL migrations: parent/reference t
 7. Whether any financial campaign is lawful and partner-operated, plus refund, dispute, receipt, and reconciliation requirements.
 
 These decisions are gates for their respective migrations, not permission to deploy the whole proposed schema now.
+
+### Phase 4C community recommendations
+
+| Existing private table | Columns and keys | Indexes and retention |
+| --- | --- | --- |
+| `feed_data.community_recommendation_versions` | `version text PK`, `interest_weight smallint!`, `joined_topic_weight smallint!`, `activity_weight smallint!`, `category_penalty smallint!` | Versioned immutable v1 values in the migration. |
+| `feed_data.community_recommendation_feedback` | `user_id uuid! FK→auth.users.id CASCADE`, `community_id uuid! FK→communities.id CASCADE`, `action text!`, `updated_at timestamptz!`. PK `(user_id,community_id)`. | Partial expiry index and community FK index. Temporary suppression expires after 30 days. Hidden rows persist through reset or account deletion. |
+| `feed_data.community_recommendation_snapshots` | `id uuid PK`, `user_id uuid! FK→auth.users.id CASCADE`, `version text! FK→community_recommendation_versions.version`, `created_at timestamptz!`, `expires_at timestamptz!`, `filters jsonb!`, `community_ids uuid[]!`, `reasons text[]!` | Per-user and expiry indexes. Max 60 IDs, four snapshots per member, ten-minute expiry. UUID arrays are rechecked against current authorization and may contain removed references until expiry. |
+
+The three tables use RLS with no direct client or service-role privileges. Authenticated RPCs use the caller’s identity and current membership eligibility. The My Communities function projects existing group rows and adds an index for the caller’s pending requests. The migration adds discoverable category, topic and country indexes. See [the ranking and privacy rules](DATABASE.md#phase-4c-community-discovery-and-recommendations).

@@ -15,6 +15,7 @@ import { groupMessages } from "@/lib/groups-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
+import { CommunityCard, GroupMetadata } from "./community-card";
 import { DisplayControls } from "./display-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -29,23 +30,7 @@ export function GroupMore({ resource }: { resource: { page: { nextCursor: string
     disabled={resource.loadingMore} onClick={() => { void resource.more(); }}>{resource.loadingMore ? t.loading : t.more}</button>;
 }
 
-export function GroupMetadata({ group }: { group: MemberGroup }) {
-  const [locale] = useLocale();
-  const t = groupMessages[locale];
-  const count = communityDirectoryMessages[locale];
-  const region = group.countryCode && new Intl.DisplayNames([locale], { type: "region" }).of(group.countryCode);
-  return <>
-    <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--theme-link)]">
-      <span>{t[group.kind]}</span><span>{t[group.policy]}</span>
-      {region && <span>{region}</span>}{group.topic && <span>{membershipMessages[locale][group.topic]}</span>}
-    </div>
-    <p dir="auto" className="whitespace-pre-line break-words text-[var(--theme-body)]">{group.description}</p>
-    <p className="text-sm text-[var(--theme-body)]">{group.memberCount === null ? count.privateCount
-      : count.count.replace("{count}", new Intl.NumberFormat(locale).format(group.memberCount))}</p>
-  </>;
-}
-
-function TopicSelect({ value, change }: { value: string; change(value: string): void }) {
+export function TopicSelect({ value, change }: { value: string; change(value: string): void }) {
   const [locale] = useLocale();
   const t = groupMessages[locale];
   return <label className="min-w-0 text-sm font-semibold">{t.topic}
@@ -56,16 +41,17 @@ function TopicSelect({ value, change }: { value: string; change(value: string): 
   </label>;
 }
 
-export function GroupsDirectory({ kind, mine = false, guest = false, search }: { kind?: GroupKind; mine?: boolean; guest?: boolean; search: string }) {
+export function GroupsDirectory({ kind, guest = false, search, initialTopic = "" }: { kind?: GroupKind; guest?: boolean; search: string; initialTopic?: string }) {
   const [locale] = useLocale();
   const t = groupMessages[locale];
   const c = communityDirectoryMessages[locale];
   const [country, setCountry] = useState("");
-  const [topic, setTopic] = useState("");
+  const [topic, setTopic] = useState(initialTopic);
+  const [changed, setChanged] = useState<Record<string, MemberGroup>>({});
   const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
-    const page = await listGroups({ kind, mine, search, country, topic }, cursor, signal, guest);
+    const page = await listGroups({ kind, search, country, topic }, cursor, signal, guest);
     return { rows: page.communities, nextCursor: page.nextCursor };
-  }, [country, guest, kind, mine, search, topic]);
+  }, [country, guest, kind, search, topic]);
   const resource = useCursorPage(load);
   return <section className="grid min-w-0 gap-4" aria-label={t.groups}>
     {kind && <div className="max-w-xs">
@@ -77,12 +63,8 @@ export function GroupsDirectory({ kind, mine = false, guest = false, search }: {
     {!resource.page && resource.error === null && <p role="status">{c.loading}</p>}
     {resource.page?.rows.length === 0 && <p role="status">{t.noGroups}</p>}
     <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-      {resource.error === null && resource.page?.rows.map((group) => <li key={group.id} className={`${institutionCard} grid content-start gap-2`}>
-        <h2 className="break-words text-xl font-semibold"><Link className="hover:underline" href={`${guest ? "/community-directory" : "/communities"}/${group.slug}`}>{group.name}</Link></h2>
-        <GroupMetadata group={group} />
-        {group.joined && <p className="text-sm font-semibold text-[var(--theme-link)]">{c.joined} · {group.role && t[group.role]}</p>}
-        {group.requestStatus === "pending" && !group.joined && <p className="text-sm">{t.pending}</p>}
-      </li>)}
+      {resource.error === null && resource.page?.rows.map((group) => <CommunityCard key={group.id} community={changed[group.id] ?? group} guest={guest}
+        update={(next) => { if (next && next.kind !== "department") setChanged((current) => ({ ...current, [next.id]: next })); }} />)}
     </ul>
     <GroupMore resource={resource} />
   </section>;
@@ -180,6 +162,14 @@ export function NewGroup() {
 
 export function GroupInbox() {
   const [locale] = useLocale();
+  return <MemberShell><div className="grid gap-4">
+    <Link className={institutionLink} href="/communities">← {communityDirectoryMessages[locale].title}</Link>
+    <GroupInvitationList standalone />
+  </div></MemberShell>;
+}
+
+export function GroupInvitationList({ standalone = false, onRespond }: { standalone?: boolean; onRespond?(): void }) {
+  const [locale] = useLocale();
   const t = groupMessages[locale];
   const [revision, setRevision] = useState(0);
   const [handled, setHandled] = useState<string[]>([]);
@@ -190,9 +180,8 @@ export function GroupInbox() {
   }, []);
   const resource = useCursorPage(load, revision);
   const entries = resource.error === null ? resource.page?.rows.filter(({ id }) => !handled.includes(id)) : null;
-  return <MemberShell><div className="grid gap-4">
-    <Link className={institutionLink} href="/communities">← {communityDirectoryMessages[locale].title}</Link>
-    <h1 className="text-3xl font-semibold">{t.invitations}</h1>
+  return <section className="grid gap-4" aria-label={t.invitations}>
+    {standalone ? <h1 className="text-3xl font-semibold">{t.invitations}</h1> : <h2 className="text-xl font-semibold">{t.invitations}</h2>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
     {!resource.page && resource.error === null && <p role="status">{communityDirectoryMessages[locale].loading}</p>}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
@@ -208,13 +197,14 @@ export function GroupInbox() {
               await respondGroupInvitation(invite.id, accept);
               setHandled((ids) => [...ids, invite.id]);
               setRevision((value) => value + 1);
+              onRespond?.();
             }); }}>{accept ? t.accept : t.decline}</button>)}
           {invite.purpose === "ownership" && <Link href="/mfa?next=%2Fcommunities%2Finvitations" className={institutionLink}>{t.manageMfa}</Link>}
         </div>
       </li>)}
     </ul>
     <GroupMore resource={resource} />
-  </div></MemberShell>;
+  </section>;
 }
 
 const sectionChoices = ["requests", "invitations", "staff"] as const;

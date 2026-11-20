@@ -1,4 +1,5 @@
-import type { CommunityStaffRole, GroupInvitation, GroupKind, GroupRole, GroupSettings, MemberGroup } from "@ayinou/shared";
+import type { Community, CommunityRecommendationFeedbackAction, CommunityRecommendationPage, CommunityRecommendationSettings,
+  CommunityStaffRole, GroupInvitation, GroupKind, GroupRole, GroupSettings, MemberGroup } from "@ayinou/shared";
 import { publicRequest } from "./api";
 import { authorizedSocialRequest } from "./feed-api";
 
@@ -14,6 +15,30 @@ export type ManagementAction =
   | { action: "staff"; handle: string; role: CommunityStaffRole | null }
   | { action: "revoke"; invitationId: string };
 export type GroupDraft = GroupSettings & { slug: string; kind: GroupKind };
+export type GroupActivityView = "joined" | "managed" | "pending";
+export type CommunityRecommendationFilters = { kind: Community["kind"] | ""; search: string; country: string; topic: string };
+
+export function listCommunityRecommendations(filters: CommunityRecommendationFilters, cursor: string | null, signal: AbortSignal): Promise<CommunityRecommendationPage> {
+  const query = new URLSearchParams();
+  if (filters.kind) query.set("kind", filters.kind);
+  if (filters.search.trim()) query.set("search", filters.search.trim());
+  if (/^[A-Z]{2}$/.test(filters.country)) query.set("country", filters.country);
+  if (filters.topic) query.set("topic", filters.topic);
+  if (cursor) query.set("cursor", cursor);
+  return authorizedSocialRequest(`${base}/recommendations/list?${query}`, { signal });
+}
+
+export const communityRecommendationSettings = (signal: AbortSignal): Promise<CommunityRecommendationSettings> =>
+  authorizedSocialRequest("/api/v1/me/community-recommendation-settings", { signal });
+export const saveCommunityRecommendationFeedback = (id: string, action: CommunityRecommendationFeedbackAction): Promise<void> =>
+  authorizedSocialRequest(`${room(id)}/recommendation-feedback`, { method: "POST", body: JSON.stringify({ action }) });
+export const resetCommunityRecommendationFeedback = (): Promise<void> =>
+  authorizedSocialRequest("/api/v1/me/community-recommendation-feedback", { method: "DELETE" });
+
+export function listGroupActivity(view: GroupActivityView, search: string, cursor: string | null, signal: AbortSignal): Promise<{ communities: MemberGroup[]; nextCursor: string | null }> {
+  const query = new URLSearchParams({ view, ...(search ? { search } : {}), ...(cursor ? { cursor } : {}) });
+  return authorizedSocialRequest(`/api/v1/me/community-activity?${query}`, { signal });
+}
 
 export function listGroups(filters: GroupQuery, cursor: string | null, signal: AbortSignal, guest: boolean): Promise<{ communities: MemberGroup[]; nextCursor: string | null }> {
   const query = new URLSearchParams();

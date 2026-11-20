@@ -1,6 +1,8 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { communityStaffRoles, groupKinds, groupPolicies, interestCodes } from "@ayinou/shared";
+import { communityKinds, communityRecommendationFeedbackActions, communityStaffRoles, groupKinds, groupPolicies, interestCodes,
+  type CommunityRecommendation, type CommunityRecommendationSettings } from "@ayinou/shared";
 import { z } from "zod";
+import { ApiError } from "../services/api-error.js";
 import type { FeedRepository } from "../services/feed.js";
 import type { ReadBudget } from "../services/read-budget.js";
 
@@ -10,6 +12,18 @@ const handle = z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/);
 const section = z.enum(["requests", "invitations", "staff"]);
 const limit = z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(24)).optional();
 const country = z.string().regex(/^[A-Z]{2}$/);
+const recommendationCursor = z.strictObject({ snapshot: z.uuid(), after: z.number().int().min(1).max(60) });
+const encodedCursor = z.string().max(160).regex(/^[A-Za-z0-9_-]+$/).optional();
+const searchText = z.string().trim().max(80).optional();
+
+function readRecommendationCursor(value: string | undefined) {
+  if (!value) return { snapshot: null, after: 0 };
+  try {
+    return recommendationCursor.parse(JSON.parse(Buffer.from(value, "base64url").toString("utf8")));
+  } catch {
+    throw new ApiError(400, "INVALID_INPUT", "Invalid community cursor");
+  }
+}
 const singleLine = (minimum: number, maximum: number) => z.string().trim().min(minimum).max(maximum).refine((value) => !/\p{Cc}/u.test(value));
 const textBlock = (maximum: number) => z.string().trim().min(10).max(maximum).refine((value) => !/\p{Cc}/u.test(value.replace(/[\r\n\t]/g, "")));
 const settings = z.strictObject({
@@ -39,6 +53,53 @@ export function registerGroupRoutes(app: FastifyInstance, context: {
 }) {
   const { viewer, repo, read } = context;
   const base = "/api/v1/communities";
+  app.get(base + "/recommendations/list", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    const query = z.strictObject({
+      kind: z.enum(communityKinds).optional(), topic: z.enum(interestCodes).optional(), country: country.optional(),
+      search: searchText, cursor: encodedCursor, limit: z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(18)).optional(),
+    }).parse(request.query);
+    await read("discovery", actor, request.ip);
+    const cursor = readRecommendationCursor(query.cursor);
+    const size = query.limit ?? 12;
+    const result = await repo().rpc<{ snapshotId: string; algorithmVersion: string; rows: Array<CommunityRecommendation & { position: number }> }>(
+      token, "read_community_recommendations_for_client", {
+        p_snapshot: cursor.snapshot, p_after: cursor.after, p_limit: size, p_kind: query.kind ?? null,
+        p_topic: query.topic ?? null, p_country: query.country ?? null, p_search: query.search ?? null,
+      });
+    const { values, nextCursor } = paginate(result.rows, size, ({ position }) =>
+      Buffer.from(JSON.stringify({ snapshot: result.snapshotId, after: position })).toString("base64url"));
+    return { recommendations: values.map(({ community, reason, recentPublicActivity }) => ({ community, reason, recentPublicActivity })),
+      nextCursor, algorithmVersion: result.algorithmVersion };
+  });
+  app.get("/api/v1/me/community-recommendation-settings", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    await read("discovery", actor, request.ip);
+    return repo().rpc<CommunityRecommendationSettings>(token, "community_recommendation_settings_for_client");
+  });
+  app.post(base + "/:id/recommendation-feedback", { bodyLimit: 1024 }, async (request, reply) => {
+    const { token } = await viewer(request, true);
+    const { id } = z.strictObject({ id: z.uuid() }).parse(request.params);
+    const { action } = z.strictObject({ action: z.enum(communityRecommendationFeedbackActions) }).parse(request.body);
+    await repo().rpc(token, "save_community_recommendation_feedback_for_client", { p_id: id, p_action: action });
+    return reply.code(204).send();
+  });
+  app.delete("/api/v1/me/community-recommendation-feedback", async (request, reply) => {
+    const { token } = await viewer(request, true);
+    await repo().rpc(token, "clear_community_recommendation_feedback_for_client");
+    return reply.code(204).send();
+  });
+  app.get("/api/v1/me/community-activity", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    const query = z.strictObject({ view: z.enum(["joined", "managed", "pending"]), search: searchText, cursor: slug.optional(), limit }).parse(request.query);
+    await read("discovery", actor, request.ip);
+    const size = query.limit ?? 18;
+    const rows = await repo().rpc<{ slug: string }[]>(token, "my_group_activity_for_client", {
+      p_view: query.view, p_search: query.search ?? null, p_after: query.cursor ?? null, p_limit: size,
+    });
+    const { values, nextCursor } = paginate(rows, size, (row) => row.slug);
+    return { communities: values, nextCursor };
+  });
   app.get(base + "/groups", async (request) => {
     const query = z.strictObject({
       kind: z.enum(groupKinds).optional(), mine: z.enum(["true", "false"]).optional(),

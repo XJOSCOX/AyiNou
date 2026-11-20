@@ -41,6 +41,8 @@ export function feedDatabaseError(code: string): ApiError {
     case "PCG05": return new ApiError(403, "MFA_REQUIRED", "Recent authenticator verification is required");
     case "PCG06": return new ApiError(409, "GROUP_POLICY_CHANGED", "Community settings changed");
     case "PCG07": return new ApiError(409, "GROUP_OWNER_REQUIRED", "Transfer ownership before leaving");
+    case "PCR12": return new ApiError(409, "COMMUNITY_FEEDBACK_LIMIT", "Community feedback limit reached");
+    case "PCR30": return new ApiError(409, "COMMUNITY_RECOMMENDATIONS_EXPIRED", "Refresh community recommendations");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");

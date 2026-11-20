@@ -117,3 +117,7 @@ The community view reuses the post composer, timeline cards, media, and moderati
 ### Member-created groups
 
 Fastify uses the same member identity and scoped post routes for department, diaspora and interest communities. Group metadata discovery, membership and discussion reading are independent checks. Public discussion begins at a policy timestamp enforced in PostgreSQL across post, comment and Storage reads. Group role mutations and recipient invitation responses serialize on the room row. Group staff carry no cross-room or platform authority. Public and protected Next.js views share theme tokens and call Fastify with the same API contracts available to mobile clients.
+
+### Community discovery and recommendations
+
+The protected directory and existing public directory use Fastify and the same community records. PostgreSQL ranks bounded eligible pools, stores a ten-minute caller-bound cursor snapshot and rechecks permissions before hydrating a page. Fastify returns shared mobile-ready card and reason contracts. My Communities queries existing membership, staff, request and invitation records. Invitation visibility remains recipient-bound and group activity never enters the home timeline.

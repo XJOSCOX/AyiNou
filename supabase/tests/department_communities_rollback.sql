@@ -15,7 +15,7 @@ declare
   mod_handle text:='dept_'||left(replace(moderator::text,'-',''),12);
 begin
   if (select count(*) from feed_data.communities where kind='department')<>10
-    or (select array_agg(department_code order by department_code) from feed_data.communities)
+    or (select array_agg(department_code order by department_code) from feed_data.communities where kind='department')
       <>array['HT-AR','HT-CE','HT-GA','HT-ND','HT-NE','HT-NI','HT-NO','HT-OU','HT-SD','HT-SE']
   then raise exception 'incorrect official department seed'; end if;
   select id into nord from feed_data.communities where slug='nord';

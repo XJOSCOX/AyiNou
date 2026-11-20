@@ -76,3 +76,7 @@ Initial local testing covers the interface in four languages, access control, on
 ### Member-created groups
 
 Members can organize around diaspora communities or interests. They choose open membership, approval, or private invitations. A public group can choose to open future discussions to visitors. Private groups are absent from discovery. Participation is voluntary and does not communicate anyone’s nationality, immigration status or location. Owners manage their groups. Platform administrators retain independent oversight of eligible content appeals.
+
+### Community discovery
+
+Members can explore recommended communities, official departments, diaspora groups and interest groups in the same directory. Visible reasons explain recommendations and feedback stays private. My Communities brings existing memberships, group roles, requests and invitations together. Opening the public directory or a public group URL still works without signing in.

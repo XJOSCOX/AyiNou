@@ -158,13 +158,18 @@ try {
         delete from private.organizations where id='${organization}' and handle='${orgHandle}'; commit;`);
     }
   } finally {
-    const results = await Promise.allSettled(users.map(async ({ id, email }) => {
-      const record = await admin.auth.admin.getUserById(id);
-      assert.ifError(record.error);
-      assert.equal(record.data.user.email, email);
-      assert.ifError((await admin.auth.admin.deleteUser(id)).error);
-    }));
-    assert.ok(results.every(({ status }) => status === "fulfilled"), "Targeted synthetic account cleanup failed");
+    const errors = [];
+    for (const { id, email } of users) {
+      try {
+        const record = await admin.auth.admin.getUserById(id);
+        assert.ifError(record.error);
+        assert.equal(record.data.user.email, email);
+        assert.ifError((await admin.auth.admin.deleteUser(id)).error);
+      } catch (cause) {
+        errors.push(new Error(`Could not remove synthetic account ${id}`, { cause }));
+      }
+    }
+    if (errors.length) throw new AggregateError(errors, "Targeted synthetic account cleanup failed");
   }
   console.log("Synthetic following accounts and institution removed.");
 }

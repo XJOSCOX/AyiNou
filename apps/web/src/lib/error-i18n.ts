@@ -9,6 +9,7 @@ import { recommendationMessages } from "./recommendation-i18n";
 import { safetyMessages } from "./safety-i18n";
 import { communityDirectoryMessages } from "./communities-i18n";
 import { groupMessages } from "./groups-i18n";
+import { communityDiscoveryMessages } from "./community-discovery-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -27,6 +28,8 @@ export function localizedApiError(locale: Locale, cause: unknown) {
   switch (code) {
     case "COMMUNITY_UNAVAILABLE": return communityDirectoryMessages[locale].unavailable;
     case "COMMUNITY_MEMBERSHIP_REQUIRED": return communityDirectoryMessages[locale].membership;
+    case "COMMUNITY_RECOMMENDATIONS_EXPIRED": return communityDiscoveryMessages[locale].expired;
+    case "COMMUNITY_FEEDBACK_LIMIT": return communityDiscoveryMessages[locale].feedbackLimit;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

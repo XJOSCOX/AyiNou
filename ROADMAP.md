@@ -176,6 +176,12 @@ Activation of temporary proof challenges and external evidence delivery remains 
 
 **Gate:** Group access and moderation policy tests pass; reporting/escalation is practical for moderators.
 
+## Phase 4C — Community discovery and recommendations
+
+- [x] Add recommended communities, private feedback, and public category discovery filters.
+- [x] Show joined and managed communities, pending requests, and invitations in the existing workspace.
+- [ ] Add reversible archival, membership-removal appeal operations and recipient-safe group notification events.
+
 ## Phase 5 — Verified identities and founding ambassadors
 
 - [ ] Verification application process for public figures, radio stations, and organizations.

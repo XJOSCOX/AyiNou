@@ -1,12 +1,13 @@
 "use client";
 
-import { communityStaffRoles, departmentCommunityContent, type Community, type CommunityStaffRole } from "@ayinou/shared";
+import { communityStaffRoles, departmentCommunityContent, type Community, type CommunityStaffRole, type InterestCode } from "@ayinou/shared";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { apiErrorCode } from "@/lib/api-errors";
 import { communityDirectoryMessages } from "@/lib/communities-i18n";
-import { changeDepartmentMembership, changeDepartmentPrivacy, changeDepartmentStaff, loadDepartmentCommunities,
+import { communityDiscoveryMessages } from "@/lib/community-discovery-i18n";
+import { changeDepartmentPrivacy, changeDepartmentStaff, loadDepartmentCommunities,
   loadDepartmentCommunity, loadDepartmentFeed, loadDepartmentMembers } from "@/lib/department-community-api";
 import { feedMessages } from "@/lib/feed-i18n";
 import { groupMessages } from "@/lib/groups-i18n";
@@ -17,33 +18,31 @@ import { DiscoveryAccounts } from "./discovery-accounts";
 import { PostCard } from "./feed-screen";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { CommunityCard, CommunitySummary, MembershipControl } from "./community-card";
+import { MyGroupActivities, RecommendedCommunities } from "./community-discovery";
 import { PostComposer } from "./post-composer";
-import { GroupManagement, GroupMetadata, GroupsDirectory, ReadOnlyGroupPost } from "./groups";
+import { GroupManagement, GroupsDirectory, ReadOnlyGroupPost } from "./groups";
 
 function normalize(value: string) {
   return value.normalize("NFD").replace(/\p{M}/gu, "").replace(/[^\p{L}\p{N}]/gu, "").toLowerCase();
-}
-
-function CommunitySummary({ community }: { community: Community }) {
-  const [locale] = useLocale();
-  const t = communityDirectoryMessages[locale];
-  if (community.kind !== "department") return <GroupMetadata group={community} />;
-  return <>
-    <p className="text-sm leading-6 text-[var(--theme-body)]">{departmentCommunityContent(locale, community.name).description}</p>
-    <p className="text-sm text-[var(--theme-body)]">{community.memberCount === null ? t.privateCount
-      : t.count.replace("{count}", new Intl.NumberFormat(locale).format(community.memberCount))}</p>
-  </>;
 }
 
 export function DepartmentDirectory() {
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
   const groups = groupMessages[locale];
+  const discovery = communityDiscoveryMessages[locale];
   const resource = useInstitutionResource(loadDepartmentCommunities);
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<"official" | "diaspora" | "interest" | "mine">("official");
+  const [search, setSearch] = useState("");
+  const [topic, setTopic] = useState<InterestCode | "">("");
+  const [category, setCategory] = useState<"recommended" | "official" | "diaspora" | "interest" | "mine">("recommended");
   const membershipsOnly = category === "mine";
   const [changed, setChanged] = useState<Record<string, Community>>({});
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setSearch(query.trim()), 350);
+    return () => window.clearTimeout(timeout);
+  }, [query]);
   const needle = normalize(query);
   const rooms = resource.data?.communities
     .map((community) => changed[community.id] ?? community)
@@ -66,61 +65,31 @@ export function DepartmentDirectory() {
       </label>
     </div>
     <div className="flex flex-wrap gap-2" role="group" aria-label={t.title}>
-      {(["official", "diaspora", "interest", "mine"] as const).map((value) => <button key={value} type="button" aria-pressed={category === value}
+      {(["recommended", "official", "diaspora", "interest", "mine"] as const).map((value) => <button key={value} type="button" aria-pressed={category === value}
         className="min-h-10 rounded-md border border-[var(--theme-border)] px-3 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]"
-        onClick={() => setCategory(value)}>{value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
+        onClick={() => setCategory(value)}>{value === "recommended" ? discovery.recommended : value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
     </div>
+    {category === "recommended" && <RecommendedCommunities search={search} onMembership={(next) =>
+      setChanged((items) => ({ ...items, [next.id]: next }))} explore={(next) => {
+      setQuery("");
+      setSearch("");
+      setTopic(next);
+      setCategory("interest");
+    }} />}
     {(category === "official" || membershipsOnly) && <>
+    {membershipsOnly && <h2 className="text-xl font-semibold">{discovery.departmentsJoined}</h2>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!rooms && resource.error === null && <p role="status">{t.loading}</p>}
     {rooms?.length === 0 && <p role="status">{membershipsOnly && !needle ? t.emptyMine : t.noMatches}</p>}
     {!!rooms?.length && <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-      {rooms.map((community) => <li key={community.id} className={`${institutionCard} grid content-start gap-2`}>
-        <p className="text-xs text-[var(--theme-body)]">{t.official}</p>
-        <h2 className="text-xl font-semibold"><Link className="hover:underline" href={`/communities/${community.slug}`}>{community.name}</Link></h2>
-        <CommunitySummary community={community} />
-        {community.joined ? <p className="text-sm font-semibold text-[var(--theme-link)]">{t.joined}</p>
-          : <MembershipControl community={community} update={(next) => { if (next) setChanged((items) => ({ ...items, [next.id]: next })); }} />}
-      </li>)}
+      {rooms.map((community) => <CommunityCard key={community.id} community={community}
+        update={(next) => { if (next) setChanged((items) => ({ ...items, [next.id]: next })); }} />)}
     </ul>}
     </>}
-    {category !== "official" && <GroupsDirectory key={category} search={query}
-      kind={category === "mine" ? undefined : category} mine={membershipsOnly} />}
+    {(category === "diaspora" || category === "interest") && <GroupsDirectory key={`${category}:${topic}`} search={search}
+      kind={category} initialTopic={category === "interest" ? topic : ""} />}
+    {membershipsOnly && <MyGroupActivities search={search} />}
   </div></MemberShell>;
-}
-
-function MembershipControl({ community, update }: { community: Community; update: (next: Community | null) => void }) {
-  const [locale] = useLocale();
-  const t = communityDirectoryMessages[locale];
-  const groups = groupMessages[locale];
-  const mutation = useFeedMutation();
-  const [confirmLeave, setConfirmLeave] = useState(false);
-  const group = community.kind === "department" ? null : community;
-  const pending = !community.joined && group?.requestStatus === "pending";
-  if (!community.joined && group?.policy === "private") return null;
-  if (!community.joined && group?.requestStatus === "rejected" && group.policy === "approval")
-    return <p className="text-sm">{groups.rejected}</p>;
-  if (group?.role === "owner") return <p className="text-sm font-semibold text-[var(--theme-link)]">{groups.owner}</p>;
-  function change(join: boolean) {
-    void mutation.run(async () => {
-      const result = await changeDepartmentMembership(community.slug, join);
-      update(result.community);
-      setConfirmLeave(false);
-    });
-  }
-  return <div className="mt-2 grid gap-2">
-    {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
-    {confirmLeave && <p className="text-sm font-semibold">{t.leaving}</p>}
-    {pending && <p role="status" className="text-sm">{groups.pending}</p>}
-    <div className="flex flex-wrap items-center gap-3">
-      <button type="button" className={institutionAction} disabled={mutation.busy} onClick={() => {
-        if (!community.joined || confirmLeave) change(!community.joined && !pending);
-        else setConfirmLeave(true);
-      }}>{community.joined ? t.leave : pending ? groups.cancelRequest : group?.policy === "approval" ? groups.request : t.join}</button>
-      {confirmLeave && <button type="button" className={institutionLink} disabled={mutation.busy}
-        onClick={() => setConfirmLeave(false)}>{feedMessages[locale].cancel}</button>}
-    </div>
-  </div>;
 }
 
 export function DepartmentSpace({ slug }: { slug: string }) {

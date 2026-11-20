@@ -437,3 +437,44 @@ Existing routes under `/api/v1/communities/:key` handle detail, join/request, le
 The web pages use the same contracts that future Android and iOS clients can call. Public pages are `/community-directory` and `/community-directory/:slug`. The member workspace has creation, room management, invitations, and moderation under `/communities`. API errors include stable codes and request IDs. Supabase Auth remains the identity source.
 
 With the named hosted project confirmed, run `npm run test:hosted:groups:sql -- --preflight` before migrations or omit `--preflight` afterward. `npm run test:hosted:groups` exercises real Auth, Fastify and Storage with synthetic fixtures. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` as for the other hosted workflows. Use `npm run db:push:dry` to review changes. Never run database reset against hosted Supabase.
+
+## Phase 4C community discovery and recommendations
+
+The signed-in `/communities` directory adds **Recommended** to the official department, diaspora, interest and My Communities views. Search and category controls stay in the same directory. Country and topic filters apply to the corresponding group types. The public directory and every existing room URL remain available. My Communities shows joined departments, joined and managed member groups, pending membership requests and the existing recipient-only invitation inbox.
+
+### Ranking v1
+
+| Signal | Weight |
+| --- | ---: |
+| Group topic matches an explicit saved interest | +30 |
+| Group topic also appears in a discoverable group the member joined | +12 |
+| Eligible public discussion in the last 14 days | +4 |
+| Each preceding result of the same category | −10 |
+
+Scores add the applicable signals. Titles, country codes and department metadata support filtering. The algorithm considers at most 48 eligible candidates per category plus 12 candidates per explicit or eligible joined topic. Each candidate samples at most eight recent posts in its current public-reading period. A deterministic category position, category, creation time and UUID break ties. Cold start uses public activity and category diversity. Personal geography, identity, verification, payment and private memberships carry no weight. Institutional follows have no weight until there is an explicit eligible institution-to-community relationship. Neither approval-only nor private discussion data contributes activity.
+
+New suggestions exclude joined and owned groups, currently suppressed recommendations, pending or rejected application targets where approval is required, removed members' former groups, and groups whose owner is missing, ineligible or blocked. Private groups are excluded from suggestions for all members. Public browse also filters out missing, restricted or blocked owners without altering a current member’s direct room access. The database rechecks eligibility and active filters on every page and recomputes the public activity indicator. No snippets, actor identities or raw counts are returned by the ranking engine. It reuses the department and group projections, including existing safe member counts.
+
+A caller-bound snapshot stores up to 60 ordered IDs and reason codes. It expires after ten minutes. The server retains at most four snapshots per member. Expired snapshots and expired feedback are cleaned in bounded batches during builds. Invalid or expired cursors require a refresh with the existing filters. Ranking builds and feedback writes have separate database quotas. Feed For You weights and feedback are independent.
+
+**Not interested** suppresses a community for 30 days. **Hide this group** suppresses it until restored or reset. A member can undo the latest action or reset all community recommendation feedback. Writes are scoped to the caller and capped at 500 saved entries. Feedback never changes memberships, follows, or saved interests or geography.
+
+### Fastify endpoints
+
+| Route | Purpose |
+| --- | --- |
+| `GET /api/v1/communities/recommendations/list` | Authenticated, cursor-paged community cards with reason codes, recent-public-activity flags and algorithm version. Optional kind, topic, country and search filters. The suffix preserves existing group slug resolution. |
+| `GET /api/v1/me/community-recommendation-settings` | Caller’s hidden and temporarily suppressed counts. |
+| `POST /api/v1/communities/:id/recommendation-feedback` | Apply `not_interested`, `hide`, or `restore` to caller feedback. The path uses a community UUID. |
+| `DELETE /api/v1/me/community-recommendation-feedback` | Reset only the caller’s community feedback and snapshots. |
+| `GET /api/v1/me/community-activity` | Cursor-paged group cards in `joined`, `managed`, or `pending`. Existing department and invitation endpoints complete the dashboard. |
+
+### Notifications and lifecycle
+
+Membership request and invitation states come from the existing group tables and inbox. The shared notification model currently relies on an actor and accessible post or appeal targets. Group membership outcomes would need recipient-specific access checks at both event creation and delivery, deduplication and event preferences. Phase 4C keeps these events in the existing membership and invitation surfaces. There are no new group notification types or broadcasts.
+
+Archive and unarchive remain deferred. The existing system has no archive state. A later reversible archive must gate participation, invitations, direct links, post/comment/media access and recommendations while preserving unresolved content reports and evidence. Current account restrictions and group privacy continue to apply.
+
+The proposed membership-removal appeal model allows the removed member to file once per recorded removal within 14 days. Access would be limited to the filer’s case status and the minimum evidence needed by an assigned platform reviewer with recent MFA. The staff member who removed the applicant, current group staff, and reviewers with a conflict would be ineligible to decide the case. Filing would leave membership unchanged. A written, audited decision and a fresh eligibility check would precede any separate reinstatement. Implementation remains deferred. Existing content-hide appeals continue through their current workflow.
+
+Run `npm run test:hosted:community-recommendations:sql -- --preflight` before applying Phase 4C to the named project, or omit `--preflight` afterward. The rollback suite checks ranking, authorization, feedback, snapshot behavior and a 1,200-group catalog. Run `npm run test:hosted:community-recommendations` for the synthetic Auth and Fastify integration check. Both require the configured hosted project reference and do not require Docker or SMTP.

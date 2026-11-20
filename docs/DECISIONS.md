@@ -112,3 +112,9 @@ Phase 2B uses self-declared membership categories. A category grants no verifica
 - Store the single owner on the group and reuse room-scoped staff assignments. Ownership transfer requires existing membership, recipient acceptance and recent TOTP. Recovery is restricted to platform administrators when there is no eligible owner.
 - Invitations use a private recipient inbox. Membership removal prevents reentry in this phase. Group membership never sets personal geography or platform verification.
 - Store written decisions in a private append-only application audit. Account deletion clears mutable identity references where specified by the schema. A safe self-service group archival and deletion workflow remains open.
+
+### Phase 4C recommendation decisions
+
+- Rank groups independently from For You with fixed versioned rules and caller-bound snapshots.
+- Use explicit topics, discoverable joined topics and real eligible public discussion. Institutional follow signals require an explicit group link before activation. The ranker does not use sensitive identity or geography.
+- Preserve the existing invitation inbox and approval workflow. Defer group notification types, archiving and membership-removal appeals until their read, write and evidence boundaries can be enforced together.
