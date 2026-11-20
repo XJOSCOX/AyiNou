@@ -182,4 +182,34 @@ Dictionary parity verified 1,565 baseline Spanish keys against the same Haitian 
 7. Optimize query and rendering paths after controlled measurements. Compare scope-aware listing plans, notification counts, private media and concurrent poll writes while retaining access and consistency. Add indexes only where query evidence warrants them.
 8. Add CI with pinned Node, lockfile installs, isolated parallel typecheck/lint/tests, translation parity and production builds. Run dependency reports and keep hosted jobs manual, serialized and restricted. Verify recovery procedures and capture final regression baselines.
 
-Phase 6E stops at the audit. Phase 6F awaits owner review of these priorities.
+## Phase 6F.1 results
+
+| Finding | Status | Validation |
+| --- | --- | --- |
+| 6E-01 | Fixed and validated | The poll uses server time for its opening and closing refreshes. Controlled-clock tests cover skew, hidden tabs, focus, obsolete results and cleanup. A live private poll opened and closed on the same browser page and kept the selected option and unsent reason. Fastify and hosted tests covered a late vote, concurrent submissions, retry, result privacy and nominee consent. |
+| 6E-02 | Fixed and validated for the navbar | Profile reads share an in-flight request for the same token. The navbar uses the authorized signed URL, updates after a profile upload, renews the URL before its normal expiry and clears identity state at session changes. Synthetic browser and API checks covered avatar delivery, replacement, navigation, refresh, sign-out and signing in as a different account. |
+| 6E-03 | Fixed and validated | The guarded hosted fixture ran deployed aggregation function bodies against isolated temporary cohorts of 0, 9, 10 and 11. Missing rows and JSON null are checked explicitly. The fixture verifies suppression and excludes production member data. The transaction rolled back. |
+| 6E-04 | Local improvements measured | Protected layout starts independent reads together and waits for the same access decisions. Provider and sidebar share platform access display state. Public footer status has a short cache and development uses Turbopack. Production performance and peak load remain unmeasured. |
+| 6E-05 to 6E-09 | Outstanding | Module extraction, scoped poll query and lock behavior under load, the build dependency advisory, an automated browser suite, and failure and recovery simulation remain follow-up work. |
+
+### Local development baseline
+
+TTFB in milliseconds from authenticated loopback requests on the same machine, with the same hosted project, synthetic account and installed dependencies. Each archive ran Next.js 16.4.6 in development with a fresh compiler cache. The first sample is the first measured request for that route, and shared compiler work may carry over from earlier routes. Warm values are medians of three immediate repeats. This comparison measures the combined compiler and request changes under local conditions.
+
+| Route | Audit Webpack first | 6F.1 Turbopack first | Audit warm median | 6F.1 warm median |
+| --- | ---: | ---: | ---: | ---: |
+| Dashboard | 4,642 | 1,984 | 343 | 137 |
+| Feed | 1,075 | 429 | 273 | 125 |
+| Communities | 750 | 388 | 256 | 115 |
+| Polls | 703 | 339 | 269 | 130 |
+| Account Settings | 737 | 335 | 270 | 128 |
+
+Fastify logs from one direct browser load of the profile on each archive counted 10 and 7 successful API GETs respectively. Platform access dropped from 2 to 1, profile from 2 to 1, footer status from 2 to 1, and department lookup remained at 2. These exclude preflights, signed media and calls made directly to Supabase.
+
+To repeat the sample, export the audit commit and the final code commit to separate directories. Use the same local environment and dependency versions, start Webpack for the audit export and Turbopack for the code export on separate loopback ports, and warm neither cache beforehand. Reuse one synthetic session to send four authenticated requests per route in table order. Measure response headers, verify the body contains the authenticated workspace and report the first sample and median of the remaining three. Compare successful Fastify GETs during a single full profile navigation on each origin.
+
+The clean commit export passed typecheck, lint, translation parity for 1,567 keys across four languages, 31 API tests, seven client tests and both production builds. Guarded hosted rollback checks passed for admin and session rules, polls, department communities, member groups, media and notifications, and aggregation. Live tests passed for real TOTP, suspension with a previously issued token, independent review, global logout, and a concurrent ballot with an idempotent receipt. No migrations were needed.
+
+Manual browser checks covered session restoration, community navigation, sidebar folding, both themes and localized Create Poll in all four languages. Create Poll used two columns at desktop width and stacked at 320 pixels. Dashboard, Feed, Communities, Polls, Profile, Settings, Institutions, Projects, Ambassadors and Verification fit their tested workspaces without horizontal overflow at 320 and 2560 pixels. The public landing page, auth cards and error text retain readable width limits.
+
+The [6F.1 code comparison](https://github.com/XJOSCOX/AyiNou/compare/754764921003111a4d6bc730d490d529f373d060...30213274bbe5ee9ab127c5fb1a9b6f40595471b5) lists the exact files in the three implementation commits. The local logo, feed icons, draft database blueprint and screenshots remain outside those commits.

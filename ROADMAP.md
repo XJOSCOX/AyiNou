@@ -227,6 +227,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Phase 6D adds scoped polls and private ballots, frozen higher-trust eligibility, nominee consent, and auditable recommendations.
 - [ ] Phase 6E audits the codebase, architecture, authorization, privacy, tests, and operational readiness.
 - [ ] Phase 6F addresses audit findings through controlled refactoring, bug fixes, and optimization.
+- [x] Phase 6F.1 consolidates responsive workspaces, improves local request performance, refreshes scheduled polls and navbar avatars, and isolates the aggregation regression fixture.
 - [ ] Define independent outcomes validation, retention, fraud escalation, quorum standards, and operational voting governance.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
