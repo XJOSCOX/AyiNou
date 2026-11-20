@@ -70,6 +70,8 @@ GET /api/v1/me/privacy-exports/:id/download - -
 GET /api/v1/me/privacy-exports/availability - -
 GET /api/v1/me/privacy-requests - -
 GET /api/v1/me/privacy-requests/:id - -
+GET /api/v1/me/privacy-requests/:id/deletion-preview - -
+GET /api/v1/me/privacy-requests/:id/deletion-status - -
 GET /api/v1/me/privacy-requests/:id/export - -
 GET /api/v1/me/profile - -
 GET /api/v1/me/project-work - -
@@ -171,6 +173,8 @@ HEAD /api/v1/me/privacy-exports/:id - onSend
 HEAD /api/v1/me/privacy-exports/availability - onSend
 HEAD /api/v1/me/privacy-requests - onSend
 HEAD /api/v1/me/privacy-requests/:id - onSend
+HEAD /api/v1/me/privacy-requests/:id/deletion-preview - onSend
+HEAD /api/v1/me/privacy-requests/:id/deletion-status - onSend
 HEAD /api/v1/me/privacy-requests/:id/export - onSend
 HEAD /api/v1/me/profile - onSend
 HEAD /api/v1/me/project-work - onSend
@@ -271,6 +275,8 @@ POST /api/v1/me/notifications/read-all 1024 -
 POST /api/v1/me/post-media 4200000 onRequest
 POST /api/v1/me/privacy-exports/:id/revoke 512 -
 POST /api/v1/me/privacy-requests 512 -
+POST /api/v1/me/privacy-requests/:id/deletion-confirmation 512 -
+POST /api/v1/me/privacy-requests/:id/deletion-plan 512 -
 POST /api/v1/me/privacy-requests/:id/export 512 -
 POST /api/v1/me/privacy-requests/:id/withdraw 512 -
 POST /api/v1/me/profile/avatar 2800000 -

@@ -16,6 +16,7 @@ const config = readConfig({
   LOG_LEVEL: "error",
   AYINOU_PRIVACY_INTAKE: "synthetic",
   AYINOU_PRIVACY_EXPORT: "synthetic",
+  AYINOU_PRIVACY_LIFECYCLE: "synthetic",
   AYINOU_PRIVACY_EXPORT_TEST_KEY: process.env.AYINOU_E2E_EXPORT_KEY,
 });
 const app = createApp(config);
