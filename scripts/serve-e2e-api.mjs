@@ -8,12 +8,13 @@ if (url !== "http://127.0.0.1:55321" || !/^ayinou-e2e-[a-f0-9-]{12}$/.test(proje
 }
 const config = readConfig({
   API_HOST: "127.0.0.1",
-  API_PORT: "5300",
+  API_PORT: process.argv.includes("--secondary") ? "5301" : "5300",
   WEB_ORIGINS: "http://127.0.0.1:5400",
   SUPABASE_URL: url,
   SUPABASE_PUBLISHABLE_KEY: publishable,
   SUPABASE_SECRET_KEY: secret,
   LOG_LEVEL: "error",
+  AYINOU_PRIVACY_INTAKE: "synthetic",
 });
 const app = createApp(config);
 await app.listen({ host: config.API_HOST, port: config.API_PORT });

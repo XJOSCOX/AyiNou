@@ -37,6 +37,11 @@ export default defineConfig({
     url: api + "/api/v1/status",
     reuseExistingServer: false,
   }, {
+    command: "node --import tsx scripts/serve-e2e-api.mjs --secondary",
+    cwd: root,
+    url: "http://127.0.0.1:5301/api/v1/status",
+    reuseExistingServer: false,
+  }, {
     command: "node ../../node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 5400",
     cwd: webDirectory,
     url: web + "/login",

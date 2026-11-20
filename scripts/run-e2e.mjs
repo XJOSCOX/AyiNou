@@ -78,7 +78,7 @@ async function main() {
     await run(playwright, ["test", "--config", config, ...args]);
     return;
   }
-  await Promise.all([...ports.values(), 5300, 5400].map(available));
+  await Promise.all([...ports.values(), 5300, 5301, 5400].map(available));
   const directory = await mkdtemp(fromRoot(".e2e-run-"));
   let startAttempted = false;
   try {

@@ -15,6 +15,7 @@ GET /api/v1/admin/accounts - -
 GET /api/v1/admin/ambassadors - -
 GET /api/v1/admin/audit - -
 GET /api/v1/admin/overview - -
+GET /api/v1/admin/privacy-requests/* 512 -
 GET /api/v1/admin/safety - -
 GET /api/v1/ambassadors - -
 GET /api/v1/comments/:id/reaction - -
@@ -64,6 +65,8 @@ GET /api/v1/me/platform-access - -
 GET /api/v1/me/polls - -
 GET /api/v1/me/polls/nominations - -
 GET /api/v1/me/polls/options - -
+GET /api/v1/me/privacy-requests - -
+GET /api/v1/me/privacy-requests/:id - -
 GET /api/v1/me/profile - -
 GET /api/v1/me/project-work - -
 GET /api/v1/me/projects - -
@@ -110,6 +113,7 @@ HEAD /api/v1/admin/accounts - onSend
 HEAD /api/v1/admin/ambassadors - onSend
 HEAD /api/v1/admin/audit - onSend
 HEAD /api/v1/admin/overview - onSend
+HEAD /api/v1/admin/privacy-requests/* 512 onSend
 HEAD /api/v1/admin/safety - onSend
 HEAD /api/v1/ambassadors - onSend
 HEAD /api/v1/comments/:id/reaction - onSend
@@ -159,6 +163,8 @@ HEAD /api/v1/me/platform-access - onSend
 HEAD /api/v1/me/polls - onSend
 HEAD /api/v1/me/polls/nominations - onSend
 HEAD /api/v1/me/polls/options - onSend
+HEAD /api/v1/me/privacy-requests - onSend
+HEAD /api/v1/me/privacy-requests/:id - onSend
 HEAD /api/v1/me/profile - onSend
 HEAD /api/v1/me/project-work - onSend
 HEAD /api/v1/me/projects - onSend
@@ -204,6 +210,7 @@ HEAD /health - onSend
 OPTIONS * - -
 PATCH /api/v1/admin/accounts/:id 4096 -
 PATCH /api/v1/admin/ambassadors/:id 6000 -
+PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/comments/:id 12288 -
 PATCH /api/v1/communities/:key/membership 1024 -
 PATCH /api/v1/communities/:key/moderation/:target/:id 4096 -
@@ -235,6 +242,7 @@ PATCH /api/v1/trust/verification-appeals/:id/assignment 4096 -
 PATCH /api/v1/trust/verification-appeals/:id/decision 6000 -
 PATCH /api/v1/verification/review/:id/work 256 -
 POST /api/v1/admin/ambassadors 6000 -
+POST /api/v1/admin/privacy-requests/* 512 -
 POST /api/v1/affiliation-invitations/:id/:action 256 -
 POST /api/v1/comments/:id/reports 4096 -
 POST /api/v1/communities 13000 -
@@ -254,6 +262,8 @@ POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
 POST /api/v1/me/notifications/read-all 1024 -
 POST /api/v1/me/post-media 4200000 onRequest
+POST /api/v1/me/privacy-requests 512 -
+POST /api/v1/me/privacy-requests/:id/withdraw 512 -
 POST /api/v1/me/profile/avatar 2800000 -
 POST /api/v1/me/referrals/attribution 512 -
 POST /api/v1/me/verification 4096 -
