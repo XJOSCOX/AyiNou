@@ -7,7 +7,7 @@ function query<T extends string>(scope: T, cursor: string | null) {
 }
 
 export const loadFeed = (scope: FeedScope, cursor: string | null, signal: AbortSignal): Promise<FeedPage> =>
-  authorizedRequest(`/api/v1/feed?${query(scope, cursor)}`, { signal });
+  (scope === "for_you" ? authorizedSocialRequest : authorizedRequest)(`/api/v1/feed?${query(scope, cursor)}`, { signal });
 
 export const createPost = (input: PostInput, key: string): Promise<{ id: string }> =>
   authorizedRequest("/api/v1/posts", { method: "POST", headers: { "Idempotency-Key": key }, body: JSON.stringify(input) });

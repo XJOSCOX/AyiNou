@@ -28,6 +28,8 @@
     "test:hosted:feed:sql": "node scripts/check-feed-sql.mjs",
     "test:hosted:following:sql": "node scripts/check-following-sql.mjs",
     "test:hosted:following": "node --import tsx scripts/check-following-hosted.mjs",
+    "test:hosted:recommendations:sql": "node scripts/check-recommendations-sql.mjs",
+    "test:hosted:recommendations": "node --import tsx scripts/check-recommendations-hosted.mjs",
     "test:hosted:engagement:sql": "node scripts/check-engagement-sql.mjs",
     "test:hosted:feed": "node --import tsx scripts/check-feed-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",

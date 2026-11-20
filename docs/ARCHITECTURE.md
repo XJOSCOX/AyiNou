@@ -84,6 +84,10 @@ Fastify exposes discovery, follow state, and relationship lists through the same
 
 Discovery pages use bounded handle keysets and safe projections. The Following feed uses indexed per-author chronological pages and merges them in PostgreSQL before the existing Fastify reaction summary step. Comments stay lazy-loaded. The web workspace shares the existing theme, cursor loader, and error handling, and exposes equivalent contracts for future native clients.
 
+### For You recommendations
+
+The recommendation RPC ranks a bounded eligible candidate set using a versioned rules table. It stores only ordered post IDs and coarse explanation codes in a viewer-bound snapshot. Fastify paginates through that snapshot, checks a scoped cursor, and hydrates public avatars, author topics, and reaction summaries in batches. Latest and Following keep their existing chronological queries. Feed-mode choice lives in the browser and starts on Latest. Visited timelines stay mounted when switching modes so open comment drafts survive.
+
 ## References
 
 - [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)

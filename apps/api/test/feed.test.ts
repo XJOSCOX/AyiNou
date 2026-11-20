@@ -19,6 +19,12 @@ function fixture() {
   const second = { ...first, id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", body: "Second post" };
   const calls: { token: string | null; name: string; input?: Record<string, unknown> }[] = [];
   const feed: FeedRepository = {
+    async recommendations(token, input) {
+      calls.push({ token, name: "recommendations", input });
+      return { snapshotId: first.id, algorithmVersion: "v1", rows: input.p_after
+        ? [{ post: second, position: 9 }]
+        : [{ post: first, position: 4 }, { post: second, position: 9 }] };
+    },
     async read(token, input) {
       calls.push({ token, name: "read", input });
       return input.p_before_id ? [second] : [first, second];
@@ -77,8 +83,36 @@ test("post creation validates requests, preserves source text and forwards only 
     const created = await submit(body);
     assert.equal(created.statusCode, 201);
     assert.deepEqual(created.json(), { id: first.id });
-    assert.deepEqual(calls, [{ token: "member", name: "create_post_for_client",
-      input: { p_body: body.body, p_language: "es", p_visibility: "public", p_submission: key } }]);
+    assert.deepEqual(calls, [{ token: "member", name: "create_post_with_topics_for_client",
+      input: { p_body: body.body, p_language: "es", p_visibility: "public", p_submission: key, p_topics: [] } }]);
+  } finally {
+    await app.close();
+  }
+});
+
+test("For You uses an authenticated snapshot cursor and validates author topics and feedback", async () => {
+  const { app, first, second, calls } = fixture();
+  try {
+    const url = "/api/v1/feed?scope=for_you&limit=1";
+    const headers = { authorization: "Bearer member" };
+    assert.equal((await app.inject(url)).statusCode, 401);
+    assert.equal((await app.inject({ url: `${url}&cursor=bad`, headers })).statusCode, 400);
+    const page = await app.inject({ url, headers });
+    assert.equal(page.json().algorithmVersion, "v1");
+    assert.equal(page.json().posts[0].id, first.id);
+    assert.equal("position" in page.json().posts[0], false);
+    const next = await app.inject({ url: `${url}&cursor=${page.json().nextCursor}`, headers });
+    assert.equal(next.json().posts[0].id, second.id);
+    assert.deepEqual(calls.at(-1)?.input, { p_snapshot: first.id, p_after: 4, p_limit: 1 });
+    const authorKey = { ...headers, "idempotency-key": randomUUID() };
+    for (const topics of [["healthcare", "healthcare"], ["unknown"], ["education", "culture", "peace", "healthcare"]]) {
+      assert.equal((await app.inject({ method: "POST", url: "/api/v1/posts", headers: authorKey, payload: { ...body, topics } })).statusCode, 400);
+    }
+    const feedback = `/api/v1/posts/${first.id}/recommendation-feedback`;
+    assert.equal((await app.inject({ method: "POST", url: feedback, headers, payload: { action: "hide_author", account: other } })).statusCode, 400);
+    assert.equal((await app.inject({ method: "POST", url: feedback, headers, payload: { action: "hide_author" } })).statusCode, 204);
+    assert.deepEqual(calls.at(-1)?.input, { p_post: first.id, p_action: "hide_author" });
+    assert.equal((await app.inject("/api/v1/recommendations/settings")).statusCode, 401);
   } finally {
     await app.close();
   }

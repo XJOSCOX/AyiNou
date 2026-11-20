@@ -67,6 +67,12 @@
 - Preserve dormant links while a target is temporarily private, suspended, archived, or verification-revoked. Restore their eligibility only when the existing visibility and account rules permit it again.
 - Order Following chronologically and use deterministic, bounded suggestions drawn from public accounts. Institution follows carry no publishing or representation authority.
 
+## Recommendation decisions
+
+- Offer For You as a separate feed mode with Latest as the default. Reuse explicitly selected interests and the current topic catalog.
+- Bound topic, follow, freshness, language, and reaction weights. Use engagement only after a topic or follow match and cap repeated authors per snapshot.
+- Use private short-lived snapshots for stable pagination and apply current visibility and feedback at read time. Keep feedback controls confined to For You.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

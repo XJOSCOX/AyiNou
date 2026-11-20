@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import {
-  commentBodyLimit, locales, moderationActions, postBodyLimit, postVisibilities, reactionKinds, reportCategories,
-  type FeedComment, type FeedReport, type ReactionSummary,
+  commentBodyLimit, interestCodes, locales, moderationActions, postBodyLimit, postVisibilities, reactionKinds,
+  recommendationActions, reportCategories, type FeedComment, type FeedReport, type ReactionSummary, type RecommendationSettings,
 } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
@@ -12,13 +12,15 @@ import { registerDiscoveryRoutes } from "./discovery.js";
 const cursorShape = z.strictObject({ createdAt: z.iso.datetime({ offset: true }), id: z.uuid() });
 const pageCursor = z.string().max(250).regex(/^[A-Za-z0-9_-]+$/).optional();
 const feedQuery = z.strictObject({
-  scope: z.enum(["feed", "mine", "following"]).default("feed"), cursor: pageCursor,
+  scope: z.enum(["feed", "mine", "following", "for_you"]).default("feed"), cursor: pageCursor,
   limit: z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(40)).optional(),
 });
 const identifiers = z.object({ id: z.uuid() });
 const version = z.number().int().min(1).max(2_147_483_647);
 const postFields = z.strictObject({ body: z.string(), language: z.enum(locales), visibility: z.enum(postVisibilities) });
-const postEdit = postFields.extend({ version });
+const topics = z.array(z.enum(interestCodes)).refine((codes) => new Set(codes).size === codes.length);
+const postInput = postFields.extend({ topics: z.array(z.enum(interestCodes)).max(3).pipe(topics).optional() });
+const postEdit = postInput.extend({ version });
 const commentFields = postFields.omit({ visibility: true });
 const commentEdit = commentFields.extend({ version });
 const versionQuery = z.strictObject({ version: z.string().regex(/^\d{1,10}$/).transform(Number).pipe(version) });
@@ -101,6 +103,24 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     const { actor, token } = await viewer(request, input.scope !== "feed");
     limitReads(request, actor);
     const limit = input.limit ?? 20;
+    if (input.scope === "for_you") {
+      let snapshot: string | null = null;
+      let after = 0;
+      if (input.cursor) {
+        try {
+          const cursor = z.strictObject({ snapshot: z.uuid(), after: z.number().int().min(1).max(80) })
+            .parse(JSON.parse(Buffer.from(input.cursor, "base64url").toString("utf8")));
+          snapshot = cursor.snapshot;
+          after = cursor.after;
+        } catch { throw new ApiError(400, "INVALID_INPUT", "Invalid recommendation cursor"); }
+      }
+      const ranked = await repo().recommendations(token, { p_snapshot: snapshot, p_after: after, p_limit: limit });
+      const page = ranked.rows.slice(0, limit);
+      const last = page.at(-1);
+      const nextCursor = ranked.rows.length > limit && last
+        ? Buffer.from(JSON.stringify({ snapshot: ranked.snapshotId, after: last.position })).toString("base64url") : null;
+      return { posts: page.map(({ post }) => post), nextCursor, algorithmVersion: ranked.algorithmVersion };
+    }
     const rows = await repo().read(token, { p_scope: input.scope, p_limit: limit, ...before(input.cursor), p_id: null });
     const { page, nextCursor } = paginate(rows, limit);
     return { posts: page, nextCursor };
@@ -116,10 +136,11 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.post("/api/v1/posts", { bodyLimit: 16_384 }, async (request, reply) => {
     const { token } = await viewer(request, true);
     const key = z.uuid().parse(request.headers["idempotency-key"]);
-    const input = postFields.parse(request.body);
+    const input = postInput.parse(request.body);
     content(input.body, postBodyLimit);
-    const id = await repo().rpc<string>(token, "create_post_for_client", {
+    const id = await repo().rpc<string>(token, "create_post_with_topics_for_client", {
       p_body: input.body, p_language: input.language, p_visibility: input.visibility, p_submission: key,
+      p_topics: input.topics ?? [],
     });
     return reply.code(201).send({ id });
   });
@@ -128,10 +149,32 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     const { id } = identifiers.parse(request.params);
     const input = postEdit.parse(request.body);
     content(input.body, postBodyLimit);
-    await repo().rpc(token, "mutate_post_for_client", {
-      p_id: id, p_version: input.version, p_delete: false, p_body: input.body, p_language: input.language, p_visibility: input.visibility,
+    await repo().rpc(token, input.topics ? "edit_post_with_topics_for_client" : "mutate_post_for_client", {
+      p_id: id, p_version: input.version, p_body: input.body, p_language: input.language, p_visibility: input.visibility,
+      ...(input.topics ? { p_topics: input.topics } : { p_delete: false }),
     });
     return reply.code(204).send();
+  });
+  app.get("/api/v1/recommendations/settings", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    limitReads(request, actor);
+    return repo().rpc<RecommendationSettings>(token, "recommendation_settings_for_client");
+  });
+  app.put("/api/v1/recommendations/settings", { bodyLimit: 2_048 }, async (request) => {
+    const { token } = await viewer(request, true);
+    const input = z.strictObject({ topics: z.array(z.enum(interestCodes)).max(10).pipe(topics) }).parse(request.body);
+    return repo().rpc<RecommendationSettings>(token, "save_recommendation_topics_for_client", { p_topics: input.topics });
+  });
+  app.post("/api/v1/posts/:id/recommendation-feedback", { bodyLimit: 1_024 }, async (request, reply) => {
+    const { token } = await viewer(request, true);
+    const { id } = identifiers.parse(request.params);
+    const { action } = z.strictObject({ action: z.enum(recommendationActions) }).parse(request.body);
+    await repo().rpc(token, "recommendation_feedback_for_client", { p_post: id, p_action: action });
+    return reply.code(204).send();
+  });
+  app.delete("/api/v1/recommendations/feedback", async (request) => {
+    const { token } = await viewer(request, true);
+    return repo().rpc<RecommendationSettings>(token, "clear_recommendation_feedback_for_client");
   });
   app.delete("/api/v1/posts/:id", async (request, reply) => {
     const { token } = await viewer(request, true);

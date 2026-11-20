@@ -243,7 +243,30 @@ Database quotas allow 20 follow changes or attempts and 90 searches per account 
 
 Following never changes representative, membership, or verification rights. The Following feed shows eligible public and members-only posts from followed members and retains the existing reaction and discussion contracts. Institution follows currently yield no feed posts. Search uses a deterministic order and does not infer interests or track behavior.
 
+## Phase 3D For You recommendations
+
+`20261120100000_phase3d_recommendations.sql` adds `post_topics`, `recommendation_feedback`, `recommendation_versions`, and `recommendation_snapshots` in `feed_data`. `20261120101000_recommendation_engagement_guard.sql` limits reaction scoring to posts already relevant through topics or follows. `20261120102000_optimize_recommendation_rank.sql` batches account checks across the bounded sample and disables JIT for the ranking query. All four tables have RLS and no direct app-role grants. Authors can choose zero to three unique catalog topics on posts and drafts. Older posts remain valid without tags. Topic changes use the same ownership and version checks as post edits, and topic-aware create retries include the sorted topic set.
+
+| Fastify endpoint | Contract |
+| --- | --- |
+| `GET /api/v1/feed?scope=for_you` | Authenticated recommendations, `algorithmVersion`, per-post `recommendationReason`, and the next snapshot cursor. |
+| `POST /api/v1/posts`, `PATCH /api/v1/posts/:id` | Optional `topics` from the existing catalog, up to three. An explicit empty array clears tags on edit. An omitted edit field preserves tags. |
+| `GET /api/v1/recommendations/settings` | Caller’s selected topics and feedback count. |
+| `PUT /api/v1/recommendations/settings` | Replace the caller’s selected topics. The same choices appear in My Profile. |
+| `POST /api/v1/posts/:id/recommendation-feedback` | Private `not_interested`, `less_author`, or `hide_author`, bound to the visible post and its author. |
+| `DELETE /api/v1/recommendations/feedback` | Clear the caller’s explicit recommendation feedback. |
+
+The `v1` weights live in a private configuration row. A post gets 18 points per matching topic, capped at two matches, 25 for a followed author, 6 for matching the saved language, and up to 20 for freshness, with one point subtracted per 12 hours. For a topic or follow match, up to three eligible reactors add two points each. The deterministic sample checks up to 12 reaction rows and excludes the viewer, the author, and accounts less than seven days old. Reports, badges, and raw engagement totals carry no weight. Show less subtracts 45. A second post by the same author loses 8, and repeat primary topics lose two per position up to 12. Each snapshot contains at most two posts per author. Ties use publication time and UUID. Cold-start and unmatched posts are ordered by freshness, language, and variety.
+
+An indexed query considers up to 420 recent published posts in a 30-day window. It excludes the viewer’s own posts, private or restricted authors, drafts, hidden or removed posts, and explicit post or author hides before ranking. The caller must have a live member session, and current eligibility is checked again on each page. The feed uses selected interests, follows, saved language, and limited eligible reactions. It collects no browsing history, precise location, inferred sensitive interests, or verification evidence.
+
+Snapshots store up to 80 ordered IDs and explanation codes for ten minutes, with up to three snapshots per viewer. New snapshot builds reclaim expired rows in bounded batches. Expired cursors return `FEED_REFRESH_REQUIRED`. Current hides take effect on each page, and new Show less feedback also suppresses that author on an older snapshot. Fresh snapshots apply its downrank. Feedback stays until the member clears it or the target or account is deleted. Later blocks and mutes require their own authorization integration.
+
+Limits are ten snapshot builds and 20 preference or feedback writes per account per minute, plus the existing per-instance Fastify read limit. The rollback-only benchmark uses 1,200 synthetic posts by 150 authors with 7,200 reactions and sets a six-second budget for one personalized page. This guards the bounded query on hosted Supabase Free. Concurrent production throughput, longer windows, and behavior beyond the fixed candidate cap need separate measurement.
+
 ## Testing and optional local stack
+
+Use `npm run test:hosted:recommendations:sql` for rollback-only security, ranking, cursor, and performance checks. Use `-- --preflight` before all Phase 3D migrations, `-- --engagement-preflight` before the guard and optimization, or `-- --ranking-preflight` before the optimization alone. Run `npm run test:hosted:recommendations` for live synthetic-account API checks.
 
 Run `npm run test:hosted:following:sql` for rollback-only RLS, visibility, and quota checks. Before applying the migration, add `-- --preflight`. Run `npm run test:hosted:following` for live synthetic-account API, concurrency, and privacy checks.
 

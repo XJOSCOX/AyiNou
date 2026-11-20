@@ -33,9 +33,14 @@ export type PostVisibility = (typeof postVisibilities)[number];
 export type ReportCategory = (typeof reportCategories)[number];
 export type ModerationAction = (typeof moderationActions)[number];
 export type PostStatus = "draft" | "published" | "hidden" | "removed";
-export type FeedScope = "feed" | "mine" | "following";
+export type FeedScope = "feed" | "mine" | "following" | "for_you";
 export type ModerationScope = "reports" | "hidden";
-export type PostInput = { body: string; language: Locale; visibility: PostVisibility };
+export const recommendationReasons = ["topic", "follow", "language", "recent"] as const;
+export type RecommendationReason = (typeof recommendationReasons)[number];
+export const recommendationActions = ["not_interested", "less_author", "hide_author"] as const;
+export type RecommendationAction = (typeof recommendationActions)[number];
+export type RecommendationSettings = { topics: InterestCode[]; feedbackCount: number };
+export type PostInput = { body: string; language: Locale; visibility: PostVisibility; topics?: InterestCode[] };
 export interface FeedAuthor {
   displayName: string;
   username: string | null;
@@ -52,10 +57,12 @@ export interface FeedPost extends PostInput {
   own: boolean;
   author: FeedAuthor | null;
   reactions?: ReactionSummary;
+  recommendationReason?: RecommendationReason;
 }
 export interface FeedPage {
   posts: FeedPost[];
   nextCursor: string | null;
+  algorithmVersion?: string;
 }
 export interface FeedReport {
   id: string;

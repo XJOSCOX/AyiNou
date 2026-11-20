@@ -28,6 +28,8 @@ Members can open a post’s comments, add a text comment or reply, and react wit
 
 Discover connects members to public people and institutions. Following is voluntary and one-way. The Following tab shows chronological personal posts from eligible followed accounts. Institutional follows live alongside membership without changing a member’s institutional permissions.
 
+For You is optional. Members can choose topics, see why a post appeared, hide recommendations, and reset their feedback. Latest and Following remain chronological. Verification badges show account verification status, and account popularity carries limited weight in recommendations.
+
 ## Dashboard terminology
 
 - `Registered members`: non-deleted user accounts, excluding known spam/test accounts in production metrics.

@@ -134,6 +134,12 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Add privacy-filtered follower lists, counts, and a chronological following feed.
 - [x] Keep institutional following independent from membership, representation, and verification.
 
+## Phase 3D — For You recommendations
+
+- [x] Add an optional rules-based feed with explicit topics, explanations, and member controls.
+- [x] Keep Latest and Following chronological and preserve My Posts and Drafts.
+- [x] Apply privacy and moderation eligibility before ranking and again during snapshot pagination.
+
 ## Remaining Phase 3 — Social network MVP
 
 - [ ] Basic notifications and institution-authored posts.

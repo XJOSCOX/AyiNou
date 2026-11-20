@@ -50,6 +50,8 @@ Open **Comments** on a post to read or contribute to the discussion. Comments su
 
 Open **Discover** to find public members and institutions, manage the accounts you follow, and see privacy-filtered follower lists. **Following** in the feed shows recent eligible posts from the personal accounts you follow. Institution follows are available ahead of institution posting. [Discovery privacy, API and tests](docs/DATABASE.md#phase-3c-following-and-discovery)
 
+**For You** is an optional feed tab. It ranks eligible posts using selected topics, follows, language, and freshness, with a small reaction score for posts already relevant through topics or follows. Members can see why a post appeared, change their topics, or hide posts and accounts from recommendations. [Ranking and controls](docs/DATABASE.md#phase-3d-for-you-recommendations)
+
 ## Key features by phase
 
 1. Registration, onboarding, profiles, language, optional geographic information

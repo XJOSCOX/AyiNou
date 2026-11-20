@@ -4,7 +4,7 @@
 
 ## Verified baseline and design rules
 
-Hosted migration history runs from `20261119160000_initial_schema` through `20261120090000_phase3c_following_discovery`. Guarded hosted checks cover profile behavior and saved languages, metrics, referral setup, TOTP, institutional authorization, ordinary affiliation, feed engagement, and following. Delivered confirmation and recovery mail and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120102000_optimize_recommendation_rank`. Guarded hosted checks cover profile behavior and saved languages, TOTP, institutions, affiliations, feed engagement, following, and recommendations. Delivered confirmation and recovery mail and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Preserve user-generated content in its original language and label any future translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -125,6 +125,17 @@ Engagement depends on the Phase 3A post schema and live-session checks. All six 
 | `institution_follows` | `follower_id uuid! FK→auth.users.id CASCADE`, `organization_id uuid! FK→private.organizations.id CASCADE`, `created_at timestamptz!`; PK `(follower_id,organization_id)` | `(organization_id,follower_id)` |
 
 Both tables use RLS without direct application grants. Queries apply current visibility and live-account checks before returning an identity or counting a relationship. Discovery uses partial name, handle, category, and country indexes over eligible candidate rows. The chronological Following query uses a partial published-post index on `(author_id,created_at DESC,id DESC)`. Organization follows depend on the existing institution table and carry no authority.
+
+### Phase 3D For You recommendations
+
+| Table in `feed_data` | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `post_topics` | `post_id uuid! FK→posts.id CASCADE`, `slot smallint!` between 1 and 3, `topic_code text! FK→interest_catalog.code`; PK `(post_id,slot)`; UQ `(post_id,topic_code)` | `(topic_code,post_id)` |
+| `recommendation_feedback` | `user_id uuid! FK→auth.users.id CASCADE`, `post_id uuid? FK→posts.id CASCADE`, `author_id uuid? FK→auth.users.id CASCADE`, `action text!`, `updated_at timestamptz!`; exactly one target per action; UQ `(user_id,post_id)`, `(user_id,author_id)` | Partial FK indexes on post and author |
+| `recommendation_versions` | `version text PK`, bounded `topic_weight`, `follow_weight`, `language_weight`, `freshness_max`, `reaction_weight`, `less_penalty`, `repeat_penalty`, each `smallint!` | PK |
+| `recommendation_snapshots` | `id uuid PK`, `user_id uuid! FK→auth.users.id CASCADE`, `version text! FK→recommendation_versions.version`, `created_at timestamptz!`, `expires_at timestamptz!`, `post_ids uuid[]!`, `reasons text[]!`; ordered arrays of equal length up to 80 | Viewer/time and expiry indexes |
+
+The migration adds a nullable topic digest to legacy post submissions and a partial publication-time index for candidate retrieval. These four tables enable RLS with zero direct app-role privileges. Feedback is caller-owned and clearable. Only current eligible posts from a live viewer’s valid snapshot are projected. Expired snapshots are reclaimed during subsequent snapshot creation.
 
 ## Planned schema by domain and implementation phase
 
@@ -296,6 +307,10 @@ erDiagram
     posts ||--o{ post_media : attaches
     media_assets ||--o{ post_media : used_by
     posts ||--o{ post_reactions : receives
+    posts ||--o{ post_topics : tagged_as
+    interest_catalog ||--o{ post_topics : defines
+    auth_users ||--o{ recommendation_snapshots : owns
+    recommendation_versions ||--o{ recommendation_snapshots : ranks
     comments ||--o{ comment_reactions : receives
     auth_users ||--o{ member_follows : follows_as
     profiles ||--o{ member_follows : followed_member
@@ -353,6 +368,7 @@ erDiagram
 | Posts, comments, and reactions | Published public projection | Eligible threads and own reaction writes | Own versioned edits and deletion | Recent TOTP for moderation | Restricted repair/audit |
 | Comment reports and decisions | — | Report visible content once per target | — | Recent TOTP, private queue and written decisions | Restricted repair/audit |
 | Discovery and following | Eligible counts only | Authenticated filtered lists and own follow changes | Same | Same | Restricted maintenance |
+| For You topics, snapshots and feedback | Eligible post tags only | Own preferences, feedback and eligible recommendations | Versioned author topic writes | Existing post moderation | Private algorithm weights and maintenance |
 | Planned bookmarks | — | Own actions | Same | — | Restricted repair/audit |
 | Media metadata/Storage | Only approved public derivative | Signed permitted read | Own upload/management | Assigned evidence access | Storage policy/scan/retention |
 | Notifications/preferences/push devices | — | Own read/edit | Same | — | Delivery worker, no token exposure |
@@ -383,7 +399,7 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 1. **Existing through 2E.** Preserve the applied migration files. Check remote history before each future migration. Phase 2E depends on Auth, institutions, ordinary affiliations, the existing role assignments, and active personal verification for new administrator promotions. Challenge activation depends on an audited proof channel configuration and retention policy.
 2. **Common hardening** sets privacy and retention rules, extends the existing audit projection as needed, and adds `countries` and optional validated residence FK after existing values are checked. Handle user rights before public launch. Future profile changes must preserve current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
-4. **Phases 3A–3C** deliver text posts, moderation records, durable quotas, comments, reactions, and following. Later phases add media, blocking and muting, and formal appeals behind their authorization gates.
+4. **Phases 3A–3D** deliver text posts, moderation, durable quotas, comments, reactions, following, and For You. Later phases add media, blocking and muting, and formal appeals behind their authorization gates.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
 6. **Phase 5:** Extend the delivered institutional and review foundation with ambassador assignments and reviewed proof channels. Any evidence files depend on private media assets and retention approval. Radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
 7. **Phase 6:** Create projects after organizations, then members/milestones/needs/updates/reviews/outcomes and offers. Validate cross-table project/need ownership in trusted write workflows.
