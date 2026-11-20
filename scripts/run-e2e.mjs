@@ -1,5 +1,5 @@
 import { execFileSync, spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { cp, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { basename, dirname, join } from "node:path";
@@ -102,7 +102,8 @@ async function main() {
     await run(playwright, ["test", "--config", config, ...args], {
       env: { ...env, AYINOU_E2E_PROJECT: project, AYINOU_E2E_WEB_DIR: web, AYINOU_E2E_WEB_URL: webUrl,
         AYINOU_E2E_API_URL: apiUrl, AYINOU_E2E_SUPABASE_URL: supabaseUrl,
-        AYINOU_E2E_SUPABASE_PUBLIC: publicKey, AYINOU_E2E_SUPABASE_SECRET: secretKey },
+        AYINOU_E2E_SUPABASE_PUBLIC: publicKey, AYINOU_E2E_SUPABASE_SECRET: secretKey,
+        AYINOU_E2E_EXPORT_KEY: randomBytes(32).toString("hex") },
     });
   } finally {
     if (startAttempted) {

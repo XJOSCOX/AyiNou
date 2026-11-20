@@ -15,6 +15,8 @@ const config = readConfig({
   SUPABASE_SECRET_KEY: secret,
   LOG_LEVEL: "error",
   AYINOU_PRIVACY_INTAKE: "synthetic",
+  AYINOU_PRIVACY_EXPORT: "synthetic",
+  AYINOU_PRIVACY_EXPORT_TEST_KEY: process.env.AYINOU_E2E_EXPORT_KEY,
 });
 const app = createApp(config);
 await app.listen({ host: config.API_HOST, port: config.API_PORT });

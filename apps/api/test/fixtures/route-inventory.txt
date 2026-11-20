@@ -65,8 +65,12 @@ GET /api/v1/me/platform-access - -
 GET /api/v1/me/polls - -
 GET /api/v1/me/polls/nominations - -
 GET /api/v1/me/polls/options - -
+GET /api/v1/me/privacy-exports/:id - -
+GET /api/v1/me/privacy-exports/:id/download - -
+GET /api/v1/me/privacy-exports/availability - -
 GET /api/v1/me/privacy-requests - -
 GET /api/v1/me/privacy-requests/:id - -
+GET /api/v1/me/privacy-requests/:id/export - -
 GET /api/v1/me/profile - -
 GET /api/v1/me/project-work - -
 GET /api/v1/me/projects - -
@@ -163,8 +167,11 @@ HEAD /api/v1/me/platform-access - onSend
 HEAD /api/v1/me/polls - onSend
 HEAD /api/v1/me/polls/nominations - onSend
 HEAD /api/v1/me/polls/options - onSend
+HEAD /api/v1/me/privacy-exports/:id - onSend
+HEAD /api/v1/me/privacy-exports/availability - onSend
 HEAD /api/v1/me/privacy-requests - onSend
 HEAD /api/v1/me/privacy-requests/:id - onSend
+HEAD /api/v1/me/privacy-requests/:id/export - onSend
 HEAD /api/v1/me/profile - onSend
 HEAD /api/v1/me/project-work - onSend
 HEAD /api/v1/me/projects - onSend
@@ -262,7 +269,9 @@ POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
 POST /api/v1/me/notifications/read-all 1024 -
 POST /api/v1/me/post-media 4200000 onRequest
+POST /api/v1/me/privacy-exports/:id/revoke 512 -
 POST /api/v1/me/privacy-requests 512 -
+POST /api/v1/me/privacy-requests/:id/export 512 -
 POST /api/v1/me/privacy-requests/:id/withdraw 512 -
 POST /api/v1/me/profile/avatar 2800000 -
 POST /api/v1/me/referrals/attribution 512 -
