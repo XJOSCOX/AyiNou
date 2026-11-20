@@ -1,0 +1,48 @@
+# Retention and evidence holds
+
+**DRAFT — NOT APPROVED FOR IMPLEMENTATION OR PUBLICATION**
+
+The lifecycle starts with the applicable owner- and counsel-approved rule for the data and jurisdiction. Duration, trigger, exception authority, hold review interval and deletion method are open decisions for every category. Existing expiration windows control particular features. They do not establish an approved retention schedule or prove physical erasure. [L2 retention matrix](../legal/RETENTION_AND_DELETION_MATRIX.md)
+
+## Category review
+
+The triggers below are candidates for legal review. Each row needs an approved policy version and a separately verified cleanup result.
+
+| Category | Candidate trigger and disposition review |
+| --- | --- |
+| Registration, credentials, email, sessions and factors | Unconfirmed registration expiry, session revocation, factor removal or final closure. Separate application, Supabase Auth and provider log lifecycles. Keep necessary fraud or recovery evidence under a narrow hold. |
+| Private names, onboarding, residence and identity fields | Correction, abandoned onboarding or closure. Review original signup metadata and eligible suppression of statistics as well as current copies. |
+| Public profiles, handles and avatars | Visibility withdrawal, replacement or closure. Stop new projections and links; review handle reuse, history and old derivatives. |
+| Settings, interests and device preferences | Replacement, inactivity, reset or closure. Distinguish profile fields and server settings from browser-held preference state. |
+| Member codes, referrals and activity | Attribution resolution, code retirement, end of an activity window or closure. Review effects on both participants, signup metadata and de-identified metrics. |
+| Verification, evidence, badge history and impersonation | Final decision including appeal, badge expiry/revocation or closure. Remove sensitive evidence and external URLs when eligible, subject to approved independent review. Restrict minimal provenance. |
+| Institutions, private contacts, logos, roles and affiliations | Replacement, role/invitation expiry, revocation, consent withdrawal or institution closure. Keep successor and institutional records independent of a departing representative. |
+| Communities, membership, staff decisions and invitations | Membership or role end, request resolution, offer expiry or community closure. Review private histories and independently authorized member receipts. |
+| Social posts, drafts, comments, reactions and follows | Content withdrawal, abandoned draft, unfollow, closure or final moderation outcome. Review authorship and shared conversation references before tombstoning or erasure. |
+| Safety settings, reports, restrictions, decisions and appeals | Safety setting removal, final case resolution or approved evidence release. Separate current controls from restricted case evidence, third-party reports and reviewer records. |
+| Post media, attachments and alt text | Upload abandonment, detachment or eligible post removal. Existing 24-hour windows and case holds affect cleanup eligibility. Verify both derivatives and database references, including holds after detachment. |
+| Notification inbox and settings | Read window expiry, settings removal or closure. The current 30-day inbox window is separate from notification events and audit. |
+| Recommendations and ranking state | Snapshot expiry, preference reset, hide reversal or closure. Existing ten-minute snapshots and 30-day community “Not interested” windows differ from durable hides. Preserve unrelated shared configuration. |
+| Founding Ambassador publicity and private cases | Consent withdrawal, eligibility ending or independent case resolution. Review public recognition, invitation payloads, statements and minimal decision history separately. |
+| Project proposals, approvals and ownership | Withdrawal, rejection, superseded proposal revision, approved disposition or project closure. Protect accepted project histories and shared image references; review personal project ownership before closure. |
+| Project volunteers, roles, applications and tasks | Withdrawal, position term end, unassignment, completed obligation or final dispute. Limit private notes and review dependencies before erasing another person's protected record. |
+| Milestones, metrics, progress evidence and reports | Correction, accepted final report, dispute resolution or project closure. Separate maintained outcomes from private evidence. Proposal/progress image bytes live in the database, not the post-media bucket described in the earlier matrix. |
+| Polls, nominees, electorates, ballots and decisions | Finalization, cancellation, withdrawal or final dispute. Preserve finalized aggregate provenance under approved rules, minimize eligibility identities and candidate caches, and review linkage and differencing risk before removing or exporting any receipt. |
+| Privileged audit, quotas and technical logs | Audit period close, event review completion or incident release. Establish provider rotation and keep high-volume telemetry separate from minimal decision evidence. |
+| Backups and provider/restore copies | Rotation event, approved restoration or provider confirmation. Use a tested deletion reconciliation process and record pending historical copies distinctly. |
+| Future corporate and governance records | Execution, filing, termination or accounting period end. Keep a separate register and access scope for any future records or vendors and obtain applicable entity advice before choosing a schedule. |
+
+For actual project image storage and post-media cleanup, see the [media service](../../apps/api/src/services/post-media.ts), [project schema](../../supabase/migrations/20261120200000_phase6a_project_model.sql), [progress schema](../../supabase/migrations/20261120207000_phase6c_project_progress.sql) and [post safety operations](../../supabase/migrations/20261120122000_phase3f_operations.sql).
+
+## Rules, holds and worker eligibility
+
+- **Versioned rules.** Proposed `retention_policy_versions` and category rules store approved market and data scopes, trigger, duration, expected disposition, review date, exception authorities and effective dates. Keep approval references and preserve the rule version used for each decision. Reevaluate eligibility under any applicable approved change before cleanup. Unknown trigger or missing approval blocks automated destruction, creates a bounded exception review with an owner and due date, and restricts ordinary access as appropriate. Escalate overdue exceptions and report them as aged inventory.
+- **Resource and hold references.** Proposed private item records contain a typed resource reference, generation, clock origin and evidence class. Hold records and links capture authorized placement, narrow purpose and justification, authority, protected scope, start, review deadline, expiration if approved, and independent authorized release with reason. Store sensitive evidence in its purpose-limited location. A separate permission controls placement/release, with separation of requester, subject, reviewer and releaser as applicable. Restricted hold reads expose only the metadata necessary for each actor. Scope must not silently broaden.
+- **Trigger and review.** Visibility expiration stops ordinary projection as applicable. Scheduled review and optional hold expiration trigger reevaluation. Cleanup waits for verified end of every applicable hold and disposition approval. A pending case, unknown version, legal conflict or expired review without a disposition blocks execution and goes to the responsible reviewer. Review renewal requires a current reason and new bounded due date.
+- **Safe cleanup.** A queue claims eligible items by immutable identifier, policy version, generation and execution lease. Placement and dispatch coordinate under a resource lock and persisted cleanup fence. While a provider call is in flight, route newly received evidence requirements to urgent review and report the in-flight status accurately. Avoid object-key reuse across generations. Record dispatch, verification, redaction, erasure, detachment, blocked status or reconciliation using minimum audit identifiers and no raw evidence. Timeouts require read-back before a repeat. Reconcile dead leases and retry only after fresh authorization and hold checks, with bounded automated retries and manual resolution. Test overlapping holds, hold release, policy changes and late events against cleanup.
+
+## Backup and provider reconciliation
+
+Maintain a separately protected, signed erasure ledger outside the restorable data, using versioned, keyed references, approved expiry tied to backup survivability, restricted matching, and tamper-evident receipts. Confirm actual rotation, jurisdiction, restoration granularity, provider-side deletion interfaces and practices. Avoid clear identifiers in portable logs or widely visible tickets.
+
+Restore into isolated infrastructure with access and outbound delivery disabled. Verify the ledger and rule version, replay applicable deletions and redactions, reapply active holds and suppression before traffic, and inspect Auth, application tables, Storage, caches and future processors separately. Compare surviving dependencies and independently verify erased material cannot reappear through projections. Block release if the ledger is stale, missing or unverifiable. Record drills, failed obligations, signed approval of recovery, and any confirmed provider delays without treating an application receipt as proof for the provider. [Staged deletion](ACCOUNT_DELETION_ARCHITECTURE.md)
