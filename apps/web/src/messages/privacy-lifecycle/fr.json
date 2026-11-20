@@ -1,0 +1,39 @@
+{
+  "title": "Planification de la suppression",
+  "disabled": "Le traitement des demandes de suppression de compte est indisponible.",
+  "synthetic": "Ce test modifie uniquement des marqueurs simulés. Il ne ferme pas le compte et n’efface aucune donnée du compte.",
+  "verify": "Vérifier avec votre authentificateur",
+  "refresh": "Actualiser le statut du plan",
+  "save": "Enregistrer le plan de test",
+  "confirm": "Confirmer la simulation",
+  "receipt": "Référence du plan",
+  "checkedSteps": "Étapes de simulation vérifiées : {count} sur 2. Actualisez après vérification.",
+  "loading": "Vérification des dépendances…",
+  "changed": "Le dossier ou ses dépendances ont changé. Actualisez le plan avant de réessayer.",
+  "state": {
+    "preview": "Aperçu en lecture seule",
+    "blocked": "Bloqué",
+    "review_required": "Examen indépendant requis",
+    "approved": "Simulation approuvée",
+    "partial": "Simulation partielle. Une reprise ou une vérification est en attente.",
+    "stale": "Plan obsolète",
+    "simulated": "Simulation vérifiée",
+    "quarantined": "Données de test restaurées en quarantaine"
+  },
+  "warning": {
+    "last_administrator": "Le dernier administrateur habilité doit être protégé.",
+    "privileged_role": "La continuité des accès privilégiés doit être examinée.",
+    "institution_owner": "Un transfert de propriété autorisé est nécessaire pour l’institution.",
+    "institution_authority": "La représentation officielle de l’institution doit être examinée.",
+    "group_owner": "Un transfert de propriété autorisé est nécessaire pour la communauté.",
+    "group_staff": "Les responsabilités dans le groupe doivent être examinées.",
+    "third_party_discussion": "Les contributions d’un autre membre à la discussion doivent être protégées.",
+    "personal_project": "Un projet détenu à titre personnel exige une décision distincte.",
+    "project_commitment": "Les engagements de bénévolat ou les tâches en cours doivent être examinés.",
+    "protected_evidence": "Les dossiers ouverts ou les preuves protégées doivent être préservés.",
+    "shared_media": "Les médias ou transferts liés exigent un contrôle des références et des preuves.",
+    "voting_integrity": "L’intégrité des données de vote doit être vérifiée.",
+    "inventory_limit": "L’aperçu a atteint sa limite d’inventaire.",
+    "evidence_hold": "Une mesure active de conservation des preuves bloque la procédure."
+  }
+}

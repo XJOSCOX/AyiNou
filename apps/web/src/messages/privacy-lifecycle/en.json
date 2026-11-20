@@ -1,0 +1,39 @@
+{
+  "title": "Deletion planning",
+  "disabled": "Account deletion processing is unavailable.",
+  "synthetic": "This test changes simulated markers only. It does not close the account or erase any account data.",
+  "verify": "Verify with your authenticator",
+  "refresh": "Refresh plan status",
+  "save": "Save test plan",
+  "confirm": "Confirm test simulation",
+  "receipt": "Plan receipt",
+  "checkedSteps": "Verified simulation steps: {count} of 2. Refresh after reconciliation.",
+  "loading": "Checking dependencies…",
+  "changed": "The case or its dependencies changed. Refresh the plan before trying again.",
+  "state": {
+    "preview": "Read-only preview",
+    "blocked": "Blocked",
+    "review_required": "Independent review required",
+    "approved": "Approved for simulation",
+    "partial": "Partial simulation. Recovery or read-back is pending.",
+    "stale": "Plan out of date",
+    "simulated": "Simulation verified",
+    "quarantined": "Restored fixture quarantined"
+  },
+  "warning": {
+    "last_administrator": "The last eligible administrator must be protected.",
+    "privileged_role": "Privileged access needs a continuity review.",
+    "institution_owner": "Institution ownership needs an authorized transfer.",
+    "institution_authority": "Official institutional representation needs review.",
+    "group_owner": "Community ownership needs an authorized transfer.",
+    "group_staff": "Current group authority needs review.",
+    "third_party_discussion": "Another member’s discussion contributions need protection.",
+    "personal_project": "A personally owned project needs a separate decision.",
+    "project_commitment": "Outstanding volunteer or task commitments need review.",
+    "protected_evidence": "Open cases or protected evidence need preservation.",
+    "shared_media": "Linked media or uploads need reference and evidence checks.",
+    "voting_integrity": "Voting records require an integrity review.",
+    "inventory_limit": "The preview reached its inventory limit.",
+    "evidence_hold": "An active evidence hold blocks progress."
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "title": "Planificación de la eliminación",
+  "disabled": "La tramitación de la eliminación de cuentas no está disponible.",
+  "synthetic": "Esta prueba solo cambia marcadores simulados. No cierra la cuenta ni borra sus datos.",
+  "verify": "Verificar con tu autenticador",
+  "refresh": "Actualizar el estado del plan",
+  "save": "Guardar plan de prueba",
+  "confirm": "Confirmar simulación de prueba",
+  "receipt": "Referencia del plan",
+  "checkedSteps": "Pasos de simulación verificados: {count} de 2. Actualiza después de la conciliación.",
+  "loading": "Comprobando dependencias…",
+  "changed": "El caso o sus dependencias cambiaron. Actualiza el plan antes de volver a intentarlo.",
+  "state": {
+    "preview": "Vista previa de solo lectura",
+    "blocked": "Bloqueado",
+    "review_required": "Requiere revisión independiente",
+    "approved": "Aprobado para simulación",
+    "partial": "Simulación parcial. La recuperación o verificación está pendiente.",
+    "stale": "Plan desactualizado",
+    "simulated": "Simulación verificada",
+    "quarantined": "Datos de prueba restaurados en cuarentena"
+  },
+  "warning": {
+    "last_administrator": "Debe protegerse al último administrador elegible.",
+    "privileged_role": "Se debe revisar la continuidad del acceso privilegiado.",
+    "institution_owner": "La propiedad institucional necesita una transferencia autorizada.",
+    "institution_authority": "Se debe revisar la representación institucional oficial.",
+    "group_owner": "La propiedad de la comunidad necesita una transferencia autorizada.",
+    "group_staff": "Se debe revisar la autoridad actual en el grupo.",
+    "third_party_discussion": "Hay que proteger las aportaciones de otros miembros a la conversación.",
+    "personal_project": "Un proyecto de propiedad personal requiere una decisión independiente.",
+    "project_commitment": "Las tareas o compromisos de voluntariado pendientes requieren revisión.",
+    "protected_evidence": "Los casos abiertos o las pruebas protegidas requieren preservación.",
+    "shared_media": "Los medios o archivos vinculados requieren revisar referencias y pruebas.",
+    "voting_integrity": "Los registros de votación requieren una revisión de integridad.",
+    "inventory_limit": "La vista previa alcanzó el límite de inventario.",
+    "evidence_hold": "Una orden activa de preservación de pruebas bloquea el proceso."
+  }
+}

@@ -10,11 +10,13 @@ import { localizedApiError } from "@/lib/error-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { privacyMessages } from "@/lib/privacy-i18n";
 import { exportMessages } from "@/lib/privacy-export-i18n";
+import { lifecycleMessages } from "@/lib/privacy-lifecycle-i18n";
 import { ownPrivacyRequest } from "@/lib/privacy-session";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { PrivacyExportPanel } from "./privacy-export-panel";
+import { PrivacyLifecyclePanel } from "./privacy-lifecycle-panel";
 
 const collection = "/api/v1/me/privacy-requests";
 const card = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-4 sm:p-6";
@@ -170,6 +172,7 @@ function CaseWorkspace({ actor, locale }: { actor: string; locale: Locale }) {
     {result === "disabled" ? <section className={card}>
       <p role="status">{t.disabled}</p>
       <p className="mt-2">{exportMessages[locale].disabled}</p>
+      <p className="mt-2">{lifecycleMessages[locale].disabled}</p>
       <dl className="mt-4 grid gap-4 md:grid-cols-2">
         {privacyRequestKinds.map((value) => <div key={value}>
           <dt className="font-semibold">{t.kinds[value].label}</dt>
@@ -220,6 +223,8 @@ function CaseWorkspace({ actor, locale }: { actor: string; locale: Locale }) {
                 {new Date(event.at).toLocaleString(locale)}</time></li>)}
             </ol>
             {item.kind === "export" && <PrivacyExportPanel key={item.id} actor={actor} locale={locale} item={item} />}
+            {(item.kind === "deletion" || item.kind === "closure") && item.state === "received" &&
+              <PrivacyLifecyclePanel key={item.id} actor={actor} locale={locale} item={item} />}
             </>}
           </li>)}
         </ul>

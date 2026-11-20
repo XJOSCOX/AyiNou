@@ -1,0 +1,39 @@
+{
+  "title": "Planifikasyon efasman",
+  "disabled": "Sèvis pou trete efasman kont pa disponib.",
+  "synthetic": "Tès sa a chanje makè tès sèlman. Li pa fèmen kont lan ni efase done kont lan.",
+  "verify": "Verifye ak aplikasyon otantifikasyon ou",
+  "refresh": "Mete estati plan an ajou",
+  "save": "Anrejistre plan tès la",
+  "confirm": "Konfime simulasyon tès la",
+  "receipt": "Referans plan an",
+  "checkedSteps": "Etap simulasyon ki verifye: {count} sou 2. Mete estati a ajou apre verifikasyon an.",
+  "loading": "N ap tcheke depandans yo…",
+  "changed": "Dosye a oswa depandans li yo chanje. Mete plan an ajou anvan ou eseye ankò.",
+  "state": {
+    "preview": "Apèsi pou lekti sèlman",
+    "blocked": "Bloke",
+    "review_required": "Yon revizyon endepandan nesesè",
+    "approved": "Simulasyon an apwouve",
+    "partial": "Simulasyon pasyèl. Li poko refè oswa verifye.",
+    "stale": "Plan an pa ajou",
+    "simulated": "Simulasyon an verifye",
+    "quarantined": "Done tès ki retabli yo an karantèn"
+  },
+  "warning": {
+    "last_administrator": "Fòk yo pwoteje dènye administratè ki kalifye a.",
+    "privileged_role": "Fòk yo verifye kontinite aksè privilejye yo.",
+    "institution_owner": "Fòk yon moun otorize transfere pwopriyete enstitisyon an.",
+    "institution_authority": "Reprezantasyon ofisyèl enstitisyon an bezwen revizyon.",
+    "group_owner": "Fòk yon moun otorize transfere pwopriyete kominote a.",
+    "group_staff": "Otorite aktyèl nan gwoup la bezwen revizyon.",
+    "third_party_discussion": "Kontribisyon yon lòt manm nan diskisyon an bezwen pwoteksyon.",
+    "personal_project": "Yon pwojè pèsonèl bezwen yon desizyon apa.",
+    "project_commitment": "Travay oswa angajman volontè ki poko fini bezwen revizyon.",
+    "protected_evidence": "Fòk yo konsève dosye ki ouvè ak prèv ki pwoteje.",
+    "shared_media": "Medya oswa telechajman ki lye yo bezwen verifikasyon.",
+    "voting_integrity": "Dosye vòt yo bezwen yon revizyon pou asire entegrite yo.",
+    "inventory_limit": "Apèsi a rive nan limit envantè li.",
+    "evidence_hold": "Yon mezi konsèvasyon prèv ki aktif bloke pwogrè a."
+  }
+}
