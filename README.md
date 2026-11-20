@@ -177,6 +177,8 @@ See [docs/WORKFLOW.md](docs/WORKFLOW.md) for local Git commands and validation c
 - [docs/PRODUCT.md](docs/PRODUCT.md) — MVP scope, users, roles, and privacy
 - [docs/WORKFLOW.md](docs/WORKFLOW.md) — branch-free Git process and quality gates
 - [docs/DECISIONS.md](docs/DECISIONS.md) — agreed decisions and open questions
+- [Phase 6F final engineering review](docs/audits/PHASE_6F_FINAL_REVIEW.md) — regression evidence and open public-launch gates
+- [Privacy data inventory](docs/audits/PRIVACY_DATA_INVENTORY.md) — implemented collection, access and deletion behavior and open policy decisions
 
 ## Governance and safety
 

@@ -226,19 +226,20 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Phase 6C adds reviewed milestones, public progress updates, private evidence, self-reported measures, and versioned final reports.
 - [x] Phase 6D adds scoped polls and private ballots, frozen higher-trust eligibility, nominee consent, and auditable recommendations.
 - [ ] Phase 6E audits the codebase, architecture, authorization, privacy, tests, and operational readiness.
-- [ ] Phase 6F addresses audit findings through controlled refactoring, bug fixes, and optimization.
+- [x] Phase 6F closes the tested engineering stabilization scope. Public launch readiness remains open. [Final engineering review](docs/audits/PHASE_6F_FINAL_REVIEW.md)
 - [x] Phase 6F.1 consolidates responsive workspaces, improves local request performance, refreshes scheduled polls and navbar avatars, and isolates the aggregation regression fixture.
 - [x] Phase 6F.2 adds automated browser regression tests with an isolated local Supabase stack and verified fixture cleanup.
 - [x] Phase 6F.3 splits Fastify Feed and Project Review into domain modules and verifies the existing route contracts.
 - [x] Phase 6F.4 extracts project, community, profile, trust, and Feed media modules while preserving the web routes and client entry points. [Test and build comparison](docs/audits/PHASE_6E_AUDIT.md#phase-6f4-results)
 - [x] Phase 6F.5 organizes shared TypeScript contracts by domain and adds automated checks for public compatibility. [Contract and build comparison](docs/audits/PHASE_6E_AUDIT.md#phase-6f5-results)
 - [x] Phase 6F.6 improves scoped poll lookups, updates the affected build dependency, bounds remote API calls, and adds main-branch CI. [Performance and reliability validation](docs/audits/PHASE_6E_AUDIT.md#phase-6f6-results)
+- [x] Phase 6F.7 completes the integration, authorization, privacy and release-readiness review. [Final review](docs/audits/PHASE_6F_FINAL_REVIEW.md) · [Data lifecycle inventory](docs/audits/PRIVACY_DATA_INVENTORY.md)
 - [ ] Define independent outcomes validation, retention, fraud escalation, quorum standards, and operational voting governance.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
 **Gate:** An initiative can be proposed, reviewed, organized, updated, completed and archived with transparent responsibility.
 
-Feature development pauses after Phase 6D. Complete the Phase 6E audit and Phase 6F remediation before advancing the product roadmap.
+Feature development pauses here for owner review of the engineering results and public launch blockers before advancing the product roadmap.
 
 ## Phase 7 — Community reports and evidence-based verification
 

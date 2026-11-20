@@ -492,6 +492,8 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 
 ## Retention, deletion, auditing, privacy
 
+For behavior already implemented, see the [Phase 6F privacy data inventory](audits/PRIVACY_DATA_INVENTORY.md). Proposed horizons and unimplemented workflows below still need explicit operating decisions.
+
 - **Policy before data:** Set a published privacy notice and concrete retention periods before collecting each category. Proposed starting limits for review: session audit 30 days, activity counters 90 days, delivery/outbox payloads 30 days after success, export files 7 days, rejected verification/claim evidence 90 days after final appeal, inactive push tokens 90 days. These are proposals, not current deployed jobs or legal conclusions.
 - **Account deletion:** Authenticate and confirm requests; revoke sessions/devices, halt notifications, remove private profile data and Storage objects, then delete or de-identify dependent social content according to a documented public-interest/appeal policy. Existing `auth.users` cascades remove profile and role rows; do not rely on that cascade for future evidence, finance, audit, or published content. Preserve only legally required minimal records with restricted access and a deletion receipt.
 - **Audit:** Privileged role grants, badge decisions, profile visibility, organization rights, moderation, claim publication, financial webhook handling, and retention deletion need append-only actor/time/reason records. Store safe metadata, not tokens or full private evidence. Reviewers cannot erase their own actions or adjudicate their own appeals.

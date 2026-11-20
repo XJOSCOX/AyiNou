@@ -48,6 +48,8 @@ Run `npm run test:e2e -- --measure-polls` in a clean Phase 6F.6 checkout for the
 
 Follow the pushed commit in the repository's Actions tab or run `gh run list --workflow main-checks.yml --branch main`. Use `gh run view <run-id> --log-failed` when a job fails. Reproduce the job locally with `npm run typecheck`, `npm run lint`, `npm test`, `npm audit --audit-level=low`, `npm run build`, or `npm run test:e2e:smoke`. Continue to run the full Chromium suite for locally validated releases.
 
+The [final Phase 6F review](audits/PHASE_6F_FINAL_REVIEW.md) records the engineering gate and remaining launch work. A green Actions run establishes the push's automated checks. Hosted staffing, incident response, email delivery, privacy operations and restoration have separate evidence requirements.
+
 ## Browser regression tests
 
 The suite in `apps/web/e2e/` uses Playwright Test **1.65.1** with Chromium and axe **4.14.0**. Use the repository's Node and npm versions and a running local Docker Engine. The phase baseline was verified on Node 22.18. Install dependencies with `npm ci` and Chromium with `npx playwright install chromium`. On a Linux test host that needs browser libraries, use `npx playwright install --with-deps chromium`.
