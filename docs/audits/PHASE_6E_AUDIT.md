@@ -223,3 +223,36 @@ Coverage includes sign-in, session restoration, logout, account suspension, real
 The display suite measured key controls and page width at 320, 768, 1440 and 2560 pixels. It checked four-language persistence, localized errors and validation, both themes, skip-link and menu focus, and representative axe label, ARIA and contrast rules. Smooth scrolling now respects reduced motion. Tailwind scans application source so test artifacts cannot change the generated stylesheet.
 
 Typecheck, lint, translation parity, all 31 API tests, seven client tests and both production builds passed. Six guarded hosted SQL suites passed and rolled back. No migration changes were needed. Cross-engine testing, assistive-technology review, natural token or signed URL expiry, and hosted mail delivery remain separate coverage gaps. Findings 6E-05, 6E-06, 6E-07 and 6E-09 remain open. [Browser test workflow](../WORKFLOW.md#browser-regression-tests)
+
+## Phase 6F.3 results
+
+Phase 6F.2 was verified on local and remote `571fcd5826fcaa59d2942eaa9042029cb1554d14`, which followed the brief's original `1b5b946` reference. Typecheck, lint, translation parity, 31 API tests, seven client tests, both builds, and all seven browser smoke tests passed before production code changed.
+
+The backend portion of 6E-05 progressed. The 502-line Feed entry point is now a 47-line registrar. Eight registrars own the timeline, post mutations, engagement, moderation, post media, notifications, recommendations, and community feed routes. The largest extracted Feed file is 100 lines. Three Feed helpers cover request access, pagination and validation. Projects went from 146 to 99 lines after review and reporting moved to a 44-line registrar with shared project request schemas. Project work and progress keep their existing registration boundaries.
+
+The review covered relative imports, validators, error translation, resource ownership, authentication hooks and per-process quotas. The 45 backend source files had no relative import cycles after extraction. Feed authentication and moderation remain shared within the Feed scope. Members, Institutions and Admin keep their own hooks and call order because they enforce different authentication and error semantics. The app still closes the member service on shutdown and the post upload keeps request-local state in a WeakMap. The shared Feed repository still batches attachments, reactions, topics and signed avatar metadata.
+
+The recorded inventory matched all **290** registered method and path entries, including implicit HEAD and preflight, explicit body limits and route-local hooks. Source comparison matched **40 Feed and 14 Project** registration statements after accounting for the shared MFA helper and unchanged project path constant. The new injection tests passed on the baseline and candidate. They cover exact success and failure bodies, cache headers, generated request IDs, token and RPC forwarding, recent MFA, unavailable storage and database paths through the combined suite, and stale writes. Authorization and version checks remain enforced by the existing Fastify and PostgreSQL layers. No schema, migration, grant, translation, or frontend file was committed.
+
+### Local Fastify measurements
+
+Three interleaved before-and-after run pairs used the same Node runtime and synthetic adapters. Each run warmed two of 13 app instances. For each metric below, the table shows the median of the three run medians. Startup included a real loopback HTTP status request. Route timings use Fastify injection and exclude Supabase and network latency.
+
+| Metric | Baseline | Refactor |
+| --- | ---: | ---: |
+| App creation | 0.976 ms | 0.934 ms |
+| Fastify ready and route registration | 12.888 ms | 13.168 ms |
+| Loopback listen after ready | 0.624 ms | 0.648 ms |
+| Status injection | 0.070 ms | 0.076 ms |
+| Public feed injection | 0.065 ms | 0.070 ms |
+| Following feed injection | 0.064 ms | 0.066 ms |
+| Notification count injection | 0.061 ms | 0.058 ms |
+| Project directory injection | 0.178 ms | 0.187 ms |
+| Post-close heap after collection | 34.259 MiB | 34.250 MiB |
+| API build artifact | 163,829 bytes | 166,250 bytes |
+
+Each revision made 1,560 verifier calls, 1,560 repository reads and 1,560 RPC-adapter calls per run, including warmup. Registration was 0.28 ms slower in this sample and the bundle grew 2,421 bytes. Timing and heap differences are local observations. Hosted latency, cold process startup and concurrent production load were outside this benchmark.
+
+Final checks passed for typecheck, lint, translation parity, 33 API tests, seven client tests, both production builds, 24 isolated Chromium scenarios and 15 guarded hosted SQL suites. The local browser project and its fixtures were removed. Hosted suites rolled back across Feed, engagement, media and notifications, recommendations, departments, groups, safety, institutions, custom roles, trust, projects, project work, progress, polls and administration.
+
+Members, Groups, Institutions and the Feed repository remain larger modules. Keep their distinct authorization and lifecycle behavior explicit if they are split in later work. The frontend portions of 6E-05 remain for a separate phase, including the Feed presentation, group workspaces, profile, project workspaces and their shared contract boundaries. Findings 6E-06, 6E-07 and 6E-09 remain open. [Backend module boundaries](../ARCHITECTURE.md#text-feed-and-error-handling)

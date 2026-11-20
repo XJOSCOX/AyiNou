@@ -30,7 +30,7 @@ Phase 2B keeps Auth credential handling in Supabase. `PATCH /api/v1/me/profile/d
 
 ```text
 apps/
-  api/src/{config.ts,app.ts,server.ts,routes/,services/}
+  api/src/{config.ts,app.ts,server.ts,routes/,modules/,services/}
   api/test/
   web/src/{app/,components/,lib/,messages/}
 packages/shared/src/
@@ -65,6 +65,10 @@ The shared `locales` contract defines `ht` (default), `fr`, `en`, and `es` for w
 Next.js renders the language from the browser cookie. The menu writes the cookie and a local storage fallback, updates the current screen, and reuses the active locale for native form feedback, time, and number formatting. Without a browser choice, a signed-in browser restores the saved profile preference when RLS grants access. During first onboarding, the confirmed signup selection can seed the interface. Saving the profile preference uses the existing authenticated Fastify endpoint and the database constraint.
 
 ### Text feed and error handling
+
+`routes/feed.ts` remains the Fastify entry point and composes timeline and post-write routes, engagement, moderation, media, notifications, recommendations, and community feed routes under `modules/feed/`. Each registrar binds handlers to the same Fastify instance, inheriting the existing `private, no-store` hook. Route-local hooks stay with their handlers, including the upload check that runs before media parsing. The typed Feed context supplies viewer resolution, quota checks, the caller-scoped repository, scoped moderation and media access. Feed cursor encoding and shared validators stay local to that domain.
+
+`routes/projects.ts` continues to compose proposals, work, progress and images. `modules/projects/review.ts` owns the review and report endpoints and shares project request schemas with the proposal routes. The project review handlers still pass the caller token to PostgreSQL, which enforces current ownership, reviewer independence, and the relevant privileged session constraints. The root Fastify error handler remains the single source for safe error envelopes, request IDs and logging.
 
 Fastify validates optional bearer authentication for feed reads and requires it for writes. Feed RPCs receive the caller’s token with the publishable key. Read RPCs use RLS in the non-exposed `feed_data` schema and project safe author fields in one query. Write RPCs bind to `auth.uid()` and check current sessions, ownership, visibility, version, and quotas. The server credential only signs a batch of eligible avatar paths. Moderation checks current administrator or moderator assignment and recent TOTP at both the API and database boundaries.
 

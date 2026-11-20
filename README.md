@@ -104,6 +104,8 @@ npm run test:e2e
 
 Regular development and unit tests can run independently. Browser tests use separate ports, generated fixture accounts, and local Auth, Fastify, PostgreSQL and Storage. [Browser testing, targeted runs, and cleanup](docs/WORKFLOW.md#browser-regression-tests)
 
+Backend contract checks run in `npm run test -w @ayinou/api`. The Feed and Project Review modules share the existing Fastify registration scopes and the versioned endpoints. [API structure and contract checks](docs/ARCHITECTURE.md#text-feed-and-error-handling)
+
 ## Hosted Supabase database
 
 The pinned Supabase CLI is installed by `npm install`. The confirmed hosted project is **AyiNou** (`hcbxulyfmdmuyccgrujs`). To inspect and apply future versioned migrations, verify the target in CLI output and use:
