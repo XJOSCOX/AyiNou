@@ -34,10 +34,12 @@ test("privacy gates, database privileges and concurrent versioned transitions @s
   expect((await offline.json()).error.code).toBe("PRIVACY_DISABLED");
   expect(sql("select count(*) from private.privacy_cases where subject_id='" + disabled.id + "'")).toBe("0");
   expect(sql(`select count(*) from pg_class where relnamespace='private'::regnamespace
-    and relname like 'privacy_%' and relkind='r' and relrowsecurity
+    and relname in ('privacy_intake_fixtures','privacy_cases','privacy_case_events','privacy_case_assignments','privacy_case_commands')
+    and relkind='r' and relrowsecurity
     and not has_table_privilege('authenticated',oid,'insert,select,update,delete')
     and not has_table_privilege('service_role',oid,'insert,select,update,delete');`)).toBe("5");
-  expect(sql(`select count(*) from pg_proc where pronamespace='public'::regnamespace and proname like 'privacy_%'
+  expect(sql(`select count(*) from pg_proc where pronamespace='public'::regnamespace
+    and proname in ('privacy_cases_for_api','privacy_case_command_for_api')
     and prosecdef and proconfig @> array['search_path=""']
     and not has_function_privilege('authenticated',oid,'execute')
     and not has_function_privilege('anon',oid,'execute') and has_function_privilege('service_role',oid,'execute');`)).toBe("2");
