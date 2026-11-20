@@ -11,6 +11,7 @@
   "tooLarge": "Esta solicitud es demasiado grande.",
   "rate": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
   "mfa": "Confirma con tu autenticador para continuar.",
-  "duplicateReport": "Ya reportaste esta publicación.",
+  "duplicateReport": "Ya denunciaste este contenido.",
+  "timeout": "La solicitud tardó demasiado. Comprueba el estado actual antes de volver a intentarlo.",
   "server": "Esta acción no está disponible por el momento. Inténtalo más tarde."
 }

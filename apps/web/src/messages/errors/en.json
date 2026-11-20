@@ -11,6 +11,7 @@
   "tooLarge": "This request is too large.",
   "rate": "Too many requests. Wait a moment and try again.",
   "mfa": "Confirm with your authenticator to continue.",
-  "duplicateReport": "You already reported this post.",
+  "duplicateReport": "You already reported this item.",
+  "timeout": "The request timed out. Check the latest state before trying again.",
   "server": "This action is temporarily unavailable. Try again later."
 }

@@ -8,7 +8,7 @@ import { apiErrorCode } from "./api-errors";
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
 const messageByCode: Readonly<Partial<Record<string, keyof typeof en>>> = {
-  NETWORK_ERROR: "network", UNAUTHORIZED: "auth", FORBIDDEN: "permission", NOT_FOUND: "missing",
+  NETWORK_ERROR: "network", TIMEOUT: "timeout", UNAUTHORIZED: "auth", FORBIDDEN: "permission", NOT_FOUND: "missing",
   BAD_REQUEST: "validation", INVALID_INPUT: "validation", INVALID_PROFILE: "validation",
   INVALID_CONTENT: "content", CONFLICT: "conflict", PAYLOAD_TOO_LARGE: "tooLarge", RATE_LIMITED: "rate",
   LIMIT_REACHED: "rate", MFA_REQUIRED: "mfa", DUPLICATE_REPORT: "duplicateReport",

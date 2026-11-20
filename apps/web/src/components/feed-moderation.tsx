@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useState, type FormEvent } from "react";
 import { moderationActions, type FeedReport, type ModerationAction, type ModerationScope } from "@ayinou/shared";
 import { apiErrorCode } from "@/lib/api-errors";
-import { loadModeration, moderatePost } from "@/lib/feed-api";
+import { loadModeration, moderateFeedContent } from "@/lib/feed-api";
 import { feedMessages } from "@/lib/feed-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
@@ -13,11 +13,16 @@ import { institutionAction, institutionCard, institutionField, institutionLink }
 import { MemberShell } from "./member-shell";
 
 const tabs = ["reports", "hidden"] as const;
+const targets = ["posts", "comments"] as const;
+type Target = (typeof targets)[number];
+const choiceStyle = "min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]";
 
 export function FeedModeration() {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const [scope, setScope] = useState<ModerationScope>("reports");
+  const [target, setTarget] = useState<Target>("posts");
+  const hidden = target === "posts" ? t.hiddenPosts : t.hiddenComments;
 
   return <MemberShell>
     <div className="grid w-full min-w-0 gap-5">
@@ -26,30 +31,34 @@ export function FeedModeration() {
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{t.moderation}</h1>
         <p className="mt-2 text-sm text-[var(--theme-body)]">{t.moderationIntro}</p>
       </header>
+      <div role="group" aria-label={t.queueContent} className="flex flex-wrap gap-2">
+        {targets.map((kind) => <button key={kind} type="button" aria-pressed={kind === target}
+          className={choiceStyle} onClick={() => setTarget(kind)}>{kind === "posts" ? t.postQueue : t.commentQueue}</button>)}
+      </div>
       <div role="group" aria-label={t.moderation} className="flex flex-wrap gap-2">
         {tabs.map((tab) => <button key={tab} type="button" aria-pressed={scope === tab} onClick={() => setScope(tab)}
-          className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]">
-          {tab === "reports" ? t.pendingReports : t.hiddenPosts}
+          className={choiceStyle}>
+          {tab === "reports" ? t.pendingReports : hidden}
         </button>)}
       </div>
-      <Queue key={scope} scope={scope} />
+      <Queue key={`${target}:${scope}`} scope={scope} target={target} label={scope === "reports" ? t.pendingReports : hidden} />
     </div>
   </MemberShell>;
 }
 
-function Queue({ scope }: { scope: ModerationScope }) {
+function Queue({ scope, target, label }: { scope: ModerationScope; target: Target; label: string }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const [revision, setRevision] = useState(0);
   const [saved, setSaved] = useState(false);
   const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
-    const { reports, nextCursor } = await loadModeration(scope, cursor, signal);
+    const { reports, nextCursor } = await loadModeration(scope, target, cursor, signal);
     return { rows: reports, nextCursor };
-  }, [scope]);
+  }, [scope, target]);
   const resource = useCursorPage(load, revision);
   const roleDenied = ["MFA_REQUIRED", "FORBIDDEN", "UNAUTHORIZED"].includes(apiErrorCode(resource.error));
 
-  return <section className="grid gap-3" aria-label={scope === "reports" ? t.pendingReports : t.hiddenPosts}>
+  return <section className="grid gap-3" aria-label={label}>
     {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.decisionRecorded}</p>}
     {resource.error !== null && <div className="grid gap-2">
       <ApiErrorNotice error={resource.error} retry={roleDenied ? undefined : resource.retry} />
@@ -83,11 +92,14 @@ function ReviewItem({ item, refresh }: { item: FeedReport; refresh: () => void }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!action || item.own || completed || reason.trim().length < 10) return;
-    if (await mutation.run(() => moderatePost(item.postId, item.version, action, reason))) {
+    if (await mutation.run(() => moderateFeedContent(item.commentId ? "comments" : "posts", item.commentId ?? item.postId, item.version, action, reason))) {
       setCompleted(true);
       refresh();
     }
   }
+  const labels = item.commentId
+    ? { hide: t.hideComment, restore: t.restoreComment, remove: t.removeComment, dismiss: t.dismiss }
+    : { hide: t.hide, restore: t.restore, remove: t.remove, dismiss: t.dismiss };
 
   return <article className={institutionCard}>
     <header>
@@ -99,17 +111,17 @@ function ReviewItem({ item, refresh }: { item: FeedReport; refresh: () => void }
     {item.deleted && <p className="mt-2 text-sm font-semibold">{t.authorDeleted}</p>}
     {item.status === "removed" && <p className="mt-2 text-sm font-semibold">{t.removed}</p>}
     {item.lastAction && <div className="mt-3 border-t border-[var(--theme-border)] pt-3 text-sm">
-      <h3 className="font-semibold">{t.lastDecision} · {t[item.lastAction.action]}</h3>
+      <h3 className="font-semibold">{t.lastDecision} · {labels[item.lastAction.action]}</h3>
       <p className="break-words">{item.lastAction.reason}</p>
       <time dateTime={item.lastAction.createdAt} className="text-xs text-[var(--theme-body)]">{format.format(new Date(item.lastAction.createdAt))}</time>
     </div>}
-    {item.own ? <p className="mt-3 text-sm">{t.cannotModerateOwn}</p> : actions.length > 0 && !completed &&
+    {item.own ? <p className="mt-3 text-sm">{item.commentId ? t.cannotModerateOwnComment : t.cannotModerateOwn}</p> : actions.length > 0 && !completed &&
       <form className="mt-4 grid gap-3 border-t border-[var(--theme-border)] pt-4" onSubmit={submit} aria-busy={mutation.busy}>
         <label className="text-sm font-semibold">{t.moderationAction}
           <select className={institutionField} value={action} required disabled={mutation.busy}
             onChange={(event) => setChoice(actions.find((value) => value === event.target.value) ?? "")}>
             <option value="" disabled>—</option>
-            {actions.map((value) => <option value={value} key={value}>{t[value]}</option>)}
+            {actions.map((value) => <option value={value} key={value}>{labels[value]}</option>)}
           </select>
         </label>
         <label className="text-sm font-semibold">{t.decisionReason}

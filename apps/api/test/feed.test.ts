@@ -27,6 +27,12 @@ function fixture() {
       calls.push({ token, name, input });
       if (name === "feed_moderation_access") return (token !== "other") as T;
       if (name === "list_feed_reports_for_client") return [] as T;
+      if (name === "list_comment_reports_for_client") return [] as T;
+      if (name === "list_comments_for_client") return [first, second] as T;
+      if (name === "write_engagement_for_client") {
+        if (input?.p_operation === "edit") return { error: "PFR09" } as T;
+        return { id: first.id } as T;
+      }
       return first.id as T;
     },
   };
@@ -65,6 +71,45 @@ test("post creation validates requests, preserves source text and forwards only 
     assert.deepEqual(created.json(), { id: first.id });
     assert.deepEqual(calls, [{ token: "member", name: "create_post_for_client",
       input: { p_body: body.body, p_language: "es", p_visibility: "public", p_submission: key } }]);
+  } finally {
+    await app.close();
+  }
+});
+
+test("engagement routes validate payloads, keep cursor precision, and normalize database errors", async () => {
+  const { app, first, calls } = fixture();
+  try {
+    const path = `/api/v1/posts/${first.id}/comments`;
+    const key = randomUUID();
+    const source = { body: "  Original comment.  ", language: "ht" };
+    const headers = { authorization: "Bearer member", "idempotency-key": key };
+    assert.equal((await app.inject({ method: "POST", url: path, payload: source })).statusCode, 401);
+    const tooLong = await app.inject({ method: "POST", url: path, headers, payload: { ...source, body: "à".repeat(1001) } });
+    assert.equal(tooLong.statusCode, 422);
+    assert.equal(tooLong.json().error.code, "INVALID_CONTENT");
+    assert.equal((await app.inject({ method: "POST", url: path, headers, payload: { ...source, authorId: other } })).statusCode, 400);
+    assert.equal(calls.length, 0);
+    const saved = await app.inject({ method: "POST", url: path, headers, payload: source });
+    assert.equal(saved.statusCode, 201);
+    assert.deepEqual(calls.at(-1), { token: "member", name: "write_engagement_for_client", input: {
+      p_operation: "create", p_id: first.id, p_parent: null, p_body: source.body, p_language: "ht", p_submission: key,
+    } });
+    const page = await app.inject(`${path}?limit=1`);
+    assert.equal(page.json().comments[0].id, first.id);
+    await app.inject(`${path}?cursor=${page.json().nextCursor}`);
+    assert.equal(calls.at(-1)?.input?.p_after_at, first.createdAt);
+    const stale = await app.inject({ method: "PATCH", url: `/api/v1/comments/${first.id}`, headers, payload: { ...source, version: 1 } });
+    assert.equal(stale.statusCode, 409);
+    assert.equal(stale.json().error.code, "CONFLICT");
+    assert.equal(stale.json().error.requestId, stale.headers["x-request-id"]);
+    const reaction = `/api/v1/comments/${first.id}/reaction`;
+    assert.equal((await app.inject({ method: "PUT", url: reaction, headers, payload: { kind: "love", count: 10 } })).statusCode, 400);
+    assert.equal((await app.inject({ method: "PUT", url: reaction, headers, payload: { kind: "love" } })).statusCode, 200);
+    assert.equal(calls.at(-1)?.input?.p_operation, "comment_reaction");
+    const moderation = "/api/v1/moderation/feed?target=comments";
+    assert.equal((await app.inject({ url: moderation, headers })).json().error.code, "MFA_REQUIRED");
+    assert.equal((await app.inject({ url: moderation, headers: { authorization: "Bearer elevated" } })).statusCode, 200);
+    assert.equal(calls.at(-1)?.name, "list_comment_reports_for_client");
   } finally {
     await app.close();
   }

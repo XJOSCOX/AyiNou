@@ -24,6 +24,8 @@ New visitors start in Haitian Creole and can switch to French, English, or Spani
 
 The current member dashboard presents privacy-filtered community statistics. Account Settings groups personal and public profile editing, privacy preferences, recovery and authenticator controls, the private member reference, and referrals. Members can share an invitation link. A new member may use one code at signup, with attribution confirmed after email confirmation and a signed-in request. Referrals carry no payment, reward, role, or badge.
 
+Members can open a post’s comments, add a text comment or reply, and react with Like, Love, Support, or Celebrate. Existing replies stay readable under a generic unavailable marker if the root comment is removed. Accounts can report visible comments to moderators. Reactions count engagement and carry no role, verification, or ranking effect.
+
 ## Dashboard terminology
 
 - `Registered members`: non-deleted user accounts, excluding known spam/test accounts in production metrics.

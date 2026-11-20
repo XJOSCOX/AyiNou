@@ -3,14 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useId, useRef, useState, type FormEvent } from "react";
-import { postBodyLimit, postVisibilities, reportCategories, type FeedPost, type FeedScope, type Locale, type PostInput, type PostVisibility, type ReportCategory } from "@ayinou/shared";
-import { apiErrorCode } from "@/lib/api-errors";
+import { postBodyLimit, postVisibilities, type FeedPost, type FeedScope, type Locale, type PostInput, type PostVisibility } from "@ayinou/shared";
 import { createPost, deletePost, editPost, loadFeed, loadFeedModerationAccess, reportPost } from "@/lib/feed-api";
 import { feedMessages } from "@/lib/feed-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { isLocale, languageNames, locales } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
+import { ContentReportForm } from "./content-report-form";
+import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { VerifiedCheck, institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
@@ -125,24 +126,33 @@ function PostForm({ post, onSaved, onCancel }: { post?: FeedPost; onSaved: (mess
       }} rows={4}
         required maxLength={postBodyLimit * 2} disabled={mutation.busy} aria-describedby={hint} />
     </label>
-    <p id={hint} className={`text-sm ${count > postBodyLimit ? "text-[var(--theme-error-text)]" : "text-[var(--theme-body)]"}`}>
-      {body ? t.bodyCount.replace("{count}", String(count)).replace("{max}", String(postBodyLimit)) : t.bodyHint.replace("{max}", String(postBodyLimit))}
-    </p>
-    <div className="grid min-w-0 gap-3 sm:grid-cols-2">
-      <label className="min-w-0 text-sm font-semibold">{t.visibility}
-        <select className={institutionField} value={visibility} disabled={mutation.busy} onChange={(event) => {
-          const next = postVisibilities.find((value) => value === event.target.value);
-          if (next) setVisibility(next);
-        }}>
-          {postVisibilities.map((value) => <option value={value} key={value}>{t[value]}</option>)}
-        </select>
-      </label>
-      <label className="min-w-0 text-sm font-semibold">{t.language}
-        <select className={institutionField} value={language} disabled={mutation.busy}
-          onChange={(event) => { if (isLocale(event.target.value)) setLanguage(event.target.value); }}>
-          {locales.map((value) => <option value={value} key={value} lang={value}>{languageNames[value]}</option>)}
-        </select>
-      </label>
+    <div className="flex min-w-0 items-center justify-between gap-2">
+      <p id={hint} className={`min-w-0 text-sm ${count > postBodyLimit ? "text-[var(--theme-error-text)]" : "text-[var(--theme-body)]"}`}>
+        {body ? t.bodyCount.replace("{count}", String(count)).replace("{max}", String(postBodyLimit)) : t.bodyHint.replace("{max}", String(postBodyLimit))}
+      </p>
+      <div className="flex shrink-0 gap-1">
+        <label className={composerControl} title={`${t.visibility} ${t[visibility]}`}>
+          <VisibilityIcon visibility={visibility} />
+          <select aria-label={t.visibility} className={composerSelect} value={visibility} disabled={mutation.busy} onChange={(event) => {
+            const next = postVisibilities.find((value) => value === event.target.value);
+            if (next) setVisibility(next);
+          }}>
+            {postVisibilities.map((value) => <option value={value} key={value}>{t[value]}</option>)}
+          </select>
+        </label>
+        <label className={composerControl} title={`${t.language} · ${languageNames[language]}`}>
+          <span className="flex items-center gap-0.5 text-[10px] font-semibold uppercase" aria-hidden="true">
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h8v6H4zM12 14h8v6h-8zM4 14v3a3 3 0 0 0 3 3h2m11-10V7a3 3 0 0 0-3-3h-2" />
+            </svg>
+            {language}
+          </span>
+          <select aria-label={t.language} className={composerSelect} value={language} disabled={mutation.busy}
+            onChange={(event) => { if (isLocale(event.target.value)) setLanguage(event.target.value); }}>
+            {locales.map((value) => <option value={value} key={value} lang={value}>{languageNames[value]}</option>)}
+          </select>
+        </label>
+      </div>
     </div>
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
     <div className="flex flex-wrap items-center gap-3">
@@ -152,6 +162,17 @@ function PostForm({ post, onSaved, onCancel }: { post?: FeedPost; onSaved: (mess
       {onCancel && <button type="button" className={institutionLink} disabled={mutation.busy} onClick={onCancel}>{t.cancel}</button>}
     </div>
   </form>;
+}
+
+const composerControl = "relative grid size-11 place-items-center rounded-md text-[var(--theme-link)] hover:bg-[var(--theme-selected)] focus-within:outline-2 focus-within:outline-[var(--theme-link)]";
+const composerSelect = "absolute inset-0 size-full cursor-pointer opacity-0 disabled:cursor-default";
+
+function VisibilityIcon({ visibility }: { visibility: PostVisibility }) {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+    {visibility === "public" && <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z" /></>}
+    {visibility === "members_only" && <><circle cx="9" cy="8" r="3" /><path d="M3 20v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2m2-15a3 3 0 0 1 0 6m4 9v-2a5 5 0 0 0-4-5" /></>}
+    {visibility === "private" && <><rect x="5" y="10" width="14" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2" /></>}
+  </svg>;
 }
 
 function PostCard({ post, changed }: { post: FeedPost; changed: (message: PostNotice) => void }) {
@@ -209,35 +230,11 @@ function PostCard({ post, changed }: { post: FeedPost; changed: (message: PostNo
         <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => setMode(null)}>{t.cancel}</button>
       </div>
     </div>}
-    {mode === "report" && <ReportForm post={post} cancel={() => setMode(null)} reported={() => { setMode(null); setReported(true); }} />}
+    {mode === "report" && <ContentReportForm submitReport={(category, note) => reportPost(post.id, category, note)}
+      cancel={() => setMode(null)} reported={() => { setMode(null); setReported(true); }} />}
     {reported && <p role="status" className="mt-3 text-sm text-[var(--theme-link)]">{t.reportSent}</p>}
+    {post.reactions && <PostDiscussion postId={post.id}>
+      <ReactionPicker target="posts" id={post.id} summary={post.reactions} />
+    </PostDiscussion>}
   </article>;
-}
-
-function ReportForm({ post, cancel, reported }: { post: FeedPost; cancel: () => void; reported: () => void }) {
-  const [locale] = useLocale();
-  const t = feedMessages[locale];
-  const mutation = useFeedMutation();
-  const [category, setCategory] = useState<ReportCategory | "">("");
-  const [note, setNote] = useState("");
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (category && await mutation.run(() => reportPost(post.id, category, note))) reported();
-  }
-  return <form className="mt-4 grid gap-3 border-t border-[var(--theme-border)] pt-4" onSubmit={submit} aria-busy={mutation.busy}>
-    <label className="text-sm font-semibold">{t.reportReason}
-      <select className={institutionField} value={category} required disabled={mutation.busy}
-        onChange={(event) => setCategory(reportCategories.find((value) => value === event.target.value) ?? "")}>
-        <option value="" disabled>—</option>
-        {reportCategories.map((value) => <option value={value} key={value}>{t[value]}</option>)}
-      </select>
-    </label>
-    <label className="text-sm font-semibold">{t.reportNote}
-      <textarea className={institutionField} value={note} rows={3} maxLength={500} disabled={mutation.busy} onChange={(event) => setNote(event.target.value)} />
-    </label>
-    {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
-    {apiErrorCode(mutation.error) === "DUPLICATE_REPORT" ? null : <button type="submit" className={`${institutionAction} justify-self-start`}
-      disabled={mutation.busy || !category}>{mutation.busy ? t.working : t.sendReport}</button>}
-    <button type="button" className={`${institutionLink} justify-self-start`} disabled={mutation.busy} onClick={cancel}>{t.cancel}</button>
-  </form>;
 }

@@ -122,9 +122,15 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Share safe request references and localized errors across application clients.
 - [x] Add durable per-member write quotas and bounded local read quotas.
 
+## Phase 3B — Comments, replies, and reactions
+
+- [x] Add paginated text comments with one reply level, versioned edits, and private report submission.
+- [x] Add one reaction per member per post or comment, with counts and replacement.
+- [x] Add comment review queues and versioned MFA-gated decisions. Reuse localized errors and database-enforced abuse limits.
+
 ## Remaining Phase 3 — Social network MVP
 
-- [ ] Comments, reactions, follows, basic notifications.
+- [ ] Follows and basic notifications.
 - [ ] Optional image attachments with storage rules, upload limits and security scanning where feasible.
 - [ ] Add a formal appeals workflow and operational retention rules.
 - [ ] Blocking, muting, and shared read-rate controls for multi-instance deployment.

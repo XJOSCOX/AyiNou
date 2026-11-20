@@ -4,7 +4,7 @@
 
 ## Verified baseline and design rules
 
-Hosted migration history runs from `20261119160000_initial_schema` through `20261120071000_feed_publication_time`. Guarded hosted checks cover profile behavior and saved languages, metrics, referral setup, TOTP, institutional authorization, ordinary affiliation, and the text feed. Delivered confirmation and recovery mail and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120080000_phase3b_engagement`. Guarded hosted checks cover profile behavior and saved languages, metrics, referral setup, TOTP, institutional authorization, ordinary affiliation, and the feed with engagement. Delivered confirmation and recovery mail and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Preserve user-generated content in its original language and label any future translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -104,6 +104,19 @@ All three tables deny direct application and service-role access. Fastify derive
 
 All five tables use RLS in the non-exposed schema. Caller RLS covers anonymous public reads, eligible member reads, and own draft or hidden reads. Scoped RPCs handle edits, reports, and moderation. New actor or community relationships can use additive foreign keys when those domains and their authorization rules exist.
 
+### Phase 3B feed engagement
+
+| Table in `feed_data` | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `comments` | `id uuid PK`, `post_id uuid! FK→posts.id CASCADE`, `author_id uuid! FK→auth.users.id CASCADE`, `parent_id uuid?`, generated boolean `is_root` and `parent_is_root`, `body text!`, `language text!`, `status text!`, `ca`, `ua`, `edited_at timestamptz?`, `deleted_at timestamptz?`, `version integer!`; UQ `(id,post_id,is_root)`; FK `(parent_id,post_id,parent_is_root)→comments(id,post_id,is_root) CASCADE` | `(post_id,parent_id,created_at,id)`, `(author_id)`, partial hidden queue `(updated_at DESC,id DESC)` |
+| `comment_submissions` | `author_id uuid! FK→auth.users.id CASCADE`, `submission_id uuid!`, `comment_id uuid! UQ FK→comments.id CASCADE`, `request_digest bytea!`; PK `(author_id,submission_id)` | PK and UQ |
+| `post_reactions` | `post_id uuid! FK→posts.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, `kind text!`, `updated_at timestamptz!`; PK `(post_id,user_id)` | `(user_id)` |
+| `comment_reactions` | `comment_id uuid! FK→comments.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, `kind text!`, `updated_at timestamptz!`; PK `(comment_id,user_id)` | `(user_id)` |
+| `comment_reports` | `id uuid PK`, `comment_id uuid! FK→comments.id CASCADE`, `reporter_id uuid? FK→auth.users.id SET NULL`, `category text!`, `note text?`, `status text!`, `ca`, `closed_at timestamptz?`; UQ `(comment_id,reporter_id)` | Pending queue and reporter indexes |
+| `comment_moderation_actions` | `id uuid PK`, `comment_id uuid! FK→comments.id CASCADE`, `actor_id uuid? FK→auth.users.id SET NULL`, `action text!`, `reason text!`, `ca` | Comment history and actor indexes |
+
+Engagement depends on the Phase 3A post schema and live-session checks. All six tables enable RLS, with zero direct app-role grants. Scoped RPCs enforce parent visibility and project only eligible comments, minimal tombstones, and reaction totals. Operational retention still needs a policy for hard deletion, including replies cascading from a physically deleted root.
+
 ## Planned schema by domain and implementation phase
 
 The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
@@ -154,9 +167,6 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `comments` | `id uuid PK`, `post_id uuid! FK→posts.id`, `author_user_id uuid! FK→profiles.user_id`, `parent_comment_id uuid? FK→comments.id`, `body text!`, `content_language text!`, `status text!`, `ca`, `ua`, `deleted_at timestamptz?` | IX `(post_id,created_at,id)`, `(parent_comment_id)`; parent must belong to same post, bound depth |
-| `post_reactions` | `post_id uuid! FK→posts.id`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `ca`; PK `(post_id,user_id)` | IX `(user_id,created_at DESC)`; one active reaction/post/user |
-| `comment_reactions` | `comment_id uuid! FK→comments.id`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `ca`; PK `(comment_id,user_id)` | IX `(user_id,created_at DESC)` |
 | `follows` | `follower_id uuid! FK→profiles.user_id`, `followed_id uuid! FK→profiles.user_id`, `ca`; PK `(follower_id,followed_id)` | CHECK users differ; IX `(followed_id,follower_id)` |
 | `bookmarks` / later | `user_id uuid! FK→profiles.user_id`, `post_id uuid! FK→posts.id`, `ca`; PK `(user_id,post_id)` | Private owner-only |
 | `hashtags` / later | `id uuid PK`, `normalized_tag text! UQ`, `display_tag text!`, `ca` | CHECK normalized format/length |
@@ -268,9 +278,13 @@ erDiagram
     referral_codes ||--o{ referrals : captured_code
     auth_users ||--o{ verification_challenges : planned_subject
     verification_applications ||--o{ verification_challenges : planned_application
-    profiles ||--o{ posts : writes
-    profiles ||--o{ comments : writes
+    auth_users ||--o{ posts : writes
+    auth_users ||--o{ comments : writes
     posts ||--o{ comments : contains
+    comments o|--o{ comments : root_of
+    comments ||--o| comment_submissions : submitted_as
+    comments ||--o{ comment_reports : reported_as
+    comments ||--o{ comment_moderation_actions : reviewed_by
     posts ||--o{ post_media : attaches
     media_assets ||--o{ post_media : used_by
     posts ||--o{ post_reactions : receives
@@ -325,7 +339,9 @@ erDiagram
 | Phase 2E review work | — | — | — | Own conflict-filtered work with recent TOTP | Audit projection only |
 | Settings, blocks, mutes, export/deletion requests | — | Own read/write | Same | — | Rights-processing workflow |
 | Countries/communes; aggregate metrics | Safe read | Safe read | Same | Same | Reference/metric computation; raw activity restricted |
-| Posts, comments, reactions, follows, bookmarks | Published public read | Eligibility-scoped read/create | Own edit/delete request | Assigned moderation action | Restricted repair/audit |
+| Posts, comments, and reactions | Published public projection | Eligible threads and own reaction writes | Own versioned edits and deletion | Recent TOTP for moderation | Restricted repair/audit |
+| Comment reports and decisions | — | Report visible content once per target | — | Recent TOTP, private queue and written decisions | Restricted repair/audit |
+| Planned follows and bookmarks | — | Own actions | Same | — | Restricted repair/audit |
 | Media metadata/Storage | Only approved public derivative | Signed permitted read | Own upload/management | Assigned evidence access | Storage policy/scan/retention |
 | Notifications/preferences/push devices | — | Own read/edit | Same | — | Delivery worker, no token exposure |
 | Communities/members/rules/bans | Public communities/rules | Eligible membership/read | Scoped member actions | Assigned community moderation | Audited role/bans |

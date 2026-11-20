@@ -11,6 +11,7 @@
   "tooLarge": "Cette requête est trop volumineuse.",
   "rate": "Trop de requêtes. Patientez un instant et réessayez.",
   "mfa": "Confirmez avec votre authentificateur pour continuer.",
-  "duplicateReport": "Vous avez déjà signalé cette publication.",
+  "duplicateReport": "Vous avez déjà signalé cet élément.",
+  "timeout": "Le délai de la requête est dépassé. Vérifiez l’état actuel avant de réessayer.",
   "server": "Cette action est temporairement indisponible. Réessayez plus tard."
 }

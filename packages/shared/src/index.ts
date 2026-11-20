@@ -25,6 +25,10 @@ export const postVisibilities = ["public", "members_only", "private"] as const;
 export const reportCategories = ["harassment", "hate", "spam", "privacy", "other"] as const;
 export const moderationActions = ["hide", "restore", "remove", "dismiss"] as const;
 export const postBodyLimit = 2_000;
+export const commentBodyLimit = 1_000;
+export const reactionKinds = ["like", "love", "support", "celebrate"] as const;
+export type ReactionKind = (typeof reactionKinds)[number];
+export type ReactionSummary = { counts: Record<ReactionKind, number>; mine: ReactionKind | null };
 export type PostVisibility = (typeof postVisibilities)[number];
 export type ReportCategory = (typeof reportCategories)[number];
 export type ModerationAction = (typeof moderationActions)[number];
@@ -47,6 +51,7 @@ export interface FeedPost extends PostInput {
   version: number;
   own: boolean;
   author: FeedAuthor | null;
+  reactions?: ReactionSummary;
 }
 export interface FeedPage {
   posts: FeedPost[];
@@ -55,6 +60,7 @@ export interface FeedPage {
 export interface FeedReport {
   id: string;
   postId: string;
+  commentId?: string;
   body: string;
   language: Locale;
   status: PostStatus;
@@ -65,6 +71,18 @@ export interface FeedReport {
   note: string | null;
   createdAt: string;
   lastAction: { action: ModerationAction; reason: string; createdAt: string } | null;
+}
+export type CommentInput = Pick<PostInput, "body" | "language">;
+type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
+export type FeedComment = CommentPosition & (
+  { available: true; body: string; language: Locale; editedAt: string | null; version: number;
+    own: boolean; author: Omit<FeedAuthor, "avatarUrl"> | null; reactions: ReactionSummary }
+  | { available: false; body: null; language: null; editedAt: null; version: null;
+    own: false; author: null; reactions: null }
+);
+export interface CommentPage {
+  comments: FeedComment[];
+  nextCursor: string | null;
 }
 export interface FeedReportPage {
   reports: FeedReport[];

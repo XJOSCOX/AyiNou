@@ -11,6 +11,7 @@
   "tooLarge": "Demann sa a twò gwo.",
   "rate": "Twòp demann. Tann yon ti moman epi eseye ankò.",
   "mfa": "Konfime ak aplikasyon otantifikasyon ou pou kontinye.",
-  "duplicateReport": "Ou deja siyale piblikasyon sa a.",
+  "duplicateReport": "Ou deja siyale kontni sa a.",
+  "timeout": "Demann lan pran twòp tan. Tcheke dènye eta a anvan ou eseye ankò.",
   "server": "Aksyon sa a pa disponib pou kounye a. Eseye ankò pita."
 }

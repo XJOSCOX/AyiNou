@@ -33,7 +33,7 @@ export function createApp(config: ApiConfig, overrides?: {
 
   app.register(cors, {
     origin: config.WEB_ORIGINS,
-    methods: ["GET", "PATCH", "POST", "DELETE"],
+    methods: ["GET", "PATCH", "POST", "PUT", "DELETE"],
     exposedHeaders: ["X-Request-ID", "Retry-After"],
   });
   app.register(statusRoutes);

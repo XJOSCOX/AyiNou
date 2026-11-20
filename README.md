@@ -46,6 +46,8 @@ Phase 3A adds the text feed at `/feed`. Signed-in members can publish, save priv
 
 The feed keeps the composer and timeline together, with sections for account suggestions and community news alongside them on wide screens. Those sections show empty states while the underlying features are planned. Members can browse the existing institution directory from the feed.
 
+Open **Comments** on a post to read or contribute to the discussion. Comments support one level of replies. Members can react to posts and comments, edit or delete their own comments, and report a comment for moderator review. The post composer places visibility and language beside the character count. [Discussion permissions, API and tests](docs/DATABASE.md#phase-3b-comments-replies-and-reactions)
+
 ## Key features by phase
 
 1. Registration, onboarding, profiles, language, optional geographic information

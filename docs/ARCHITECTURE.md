@@ -72,6 +72,12 @@ API errors retain the existing `error.code` and `error.message` fields and add `
 
 The pinned Supabase CLI manages hosted migration history. Docker and pgTAP remain optional for isolated local checks. Hosted integration tests use identifiable synthetic records, exclusion from public metrics, transaction rollback for aggregate assertions, and targeted cleanup. No hosted reset or destructive test workflow is used.
 
+### Comment threads and reactions
+
+Fastify exposes the same discussion contracts to the web and future mobile clients. A bounded chronological query returns one page of root comments or one root’s replies. The initial feed response batches post reaction summaries. Comment page queries project safe author fields and counts in PostgreSQL. Individual reaction reads let clients reconcile a timeout without an automatic second write.
+
+PostgreSQL checks eligibility at each RPC, serializes account writes through the shared quota row, and locks the parent post during comment and reaction writes. Composite foreign keys enforce reply scope and depth. A subtransaction rolls back an invalid write while the outer transaction retains the abuse-limit charge for recognized failures. Comment reports use the existing moderation role and recent TOTP policy, with separate comment actions and a private queue.
+
 ## References
 
 - [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)

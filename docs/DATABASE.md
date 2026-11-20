@@ -193,7 +193,34 @@ Per-minute database write quotas are 8 creations, 20 edits, and 5 reports per ac
 
 Run `npm run test:hosted:feed:sql -- --preflight` for the rollback-only migration rehearsal, `npm run test:hosted:feed:sql` for the deployed RLS suite, and `npm run test:hosted:feed` for the synthetic live API integration. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` first. Docker and SMTP are optional for this phase.
 
+## Phase 3B comments, replies, and reactions
+
+Migration `20261120080000_phase3b_engagement.sql` adds `comments`, `comment_submissions`, `post_reactions`, `comment_reactions`, `comment_reports`, and `comment_moderation_actions` under `feed_data`. RLS is enabled on all six tables. Anonymous, authenticated, and service roles have zero direct table grants. Caller-bound RPCs check the current post and comment state and return narrow projections.
+
+| Fastify endpoint | Contract |
+| --- | --- |
+| `GET /api/v1/posts/:id/comments` | Oldest first by `created_at, id`. Pass `parent` for replies, `cursor` for the next page, and optionally `limit` from 1 to 25. Default 15. |
+| `POST /api/v1/posts/:id/comments` | Original `body`, `language`, optional `parentId`, required UUID `Idempotency-Key`. Returns the comment UUID. |
+| `PATCH /api/v1/comments/:id` | Replace the body and language with an expected edit version. |
+| `DELETE /api/v1/comments/:id?version=…` | Soft-delete an eligible owned comment using the expected version. |
+| `GET /api/v1/{posts,comments}/:id/reaction` | Aggregate counts for the target and the caller’s selection. |
+| `PUT /api/v1/{posts,comments}/:id/reaction` | Add or replace the caller’s selected `kind`. Returns the authoritative summary. |
+| `DELETE /api/v1/{posts,comments}/:id/reaction` | Remove the caller’s reaction and return the authoritative summary. |
+| `POST /api/v1/comments/:id/reports` | Report a visible comment with a category and optional 500-character note. |
+| `GET /api/v1/moderation/feed?target=comments&scope=reports` | Recent-MFA queue for pending reports or `scope=hidden`, with cursor pagination. |
+| `PATCH /api/v1/moderation/comments/:id` | Review with expected version, action, and a written reason of 10–500 characters. |
+
+A visible comment has 1–1,000 characters of original text and an explicit content locale. The parent key includes the post and a generated root flag, so PostgreSQL rejects cross-post parents and replies to replies. Threads inherit published public or members-only post visibility. Draft, hidden, removed, deleted, and restricted-author posts have no visible discussion. A hidden, removed, or deleted root with any eligible replies is projected as a generic tombstone with no body, author, edit metadata, or reactions. Visible replies can still be read. Unavailable roots accept no new replies.
+
+React with `like`, `love`, `support`, or `celebrate`. Each reaction table has a unique target-and-account primary key. Counts are calculated from reaction rows, and responses expose only the caller’s selection. Posting and reacting require an eligible live Supabase session. Comment creation reuses the original UUID for a byte-equivalent payload and rejects conflicting reuse. Edits and moderation decisions use the current version. The client keeps unsent text and uses a bounded request deadline. If the response to a reaction write is lost, the client tries a read to reconcile the selection without replaying the write.
+
+Database limits per account per minute are 12 new comments or replies, 24 edits or deletions, 40 reaction writes across posts and comments, and 5 comment reports. A combined 100-attempt limit also charges authenticated writes that reach PostgreSQL and return a known failure. Requests rejected during API shape validation never reach the database. Reads use the existing per-instance feed read limiter. A 429 includes `Retry-After`; edit conflicts and permission failures require checking the latest state. Shared responses return localized errors, safe request references, and retryability.
+
+One report per reporter and comment is allowed. Reporter identities stay private, and reports stay pending until an authorized decision. Moderators and administrators require recent TOTP to view the queue or act. A decision records an append-only action and reason, and staff cannot decide their own comment. Authors cannot edit around a hide or removal. Assigned staff can use the original report and action history when reconsidering a decision. The user-facing appeals workflow and operational retention policy remain planned.
+
 ## Testing and optional local stack
+
+Run `npm run test:hosted:engagement:sql` for rollback-only tests of grants, reply constraints, projection privacy, moderation history, and abuse limits. Before applying Phase 3B, append `-- --preflight` to rehearse the migration inside the same rollback transaction. Run `npm run test:hosted:feed` for the Phase 3A and Phase 3B hosted API suites with disposable accounts and targeted cleanup.
 
 Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:aggregation`. The guard must match the API URL. The scripts create uniquely named, confirmed synthetic Auth users, mark them excluded from public metrics, check API/RLS and aggregate cases, then delete only those returned IDs. The aggregation script requires the pinned CLI's hosted SQL access and an empty eligible-member baseline; its SQL assertions roll back each transaction. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by these scripts.
 

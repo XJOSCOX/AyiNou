@@ -55,6 +55,12 @@
 - Require a verified TOTP factor for privileged role grants and a live TOTP-backed AAL2 session verified within the prior 15 minutes for administration and review. Protect the last eligible administrator through application role and restriction controls and final-factor removal checks.
 - Record application restrictions separately from Supabase Auth bans. Use authentication logs for credential changes and an append-only application audit for administration, reviews, and ownership decisions. Establish retention and appeals before public launch.
 
+## Comment and reaction decisions
+
+- Keep one reply level and use chronological cursor pagination. Keep a generic root placeholder only when needed to reach visible replies.
+- Store reaction choices separately for posts and comments. Membership and current content visibility govern writes. The server calculates counts from stored choices.
+- Keep private comment reports and written decisions within the existing recent-TOTP moderation boundary. Decisions are independent of report volume. Formal appeals and deletion retention need launch policies.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

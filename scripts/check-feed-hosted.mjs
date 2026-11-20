@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import { createApp } from "../apps/api/src/app.ts";
 import { readConfig } from "../apps/api/src/config.ts";
+import { checkEngagement } from "./check-engagement-hosted.mjs";
 
 const project = "hcbxulyfmdmuyccgrujs";
 assert.equal(process.env.AYINOU_HOSTED_TEST_PROJECT_REF, project);
@@ -152,6 +153,7 @@ try {
   await expected(200, "GET", detail, reader);
   await expected(204, "PATCH", review, moderator, { action: "remove", version: 4, reason: "Synthetic removal rationale" });
   await expected(404, "GET", detail, author);
+  await checkEngagement({ author, reader, moderator, expected, send, query, createPost: create });
   query(`insert into private.account_restrictions(user_id,status,reason)
     select id,'suspended','Synthetic feed restriction test' from auth.users where id='${author.id}' and email='${author.email}';`);
   await expected(401, "POST", posts, author, base, { "idempotency-key": randomUUID() });
