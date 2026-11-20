@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { pollDecisions, type PollDetail, type PollNomination } from "@ayinou/shared";
-import { apiErrorCode } from "@/lib/api-errors";
+import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { castBallot, loadNominations, loadOwnBallot, loadPoll, loadPolls, respondToNomination, transitionPoll, type PollContext } from "@/lib/poll-api";
 import { pollMessages } from "@/lib/poll-i18n";
+import { watchPoll } from "@/lib/poll-refresh";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -51,15 +52,49 @@ export function PollDirectory({ mine = false, context = null }: { mine?: boolean
 }
 
 export function PollDetailScreen({ id }: { id: string }) {
+  return <PollDetailResource key={id} id={id} />;
+}
+
+function PollDetailResource({ id }: { id: string }) {
   const [locale] = useLocale();
   const t = pollMessages[locale];
-  const loader = useCallback((signal: AbortSignal) => loadPoll(id, signal), [id]);
-  const resource = useInstitutionResource(loader);
+  const [data, setData] = useState<PollDetail | null>(null);
+  const [error, setError] = useState<unknown>(null);
+  const reload = useRef<(replace: boolean) => void>(null);
+  const refresh = useCallback(() => reload.current?.(true), []);
+
+  useEffect(() => {
+    const watcher = watchPoll({
+      load: (signal) => loadPoll(id, signal),
+      publish(next) { setData(next); setError(null); },
+      fail(cause) {
+        if (!(cause instanceof ApiRequestError && cause.retryable)) setData(null);
+        setError(cause);
+      },
+      visible: () => document.visibilityState === "visible",
+      monotonic: () => performance.now(),
+      wallTime: () => Date.now(),
+      schedule(callback, delay) {
+        const timer = window.setTimeout(callback, delay);
+        return () => window.clearTimeout(timer);
+      },
+    });
+    reload.current = watcher.refresh;
+    window.addEventListener("focus", watcher.visibilityChanged);
+    document.addEventListener("visibilitychange", watcher.visibilityChanged);
+    watcher.refresh();
+    return () => {
+      reload.current = null;
+      watcher.dispose();
+      window.removeEventListener("focus", watcher.visibilityChanged);
+      document.removeEventListener("visibilitychange", watcher.visibilityChanged);
+    };
+  }, [id]);
+
   return <MemberShell><section className="grid min-w-0 gap-4">
     <Link href="/polls" className={institutionLink}>{t.title}</Link>
-    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
-    {resource.data ? <PollDetailBody key={id} poll={resource.data} refresh={resource.refresh} /> :
-      resource.error === null && <p role="status">{t.loading}</p>}
+    {error !== null && <ApiErrorNotice error={error} retry={refresh} signIn />}
+    {data ? <PollDetailBody poll={data} refresh={refresh} /> : error === null && <p role="status">{t.loading}</p>}
   </section></MemberShell>;
 }
 
@@ -76,11 +111,15 @@ function PollDetailBody({ poll, refresh }: { poll: PollDetail; refresh: () => vo
   const high = poll.policy === "governance" || poll.kind !== "community" || poll.scope === "organization";
   function vote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selected) return;
+    if (!selected || !poll.canVote || !poll.options.some((option) => option.id === selected && option.available)) return;
     void mutation.run(async () => {
       try {
         await castBallot(poll.id, selected);
       } catch (cause) {
+        if (["POLL_CLOSED", "POLL_NOT_OPEN", "POLL_CANCELLED", "POLL_NOT_ELIGIBLE", "POLL_CHANGED"].includes(apiErrorCode(cause))) {
+          refresh();
+          throw cause;
+        }
         const receipt = await loadOwnBallot(poll.id).catch(() => null);
         if (receipt?.optionId !== selected) throw cause;
       }
@@ -147,7 +186,7 @@ function PollDetailBody({ poll, refresh }: { poll: PollDetail; refresh: () => vo
       <h2 className="text-xl font-semibold">{t.edit}</h2>
       {poll.kind === "person" && <ul className="grid gap-1">{poll.options.map(({ id, label, consent }) =>
         <li key={id}>{label ?? t.unavailableOption}{consent && " · " + t.consents[consent]}</li>)}</ul>}
-      <PollForm key={version} detail={poll} refresh={refresh} />
+      <PollForm detail={poll} refresh={refresh} />
       <p>{high ? t.frozenHelp : t.publishHelp}</p>
       <button type="button" className={institutionAction + " justify-self-start"} disabled={mutation.busy}
         onClick={() => act("publish")}>{t.publish}</button>

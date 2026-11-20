@@ -13,12 +13,13 @@ const own = "/api/v1/me/polls";
 export const loadPolls = (mine: boolean, context: PollContext | null, cursor: string | null, signal: AbortSignal):
   Promise<{ items: PollCard[]; nextCursor: string | null }> =>
   authorizedSocialRequest((mine ? own : polls) + "?" + new URLSearchParams({ ...context, ...(cursor ? { cursor } : {}) }), { signal });
-export const loadPoll = (id: string, signal: AbortSignal): Promise<PollDetail> => authorizedSocialRequest(polls + "/" + id, { signal });
+export const loadPoll = (id: string, signal: AbortSignal): Promise<PollDetail & { serverNow?: number }> =>
+  authorizedSocialRequest(polls + "/" + id, { signal });
 export const loadPollOptions = (signal: AbortSignal): Promise<PollConfigOptions> => authorizedSocialRequest(own + "/options", { signal });
 export const loadNominations = (signal: AbortSignal): Promise<{ nominations: PollNomination[] }> =>
   authorizedSocialRequest(own + "/nominations", { signal });
 export const savePoll = (body: PollDraft): Promise<{ id: string }> => authorizedSocialRequest(polls, json("POST", body));
-export const editPoll = (id: string, body: PollConfiguration & { version: number; options?: string[] }) =>
+export const editPoll = (id: string, body: PollConfiguration & { version: number; options?: string[] }): Promise<{ version: number }> =>
   authorizedSocialRequest(polls + "/" + id, json("PATCH", body));
 export const castBallot = (id: string, optionId: string) =>
   authorizedSocialRequest(polls + "/" + id + "/ballot", json("POST", { optionId }));

@@ -5,6 +5,73 @@ import { errorMessages, localizedApiError } from "../apps/web/src/lib/error-i18n
 import { reconcileReaction } from "../apps/web/src/lib/reaction-state.ts";
 import { reconcileFollow } from "../apps/web/src/lib/follow-state.ts";
 import { communityDiscoveryMessages } from "../apps/web/src/lib/community-discovery-i18n.ts";
+import { pollRefreshDelay, watchPoll } from "../apps/web/src/lib/poll-refresh.ts";
+
+const pollEpoch = Date.parse("2026-11-20T10:00:00Z");
+const openingPoll = {
+  status: "scheduled", serverNow: pollEpoch, opensAt: "2026-11-20T10:00:05Z", closesAt: "2026-11-20T10:00:12Z",
+};
+
+test("poll boundary timers use the server clock even when the browser clock is wrong", () => {
+  assert.equal(pollRefreshDelay(openingPoll, 300, pollEpoch + 3_600_000), 4850);
+  assert.equal(pollRefreshDelay({ ...openingPoll, status: "open" }, 1500, pollEpoch - 3_600_000), 10_650);
+  assert.equal(pollRefreshDelay(openingPoll, 6000, pollEpoch), 1000);
+  assert.equal(pollRefreshDelay({ ...openingPoll, status: "awaiting_close" }, 0, pollEpoch), null);
+});
+
+test("poll refresh pauses background timers and ignores obsolete responses after focus or a write", async () => {
+  let visible = true;
+  let now = 0;
+  let nextTimer;
+  const reads = [];
+  const states = [];
+  const errors = [];
+  const watcher = watchPoll({
+    load: (signal) => new Promise((resolve, reject) => reads.push({ signal, resolve, reject })),
+    publish: (poll) => states.push(poll.status),
+    fail: (error) => errors.push(error),
+    visible: () => visible,
+    monotonic: () => now,
+    wallTime: () => pollEpoch + now,
+    schedule(callback, delay) {
+      nextTimer = { callback, delay };
+      return () => { nextTimer = undefined; };
+    },
+  });
+  watcher.refresh();
+  reads[0].resolve(openingPoll);
+  await Promise.resolve();
+  assert.equal(nextTimer.delay, 5150);
+  now = 5150;
+  nextTimer.callback();
+  reads[1].resolve({ ...openingPoll, status: "open", serverNow: pollEpoch + now });
+  await Promise.resolve();
+  assert.equal(nextTimer.delay, 7000);
+  visible = false;
+  watcher.visibilityChanged();
+  assert.equal(nextTimer, undefined);
+
+  visible = true;
+  now = 12300;
+  watcher.visibilityChanged();
+  watcher.visibilityChanged();
+  assert.equal(reads.length, 3, "focus and visibility changes share the current read");
+  watcher.refresh(true);
+  assert.equal(reads[2].signal.aborted, true);
+  reads[3].resolve({ ...openingPoll, status: "awaiting_close", serverNow: pollEpoch + now });
+  await Promise.resolve();
+  reads[2].resolve({ ...openingPoll, status: "open" });
+  await Promise.resolve();
+  assert.deepEqual(states, ["scheduled", "open", "awaiting_close"]);
+  assert.equal(nextTimer, undefined);
+  watcher.refresh();
+  watcher.dispose();
+  assert.equal(reads[4].signal.aborted, true);
+  reads[4].reject(new Error("obsolete"));
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.deepEqual(errors, []);
+});
 
 test("follow writes reconcile a lost response without replay and report permission failures directly", async () => {
   const network = new ApiRequestError("NETWORK_ERROR", 0, true);

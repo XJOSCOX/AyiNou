@@ -61,9 +61,10 @@ export function registerPollRoutes(app: FastifyInstance, { viewer, repo, read }:
     app.get(polls + "/:id" + projection, async (request) => {
       const { actor, token } = await viewer(request, true);
       await read("profile", actor, request.ip);
+      const serverNow = Date.now();
       const detail = await repo().rpc<PollDetail>(token, "poll_detail_for_client", { p_id: id.parse(request.params).id });
       if (projection === "/ballot") return { optionId: detail.ownBallot };
-      if (projection === "") return detail;
+      if (projection === "") return { ...detail, serverNow };
       if (!detail.results) throw new ApiError(409, "POLL_RESULT_UNAVAILABLE", "Results are not available");
       return detail.results;
     });

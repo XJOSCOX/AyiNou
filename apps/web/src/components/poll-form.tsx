@@ -43,6 +43,7 @@ export function PollForm({ detail, refresh }: { detail?: PollDetail; refresh?: (
   const resource = useInstitutionResource(loadPollOptions);
   const mutation = useFeedMutation();
   const requestKey = useRef<string | null>(null);
+  const draftVersion = useRef(detail?.version);
   const [scope, setScope] = useState<PollScope>(detail?.scope ?? "individual");
   const [scopeId, setScopeId] = useState(detail?.scopeId ?? "");
   const [kind, setKind] = useState<PollKind>(detail?.kind ?? "community");
@@ -70,8 +71,9 @@ export function PollForm({ detail, refresh }: { detail?: PollDetail; refresh?: (
     };
     const options = text(fields, "options").split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
     void mutation.run(async () => {
-      if (detail && detail.version !== null) {
-        await editPoll(detail.id, { ...body, version: detail.version, ...(options.length ? { options } : {}) });
+      if (detail && draftVersion.current != null) {
+        const saved = await editPoll(detail.id, { ...body, version: draftVersion.current, ...(options.length ? { options } : {}) });
+        draftVersion.current = saved.version;
         refresh?.();
       } else {
         requestKey.current ??= crypto.randomUUID();
