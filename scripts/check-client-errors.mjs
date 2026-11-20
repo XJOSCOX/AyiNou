@@ -4,6 +4,7 @@ import { ApiRequestError, apiErrorCode, requestJson } from "../apps/web/src/lib/
 import { errorMessages, localizedApiError } from "../apps/web/src/lib/error-i18n.ts";
 import { reconcileReaction } from "../apps/web/src/lib/reaction-state.ts";
 import { reconcileFollow } from "../apps/web/src/lib/follow-state.ts";
+import { communityDiscoveryMessages } from "../apps/web/src/lib/community-discovery-i18n.ts";
 
 test("follow writes reconcile a lost response without replay and report permission failures directly", async () => {
   const network = new ApiRequestError("NETWORK_ERROR", 0, true);
@@ -68,4 +69,25 @@ test("known codes and safe request references are preserved without exposing raw
     assert.equal(localizedApiError("en", new Error("Database password and stack details")), errorMessages.en.server);
     return true;
   });
+});
+
+test("community reads distinguish expired snapshots and sessions from retryable gateway failures", async (t) => {
+  const url = "https://example.invalid/api/v1/communities/recommendations/list";
+  const fetch = t.mock.method(globalThis, "fetch", async () => Response.json({
+    error: { code: "COMMUNITY_RECOMMENDATIONS_EXPIRED", message: "Untrusted server detail", requestId: "invalid" },
+  }, { status: 409 }));
+  await assert.rejects(requestJson(url), (cause) => {
+    assert.equal(cause.code, "COMMUNITY_RECOMMENDATIONS_EXPIRED");
+    assert.equal(cause.retryable, false);
+    assert.equal(cause.requestId, undefined);
+    for (const locale of ["ht", "fr", "en", "es"])
+      assert.equal(localizedApiError(locale, cause), communityDiscoveryMessages[locale].expired);
+    return true;
+  });
+  fetch.mock.mockImplementation(async () => Response.json({ error: { code: "OTHER_ERROR" } }, { status: 401 }));
+  await assert.rejects(requestJson(url), (cause) => cause.code === "UNAUTHORIZED" && !cause.retryable);
+  for (const status of [429, 502, 503, 504]) {
+    fetch.mock.mockImplementation(async () => new Response("Unavailable upstream", { status }));
+    await assert.rejects(requestJson(url), (cause) => cause instanceof ApiRequestError && cause.retryable);
+  }
 });

@@ -4,23 +4,32 @@ import { useEffect, useRef, useState } from "react";
 
 type Page<T> = { rows: T[]; nextCursor: string | null };
 type Loader<T> = (cursor: string | null, signal: AbortSignal) => Promise<Page<T>>;
+type PageResult<T> = {
+  load: Loader<T>;
+  revision: number;
+  attempt: number;
+  page: Page<T> | null;
+  error: unknown;
+  failedPage: "initial" | "more";
+};
 
 export function useCursorPage<T extends { id: string }>(load: Loader<T>, revision = 0) {
-  const [page, setPage] = useState<Page<T> | null>(null);
-  const [error, setError] = useState<unknown>(null);
-  const pageError = useRef<"initial" | "more">("initial");
+  const [result, setResult] = useState<PageResult<T> | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadingPage, setLoadingPage] = useState<Page<T> | null>(null);
   const current = useRef<AbortController | null>(null);
   const pendingCursor = useRef<AbortController | null>(null);
+  const active = result?.load === load && result.revision === revision && result.attempt === attempt ? result : null;
+  const page = active?.page ?? null;
 
   useEffect(() => {
     const control = new AbortController();
     current.current = control;
-    load(null, control.signal).then((result) => {
-      if (!control.signal.aborted) { setPage(result); setError(null); }
+    const query = { load, revision, attempt, failedPage: "initial" as const };
+    load(null, control.signal).then((page) => {
+      if (!control.signal.aborted) setResult({ ...query, page, error: null });
     }).catch((cause: unknown) => {
-      if (!control.signal.aborted) { pageError.current = "initial"; setError(cause); }
+      if (!control.signal.aborted) setResult({ ...query, page: null, error: cause });
     });
     return () => {
       control.abort();
@@ -30,30 +39,31 @@ export function useCursorPage<T extends { id: string }>(load: Loader<T>, revisio
 
   async function more() {
     const control = current.current;
-    if (!page?.nextCursor || !control || pendingCursor.current === control) return;
+    if (!active || !page?.nextCursor || !control || pendingCursor.current === control) return;
     pendingCursor.current = control;
-    setError(null);
-    setLoadingMore(true);
+    setResult({ ...active, error: null });
+    setLoadingPage(page);
     try {
-      const result = await load(page.nextCursor, control.signal);
+      const next = await load(page.nextCursor, control.signal);
       if (control.signal.aborted) return;
       const seen = new Set(page.rows.map(({ id }) => id));
-      setPage({ rows: [...page.rows, ...result.rows.filter(({ id }) => !seen.has(id))], nextCursor: result.nextCursor });
+      setResult({ ...active, error: null,
+        page: { rows: [...page.rows, ...next.rows.filter(({ id }) => !seen.has(id))], nextCursor: next.nextCursor } });
     } catch (cause) {
-      if (!control.signal.aborted) { pageError.current = "more"; setError(cause); }
+      if (!control.signal.aborted) setResult({ ...active, error: cause, failedPage: "more" });
     } finally {
       if (pendingCursor.current === control) {
         pendingCursor.current = null;
-        setLoadingMore(false);
+        setLoadingPage(null);
       }
     }
   }
 
   return {
-    page, error, loadingMore, more,
+    page, error: active?.error ?? null, loadingMore: page !== null && loadingPage === page, more,
     retry: () => {
-      if (pageError.current === "more") void more();
-      else { setError(null); setAttempt((value) => value + 1); }
+      if (active?.failedPage === "more") void more();
+      else setAttempt((value) => value + 1);
     },
   };
 }

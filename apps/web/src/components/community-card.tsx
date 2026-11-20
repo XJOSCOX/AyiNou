@@ -60,7 +60,7 @@ export function MembershipControl({ community, update }: { community: Community;
     });
   }
   return <div className="mt-2 grid gap-2">
-    {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
+    {mutation.error !== null && <ApiErrorNotice error={mutation.error} signIn />}
     {confirmLeave && <p className="text-sm font-semibold">{t.leaving}</p>}
     {pending && <p role="status" className="text-sm">{groups.pending}</p>}
     <div className="flex flex-wrap items-center gap-3">

@@ -29,7 +29,7 @@ export async function requestResponse(url: string, init?: RequestInit) {
   const code = response.status === 401 ? "UNAUTHORIZED"
     : typeof serverCode === "string" && stableCode.test(serverCode) ? serverCode : defaultCodes[response.status] ?? "API_ERROR";
   const id = payload?.error?.requestId ?? response.headers.get("X-Request-ID");
-  throw new ApiRequestError(code, response.status, response.status === 429 || response.status === 503,
+  throw new ApiRequestError(code, response.status, response.status === 429 || [502, 503, 504].includes(response.status),
     typeof id === "string" && safeId.test(id) ? id : undefined);
 }
 

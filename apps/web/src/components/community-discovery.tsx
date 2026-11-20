@@ -1,8 +1,8 @@
 "use client";
 
 import { communityKinds, type Community, type CommunityRecommendationFeedbackAction, type InterestCode } from "@ayinou/shared";
-import { useCallback, useState } from "react";
-import { apiErrorCode } from "@/lib/api-errors";
+import { useCallback, useId, useState } from "react";
+import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
 import { communityDiscoveryMessages } from "@/lib/community-discovery-i18n";
 import { communityDirectoryMessages } from "@/lib/communities-i18n";
 import { feedMessages } from "@/lib/feed-i18n";
@@ -16,6 +16,8 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { CommunityCard } from "./community-card";
 import { GroupInvitationList, GroupMore, TopicSelect } from "./groups";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+
+type FeedbackChange = { id: string; action: CommunityRecommendationFeedbackAction } | { action: "reset" };
 
 export function RecommendedCommunities({ search, explore, onMembership }: {
   search: string; explore(topic: InterestCode): void; onMembership(community: Community): void;
@@ -34,7 +36,10 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
   const [lastFeedback, setLastFeedback] = useState<string | null>(null);
   const [notice, setNotice] = useState<"feedbackSaved" | "feedbackRestored" | "feedbackReset" | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pendingFeedback, setPendingFeedback] = useState<FeedbackChange | null>(null);
+  const countryError = useId();
   const countryFilter = /^[A-Z]{2}$/.test(country) ? country : "";
+  const invalidCountry = Boolean(country && !countryFilter);
   const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
     const result = await listCommunityRecommendations({ kind, search, country: countryFilter, topic }, cursor, signal);
     return { rows: result.recommendations.map((entry) => ({ ...entry, id: entry.community.id })), nextCursor: result.nextCursor };
@@ -42,32 +47,35 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
   const resource = useCursorPage(load, revision);
   const rows = resource.error === null ? resource.page?.rows.filter((entry) => !excluded.includes(entry.id)) : null;
   const expired = apiErrorCode(resource.error) === "COMMUNITY_RECOMMENDATIONS_EXPIRED";
+  const retryFeedback = pendingFeedback && mutation.error instanceof ApiRequestError && mutation.error.retryable
+    ? () => submitFeedback(pendingFeedback) : undefined;
 
-  function feedback(id: string, action: CommunityRecommendationFeedbackAction) {
+  function submitFeedback(change: FeedbackChange) {
     void mutation.run(async () => {
-      await saveCommunityRecommendationFeedback(id, action);
-      if (action === "restore") {
-        setExcluded((removed) => removed.filter((item) => item !== id));
+      setPendingFeedback(change);
+      if (change.action === "reset") {
+        await resetCommunityRecommendationFeedback();
+        setExcluded([]);
         setLastFeedback(null);
-        setNotice("feedbackRestored");
+        setConfirmReset(false);
+        setNotice("feedbackReset");
         setRevision((value) => value + 1);
       } else {
-        setExcluded((removed) => [...removed, id]);
-        setLastFeedback(id);
-        setNotice("feedbackSaved");
+        const { id, action } = change;
+        await saveCommunityRecommendationFeedback(id, action);
+        if (action === "restore") {
+          setExcluded((removed) => removed.filter((item) => item !== id));
+          setLastFeedback(null);
+          setNotice("feedbackRestored");
+          setRevision((value) => value + 1);
+        } else {
+          setExcluded((removed) => [...removed, id]);
+          setLastFeedback(id);
+          setNotice("feedbackSaved");
+        }
       }
+      setPendingFeedback(null);
       settings.refresh();
-    });
-  }
-  function reset() {
-    void mutation.run(async () => {
-      await resetCommunityRecommendationFeedback();
-      setExcluded([]);
-      setLastFeedback(null);
-      setConfirmReset(false);
-      setNotice("feedbackReset");
-      settings.refresh();
-      setRevision((value) => value + 1);
     });
   }
   return <section className="grid gap-4" aria-label={t.recommended}>
@@ -89,8 +97,8 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
       {kind === "interest" && <TopicSelect value={topic} change={setTopic} />}
       {kind === "diaspora" && <label className="text-sm font-semibold">{groups.country}
         <input value={country} onChange={(event) => setCountry(event.target.value.toUpperCase())} maxLength={2}
-          aria-invalid={country.length > 0 && !/^[A-Z]{2}$/.test(country)} className={institutionField} placeholder="HT" />
-        {country.length > 0 && !/^[A-Z]{2}$/.test(country) && <span className="mt-1 block text-[var(--theme-body)]">{t.invalidCountry}</span>}
+          aria-invalid={invalidCountry} aria-describedby={invalidCountry ? countryError : undefined} className={institutionField} placeholder="HT" />
+        {invalidCountry && <span id={countryError} className="mt-1 block text-[var(--theme-body)]">{t.invalidCountry}</span>}
       </label>}
     </div>
     <details className={institutionCard}>
@@ -98,19 +106,24 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
       {settings.data && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.feedbackSummary
         .replace("{hidden}", new Intl.NumberFormat(locale).format(settings.data.hidden))
         .replace("{count}", new Intl.NumberFormat(locale).format(settings.data.notInterested))}</p>}
-      {settings.error !== null && <ApiErrorNotice error={settings.error} retry={settings.refresh} />}
+      {settings.error !== null && <ApiErrorNotice error={settings.error} retry={settings.refresh} signIn />}
       {confirmReset && <p className="my-2 text-sm">{t.resetConfirm}</p>}
       <div className="mt-2 flex flex-wrap gap-3">
-        <button type="button" disabled={mutation.busy} className={institutionAction} onClick={() => confirmReset ? reset() : setConfirmReset(true)}>{t.reset}</button>
-        {confirmReset && <button type="button" className={institutionLink} onClick={() => setConfirmReset(false)}>{feedMessages[locale].cancel}</button>}
+        <button type="button" disabled={mutation.busy} className={institutionAction}
+          onClick={() => confirmReset ? submitFeedback({ action: "reset" }) : setConfirmReset(true)}>{t.reset}</button>
+        {confirmReset && <button type="button" className={institutionLink} onClick={() => {
+          setConfirmReset(false);
+          if (pendingFeedback?.action === "reset") setPendingFeedback(null);
+        }}>{feedMessages[locale].cancel}</button>}
       </div>
     </details>
-    {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
+    {mutation.error !== null && <ApiErrorNotice error={mutation.error} retry={retryFeedback} signIn />}
     {notice && <div className="flex flex-wrap items-center gap-3">
       <p role="status" className="text-sm">{t[notice]}</p>
-      {lastFeedback && <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => feedback(lastFeedback, "restore")}>{t.undo}</button>}
+      {lastFeedback && <button type="button" className={institutionLink} disabled={mutation.busy}
+        onClick={() => submitFeedback({ id: lastFeedback, action: "restore" })}>{t.undo}</button>}
     </div>}
-    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={expired ? undefined : resource.retry} />}
+    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={expired ? undefined : resource.retry} signIn />}
     {expired && <button type="button" className={`${institutionAction} justify-self-start`}
       onClick={() => setRevision((value) => value + 1)}>{t.refresh}</button>}
     {!resource.page && resource.error === null && <p role="status">{c.loading}</p>}
@@ -129,8 +142,8 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-2">
           {community.kind !== "department" && community.topic && <button className={institutionLink} type="button"
             onClick={() => { if (community.topic) explore(community.topic); }}>{membershipMessages[locale][community.topic]} ↗</button>}
-          <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => feedback(id, "not_interested")}>{t.notInterested}</button>
-          <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => feedback(id, "hide")}>{t.hide}</button>
+          <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => submitFeedback({ id, action: "not_interested" })}>{t.notInterested}</button>
+          <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => submitFeedback({ id, action: "hide" })}>{t.hide}</button>
         </div>
       </CommunityCard>)}
     </ul>
@@ -162,7 +175,7 @@ function MyGroupSection({ view, search, revision }: { view: GroupActivityView; s
   const heading = { joined: t.groupsJoined, managed: t.groupsManaged, pending: t.membershipRequests }[view];
   return <section className="grid gap-3" aria-label={heading}>
     <h2 className="text-xl font-semibold">{heading}</h2>
-    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
+    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} signIn />}
     {!resource.page && resource.error === null && <p role="status">{c.loading}</p>}
     {rows?.length === 0 && <p role="status">{search ? groupMessages[locale].noGroups : { joined: t.noJoined, managed: t.noManaged, pending: t.noPending }[view]}</p>}
     <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
