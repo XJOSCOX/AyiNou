@@ -10,6 +10,8 @@ import type { AuthVerifier } from "../services/auth.js";
 import { feedDatabaseError, type FeedRepository } from "../services/feed.js";
 import { registerDiscoveryRoutes } from "./discovery.js";
 import type { PostMediaService } from "../services/post-media.js";
+import type { ReadBudget } from "../services/read-budget.js";
+import { registerSafetyRoutes } from "./safety.js";
 
 const cursorShape = z.strictObject({ createdAt: z.iso.datetime({ offset: true }), id: z.uuid() });
 const pageCursor = z.string().max(250).regex(/^[A-Za-z0-9_-]+$/).optional();
@@ -56,9 +58,8 @@ function content(body: string, limit: number) {
   }
 }
 
-export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifier | null, repository: FeedRepository | null, media: PostMediaService | null) {
-  const readCounts = new Map<string, number>();
-  let windowEnds = 0;
+export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifier | null, repository: FeedRepository | null, media: PostMediaService | null, read: ReadBudget) {
+  const uploadIdentity = new WeakMap<FastifyRequest, { actor: string; id: string }>();
 
   function repo() {
     if (!repository) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Feed service unavailable");
@@ -75,18 +76,6 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     return { actor, token };
   }
 
-  function limitReads(request: FastifyRequest, actor: string | null, images = false) {
-    const now = Date.now();
-    if (now >= windowEnds) { readCounts.clear(); windowEnds = now + 60_000; }
-    const key = `${images ? "images:" : ""}${actor ? `member:${actor}` : `anonymous:${request.ip}`}`;
-    const count = readCounts.get(key) ?? 0;
-    const limit = images ? (actor ? 240 : 120) : (actor ? 120 : 90);
-    if (count >= limit || (!readCounts.has(key) && readCounts.size >= 10_000)) {
-      throw new ApiError(429, "RATE_LIMITED", "Wait before trying again");
-    }
-    readCounts.set(key, count + 1);
-  }
-
   function storage() {
     if (!media) throw new ApiError(503, "STORAGE_UNAVAILABLE", "Image storage is temporarily unavailable");
     return media;
@@ -97,12 +86,12 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   }
 
   async function moderator(request: FastifyRequest) {
-    const { token } = await viewer(request, true);
+    const { token, actor } = await viewer(request, true);
     if (!await repo().rpc<boolean>(token, "feed_moderation_access")) {
       throw new ApiError(403, "FORBIDDEN", "A moderation role is required");
     }
     if (!await auth!.verify(token!, true)) throw new ApiError(403, "MFA_REQUIRED", "Recent authenticator verification is required");
-    return token;
+    return { token, actor };
   }
 
   async function engagement<T extends object>(token: string | null, operation: string, id: string, fields: Record<string, unknown> = {}) {
@@ -114,23 +103,30 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   }
 
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
-  registerDiscoveryRoutes(app, viewer, repo);
-  app.post("/api/v1/me/post-media", { bodyLimit: 4_200_000 }, async (request, reply) => {
-    const { actor, token } = await viewer(request, true);
+  registerDiscoveryRoutes(app, viewer, repo, read);
+  registerSafetyRoutes(app, { viewer, moderator, repo, read });
+  app.post("/api/v1/me/post-media", {
+    bodyLimit: 4_200_000,
+    onRequest: async (request) => {
+      const { actor, token } = await viewer(request, true);
+      storage();
+      const id = z.uuid().parse(request.headers["idempotency-key"]).toLowerCase();
+      await repo().rpc(token, "post_upload_budget_for_client");
+      uploadIdentity.set(request, { actor: actor!, id });
+    },
+  }, async (request, reply) => {
+    const { actor, id } = uploadIdentity.get(request)!;
     const service = storage();
-    const id = z.uuid().parse(request.headers["idempotency-key"]).toLowerCase();
     const { image } = z.strictObject({ image: z.base64().min(4).max(4_194_304) }).parse(request.body);
-    await repo().rpc(token, "post_upload_budget_for_client");
     await service.cleanup().catch(() => request.log.warn("Post media cleanup deferred"));
-    await service.upload(actor!, id, Buffer.from(image, "base64"));
+    await service.upload(actor, id, Buffer.from(image, "base64"));
     return reply.code(201).send({ id });
   });
   app.get("/api/v1/posts/:id/attachments/:attachmentId/image", async (request, reply) => {
     const { id, attachmentId } = identifiers.extend({ attachmentId: z.uuid() }).parse(request.params);
     const query = z.strictObject({ variant: z.enum(["thumbnail", "display"]).default("thumbnail"), review: z.literal("true").optional() }).parse(request.query);
-    const { actor, token } = await viewer(request, Boolean(query.review));
-    limitReads(request, actor, true);
-    if (query.review) await moderator(request);
+    const { actor, token } = query.review ? await moderator(request) : await viewer(request);
+    await read("media", actor, request.ip);
     if (!await repo().rpc<boolean>(token, "can_download_post_media_for_client", {
       p_post: id, p_id: attachmentId, p_review: Boolean(query.review),
     })) throw new ApiError(404, "ATTACHMENT_UNAVAILABLE", "Image unavailable");
@@ -139,7 +135,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   });
   app.get("/api/v1/me/notifications", async (request) => {
     const { actor, token } = await viewer(request, true);
-    limitReads(request, actor);
+    await read("notifications", actor, request.ip);
     const { cursor, limit } = z.strictObject({
       cursor: pageCursor,
       limit: z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(30)).optional(),
@@ -150,7 +146,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   });
   app.get("/api/v1/me/notifications/unread-count", async (request) => {
     const { actor, token } = await viewer(request, true);
-    limitReads(request, actor);
+    await read("notifications", actor, request.ip);
     return { count: await repo().rpc<number>(token, "notification_count_for_client") };
   });
   app.patch("/api/v1/me/notifications/:id", { bodyLimit: 1024 }, async (request, reply) => {
@@ -167,7 +163,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   });
   app.get("/api/v1/me/notification-preferences", async (request) => {
     const { actor, token } = await viewer(request, true);
-    limitReads(request, actor);
+    await read("notifications", actor, request.ip);
     return repo().rpc<NotificationPreferences>(token, "notification_preferences_for_client");
   });
   app.put("/api/v1/me/notification-preferences", { bodyLimit: 1024 }, async (request) => {
@@ -179,7 +175,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   });
   app.get("/api/v1/posts/:id/comments/:commentId", async (request) => {
     const { actor, token } = await viewer(request);
-    limitReads(request, actor);
+    await read("feed", actor, request.ip);
     const { id, commentId } = identifiers.extend({ commentId: z.uuid() }).parse(request.params);
     const comment = await repo().rpc<CommentTarget | null>(token, "post_comment_target_for_client", { p_post: id, p_comment: commentId });
     if (!comment) throw new ApiError(404, "NOT_FOUND", "Comment unavailable");
@@ -188,7 +184,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.get("/api/v1/feed", async (request) => {
     const input = feedQuery.parse(request.query);
     const { actor, token } = await viewer(request, input.scope !== "feed");
-    limitReads(request, actor);
+    await read("feed", actor, request.ip);
     const limit = input.limit ?? 20;
     if (input.scope === "for_you") {
       let snapshot: string | null = null;
@@ -215,7 +211,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.get("/api/v1/posts/:id", async (request) => {
     const { id } = identifiers.parse(request.params);
     const { actor, token } = await viewer(request);
-    limitReads(request, actor);
+    await read("feed", actor, request.ip);
     const [post] = await repo().read(token, { p_scope: "feed", p_limit: 1, ...before(), p_id: id });
     if (!post) throw new ApiError(404, "NOT_FOUND", "Post unavailable");
     return { post };
@@ -248,7 +244,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   });
   app.get("/api/v1/recommendations/settings", async (request) => {
     const { actor, token } = await viewer(request, true);
-    limitReads(request, actor);
+    await read("feed", actor, request.ip);
     return repo().rpc<RecommendationSettings>(token, "recommendation_settings_for_client");
   });
   app.put("/api/v1/recommendations/settings", { bodyLimit: 2_048 }, async (request) => {
@@ -290,7 +286,8 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     return { allowed: await repo().rpc<boolean>(token, "feed_moderation_access") };
   });
   app.get("/api/v1/moderation/feed", async (request) => {
-    const token = await moderator(request);
+    const { token, actor } = await moderator(request);
+    await read("feed", actor, request.ip);
     const input = z.strictObject({ scope: z.enum(["reports", "hidden"]).default("reports"), target: z.enum(["posts", "comments"]).default("posts"), cursor: pageCursor }).parse(request.query);
     const rows = await repo().rpc<FeedReport[]>(token, input.target === "comments" ? "list_comment_reports_for_client" : "list_feed_reports_for_client", {
       p_scope: input.scope, ...before(input.cursor),
@@ -303,7 +300,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   });
   for (const kind of ["posts", "comments"] as const) {
     app.patch(`/api/v1/moderation/${kind}/:id`, { bodyLimit: 4_096 }, async (request, reply) => {
-      const token = await moderator(request);
+      const { token } = await moderator(request);
       const { id } = identifiers.parse(request.params);
       const input = decisionInput.parse(request.body);
       await repo().rpc(token, kind === "posts" ? "moderate_post_for_client" : "moderate_comment_for_client", {
@@ -317,7 +314,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     app.get(reaction, async (request) => {
       const { id } = identifiers.parse(request.params);
       const { actor, token } = await viewer(request);
-      limitReads(request, actor);
+      await read("feed", actor, request.ip);
       return { reactions: await repo().rpc<ReactionSummary>(token, "read_reaction_for_client", { p_id: id, p_comment: kind === "comments" }) };
     });
     app.route({
@@ -334,7 +331,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.get("/api/v1/posts/:id/comments", async (request) => {
     const { id } = identifiers.parse(request.params);
     const { actor, token } = await viewer(request);
-    limitReads(request, actor);
+    await read("feed", actor, request.ip);
     const query = z.strictObject({
       parent: z.uuid().optional(), cursor: pageCursor,
       limit: z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(25)).optional(),

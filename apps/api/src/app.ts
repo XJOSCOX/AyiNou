@@ -14,6 +14,7 @@ import { registerErrorHandling, requestIdentification } from "./services/api-err
 import { registerFeedRoutes } from "./routes/feed.js";
 import { createFeedRepository, type FeedRepository } from "./services/feed.js";
 import { createPostMediaService, type PostMediaService } from "./services/post-media.js";
+import { createReadBudget } from "./services/read-budget.js";
 
 export function createApp(config: ApiConfig, overrides?: {
   auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository; institutions?: InstitutionRepository; feed?: FeedRepository;
@@ -33,6 +34,7 @@ export function createApp(config: ApiConfig, overrides?: {
   const institutions = overrides?.institutions ?? createInstitutionRepository(config);
   const feed = overrides?.feed ?? createFeedRepository(config);
   const media = overrides?.media ?? createPostMediaService(config);
+  const readBudget = createReadBudget(config);
 
   app.register(cors, {
     origin: config.WEB_ORIGINS,
@@ -40,11 +42,11 @@ export function createApp(config: ApiConfig, overrides?: {
     exposedHeaders: ["X-Request-ID", "Retry-After"],
   });
   app.register(statusRoutes);
-  app.register((instance) => registerMemberRoutes(instance, auth, members));
+  app.register((instance) => registerMemberRoutes(instance, auth, members, readBudget));
   app.register((instance) => registerCommunityRoutes(instance, community));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions));
-  app.register((instance) => registerFeedRoutes(instance, auth, feed, media));
+  app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));
   app.addHook("onClose", async () => { await members?.close(); });
 
   return app;

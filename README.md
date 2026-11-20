@@ -54,6 +54,8 @@ Open **Discover** to find public members and institutions, manage the accounts y
 
 Posts and private drafts can include up to four still images with optional descriptions. The member navbar bell opens private notifications for reactions, comments, replies, and new followers. Account Settings lets members turn each event type on or off. [Image limits, API contracts, and hosted checks](docs/DATABASE.md#phase-3e-post-images-and-notifications)
 
+Members can block or mute another account from its profile and manage those choices in Account Settings. Members can appeal an active hide decision from **Account Settings → Moderation appeals**. The moderation workspace has a separate appeals queue. [Phase 3F behavior and maintenance](docs/DATABASE.md#phase-3f-member-safety-and-appeals)
+
 ## Key features by phase
 
 1. Registration, onboarding, profiles, language, optional geographic information

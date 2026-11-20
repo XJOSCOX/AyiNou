@@ -6,6 +6,7 @@ import es from "../messages/errors/es.json";
 import { apiErrorCode } from "./api-errors";
 import { discoveryMessages } from "./discovery-i18n";
 import { recommendationMessages } from "./recommendation-i18n";
+import { safetyMessages } from "./safety-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -20,6 +21,15 @@ const messageByCode: Readonly<Partial<Record<string, keyof typeof en>>> = {
 
 export function localizedApiError(locale: Locale, cause: unknown) {
   const code = apiErrorCode(cause);
+  const safety = safetyMessages[locale];
+  switch (code) {
+    case "SELF_SAFETY_ACTION": return safety.selfError;
+    case "APPEAL_REVIEW_CONFLICT": return safety.conflictError;
+    case "APPEAL_INELIGIBLE": return safety.ineligibleError;
+    case "APPEAL_EXISTS": return safety.existsError;
+    case "APPEAL_EXPIRED": return safety.expiredError;
+    case "SAFETY_CAP": return safety.safetyCap;
+  }
   if (code === "FOLLOW_CAP") return discoveryMessages[locale].followCap;
   if (code === "FEED_REFRESH_REQUIRED") return recommendationMessages[locale].expired;
   return errorMessages[locale][messageByCode[code] ?? "server"];

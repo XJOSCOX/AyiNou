@@ -93,12 +93,39 @@ export interface MemberNotification {
   createdAt: string;
   readAt: string | null;
   available: boolean;
-  kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | null;
+  kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "appeal_decided" | null;
+  appealId?: string | null;
   postId: string | null;
   commentId: string | null;
   actor: Omit<FeedAuthor, "avatarUrl"> | null;
 }
 export type NotificationPage = { notifications: MemberNotification[]; nextCursor: string | null };
+export const appealOutcomes = ["upheld", "overturned", "closed"] as const;
+export type AppealOutcome = (typeof appealOutcomes)[number];
+export type AppealKind = "post" | "comment";
+export type MemberSafetyEntry = { id: string; username: string | null; name: string | null; createdAt: string };
+export type MemberSafetyPage = { accounts: MemberSafetyEntry[]; nextCursor: string | null };
+export interface ModerationAppeal {
+  id: string;
+  reason: string;
+  outcome: "pending" | AppealOutcome;
+  explanation: string | null;
+  createdAt: string;
+  decidedAt: string | null;
+}
+export type MemberAppealDecision = {
+  id: string; kind: AppealKind; createdAt: string; deadline: string; eligible: boolean; appeal: ModerationAppeal | null;
+};
+export type AppealReview = ModerationAppeal & {
+  kind: AppealKind; postId: string; commentId: string | null; body: string; language: Locale;
+  originalReason: string; originalAt: string; conflict: boolean; canRestore: boolean;
+  attachments?: PostAttachment[];
+};
+export type AppealPage<T> = { decisions: T[]; nextCursor: string | null };
+export type SafetyOverview = {
+  pendingPostReports: number; pendingCommentReports: number; pendingAppeals: number;
+  restrictedAccounts: number; moderationActions30Days: number; cleanupBacklog: number;
+};
 export type CommentTarget = { id: string; body: string; language: Locale; createdAt: string };
 type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
 export type FeedComment = CommentPosition & (

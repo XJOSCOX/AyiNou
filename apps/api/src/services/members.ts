@@ -12,7 +12,7 @@ export interface MemberRepository {
   update(userId: string, token: string, input: UpdateMemberProfile): Promise<MemberProfile>;
   saveDetails?(userId: string, token: string, input: ProfileChanges): Promise<MemberProfile>;
   saveAvatar?(userId: string, bytes: Buffer): Promise<string>;
-  publicProfile?(username: string): Promise<ProfilePreview | null>;
+  publicProfile?(username: string, token?: string): Promise<ProfilePreview | null>;
   departments(): Promise<Department[]>;
   close(): Promise<void>;
 }
@@ -178,8 +178,9 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       if (!signed) throw unavailable();
       return signed;
     },
-    async publicProfile(username) {
-      const profile = await admin.rpc("find_public_profile_for_api", { p_username: username }).maybeSingle();
+    async publicProfile(username, token) {
+      const client = token ? asMember(token) : admin;
+      const profile = await client.rpc(token ? "find_member_profile_for_client" : "find_public_profile_for_api", { p_username: username }).maybeSingle();
       if (profile.error) throw unavailable();
       if (!profile.data) return null;
       const row = profile.data as { user_id: string; display_name: string; username: string; biography: string | null; avatar_asset: string | null; membership_category: ProfilePreview["membershipCategory"] };

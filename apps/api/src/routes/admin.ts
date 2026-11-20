@@ -42,6 +42,7 @@ export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifi
       }
     });
     admin.get("/api/v1/admin/overview", async (request) => repo!.rpc("admin_overview_for_api", { p_actor: request.authUserId }));
+    admin.get("/api/v1/admin/safety", async (request) => repo!.rpc("safety_overview_for_api", { p_actor: request.authUserId }));
     admin.get("/api/v1/admin/accounts", async (request) => {
       const { q, offset } = z.strictObject({
         q: z.string().trim().max(100).default(""),

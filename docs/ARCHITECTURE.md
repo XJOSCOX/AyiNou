@@ -94,6 +94,14 @@ Fastify verifies the bearer token, checks the upload budget, and decodes and re-
 
 Database triggers capture personal reactions, comments, replies, and follows in the source transaction. A recipient-scoped unique key deduplicates repeated activity. Caller-scoped RPCs re-evaluate the source and actor before projecting a minimal notification or counting it as unread. In-app clients refresh the count on navigation to the inbox and after read actions. [Endpoints, limits, and access rules](DATABASE.md#phase-3e-post-images-and-notifications)
 
+### Member safety and appeals
+
+Direction belongs to the member who creates a block. A block gates both parties’ signed-in visibility and direct interactions. PostgreSQL RLS, caller-bound reads, and pair-locked write triggers enforce the rule across profiles, feeds, media, discovery, follows, engagement and the inbox. Mutes are a separate owner-scoped filter applied before chronological pagination and during recommendation ranking and snapshot reads.
+
+Appeals reference an original post or comment hide action. A recent TOTP session, reviewer separation, and a fresh content check gate the existing audited restore transition. The safety migrations hold pending evidence, and the resolution and in-app notification commit together.
+
+Fastify applies a process-local request ceiling and a shared PostgreSQL budget to feed, media, profile, discovery and notification reads. Signed-in quotas use the verified account ID. Guest quotas use one of 4,096 keyed buckets per route category, and raw IPs are used only in process memory. Upload requests verify the session and charge the existing write quota before decoding the JSON body. Aggregate safety counts require administrator access and recent TOTP. [Quotas and retention](DATABASE.md#phase-3f-member-safety-and-appeals)
+
 ## References
 
 - [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)

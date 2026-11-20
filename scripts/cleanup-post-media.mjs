@@ -1,7 +1,15 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import dotenv from "dotenv";
 import { readConfig } from "../apps/api/src/config.ts";
 import { createPostMediaService } from "../apps/api/src/services/post-media.ts";
+
+const [mode, ...other] = process.argv.slice(2);
+assert.ok(other.length === 0 && (mode === undefined || mode === "--apply"), "Unsupported cleanup mode.");
+if (mode === undefined) {
+  const preview = spawnSync(process.execPath, ["--import", "tsx", "scripts/cleanup-safety.mjs", "post_media"], { stdio: "inherit" });
+  process.exit(preview.status ?? 1);
+}
 
 dotenv.config({ path: "apps/api/.env", quiet: true });
 const config = readConfig();

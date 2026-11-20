@@ -8,6 +8,7 @@ import { feedMessages } from "@/lib/feed-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { DisplayControls } from "./display-controls";
 import { ProfileFollowPanel } from "./discovery-accounts";
+import { MemberSafetyControls } from "./member-safety";
 import { VerifiedCheck, institutionCard, institutionLink } from "./institution-ui";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
@@ -39,6 +40,7 @@ export function MemberPublic({ profile, username, social, signedIn }: {
         {profile.biography && <p className="mt-4 max-w-prose whitespace-pre-line break-words" dir="auto">{profile.biography}</p>}
       </section>
       <ProfileFollowPanel target={{ kind: "member", key: username }} initial={social} signedIn={signedIn} />
+      {signedIn && social.canFollow && <MemberSafetyControls username={username} />}
     </main>
     <SiteFooter />
   </div>;

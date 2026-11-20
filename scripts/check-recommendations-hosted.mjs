@@ -106,12 +106,12 @@ try {
   console.log("Hosted recommendation topics, legacy posts, live sessions, snapshot ownership, feedback, reactions, and chronological feed passed.");
 } finally {
   await app.close();
-  const results = await Promise.allSettled(users.map(async ({ id, email }) => {
+  // The fixtures share follows, alerts, and posts. Serialize their cascading deletes.
+  for (const { id, email } of users) {
     const record = await admin.auth.admin.getUserById(id);
     assert.ifError(record.error);
     assert.equal(record.data.user.email, email);
     assert.ifError((await admin.auth.admin.deleteUser(id)).error);
-  }));
-  assert.ok(results.every(({ status }) => status === "fulfilled"), "Targeted recommendation account cleanup failed");
+  }
   console.log("Synthetic recommendation accounts and posts removed.");
 }

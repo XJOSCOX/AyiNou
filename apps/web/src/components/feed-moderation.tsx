@@ -8,10 +8,12 @@ import { loadModeration, moderateFeedContent } from "@/lib/feed-api";
 import { feedMessages } from "@/lib/feed-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
+import { safetyMessages } from "@/lib/safety-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { PostMediaGallery } from "./post-media";
 import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { AppealReviewQueue } from "./moderation-appeals";
 
 const tabs = ["reports", "hidden"] as const;
 const targets = ["posts", "comments"] as const;
@@ -23,6 +25,8 @@ export function FeedModeration() {
   const t = feedMessages[locale];
   const [scope, setScope] = useState<ModerationScope>("reports");
   const [target, setTarget] = useState<Target>("posts");
+  const [appeals, setAppeals] = useState(false);
+  const safety = safetyMessages[locale];
   const hidden = target === "posts" ? t.hiddenPosts : t.hiddenComments;
 
   return <MemberShell>
@@ -32,6 +36,11 @@ export function FeedModeration() {
         <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{t.moderation}</h1>
         <p className="mt-2 text-sm text-[var(--theme-body)]">{t.moderationIntro}</p>
       </header>
+      <div role="group" aria-label={t.moderation} className="flex flex-wrap gap-2">
+        <button type="button" className={choiceStyle} aria-pressed={!appeals} onClick={() => setAppeals(false)}>{t.pendingReports}</button>
+        <button type="button" className={choiceStyle} aria-pressed={appeals} onClick={() => setAppeals(true)}>{safety.review}</button>
+      </div>
+      {appeals ? <AppealReviewQueue /> : <>
       <div role="group" aria-label={t.queueContent} className="flex flex-wrap gap-2">
         {targets.map((kind) => <button key={kind} type="button" aria-pressed={kind === target}
           className={choiceStyle} onClick={() => setTarget(kind)}>{kind === "posts" ? t.postQueue : t.commentQueue}</button>)}
@@ -43,6 +52,7 @@ export function FeedModeration() {
         </button>)}
       </div>
       <Queue key={`${target}:${scope}`} scope={scope} target={target} label={scope === "reports" ? t.pendingReports : hidden} />
+      </>}
     </div>
   </MemberShell>;
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { interestCodes, locales, referralCodePattern, type ApiErrorResponse, type UpdateMemberProfile } from "@ayinou/shared";
 import type { AuthVerifier } from "../services/auth.js";
 import { MemberError, type MemberRepository } from "../services/members.js";
+import type { ReadBudget } from "../services/read-budget.js";
 
 declare module "fastify" {
   interface FastifyRequest { authUserId: string | null; authToken: string | null }
@@ -46,6 +47,7 @@ export async function registerMemberRoutes(
   app: FastifyInstance,
   auth: AuthVerifier | null,
   members: MemberRepository | null,
+  read: ReadBudget,
 ): Promise<void> {
   const accounts = members?.accounts;
   const validationAttempts = new Map<string, number>();
@@ -83,7 +85,12 @@ export async function registerMemberRoutes(
     reply.header("Cache-Control", "no-store");
     if (!input.success) return reply.code(404).send(error("NOT_FOUND", "Profile not found"));
     if (!members?.publicProfile) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Profile unavailable"));
-    const profile = await members.publicProfile(input.data.username);
+    const header = request.headers.authorization;
+    const token = /^Bearer ([^\s]+)$/.exec(header ?? "")?.[1];
+    const actor = token && auth ? await auth.verify(token) : null;
+    if (header !== undefined && (!token || !actor)) return reply.code(401).send(error("UNAUTHORIZED", "Invalid or expired session"));
+    await read("profile", actor, request.ip);
+    const profile = await members.publicProfile(input.data.username, token);
     if (!profile) return reply.code(404).send(error("NOT_FOUND", "Profile not found"));
     return { profile };
   });

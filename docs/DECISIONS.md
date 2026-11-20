@@ -79,6 +79,14 @@
 - Keep temporary uploads independent of the post until an atomic post write attaches them. Use expiring leases, file-digest idempotency, bounded storage quotas, and cleanup on demand. Discard detached assets and retain hidden assets for authorized review and possible restoration.
 - Create notifications in the source transaction. Deduplicate repeated reactions and follows with recipient-owned event keys, and use live eligibility for unread counts and visibility. Keep read state and each event preference private. The initial delivery channel is the in-app inbox.
 
+## Member safety, appeals, and operations
+
+- Store directional blocks privately and enforce a mutual authenticated boundary while either relevant relationship exists. End follows at block time. Historical discussion and notification projections check the current relationship.
+- Store explicit mutes separately from For You feedback. Mute filters personalized and chronological feed views without changing their sort order or sending an alert.
+- Accept one appeal per current hide action within 14 days. Keep original rationale reviewer-only, require recent TOTP and reviewer independence, and commit restoration and a private decision alert in the same transaction.
+- Keep pending evidence, original moderation decisions, and account and referral audits out of routine cleanup. Make manual maintenance category-specific, project-guarded and dry-run by default. Publish an approved retention and deletion policy before launch.
+- Use PostgreSQL minute buckets to share protective limits between API instances. Review guest bucket collisions, trusted proxy configuration, traffic limits and monitoring before public launch.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

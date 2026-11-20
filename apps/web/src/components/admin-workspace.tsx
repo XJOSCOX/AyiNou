@@ -11,6 +11,7 @@ import { apiErrorCode } from "@/lib/api-errors";
 import { localizedApiError } from "@/lib/error-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { SafetyOverviewPanel } from "./moderation-appeals";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
@@ -35,12 +36,12 @@ export function AdminWorkspace() {
               className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">{t[section]}</button>)}
             {access.data?.reviewer && <Link className={institutionLink} href="/verification/review">{t.reviewWorkspace}</Link>}
           </nav>
-          {tab === "overview" && <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {metrics.map((metric) => <div key={metric} className={institutionCard}>
               <dt className="text-sm text-[var(--theme-body)]">{t[metric]}</dt>
               <dd className="mt-2 text-3xl font-semibold tabular-nums">{new Intl.NumberFormat(locale).format(overview.data![metric])}</dd>
             </div>)}
-          </dl>}
+          </dl><SafetyOverviewPanel /></>}
           {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
           {tab === "audit" && <AuditFeed />}
         </>}

@@ -55,12 +55,14 @@ People can manage one institution and belong to others as members, volunteers, s
 
 ## User safety
 
-The signed-in feed lets members publish short text updates, choose an audience, and maintain private drafts. Posts display in chronological order. Members can report visible posts by others. Authorized moderators can hide, restore, remove, or close reports with a written reason. Reports remain pending until reviewed, and formal appeals remain future work.
+The signed-in feed lets members publish short updates, choose an audience, and keep private drafts. Members can report visible posts. Authorized moderators can hide, restore, remove, or close reports with a written reason. Members may appeal a current hide of their own post or comment within 14 days. An independent reviewer decides the appeal and shares a written explanation.
+
+Blocking ends personal follows between the two members and stops their signed-in direct interactions. A signed-out viewer can still access eligible public content. Muting privately filters the member’s Latest, Following, and For You feeds while preserving their follow and interaction options.
 
 Platform administrators can search a minimal account projection, investigate impersonation using public identifiers, and record account restrictions with an audit reason. Verification reviewers use a separate workspace for assigned work, public references, written decisions, and revocation. Both workspaces require recent authenticator verification. Members can manage their password and authenticator or sign out of all Supabase sessions from account settings.
 
 - Enforce anti-harassment, anti-threat and anti-impersonation rules.
-- Provide blocking/muting, accessible reporting, takedown review and appeals.
+- Maintain accessible reporting, blocking, muting, and appeals.
 - For fires, security incidents and vulnerable-person reports, avoid publishing actionable live location details by default.
 - Do not imply Ayinou replaces emergency response or emergency services.
 - Establish governance for verification disputes, misinformation appeals, and public corrections before the claim-verification module launches.

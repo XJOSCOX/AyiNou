@@ -6,14 +6,16 @@ import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
+import { safetyMessages } from "@/lib/safety-i18n";
 import { loadNotificationPreferences, loadNotifications, markNotifications, saveNotificationPreferences } from "@/lib/notification-api";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
-function notificationTarget({ available, kind, actor, postId, commentId }: MemberNotification) {
+function notificationTarget({ available, kind, actor, postId, commentId, appealId }: MemberNotification) {
   if (!available) return null;
   if (kind === "new_follower") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
+  if (kind === "appeal_decided") return appealId ? `/settings/appeals#appeal-${appealId}` : null;
   if (!postId) return null;
   return `/posts/${postId}${commentId ? `?comment=${commentId}` : ""}`;
 }
@@ -43,7 +45,9 @@ export function NotificationCenter() {
     {!!rows?.length && <ul className="grid gap-2">{rows.map((item) => {
       const target = notificationTarget(item);
       const newItem = item.available && !item.readAt && !read.has(item.id);
-      const text = item.available && item.kind ? t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone) : t.unavailable;
+      const text = !item.available || !item.kind ? t.unavailable
+        : item.kind === "appeal_decided" ? safetyMessages[locale].appeal_decided
+        : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
       return <li key={item.id} className={`${institutionCard} flex flex-wrap items-center justify-between gap-3`}>
         <div className="min-w-0"><p className={`break-words ${newItem ? "font-semibold" : ""}`}>{text}</p>
           <p className="mt-1 flex flex-wrap gap-2 text-xs text-[var(--theme-body)]">

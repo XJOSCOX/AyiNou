@@ -1,8 +1,8 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { organizationKinds, type DiscoveryCard, type FollowStatus } from "@ayinou/shared";
 import { z } from "zod";
-import { ApiError } from "../services/api-error.js";
 import { feedDatabaseError, type FeedRepository } from "../services/feed.js";
+import type { ReadBudget } from "../services/read-budget.js";
 
 const username = z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/);
 const cursor = z.string().max(52).regex(/^(?:(?:member|institution):)?[a-z0-9][a-z0-9_-]{2,39}$/).optional();
@@ -22,21 +22,8 @@ export function registerDiscoveryRoutes(
   app: FastifyInstance,
   viewer: (request: FastifyRequest, required?: boolean) => Promise<{ actor: string | null; token: string | null }>,
   repo: () => FeedRepository,
+  read: ReadBudget,
 ) {
-  let windowEnds = 0;
-  const requests = new Map<string, number>();
-
-  function checkReads(request: FastifyRequest, actor: string | null) {
-    const now = Date.now();
-    if (now >= windowEnds) { requests.clear(); windowEnds = now + 60_000; }
-    const key = actor ? "member:" + actor : "guest:" + request.ip;
-    const count = requests.get(key) ?? 0;
-    if (count >= (actor ? 60 : 30) || (!requests.has(key) && requests.size >= 10_000)) {
-      throw new ApiError(429, "RATE_LIMITED", "Wait before trying again");
-    }
-    requests.set(key, count + 1);
-  }
-
   function response(rows: DiscoveryCard[], size: number, combined: boolean) {
     const accounts = rows.slice(0, size);
     const last = accounts.at(-1);
@@ -45,14 +32,14 @@ export function registerDiscoveryRoutes(
 
   app.get("/api/v1/discover/suggestions", async (request) => {
     const { actor, token } = await viewer(request, true);
-    checkReads(request, actor);
+    await read("discovery", actor, request.ip);
     return { accounts: await repo().rpc<DiscoveryCard[]>(token, "discovery_suggestions_for_client") };
   });
 
   for (const kind of ["people", "institutions"] as const) {
     app.get("/api/v1/discover/" + kind, async (request) => {
       const { actor, token } = await viewer(request, true);
-      checkReads(request, actor);
+      await read("discovery", actor, request.ip);
       const input = (kind === "people" ? search : institutionSearch).parse(request.query);
       const size = input.limit ?? 15;
       const rows = await repo().rpc<DiscoveryCard[]>(token, "search_discovery_for_client", {
@@ -71,7 +58,7 @@ export function registerDiscoveryRoutes(
     const params = z.object({ key: target.id });
     app.get(targetPath + "/follow", async (request) => {
       const { actor, token } = await viewer(request);
-      checkReads(request, actor);
+      await read("discovery", actor, request.ip);
       const { key } = params.parse(request.params);
       return repo().rpc<FollowStatus>(token, "follow_status_for_client", { p_kind: target.kind, p_key: key });
     });
@@ -96,7 +83,7 @@ export function registerDiscoveryRoutes(
   function list(view: string, params?: z.ZodType<{ key: string }>) {
     return async (request: FastifyRequest) => {
       const { actor, token } = await viewer(request, true);
-      checkReads(request, actor);
+      await read("discovery", actor, request.ip);
       const { cursor, limit } = paging.parse(request.query);
       const size = limit ?? 15;
       const rows = await repo().rpc<DiscoveryCard[]>(token, "follow_list_for_client", {

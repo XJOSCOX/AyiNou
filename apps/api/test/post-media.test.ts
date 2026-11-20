@@ -75,6 +75,9 @@ test("image and notification endpoints enforce auth, project only accessible med
   const url = `/api/v1/posts/${post}/attachments/${image}/image`;
   const upload = { method: "POST", url: "/api/v1/me/post-media", headers, payload: { image: "ZGF0YQ==" } } as const;
   try {
+    const guestUpload = await app.inject({ method: "POST", url: upload.url, headers: { "content-type": "application/json" }, payload: "{" });
+    assert.equal(guestUpload.statusCode, 401);
+    assert.ok(!calls.includes("post_upload_budget_for_client"));
     assert.equal((await app.inject(url)).statusCode, 404);
     assert.ok(!calls.includes("download"));
     assert.equal((await app.inject({ url: `${url}?review=true`, headers })).statusCode, 403);

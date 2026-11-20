@@ -146,12 +146,17 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Add a member inbox, unread count, read controls, and four event preferences.
 - [x] Recheck live permissions for image requests, notification previews, and linked targets.
 
+## Phase 3F — Member safety and moderation appeals
+
+- [x] Block or mute an individual account with private self-service lists.
+- [x] Appeal eligible hide decisions and require an independent, recently authenticated reviewer.
+- [x] Add shared read quotas, safety counts, and bounded cleanup with evidence holds.
+
 ## Remaining Phase 3 — Social network MVP
 
 - [ ] Institution-authored posts.
 - [ ] Additional media abuse detection and operational monitoring before launch.
-- [ ] Add a formal appeals workflow and operational retention rules.
-- [ ] Blocking, muting, and shared read-rate controls for multi-instance deployment.
+- [ ] Confirm retention and account-deletion policies, staffing for independent appeals, and production quota tuning.
 - [ ] No unmoderated live broadcast or unlimited DMs at this phase.
 
 **Gate:** Feeds behave correctly at load; user permissions enforced; reports can be reviewed; moderation tested.

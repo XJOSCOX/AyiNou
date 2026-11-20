@@ -4,7 +4,7 @@
 
 ## Verified baseline and design rules
 
-Hosted migration history runs from `20261119160000_initial_schema` through `20261120111000_phase3e_notifications`. Guarded hosted checks cover profile behavior and saved languages, TOTP, institutions, affiliations, feed engagement, following, recommendations, post images, and notification permissions. Delivered confirmation and recovery mail and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120122000_phase3f_operations`. Guarded hosted checks cover profile behavior and saved languages, TOTP, institutions, affiliations, feed engagement, following, recommendations, post images, notifications, member safety, and appeals. Delivered confirmation and recovery mail and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Preserve user-generated content in its original language and label any future translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -147,6 +147,16 @@ The migration adds a nullable topic digest to legacy post submissions and a part
 
 All three tables enable RLS with direct application-role privileges revoked. Image reads use the post audience and live role and session checks. Notification writes derive the recipient in the source transaction, and recipient reads return only current activity or a generic unavailable entry. Storage keys are deterministic from the attachment ID and variant. `post_submissions.media_digest` retains the hash of the ordered image IDs and normalized alt descriptions for retries. See [retention and cleanup](DATABASE.md#phase-3e-post-images-and-notifications).
 
+### Phase 3F member safety, appeals, and request limits
+
+| Table in `feed_data` | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `member_blocks`, `member_mutes` | `actor_id uuid! FK→auth.users.id CASCADE`, `target_id uuid! FK→profiles.user_id CASCADE`, `created_at timestamptz!`; PK `(actor_id,target_id)`, CHECK distinct endpoints | Block target/actor and mute target indexes |
+| `moderation_appeals` | `id uuid PK`, `appellant_id uuid? FK→auth.users.id SET NULL`, `post_action_id uuid? UQ FK→post_moderation_actions.id RESTRICT`, `comment_action_id uuid? UQ FK→comment_moderation_actions.id RESTRICT`, `reason text!`, `created_at timestamptz!`, `outcome text!`, `reviewer_id uuid? FK→auth.users.id SET NULL`, `explanation text?`, `decided_at timestamptz?`; CHECK exactly one action and consistent outcome/date | Appellant page, pending queue, decision history, reviewer |
+| `read_limits` | `subject text!` (verified account or finite guest bucket), `category text!`, `window_started timestamptz!`, `total integer!` (bounded); PK `(subject,category)` | `(window_started)` |
+
+All four tables use RLS with no direct app-role grants. Members access their own safety lists, appeal submissions, and explanations. Review is limited to recently TOTP-authenticated moderators with conflict checks. Server-only budget and maintenance RPCs return a Boolean or bounded aggregate count. `notifications.appeal_id` is a unique optional appeal reference for system notifications. `post_attachments.retention_post_id` preserves an indexed post reference during detached-media evidence holds. [Retention and operational policy](DATABASE.md#phase-3f-member-safety-and-appeals)
+
 ## Planned schema by domain and implementation phase
 
 The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
@@ -184,8 +194,6 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `user_blocks` / 3 | `blocker_id uuid! FK→profiles.user_id`, `blocked_id uuid! FK→profiles.user_id`, `ca`; PK `(blocker_id,blocked_id)` | CHECK blocker≠blocked; IX `(blocked_id,blocker_id)` |
-| `user_mutes` / 3 | `user_id uuid! FK→profiles.user_id`, `muted_user_id uuid! FK→profiles.user_id`, `ca`; PK `(user_id,muted_user_id)` | CHECK users differ |
 | `user_sessions_audit` / conditional | `id uuid PK`, `user_id uuid? FK→auth.users.id`, `event_kind text!`, `device_class text?`, `coarse_region text?`, `occurred_at timestamptz!` | IX `(user_id,occurred_at DESC)`; no tokens/IP by default |
 | `account_deletion_requests` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `status text!`, `requested_at timestamptz!`, `processed_at timestamptz?`, `ca`, `ua` | IX `(user_id,requested_at DESC)`; partial UQ one open request/user |
 | `account_data_exports` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `status text!`, `private_object_path text?`, `expires_at timestamptz?`, `ca`, `ua` | IX `(user_id,created_at DESC)`; private signed retrieval |
@@ -277,7 +285,6 @@ Published claim summaries must pass separate safety and evidence checks. No live
 | Report targets beyond text posts / later | Extend the existing `feed_data.content_reports` with explicit target foreign keys or add separate domain tables after those resources exist. | Exactly one target and scoped permissions |
 | `moderation_cases` / 3 | `id uuid PK`, `report_id uuid? FK→content_reports.id`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `subject_user_id uuid? FK→profiles.user_id`, `state text!`, `assigned_reviewer_id uuid? FK→auth.users.id`, `opened_at timestamptz!`, `closed_at timestamptz?`, `ua` | CHECK exactly one primary subject; IX `(state,assigned_reviewer_id,opened_at)`; report may point to same subject |
 | `moderation_actions` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `actor_id uuid! FK→auth.users.id`, `action text!`, `reason text!`, `ca` | IX `(case_id,created_at)`; append-only |
-| `moderation_appeals` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `appellant_id uuid! FK→profiles.user_id`, `reason text!`, `status text!`, `adjudicator_id uuid? FK→auth.users.id`, `resolved_at timestamptz?`, `ca`, `ua` | IX `(case_id,status)`, `(appellant_id,created_at DESC)`; distinct adjudicator |
 | `user_restrictions` / 3 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `starts_at timestamptz!`, `ends_at timestamptz?`, `issuer_id uuid! FK→auth.users.id`, `case_id uuid? FK→moderation_cases.id`, `ca` | IX `(user_id,kind,ends_at)`; CHECK end>start. Scope to future content restrictions and reuse Phase 2E for whole-account restrictions. |
 | `audit_events` / future cross-domain audit | `id uuid PK`, `actor_id uuid? FK→auth.users.id`, `event_kind text!`, `subject_kind text!`, `subject_id uuid?`, `safe_metadata jsonb!`, `occurred_at timestamptz!` | IX `(occurred_at DESC)`, `(subject_kind,subject_id,occurred_at DESC)`. Extend the Phase 2E audit projection where feasible and preserve the original events. |
 | `consent_records` / before launch | `id uuid PK`, `user_id uuid! FK→auth.users.id`, `policy_version text!`, `consent_kind text!`, `granted_at timestamptz!`, `revoked_at timestamptz?`; UQ `(user_id,policy_version,consent_kind)` | IX `(user_id,granted_at DESC)`; preserve withdrawal history |
@@ -322,6 +329,14 @@ erDiagram
     auth_users |o--o{ notifications : generates
     posts |o--o{ notifications : references
     comments |o--o{ notifications : references
+    auth_users ||--o{ member_blocks : creates
+    profiles ||--o{ member_blocks : targets
+    auth_users ||--o{ member_mutes : creates
+    profiles ||--o{ member_mutes : targets
+    auth_users |o--o{ moderation_appeals : submits
+    post_moderation_actions |o--o| moderation_appeals : challenged_in
+    comment_moderation_actions |o--o| moderation_appeals : challenged_in
+    moderation_appeals |o--o| notifications : announces
     auth_users ||--o| notification_preferences : configures
     recommendation_versions ||--o{ recommendation_snapshots : ranks
     comments ||--o{ comment_reactions : receives
@@ -414,7 +429,7 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 1. **Existing through 2E.** Preserve the applied migration files. Check remote history before each future migration. Phase 2E depends on Auth, institutions, ordinary affiliations, the existing role assignments, and active personal verification for new administrator promotions. Challenge activation depends on an audited proof channel configuration and retention policy.
 2. **Common hardening** sets privacy and retention rules, extends the existing audit projection as needed, and adds `countries` and optional validated residence FK after existing values are checked. Handle user rights before public launch. Future profile changes must preserve current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
-4. **Phases 3A–3D** deliver text posts, moderation, durable quotas, comments, reactions, following, and For You. Later phases add media, blocking and muting, and formal appeals behind their authorization gates.
+4. **Phases 3A–3F** deliver text posts, moderation, durable quotas, comments, reactions, following, For You, private media and notifications, member safety lists, and appeals.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
 6. **Phase 5:** Extend the delivered institutional and review foundation with ambassador assignments and reviewed proof channels. Any evidence files depend on private media assets and retention approval. Radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
 7. **Phase 6:** Create projects after organizations, then members/milestones/needs/updates/reviews/outcomes and offers. Validate cross-table project/need ownership in trusted write workflows.

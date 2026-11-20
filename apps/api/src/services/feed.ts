@@ -26,6 +26,12 @@ export function feedDatabaseError(code: string): ApiError {
     case "PFD30": return new ApiError(409, "FEED_REFRESH_REQUIRED", "Refresh your recommendations");
     case "PMD04": return new ApiError(404, "ATTACHMENT_UNAVAILABLE", "Image unavailable");
     case "PMD12": return new ApiError(409, "MEDIA_CAP", "Image storage limit reached");
+    case "PSF01": return new ApiError(422, "SELF_SAFETY_ACTION", "Action unavailable for your own account");
+    case "PSF03": return new ApiError(403, "APPEAL_REVIEW_CONFLICT", "An independent reviewer is required");
+    case "PSF04": return new ApiError(404, "APPEAL_INELIGIBLE", "Appeal unavailable");
+    case "PSF09": return new ApiError(409, "APPEAL_EXISTS", "An appeal already exists");
+    case "PSF12": return new ApiError(409, "SAFETY_CAP", "Member safety list limit reached");
+    case "PSF14": return new ApiError(410, "APPEAL_EXPIRED", "The appeal window has ended");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");
