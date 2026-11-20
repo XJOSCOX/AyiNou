@@ -13,5 +13,12 @@
   "mfa": "Confirmez avec votre authentificateur pour continuer.",
   "duplicateReport": "Vous avez déjà signalé cet élément.",
   "timeout": "Le délai de la requête est dépassé. Vérifiez l’état actuel avant de réessayer.",
-  "server": "Cette action est temporairement indisponible. Réessayez plus tard."
+  "server": "Cette action est temporairement indisponible. Réessayez plus tard.",
+  "invalidImage": "Cette image n’a pas pu être lue en toute sécurité. Essayez un autre fichier.",
+  "unsupportedImage": "Choisissez une image JPEG, PNG ou WebP non animée.",
+  "imageProcessing": "L’image n’a pas pu être optimisée. Essayez une image plus petite.",
+  "imageStorage": "Le stockage des images est temporairement indisponible. Réessayez.",
+  "imageBusy": "Le traitement des images est occupé. Réessayez dans un instant.",
+  "imageCap": "Votre limite de stockage est atteinte. Supprimez d’anciennes pièces jointes ou attendez le nettoyage des envois inutilisés.",
+  "imageUnavailable": "Cette image est indisponible. Si l’envoi était en attente, retirez-la du brouillon, puis sélectionnez-la à nouveau."
 }

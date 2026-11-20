@@ -83,8 +83,8 @@ test("post creation validates requests, preserves source text and forwards only 
     const created = await submit(body);
     assert.equal(created.statusCode, 201);
     assert.deepEqual(created.json(), { id: first.id });
-    assert.deepEqual(calls, [{ token: "member", name: "create_post_with_topics_for_client",
-      input: { p_body: body.body, p_language: "es", p_visibility: "public", p_submission: key, p_topics: [] } }]);
+    assert.deepEqual(calls, [{ token: "member", name: "create_post_with_media_for_client",
+      input: { p_body: body.body, p_language: "es", p_visibility: "public", p_submission: key, p_topics: [], p_items: [] } }]);
   } finally {
     await app.close();
   }

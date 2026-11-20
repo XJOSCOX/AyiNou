@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { FeedAuthor, FeedPost, InterestCode, ReactionSummary } from "@ayinou/shared";
+import type { FeedAuthor, FeedPost, InterestCode, PostAttachment, ReactionSummary } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { ApiError } from "./api-error.js";
 
@@ -24,6 +24,8 @@ export function feedDatabaseError(code: string): ApiError {
     case "PFR29": return new ApiError(429, "RATE_LIMITED", "Wait before trying again");
     case "PFD12": return new ApiError(409, "FOLLOW_CAP", "The following limit has been reached");
     case "PFD30": return new ApiError(409, "FEED_REFRESH_REQUIRED", "Refresh your recommendations");
+    case "PMD04": return new ApiError(404, "ATTACHMENT_UNAVAILABLE", "Image unavailable");
+    case "PMD12": return new ApiError(409, "MEDIA_CAP", "Image storage limit reached");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");
@@ -48,7 +50,8 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
   }
 
   async function hydrate<T extends PostRow>(token: string | null, posts: T[]) {
-  const eligible = posts.filter(({ status }) => status === "published").map(({ id }) => id);
+    const eligible = posts.filter(({ status }) => status === "published").map(({ id }) => id);
+    const ids = posts.map(({ id }) => id);
     const paths = [...new Set(posts.flatMap(({ author }) => author?.avatarPath ? [author.avatarPath] : []))];
     const signed = new Map<string, string>();
     async function signAvatars() {
@@ -58,17 +61,19 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
         for (const row of data ?? []) if (row.path && row.signedUrl) signed.set(row.path, row.signedUrl);
       } catch { /* A storage outage can omit avatars without affecting posts. */ }
     }
-    const [summaries, tags] = await Promise.all([
+    const [summaries, tags, media] = await Promise.all([
       eligible.length ? rpc<Partial<Record<string, ReactionSummary>>>(token, "post_reactions_for_client", { p_ids: eligible }) : undefined,
-      posts.length ? rpc<Partial<Record<string, InterestCode[]>>>(token, "post_topics_for_client", { p_ids: posts.map(({ id }) => id) }) : undefined,
+      ids.length ? rpc<Partial<Record<string, InterestCode[]>>>(token, "post_topics_for_client", { p_ids: ids }) : undefined,
+      ids.length ? rpc<Partial<Record<string, PostAttachment[]>>>(token, "post_attachments_for_client", { p_ids: ids }) : undefined,
       signAvatars(),
     ]);
     return posts.map(({ author, ...post }) => {
       const reactions = summaries?.[post.id];
       const topics = tags?.[post.id];
-      if (!author) return { ...post, reactions, topics, author: null };
+      const attachments = media?.[post.id] ?? [];
+      if (!author) return { ...post, reactions, topics, attachments, author: null };
       const { avatarPath, ...publicAuthor } = author;
-      return { ...post, reactions, topics, author: { ...publicAuthor, avatarUrl: avatarPath ? signed.get(avatarPath) ?? null : null } };
+      return { ...post, reactions, topics, attachments, author: { ...publicAuthor, avatarUrl: avatarPath ? signed.get(avatarPath) ?? null : null } };
     });
   }
 

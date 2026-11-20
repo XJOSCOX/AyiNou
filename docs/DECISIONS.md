@@ -73,6 +73,12 @@
 - Bound topic, follow, freshness, language, and reaction weights. Use engagement only after a topic or follow match and cap repeated authors per snapshot.
 - Use private short-lived snapshots for stable pagination and apply current visibility and feedback at read time. Keep feedback controls confined to For You.
 
+## Post images and notification decisions
+
+- Use a dedicated private Storage bucket and serve sanitized WebP derivatives through Fastify. Authorize each request against current visibility, use the existing recent-TOTP boundary for moderation, and use private no-store responses.
+- Keep temporary uploads independent of the post until an atomic post write attaches them. Use expiring leases, file-digest idempotency, bounded storage quotas, and cleanup on demand. Discard detached assets and retain hidden assets for authorized review and possible restoration.
+- Create notifications in the source transaction. Deduplicate repeated reactions and follows with recipient-owned event keys, and use live eligibility for unread counts and visibility. Keep read state and each event preference private. The initial delivery channel is the in-app inbox.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

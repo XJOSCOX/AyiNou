@@ -10,6 +10,7 @@ import { useLocale } from "@/lib/locale-store";
 import { AccountMfa } from "./account-mfa";
 import { AccountSecurity } from "./account-security";
 import { MemberShell } from "./member-shell";
+import { NotificationPreferencesPanel } from "./notifications";
 
 const card = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
 const secondaryAction = "rounded-md border border-[var(--theme-button-border)] bg-[var(--theme-button)] px-3 py-2 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-button-hover)]";
@@ -78,6 +79,7 @@ export function AccountSettings() {
           <AccountSecurity />
           <AccountMfa />
         </section>
+        <NotificationPreferencesPanel />
         {failed ? (
           <div className={card}>
             <p role="alert" className="text-[var(--theme-error-text)]">{t.loadError}</p>

@@ -88,6 +88,12 @@ Discovery pages use bounded handle keysets and safe projections. The Following f
 
 The recommendation RPC ranks a bounded eligible candidate set using a versioned rules table. It stores only ordered post IDs and coarse explanation codes in a viewer-bound snapshot. Fastify paginates through that snapshot, checks a scoped cursor, and hydrates public avatars, author topics, and reaction summaries in batches. Latest and Following keep their existing chronological queries. Feed-mode choice lives in the browser and starts on Latest. Visited timelines stay mounted when switching modes so open comment drafts survive.
 
+### Post images and member notifications
+
+Fastify verifies the bearer token, checks the upload budget, and decodes and re-encodes each image before writing WebP derivatives to private Storage. PostgreSQL tracks an upload lease and atomically attaches staged images during versioned post writes. Feed responses include image IDs, dimensions, and alt text. The binary Fastify endpoint checks the current viewer and post before reading the derivative. Both web and future native clients use that endpoint with the same Supabase access token. The browser requests thumbnails near the viewport and fetches the display variant when a viewer opens.
+
+Database triggers capture personal reactions, comments, replies, and follows in the source transaction. A recipient-scoped unique key deduplicates repeated activity. Caller-scoped RPCs re-evaluate the source and actor before projecting a minimal notification or counting it as unread. In-app clients refresh the count on navigation to the inbox and after read actions. [Endpoints, limits, and access rules](DATABASE.md#phase-3e-post-images-and-notifications)
+
 ## References
 
 - [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)

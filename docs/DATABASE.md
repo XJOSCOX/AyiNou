@@ -264,7 +264,34 @@ Snapshots store up to 80 ordered IDs and explanation codes for ten minutes, with
 
 Limits are ten snapshot builds and 20 preference or feedback writes per account per minute, plus the existing per-instance Fastify read limit. The rollback-only benchmark uses 1,200 synthetic posts by 150 authors with 7,200 reactions and sets a six-second budget for one personalized page. This guards the bounded query on hosted Supabase Free. Concurrent production throughput, longer windows, and behavior beyond the fixed candidate cap need separate measurement.
 
+## Phase 3E post images and notifications
+
+`20261120110000_phase3e_post_media.sql` adds `feed_data.post_attachments`, post submission media digests, and the private `post-media` bucket. `20261120111000_phase3e_notifications.sql` adds `notifications` and `notification_preferences` in `feed_data`. The tables have RLS enabled and no direct anonymous, authenticated, or service-role table grants. Clients use narrowly granted RPCs. Storage policies deny direct app-role access to this bucket, including for the uploader.
+
+| Fastify endpoint | Contract |
+| --- | --- |
+| `POST /api/v1/me/post-media` | Stage a still JPEG, PNG, or WebP as JSON `{ image: base64 }`. Supply a UUID in `Idempotency-Key`. Returns `{ id }`. Identical retries reuse the stage. |
+| `POST /api/v1/posts` | Optional ordered `attachments: [{ id, alt? }]` attaches ready uploads atomically with the post, including drafts. Post idempotency covers text, audience, language, topics, and the ordered attachments. |
+| `PATCH /api/v1/posts/:id` | With the existing `version`, an explicit attachment list replaces and reorders the post’s images or detaches all with `[]`. Omission preserves attachments. |
+| `GET /api/v1/posts/:id/attachments/:attachmentId/image` | WebP bytes. `variant=thumbnail` is the default. Use `variant=display` for the larger image. `review=true` requires a live moderation role and recent TOTP. |
+| `GET /api/v1/posts/:id/comments/:commentId` | Viewer-scoped comment detail for links. Inaccessible targets return 404. |
+| `GET /api/v1/me/notifications` | Latest-first inbox with optional `cursor` and `limit` (default 20, max 30). |
+| `GET /api/v1/me/notifications/unread-count` | `{ count }` for currently visible unread events. |
+| `PATCH /api/v1/me/notifications/:id` | Set `{ read: true }` on a notification owned by the caller. |
+| `POST /api/v1/me/notifications/read-all` | Mark all current retained inbox entries as read. |
+| `GET/PUT /api/v1/me/notification-preferences` | Read or replace the caller’s `reactions`, `comments`, `replies`, and `followers` booleans. All four default to true. |
+
+Sharp checks the decoded format and geometry. The input ceiling is 3 MiB, 12 million pixels, 6,000 pixels on either axis, and one still frame. The service applies orientation, strips metadata including GPS, and never stores the original. Display images are at most 1,440 px and 512 KiB, and thumbnails are at most 480 px and 128 KiB. The server processes at most two uploads concurrently per Fastify instance. Each member may attempt eight uploads per minute and hold up to 16 unattached stages and 12 MiB of derivatives. The existing post edit rate and optimistic version checks cover attachment changes. Alt text is optional and limited to 240 characters.
+
+Feed and detail responses include attachment UUIDs, dimensions, and descriptions. They omit object paths. The binary route rechecks current post visibility for each request, allows own drafts and eligible members-only posts, and returns `Cache-Control: private, no-store`. Signed links and URL expiry are unnecessary with this proxy. Any bytes already received by a viewer are beyond server revocation. The moderation view can read hidden images through the existing recent-TOTP boundary. Deleted or permanently removed posts hide and discard their attachments.
+
+Unattached uploads expire after 24 hours. Failed uploads keep a retryable reservation, and two-minute leases prevent overlapping writes or cleanup. Upload, detach, and deletion requests can trigger a bounded cleanup batch. An operator can also set `AYINOU_MEDIA_PROJECT_REF=hcbxulyfmdmuyccgrujs` and run `npm run db:cleanup:post-media` with the API env configured. The runner only claims expired, discarded, or orphaned attachments and removes their exact object keys. Run it periodically if usage is low. A cleanup failure retains state for a later retry.
+
+The inbox uses transactional capture and unique recipient/event keys for post reactions, post comments, comment replies, and new personal followers. Self-actions generate no alert. Reaction changes or repeat follows reuse the existing event during retention. Preferences apply to future activity. An unavailable post, comment, actor, or follow edge removes details from the response and excludes the item from the unread count. Notification reads and writes are recipient-scoped. Read-state and preference writes are limited to 40 per member per minute. The inbox displays 30 days, and new unique events reclaim expired records in bounded batches. Physical expiry depends on activity. Email, SMS, native push, and institution-authored notifications are separate phases.
+
 ## Testing and optional local stack
+
+Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs`. Run `npm run test:hosted:media:sql` to validate storage and inbox permissions, lifecycle, and stale targets using a rollback-only SQL transaction. Add `-- --preflight` before applying both Phase 3E migrations. Run `npm run test:hosted:media` to check the API and private Storage with synthetic accounts and known test object keys.
 
 Use `npm run test:hosted:recommendations:sql` for rollback-only security, ranking, cursor, and performance checks. Use `-- --preflight` before all Phase 3D migrations, `-- --engagement-preflight` before the guard and optimization, or `-- --ranking-preflight` before the optimization alone. Run `npm run test:hosted:recommendations` for live synthetic-account API checks.
 

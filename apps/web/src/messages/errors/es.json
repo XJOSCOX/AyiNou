@@ -13,5 +13,12 @@
   "mfa": "Confirma con tu autenticador para continuar.",
   "duplicateReport": "Ya denunciaste este contenido.",
   "timeout": "La solicitud tardó demasiado. Comprueba el estado actual antes de volver a intentarlo.",
-  "server": "Esta acción no está disponible por el momento. Inténtalo más tarde."
+  "server": "Esta acción no está disponible por el momento. Inténtalo más tarde.",
+  "invalidImage": "No se pudo leer esta imagen de forma segura. Prueba con otro archivo.",
+  "unsupportedImage": "Elige una imagen JPEG, PNG o WebP sin animación.",
+  "imageProcessing": "No se pudo optimizar la imagen. Prueba con una imagen más pequeña.",
+  "imageStorage": "El almacenamiento de imágenes no está disponible temporalmente. Vuelve a intentarlo.",
+  "imageBusy": "El procesamiento de imágenes está ocupado. Vuelve a intentarlo en unos instantes.",
+  "imageCap": "Alcanzaste tu límite de almacenamiento. Borra archivos antiguos o espera a que se limpien las subidas sin usar.",
+  "imageUnavailable": "Esta imagen no está disponible. Si la subida estaba pendiente, quítala del borrador y selecciónala de nuevo."
 }

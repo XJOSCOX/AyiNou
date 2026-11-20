@@ -13,6 +13,7 @@ import { DisplayControls } from "./display-controls";
 import { InstitutionSwitcher } from "./institution-switcher";
 import { VerifiedCheck } from "./institution-ui";
 import { SiteBrand } from "./site-brand";
+import { NotificationBell } from "./notification-bell";
 
 export function MemberNavbar() {
   const [locale] = useLocale();
@@ -37,7 +38,7 @@ export function MemberNavbar() {
 
   return (
     <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:px-6 xl:px-10">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:gap-x-3 sm:px-6 xl:px-10">
         <div className="justify-self-start"><SiteBrand href="/dashboard" /></div>
         <details className="relative min-w-0 max-w-full justify-self-end" onKeyDown={(event) => {
           if (event.key === "Escape" && event.currentTarget.open) {
@@ -64,7 +65,8 @@ export function MemberNavbar() {
             {logoutFailed && <p role="alert" className="px-3 text-xs text-[var(--theme-error-text)]">{authMessages[locale].loadError}</p>}
           </div>
         </details>
-        <div className="col-span-2 flex min-w-0 items-center justify-between gap-2 border-t border-[var(--theme-border)] pt-2 sm:col-span-1 sm:border-t-0 sm:pt-0">
+        <NotificationBell />
+        <div className="col-span-3 flex min-w-0 items-center justify-between gap-2 border-t border-[var(--theme-border)] pt-2 sm:col-span-1 sm:border-t-0 sm:pt-0">
           <InstitutionSwitcher />
           <DisplayControls />
         </div>

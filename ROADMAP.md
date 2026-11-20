@@ -140,10 +140,16 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Keep Latest and Following chronological and preserve My Posts and Drafts.
 - [x] Apply privacy and moderation eligibility before ranking and again during snapshot pagination.
 
+## Phase 3E — Post images and in-app notifications
+
+- [x] Add private post images, bounded WebP derivatives, previews, alt text, reordering, and guarded cleanup.
+- [x] Add a member inbox, unread count, read controls, and four event preferences.
+- [x] Recheck live permissions for image requests, notification previews, and linked targets.
+
 ## Remaining Phase 3 — Social network MVP
 
-- [ ] Basic notifications and institution-authored posts.
-- [ ] Optional image attachments with storage rules, upload limits and security scanning where feasible.
+- [ ] Institution-authored posts.
+- [ ] Additional media abuse detection and operational monitoring before launch.
 - [ ] Add a formal appeals workflow and operational retention rules.
 - [ ] Blocking, muting, and shared read-rate controls for multi-instance deployment.
 - [ ] No unmoderated live broadcast or unlimited DMs at this phase.

@@ -14,6 +14,8 @@ const messageByCode: Readonly<Partial<Record<string, keyof typeof en>>> = {
   BAD_REQUEST: "validation", INVALID_INPUT: "validation", INVALID_PROFILE: "validation",
   INVALID_CONTENT: "content", CONFLICT: "conflict", PAYLOAD_TOO_LARGE: "tooLarge", RATE_LIMITED: "rate",
   LIMIT_REACHED: "rate", MFA_REQUIRED: "mfa", DUPLICATE_REPORT: "duplicateReport",
+  INVALID_IMAGE: "invalidImage", UNSUPPORTED_IMAGE: "unsupportedImage", IMAGE_PROCESSING: "imageProcessing",
+  STORAGE_UNAVAILABLE: "imageStorage", IMAGE_BUSY: "imageBusy", MEDIA_CAP: "imageCap", ATTACHMENT_UNAVAILABLE: "imageUnavailable",
 };
 
 export function localizedApiError(locale: Locale, cause: unknown) {

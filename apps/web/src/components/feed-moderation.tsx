@@ -9,6 +9,7 @@ import { feedMessages } from "@/lib/feed-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
+import { PostMediaGallery } from "./post-media";
 import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
@@ -108,6 +109,7 @@ function ReviewItem({ item, refresh }: { item: FeedReport; refresh: () => void }
     </header>
     {item.note && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[var(--theme-body)]">{item.note}</p>}
     <p lang={item.language} dir="auto" className="mt-3 whitespace-pre-wrap break-words rounded-md bg-[var(--theme-control)] p-3 text-sm">{item.body}</p>
+    {item.attachments && !completed && <PostMediaGallery post={item.postId} attachments={item.attachments} review />}
     {item.deleted && <p className="mt-2 text-sm font-semibold">{t.authorDeleted}</p>}
     {item.status === "removed" && <p className="mt-2 text-sm font-semibold">{t.removed}</p>}
     {item.lastAction && <div className="mt-3 border-t border-[var(--theme-border)] pt-3 text-sm">

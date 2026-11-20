@@ -13,9 +13,11 @@ import { registerAdminRoutes } from "./routes/admin.js";
 import { registerErrorHandling, requestIdentification } from "./services/api-error.js";
 import { registerFeedRoutes } from "./routes/feed.js";
 import { createFeedRepository, type FeedRepository } from "./services/feed.js";
+import { createPostMediaService, type PostMediaService } from "./services/post-media.js";
 
 export function createApp(config: ApiConfig, overrides?: {
   auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository; institutions?: InstitutionRepository; feed?: FeedRepository;
+  media?: PostMediaService;
 }) {
   const app = Fastify({
     ...requestIdentification(),
@@ -30,6 +32,7 @@ export function createApp(config: ApiConfig, overrides?: {
   const community = overrides?.community ?? createCommunityRepository(config);
   const institutions = overrides?.institutions ?? createInstitutionRepository(config);
   const feed = overrides?.feed ?? createFeedRepository(config);
+  const media = overrides?.media ?? createPostMediaService(config);
 
   app.register(cors, {
     origin: config.WEB_ORIGINS,
@@ -41,7 +44,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerCommunityRoutes(instance, community));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions));
-  app.register((instance) => registerFeedRoutes(instance, auth, feed));
+  app.register((instance) => registerFeedRoutes(instance, auth, feed, media));
   app.addHook("onClose", async () => { await members?.close(); });
 
   return app;

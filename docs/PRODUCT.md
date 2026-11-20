@@ -30,6 +30,8 @@ Discover connects members to public people and institutions. Following is volunt
 
 For You is optional. Members can choose topics, see why a post appeared, hide recommendations, and reset their feedback. Latest and Following remain chronological. Verification badges show account verification status, and account popularity carries limited weight in recommendations.
 
+Members can attach and reorder up to four still images on a post or draft and write optional descriptions. Post images follow the audience and moderation state of the post. The member inbox covers reactions to posts, comments, replies, and new personal followers. Members can mark alerts read and choose which events generate future alerts in Account Settings. Unavailable activity displays a generic notice.
+
 ## Dashboard terminology
 
 - `Registered members`: non-deleted user accounts, excluding known spam/test accounts in production metrics.

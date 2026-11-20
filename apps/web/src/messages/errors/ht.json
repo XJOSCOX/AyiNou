@@ -13,5 +13,12 @@
   "mfa": "Konfime ak aplikasyon otantifikasyon ou pou kontinye.",
   "duplicateReport": "Ou deja siyale kontni sa a.",
   "timeout": "Demann lan pran twòp tan. Tcheke dènye eta a anvan ou eseye ankò.",
-  "server": "Aksyon sa a pa disponib pou kounye a. Eseye ankò pita."
+  "server": "Aksyon sa a pa disponib pou kounye a. Eseye ankò pita.",
+  "invalidImage": "Nou pa t ka li imaj sa a san danje. Eseye yon lòt fichye.",
+  "unsupportedImage": "Chwazi yon imaj JPEG, PNG oswa WebP ki pa anime.",
+  "imageProcessing": "Nou pa t ka optimize imaj sa a. Eseye yon imaj ki pi piti.",
+  "imageStorage": "Depo imaj yo pa disponib pou kounye a. Eseye ankò.",
+  "imageBusy": "Sistèm nan okipe ak lòt imaj. Eseye ankò talè.",
+  "imageCap": "Ou rive nan limit depo imaj ou. Retire ansyen imaj oswa tann imaj ou pa itilize yo efase.",
+  "imageUnavailable": "Imaj sa a pa disponib. Si li te sou lis pou telechaje, retire l nan bouyon an epi chwazi l ankò."
 }

@@ -2,12 +2,14 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import {
   commentBodyLimit, interestCodes, locales, moderationActions, postBodyLimit, postVisibilities, reactionKinds,
   recommendationActions, reportCategories, type FeedComment, type FeedReport, type ReactionSummary, type RecommendationSettings,
+  type PostAttachment, type MemberNotification, type NotificationPreferences, type CommentTarget,
 } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
 import { feedDatabaseError, type FeedRepository } from "../services/feed.js";
 import { registerDiscoveryRoutes } from "./discovery.js";
+import type { PostMediaService } from "../services/post-media.js";
 
 const cursorShape = z.strictObject({ createdAt: z.iso.datetime({ offset: true }), id: z.uuid() });
 const pageCursor = z.string().max(250).regex(/^[A-Za-z0-9_-]+$/).optional();
@@ -19,7 +21,12 @@ const identifiers = z.object({ id: z.uuid() });
 const version = z.number().int().min(1).max(2_147_483_647);
 const postFields = z.strictObject({ body: z.string(), language: z.enum(locales), visibility: z.enum(postVisibilities) });
 const topics = z.array(z.enum(interestCodes)).refine((codes) => new Set(codes).size === codes.length);
-const postInput = postFields.extend({ topics: z.array(z.enum(interestCodes)).max(3).pipe(topics).optional() });
+const attachments = z.array(z.strictObject({
+  id: z.uuid(),
+  alt: z.string().trim().max(240).refine((value) => !/\p{Cc}/u.test(value)).nullish(),
+})).max(4).refine((items) => new Set(items.map(({ id }) => id.toLowerCase())).size === items.length);
+const postInput = postFields.extend({ topics: z.array(z.enum(interestCodes)).max(3).pipe(topics).optional(), attachments: attachments.optional() });
+const preferenceInput = z.strictObject({ reactions: z.boolean(), comments: z.boolean(), replies: z.boolean(), followers: z.boolean() });
 const postEdit = postInput.extend({ version });
 const commentFields = postFields.omit({ visibility: true });
 const commentEdit = commentFields.extend({ version });
@@ -49,7 +56,7 @@ function content(body: string, limit: number) {
   }
 }
 
-export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifier | null, repository: FeedRepository | null) {
+export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifier | null, repository: FeedRepository | null, media: PostMediaService | null) {
   const readCounts = new Map<string, number>();
   let windowEnds = 0;
 
@@ -68,15 +75,25 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     return { actor, token };
   }
 
-  function limitReads(request: FastifyRequest, actor: string | null) {
+  function limitReads(request: FastifyRequest, actor: string | null, images = false) {
     const now = Date.now();
     if (now >= windowEnds) { readCounts.clear(); windowEnds = now + 60_000; }
-    const key = actor ? `member:${actor}` : `anonymous:${request.ip}`;
+    const key = `${images ? "images:" : ""}${actor ? `member:${actor}` : `anonymous:${request.ip}`}`;
     const count = readCounts.get(key) ?? 0;
-    if (count >= (actor ? 120 : 90) || (!readCounts.has(key) && readCounts.size >= 10_000)) {
+    const limit = images ? (actor ? 240 : 120) : (actor ? 120 : 90);
+    if (count >= limit || (!readCounts.has(key) && readCounts.size >= 10_000)) {
       throw new ApiError(429, "RATE_LIMITED", "Wait before trying again");
     }
     readCounts.set(key, count + 1);
+  }
+
+  function storage() {
+    if (!media) throw new ApiError(503, "STORAGE_UNAVAILABLE", "Image storage is temporarily unavailable");
+    return media;
+  }
+
+  function cleanMedia(request: FastifyRequest) {
+    void media?.cleanup().catch(() => request.log.warn("Post media cleanup deferred"));
   }
 
   async function moderator(request: FastifyRequest) {
@@ -98,6 +115,76 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
 
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
   registerDiscoveryRoutes(app, viewer, repo);
+  app.post("/api/v1/me/post-media", { bodyLimit: 4_200_000 }, async (request, reply) => {
+    const { actor, token } = await viewer(request, true);
+    const service = storage();
+    const id = z.uuid().parse(request.headers["idempotency-key"]).toLowerCase();
+    const { image } = z.strictObject({ image: z.base64().min(4).max(4_194_304) }).parse(request.body);
+    await repo().rpc(token, "post_upload_budget_for_client");
+    await service.cleanup().catch(() => request.log.warn("Post media cleanup deferred"));
+    await service.upload(actor!, id, Buffer.from(image, "base64"));
+    return reply.code(201).send({ id });
+  });
+  app.get("/api/v1/posts/:id/attachments/:attachmentId/image", async (request, reply) => {
+    const { id, attachmentId } = identifiers.extend({ attachmentId: z.uuid() }).parse(request.params);
+    const query = z.strictObject({ variant: z.enum(["thumbnail", "display"]).default("thumbnail"), review: z.literal("true").optional() }).parse(request.query);
+    const { actor, token } = await viewer(request, Boolean(query.review));
+    limitReads(request, actor, true);
+    if (query.review) await moderator(request);
+    if (!await repo().rpc<boolean>(token, "can_download_post_media_for_client", {
+      p_post: id, p_id: attachmentId, p_review: Boolean(query.review),
+    })) throw new ApiError(404, "ATTACHMENT_UNAVAILABLE", "Image unavailable");
+    const bytes = await storage().download(attachmentId.toLowerCase(), query.variant);
+    return reply.type("image/webp").header("X-Content-Type-Options", "nosniff").send(bytes);
+  });
+  app.get("/api/v1/me/notifications", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    limitReads(request, actor);
+    const { cursor, limit } = z.strictObject({
+      cursor: pageCursor,
+      limit: z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(30)).optional(),
+    }).parse(request.query);
+    const rows = await repo().rpc<MemberNotification[]>(token, "notifications_for_client", { p_limit: limit ?? 20, ...before(cursor) });
+    const { page, nextCursor } = paginate(rows, limit ?? 20);
+    return { notifications: page, nextCursor };
+  });
+  app.get("/api/v1/me/notifications/unread-count", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    limitReads(request, actor);
+    return { count: await repo().rpc<number>(token, "notification_count_for_client") };
+  });
+  app.patch("/api/v1/me/notifications/:id", { bodyLimit: 1024 }, async (request, reply) => {
+    const { token } = await viewer(request, true);
+    const { id } = identifiers.parse(request.params);
+    z.strictObject({ read: z.literal(true) }).parse(request.body);
+    await repo().rpc(token, "mark_notifications_for_client", { p_id: id });
+    return reply.code(204).send();
+  });
+  app.post("/api/v1/me/notifications/read-all", { bodyLimit: 1024 }, async (request, reply) => {
+    const { token } = await viewer(request, true);
+    await repo().rpc(token, "mark_notifications_for_client", { p_id: null });
+    return reply.code(204).send();
+  });
+  app.get("/api/v1/me/notification-preferences", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    limitReads(request, actor);
+    return repo().rpc<NotificationPreferences>(token, "notification_preferences_for_client");
+  });
+  app.put("/api/v1/me/notification-preferences", { bodyLimit: 1024 }, async (request) => {
+    const { token } = await viewer(request, true);
+    const { reactions, comments, replies, followers } = preferenceInput.parse(request.body);
+    return repo().rpc<NotificationPreferences>(token, "save_notification_preferences_for_client", {
+      p_reactions: reactions, p_comments: comments, p_replies: replies, p_followers: followers,
+    });
+  });
+  app.get("/api/v1/posts/:id/comments/:commentId", async (request) => {
+    const { actor, token } = await viewer(request);
+    limitReads(request, actor);
+    const { id, commentId } = identifiers.extend({ commentId: z.uuid() }).parse(request.params);
+    const comment = await repo().rpc<CommentTarget | null>(token, "post_comment_target_for_client", { p_post: id, p_comment: commentId });
+    if (!comment) throw new ApiError(404, "NOT_FOUND", "Comment unavailable");
+    return { comment };
+  });
   app.get("/api/v1/feed", async (request) => {
     const input = feedQuery.parse(request.query);
     const { actor, token } = await viewer(request, input.scope !== "feed");
@@ -138,9 +225,9 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     const key = z.uuid().parse(request.headers["idempotency-key"]);
     const input = postInput.parse(request.body);
     content(input.body, postBodyLimit);
-    const id = await repo().rpc<string>(token, "create_post_with_topics_for_client", {
+    const id = await repo().rpc<string>(token, "create_post_with_media_for_client", {
       p_body: input.body, p_language: input.language, p_visibility: input.visibility, p_submission: key,
-      p_topics: input.topics ?? [],
+      p_topics: input.topics ?? [], p_items: input.attachments ?? [],
     });
     return reply.code(201).send({ id });
   });
@@ -149,8 +236,12 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     const { id } = identifiers.parse(request.params);
     const input = postEdit.parse(request.body);
     content(input.body, postBodyLimit);
-    await repo().rpc(token, input.topics ? "edit_post_with_topics_for_client" : "mutate_post_for_client", {
-      p_id: id, p_version: input.version, p_body: input.body, p_language: input.language, p_visibility: input.visibility,
+    const fields = { p_id: id, p_version: input.version, p_body: input.body, p_language: input.language, p_visibility: input.visibility };
+    if (input.attachments) {
+      await repo().rpc(token, "edit_post_with_media_for_client", { ...fields, p_topics: input.topics ?? null, p_items: input.attachments });
+      cleanMedia(request);
+    } else await repo().rpc(token, input.topics ? "edit_post_with_topics_for_client" : "mutate_post_for_client", {
+      ...fields,
       ...(input.topics ? { p_topics: input.topics } : { p_delete: false }),
     });
     return reply.code(204).send();
@@ -183,6 +274,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     await repo().rpc(token, "mutate_post_for_client", {
       p_id: id, p_version: input.version, p_delete: true, p_body: null, p_language: null, p_visibility: null,
     });
+    cleanMedia(request);
     return reply.code(204).send();
   });
   app.post("/api/v1/posts/:id/reports", { bodyLimit: 4_096 }, async (request, reply) => {
@@ -204,7 +296,10 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
       p_scope: input.scope, ...before(input.cursor),
     });
     const { page, nextCursor } = paginate(rows, 25);
-    return { reports: page, nextCursor };
+    const mediaIds = [...new Set(page.filter((report) => !report.deleted).map((report) => report.postId))];
+    const attachments = input.target === "posts" && mediaIds.length
+      ? await repo().rpc<Record<string, PostAttachment[]>>(token, "post_attachments_for_client", { p_ids: mediaIds, p_review: true }) : {};
+    return { reports: page.map((report) => ({ ...report, attachments: attachments[report.postId] ?? [] })), nextCursor };
   });
   for (const kind of ["posts", "comments"] as const) {
     app.patch(`/api/v1/moderation/${kind}/:id`, { bodyLimit: 4_096 }, async (request, reply) => {
@@ -214,6 +309,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
       await repo().rpc(token, kind === "posts" ? "moderate_post_for_client" : "moderate_comment_for_client", {
         p_id: id, p_version: input.version, p_action: input.action, p_reason: input.reason,
       });
+      if (kind === "posts" && input.action === "remove") cleanMedia(request);
       return reply.code(204).send();
     });
 

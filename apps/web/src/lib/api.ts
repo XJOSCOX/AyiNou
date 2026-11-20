@@ -1,6 +1,6 @@
 import type { CommunityStats, Department, MemberProfile, ProfileChanges, ReferralSummary, StatusResponse } from "@ayinou/shared";
 import { browserSupabase } from "./supabase/browser";
-import { ApiRequestError, requestJson } from "./api-errors";
+import { ApiRequestError, requestJson, requestResponse } from "./api-errors";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
 
@@ -19,13 +19,25 @@ export async function fetchApiStatus(signal?: AbortSignal): Promise<StatusRespon
   return data as StatusResponse;
 }
 
-export async function authorizedRequest(path: string, init?: RequestInit) {
+async function sessionHeaders(init?: RequestInit) {
   const { data, error } = await browserSupabase().auth.getSession();
   const token = data.session?.access_token;
   if (error || !token) throw new ApiRequestError("UNAUTHORIZED", 401);
   const headers = new Headers(init?.headers);
   headers.set("Authorization", `Bearer ${token}`);
-  return publicRequest(path, { ...init, headers });
+  return headers;
+}
+
+export async function authorizedRequest(path: string, init?: RequestInit) {
+  return publicRequest(path, { ...init, headers: await sessionHeaders(init) });
+}
+
+export async function authorizedImage(path: string, signal: AbortSignal) {
+  const headers = await sessionHeaders();
+  headers.set("Accept", "image/webp");
+  const response = await requestResponse(`${apiBaseUrl}${path}`, { headers, signal });
+  if (!response.headers.get("Content-Type")?.startsWith("image/webp")) throw new ApiRequestError("IMAGE_PROCESSING", 502);
+  return response.blob();
 }
 
 export function publicRequest(path: string, init?: RequestInit) {

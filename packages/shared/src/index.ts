@@ -40,7 +40,11 @@ export type RecommendationReason = (typeof recommendationReasons)[number];
 export const recommendationActions = ["not_interested", "less_author", "hide_author"] as const;
 export type RecommendationAction = (typeof recommendationActions)[number];
 export type RecommendationSettings = { topics: InterestCode[]; feedbackCount: number };
-export type PostInput = { body: string; language: Locale; visibility: PostVisibility; topics?: InterestCode[] };
+export type AttachmentInput = { id: string; alt?: string | null };
+export type PostAttachment = { id: string; alt: string | null; width: number; height: number };
+export type PostInput = {
+  body: string; language: Locale; visibility: PostVisibility; topics?: InterestCode[]; attachments?: AttachmentInput[];
+};
 export interface FeedAuthor {
   displayName: string;
   username: string | null;
@@ -48,6 +52,7 @@ export interface FeedAuthor {
   verified: boolean;
 }
 export interface FeedPost extends PostInput {
+  attachments?: PostAttachment[];
   id: string;
   status: PostStatus;
   createdAt: string;
@@ -65,6 +70,7 @@ export interface FeedPage {
   algorithmVersion?: string;
 }
 export interface FeedReport {
+  attachments?: PostAttachment[];
   id: string;
   postId: string;
   commentId?: string;
@@ -80,6 +86,20 @@ export interface FeedReport {
   lastAction: { action: ModerationAction; reason: string; createdAt: string } | null;
 }
 export type CommentInput = Pick<PostInput, "body" | "language">;
+export const notificationPreferenceKeys = ["reactions", "comments", "replies", "followers"] as const;
+export type NotificationPreferences = Record<(typeof notificationPreferenceKeys)[number], boolean>;
+export interface MemberNotification {
+  id: string;
+  createdAt: string;
+  readAt: string | null;
+  available: boolean;
+  kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | null;
+  postId: string | null;
+  commentId: string | null;
+  actor: Omit<FeedAuthor, "avatarUrl"> | null;
+}
+export type NotificationPage = { notifications: MemberNotification[]; nextCursor: string | null };
+export type CommentTarget = { id: string; body: string; language: Locale; createdAt: string };
 type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
 export type FeedComment = CommentPosition & (
   { available: true; body: string; language: Locale; editedAt: string | null; version: number;

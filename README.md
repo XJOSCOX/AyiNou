@@ -52,6 +52,8 @@ Open **Discover** to find public members and institutions, manage the accounts y
 
 **For You** is an optional feed tab. It ranks eligible posts using selected topics, follows, language, and freshness, with a small reaction score for posts already relevant through topics or follows. Members can see why a post appeared, change their topics, or hide posts and accounts from recommendations. [Ranking and controls](docs/DATABASE.md#phase-3d-for-you-recommendations)
 
+Posts and private drafts can include up to four still images with optional descriptions. The member navbar bell opens private notifications for reactions, comments, replies, and new followers. Account Settings lets members turn each event type on or off. [Image limits, API contracts, and hosted checks](docs/DATABASE.md#phase-3e-post-images-and-notifications)
+
 ## Key features by phase
 
 1. Registration, onboarding, profiles, language, optional geographic information

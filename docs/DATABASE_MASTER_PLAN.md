@@ -4,7 +4,7 @@
 
 ## Verified baseline and design rules
 
-Hosted migration history runs from `20261119160000_initial_schema` through `20261120102000_optimize_recommendation_rank`. Guarded hosted checks cover profile behavior and saved languages, TOTP, institutions, affiliations, feed engagement, following, and recommendations. Delivered confirmation and recovery mail and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120111000_phase3e_notifications`. Guarded hosted checks cover profile behavior and saved languages, TOTP, institutions, affiliations, feed engagement, following, recommendations, post images, and notification permissions. Delivered confirmation and recovery mail and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Preserve user-generated content in its original language and label any future translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -137,6 +137,16 @@ Both tables use RLS without direct application grants. Queries apply current vis
 
 The migration adds a nullable topic digest to legacy post submissions and a partial publication-time index for candidate retrieval. These four tables enable RLS with zero direct app-role privileges. Feedback is caller-owned and clearable. Only current eligible posts from a live viewer’s valid snapshot are projected. Expired snapshots are reclaimed during subsequent snapshot creation.
 
+### Phase 3E post images and notification inbox
+
+| Table in `feed_data` | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `post_attachments` | `id uuid PK` (upload idempotency key), `author_id uuid? FK→auth.users.id SET NULL`, `post_id uuid? FK→posts.id SET NULL`, `position smallint?` (1–4), `state text!` (uploading, ready, attached, discarded), `width integer!`, `height integer!` (1–1440 each), `thumbnail_bytes integer!`, `display_bytes integer!` (bounded by variant), `digest bytea!` (32 bytes), `alt text?` (≤240 characters), `lease uuid?`, `upload_until timestamptz?`, `created_at timestamptz!`, `expires_at timestamptz!` (24 hours); deferrable UQ `(post_id,position)` | `(author_id)`, `(state,expires_at,id)` |
+| `notifications` | `id uuid PK`, `recipient_id uuid! FK→auth.users.id CASCADE`, `actor_id uuid? FK→auth.users.id SET NULL`, `kind text!`, `post_id uuid? FK→posts.id SET NULL`, `comment_id uuid? FK→comments.id SET NULL`, `dedupe text!`, `created_at timestamptz!`, `read_at timestamptz?`; UQ `(recipient_id,dedupe)` | `(recipient_id,created_at DESC,id DESC)`, unread partial `(recipient_id,created_at)`, `(created_at,id)`, `(actor_id)`, `(post_id)`, `(comment_id)` |
+| `notification_preferences` | `user_id uuid PK FK→auth.users.id CASCADE`, `reactions boolean!`, `comments boolean!`, `replies boolean!`, `followers boolean!` (all default true), `updated_at timestamptz!` | PK |
+
+All three tables enable RLS with direct application-role privileges revoked. Image reads use the post audience and live role and session checks. Notification writes derive the recipient in the source transaction, and recipient reads return only current activity or a generic unavailable entry. Storage keys are deterministic from the attachment ID and variant. `post_submissions.media_digest` retains the hash of the ordered image IDs and normalized alt descriptions for retries. See [retention and cleanup](DATABASE.md#phase-3e-post-images-and-notifications).
+
 ## Planned schema by domain and implementation phase
 
 The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
@@ -190,10 +200,6 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 | `bookmarks` / later | `user_id uuid! FK→profiles.user_id`, `post_id uuid! FK→posts.id`, `ca`; PK `(user_id,post_id)` | Private owner-only |
 | `hashtags` / later | `id uuid PK`, `normalized_tag text! UQ`, `display_tag text!`, `ca` | CHECK normalized format/length |
 | `post_tags` / later | `post_id uuid! FK→posts.id`, `hashtag_id uuid! FK→hashtags.id`; PK `(post_id,hashtag_id)` | IX `(hashtag_id,post_id)` |
-| `media_assets` | `id uuid PK`, `owner_user_id uuid! FK→profiles.user_id`, `bucket text!`, `storage_path text!`, `mime_type text!`, `byte_size bigint!`, `moderation_state text!`, `ca`, `ua`, `deleted_at timestamptz?`; UQ `(bucket,storage_path)` | IX `(owner_user_id,created_at DESC)`; CHECK bytes>0, allowlisted type/bucket; bytes in Storage, private by default |
-| `post_media` | `post_id uuid! FK→posts.id`, `media_asset_id uuid! FK→media_assets.id`, `position smallint!`; PK `(post_id,media_asset_id)` | UQ `(post_id,position)`; ownership/permission validation |
-| `notifications` | `id uuid PK`, `recipient_id uuid! FK→profiles.user_id`, `actor_id uuid? FK→profiles.user_id`, `event_kind text!`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `read_at timestamptz?`, `ca` | IX `(recipient_id,read_at,created_at DESC)`; CHECK at most one object target; no private preview |
-| `notification_preferences` | `user_id uuid PK FK→profiles.user_id`, `in_app_enabled boolean!`, `email_enabled boolean!`, `push_enabled boolean!`, `ca`, `ua` | Owner-only; event-level preferences can be additive later |
 | `push_devices` / 10 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `platform text!`, `token_ciphertext bytea!`, `token_hash bytea! UQ`, `last_seen_at timestamptz!`, `revoked_at timestamptz?`, `ca`, `ua` | IX `(user_id,revoked_at)`; server-only token access |
 
 ### Communities and groups — phase 4
@@ -310,6 +316,13 @@ erDiagram
     posts ||--o{ post_topics : tagged_as
     interest_catalog ||--o{ post_topics : defines
     auth_users ||--o{ recommendation_snapshots : owns
+    auth_users |o--o{ post_attachments : uploads
+    posts |o--o{ post_attachments : displays
+    auth_users ||--o{ notifications : receives
+    auth_users |o--o{ notifications : generates
+    posts |o--o{ notifications : references
+    comments |o--o{ notifications : references
+    auth_users ||--o| notification_preferences : configures
     recommendation_versions ||--o{ recommendation_snapshots : ranks
     comments ||--o{ comment_reactions : receives
     auth_users ||--o{ member_follows : follows_as
@@ -369,6 +382,8 @@ erDiagram
 | Comment reports and decisions | — | Report visible content once per target | — | Recent TOTP, private queue and written decisions | Restricted repair/audit |
 | Discovery and following | Eligible counts only | Authenticated filtered lists and own follow changes | Same | Same | Restricted maintenance |
 | For You topics, snapshots and feedback | Eligible post tags only | Own preferences, feedback and eligible recommendations | Versioned author topic writes | Existing post moderation | Private algorithm weights and maintenance |
+| Post images | Public post image metadata and bytes | Currently accessible images, including members-only posts and own drafts | Stage and attach own images through versioned writes | Recent TOTP for eligible review items | Private derivatives and leased cleanup |
+| In-app notifications | None | Own minimal inbox, read state, event preferences | Trusted personal activity through existing write RPCs | No inbox access through moderation | Transactional capture and bounded expiry |
 | Planned bookmarks | — | Own actions | Same | — | Restricted repair/audit |
 | Media metadata/Storage | Only approved public derivative | Signed permitted read | Own upload/management | Assigned evidence access | Storage policy/scan/retention |
 | Notifications/preferences/push devices | — | Own read/edit | Same | — | Delivery worker, no token exposure |
