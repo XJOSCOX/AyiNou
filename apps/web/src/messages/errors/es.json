@@ -1,0 +1,16 @@
+{
+  "retry": "Intentar de nuevo",
+  "reference": "Referencia de la solicitud",
+  "network": "Se perdió la conexión. Revisa tu conexión e inténtalo de nuevo.",
+  "auth": "Inicia sesión de nuevo para continuar.",
+  "permission": "Tu cuenta no tiene permiso para realizar esta acción.",
+  "missing": "Este elemento ya no está disponible.",
+  "validation": "Revisa los campos e inténtalo de nuevo.",
+  "content": "Revisa que el texto y su longitud cumplan los requisitos.",
+  "conflict": "El elemento cambió o la solicitud ya se usó. Recarga para consultar el estado más reciente.",
+  "tooLarge": "Esta solicitud es demasiado grande.",
+  "rate": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
+  "mfa": "Confirma con tu autenticador para continuar.",
+  "duplicateReport": "Ya reportaste esta publicación.",
+  "server": "Esta acción no está disponible por el momento. Inténtalo más tarde."
+}

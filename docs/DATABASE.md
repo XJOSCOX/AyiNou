@@ -167,6 +167,32 @@ The same UUID is safe to leave in the API environment after success. It can also
 
 Run `npm run test:hosted:admin:sql -- --preflight` before first applying the migration and `npm run test:hosted:admin:sql` afterward. Run `npm run test:hosted:admin` for live synthetic Auth, TOTP, restriction, reviewer, audit, and sign-out checks. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` first. The SQL suite rolls back, and the Auth suite removes its exact synthetic fixtures. Custom SMTP remains required to test public email recovery reliably.
 
+## Phase 3A text feed and moderation
+
+`20261120070000_phase3a_text_feed.sql` introduces `feed_data.posts`, `post_submissions`, `content_reports`, `post_moderation_actions`, and `write_limits`. All tables have RLS. The schema stays outside the Supabase Data API. The read RPC runs under caller RLS. Restricted write functions check the authenticated subject and the live session within PostgreSQL. The service role has no direct feed table grants.
+
+`20261120071000_feed_publication_time.sql` records the first publication time separately from creation. Drafts have no publication time. The displayed time survives edits and moderation actions, and pagination keeps using the stable creation cursor.
+
+| Method and path | Behavior |
+| --- | --- |
+| `GET /api/v1/feed?scope=feed&limit=20&cursor=…` | Chronological page ordered by `created_at DESC, id DESC`. Maximum 40. `scope=mine` requires authentication and includes the caller’s published, draft, and hidden posts. |
+| `GET /api/v1/posts/:id` | Read a post available to the caller. Unavailable posts return 404. |
+| `POST /api/v1/posts` | Create or replay a submission. Body includes `body`, `language`, and `visibility`. Requires an `Idempotency-Key` UUID header. |
+| `PATCH /api/v1/posts/:id` | Replace editable fields with an expected `version`. |
+| `DELETE /api/v1/posts/:id?version=…` | Soft-delete an owned, editable post with the expected version. |
+| `POST /api/v1/posts/:id/reports` | Report a visible post by another user with a category and optional note. |
+| `GET /api/v1/me/feed-moderation` | Check whether the caller has a moderation assignment. |
+| `GET /api/v1/moderation/feed?scope=reports&cursor=…` | Recent-MFA moderation list of pending reports or `scope=hidden` posts. Page size 25. |
+| `PATCH /api/v1/moderation/posts/:id` | Record a reason and expected version for `hide`, `restore`, `remove`, or `dismiss`. |
+
+Posts keep 1–2,000 characters of original text and one of four content language codes. Anonymous readers see published `public` posts. Eligible members also see `members_only` posts. The `private` visibility represents an author-only draft. Hidden posts remain available to their author and authorized moderation. Auth restrictions block protected actions and suppress the restricted author’s published posts. A public author name, handle, avatar, and verification badge are available when the profile is published and discoverable. Otherwise the feed uses a generic author label.
+
+Create retries with the same author, UUID, and payload return the original ID. The database stores a digest and rejects reuse of the same key with a different payload. Version checks reject stale edits, deletes, and moderation decisions with 409. Author deletion sets `deleted_at`. Moderator removal sets `removed` and appends an audit action. Reports are unique per reporter and post. Pending reports remain in the queue until a reviewer records an explicit decision. Reports and notes have no public projection. A formal appeal flow, retention policy for deleted content, and audit retention after a hard account deletion remain launch work.
+
+Per-minute database write quotas are 8 creations, 20 edits, and 5 reports per account. Successful duplicate create retries consume no quota. Feed read limits are 90 per anonymous IP and 120 per verified account per minute in the local API process. The bounded read limiter holds at most 10,000 active keys per window. Move the read counter to a shared store before running multiple API instances.
+
+Run `npm run test:hosted:feed:sql -- --preflight` for the rollback-only migration rehearsal, `npm run test:hosted:feed:sql` for the deployed RLS suite, and `npm run test:hosted:feed` for the synthetic live API integration. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` first. Docker and SMTP are optional for this phase.
+
 ## Testing and optional local stack
 
 Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:aggregation`. The guard must match the API URL. The scripts create uniquely named, confirmed synthetic Auth users, mark them excluded from public metrics, check API/RLS and aggregate cases, then delete only those returned IDs. The aggregation script requires the pinned CLI's hosted SQL access and an empty eligible-member baseline; its SQL assertions roll back each transaction. Real email confirmation, password reset, and natural token expiry require controlled mailbox testing or a disposable environment and are not asserted by these scripts.

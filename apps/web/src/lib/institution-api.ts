@@ -1,6 +1,6 @@
 import type { Institution, InstitutionAccounts, InstitutionInput, InstitutionManagement, OrganizationRole, ReviewApplication, ReviewQueueMode,
   ReviewDecision, VerificationApplication, VerificationKind } from "@ayinou/shared";
-import { authorizedRequest, encodeProfileImage } from "./api";
+import { authorizedRequest, encodeProfileImage, publicRequest } from "./api";
 
 const base = "/api/v1/institutions";
 const verify = "/api/v1/me/verification";
@@ -16,11 +16,7 @@ export const loadInstitution = (id: string, signal?: AbortSignal): Promise<Insti
   authorizedRequest(`${base}/${id}`, { signal });
 
 export async function readPublicInstitution(handle: string, signal?: AbortSignal): Promise<Institution> {
-  const url = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
-  const response = await fetch(`${url}${base}/by-handle/${encodeURIComponent(handle)}`, { signal, cache: "no-store" });
-  if (response.status === 404) throw new Error("NOT_FOUND");
-  if (!response.ok) throw new Error("API_ERROR");
-  return (await response.json()).organization;
+  return (await publicRequest(`${base}/by-handle/${encodeURIComponent(handle)}`, { signal })).organization;
 }
 
 export function createInstitution(input: InstitutionInput): Promise<{ id: string }> {

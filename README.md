@@ -42,11 +42,15 @@ We start with a responsive web app to validate UX and product flows. Android/iOS
 
 **Phase 2B: Welcome, registration, and member profiles** (see [ROADMAP.md](ROADMAP.md)). The welcome page shows privacy-filtered community statistics, and members can resume onboarding from their last saved stage. Haitian members and international supporters can both join. The shared light and dark themes are available across the web app.
 
+Phase 3A adds the text feed at `/feed`. Signed-in members can publish, save private drafts, edit or delete their posts, and report visible posts. Assigned platform moderators and administrators use `/feed/moderation` after recent authenticator verification. [Feed endpoints, permissions, and testing](docs/DATABASE.md#phase-3a-text-feed-and-moderation)
+
+The feed keeps the composer and timeline together, with sections for account suggestions and community news alongside them on wide screens. Those sections show empty states while the underlying features are planned. Members can browse the existing institution directory from the feed.
+
 ## Key features by phase
 
 1. Registration, onboarding, profiles, language, optional geographic information
 2. Aggregate member statistics by department, plus diaspora summaries
-3. Posts, comments, reactions, follows, media, moderation
+3. Text posts and basic moderation first, then comments, reactions, follows, and media
 4. Local/interest communities and groups
 5. Verified identities, organizations and founding ambassadors
 6. Community projects, volunteers and milestone reporting

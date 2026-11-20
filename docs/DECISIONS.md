@@ -51,7 +51,7 @@
 
 ## Platform administration
 
-- Reuse the platform role and reviewer tables. Administrator privileges and reviewer appointments are independent. The moderator role reserves a future permission boundary.
+- Reuse the platform role and reviewer tables. Administrator privileges and reviewer appointments are independent. Administrators and platform moderators can handle text-feed reports with recent TOTP.
 - Require a verified TOTP factor for privileged role grants and a live TOTP-backed AAL2 session verified within the prior 15 minutes for administration and review. Protect the last eligible administrator through application role and restriction controls and final-factor removal checks.
 - Record application restrictions separately from Supabase Auth bans. Use authentication logs for credential changes and an append-only application audit for administration, reviews, and ownership decisions. Establish retention and appeals before public launch.
 

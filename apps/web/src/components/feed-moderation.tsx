@@ -1,0 +1,126 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useState, type FormEvent } from "react";
+import { moderationActions, type FeedReport, type ModerationAction, type ModerationScope } from "@ayinou/shared";
+import { apiErrorCode } from "@/lib/api-errors";
+import { loadModeration, moderatePost } from "@/lib/feed-api";
+import { feedMessages } from "@/lib/feed-i18n";
+import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
+import { useLocale } from "@/lib/locale-store";
+import { ApiErrorNotice } from "./api-error-notice";
+import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
+import { MemberShell } from "./member-shell";
+
+const tabs = ["reports", "hidden"] as const;
+
+export function FeedModeration() {
+  const [locale] = useLocale();
+  const t = feedMessages[locale];
+  const [scope, setScope] = useState<ModerationScope>("reports");
+
+  return <MemberShell>
+    <div className="grid w-full min-w-0 gap-5">
+      <header>
+        <Link href="/feed" className={institutionLink}>{t.backToFeed}</Link>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{t.moderation}</h1>
+        <p className="mt-2 text-sm text-[var(--theme-body)]">{t.moderationIntro}</p>
+      </header>
+      <div role="group" aria-label={t.moderation} className="flex flex-wrap gap-2">
+        {tabs.map((tab) => <button key={tab} type="button" aria-pressed={scope === tab} onClick={() => setScope(tab)}
+          className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]">
+          {tab === "reports" ? t.pendingReports : t.hiddenPosts}
+        </button>)}
+      </div>
+      <Queue key={scope} scope={scope} />
+    </div>
+  </MemberShell>;
+}
+
+function Queue({ scope }: { scope: ModerationScope }) {
+  const [locale] = useLocale();
+  const t = feedMessages[locale];
+  const [revision, setRevision] = useState(0);
+  const [saved, setSaved] = useState(false);
+  const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
+    const { reports, nextCursor } = await loadModeration(scope, cursor, signal);
+    return { rows: reports, nextCursor };
+  }, [scope]);
+  const resource = useCursorPage(load, revision);
+  const roleDenied = ["MFA_REQUIRED", "FORBIDDEN", "UNAUTHORIZED"].includes(apiErrorCode(resource.error));
+
+  return <section className="grid gap-3" aria-label={scope === "reports" ? t.pendingReports : t.hiddenPosts}>
+    {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.decisionRecorded}</p>}
+    {resource.error !== null && <div className="grid gap-2">
+      <ApiErrorNotice error={resource.error} retry={roleDenied ? undefined : resource.retry} />
+      {apiErrorCode(resource.error) === "MFA_REQUIRED" && <Link href="/mfa?next=/feed/moderation" className={institutionLink}>{t.checkMfa}</Link>}
+    </div>}
+    {!resource.page && resource.error === null && <p role="status">{t.working}</p>}
+    {resource.page?.rows.length === 0 && <p className={institutionCard}>{t.queueEmpty}</p>}
+    {!roleDenied && resource.page?.rows.map((item) => <ReviewItem key={item.id} item={item}
+      refresh={() => { setSaved(true); setRevision((value) => value + 1); }} />)}
+    {!roleDenied && resource.page?.nextCursor && <button type="button" disabled={resource.loadingMore}
+      className={`${institutionAction} justify-self-start`} onClick={() => { void resource.more(); }}>{resource.loadingMore ? t.working : t.loadMore}</button>}
+  </section>;
+}
+
+function ReviewItem({ item, refresh }: { item: FeedReport; refresh: () => void }) {
+  const [locale] = useLocale();
+  const t = feedMessages[locale];
+  const mutation = useFeedMutation();
+  const [reason, setReason] = useState("");
+  const [completed, setCompleted] = useState(false);
+  const actions = moderationActions.filter((action) => {
+    if (action === "dismiss") return item.category !== null;
+    if (item.deleted) return false;
+    return action === "restore" ? item.status === "hidden"
+      : action === "hide" ? item.status === "published" : item.status === "published" || item.status === "hidden";
+  });
+  const [choice, setChoice] = useState<ModerationAction | "">("");
+  const action = actions.includes(choice as ModerationAction) ? choice : "";
+  const format = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!action || item.own || completed || reason.trim().length < 10) return;
+    if (await mutation.run(() => moderatePost(item.postId, item.version, action, reason))) {
+      setCompleted(true);
+      refresh();
+    }
+  }
+
+  return <article className={institutionCard}>
+    <header>
+      <h2 className="font-semibold">{item.category ? t[item.category] : t.hidden}</h2>
+      <time dateTime={item.createdAt} className="text-xs text-[var(--theme-body)]">{format.format(new Date(item.createdAt))}</time>
+    </header>
+    {item.note && <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[var(--theme-body)]">{item.note}</p>}
+    <p lang={item.language} dir="auto" className="mt-3 whitespace-pre-wrap break-words rounded-md bg-[var(--theme-control)] p-3 text-sm">{item.body}</p>
+    {item.deleted && <p className="mt-2 text-sm font-semibold">{t.authorDeleted}</p>}
+    {item.status === "removed" && <p className="mt-2 text-sm font-semibold">{t.removed}</p>}
+    {item.lastAction && <div className="mt-3 border-t border-[var(--theme-border)] pt-3 text-sm">
+      <h3 className="font-semibold">{t.lastDecision} · {t[item.lastAction.action]}</h3>
+      <p className="break-words">{item.lastAction.reason}</p>
+      <time dateTime={item.lastAction.createdAt} className="text-xs text-[var(--theme-body)]">{format.format(new Date(item.lastAction.createdAt))}</time>
+    </div>}
+    {item.own ? <p className="mt-3 text-sm">{t.cannotModerateOwn}</p> : actions.length > 0 && !completed &&
+      <form className="mt-4 grid gap-3 border-t border-[var(--theme-border)] pt-4" onSubmit={submit} aria-busy={mutation.busy}>
+        <label className="text-sm font-semibold">{t.moderationAction}
+          <select className={institutionField} value={action} required disabled={mutation.busy}
+            onChange={(event) => setChoice(actions.find((value) => value === event.target.value) ?? "")}>
+            <option value="" disabled>—</option>
+            {actions.map((value) => <option value={value} key={value}>{t[value]}</option>)}
+          </select>
+        </label>
+        <label className="text-sm font-semibold">{t.decisionReason}
+          <input className={institutionField} value={reason} required minLength={10} maxLength={500} disabled={mutation.busy}
+            onChange={(event) => setReason(event.target.value)} />
+        </label>
+        {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
+        {apiErrorCode(mutation.error) === "MFA_REQUIRED" && <Link href="/mfa?next=/feed/moderation" className={institutionLink}>{t.checkMfa}</Link>}
+        <button type="submit" className={`${institutionAction} justify-self-start`} disabled={mutation.busy || !action}>
+          {mutation.busy ? t.working : t.recordDecision}
+        </button>
+      </form>}
+  </article>;
+}

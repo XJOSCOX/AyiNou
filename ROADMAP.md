@@ -115,13 +115,19 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Keep Haitian Creole as the default and let members save any of the four languages.
 - [x] Validate dictionary keys and placeholders, hosted profile persistence, and responsive screens in both themes.
 
-## Phase 3 — Social network MVP
+## Phase 3A — Text feed, reporting, and error handling
 
-- [ ] Create/edit/delete text posts; read feed; pagination.
+- [x] Add chronological pages, text posting, private drafts, and versioned edits and deletion.
+- [x] Add private reports, MFA-gated moderation, and recorded hide, restore, removal, and closure decisions.
+- [x] Share safe request references and localized errors across application clients.
+- [x] Add durable per-member write quotas and bounded local read quotas.
+
+## Remaining Phase 3 — Social network MVP
+
 - [ ] Comments, reactions, follows, basic notifications.
 - [ ] Optional image attachments with storage rules, upload limits and security scanning where feasible.
-- [ ] Report content; moderators can review, hide and appeal moderation actions.
-- [ ] Blocking/muting and spam/rate controls.
+- [ ] Add a formal appeals workflow and operational retention rules.
+- [ ] Blocking, muting, and shared read-rate controls for multi-instance deployment.
 - [ ] No unmoderated live broadcast or unlimited DMs at this phase.
 
 **Gate:** Feeds behave correctly at load; user permissions enforced; reports can be reviewed; moderation tested.

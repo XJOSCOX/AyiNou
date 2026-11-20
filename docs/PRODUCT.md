@@ -47,6 +47,8 @@ People can manage one institution and belong to others as members, volunteers, s
 
 ## User safety
 
+The signed-in feed lets members publish short text updates, choose an audience, and maintain private drafts. Posts display in chronological order. Members can report visible posts by others. Authorized moderators can hide, restore, remove, or close reports with a written reason. Reports remain pending until reviewed, and formal appeals remain future work.
+
 Platform administrators can search a minimal account projection, investigate impersonation using public identifiers, and record account restrictions with an audit reason. Verification reviewers use a separate workspace for assigned work, public references, written decisions, and revocation. Both workspaces require recent authenticator verification. Members can manage their password and authenticator or sign out of all Supabase sessions from account settings.
 
 - Enforce anti-harassment, anti-threat and anti-impersonation rules.

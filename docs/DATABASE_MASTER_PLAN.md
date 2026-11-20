@@ -4,7 +4,7 @@
 
 ## Verified baseline and design rules
 
-Hosted migration history runs from `20261119160000_initial_schema` through `20261120060000_spanish_locale`. Guarded hosted checks cover profile behavior and saved languages, privacy-safe metrics, referral setup, Supabase TOTP, institutional authorization, verification, and ordinary affiliation. Delivered confirmation and recovery mail and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120071000_feed_publication_time`. Guarded hosted checks cover profile behavior and saved languages, metrics, referral setup, TOTP, institutional authorization, ordinary affiliation, and the text feed. Delivered confirmation and recovery mail and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Preserve user-generated content in its original language and label any future translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -92,6 +92,18 @@ Ordinary affiliation states are pending, active, suspended, removed, and left. A
 
 All three tables deny direct application and service-role access. Fastify derives identity from a live session and passes it to narrow RPCs. The database checks current roles and writes restriction/role changes and audit records atomically. Auth factor protection guards the last eligible administrator. Platform administration and evidence review use independent assignments. Two eligible reviewers must approve a verification even if someone has already picked it up from the queue. Audit actor and subject UUIDs are cleared when the related Auth account is hard-deleted. The audit reason remains subject to the operator retention policy.
 
+### Phase 3A text feed
+
+| Table in `feed_data` | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `posts` | `id uuid PK`, `author_id uuid! FK→auth.users.id CASCADE`, `body text!`, `language text!`, `visibility text!`, `status text!`, `ca`, `ua`, `published_at timestamptz?`, `edited_at timestamptz?`, `deleted_at timestamptz?`, `version integer! DEFAULT 1` | Chronological indexes for public and published posts, author index, hidden update index |
+| `post_submissions` | `author_id uuid! FK→auth.users.id CASCADE`, `submission_id uuid!`, `post_id uuid! UQ FK→posts.id CASCADE`, `request_digest bytea!`; PK `(author_id,submission_id)` | PK and UQ |
+| `content_reports` | `id uuid PK`, `post_id uuid! FK→posts.id CASCADE`, `reporter_id uuid? FK→auth.users.id SET NULL`, `category text!`, `note text?`, `status text!`, `ca`, `closed_at timestamptz?`; UQ `(post_id,reporter_id)` | Pending chronological index and reporter index |
+| `post_moderation_actions` | `id uuid PK`, `post_id uuid! FK→posts.id CASCADE`, `actor_id uuid? FK→auth.users.id SET NULL`, `action text!`, `reason text!`, `ca` | Post history index |
+| `write_limits` | `actor_id uuid! FK→auth.users.id CASCADE`, `action text!`, `window_started timestamptz!`, `total integer!`; PK `(actor_id,action)` | PK |
+
+All five tables use RLS in the non-exposed schema. Caller RLS covers anonymous public reads, eligible member reads, and own draft or hidden reads. Scoped RPCs handle edits, reports, and moderation. New actor or community relationships can use additive foreign keys when those domains and their authorization rules exist.
+
 ## Planned schema by domain and implementation phase
 
 The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
@@ -142,7 +154,6 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `posts` | `id uuid PK`, `author_user_id uuid! FK→profiles.user_id`, `community_id uuid? FK→communities.id`, `body text!`, `content_language text!`, `visibility text!`, `status text!`, `ca`, `ua`, `deleted_at timestamptz?` | IX `(status,created_at DESC,id DESC)`, `(author_user_id,created_at DESC)`, `(community_id,created_at DESC)`; body length/language CHECK |
 | `comments` | `id uuid PK`, `post_id uuid! FK→posts.id`, `author_user_id uuid! FK→profiles.user_id`, `parent_comment_id uuid? FK→comments.id`, `body text!`, `content_language text!`, `status text!`, `ca`, `ua`, `deleted_at timestamptz?` | IX `(post_id,created_at,id)`, `(parent_comment_id)`; parent must belong to same post, bound depth |
 | `post_reactions` | `post_id uuid! FK→posts.id`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `ca`; PK `(post_id,user_id)` | IX `(user_id,created_at DESC)`; one active reaction/post/user |
 | `comment_reactions` | `comment_id uuid! FK→comments.id`, `user_id uuid! FK→profiles.user_id`, `kind text!`, `ca`; PK `(comment_id,user_id)` | IX `(user_id,created_at DESC)` |
@@ -228,7 +239,7 @@ Published claim summaries must pass separate safety and evidence checks. No live
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `content_reports` / 3 | `id uuid PK`, `reporter_id uuid! FK→profiles.user_id`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `subject_user_id uuid? FK→profiles.user_id`, `reason_code text!`, `private_details text?`, `status text!`, `ca`, `ua` | CHECK exactly one target; IX `(status,created_at)`, `(reporter_id,created_at DESC)`; abuse/rate controls |
+| Report targets beyond text posts / later | Extend the existing `feed_data.content_reports` with explicit target foreign keys or add separate domain tables after those resources exist. | Exactly one target and scoped permissions |
 | `moderation_cases` / 3 | `id uuid PK`, `report_id uuid? FK→content_reports.id`, `post_id uuid? FK→posts.id`, `comment_id uuid? FK→comments.id`, `subject_user_id uuid? FK→profiles.user_id`, `state text!`, `assigned_reviewer_id uuid? FK→auth.users.id`, `opened_at timestamptz!`, `closed_at timestamptz?`, `ua` | CHECK exactly one primary subject; IX `(state,assigned_reviewer_id,opened_at)`; report may point to same subject |
 | `moderation_actions` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `actor_id uuid! FK→auth.users.id`, `action text!`, `reason text!`, `ca` | IX `(case_id,created_at)`; append-only |
 | `moderation_appeals` / 3 | `id uuid PK`, `case_id uuid! FK→moderation_cases.id`, `appellant_id uuid! FK→profiles.user_id`, `reason text!`, `status text!`, `adjudicator_id uuid? FK→auth.users.id`, `resolved_at timestamptz?`, `ca`, `ua` | IX `(case_id,status)`, `(appellant_id,created_at DESC)`; distinct adjudicator |
@@ -344,7 +355,7 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 1. **Existing through 2E.** Preserve the applied migration files. Check remote history before each future migration. Phase 2E depends on Auth, institutions, ordinary affiliations, the existing role assignments, and active personal verification for new administrator promotions. Challenge activation depends on an audited proof channel configuration and retention policy.
 2. **Common hardening** sets privacy and retention rules, extends the existing audit projection as needed, and adds `countries` and optional validated residence FK after existing values are checked. Handle user rights before public launch. Future profile changes must preserve current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
-4. **Phase 3 base:** Create media metadata/Storage rules, blocks/mutes, `posts`, `comments`, split reactions, follows, reports, moderation cases/actions/appeals/restrictions, notifications. Create `posts` **without** `community_id` in the first phase-3 migration; add the nullable column and FK in phase 4 after `communities` exists. Require moderation and abuse gates before opening posting.
+4. **Phase 3A** delivers text posts, report and moderation records, and write limits. Later phases add media, blocking and muting, comments, reactions, follows, and formal appeals behind their authorization gates.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
 6. **Phase 5:** Extend the delivered institutional and review foundation with ambassador assignments and reviewed proof channels. Any evidence files depend on private media assets and retention approval. Radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
 7. **Phase 6:** Create projects after organizations, then members/milestones/needs/updates/reviews/outcomes and offers. Validate cross-table project/need ownership in trusted write workflows.

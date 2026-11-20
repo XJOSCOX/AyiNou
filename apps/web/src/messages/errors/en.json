@@ -1,0 +1,16 @@
+{
+  "retry": "Try again",
+  "reference": "Request reference",
+  "network": "Connection lost. Check your connection and try again.",
+  "auth": "Sign in again to continue.",
+  "permission": "Your account does not have permission for this action.",
+  "missing": "This item is no longer available.",
+  "validation": "Check the fields and try again.",
+  "content": "Check that the text and its length meet the requirements.",
+  "conflict": "The item changed or this request was already used. Reload to check the latest state.",
+  "tooLarge": "This request is too large.",
+  "rate": "Too many requests. Wait a moment and try again.",
+  "mfa": "Confirm with your authenticator to continue.",
+  "duplicateReport": "You already reported this post.",
+  "server": "This action is temporarily unavailable. Try again later."
+}

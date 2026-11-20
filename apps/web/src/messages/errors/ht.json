@@ -1,0 +1,16 @@
+{
+  "retry": "Eseye ankò",
+  "reference": "Referans demann lan",
+  "network": "Koneksyon an koupe. Tcheke koneksyon ou epi eseye ankò.",
+  "auth": "Konekte ankò pou kontinye.",
+  "permission": "Kont ou pa gen pèmisyon pou fè aksyon sa a.",
+  "missing": "Atik sa a pa disponib ankò.",
+  "validation": "Tcheke chan yo epi eseye ankò.",
+  "content": "Tcheke si tèks la ak longè li respekte kondisyon yo.",
+  "conflict": "Atik la chanje oswa demann sa a te deja sèvi. Rechaje pou tcheke dènye eta a.",
+  "tooLarge": "Demann sa a twò gwo.",
+  "rate": "Twòp demann. Tann yon ti moman epi eseye ankò.",
+  "mfa": "Konfime ak aplikasyon otantifikasyon ou pou kontinye.",
+  "duplicateReport": "Ou deja siyale piblikasyon sa a.",
+  "server": "Aksyon sa a pa disponib pou kounye a. Eseye ankò pita."
+}

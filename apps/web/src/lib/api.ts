@@ -1,16 +1,15 @@
-import type { ApiErrorResponse, CommunityStats, Department, MemberProfile, ProfileChanges, ReferralSummary, StatusResponse } from "@ayinou/shared";
+import type { CommunityStats, Department, MemberProfile, ProfileChanges, ReferralSummary, StatusResponse } from "@ayinou/shared";
 import { browserSupabase } from "./supabase/browser";
+import { ApiRequestError, requestJson } from "./api-errors";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
 
 export async function fetchApiStatus(signal?: AbortSignal): Promise<StatusResponse> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/status`, {
+  const data: unknown = await requestJson(`${apiBaseUrl}/api/v1/status`, {
     signal,
     headers: { Accept: "application/json" },
     cache: "no-store",
   });
-  if (!response.ok) throw new Error("API unavailable");
-  const data: unknown = await response.json();
   if (
     typeof data !== "object" || data === null ||
     !("status" in data) || data.status !== "ok" ||
@@ -23,22 +22,17 @@ export async function fetchApiStatus(signal?: AbortSignal): Promise<StatusRespon
 export async function authorizedRequest(path: string, init?: RequestInit) {
   const { data, error } = await browserSupabase().auth.getSession();
   const token = data.session?.access_token;
-  if (error || !token) throw new Error("UNAUTHORIZED");
-  const response = await fetch(`${apiBaseUrl}${path}`, {
-    ...init,
-    cache: "no-store",
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-    },
-  });
-  if (!response.ok) {
-    if (response.status === 401) throw new Error("UNAUTHORIZED");
-    const result: ApiErrorResponse | null = await response.json().catch(() => null);
-    throw new Error(result?.error?.code ?? "API_ERROR");
-  }
-  return response.status === 204 ? undefined : response.json();
+  if (error || !token) throw new ApiRequestError("UNAUTHORIZED", 401);
+  const headers = new Headers(init?.headers);
+  headers.set("Authorization", `Bearer ${token}`);
+  return publicRequest(path, { ...init, headers });
+}
+
+export function publicRequest(path: string, init?: RequestInit) {
+  const headers = new Headers(init?.headers);
+  headers.set("Accept", "application/json");
+  if (init?.body) headers.set("Content-Type", "application/json");
+  return requestJson(`${apiBaseUrl}${path}`, { ...init, headers });
 }
 
 export async function fetchMyProfile(): Promise<MemberProfile> {
@@ -57,15 +51,12 @@ export async function fetchAccountCodes(signal: AbortSignal) {
 }
 
 export async function validateReferralCode(code: string): Promise<boolean> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/referrals/validate`, {
+  const result: { valid: boolean } = await publicRequest("/api/v1/referrals/validate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     cache: "no-store",
     body: JSON.stringify({ code }),
   });
-  if (response.status === 429) throw new Error("RATE_LIMITED");
-  if (!response.ok) throw new Error("API_ERROR");
-  const result: { valid: boolean } = await response.json();
   return result.valid;
 }
 
@@ -98,17 +89,11 @@ export async function uploadAvatar(file: File): Promise<string> {
 }
 
 export async function fetchDepartments(): Promise<Department[]> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/departments`, { cache: "no-store" });
-  if (!response.ok) throw new Error("API_ERROR");
-  const result: { departments: Department[] } = await response.json();
+  const result: { departments: Department[] } = await publicRequest("/api/v1/departments");
   return result.departments;
 }
 
 export async function fetchCommunityStats(signal?: AbortSignal): Promise<CommunityStats> {
-  const response = await fetch(`${apiBaseUrl}/api/v1/community/stats`, {
-    headers: { Accept: "application/json" }, cache: "no-store", signal,
-  });
-  if (!response.ok) throw new Error("API_ERROR");
-  const result: { stats: CommunityStats } = await response.json();
+  const result: { stats: CommunityStats } = await publicRequest("/api/v1/community/stats", { signal });
   return result.stats;
 }

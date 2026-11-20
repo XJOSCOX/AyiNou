@@ -7,6 +7,8 @@ import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOvervie
 import { adminMessages } from "@/lib/admin-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { apiErrorCode } from "@/lib/api-errors";
+import { localizedApiError } from "@/lib/error-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
@@ -51,10 +53,10 @@ export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
 }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
-  const code = error instanceof Error ? error.message : "";
+  const code = apiErrorCode(error);
   const message = code === "MFA_REQUIRED" ? (totp === false ? t.enrollRequired : t.mfaRequired)
     : code === "VERIFICATION_REQUIRED" ? t.adminVerificationRequired
-    : code === "FORBIDDEN" ? t.forbidden : code === "CONFLICT" ? t.conflict : code === "UNAUTHORIZED" ? t.unavailableSession : authMessages[locale].loadError;
+    : code === "FORBIDDEN" ? t.forbidden : code === "CONFLICT" ? t.conflict : code === "UNAUTHORIZED" ? t.unavailableSession : localizedApiError(locale, error);
   return <div className={institutionErrorBox}>
     <p role="alert">{message}</p>
     {code === "MFA_REQUIRED" && <Link className={institutionLink}

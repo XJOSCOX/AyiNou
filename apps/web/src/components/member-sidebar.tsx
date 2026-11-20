@@ -6,6 +6,7 @@ import { accountMessages } from "@/lib/account-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { feedMessages } from "@/lib/feed-i18n";
 import { loadPlatformAccess } from "@/lib/admin-api";
 import { adminMessages } from "@/lib/admin-i18n";
 import { useInstitutionResource } from "./institution-ui";
@@ -19,6 +20,7 @@ export function MemberSidebar() {
   const access = useInstitutionResource(loadPlatformAccess);
   const links = [
     { href: "/dashboard", label: t.dashboard },
+    { href: "/feed", label: feedMessages[locale].feed },
     { href: "/profile", label: t.myProfile },
     { href: "/institutions", label: institution.institutions },
     { href: "/verification", label: institution.verification },

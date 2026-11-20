@@ -13,11 +13,63 @@ export interface ApiErrorResponse {
   error: {
     code: string;
     message: string;
+    requestId?: string;
+    retryable?: boolean;
   };
 }
 
 export const locales = ["ht", "fr", "en", "es"] as const;
 export type Locale = (typeof locales)[number];
+
+export const postVisibilities = ["public", "members_only", "private"] as const;
+export const reportCategories = ["harassment", "hate", "spam", "privacy", "other"] as const;
+export const moderationActions = ["hide", "restore", "remove", "dismiss"] as const;
+export const postBodyLimit = 2_000;
+export type PostVisibility = (typeof postVisibilities)[number];
+export type ReportCategory = (typeof reportCategories)[number];
+export type ModerationAction = (typeof moderationActions)[number];
+export type PostStatus = "draft" | "published" | "hidden" | "removed";
+export type FeedScope = "feed" | "mine";
+export type ModerationScope = "reports" | "hidden";
+export type PostInput = { body: string; language: Locale; visibility: PostVisibility };
+export interface FeedAuthor {
+  displayName: string;
+  username: string | null;
+  avatarUrl: string | null;
+  verified: boolean;
+}
+export interface FeedPost extends PostInput {
+  id: string;
+  status: PostStatus;
+  createdAt: string;
+  publishedAt: string | null;
+  editedAt: string | null;
+  version: number;
+  own: boolean;
+  author: FeedAuthor | null;
+}
+export interface FeedPage {
+  posts: FeedPost[];
+  nextCursor: string | null;
+}
+export interface FeedReport {
+  id: string;
+  postId: string;
+  body: string;
+  language: Locale;
+  status: PostStatus;
+  deleted: boolean;
+  own: boolean;
+  version: number;
+  category: ReportCategory | null;
+  note: string | null;
+  createdAt: string;
+  lastAction: { action: ModerationAction; reason: string; createdAt: string } | null;
+}
+export interface FeedReportPage {
+  reports: FeedReport[];
+  nextCursor: string | null;
+}
 export type MembershipCategory = "haitian" | "international_supporter";
 export const interestCodes = ["education", "peace", "healthcare", "agriculture", "technology", "entrepreneurship", "employment", "environment", "infrastructure", "culture"] as const;
 export type InterestCode = typeof interestCodes[number];

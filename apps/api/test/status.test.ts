@@ -37,9 +37,11 @@ test("CORS allows the configured web origin only", async () => {
 test("unknown routes return safe JSON errors", async () => {
   const app = createApp(config);
   try {
-    const response = await app.inject({ method: "GET", url: "/missing" });
+    const response = await app.inject({ method: "GET", url: "/missing", headers: { "x-request-id": "client-supplied" } });
     assert.equal(response.statusCode, 404);
-    assert.deepEqual(response.json(), { error: { code: "NOT_FOUND", message: "Route not found" } });
+    const requestId = response.headers["x-request-id"];
+    assert.match(String(requestId), /^[0-9a-f-]{36}$/);
+    assert.deepEqual(response.json(), { error: { code: "NOT_FOUND", message: "Route not found", requestId, retryable: false } });
   } finally {
     await app.close();
   }

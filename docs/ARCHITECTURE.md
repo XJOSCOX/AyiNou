@@ -64,6 +64,12 @@ The shared `locales` contract defines `ht` (default), `fr`, `en`, and `es` for w
 
 Next.js renders the language from the browser cookie. The menu writes the cookie and a local storage fallback, updates the current screen, and reuses the active locale for native form feedback, time, and number formatting. Without a browser choice, a signed-in browser restores the saved profile preference when RLS grants access. During first onboarding, the confirmed signup selection can seed the interface. Saving the profile preference uses the existing authenticated Fastify endpoint and the database constraint.
 
+### Text feed and error handling
+
+Fastify validates optional bearer authentication for feed reads and requires it for writes. Feed RPCs receive the caller’s token with the publishable key. Read RPCs use RLS in the non-exposed `feed_data` schema and project safe author fields in one query. Write RPCs bind to `auth.uid()` and check current sessions, ownership, visibility, version, and quotas. The server credential only signs a batch of eligible avatar paths. Moderation checks current administrator or moderator assignment and recent TOTP at both the API and database boundaries.
+
+API errors retain the existing `error.code` and `error.message` fields and add `requestId` and `retryable`. Fastify generates the request ID and returns it as `X-Request-ID`. Logs use that ID, the route pattern, method, and status. The web client keeps stable domain codes for existing flows and localizes safe feedback. It distinguishes cancellation, network failure, invalid input, permissions, conflicts, and service outages. Read retries are explicit. Mutations preserve their inputs on failure, and post creation reuses the same idempotency key for an identical retry. Clients should refresh after a conflict and check the current state before retrying a destructive action.
+
 The pinned Supabase CLI manages hosted migration history. Docker and pgTAP remain optional for isolated local checks. Hosted integration tests use identifiable synthetic records, exclusion from public metrics, transaction rollback for aggregate assertions, and targeted cleanup. No hosted reset or destructive test workflow is used.
 
 ## References

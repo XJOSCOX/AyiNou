@@ -25,10 +25,13 @@
     "test:hosted:affiliations:sql": "node scripts/check-affiliations-sql.mjs",
     "test:hosted:admin:sql": "node scripts/check-admin-sql.mjs",
     "test:hosted:admin": "node --import tsx scripts/check-admin-hosted.mjs",
+    "test:hosted:feed:sql": "node scripts/check-feed-sql.mjs",
+    "test:hosted:feed": "node --import tsx scripts/check-feed-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",
     "test:i18n": "node scripts/check-translations.mjs",
-    "test": "npm run test:i18n && npm run test -ws --if-present",
+    "test:client-errors": "node --import tsx --test scripts/check-client-errors.mjs",
+    "test": "npm run test:i18n && npm run test:client-errors && npm run test -ws --if-present",
     "build": "npm run build -w @ayinou/api && npm run build -w @ayinou/web"
   },
   "devDependencies": {

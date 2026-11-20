@@ -1,0 +1,16 @@
+{
+  "retry": "Réessayer",
+  "reference": "Référence de la requête",
+  "network": "La connexion a été interrompue. Vérifiez-la et réessayez.",
+  "auth": "Reconnectez-vous pour continuer.",
+  "permission": "Votre compte n’est pas autorisé à effectuer cette action.",
+  "missing": "Cet élément n’est plus disponible.",
+  "validation": "Vérifiez les champs et réessayez.",
+  "content": "Vérifiez le texte et sa longueur.",
+  "conflict": "L’élément a changé ou la requête a déjà été utilisée. Rechargez pour consulter son état actuel.",
+  "tooLarge": "Cette requête est trop volumineuse.",
+  "rate": "Trop de requêtes. Patientez un instant et réessayez.",
+  "mfa": "Confirmez avec votre authentificateur pour continuer.",
+  "duplicateReport": "Vous avez déjà signalé cette publication.",
+  "server": "Cette action est temporairement indisponible. Réessayez plus tard."
+}

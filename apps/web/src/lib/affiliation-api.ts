@@ -1,5 +1,5 @@
 import type { AffiliationAction, AffiliationDirectory, AffiliationManagement, AffiliationType, MembershipPolicy, MyAffiliations } from "@ayinou/shared";
-import { authorizedRequest } from "./api";
+import { authorizedRequest, publicRequest } from "./api";
 
 const base = (id: string) => `/api/v1/institutions/${id}/affiliations`;
 
@@ -8,10 +8,7 @@ function mutate(path: string, method: "POST" | "PATCH", input?: object): Promise
 }
 
 export async function readAffiliationDirectory(handle: string, signal?: AbortSignal): Promise<AffiliationDirectory> {
-  const url = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
-  const response = await fetch(`${url}/api/v1/institutions/by-handle/${encodeURIComponent(handle)}/affiliations`, { signal, cache: "no-store" });
-  if (!response.ok) throw new Error("API_ERROR");
-  return response.json();
+  return publicRequest(`/api/v1/institutions/by-handle/${encodeURIComponent(handle)}/affiliations`, { signal });
 }
 
 export const loadMyAffiliations = (signal?: AbortSignal): Promise<MyAffiliations> =>
