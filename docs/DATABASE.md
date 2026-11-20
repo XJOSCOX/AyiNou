@@ -586,3 +586,38 @@ Each successful change commits a versioned audit event with the state change. Lo
 | `PATCH /api/v1/admin/ambassadors/:id` | Record a privileged decision with the current version and reason. |
 
 Apply `20261120180000` then `20261120181000`. With `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs`, run `npm run test:hosted:ambassadors:sql -- --preflight` before applying and `npm run test:hosted:ambassadors:sql` afterward. The live `npm run test:hosted:ambassadors` suite reuses scoped synthetic Trust fixtures and removes the exact test records. Real public participation requires operational identity reviewers. Independent reconsideration needs a second active TOTP-backed platform administrator.
+
+## Phase 5D custom organization roles
+
+Owners and foundational administrators create custom role definitions, such as Communications Officer or Volunteer Coordinator, and assign them to eligible existing members or representatives. Each title and description is private organizational text. A grant establishes application permissions within one organization. Employment, verified representation, platform roles, institution ownership, and verification keep their existing workflows.
+
+| Capability | Active scope |
+| --- | --- |
+| `organization.view` | View scoped organization management information. |
+| `content.edit` | Edit the public description. Logo, contact, and identity writes retain their foundational guards. |
+| `affiliations.manage` | Manage eligible ordinary affiliations. Staff, current representatives, and members with operational grants need a foundational owner or administrator. |
+| `affiliations.review` | Read and decide ordinary join requests. Staff review stays with foundational managers. |
+| `affiliations.invite` | Invite an ordinary member, volunteer, or supporter and revoke one's own invitations. Staff invitations remain protected. The recipient is bound to the request and acceptance rechecks the inviter's current authority. |
+| `team.view` | View an authorized team list and current custom assignments. |
+| `roles.assign` | Assign or revoke existing eligible operational roles. Delegated managers use exact username lookup unless they also have team access. |
+
+Effective permissions are the union of the foundational role's capabilities and every current custom grant for the same organization. Owner and administrator retain the operational catalog and their original reserved permissions. Editor retains description editing and foundational profile access. Viewer retains foundational profile access. The new team listing capability has its own permission. An ordinary affiliation or custom role never adds an account to the representative switcher or changes the foundational role.
+
+Each assignment is bound to a current representative grant, or to the current ordinary affiliation when the person has no active representative grant. Direct assignment is an internal action for an already eligible account. Existing invitations remain recipient-bound and separate. Active accounts and organization status are checked on every request. Representative expiry immediately suppresses permission, and ordinary affiliation suspension or removal, representative revocation, and ownership transfer close affected assignments. Reinstatement of a suspended affiliation requires new grants. Role deactivation closes all assignments for that definition. Account or organization restrictions suppress access while they are active.
+
+Only foundational owners and administrators can create, edit or deactivate definitions. A delegated assignment manager can assign or revoke roles only when they hold every capability in the definition. Delegated managers cannot assign roles that contain assignment-management authority. Nobody changes their own custom assignments or assigns roles to the owner. An owner alone can grant to a foundational administrator. Existing account, reviewer, verified representative, private evidence, and affiliation policy protections remain in their original scopes.
+
+Role writes require a current bearer session with recent TOTP. The database locks the organization, rechecks authority and uses role versions to reject stale edits and assignments. Limits are 20 active and 100 total role definitions per organization, eight open assignments per member per organization, 500 current assignments per organization, and 100 recorded role changes per actor per day. The audit records successful mutations and before/after definition snapshots. An inherited relationship termination can appear as a system event, with the original action recorded in its existing audit. Denied attempts use the existing safe request logs. Assignment and revocation notices are recipient-bound and carry no role name or actor in the preview. The team workspace shows up to 100 members at a time, with exact username lookup and the latest 30 audit events for foundational managers.
+
+Future capabilities for project creation and management, tasks, volunteers, recruitment, financial reports, and announcements remain unavailable. Reserved ownership, foundational roles, platform administration, private contacts, verification and staff or membership policy cannot be selected in the custom catalog.
+
+| Endpoint | Operation |
+| --- | --- |
+| `GET /api/v1/me/organization-roles` | List delegated workspaces for affiliates without a foundational grant. |
+| `GET /api/v1/institutions/:id/roles` | Read effective permissions, definitions, a scoped team and authorized history. Optional exact `username` narrows the team. |
+| `POST /api/v1/institutions/:id/roles` | Create a role definition. |
+| `PATCH /api/v1/institutions/:id/roles/:roleId` | Edit or deactivate a definition with a current version. |
+| `POST /api/v1/institutions/:id/roles/:roleId/assignments` | Grant a role to an eligible account. |
+| `PATCH /api/v1/institutions/:id/roles/:roleId/assignments/:assignmentId` | Revoke a specific assignment. |
+
+Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` for the hosted checks. Apply `20261120190000`, `20261120191000` and `20261120192000` in order. Run `npm run test:hosted:organization-roles:sql -- --preflight` before application and the SQL command without `--preflight` afterward. The live `npm run test:hosted:organization-roles` exercises real TOTP with known synthetic institutions and cleans up those exact fixtures.

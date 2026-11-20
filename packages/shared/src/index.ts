@@ -98,7 +98,7 @@ export interface MemberNotification {
   available: boolean;
   kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "appeal_decided" |
     "verification_decided" | "verification_appeal_decided" | "representative_access_changed" |
-    "ambassador_invited" | "ambassador_updated" | null;
+    "ambassador_invited" | "ambassador_updated" | "organization_access_changed" | null;
   appealId?: string | null;
   postId: string | null;
   commentId: string | null;
@@ -403,9 +403,35 @@ export type AffiliationDirectory = {
 type AffiliationPersonPreview = { displayName: string | null; username: string | null; isSelf: boolean };
 export type AffiliationManagement = {
   membershipPolicy: MembershipPolicy; directoryEnabled: boolean; policyLocked: boolean; canSetPolicy: boolean;
-  members: (Affiliation & AffiliationPersonPreview)[];
+  canManageMembers: boolean; canReviewRequests: boolean; canInvite: boolean; canInviteStaff: boolean;
+  members: (Affiliation & AffiliationPersonPreview & { canManage: boolean })[];
   requests: (AffiliationPersonPreview & { id: string; affiliationType: AffiliationType; message: string | null; createdAt: string })[];
   invitations: (AffiliationInvitation & { username: string | null })[];
+};
+export const organizationPermissions = [
+  "organization.view", "content.edit", "affiliations.manage", "affiliations.review", "affiliations.invite", "team.view", "roles.assign",
+] as const;
+export const futureOrganizationPermissions = [
+  "projects.create", "projects.manage", "tasks.assign", "volunteers.coordinate", "recruitment.manage", "finance.reports", "announcements.publish",
+] as const;
+export const protectedOrganizationPermissions = ["ownership", "verification", "platform", "contacts", "membershipPolicy"] as const;
+export type OrganizationPermission = (typeof organizationPermissions)[number];
+export type OrganizationRoleInput = { name: string; description: string | null; permissions: OrganizationPermission[] };
+export type OrganizationCustomRole = OrganizationRoleInput & {
+  id: string; version: number; deactivatedAt: string | null; canDelegate: boolean; assignedToMe: boolean;
+};
+export type OperationalOrganization = Pick<Institution, "id" | "name" | "handle">;
+export type OrganizationRoleWorkspace = {
+  organization: OperationalOrganization & { description: string | null };
+  foundation: OrganizationRole | null;
+  permissions: OrganizationPermission[];
+  canEditRoles: boolean; canAssign: boolean; canViewTeam: boolean;
+  roles: OrganizationCustomRole[];
+  team: Array<{ id: string; username: string | null; displayName: string | null; foundation: OrganizationRole | null;
+    assignable: boolean; assignments: { id: string; roleId: string }[] }>;
+  activity: Array<{ id: string; roleId: string | null; event: "role_created" | "role_edited" | "role_deactivated" | "assigned" |
+    "revoked" | "relationship_ended" | "ownership_ended"; before: OrganizationRoleInput | null; after: OrganizationRoleInput | null;
+    occurredAt: string; actor: string | null; subject: string | null }>;
 };
 export const platformRoles = ["administrator", "moderator", "verification_reviewer"] as const;
 export type PlatformRole = (typeof platformRoles)[number];

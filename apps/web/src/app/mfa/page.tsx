@@ -8,6 +8,7 @@ export default async function MfaPage({ searchParams }: { searchParams: Promise<
   const join = typeof search.join === "string" && /^[a-z0-9][a-z0-9-]{2,39}$/.test(search.join) ? search.join : null;
   const requested = typeof search.next === "string" ? search.next : "";
   const privileged = requested === "/admin" || requested === "/verification/review" || requested === "/feed/moderation"
+    || /^\/institutions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/roles$/i.test(requested)
     || (requested.length <= 65 && /^\/communities\/[a-z0-9]+(?:-[a-z0-9]+)*(?:\/moderation)?$/.test(requested));
   const next = privileged || requested === "/reset-password" ? requested : claim ? `/verification?claim=${claim}`
     : join ? `/organization/${join}` : "/dashboard";

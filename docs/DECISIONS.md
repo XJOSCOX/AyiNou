@@ -139,3 +139,10 @@ Phase 2B uses self-declared membership categories. A category grants no verifica
 - Use private proposals, an explicit invitation, and recipient-only acceptance. Begin participation privately and require separate public consent and independently reviewed identity.
 - Keep a versioned, append-only audit trail. A different active administrator with recent TOTP can reconsider a revoked designation. A favorable outcome only permits a fresh invitation and consent.
 - Use in-app notices. Real reviewer staffing and retention for private decision notes remain operational requirements.
+
+### Phase 5D delegated institutional access
+
+- Keep four foundational roles and the representative and verification lifecycle. Add organization-specific capabilities through separately audited assignments.
+- Allow eligible delegated managers to grant only roles within their current capability set. Reserve delegation authority, role editing, ownership, staff operations, and verification for their original boundaries.
+- Bind a grant to its concrete relationship. Suspend or revoke access by checking current account and organization restrictions, closing ended relationships, and requiring fresh grants after ownership changes.
+- Require recent TOTP for role writes. Keep scoped team lists and generic in-app notices private. Activate future capabilities only with real backend functionality.

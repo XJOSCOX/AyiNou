@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
@@ -25,6 +25,7 @@ const handle = `institution-hosted-${run}`;
 let org;
 let ordinaryOrg;
 let reportId;
+const checkRoles = process.argv.includes("--roles");
 const ordinaryHandle = `affiliate-hosted-${run}`;
 
 async function fixture(label) {
@@ -47,6 +48,22 @@ async function send(method, url, expected, user, payload) {
   const response = await app.inject({ method, url, headers: user?.headers, payload });
   assert.equal(response.statusCode, expected, `${method} ${url}`);
   return response.body ? response.json() : undefined;
+}
+
+async function verifyAuthenticator(user) {
+  const enrollment = await user.client.auth.mfa.enroll({ factorType: "totp" });
+  assert.ifError(enrollment.error);
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+  const bits = [...enrollment.data.totp.secret.replace(/=+$/, "")]
+    .map((char) => alphabet.indexOf(char).toString(2).padStart(5, "0")).join("");
+  const key = Buffer.from((bits.match(/.{8}/g) ?? []).map((byte) => Number.parseInt(byte, 2)));
+  const counter = Buffer.alloc(8);
+  counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30_000)));
+  const digest = createHmac("sha1", key).update(counter).digest();
+  const code = String((digest.readUInt32BE(digest.at(-1) & 15) & 0x7fffffff) % 1_000_000).padStart(6, "0");
+  const verified = await user.client.auth.mfa.challengeAndVerify({ factorId: enrollment.data.id, code });
+  assert.ifError(verified.error);
+  user.headers.authorization = `Bearer ${verified.data.access_token}`;
 }
 
 try {
@@ -171,10 +188,56 @@ try {
   assert.ok(!JSON.stringify(await send("GET", directory, 200)).includes("Private synthetic message"));
   assert.equal((await send("GET", publicRoute, 200)).organization.verificationStatus, "unverified");
   console.log("Ordinary affiliation scope, concurrent join, approval, consent, invitations and audit history: pass");
+  if (checkRoles) {
+    const roleRoute = `${detail}/roles`;
+    const roleInput = { name: "Synthetic communications", description: null, permissions: ["content.edit", "team.view"] };
+    await send("POST", roleRoute, 403, owner, roleInput);
+    await verifyAuthenticator(owner);
+    await send("GET", roleRoute, 404, stranger);
+    const { id } = await send("POST", roleRoute, 201, owner, roleInput);
+    const role = `${roleRoute}/${id}`;
+    await send("POST", roleRoute, 409, owner, { ...roleInput, name: roleInput.name.toUpperCase() });
+    await send("POST", roleRoute, 422, owner, { ...roleInput, name: "Synthetic finance", permissions: ["finance.reports"] });
+    await send("POST", `${role}/assignments`, 403, owner, { version: 1, userId: owner.id });
+    await send("POST", `${role}/assignments`, 409, owner, { version: 1, userId: stranger.id });
+    await send("POST", `${root}/${ordinaryOrg}/roles/${id}/assignments`, 403, owner, { version: 1, userId: stranger.id });
+    const attempts = await Promise.all([1, 2].map(() => app.inject({
+      method: "POST", url: `${role}/assignments`, headers: owner.headers, payload: { version: 1, userId: editor.id },
+    })));
+    assert.deepEqual(attempts.map(({ statusCode }) => statusCode).sort(), [201, 409]);
+    const grant = attempts.find(({ statusCode }) => statusCode === 201).json().id;
+    const work = await send("GET", roleRoute, 200, editor);
+    assert.deepEqual(work.permissions, ["content.edit", "team.view"]);
+    assert.equal(work.foundation, null);
+    assert.ok(!JSON.stringify(work).includes("private@example.invalid"));
+    assert.ok((await editor.client.schema("private").from("organization_custom_roles").select("name")).error);
+    await send("PATCH", detail, 200, editor, { description: "Check delegated description edit" });
+    await send("PATCH", detail, 403, editor, { name: "Unauthorized identity change" });
+    await send("GET", detail, 403, editor);
+    await send("POST", roleRoute, 403, editor, roleInput);
+    await send("PATCH", role, 204, owner, { action: "save", version: 1, ...roleInput, permissions: ["team.view"] });
+    await send("PATCH", detail, 403, editor, { description: "Stale permissions" });
+    await send("PATCH", `${role}/assignments/${grant}`, 409, owner, { version: 1, action: "revoke" });
+    await send("PATCH", `${role}/assignments/${grant}`, 204, owner, { version: 2, action: "revoke" });
+    await send("GET", roleRoute, 404, editor);
+    const notices = (await send("GET", "/api/v1/me/notifications", 200, editor)).notifications
+      .filter(({ kind }) => kind === "organization_access_changed");
+    assert.equal(notices.length, 2);
+    assert.ok(notices.every(({ actor }) => actor === null) && !JSON.stringify(notices).includes(roleInput.name));
+    assert.ok((await send("GET", roleRoute, 200, owner)).activity.some(({ event }) => event === "role_edited"));
+    if (process.argv.includes("--browser")) {
+      await send("PATCH", role, 204, owner, { action: "save", version: 2, ...roleInput });
+      await send("POST", `${role}/assignments`, 201, owner, { version: 3, userId: editor.id });
+    } else {
+      await send("PATCH", role, 204, owner, { action: "deactivate", version: 2 });
+    }
+    console.log("Hosted custom-role MFA, assignment concurrency, scoped editing, revocation and private notices: pass");
+  }
   if (process.argv.includes("--browser")) {
-    const file = "supabase/.temp/phase5b-browser.json";
+    const file = checkRoles ? "supabase/.temp/phase5d-browser.json" : "supabase/.temp/phase5b-browser.json";
     try {
-      writeFileSync(file, JSON.stringify({ email: stranger.email, password, handle }), { mode: 0o600, flag: "wx" });
+      writeFileSync(file, JSON.stringify(checkRoles ? { email: editor.email, password, org } : { email: stranger.email, password, handle }),
+        { mode: 0o600, flag: "wx" });
       console.log("Browser fixture ready. Press Enter to clean up.");
       await new Promise((resolve) => { process.stdin.resume(); process.stdin.once("data", resolve); });
     } finally {

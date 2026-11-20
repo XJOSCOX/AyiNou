@@ -9,13 +9,13 @@ import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionAction, institutionErrorBox, institutionField, institutionLink } from "./institution-ui";
 
-export function AffiliationTypeSelect(props: ComponentProps<"select">) {
+export function AffiliationTypeSelect({ allowStaff = true, ...props }: ComponentProps<"select"> & { allowStaff?: boolean }) {
   const [locale] = useLocale();
   const t = affiliationMessages[locale];
   return (
     <label className="block min-w-0 text-sm font-semibold">{t.type}
       <select className={institutionField} {...props}>
-        {affiliationTypes.map((type) => <option key={type} value={type}>{t[type]}</option>)}
+        {affiliationTypes.filter((type) => allowStaff || type !== "staff").map((type) => <option key={type} value={type}>{t[type]}</option>)}
       </select>
     </label>
   );

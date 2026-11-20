@@ -24,6 +24,8 @@
     "test:hosted:accounts:preflight": "node scripts/check-phase2c-migration.mjs",
     "test:hosted:institutions:sql": "node scripts/check-phase2d-sql.mjs",
     "test:hosted:institutions": "node --import tsx scripts/check-phase2d-hosted.mjs",
+    "test:hosted:organization-roles:sql": "node scripts/check-organization-roles-sql.mjs",
+    "test:hosted:organization-roles": "node --import tsx scripts/check-phase2d-hosted.mjs --roles",
     "test:hosted:affiliations:sql": "node scripts/check-affiliations-sql.mjs",
     "test:hosted:admin:sql": "node scripts/check-admin-sql.mjs",
     "test:hosted:admin": "node --import tsx scripts/check-admin-hosted.mjs",

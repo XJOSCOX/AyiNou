@@ -1,0 +1,104 @@
+{
+  "title": "Roles y permisos",
+  "delegatedWork": "Espacios de organización delegados",
+  "permissionDetails": "Detalles de permisos",
+  "permissionHelp": "Tus permisos efectivos combinan tu rol básico con todas tus asignaciones personalizadas vigentes en esta organización.",
+  "foundation": "Rol básico",
+  "effective": "Activo para ti",
+  "notGranted": "Disponible para asignar",
+  "reserved": "Facultades reservadas",
+  "future": "No disponible hasta que exista la función",
+  "customRoles": "Roles personalizados",
+  "roleHelp": "Los títulos personalizados describen funciones internas. Una asignación no certifica empleo ni representación. Los cambios de permisos se aplican en la siguiente solicitud.",
+  "inactive": "Desactivado",
+  "active": "Activo",
+  "assignedToMe": "Asignado a ti",
+  "edit": "Editar rol",
+  "noRoles": "No hay roles personalizados en esta vista.",
+  "team": "Miembros del equipo",
+  "searchUsername": "Nombre de usuario exacto",
+  "search": "Buscar integrante",
+  "noTeam": "No hay integrantes elegibles que coincidan.",
+  "lookupRequired": "Busca un integrante elegible por su nombre de usuario exacto para gestionar una asignación.",
+  "history": "Historial de roles",
+  "noActivity": "No se han registrado cambios de roles.",
+  "unknown": "Miembro o rol no disponible",
+  "before": "Permisos anteriores",
+  "after": "Permisos registrados",
+  "save": "Guardar cambios",
+  "saved": "Cambios guardados.",
+  "name": "Nombre del rol",
+  "description": "Descripción del rol (opcional)",
+  "create": "Crear rol personalizado",
+  "deactivate": "Desactivar rol",
+  "confirmDeactivate": "¿Desactivar este rol y revocar todas sus asignaciones vigentes?",
+  "cancel": "Cancelar",
+  "affiliated": "Afiliación ordinaria",
+  "assignment": "Asignación de rol",
+  "chooseRole": "Elige un rol personalizado",
+  "assign": "Asignar rol",
+  "revoke": "Revocar rol",
+  "verify": "Verificar con tu aplicación de autenticación",
+  "notification": "Cambió tu acceso delegado a una organización.",
+  "unavailable": "Esta organización o este rol no está disponible.",
+  "changed": "El rol o la asignación cambió. Actualiza la página y comprueba los permisos actuales.",
+  "permissionProtected": "Este permiso está reservado o no está disponible.",
+  "duplicate": "Ya hay un rol activo con este nombre.",
+  "grantDenied": "Esta asignación excede tu autoridad delegada.",
+  "relationshipUnavailable": "La persona necesita una afiliación o representación vigente en esta organización.",
+  "capabilities": {
+    "organization.view": {
+      "label": "Ver el espacio de la organización",
+      "detail": "Abre el resumen de gestión permitido."
+    },
+    "content.edit": {
+      "label": "Editar la descripción",
+      "detail": "Actualiza la descripción pública. La identidad, el logotipo y el contacto conservan sus controles."
+    },
+    "affiliations.manage": {
+      "label": "Gestionar afiliaciones ordinarias",
+      "detail": "Modifica afiliaciones ordinarias elegibles. Los miembros protegidos requieren un responsable con rol básico."
+    },
+    "affiliations.review": {
+      "label": "Revisar solicitudes de afiliación",
+      "detail": "Decide sobre solicitudes ordinarias elegibles."
+    },
+    "affiliations.invite": {
+      "label": "Invitar miembros ordinarios",
+      "detail": "Envía invitaciones de afiliación ordinaria vinculadas al destinatario."
+    },
+    "team.view": {
+      "label": "Ver el equipo autorizado",
+      "detail": "Consulta integrantes elegibles y sus roles operativos."
+    },
+    "roles.assign": {
+      "label": "Gestionar asignaciones permitidas",
+      "detail": "Delega solo permisos que posees. Los responsables con rol básico controlan la facultad de delegar."
+    }
+  },
+  "protected": {
+    "ownership": "propiedad y roles básicos",
+    "verification": "verificación y pruebas privadas",
+    "platform": "administración de la plataforma",
+    "contacts": "contactos privados",
+    "membershipPolicy": "política de afiliación y afiliación del personal"
+  },
+  "planned": {
+    "projects.create": "crear proyectos",
+    "projects.manage": "gestionar proyectos",
+    "tasks.assign": "asignar tareas",
+    "volunteers.coordinate": "coordinar voluntarios",
+    "recruitment.manage": "gestionar contratación",
+    "finance.reports": "consultar informes financieros",
+    "announcements.publish": "publicar anuncios de la organización"
+  },
+  "events": {
+    "role_created": "Rol creado",
+    "role_edited": "Rol actualizado",
+    "role_deactivated": "Rol desactivado",
+    "assigned": "Rol asignado",
+    "revoked": "Asignación revocada",
+    "relationship_ended": "Relación terminada o suspendida",
+    "ownership_ended": "Fin de la titularidad anterior"
+  }
+}

@@ -515,3 +515,14 @@ Deployment order is the assignment and evidence changes, institutional report ty
 | `feed_data.notifications` | Optional `ambassador_case_id uuid` FK CASCADE to case, partial lookup index, two recipient-scoped notification kinds and constraints excluding other references. |
 
 Version 1 uses a fixed program with an account-bound lifecycle record. No email recipient or separate assignment table is used. Both private tables have RLS and no direct application-role privileges. Migration order is program and scoped RPCs, then notification integration. Public reads recheck current identity, profile eligibility and consent without editing verification or ranking records.
+
+### Phase 5D operational organization access
+
+| Applied relation | Columns and constraints |
+| --- | --- |
+| `private.organization_custom_roles` | Random UUID PK, organization FK cascade, name and description, fixed checked capability array, positive version, created and updated timestamps, optional deactivation timestamp. Unique case-insensitive active name within an organization and unique role ID and organization scope. |
+| `private.organization_custom_assignments` | Random UUID PK, organization and user FKs, composite role and organization FK, exactly one composite representative or affiliation relationship FK matching organization and user, grant timestamp and optional revoke timestamp. Unique open assignment per organization, role and account. Indexed by active account/organization, role scope, and relationship FKs. |
+| `private.organization_role_audit` | Random UUID PK, organization FK cascade, role and assignment IDs retained for history, optional actor and subject Auth FKs set null, event code, JSONB before and after states, occurrence timestamp. Indexes support recent organization history and actor rate limits. |
+| `feed_data.notifications` | Optional organization role audit event FK with cascade, partial index, and scope constraints preventing unrelated references. |
+
+The representative table gains a composite scope key for assignment references. Private role tables are RLS-enabled and expose no direct application-role table permissions. The deployment sequence is schema and guarded writes, scoped views and existing function integration, then notices. [Roles and permissions](DATABASE.md#phase-5d-custom-organization-roles)

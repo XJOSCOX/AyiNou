@@ -1,0 +1,104 @@
+{
+  "title": "Wòl ak pèmisyon",
+  "delegatedWork": "Espas òganizasyon mwen gen pèmisyon ladan yo",
+  "permissionDetails": "Detay pèmisyon yo",
+  "permissionHelp": "Pèmisyon ou genyen yo soti nan wòl debaz ou ak tout wòl pèsonalize ki aktif pou ou nan òganizasyon sa a.",
+  "foundation": "Wòl debaz",
+  "effective": "Aktif pou ou",
+  "notGranted": "Disponib pou bay",
+  "reserved": "Otorite rezève",
+  "future": "Pa disponib jiskaske fonksyon an pare",
+  "customRoles": "Wòl pèsonalize",
+  "roleHelp": "Tit pèsonalize dekri travay anndan òganizasyon an. Lè yo ba ou yon wòl, sa pa sètifye ou se anplwaye oswa reprezantan verifye. Chanjman pèmisyon yo aplike nan pwochen demann nan.",
+  "inactive": "Dezaktive",
+  "active": "Aktif",
+  "assignedToMe": "Yo ba ou wòl sa a",
+  "edit": "Modifye wòl la",
+  "noRoles": "Pa gen wòl pèsonalize nan lis sa a.",
+  "team": "Manm ekip la",
+  "searchUsername": "Non itilizatè egzak",
+  "search": "Chèche manm ekip la",
+  "noTeam": "Pa gen manm ekip ki kalifye pou rechèch sa a.",
+  "lookupRequired": "Chèche yon manm ki kalifye ak non itilizatè egzak li pou jere yon wòl.",
+  "history": "Istorik aktivite wòl yo",
+  "noActivity": "Yo poko anrejistre okenn chanjman wòl.",
+  "unknown": "Manm oswa wòl pa disponib",
+  "before": "Ansyen pèmisyon",
+  "after": "Pèmisyon ki anrejistre",
+  "save": "Anrejistre chanjman",
+  "saved": "Chanjman yo anrejistre.",
+  "name": "Non wòl la",
+  "description": "Deskripsyon wòl la (opsyonèl)",
+  "create": "Kreye wòl pèsonalize",
+  "deactivate": "Dezaktive wòl la",
+  "confirmDeactivate": "Dezaktive wòl sa a epi retire li pou tout moun ki genyen li?",
+  "cancel": "Anile",
+  "affiliated": "Afilyasyon òdinè",
+  "assignment": "Wòl pou bay",
+  "chooseRole": "Chwazi yon wòl pèsonalize",
+  "assign": "Bay wòl la",
+  "revoke": "Retire wòl la",
+  "verify": "Verifye ak aplikasyon otantifikasyon ou",
+  "notification": "Pèmisyon yo te ba ou nan yon òganizasyon chanje.",
+  "unavailable": "Òganizasyon oswa wòl sa a pa disponib.",
+  "changed": "Wòl la oswa pèmisyon yo chanje. Rafrechi paj la epi tcheke pèmisyon aktyèl yo.",
+  "permissionProtected": "Pèmisyon sa a rezève oswa li pa disponib.",
+  "duplicate": "Gen yon wòl aktif ki deja gen non sa a.",
+  "grantDenied": "Ou pa gen otorizasyon pou bay oswa retire wòl sa a.",
+  "relationshipUnavailable": "Moun nan bezwen yon afilyasyon oswa yon pozisyon reprezantan ki toujou aktif nan òganizasyon an.",
+  "capabilities": {
+    "organization.view": {
+      "label": "Gade espas òganizasyon an",
+      "detail": "Louvri rezime jesyon ki otorize a."
+    },
+    "content.edit": {
+      "label": "Modifye deskripsyon òganizasyon an",
+      "detail": "Mete deskripsyon piblik la ajou. Idantite, logo ak kontak toujou gen menm règ yo."
+    },
+    "affiliations.manage": {
+      "label": "Jere afilyasyon òdinè",
+      "detail": "Modifye afilyasyon òdinè ki kalifye. Manm pwoteje yo bezwen yon responsab ki gen wòl debaz."
+    },
+    "affiliations.review": {
+      "label": "Revize demann pou vin manm",
+      "detail": "Pran desizyon sou demann òdinè ki kalifye yo."
+    },
+    "affiliations.invite": {
+      "label": "Envite manm òdinè",
+      "detail": "Voye envitasyon pou afilyasyon òdinè bay moun ki dwe resevwa li a."
+    },
+    "team.view": {
+      "label": "Gade lis ekip ki otorize a",
+      "detail": "Gade manm ekip ki kalifye ak wòl operasyonèl yo."
+    },
+    "roles.assign": {
+      "label": "Jere wòl ou gen dwa bay",
+      "detail": "Bay sèlman pèmisyon ou genyen. Responsab ki gen wòl debaz kontwole otorite delegasyon an."
+    }
+  },
+  "protected": {
+    "ownership": "pwopriyete ak wòl debaz",
+    "verification": "verifikasyon ak prèv prive",
+    "platform": "administrasyon platfòm nan",
+    "contacts": "kontak prive",
+    "membershipPolicy": "règ afilyasyon ak afilyasyon anplwaye"
+  },
+  "planned": {
+    "projects.create": "kreye pwojè",
+    "projects.manage": "jere pwojè",
+    "tasks.assign": "bay travay",
+    "volunteers.coordinate": "kowòdone volontè",
+    "recruitment.manage": "jere rekritman",
+    "finance.reports": "gade rapò finansye",
+    "announcements.publish": "pibliye anons òganizasyon"
+  },
+  "events": {
+    "role_created": "Yo kreye wòl la",
+    "role_edited": "Yo mete wòl la ajou",
+    "role_deactivated": "Yo dezaktive wòl la",
+    "assigned": "Yo bay wòl la",
+    "revoked": "Yo retire wòl la",
+    "relationship_ended": "Relasyon an fini oswa sispann",
+    "ownership_ended": "Ansyen pwopriyetè a pèdi wòl li"
+  }
+}

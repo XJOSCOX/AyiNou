@@ -90,3 +90,7 @@ A member can request review of a personal identity or a public-figure claim. Ins
 ### Institutional trust profiles
 
 Organizational badges describe the category of an independently reviewed claim. A representative badge applies to a particular institution and current role. Only a verified representative can opt in to appearing by public name and handle on an institution profile for signed-in viewers. Members can report suspected institutional impersonation, unauthorized representation or misleading affiliations. Applicants can appeal eligible written decisions through the existing Verification workspace.
+
+### Operational organization roles
+
+Institutions can define internal duties and assign existing eligible members or representatives one or more operational roles. Team lists, role changes and internal titles stay private. The Roles & Permissions workspace shows the current capabilities and reserved controls. Description and ordinary affiliation work have separate permissions. Future project, volunteer, recruitment, finance and announcement capabilities follow the release of those features.

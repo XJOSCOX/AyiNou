@@ -1,0 +1,104 @@
+{
+  "title": "Rôles et permissions",
+  "delegatedWork": "Espaces d’organisation délégués",
+  "permissionDetails": "Détail des permissions",
+  "permissionHelp": "Vos permissions effectives combinent votre rôle de base et toutes vos attributions personnalisées en cours dans cette organisation.",
+  "foundation": "Rôle de base",
+  "effective": "Actif pour vous",
+  "notGranted": "Disponible à l’attribution",
+  "reserved": "Pouvoirs réservés",
+  "future": "Indisponible tant que la fonctionnalité est absente",
+  "customRoles": "Rôles personnalisés",
+  "roleHelp": "Les titres personnalisés décrivent des fonctions internes. Une attribution ne certifie ni un emploi ni un mandat de représentation. Les changements de permissions s’appliquent dès la prochaine requête.",
+  "inactive": "Désactivé",
+  "active": "Actif",
+  "assignedToMe": "Vous est attribué",
+  "edit": "Modifier le rôle",
+  "noRoles": "Cette vue ne contient aucun rôle personnalisé.",
+  "team": "Membres de l’équipe",
+  "searchUsername": "Identifiant exact",
+  "search": "Rechercher un membre",
+  "noTeam": "Aucun membre admissible ne correspond.",
+  "lookupRequired": "Recherchez un membre admissible par son identifiant exact pour gérer une attribution.",
+  "history": "Historique des rôles",
+  "noActivity": "Aucun changement de rôle n’a été enregistré.",
+  "unknown": "Membre ou rôle indisponible",
+  "before": "Permissions précédentes",
+  "after": "Permissions enregistrées",
+  "save": "Enregistrer les modifications",
+  "saved": "Modifications enregistrées.",
+  "name": "Nom du rôle",
+  "description": "Description du rôle (facultative)",
+  "create": "Créer un rôle personnalisé",
+  "deactivate": "Désactiver le rôle",
+  "confirmDeactivate": "Désactiver ce rôle et révoquer toutes ses attributions en cours ?",
+  "cancel": "Annuler",
+  "affiliated": "Affiliation ordinaire",
+  "assignment": "Attribution d’un rôle",
+  "chooseRole": "Choisir un rôle personnalisé",
+  "assign": "Attribuer le rôle",
+  "revoke": "Révoquer le rôle",
+  "verify": "Vérifier avec votre application d’authentification",
+  "notification": "Votre accès délégué à une organisation a changé.",
+  "unavailable": "Cette organisation ou ce rôle est indisponible.",
+  "changed": "Le rôle ou son attribution a changé. Actualisez la page et vérifiez les permissions actuelles.",
+  "permissionProtected": "Cette permission est réservée ou indisponible.",
+  "duplicate": "Un rôle actif utilise déjà ce nom.",
+  "grantDenied": "Cette attribution dépasse votre autorité déléguée.",
+  "relationshipUnavailable": "Le destinataire doit avoir une affiliation ou un mandat de représentation en cours dans cette organisation.",
+  "capabilities": {
+    "organization.view": {
+      "label": "Voir l’espace d’organisation",
+      "detail": "Ouvrir le récapitulatif de gestion autorisé."
+    },
+    "content.edit": {
+      "label": "Modifier la description",
+      "detail": "Mettre à jour la description publique. L’identité, le logo et le contact gardent leurs règles existantes."
+    },
+    "affiliations.manage": {
+      "label": "Gérer les affiliations ordinaires",
+      "detail": "Modifier les affiliations ordinaires admissibles. Un responsable de base intervient pour les membres protégés."
+    },
+    "affiliations.review": {
+      "label": "Examiner les demandes d’adhésion",
+      "detail": "Statuer sur les demandes ordinaires admissibles."
+    },
+    "affiliations.invite": {
+      "label": "Inviter des membres ordinaires",
+      "detail": "Envoyer des invitations nominatives d’affiliation ordinaire."
+    },
+    "team.view": {
+      "label": "Voir l’équipe autorisée",
+      "detail": "Voir les membres admissibles et leurs rôles opérationnels."
+    },
+    "roles.assign": {
+      "label": "Gérer les attributions permises",
+      "detail": "Déléguer uniquement vos permissions. Les responsables de base contrôlent le droit de déléguer."
+    }
+  },
+  "protected": {
+    "ownership": "propriété et rôles de base",
+    "verification": "vérification et preuves privées",
+    "platform": "administration de la plateforme",
+    "contacts": "coordonnées privées",
+    "membershipPolicy": "politique d’adhésion et affiliation du personnel"
+  },
+  "planned": {
+    "projects.create": "créer des projets",
+    "projects.manage": "gérer des projets",
+    "tasks.assign": "attribuer des tâches",
+    "volunteers.coordinate": "coordonner les bénévoles",
+    "recruitment.manage": "gérer le recrutement",
+    "finance.reports": "consulter les rapports financiers",
+    "announcements.publish": "publier des annonces d’organisation"
+  },
+  "events": {
+    "role_created": "Rôle créé",
+    "role_edited": "Rôle modifié",
+    "role_deactivated": "Rôle désactivé",
+    "assigned": "Rôle attribué",
+    "revoked": "Attribution révoquée",
+    "relationship_ended": "Relation terminée ou suspendue",
+    "ownership_ended": "Fin de la propriété précédente"
+  }
+}

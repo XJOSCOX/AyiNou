@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 5C Founding Ambassadors with hosted Supabase for development
+**Status:** Phase 5D organization roles and permissions with hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -122,6 +122,8 @@ Phase 2D hosted checks are `npm run test:hosted:institutions:sql` and `npm run t
 Institutional verification uses category-specific badges and two independent reviewers. Verified representatives can choose whether signed-in visitors see their public name and handle on the institution's profile. Signed-in members can report impersonation from that profile. [Evidence, ownership and reviewer setup](docs/DATABASE.md#phase-5b-institutional-trust)
 
 **Founding Ambassadors** at `/ambassadors` explains the program, selection criteria and public directory. Invitations are sent privately in the app. Participation starts privately, and only members with independently reviewed identity and a discoverable profile can opt in to public recognition. The member controls are under **Settings → My ambassador participation**. [Program rules, permissions and testing](docs/DATABASE.md#phase-5c-founding-ambassadors)
+
+Open **Roles & Permissions** from an institution to review operational permissions, manage custom roles, and see authorized team members. Role changes require recent TOTP. Members with delegated access can open their workspace from **Institutions**. [Permission matrix and API](docs/DATABASE.md#phase-5d-custom-organization-roles)
 
 Hosted Auth has email/password signup and confirmation enabled. Its site URL is `http://localhost:4000`, with `http://localhost:4000/auth/callback` and `http://localhost:4000/reset-password` allowed as redirects. The hosted default email sender reaches only organization team addresses and allows very few messages per hour; use a controlled team mailbox for limited testing or configure custom SMTP for reliable signup and password-reset testing. Do not turn off confirmation to bypass this. Local Mailpit is available only with the optional Docker stack; it is not the hosted project's inbox. See [docs/DATABASE.md](docs/DATABASE.md) for testing limits and troubleshooting.
 

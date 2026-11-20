@@ -10,6 +10,7 @@ import { affiliationMessages } from "@/lib/affiliation-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
+import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AffiliationFeedback, AffiliationTypeSelect, useAffiliationAction } from "./affiliation-ui";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -47,7 +48,7 @@ export function AffiliationManagementScreen({ id }: { id: string }) {
     <MemberShell>
       <div className="grid gap-5">
         <header>
-          <Link className={institutionLink} href={`/institutions/${id}`}>{system.institutionProfile}</Link>
+          <Link className={institutionLink} href={`/institutions/${id}/roles`}>{organizationRoleMessages[locale].title}</Link>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{t.management}</h1>
           <p className="mt-2 max-w-3xl text-[var(--theme-body)]">{t.authorityNote}</p>
         </header>
@@ -57,19 +58,19 @@ export function AffiliationManagementScreen({ id }: { id: string }) {
         </div> : !data ? <p role="status">{auth.working}</p> : (
           <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
             <div className="grid min-w-0 gap-4">
-              <section className={institutionCard}>
+              {data.canReviewRequests && <section className={institutionCard}>
                 <h2 className="text-xl font-semibold">{t.requests}</h2>
                 {data.requests.length ? <ul className="mt-3 divide-y divide-[var(--theme-border)]">
                   {data.requests.map((request) => <RequestRow key={request.id} id={id} request={request}
                     approvalAllowed={data.membershipPolicy !== "invitation_only"} refresh={resource.refresh} />)}
                 </ul> : <p className="mt-2 text-sm text-[var(--theme-body)]">{t.requestEmpty}</p>}
-              </section>
-              <section className={institutionCard}>
+              </section>}
+              {data.canManageMembers && <section className={institutionCard}>
                 <h2 className="text-xl font-semibold">{t.roster}</h2>
                 {data.members.length ? <ul className="mt-3 divide-y divide-[var(--theme-border)]">
-                  {data.members.map((member) => <MemberRow key={member.id} id={id} member={member} refresh={resource.refresh} />)}
+                  {data.members.map((member) => <MemberRow key={member.id} id={id} member={member} refresh={resource.refresh} allowStaff={data.canInviteStaff} />)}
                 </ul> : <p className="mt-2 text-sm text-[var(--theme-body)]">{t.rosterEmpty}</p>}
-              </section>
+              </section>}
             </div>
             <div className="grid min-w-0 gap-4">
               <section className={institutionCard}>
@@ -90,14 +91,14 @@ export function AffiliationManagementScreen({ id }: { id: string }) {
                   </form>
                 ) : <p className="mt-2 text-sm font-semibold">{t[data.membershipPolicy]}</p>}
               </section>
-              <section className={institutionCard}>
+              {data.canInvite && <section className={institutionCard}>
                 <h2 className="text-xl font-semibold">{t.invite}</h2>
                 <p className="mt-2 text-sm text-[var(--theme-body)]">{t.inviteHelp}</p>
                 <form className="mt-4 grid gap-3" onSubmit={invite} aria-busy={action.busy}>
                   <label className="text-sm font-semibold">{membershipMessages[locale].username}
                     <input className={institutionField} name="username" autoCapitalize="none" spellCheck={false} required minLength={3} maxLength={24} disabled={action.busy} />
                   </label>
-                  <AffiliationTypeSelect name="type" disabled={action.busy} />
+                  <AffiliationTypeSelect name="type" disabled={action.busy} allowStaff={data.canInviteStaff} />
                   <button type="submit" className={institutionAction} disabled={action.busy}>{t.invite}</button>
                 </form>
                 <h3 className="mt-5 border-t border-[var(--theme-border)] pt-4 font-semibold">{t.invitations}</h3>
@@ -109,7 +110,7 @@ export function AffiliationManagementScreen({ id }: { id: string }) {
                       onClick={() => { void action.run(() => resolveAffiliationInvitation(item.id, "revoke")); }}>{system.cancelInvite}</button>
                   </li>)}
                 </ul> : <p className="mt-2 text-sm text-[var(--theme-body)]">{system.noInvitations}</p>}
-              </section>
+              </section>}
               <AffiliationFeedback failure={action.failure} saved={action.saved} />
             </div>
           </div>
@@ -155,7 +156,9 @@ function RequestRow({ id, request, approvalAllowed, refresh }: {
   );
 }
 
-function MemberRow({ id, member, refresh }: { id: string; member: AffiliationManagement["members"][number]; refresh: () => void }) {
+function MemberRow({ id, member, refresh, allowStaff }: {
+  id: string; member: AffiliationManagement["members"][number]; refresh: () => void; allowStaff: boolean;
+}) {
   const [locale] = useLocale();
   const t = affiliationMessages[locale];
   const action = useAffiliationAction(refresh);
@@ -165,7 +168,7 @@ function MemberRow({ id, member, refresh }: { id: string; member: AffiliationMan
     <li className="space-y-2 py-3">
       <p className="break-words font-semibold">{member.displayName ?? member.username ?? t.unknownMember}</p>
       <p className="text-sm text-[var(--theme-body)]">{t[member.affiliationType]} · {t[member.status]}{member.admission && ` · ${t[member.admission]}`}</p>
-      {!member.isSelf && <>
+      {member.canManage && <>
         <div className="flex flex-wrap gap-3">
           {member.status === "active" && <button type="button" className={institutionLink} disabled={action.busy}
             onClick={() => { void action.run(() => updateAffiliation(id, member.id, "suspend")); }}>{t.suspend}</button>}
@@ -183,7 +186,7 @@ function MemberRow({ id, member, refresh }: { id: string; member: AffiliationMan
           const type = affiliationTypes.find((option) => option === value);
           if (type && type !== member.affiliationType) void action.run(() => updateAffiliation(id, member.id, "change_type", type));
         }}>
-          <AffiliationTypeSelect name="type" key={member.affiliationType} defaultValue={member.affiliationType} disabled={action.busy} />
+          <AffiliationTypeSelect name="type" key={member.affiliationType} defaultValue={member.affiliationType} disabled={action.busy} allowStaff={allowStaff} />
           <button type="submit" className={institutionLink} disabled={action.busy}>{t.change_type}</button>
         </form>}
       </>}

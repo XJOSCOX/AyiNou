@@ -1,0 +1,104 @@
+{
+  "title": "Roles & Permissions",
+  "delegatedWork": "Delegated organization workspaces",
+  "permissionDetails": "Permission details",
+  "permissionHelp": "Your effective permissions combine your foundational role and all current custom assignments in this organization.",
+  "foundation": "Foundational role",
+  "effective": "Active for you",
+  "notGranted": "Available to grant",
+  "reserved": "Reserved authority",
+  "future": "Unavailable until the feature exists",
+  "customRoles": "Custom roles",
+  "roleHelp": "Custom titles describe internal duties. A role assignment does not certify employment or representative status. Permission changes take effect on the next request.",
+  "inactive": "Deactivated",
+  "active": "Active",
+  "assignedToMe": "Assigned to you",
+  "edit": "Edit role",
+  "noRoles": "There are no custom roles in this view.",
+  "team": "Team members",
+  "searchUsername": "Exact username",
+  "search": "Find team member",
+  "noTeam": "No eligible team members match.",
+  "lookupRequired": "Find an eligible member by exact username to manage an assignment.",
+  "history": "Role activity history",
+  "noActivity": "No role changes have been recorded.",
+  "unknown": "Unavailable member or role",
+  "before": "Previous permissions",
+  "after": "Recorded permissions",
+  "save": "Save changes",
+  "saved": "Changes saved.",
+  "name": "Role name",
+  "description": "Role description (optional)",
+  "create": "Create custom role",
+  "deactivate": "Deactivate role",
+  "confirmDeactivate": "Deactivate this role and revoke all its current assignments?",
+  "cancel": "Cancel",
+  "affiliated": "Ordinary affiliation",
+  "assignment": "Role assignment",
+  "chooseRole": "Choose a custom role",
+  "assign": "Assign role",
+  "revoke": "Revoke role",
+  "verify": "Verify with your authenticator",
+  "notification": "Your delegated access for an organization changed.",
+  "unavailable": "This organization or role is unavailable.",
+  "changed": "The role or assignment changed. Refresh and check the current permissions.",
+  "permissionProtected": "This permission is reserved or unavailable.",
+  "duplicate": "An active role already uses this name.",
+  "grantDenied": "This assignment is outside your delegated authority.",
+  "relationshipUnavailable": "The recipient needs a current affiliation or representative position in this organization.",
+  "capabilities": {
+    "organization.view": {
+      "label": "View organization workspace",
+      "detail": "Open the scoped management summary."
+    },
+    "content.edit": {
+      "label": "Edit organization description",
+      "detail": "Update the public description. Identity, logo and contact changes keep their existing controls."
+    },
+    "affiliations.manage": {
+      "label": "Manage ordinary affiliations",
+      "detail": "Change eligible ordinary affiliations. Protected members need a foundational manager."
+    },
+    "affiliations.review": {
+      "label": "Review membership requests",
+      "detail": "Decide eligible ordinary membership requests."
+    },
+    "affiliations.invite": {
+      "label": "Invite ordinary members",
+      "detail": "Send recipient-bound invitations for ordinary affiliation."
+    },
+    "team.view": {
+      "label": "View authorized team list",
+      "detail": "See eligible team members and their operational roles."
+    },
+    "roles.assign": {
+      "label": "Manage permitted assignments",
+      "detail": "Delegate only permissions you hold. Foundational managers control delegation authority."
+    }
+  },
+  "protected": {
+    "ownership": "ownership and foundational roles",
+    "verification": "verification and private evidence",
+    "platform": "platform administration",
+    "contacts": "private contacts",
+    "membershipPolicy": "membership policy and staff affiliation"
+  },
+  "planned": {
+    "projects.create": "create projects",
+    "projects.manage": "manage projects",
+    "tasks.assign": "assign tasks",
+    "volunteers.coordinate": "coordinate volunteers",
+    "recruitment.manage": "manage recruitment",
+    "finance.reports": "access financial reports",
+    "announcements.publish": "publish organization announcements"
+  },
+  "events": {
+    "role_created": "Role created",
+    "role_edited": "Role updated",
+    "role_deactivated": "Role deactivated",
+    "assigned": "Role assigned",
+    "revoked": "Assignment revoked",
+    "relationship_ended": "Relationship ended or suspended",
+    "ownership_ended": "Previous ownership ended"
+  }
+}

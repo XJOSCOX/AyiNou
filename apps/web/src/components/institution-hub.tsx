@@ -15,6 +15,7 @@ import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionStatus, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { MyAffiliationsPanel } from "./my-affiliations-panel";
+import { OperationalOrganizations } from "./organization-roles";
 
 export function InstitutionHub() {
   const [locale] = useLocale();
@@ -98,6 +99,7 @@ export function InstitutionHub() {
           </div>
         )}
         <MyAffiliationsPanel />
+        <OperationalOrganizations />
       </div>
     </MemberShell>
   );

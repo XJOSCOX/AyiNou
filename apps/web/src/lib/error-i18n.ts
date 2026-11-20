@@ -12,6 +12,7 @@ import { groupMessages } from "./groups-i18n";
 import { communityDiscoveryMessages } from "./community-discovery-i18n";
 import { trustMessages } from "./trust-i18n";
 import { ambassadorMessages } from "./ambassador-i18n";
+import { organizationRoleMessages } from "./organization-role-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -40,6 +41,12 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "AMBASSADOR_UNAVAILABLE": return ambassadorMessages[locale].unavailable;
     case "AMBASSADOR_CASE_CHANGED": return ambassadorMessages[locale].changed;
     case "AMBASSADOR_PUBLIC_ELIGIBILITY": return ambassadorMessages[locale].eligibility;
+    case "ORGANIZATION_ROLE_UNAVAILABLE": return organizationRoleMessages[locale].unavailable;
+    case "ORGANIZATION_ROLE_CHANGED": return organizationRoleMessages[locale].changed;
+    case "ORGANIZATION_PERMISSION_PROTECTED": return organizationRoleMessages[locale].permissionProtected;
+    case "ORGANIZATION_ROLE_NAME_CONFLICT": return organizationRoleMessages[locale].duplicate;
+    case "ORGANIZATION_GRANT_DENIED": return organizationRoleMessages[locale].grantDenied;
+    case "ORGANIZATION_RELATIONSHIP_UNAVAILABLE": return organizationRoleMessages[locale].relationshipUnavailable;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

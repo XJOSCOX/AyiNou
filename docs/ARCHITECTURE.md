@@ -133,3 +133,7 @@ Institutional cases use the same assignment-gated work queue and independent app
 ### Founding Ambassador program
 
 Fastify uses the existing bearer boundary and stable shared contracts for candidate lookup, invitation decisions, and member consent. PostgreSQL owns every transition, validates recent TOTP for privileged actions, and appends private audit history and recipient-only notices in the same transaction. The public directory and profile designation share one eligibility query against the current independent identity claim and discoverability rules, with role and ranking services kept separate. The UI uses the shared theme, locale controls and error translations.
+
+### Operational organization roles
+
+Fastify forwards caller tokens to the role RPCs and existing actor-bound institution handlers delegate scoped checks to PostgreSQL. Effective permissions combine foundational authority and relationship-bound custom grants. Role mutations serialize per organization with version checks, recent TOTP, audit, and private notices. Representative and ownership checks and independent verification still use the foundational model. The same scoped API and contracts can serve web and future mobile clients.

@@ -206,6 +206,14 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Support voluntary withdrawal, suspension, revocation, and independent reconsideration.
 - [ ] Staff identity review and independent program reconsideration before inviting real participants.
 
+## Phase 5D — Custom organization roles and team permissions
+
+- [x] Add scoped operational roles, multiple assignments per member, and an effective-permission matrix.
+- [x] Connect description editing and ordinary affiliation operations to separate capability checks.
+- [x] Require recent TOTP for role changes and audit assignments, edits, deactivation, and lifecycle revocations.
+- [x] Show authorized team details and private role notices.
+- [ ] Enable future project, task, volunteer, recruitment, finance, and announcement permissions alongside their backend workflows.
+
 ## Phase 6 — Initiatives, projects and volunteers
 
 - [ ] Propose projects with location region (not dangerous exact coordinates), objectives and owners.

@@ -2,6 +2,7 @@
 
 import { notificationPreferenceKeys, type MemberNotification } from "@ayinou/shared";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
+import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import Link from "next/link";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
@@ -21,6 +22,7 @@ function notificationTarget({ available, kind, actor, postId, commentId, appealI
   if (kind === "verification_decided" || kind === "verification_appeal_decided") return "/verification";
   if (kind === "representative_access_changed") return "/institutions";
   if (kind === "ambassador_invited" || kind === "ambassador_updated") return "/settings/ambassadors";
+  if (kind === "organization_access_changed") return "/institutions";
   if (!postId) return null;
   return `/posts/${postId}${commentId ? `?comment=${commentId}` : ""}`;
 }
@@ -57,6 +59,7 @@ export function NotificationCenter() {
         : item.kind === "representative_access_changed" ? trustMessages[locale].representativeAlert
         : item.kind === "ambassador_invited" ? ambassadorMessages[locale].invitedNotice
         : item.kind === "ambassador_updated" ? ambassadorMessages[locale].updatedNotice
+        : item.kind === "organization_access_changed" ? organizationRoleMessages[locale].notification
         : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
       return <li key={item.id} className={`${institutionCard} flex flex-wrap items-center justify-between gap-3`}>
         <div className="min-w-0"><p className={`break-words ${newItem ? "font-semibold" : ""}`}>{text}</p>

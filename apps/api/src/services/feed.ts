@@ -50,6 +50,12 @@ export function feedDatabaseError(code: string): ApiError {
     case "PAB04": return new ApiError(404, "AMBASSADOR_UNAVAILABLE", "Program case unavailable");
     case "PAB09": return new ApiError(409, "AMBASSADOR_CASE_CHANGED", "Program case changed or action unavailable");
     case "PAB11": return new ApiError(409, "AMBASSADOR_PUBLIC_ELIGIBILITY", "Public eligibility is required");
+    case "POR04": return new ApiError(404, "ORGANIZATION_ROLE_UNAVAILABLE", "Organization or role unavailable");
+    case "POR09": return new ApiError(409, "ORGANIZATION_ROLE_CHANGED", "Role or assignment has changed");
+    case "POR11": return new ApiError(422, "ORGANIZATION_PERMISSION_PROTECTED", "Permission cannot be assigned");
+    case "POR12": return new ApiError(409, "ORGANIZATION_ROLE_NAME_CONFLICT", "Role name is already in use");
+    case "POR13": return new ApiError(403, "ORGANIZATION_GRANT_DENIED", "Assignment is outside delegated authority");
+    case "POR14": return new ApiError(409, "ORGANIZATION_RELATIONSHIP_UNAVAILABLE", "A current organization relationship is required");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");
