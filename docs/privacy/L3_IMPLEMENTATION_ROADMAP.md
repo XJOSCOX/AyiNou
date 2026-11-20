@@ -15,6 +15,8 @@ The implementation supports synthetic authenticated submission, status, history 
 
 ## L3.3 Personal data export
 
+L3.3 implements a limited synthetic projection, encrypted temporary artifacts, same-session release and scoped artifact cleanup. Production disclosure rules, key custody, recovery, and activation remain pending. [Implemented L3.3 scope](L3_3_IMPLEMENTATION_REPORT.md)
+
 - **Model and candidate migration.** Add export runs, versioned allowlist projections, restricted artifact and download-grant records with scope, key version, expiry and cleanup state. Bind snapshots to authorized cases and make audit independent of object contents.
 - **API and experience.** Proposed `POST /api/v1/me/privacy-requests/:id/export`, `GET /api/v1/me/privacy-exports/:id` and an authenticated download stream. Show securely available, expired, revoked and retryable states in all four locales. Provide structured data and a readable manifest in the saved language. Ordinary administrators handle safe status and escalation only, with separately scoped policy decisions where approved.
 - **Authorization and recovery.** Recheck live proof and rights at generation and delivery; short-lived purpose/session-bound grant with bounded reuse; redact logs and avoid credentials in URLs. Audit only artifact status, policy scope and release metadata. Resume or replace failed runs with stable generation/manifest versions. Revoke access before cleanup and reconcile orphaned artifacts without browsing archive contents.

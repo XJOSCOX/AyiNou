@@ -1,0 +1,46 @@
+# Legal L3.3 synthetic personal data export
+
+Baseline `1fd77af110f234c0a5262ee2c59b6f1245895906` on `main`. The synthetic projection is a development policy, with no approved production disclosures. The pilot remains a planning decision. Account Settings → Privacy Requests shows case-specific export controls only for eligible isolated fixtures. Interface text is available in Haitian Creole, French, English and Spanish.
+
+## Field inventory and approval boundaries
+
+All implemented fields below require the matching synthetic subject, an eligible received export case, the current case and projection versions, a live Supabase session and recent TOTP. The allowlist lives in the SQL projection and is validated again by the package builder. The data is visible to the acting subject only. No category has production approval.
+
+| Source | Fields included for synthetic fixtures and classification | Exclusions and review required before broadening |
+| --- | --- | --- |
+| `public.profiles` | Preferred language and public-profile flag, subject-supplied settings. | Names, handles, biographies, IDs, avatar paths and dates outside the projection. Review rights and provenance of display text and media. |
+| `public.member_private` | Country, residence department and diaspora department codes, subject-supplied. | Names, identity fields, private narrative and membership details need privacy review. |
+| `public.user_settings` and `public.member_interests` | Discoverable and membership-category-display flags and selected interest codes, subject-supplied. | Browser-local state and unseen recommendation or ranking data. |
+| `private.member_codes`, referral tables, and `auth.users` | No projection. | Own member/referral identifiers and selected Auth metadata await review. Other actors' identifiers, edges, passwords, security signals, session and recovery secrets are excluded. |
+| `feed_data.posts` | Language, visibility, draft/published status and creation time, subject input and metadata. Personal, non-removed posts only. | Text can contain other people's data. Exclude author and post IDs, moderation or appeal details, group posts, attachments and protected content. |
+| `feed_data.comments` | Language and creation time for the subject's visible top-level comments on their own eligible posts, subject input and metadata. | Replies, other authors' content, post/parent IDs, investigation details and free text. |
+| Storage and `private.project_images` | No projection. | Avatar/logo/post bytes, object paths and signed URLs are provider-dependent. Project image and progress evidence bytes live in PostgreSQL and can be shared or restricted. Verify rights, holds and cross-reference ownership before any future inclusions. |
+| Following and community membership | No projection. | Other-account edges and private group membership or history await separate scope review. |
+| `private.organization_affiliations` | Type and directory opt-in for the subject's active affiliations, subject participation settings. | Organization IDs and labels, other members, contacts, invitation and review records. |
+| Verification, safety, blocks and appeals | No projection. | Restrict case, appeal or safety metadata pending disclosure and stronger proof rules. Evidence, private reviewer notes, other subjects, detection rules and security secrets are excluded. |
+| Project teams, volunteers, progress and proposal records | No projection. | Own applications, ownership, contributions, assignments and progress need per-role, record-level review. Hidden third-party evidence and review details are excluded. |
+| Notifications and recommendations | No projection. | Recipient status and own feedback may be reviewable. Sender/target details, ranking inputs and content from restricted resources are excluded. |
+| `private.privacy_cases` | Own case kind, safe state and creation time, subject input and derived status. | Case IDs, reviewer assignments, audit reasons and proofs. |
+| `private.poll_ballots` | Own participation indicator across recorded polls, derived from existence of a subject row. | No poll IDs, vote times, option IDs, counts, choices, electorate, or portable poll-specific receipts. Existing authorized own receipts stay in the poll workflow. No voting or finalization code changes. |
+
+The manifest classifies omitted fields as pending review, additional proof required, provider-dependent, or excluded. Subject-owned selections use explicit fields and bounded reads in one database snapshot. The 101st row is a truncation signal. The UTF-8 JSON document contains structured category data, a readable text manifest, schema/policy/projection versions, generation time, category counts, omissions and SHA-256 checksums of compact UTF-8 JSON per category. Truncated categories are labeled. A failed or invalid read cannot produce an available partial artifact.
+
+## Artifact and download security
+
+`AYINOU_PRIVACY_EXPORT` defaults to disabled. The API requires L3.2 synthetic mode on the exact disposable loopback endpoint outside production, plus the export flag and a valid 32-byte test key. PostgreSQL independently requires both fixture allowlists and a valid session. The export fixture table starts empty. There is no hosted key setup or activation mode for real users.
+
+AES-256-GCM uses a fresh 96-bit nonce, a per-artifact HKDF-SHA-256 subkey, and authenticated binding to the subject, case, artifact and policy/key version. Plaintext is built and authenticated in bounded process memory. The database stores only ciphertext and integrity metadata, never a decrypting key or URL. The test runner holds the version-1 master key in the API process environment for a single disposable run. Real KMS, rotation, custody, incident recovery and restore suppression require independent approval. Already-downloaded files stay under the recipient's control.
+
+Generation pins an eligible case and uses an idempotency key and a 30-second fenced lease. Concurrent retries share an artifact; a crashed attempt can resume on the same command after expiry, up to five attempts during the test window. A lost commit response is reconciled by reading that same run. A reload retains status but discards the in-memory key; a member can revoke an unrecoverable run and use a fresh synthetic case. Encrypted payload write and availability commit together, so there are no orphan Storage objects or ambiguous separate byte and row commits. The release step checks current subject, the original session, TOTP freshness, case state and version, current projection digest, expiry, revocation and the remaining synthetic download slots. The download uses an authenticated no-store attachment response. It carries no query credential and exposes no Storage key. A source change requires a new case and artifact.
+
+An authenticated status or revocation triggers bounded subject-scoped cleanup of up to eight eligible rows under locks. Cleanup atomically clears ciphertext and integrity references and records a terminal outcome/time. It does not touch user media, project evidence or account records. Expiry and revocation deny access before bytes are cleared. Unavailable storage transactions can be retried without re-exposing anything. The ten-minute window and three uses are synthetic settings, not approved retention periods or production limits. This phase does not verify physical removal from database pages, write-ahead logs or backups.
+
+## Validation and hosted status
+
+- Clean candidate `b8bc9ade6c4887a1f7489f22c11c975bbf68d70c` passed workspace typecheck, lint, shared contract and translation parity, 42 API tests, seven client tests, dependency audit, and both production builds. The complete isolated Chromium suite passed all 35 tests.
+- The disposable database replayed all 58 migrations. Tests checked service-only functions and RLS, subject and session isolation, old and missing MFA, wrong command keys and stale case versions, duplication across API processes, confidential ballots, and exclusion of third-party and free-text data. An abandoned lease and a rejected ciphertext write left no available partial artifact. Tests covered AEAD tampering and invalid keys, corruption recovery, expiry, withdrawal, usage limits, idempotent cleanup across processes, and all four UI locales. The original L3.2 grant tests still assert its five tables and two RPCs explicitly.
+- Hosted project `hcbxulyfmdmuyccgrujs` first passed a read-only preflight and migration dry-run. The single additive migration `20261120231000_l33_privacy_exports.sql` was then applied. Read-only postflight confirmed the migration ledger, both RLS-enabled tables, both service-only RPCs, empty intake/export fixture and case/artifact tables, and no export bucket. All artifact, revocation and cleanup tests ran locally; no hosted package was generated.
+
+## Dependencies before activation
+
+Approve disclosures, jurisdiction, sensitive-data proof, reviewer and representative authority, production key and storage custody, artifact lifetimes, notices, recovery and restoration before real export. L3.4 still needs approved data and evidence lifecycle, ownership dependency handling, ballot protection, Auth and Storage disposition, and tested reconciliation and restore. [L3 roadmap](L3_IMPLEMENTATION_ROADMAP.md)

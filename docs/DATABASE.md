@@ -750,3 +750,17 @@ Migration `20261120230000_l32_privacy_intake.sql` adds `private.privacy_cases`, 
 | `/admin/privacy-requests/*` | Denial boundary. In isolated mode, the route checks a live session and recent MFA before denying review. No queue or assignment operation. |
 
 Receipts contain the opaque case ID, state and version, and remain stable for an identical command retry. Creation begins at version 1 and can transition once to withdrawn at version 2. Structured audit events omit evidence and claimant-visible history omits internal request identifiers and reason codes. Case policy context is explicitly unresolved. [Scope and operations](privacy/L3_2_IMPLEMENTATION_REPORT.md)
+
+## Legal L3.3 synthetic exports
+
+Migration `20261120231000_l33_privacy_exports.sql` adds the empty `private.privacy_export_fixtures` gate and `private.privacy_exports` table. Both enable RLS and revoke direct application-role access. The two public-schema RPCs are service-only with explicit search paths. Generation claims a lease with an opaque fencing token. The export row stores bounded ciphertext, binding and integrity metadata, download count, and expiry and cleanup state. The case and run locks prevent stale withdrawal, release, revocation or retry from resurrecting a finished artifact.
+
+| API under `/api/v1` | Function |
+| --- | --- |
+| `GET /me/privacy-exports/availability` | Verify scoped synthetic availability. |
+| `GET /me/privacy-requests/:id/export` · `GET /me/privacy-exports/:id` | Read the subject's safe export status, including eligible category counts. |
+| `POST /me/privacy-requests/:id/export` | Claim or retry an export for the current case version using a UUID idempotency key. |
+| `GET /me/privacy-exports/:id/download` | Same-session, recently verified, authenticated delivery. Successful release consumes one of three synthetic uses. |
+| `POST /me/privacy-exports/:id/revoke` | Terminal revocation for the verified subject using a UUID idempotency key, followed by bounded cleanup. |
+
+The bundle never contains case IDs, Storage object keys or ballot choices. See the field inventory and synthetic lifecycle in the [L3.3 implementation report](privacy/L3_3_IMPLEMENTATION_REPORT.md).
