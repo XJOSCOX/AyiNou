@@ -29,6 +29,14 @@ function fixture() {
       if (name === "list_feed_reports_for_client") return [] as T;
       if (name === "list_comment_reports_for_client") return [] as T;
       if (name === "list_comments_for_client") return [first, second] as T;
+      if (name === "search_discovery_for_client") return [
+        { id: "member:example", kind: "member", handle: "example", name: "Example", verified: false, following: false, self: false },
+        { id: "member:second", kind: "member", handle: "second", name: "Second", verified: false, following: false, self: false },
+      ] as T;
+      if (name === "write_follow_for_client") {
+        return (input?.p_key === "private_account" ? { error: "PFR04" }
+          : { following: input?.p_follow, followerCount: 1, followingCount: 0, canFollow: true, verified: false }) as T;
+      }
       if (name === "write_engagement_for_client") {
         if (input?.p_operation === "edit") return { error: "PFR09" } as T;
         return { id: first.id } as T;
@@ -71,6 +79,35 @@ test("post creation validates requests, preserves source text and forwards only 
     assert.deepEqual(created.json(), { id: first.id });
     assert.deepEqual(calls, [{ token: "member", name: "create_post_for_client",
       input: { p_body: body.body, p_language: "es", p_visibility: "public", p_submission: key } }]);
+  } finally {
+    await app.close();
+  }
+});
+
+test("discovery validates shape, cursors and session-bound follow writes", async () => {
+  const { app, calls } = fixture();
+  try {
+    const discovery = "/api/v1/discover/people";
+    const headers = { authorization: "Bearer member" };
+    assert.equal((await app.inject(discovery)).statusCode, 401);
+    assert.equal((await app.inject({ url: `${discovery}?q=x`, headers })).statusCode, 400);
+    assert.equal((await app.inject({ url: `${discovery}?category=education`, headers })).statusCode, 400);
+    const page = await app.inject({ url: `${discovery}?q=Example&limit=1`, headers });
+    assert.equal(page.json().nextCursor, "example");
+    assert.equal(page.json().accounts.length, 1);
+    assert.equal(calls.at(-1)?.input?.p_search, "Example");
+    const target = "/api/v1/members/example/follow";
+    assert.equal((await app.inject({ method: "PUT", url: target })).statusCode, 401);
+    assert.equal((await app.inject({ method: "PUT", url: target, headers, payload: { follower: other } })).statusCode, 400);
+    assert.equal((await app.inject({ method: "PUT", url: target, headers })).json().following, true);
+    assert.deepEqual(calls.at(-1), { token: "member", name: "write_follow_for_client",
+      input: { p_kind: "member", p_key: "example", p_follow: true } });
+    const unavailable = await app.inject({ method: "PUT", url: "/api/v1/members/private_account/follow", headers });
+    assert.equal(unavailable.statusCode, 404);
+    assert.equal(unavailable.json().error.requestId, unavailable.headers["x-request-id"]);
+    assert.equal((await app.inject("/api/v1/feed?scope=following")).statusCode, 401);
+    assert.equal((await app.inject({ url: "/api/v1/feed?scope=following", headers })).statusCode, 200);
+    assert.equal(calls.at(-1)?.input?.p_scope, "following");
   } finally {
     await app.close();
   }

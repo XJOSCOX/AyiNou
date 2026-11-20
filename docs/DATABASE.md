@@ -218,7 +218,34 @@ Database limits per account per minute are 12 new comments or replies, 24 edits 
 
 One report per reporter and comment is allowed. Reporter identities stay private, and reports stay pending until an authorized decision. Moderators and administrators require recent TOTP to view the queue or act. A decision records an append-only action and reason, and staff cannot decide their own comment. Authors cannot edit around a hide or removal. Assigned staff can use the original report and action history when reconsidering a decision. The user-facing appeals workflow and operational retention policy remain planned.
 
+## Phase 3C following and discovery
+
+Migration `20261120090000_phase3c_following_discovery.sql` adds `feed_data.member_follows` and `feed_data.institution_follows`. Their primary keys pair the caller with a typed member-profile or organization FK. Reverse indexes support follower lookups. Both tables use RLS and deny direct access to anonymous, authenticated, and service roles. RPCs bind the follower to `auth.uid()` and verify the current session.
+
+| Fastify endpoint | Contract |
+| --- | --- |
+| `GET /api/v1/discover/people` | Signed-in prefix search on public display name and username. Pass `q`, `verified`, and a cursor or page size. |
+| `GET /api/v1/discover/institutions` | The existing institution directory, searchable by name and handle, with optional `category`, `country`, `department`, and `verified` filters. |
+| `GET /api/v1/discover/suggestions` | Up to three public members by username and three eligible institutions across distinct categories, excluding the viewer and accounts they already follow. |
+| `GET /api/v1/{members,institutions}/:key/follow` | Public-safe counts and whether the signed-in viewer follows this target. Member keys are usernames. Institution keys are UUIDs. |
+| `PUT /api/v1/{members,institutions}/:key/follow` | Follow. Duplicate requests return the current state. |
+| `DELETE /api/v1/{members,institutions}/:key/follow` | Unfollow. Repeating a completed request returns the current state. |
+| `GET /api/v1/me/following` | The caller’s eligible member and institution follows. |
+| `GET /api/v1/members/:username/{followers,following}` | Privacy-filtered lists for an eligible member, accessible with a live authenticated session. |
+| `GET /api/v1/institutions/:id/followers` | Public member projections of an eligible institution’s followers, accessible with a live authenticated session. |
+| `GET /api/v1/feed?scope=following` | Eligible personal posts in the same descending creation-time and UUID order as Latest. |
+
+Discovery uses case-insensitive prefix search with literal wildcard characters and a blank query or 2–80 characters. Search and list pages default to 15 and cap at 20. They use handle-based keyset cursors. Search projects public names, handles, genuine verification, and the existing institution description, category, and broad geography. Personal residence, contact details, private names, codes, evidence, and nonpublic posts are outside the contract.
+
+A personal target must be visible, discoverable, named, and currently eligible. Hidden or suspended profiles disappear from discovery, lists, public follow counts, and the following timeline. A private member can follow eligible targets, and only that member’s own following view acknowledges their outgoing links. Public lists and counts omit private followers. Active institutions with unverified or verified status are eligible. Archived and verification-revoked institutions are omitted. Stored relationships to temporarily unavailable targets are dormant and reappear if eligibility is restored. Hard account or organization deletion cascades those relationships.
+
+Database quotas allow 20 follow changes or attempts and 90 searches per account per minute, with up to 1,000 stored outgoing follows. Fastify limits discovery, list, and status reads to 60 per account per minute or 30 per guest IP. Those Fastify limits apply per running instance. Shared localized errors include request IDs and retry feedback. A lost follow response is reconciled with a read before showing the final state.
+
+Following never changes representative, membership, or verification rights. The Following feed shows eligible public and members-only posts from followed members and retains the existing reaction and discussion contracts. Institution follows currently yield no feed posts. Search uses a deterministic order and does not infer interests or track behavior.
+
 ## Testing and optional local stack
+
+Run `npm run test:hosted:following:sql` for rollback-only RLS, visibility, and quota checks. Before applying the migration, add `-- --preflight`. Run `npm run test:hosted:following` for live synthetic-account API, concurrency, and privacy checks.
 
 Run `npm run test:hosted:engagement:sql` for rollback-only tests of grants, reply constraints, projection privacy, moderation history, and abuse limits. Before applying Phase 3B, append `-- --preflight` to rehearse the migration inside the same rollback transaction. Run `npm run test:hosted:feed` for the Phase 3A and Phase 3B hosted API suites with disposable accounts and targeted cleanup.
 

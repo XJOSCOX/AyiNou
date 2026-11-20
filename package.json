@@ -26,6 +26,8 @@
     "test:hosted:admin:sql": "node scripts/check-admin-sql.mjs",
     "test:hosted:admin": "node --import tsx scripts/check-admin-hosted.mjs",
     "test:hosted:feed:sql": "node scripts/check-feed-sql.mjs",
+    "test:hosted:following:sql": "node scripts/check-following-sql.mjs",
+    "test:hosted:following": "node --import tsx scripts/check-following-hosted.mjs",
     "test:hosted:engagement:sql": "node scripts/check-engagement-sql.mjs",
     "test:hosted:feed": "node --import tsx scripts/check-feed-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",

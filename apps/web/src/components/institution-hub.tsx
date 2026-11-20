@@ -7,6 +7,7 @@ import type { InstitutionInput } from "@ayinou/shared";
 import { accountMessages } from "@/lib/account-i18n";
 import { affiliationMessages } from "@/lib/affiliation-i18n";
 import { authMessages } from "@/lib/auth-i18n";
+import { discoveryMessages } from "@/lib/discovery-i18n";
 import { createInstitution, loadInstitutionAccounts, resolveInvitation } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -42,7 +43,10 @@ export function InstitutionHub() {
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.institutions}</h1>
             <p className="mt-2 max-w-3xl text-[var(--theme-body)]">{t.institutionsIntro}</p>
           </div>
-          {!creating && <button type="button" className={institutionAction} onClick={() => setCreating(true)}>{t.create}</button>}
+          <div className="flex flex-wrap items-center gap-3">
+            <Link className={institutionLink} href="/discover?view=institutions">{discoveryMessages[locale].viewAll}</Link>
+            {!creating && <button type="button" className={institutionAction} onClick={() => setCreating(true)}>{t.create}</button>}
+          </div>
         </header>
         {creating && <section className={institutionCard}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">

@@ -33,7 +33,7 @@ export type PostVisibility = (typeof postVisibilities)[number];
 export type ReportCategory = (typeof reportCategories)[number];
 export type ModerationAction = (typeof moderationActions)[number];
 export type PostStatus = "draft" | "published" | "hidden" | "removed";
-export type FeedScope = "feed" | "mine";
+export type FeedScope = "feed" | "mine" | "following";
 export type ModerationScope = "reports" | "hidden";
 export type PostInput = { body: string; language: Locale; visibility: PostVisibility };
 export interface FeedAuthor {
@@ -171,6 +171,18 @@ export const verificationKinds = ["identity", "notable_person", "organization", 
 export const reviewDecisions = ["approve", "reject", "revoke"] as const;
 
 export type OrganizationKind = typeof organizationKinds[number];
+export type DiscoveryKind = "people" | "institutions";
+export type DiscoveryFilter = { kind: DiscoveryKind; q?: string; verified?: boolean; category?: OrganizationKind; country?: string; department?: string };
+type DiscoveryCardBase = { id: string; handle: string; name: string; verified: boolean; following: boolean };
+export type DiscoveryCard = DiscoveryCardBase & (
+  { kind: "member"; self: boolean }
+  | { kind: "institution"; targetId: string; verificationStatus: "verified" | "unverified"; category: OrganizationKind;
+      countryCode: string; departmentCode: string | null; description: string | null }
+);
+export type DiscoveryPage = { accounts: DiscoveryCard[]; nextCursor: string | null };
+export type FollowTarget = { kind: "member" | "institution"; key: string };
+export type FollowStatus = { following: boolean; canFollow: boolean; verified: boolean; followerCount: number; followingCount: number | null };
+export type FollowList = "followers" | "following";
 export type OrganizationRole = "owner" | typeof invitedRoles[number];
 export type VerificationKind = typeof verificationKinds[number];
 export type ReviewDecision = typeof reviewDecisions[number];

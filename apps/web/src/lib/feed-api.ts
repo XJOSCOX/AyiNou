@@ -25,12 +25,12 @@ export const loadFeedModerationAccess = (signal: AbortSignal): Promise<{ allowed
   authorizedRequest("/api/v1/me/feed-moderation", { signal });
 
 export const loadModeration = (scope: ModerationScope, target: "posts" | "comments", cursor: string | null, signal: AbortSignal): Promise<FeedReportPage> =>
-  engagementRequest(`/api/v1/moderation/feed?${query(scope, cursor)}&target=${target}`, { signal });
+  authorizedSocialRequest(`/api/v1/moderation/feed?${query(scope, cursor)}&target=${target}`, { signal });
 
 export const moderateFeedContent = (target: "posts" | "comments", id: string, version: number, action: ModerationAction, reason: string): Promise<void> =>
-  engagementRequest(`/api/v1/moderation/${target}/${id}`, { method: "PATCH", body: JSON.stringify({ version, action, reason }) });
+  authorizedSocialRequest(`/api/v1/moderation/${target}/${id}`, { method: "PATCH", body: JSON.stringify({ version, action, reason }) });
 
-async function engagementRequest(path: string, init: RequestInit = {}) {
+export async function authorizedSocialRequest(path: string, init: RequestInit = {}) {
   const deadline = AbortSignal.timeout(12_000);
   const signal = init.signal ? AbortSignal.any([init.signal, deadline]) : deadline;
   try {
@@ -45,25 +45,25 @@ export function loadComments(post: string, parent: string | null, cursor: string
   const params = new URLSearchParams();
   if (parent) params.set("parent", parent);
   if (cursor) params.set("cursor", cursor);
-  return engagementRequest(`/api/v1/posts/${post}/comments?${params}`, { signal });
+  return authorizedSocialRequest(`/api/v1/posts/${post}/comments?${params}`, { signal });
 }
 
 export const createComment = (post: string, parentId: string | null, input: CommentInput, key: string): Promise<{ id: string }> =>
-  engagementRequest(`/api/v1/posts/${post}/comments`, { method: "POST", headers: { "Idempotency-Key": key }, body: JSON.stringify({ ...input, parentId }) });
+  authorizedSocialRequest(`/api/v1/posts/${post}/comments`, { method: "POST", headers: { "Idempotency-Key": key }, body: JSON.stringify({ ...input, parentId }) });
 
 export const editComment = (id: string, version: number, input: CommentInput): Promise<void> =>
-  engagementRequest(`/api/v1/comments/${id}`, { method: "PATCH", body: JSON.stringify({ ...input, version }) });
+  authorizedSocialRequest(`/api/v1/comments/${id}`, { method: "PATCH", body: JSON.stringify({ ...input, version }) });
 
 export const deleteComment = (id: string, version: number): Promise<void> =>
-  engagementRequest(`/api/v1/comments/${id}?version=${version}`, { method: "DELETE" });
+  authorizedSocialRequest(`/api/v1/comments/${id}?version=${version}`, { method: "DELETE" });
 
 export const reportComment = (id: string, category: ReportCategory, note: string): Promise<void> =>
-  engagementRequest(`/api/v1/comments/${id}/reports`, { method: "POST", body: JSON.stringify({ category, note }) });
+  authorizedSocialRequest(`/api/v1/comments/${id}/reports`, { method: "POST", body: JSON.stringify({ category, note }) });
 
 export const loadReaction = (target: "posts" | "comments", id: string): Promise<{ reactions: ReactionSummary }> =>
-  engagementRequest(`/api/v1/${target}/${id}/reaction`);
+  authorizedSocialRequest(`/api/v1/${target}/${id}/reaction`);
 
 export const setReaction = (target: "posts" | "comments", id: string, kind: ReactionKind | null): Promise<{ reactions: ReactionSummary }> =>
-  engagementRequest(`/api/v1/${target}/${id}/reaction`, kind === null
+  authorizedSocialRequest(`/api/v1/${target}/${id}/reaction`, kind === null
     ? { method: "DELETE" }
     : { method: "PUT", body: JSON.stringify({ kind }) });

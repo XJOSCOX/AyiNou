@@ -3,6 +3,26 @@ import { test } from "node:test";
 import { ApiRequestError, apiErrorCode, requestJson } from "../apps/web/src/lib/api-errors.ts";
 import { errorMessages, localizedApiError } from "../apps/web/src/lib/error-i18n.ts";
 import { reconcileReaction } from "../apps/web/src/lib/reaction-state.ts";
+import { reconcileFollow } from "../apps/web/src/lib/follow-state.ts";
+
+test("follow writes reconcile a lost response without replay and report permission failures directly", async () => {
+  const network = new ApiRequestError("NETWORK_ERROR", 0, true);
+  const forbidden = new ApiRequestError("FORBIDDEN", 403);
+  const initial = { following: false, followerCount: 1, followingCount: 0, verified: false, canFollow: true };
+  const saved = { ...initial, following: true, followerCount: 2 };
+  let visible = initial;
+  let writes = 0;
+  let reads = 0;
+  const read = async () => { reads++; return saved; };
+  const apply = (state) => { visible = state; };
+  await reconcileFollow(true, async () => { writes++; throw network; }, read, apply);
+  assert.equal(visible, saved);
+  await assert.rejects(reconcileFollow(false, async () => { writes++; throw network; }, read, apply), (cause) => cause === network);
+  assert.equal(visible, saved);
+  await assert.rejects(reconcileFollow(false, async () => { writes++; throw forbidden; }, read, apply), (cause) => cause === forbidden);
+  assert.equal(writes, 3);
+  assert.equal(reads, 2);
+});
 
 test("network failures and canceled requests remain distinct", async (t) => {
   const abort = new DOMException("Read canceled", "AbortError");

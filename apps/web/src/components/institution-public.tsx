@@ -9,6 +9,7 @@ import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
 import { PublicAffiliationPanel } from "./public-affiliation-panel";
+import { ProfileFollowPanel } from "./discovery-accounts";
 
 export function InstitutionPublic({ organization: org, signedIn }: { organization: Institution; signedIn: boolean }) {
   const [locale] = useLocale();
@@ -40,6 +41,7 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
           {org.website && <a href={org.website} target="_blank" rel="noreferrer" className={`${institutionLink} mt-4 inline-block`}>{t.website} <span aria-hidden="true">↗</span></a>}
         </section>
         <PublicAffiliationPanel organization={org} signedIn={signedIn} />
+        <ProfileFollowPanel target={{ kind: "institution", key: org.id }} signedIn={signedIn} />
         {org.verificationStatus !== "verified" && <div>
           <Link href={claim} className={institutionAction}>{t.claimProfile}</Link>
           {!signedIn && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.claimInstructions}</p>}

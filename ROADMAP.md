@@ -128,9 +128,15 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Add one reaction per member per post or comment, with counts and replacement.
 - [x] Add comment review queues and versioned MFA-gated decisions. Reuse localized errors and database-enforced abuse limits.
 
+## Phase 3C — Following and discovery
+
+- [x] Add indexed member and institution search, public profile follow controls, and limited account suggestions.
+- [x] Add privacy-filtered follower lists, counts, and a chronological following feed.
+- [x] Keep institutional following independent from membership, representation, and verification.
+
 ## Remaining Phase 3 — Social network MVP
 
-- [ ] Follows and basic notifications.
+- [ ] Basic notifications and institution-authored posts.
 - [ ] Optional image attachments with storage rules, upload limits and security scanning where feasible.
 - [ ] Add a formal appeals workflow and operational retention rules.
 - [ ] Blocking, muting, and shared read-rate controls for multi-instance deployment.

@@ -48,6 +48,8 @@ The feed keeps the composer and timeline together, with sections for account sug
 
 Open **Comments** on a post to read or contribute to the discussion. Comments support one level of replies. Members can react to posts and comments, edit or delete their own comments, and report a comment for moderator review. The post composer places visibility and language beside the character count. [Discussion permissions, API and tests](docs/DATABASE.md#phase-3b-comments-replies-and-reactions)
 
+Open **Discover** to find public members and institutions, manage the accounts you follow, and see privacy-filtered follower lists. **Following** in the feed shows recent eligible posts from the personal accounts you follow. Institution follows are available ahead of institution posting. [Discovery privacy, API and tests](docs/DATABASE.md#phase-3c-following-and-discovery)
+
 ## Key features by phase
 
 1. Registration, onboarding, profiles, language, optional geographic information

@@ -4,7 +4,7 @@
 
 ## Verified baseline and design rules
 
-Hosted migration history runs from `20261119160000_initial_schema` through `20261120080000_phase3b_engagement`. Guarded hosted checks cover profile behavior and saved languages, metrics, referral setup, TOTP, institutional authorization, ordinary affiliation, and the feed with engagement. Delivered confirmation and recovery mail and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120090000_phase3c_following_discovery`. Guarded hosted checks cover profile behavior and saved languages, metrics, referral setup, TOTP, institutional authorization, ordinary affiliation, feed engagement, and following. Delivered confirmation and recovery mail and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Preserve user-generated content in its original language and label any future translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -117,6 +117,15 @@ All five tables use RLS in the non-exposed schema. Caller RLS covers anonymous p
 
 Engagement depends on the Phase 3A post schema and live-session checks. All six tables enable RLS, with zero direct app-role grants. Scoped RPCs enforce parent visibility and project only eligible comments, minimal tombstones, and reaction totals. Operational retention still needs a policy for hard deletion, including replies cascading from a physically deleted root.
 
+### Phase 3C following and discovery
+
+| Table in `feed_data` | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `member_follows` | `follower_id uuid! FK→auth.users.id CASCADE`, `target_id uuid! FK→profiles.user_id CASCADE`, `created_at timestamptz!`; PK `(follower_id,target_id)`; CHECK follower differs from target | `(target_id,follower_id)` |
+| `institution_follows` | `follower_id uuid! FK→auth.users.id CASCADE`, `organization_id uuid! FK→private.organizations.id CASCADE`, `created_at timestamptz!`; PK `(follower_id,organization_id)` | `(organization_id,follower_id)` |
+
+Both tables use RLS without direct application grants. Queries apply current visibility and live-account checks before returning an identity or counting a relationship. Discovery uses partial name, handle, category, and country indexes over eligible candidate rows. The chronological Following query uses a partial published-post index on `(author_id,created_at DESC,id DESC)`. Organization follows depend on the existing institution table and carry no authority.
+
 ## Planned schema by domain and implementation phase
 
 The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
@@ -167,7 +176,6 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `follows` | `follower_id uuid! FK→profiles.user_id`, `followed_id uuid! FK→profiles.user_id`, `ca`; PK `(follower_id,followed_id)` | CHECK users differ; IX `(followed_id,follower_id)` |
 | `bookmarks` / later | `user_id uuid! FK→profiles.user_id`, `post_id uuid! FK→posts.id`, `ca`; PK `(user_id,post_id)` | Private owner-only |
 | `hashtags` / later | `id uuid PK`, `normalized_tag text! UQ`, `display_tag text!`, `ca` | CHECK normalized format/length |
 | `post_tags` / later | `post_id uuid! FK→posts.id`, `hashtag_id uuid! FK→hashtags.id`; PK `(post_id,hashtag_id)` | IX `(hashtag_id,post_id)` |
@@ -289,7 +297,10 @@ erDiagram
     media_assets ||--o{ post_media : used_by
     posts ||--o{ post_reactions : receives
     comments ||--o{ comment_reactions : receives
-    profiles ||--o{ follows : follows
+    auth_users ||--o{ member_follows : follows_as
+    profiles ||--o{ member_follows : followed_member
+    auth_users ||--o{ institution_follows : follows_as
+    organizations ||--o{ institution_follows : followed_institution
     profiles ||--o{ community_members : joins
     communities ||--o{ community_members : contains
     communities ||--o{ posts : hosts
@@ -341,7 +352,8 @@ erDiagram
 | Countries/communes; aggregate metrics | Safe read | Safe read | Same | Same | Reference/metric computation; raw activity restricted |
 | Posts, comments, and reactions | Published public projection | Eligible threads and own reaction writes | Own versioned edits and deletion | Recent TOTP for moderation | Restricted repair/audit |
 | Comment reports and decisions | — | Report visible content once per target | — | Recent TOTP, private queue and written decisions | Restricted repair/audit |
-| Planned follows and bookmarks | — | Own actions | Same | — | Restricted repair/audit |
+| Discovery and following | Eligible counts only | Authenticated filtered lists and own follow changes | Same | Same | Restricted maintenance |
+| Planned bookmarks | — | Own actions | Same | — | Restricted repair/audit |
 | Media metadata/Storage | Only approved public derivative | Signed permitted read | Own upload/management | Assigned evidence access | Storage policy/scan/retention |
 | Notifications/preferences/push devices | — | Own read/edit | Same | — | Delivery worker, no token exposure |
 | Communities/members/rules/bans | Public communities/rules | Eligible membership/read | Scoped member actions | Assigned community moderation | Audited role/bans |
@@ -371,7 +383,7 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 1. **Existing through 2E.** Preserve the applied migration files. Check remote history before each future migration. Phase 2E depends on Auth, institutions, ordinary affiliations, the existing role assignments, and active personal verification for new administrator promotions. Challenge activation depends on an audited proof channel configuration and retention policy.
 2. **Common hardening** sets privacy and retention rules, extends the existing audit projection as needed, and adds `countries` and optional validated residence FK after existing values are checked. Handle user rights before public launch. Future profile changes must preserve current API clients.
 3. **Phase 2 (implemented):** Registered/active/verified metrics, explicit exclusions, daily activity markers, and a server-only aggregate function are deployed. Public endpoints apply a minimum cohort of 10 and complementary geographic suppression. Future snapshot tables remain optional; never derive residence from diaspora connection.
-4. **Phase 3A** delivers text posts, report and moderation records, and write limits. Later phases add media, blocking and muting, comments, reactions, follows, and formal appeals behind their authorization gates.
+4. **Phases 3A–3C** deliver text posts, moderation records, durable quotas, comments, reactions, and following. Later phases add media, blocking and muting, and formal appeals behind their authorization gates.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
 6. **Phase 5:** Extend the delivered institutional and review foundation with ambassador assignments and reviewed proof channels. Any evidence files depend on private media assets and retention approval. Radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
 7. **Phase 6:** Create projects after organizations, then members/milestones/needs/updates/reviews/outcomes and offers. Validate cross-table project/need ownership in trusted write workflows.

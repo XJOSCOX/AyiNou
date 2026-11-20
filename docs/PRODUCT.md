@@ -26,6 +26,8 @@ The current member dashboard presents privacy-filtered community statistics. Acc
 
 Members can open a post’s comments, add a text comment or reply, and react with Like, Love, Support, or Celebrate. Existing replies stay readable under a generic unavailable marker if the root comment is removed. Accounts can report visible comments to moderators. Reactions count engagement and carry no role, verification, or ranking effect.
 
+Discover connects members to public people and institutions. Following is voluntary and one-way. The Following tab shows chronological personal posts from eligible followed accounts. Institutional follows live alongside membership without changing a member’s institutional permissions.
+
 ## Dashboard terminology
 
 - `Registered members`: non-deleted user accounts, excluding known spam/test accounts in production metrics.

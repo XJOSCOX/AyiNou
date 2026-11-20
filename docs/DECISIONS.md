@@ -61,6 +61,12 @@
 - Store reaction choices separately for posts and comments. Membership and current content visibility govern writes. The server calculates counts from stored choices.
 - Keep private comment reports and written decisions within the existing recent-TOTP moderation boundary. Decisions are independent of report volume. Formal appeals and deletion retention need launch policies.
 
+## Following and discovery decisions
+
+- A discoverable personal account can be followed by any eligible live member. A member who keeps their own profile private can still follow, and their identity is omitted from others’ lists and counts.
+- Preserve dormant links while a target is temporarily private, suspended, archived, or verification-revoked. Restore their eligibility only when the existing visibility and account rules permit it again.
+- Order Following chronologically and use deterministic, bounded suggestions drawn from public accounts. Institution follows carry no publishing or representation authority.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

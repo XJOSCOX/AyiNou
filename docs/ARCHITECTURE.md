@@ -78,6 +78,12 @@ Fastify exposes the same discussion contracts to the web and future mobile clien
 
 PostgreSQL checks eligibility at each RPC, serializes account writes through the shared quota row, and locks the parent post during comment and reaction writes. Composite foreign keys enforce reply scope and depth. A subtransaction rolls back an invalid write while the outer transaction retains the abuse-limit charge for recognized failures. Comment reports use the existing moderation role and recent TOTP policy, with separate comment actions and a private queue.
 
+### Discovery and following
+
+Fastify exposes discovery, follow state, and relationship lists through the same bearer-token boundary as the feed. PostgreSQL binds writes to the caller and serializes repeated follow requests through the per-account quota row. Member and institution links use independent typed foreign keys. Existing organization projections and permission checks remain the source of institutional identity and authority.
+
+Discovery pages use bounded handle keysets and safe projections. The Following feed uses indexed per-author chronological pages and merges them in PostgreSQL before the existing Fastify reaction summary step. Comments stay lazy-loaded. The web workspace shares the existing theme, cursor loader, and error handling, and exposes equivalent contracts for future native clients.
+
 ## References
 
 - [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)

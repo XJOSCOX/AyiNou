@@ -7,11 +7,12 @@ import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
 import { feedDatabaseError, type FeedRepository } from "../services/feed.js";
+import { registerDiscoveryRoutes } from "./discovery.js";
 
 const cursorShape = z.strictObject({ createdAt: z.iso.datetime({ offset: true }), id: z.uuid() });
 const pageCursor = z.string().max(250).regex(/^[A-Za-z0-9_-]+$/).optional();
 const feedQuery = z.strictObject({
-  scope: z.enum(["feed", "mine"]).default("feed"), cursor: pageCursor,
+  scope: z.enum(["feed", "mine", "following"]).default("feed"), cursor: pageCursor,
   limit: z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(40)).optional(),
 });
 const identifiers = z.object({ id: z.uuid() });
@@ -94,9 +95,10 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   }
 
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
+  registerDiscoveryRoutes(app, viewer, repo);
   app.get("/api/v1/feed", async (request) => {
     const input = feedQuery.parse(request.query);
-    const { actor, token } = await viewer(request, input.scope === "mine");
+    const { actor, token } = await viewer(request, input.scope !== "feed");
     limitReads(request, actor);
     const limit = input.limit ?? 20;
     const rows = await repo().read(token, { p_scope: input.scope, p_limit: limit, ...before(input.cursor), p_id: null });

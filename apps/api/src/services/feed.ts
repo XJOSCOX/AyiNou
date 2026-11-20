@@ -19,6 +19,7 @@ export function feedDatabaseError(code: string): ApiError {
     case "PFR09": return new ApiError(409, "CONFLICT", "The content or request has changed");
     case "23505": return new ApiError(409, "DUPLICATE_REPORT", "A report already exists");
     case "PFR29": return new ApiError(429, "RATE_LIMITED", "Wait before trying again");
+    case "PFD12": return new ApiError(409, "FOLLOW_CAP", "The following limit has been reached");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");
@@ -45,7 +46,10 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
   return {
     rpc,
     async read(token, params) {
-      const posts = await rpc<PostRow[]>(token, "read_feed_for_client", params);
+      const { p_scope, p_id, ...page } = params;
+      const posts = p_scope === "following"
+        ? await rpc<PostRow[]>(token, "read_following_feed_for_client", page)
+        : await rpc<PostRow[]>(token, "read_feed_for_client", { ...page, p_scope, p_id });
       const eligible = posts.filter(({ status }) => status === "published").map(({ id }) => id);
       const paths = [...new Set(posts.flatMap(({ author }) => author?.avatarPath ? [author.avatarPath] : []))];
       const signed = new Map<string, string>();
