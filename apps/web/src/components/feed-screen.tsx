@@ -156,7 +156,7 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
   </section>;
 }
 
-function PostCard({ post, changed, recommendation }: { post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode }) {
+export function PostCard({ post, changed, recommendation }: { post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const [mode, setMode] = useState<"edit" | "delete" | "report" | null>(null);

@@ -4,7 +4,7 @@
 
 ## Verified baseline and design rules
 
-Hosted migration history runs from `20261119160000_initial_schema` through `20261120122000_phase3f_operations`. Guarded hosted checks cover profile behavior and saved languages, TOTP, institutions, affiliations, feed engagement, following, recommendations, post images, notifications, member safety, and appeals. Delivered confirmation and recovery mail and natural token expiry remain unverified.
+Hosted migration history runs from `20261119160000_initial_schema` through `20261120132000_phase4a_department_moderation`. Guarded hosted checks cover profile behavior and saved languages, TOTP, institutions, affiliations, feed engagement, following, recommendations, post images, notifications, member safety, appeals, and the ten department spaces. Delivered confirmation and recovery mail and natural token expiry remain unverified.
 
 `auth.users` remains the identity source. Web, Android, and iOS use Supabase Auth to obtain tokens, then use the independent versioned Fastify API for application actions. Fastify validates tokens, checks domain authorization, and uses caller-scoped database access under RLS; privileged service operations are narrow, audited, and server-only. No application table stores passwords, raw identity documents, payment-card details, or precise household coordinates. Preserve user-generated content in its original language and label any future translations. Apply future changes as additive versioned migrations with grants, RLS, indexes, rollback/compatibility review, and allow/deny tests. Never edit applied migration files or reset hosted data.
 
@@ -157,6 +157,17 @@ All three tables enable RLS with direct application-role privileges revoked. Ima
 
 All four tables use RLS with no direct app-role grants. Members access their own safety lists, appeal submissions, and explanations. Review is limited to recently TOTP-authenticated moderators with conflict checks. Server-only budget and maintenance RPCs return a Boolean or bounded aggregate count. `notifications.appeal_id` is a unique optional appeal reference for system notifications. `post_attachments.retention_post_id` preserves an indexed post reference during detached-media evidence holds. [Retention and operational policy](DATABASE.md#phase-3f-member-safety-and-appeals)
 
+### Phase 4A official department communities
+
+| Table in `feed_data` | Columns and keys | Additional indexes |
+| --- | --- | --- |
+| `communities` | `id uuid PK`, `slug text! UQ`, `kind text!` (department), `department_code text! UQ FK→departments.code`, `created_at timestamptz!` | Unique department and slug |
+| `community_memberships` | `community_id uuid! FK→communities.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, `directory_visible boolean!` default false, `joined_at timestamptz!`; PK `(community_id,user_id)` | User and opt-in directory |
+| `community_staff` | `community_id uuid! FK→communities.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, `role text!` (moderator, administrator), `granted_at timestamptz!`; PK `(community_id,user_id)` | User and room |
+| `community_staff_audit` | `id uuid PK`, `community_id uuid! FK→communities.id`, `actor_id uuid? FK→auth.users.id SET NULL`, `target_id uuid? FK→auth.users.id SET NULL`, `old_role text?`, `new_role text?`, `reason text!`, `created_at timestamptz!`; CHECK roles differ | Room and descending creation cursor |
+
+`posts.community_id` is a nullable foreign key. A community association fixes the audience to eligible members. The indexed room feed uses the original post model and its dependent media and engagement contracts. Room moderator assignment is independent of membership and platform roles. All four tables use RLS with no direct client privileges. [Permission and API details](DATABASE.md#phase-4a-official-department-communities)
+
 ## Planned schema by domain and implementation phase
 
 The proposed tables below are **not deployed**. Column sets are implementation targets, subject to phase-specific threat modeling. Unique constraints and indexes are specified per row; add FK-side indexes whenever a listed query needs them. All exposed tables need RLS enabled and default client grants revoked before access is granted.
@@ -210,13 +221,13 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 | `post_tags` / later | `post_id uuid! FK→posts.id`, `hashtag_id uuid! FK→hashtags.id`; PK `(post_id,hashtag_id)` | IX `(hashtag_id,post_id)` |
 | `push_devices` / 10 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `platform text!`, `token_ciphertext bytea!`, `token_hash bytea! UQ`, `last_seen_at timestamptz!`, `revoked_at timestamptz?`, `ca`, `ua` | IX `(user_id,revoked_at)`; server-only token access |
 
-### Communities and groups — phase 4
+### Diaspora and topic group extensions — phase 4B
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `communities` | `id uuid PK`, `slug text! UQ`, `name text!`, `description text?`, `kind text!`, `department_code text? FK→departments.code`, `visibility text!`, `status text!`, `ca`, `ua` | IX `(kind,department_code)`, `(status,visibility)`; department kind requires department FK |
-| `community_members` | `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `member_state text!`, `joined_at timestamptz!`; PK `(community_id,user_id)` | IX `(user_id,member_state)` |
-| `community_roles` | `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `role text!`, `granted_by uuid? FK→auth.users.id`, `ca`; PK `(community_id,user_id,role)` | FK `(community_id,user_id)`→`community_members`; IX `(user_id,role)`; trusted grants only |
+| Extend `communities` | Add named diaspora or topic kinds, visibility, group status, and owner-authored descriptive content | Preserve the unique department association for official rooms |
+| Extend `community_memberships` | Add join review and lifecycle state if required by private group rules | Index by user and membership state |
+| Extend `community_staff` | Add group-specific roles only if Phase 4B requires delegated authority | Trusted grants with audit history |
 | `community_rules` | `id uuid PK`, `community_id uuid! FK→communities.id`, `rule_text text!`, `position smallint!`, `ca`, `ua` | UQ `(community_id,position)` |
 | `community_join_requests` / later | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `status text!`, `ca`, `ua` | Partial UQ one pending `(community_id,user_id)`; IX `(community_id,status,created_at)` |
 | `community_bans` | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `issued_by uuid! FK→auth.users.id`, `reason_code text!`, `expires_at timestamptz?`, `revoked_at timestamptz?`, `ca` | Partial UQ one active ban `(community_id,user_id)`; IX `(user_id,expires_at)` |
@@ -344,9 +355,13 @@ erDiagram
     profiles ||--o{ member_follows : followed_member
     auth_users ||--o{ institution_follows : follows_as
     organizations ||--o{ institution_follows : followed_institution
-    profiles ||--o{ community_members : joins
-    communities ||--o{ community_members : contains
-    communities ||--o{ posts : hosts
+    departments ||--o| communities : has_official_space
+    auth_users ||--o{ community_memberships : joins
+    communities ||--o{ community_memberships : contains
+    auth_users ||--o{ community_staff : assigned
+    communities ||--o{ community_staff : scoped_to
+    communities ||--o{ community_staff_audit : records
+    communities |o--o{ posts : hosts
     organizations ||--o{ organization_memberships : represented_by
     auth_users ||--o{ organization_memberships : serves
     organizations ||--o{ organization_invitations : issues

@@ -20,6 +20,7 @@ export interface ApiErrorResponse {
 
 export const locales = ["ht", "fr", "en", "es"] as const;
 export type Locale = (typeof locales)[number];
+export { departmentCommunityContent, type DepartmentCommunityContent } from "./department-community-content";
 
 export const postVisibilities = ["public", "members_only", "private"] as const;
 export const reportCategories = ["harassment", "hate", "spam", "privacy", "other"] as const;
@@ -53,6 +54,7 @@ export interface FeedAuthor {
 }
 export interface FeedPost extends PostInput {
   attachments?: PostAttachment[];
+  community?: { id: string; slug: string } | null;
   id: string;
   status: PostStatus;
   createdAt: string;
@@ -127,6 +129,14 @@ export type SafetyOverview = {
   restrictedAccounts: number; moderationActions30Days: number; cleanupBacklog: number;
 };
 export type CommentTarget = { id: string; body: string; language: Locale; createdAt: string };
+export const communityStaffRoles = ["moderator", "administrator"] as const;
+export type CommunityStaffRole = (typeof communityStaffRoles)[number];
+export type DepartmentCommunity = {
+  id: string; slug: string; kind: "department"; departmentCode: string; name: string; joined: boolean;
+  directoryVisible: boolean; role: CommunityStaffRole | null; canModerate: boolean; canManageRoles: boolean;
+  memberCount: number | null;
+};
+export type CommunityMembers = { accounts: DiscoveryCard[]; nextCursor: string | null };
 type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
 export type FeedComment = CommentPosition & (
   { available: true; body: string; language: Locale; editedAt: string | null; version: number;

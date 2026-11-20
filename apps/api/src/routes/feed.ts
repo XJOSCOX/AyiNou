@@ -1,8 +1,8 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import {
-  commentBodyLimit, interestCodes, locales, moderationActions, postBodyLimit, postVisibilities, reactionKinds,
+  commentBodyLimit, communityStaffRoles, departmentCommunityContent, interestCodes, locales, moderationActions, postBodyLimit, postVisibilities, reactionKinds,
   recommendationActions, reportCategories, type FeedComment, type FeedReport, type ReactionSummary, type RecommendationSettings,
-  type PostAttachment, type MemberNotification, type NotificationPreferences, type CommentTarget,
+  type PostAttachment, type MemberNotification, type NotificationPreferences, type CommentTarget, type DepartmentCommunity, type DiscoveryCard,
 } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
@@ -35,6 +35,11 @@ const commentEdit = commentFields.extend({ version });
 const versionQuery = z.strictObject({ version: z.string().regex(/^\d{1,10}$/).transform(Number).pipe(version) });
 const reportInput = z.strictObject({ category: z.enum(reportCategories), note: z.string().trim().optional() });
 const decisionInput = z.strictObject({ version, action: z.enum(moderationActions), reason: z.string().trim().min(10).max(500).refine((value) => !/\p{Cc}/u.test(value)) });
+const communityKey = z.string().max(40).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+const communityParams = z.object({ key: communityKey });
+const reportQuery = z.strictObject({
+  scope: z.enum(["reports", "hidden"]).default("reports"), target: z.enum(["posts", "comments"]).default("posts"), cursor: pageCursor,
+});
 
 function before(value?: string) {
   if (!value) return { p_before_at: null, p_before_id: null };
@@ -85,13 +90,28 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     void media?.cleanup().catch(() => request.log.warn("Post media cleanup deferred"));
   }
 
-  async function moderator(request: FastifyRequest) {
+  async function moderator(request: FastifyRequest, scope?: { community: string } | { post: string }) {
     const { token, actor } = await viewer(request, true);
-    if (!await repo().rpc<boolean>(token, "feed_moderation_access")) {
+    const allowed = !scope ? await repo().rpc<boolean>(token, "feed_moderation_access")
+      : "community" in scope ? await repo().rpc<boolean>(token, "can_review_department_for_client", { p_key: scope.community })
+      : await repo().rpc<boolean>(token, "can_review_post_for_client", { p_id: scope.post });
+    if (!allowed) {
       throw new ApiError(403, "FORBIDDEN", "A moderation role is required");
     }
     if (!await auth!.verify(token!, true)) throw new ApiError(403, "MFA_REQUIRED", "Recent authenticator verification is required");
     return { token, actor };
+  }
+
+  async function reportPage(token: string | null, input: z.output<typeof reportQuery>, community?: string) {
+    const params = { p_scope: input.scope, ...before(input.cursor) };
+    const rows = community
+      ? await repo().rpc<FeedReport[]>(token, "department_reports_for_client", { ...params, p_key: community, p_target: input.target })
+      : await repo().rpc<FeedReport[]>(token, input.target === "comments" ? "list_comment_reports_for_client" : "list_feed_reports_for_client", params);
+    const { page, nextCursor } = paginate(rows, 25);
+    const mediaIds = [...new Set(page.filter((report) => !report.deleted).map((report) => report.postId))];
+    const attachments = input.target === "posts" && mediaIds.length
+      ? await repo().rpc<Record<string, PostAttachment[]>>(token, "post_attachments_for_client", { p_ids: mediaIds, p_review: true }) : {};
+    return { reports: page.map((report) => ({ ...report, attachments: attachments[report.postId] ?? [] })), nextCursor };
   }
 
   async function engagement<T extends object>(token: string | null, operation: string, id: string, fields: Record<string, unknown> = {}) {
@@ -105,6 +125,98 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
   registerDiscoveryRoutes(app, viewer, repo, read);
   registerSafetyRoutes(app, { viewer, moderator, repo, read });
+  app.get("/api/v1/communities", async (request) => {
+    const { actor, token } = await viewer(request);
+    await read("discovery", actor, request.ip);
+    return { communities: await repo().rpc<DepartmentCommunity[]>(token, "department_communities_for_client", { p_mine: false }) };
+  });
+  app.get("/api/v1/me/communities", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    await read("discovery", actor, request.ip);
+    return { communities: await repo().rpc<DepartmentCommunity[]>(token, "department_communities_for_client", { p_mine: true }) };
+  });
+  const department = "/api/v1/communities/:key";
+  app.get(department, async (request) => {
+    const { key } = communityParams.parse(request.params);
+    const { actor, token } = await viewer(request);
+    await read("discovery", actor, request.ip);
+    const community = await repo().rpc<DepartmentCommunity | null>(token, "department_community_for_client", { p_key: key });
+    if (!community) throw feedDatabaseError("PCM04");
+    return { community, content: Object.fromEntries(locales.map((locale) => [locale, departmentCommunityContent(locale, community.name)])) };
+  });
+  for (const [method, route, action] of [["POST", "/join", "join"], ["DELETE", "/membership", "leave"], ["PATCH", "/membership", "privacy"]] as const) {
+    app.route({ method, url: department + route, bodyLimit: 1024, handler: async (request) => {
+      const { key } = communityParams.parse(request.params);
+      const { token } = await viewer(request, true);
+      const visible = action === "privacy" ? z.strictObject({ directoryVisible: z.boolean() }).parse(request.body).directoryVisible : null;
+      if (action !== "privacy" && request.body !== undefined) z.strictObject({}).parse(request.body);
+      const community = await repo().rpc<DepartmentCommunity>(token, "change_department_membership_for_client", {
+        p_key: key, p_action: action, p_visible: visible,
+      });
+      return { community };
+    } });
+  }
+  app.get(department + "/members", async (request) => {
+    const { key } = communityParams.parse(request.params);
+    const { actor, token } = await viewer(request, true);
+    await read("discovery", actor, request.ip);
+    const query = z.strictObject({
+      cursor: z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/).optional(),
+      limit: z.string().regex(/^\d{1,2}$/).transform(Number).pipe(z.number().int().min(1).max(20)).optional(),
+    }).parse(request.query);
+    const size = query.limit ?? 15;
+    const rows = await repo().rpc<DiscoveryCard[]>(token, "department_members_for_client", { p_key: key, p_after: query.cursor ?? null, p_limit: size });
+    const accounts = rows.slice(0, size);
+    return { accounts, nextCursor: rows.length > size ? accounts.at(-1)?.handle ?? null : null };
+  });
+  app.get(department + "/posts", async (request) => {
+    const { key } = communityParams.parse(request.params);
+    const { actor, token } = await viewer(request, true);
+    await read("feed", actor, request.ip);
+    const query = feedQuery.omit({ scope: true }).parse(request.query);
+    const size = query.limit ?? 20;
+    const rows = await repo().read(token, { p_scope: "community", p_community: key, p_limit: size, ...before(query.cursor) });
+    const { page, nextCursor } = paginate(rows, size);
+    return { posts: page, nextCursor };
+  });
+  app.post(department + "/posts", { bodyLimit: 16_384 }, async (request, reply) => {
+    const { key } = communityParams.parse(request.params);
+    const { token } = await viewer(request, true);
+    const submission = z.uuid().parse(request.headers["idempotency-key"]);
+    const input = postInput.omit({ visibility: true }).parse(request.body);
+    content(input.body, postBodyLimit);
+    const id = await repo().rpc<string>(token, "create_department_post_for_client", {
+      p_key: key, p_body: input.body, p_language: input.language, p_submission: submission, p_topics: input.topics ?? [], p_items: input.attachments ?? [],
+    });
+    return reply.code(201).send({ id });
+  });
+  app.get(department + "/moderation", async (request) => {
+    const { key } = communityParams.parse(request.params);
+    const { actor, token } = await moderator(request, { community: key });
+    await read("feed", actor, request.ip);
+    return reportPage(token, reportQuery.parse(request.query), key);
+  });
+  app.patch(department + "/moderation/:target/:id", { bodyLimit: 4096 }, async (request, reply) => {
+    const { key, target, id } = communityParams.extend({ target: z.enum(["posts", "comments"]), id: z.uuid() }).parse(request.params);
+    const { token } = await moderator(request, { community: key });
+    const input = decisionInput.parse(request.body);
+    await repo().rpc(token, "moderate_department_content_for_client", {
+      p_key: key, p_target: target, p_id: id, p_version: input.version, p_action: input.action, p_reason: input.reason,
+    });
+    if (target === "posts" && input.action === "remove") cleanMedia(request);
+    return reply.code(204).send();
+  });
+  app.patch(department + "/staff", { bodyLimit: 4096 }, async (request, reply) => {
+    const { key } = communityParams.parse(request.params);
+    const { token } = await viewer(request, true);
+    if (!await auth!.verify(token!, true)) throw new ApiError(403, "MFA_REQUIRED", "Recent authenticator verification is required");
+    const input = z.strictObject({
+      username: z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/), role: z.enum(communityStaffRoles).nullable(),
+      reason: decisionInput.shape.reason,
+    }).parse(request.body);
+    await repo().rpc(token, "change_department_staff_for_client", { p_key: key, p_username: input.username, p_role: input.role, p_reason: input.reason });
+    return reply.code(204).send();
+  });
   app.post("/api/v1/me/post-media", {
     bodyLimit: 4_200_000,
     onRequest: async (request) => {
@@ -125,7 +237,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.get("/api/v1/posts/:id/attachments/:attachmentId/image", async (request, reply) => {
     const { id, attachmentId } = identifiers.extend({ attachmentId: z.uuid() }).parse(request.params);
     const query = z.strictObject({ variant: z.enum(["thumbnail", "display"]).default("thumbnail"), review: z.literal("true").optional() }).parse(request.query);
-    const { actor, token } = query.review ? await moderator(request) : await viewer(request);
+    const { actor, token } = query.review ? await moderator(request, { post: id }) : await viewer(request);
     await read("media", actor, request.ip);
     if (!await repo().rpc<boolean>(token, "can_download_post_media_for_client", {
       p_post: id, p_id: attachmentId, p_review: Boolean(query.review),
@@ -288,15 +400,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.get("/api/v1/moderation/feed", async (request) => {
     const { token, actor } = await moderator(request);
     await read("feed", actor, request.ip);
-    const input = z.strictObject({ scope: z.enum(["reports", "hidden"]).default("reports"), target: z.enum(["posts", "comments"]).default("posts"), cursor: pageCursor }).parse(request.query);
-    const rows = await repo().rpc<FeedReport[]>(token, input.target === "comments" ? "list_comment_reports_for_client" : "list_feed_reports_for_client", {
-      p_scope: input.scope, ...before(input.cursor),
-    });
-    const { page, nextCursor } = paginate(rows, 25);
-    const mediaIds = [...new Set(page.filter((report) => !report.deleted).map((report) => report.postId))];
-    const attachments = input.target === "posts" && mediaIds.length
-      ? await repo().rpc<Record<string, PostAttachment[]>>(token, "post_attachments_for_client", { p_ids: mediaIds, p_review: true }) : {};
-    return { reports: page.map((report) => ({ ...report, attachments: attachments[report.postId] ?? [] })), nextCursor };
+    return reportPage(token, reportQuery.parse(request.query));
   });
   for (const kind of ["posts", "comments"] as const) {
     app.patch(`/api/v1/moderation/${kind}/:id`, { bodyLimit: 4_096 }, async (request, reply) => {

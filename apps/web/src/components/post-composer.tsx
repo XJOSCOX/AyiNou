@@ -34,7 +34,9 @@ function ComposerIcon({ name }: { name: keyof typeof paths }) {
   </svg>;
 }
 
-export function PostComposer({ post, onSaved, onCancel }: { post?: FeedPost; onSaved: (message: SavedPost) => void; onCancel?: () => void }) {
+export function PostComposer({ post, community, onSaved, onCancel }: {
+  post?: FeedPost; community?: string; onSaved: (message: SavedPost) => void; onCancel?: () => void;
+}) {
   const [locale] = useLocale();
   const { displayName } = useMemberIdentity();
   const t = feedMessages[locale];
@@ -49,7 +51,8 @@ export function PostComposer({ post, onSaved, onCancel }: { post?: FeedPost; onS
   const [images, setImages] = useState<SelectedPostImage[]>(() => post?.attachments?.map(({ id, alt }) => ({ id, alt: alt ?? "" })) ?? []);
   const [fileError, setFileError] = useState<ApiRequestError | "limit" | null>(null);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
-  const [visibility, setVisibility] = useState<PostVisibility>(post?.visibility ?? "public");
+  const room = community ?? post?.community?.slug;
+  const [visibility, setVisibility] = useState<PostVisibility>(post?.visibility ?? (room ? "members_only" : "public"));
   const [languageChoice, setLanguage] = useState<Locale | null>(post?.language ?? null);
   const language = languageChoice ?? locale;
   const [editTarget] = useState(post);
@@ -88,7 +91,7 @@ export function PostComposer({ post, onSaved, onCancel }: { post?: FeedPost; onS
       const value = JSON.stringify(input);
       const key = submissions.current.get(value) ?? crypto.randomUUID();
       submissions.current.set(value, key);
-      await createPost(input, key);
+      await createPost(input, key, room);
     });
     setProgress(null);
     if (!sent) return;
@@ -143,7 +146,7 @@ export function PostComposer({ post, onSaved, onCancel }: { post?: FeedPost; onS
           <ComposerIcon name="topics" />
           {topics.length > 0 && <span aria-hidden="true" className="absolute end-0.5 top-1 text-[10px] font-semibold">{topics.length}</span>}
         </button>
-        <label className={control} title={`${t.visibility} · ${t[visibility]}`}>
+        {!room && <label className={control} title={`${t.visibility} · ${t[visibility]}`}>
           <ComposerIcon name={visibility} />
           <select aria-label={t.visibility} className={nativeControl} value={visibility} disabled={mutation.busy} onChange={(event) => {
             const next = postVisibilities.find((value) => value === event.target.value);
@@ -151,7 +154,7 @@ export function PostComposer({ post, onSaved, onCancel }: { post?: FeedPost; onS
           }}>
             {postVisibilities.map((value) => <option value={value} key={value}>{t[value]}</option>)}
           </select>
-        </label>
+        </label>}
         <label className={control} title={`${t.language} · ${languageNames[language]}`}>
           <span className="rounded border border-current px-1 py-px text-[10px] font-semibold uppercase" aria-hidden="true">{language}</span>
           <select aria-label={t.language} className={nativeControl} value={language} disabled={mutation.busy}

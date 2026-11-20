@@ -37,6 +37,8 @@
     "test:hosted:media": "node --import tsx scripts/check-media-notifications-hosted.mjs",
     "test:hosted:safety:sql": "node scripts/check-safety-sql.mjs",
     "test:hosted:safety": "node --import tsx scripts/check-safety-hosted.mjs",
+    "test:hosted:departments:sql": "node scripts/check-department-communities-sql.mjs",
+    "test:hosted:departments": "node --import tsx scripts/check-department-communities-hosted.mjs",
     "test:hosted:feed": "node --import tsx scripts/check-feed-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",

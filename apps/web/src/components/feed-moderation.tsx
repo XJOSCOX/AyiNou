@@ -9,6 +9,7 @@ import { feedMessages } from "@/lib/feed-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { safetyMessages } from "@/lib/safety-i18n";
+import { communityDirectoryMessages } from "@/lib/communities-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { PostMediaGallery } from "./post-media";
 import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
@@ -20,26 +21,31 @@ const targets = ["posts", "comments"] as const;
 type Target = (typeof targets)[number];
 const choiceStyle = "min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]";
 
-export function FeedModeration() {
+function moderationMfa(community?: string) {
+  return `/mfa?next=${encodeURIComponent(community ? `/communities/${community}/moderation` : "/feed/moderation")}`;
+}
+
+export function FeedModeration({ community }: { community?: string }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const [scope, setScope] = useState<ModerationScope>("reports");
   const [target, setTarget] = useState<Target>("posts");
   const [appeals, setAppeals] = useState(false);
   const safety = safetyMessages[locale];
+  const c = communityDirectoryMessages[locale];
   const hidden = target === "posts" ? t.hiddenPosts : t.hiddenComments;
 
   return <MemberShell>
     <div className="grid w-full min-w-0 gap-5">
       <header>
-        <Link href="/feed" className={institutionLink}>{t.backToFeed}</Link>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{t.moderation}</h1>
+        <Link href={community ? `/communities/${community}` : "/feed"} className={institutionLink}>{community ? c.back : t.backToFeed}</Link>
+        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{community ? c.moderation : t.moderation}</h1>
         <p className="mt-2 text-sm text-[var(--theme-body)]">{t.moderationIntro}</p>
       </header>
-      <div role="group" aria-label={t.moderation} className="flex flex-wrap gap-2">
+      {!community && <div role="group" aria-label={t.moderation} className="flex flex-wrap gap-2">
         <button type="button" className={choiceStyle} aria-pressed={!appeals} onClick={() => setAppeals(false)}>{t.pendingReports}</button>
         <button type="button" className={choiceStyle} aria-pressed={appeals} onClick={() => setAppeals(true)}>{safety.review}</button>
-      </div>
+      </div>}
       {appeals ? <AppealReviewQueue /> : <>
       <div role="group" aria-label={t.queueContent} className="flex flex-wrap gap-2">
         {targets.map((kind) => <button key={kind} type="button" aria-pressed={kind === target}
@@ -51,21 +57,21 @@ export function FeedModeration() {
           {tab === "reports" ? t.pendingReports : hidden}
         </button>)}
       </div>
-      <Queue key={`${target}:${scope}`} scope={scope} target={target} label={scope === "reports" ? t.pendingReports : hidden} />
+      <Queue key={`${target}:${scope}`} scope={scope} target={target} label={scope === "reports" ? t.pendingReports : hidden} community={community} />
       </>}
     </div>
   </MemberShell>;
 }
 
-function Queue({ scope, target, label }: { scope: ModerationScope; target: Target; label: string }) {
+function Queue({ scope, target, label, community }: { scope: ModerationScope; target: Target; label: string; community?: string }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const [revision, setRevision] = useState(0);
   const [saved, setSaved] = useState(false);
   const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
-    const { reports, nextCursor } = await loadModeration(scope, target, cursor, signal);
+    const { reports, nextCursor } = await loadModeration(scope, target, cursor, signal, community);
     return { rows: reports, nextCursor };
-  }, [scope, target]);
+  }, [scope, target, community]);
   const resource = useCursorPage(load, revision);
   const roleDenied = ["MFA_REQUIRED", "FORBIDDEN", "UNAUTHORIZED"].includes(apiErrorCode(resource.error));
 
@@ -73,18 +79,18 @@ function Queue({ scope, target, label }: { scope: ModerationScope; target: Targe
     {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.decisionRecorded}</p>}
     {resource.error !== null && <div className="grid gap-2">
       <ApiErrorNotice error={resource.error} retry={roleDenied ? undefined : resource.retry} />
-      {apiErrorCode(resource.error) === "MFA_REQUIRED" && <Link href="/mfa?next=/feed/moderation" className={institutionLink}>{t.checkMfa}</Link>}
+      {apiErrorCode(resource.error) === "MFA_REQUIRED" && <Link href={moderationMfa(community)} className={institutionLink}>{t.checkMfa}</Link>}
     </div>}
     {!resource.page && resource.error === null && <p role="status">{t.working}</p>}
     {resource.page?.rows.length === 0 && <p className={institutionCard}>{t.queueEmpty}</p>}
-    {!roleDenied && resource.page?.rows.map((item) => <ReviewItem key={item.id} item={item}
+    {!roleDenied && resource.page?.rows.map((item) => <ReviewItem key={item.id} item={item} community={community}
       refresh={() => { setSaved(true); setRevision((value) => value + 1); }} />)}
     {!roleDenied && resource.page?.nextCursor && <button type="button" disabled={resource.loadingMore}
       className={`${institutionAction} justify-self-start`} onClick={() => { void resource.more(); }}>{resource.loadingMore ? t.working : t.loadMore}</button>}
   </section>;
 }
 
-function ReviewItem({ item, refresh }: { item: FeedReport; refresh: () => void }) {
+function ReviewItem({ item, refresh, community }: { item: FeedReport; refresh: () => void; community?: string }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const mutation = useFeedMutation();
@@ -103,7 +109,7 @@ function ReviewItem({ item, refresh }: { item: FeedReport; refresh: () => void }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!action || item.own || completed || reason.trim().length < 10) return;
-    if (await mutation.run(() => moderateFeedContent(item.commentId ? "comments" : "posts", item.commentId ?? item.postId, item.version, action, reason))) {
+    if (await mutation.run(() => moderateFeedContent(item.commentId ? "comments" : "posts", item.commentId ?? item.postId, item.version, action, reason, community))) {
       setCompleted(true);
       refresh();
     }
@@ -141,7 +147,7 @@ function ReviewItem({ item, refresh }: { item: FeedReport; refresh: () => void }
             onChange={(event) => setReason(event.target.value)} />
         </label>
         {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
-        {apiErrorCode(mutation.error) === "MFA_REQUIRED" && <Link href="/mfa?next=/feed/moderation" className={institutionLink}>{t.checkMfa}</Link>}
+        {apiErrorCode(mutation.error) === "MFA_REQUIRED" && <Link href={moderationMfa(community)} className={institutionLink}>{t.checkMfa}</Link>}
         <button type="submit" className={`${institutionAction} justify-self-start`} disabled={mutation.busy || !action}>
           {mutation.busy ? t.working : t.recordDecision}
         </button>

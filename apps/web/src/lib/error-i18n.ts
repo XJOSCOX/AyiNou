@@ -7,6 +7,7 @@ import { apiErrorCode } from "./api-errors";
 import { discoveryMessages } from "./discovery-i18n";
 import { recommendationMessages } from "./recommendation-i18n";
 import { safetyMessages } from "./safety-i18n";
+import { communityDirectoryMessages } from "./communities-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -23,6 +24,8 @@ export function localizedApiError(locale: Locale, cause: unknown) {
   const code = apiErrorCode(cause);
   const safety = safetyMessages[locale];
   switch (code) {
+    case "COMMUNITY_UNAVAILABLE": return communityDirectoryMessages[locale].unavailable;
+    case "COMMUNITY_MEMBERSHIP_REQUIRED": return communityDirectoryMessages[locale].membership;
     case "SELF_SAFETY_ACTION": return safety.selfError;
     case "APPEAL_REVIEW_CONFLICT": return safety.conflictError;
     case "APPEAL_INELIGIBLE": return safety.ineligibleError;

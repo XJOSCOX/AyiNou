@@ -32,6 +32,8 @@ export function feedDatabaseError(code: string): ApiError {
     case "PSF09": return new ApiError(409, "APPEAL_EXISTS", "An appeal already exists");
     case "PSF12": return new ApiError(409, "SAFETY_CAP", "Member safety list limit reached");
     case "PSF14": return new ApiError(410, "APPEAL_EXPIRED", "The appeal window has ended");
+    case "PCM03": return new ApiError(403, "COMMUNITY_MEMBERSHIP_REQUIRED", "Join this community to continue");
+    case "PCM04": return new ApiError(404, "COMMUNITY_UNAVAILABLE", "Community unavailable");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");
@@ -86,8 +88,10 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
   return {
     rpc,
     async read(token, params) {
-      const { p_scope, p_id, ...page } = params;
-      const posts = p_scope === "following"
+      const { p_scope, p_id, p_community, ...page } = params;
+      const posts = p_scope === "community"
+        ? await rpc<PostRow[]>(token, "read_department_posts_for_client", { ...page, p_key: p_community })
+        : p_scope === "following"
         ? await rpc<PostRow[]>(token, "read_following_feed_for_client", page)
         : await rpc<PostRow[]>(token, "read_feed_for_client", { ...page, p_scope, p_id });
       return hydrate(token, posts);

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback } from "react";
 import { feedMessages } from "@/lib/feed-i18n";
+import { communityDirectoryMessages } from "@/lib/communities-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { loadLinkedComment, loadPostDetail } from "@/lib/notification-api";
@@ -20,7 +21,9 @@ export function PostDetail({ id, comment }: { id: string; comment?: string }) {
   const resource = useInstitutionResource(load);
   const post = resource.data?.post;
   return <MemberShell><section className="grid gap-4">
-    <Link href="/feed" className={`${institutionLink} justify-self-start`}>← {f.backToFeed}</Link>
+    <Link href={post?.community ? `/communities/${post.community.slug}` : "/feed"} className={`${institutionLink} justify-self-start`}>
+      ← {post?.community ? communityDirectoryMessages[locale].back : f.backToFeed}
+    </Link>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!post && resource.error === null && <p role="status">{t.working}</p>}
     {post && <article className={institutionCard}>

@@ -161,12 +161,17 @@ Activation of temporary proof challenges and external evidence delivery remains 
 
 **Gate:** Feeds behave correctly at load; user permissions enforced; reports can be reviewed; moderation tested.
 
-## Phase 4 — Communities and groups
+## Phase 4A — Official department communities
 
-- [ ] Ten department spaces; create diaspora and topic groups.
-- [ ] Group membership, roles, admins, rules and member reports.
-- [ ] Basic discussions; discoverability and privacy settings.
-- [ ] Group moderation and anti-harassment controls.
+- [x] Seed a stable space for each authoritative Haiti department.
+- [x] Add voluntary multi-room membership, rules, and an opt-in member directory.
+- [x] Reuse posts, media, discussions, reports, and appeals behind a members-only room boundary.
+- [x] Add room-scoped moderation roles with platform-admin oversight.
+
+## Phase 4B — Diaspora and topic groups
+
+- [ ] Define member-created group rules, governance, visibility, and discovery.
+- [ ] Support diaspora and topic communities with scoped moderation.
 
 **Gate:** Group access and moderation policy tests pass; reporting/escalation is practical for moderators.
 

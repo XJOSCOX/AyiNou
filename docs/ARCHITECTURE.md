@@ -102,6 +102,12 @@ Appeals reference an original post or comment hide action. A recent TOTP session
 
 Fastify applies a process-local request ceiling and a shared PostgreSQL budget to feed, media, profile, discovery and notification reads. Signed-in quotas use the verified account ID. Guest quotas use one of 4,096 keyed buckets per route category, and raw IPs are used only in process memory. Upload requests verify the session and charge the existing write quota before decoding the JSON body. Aggregate safety counts require administrator access and recent TOTP. [Quotas and retention](DATABASE.md#phase-3f-member-safety-and-appeals)
 
+### Official department communities
+
+The official directory is a safe projection of department-linked rooms. Fastify uses Supabase access tokens for membership and scoped discussions. PostgreSQL RLS on the existing posts table and caller-bound membership checks fence direct reads, space pagination, comments, media and notification links. Room membership stays separate from account geography and institutional affiliations.
+
+The community view reuses the post composer, timeline cards, media, and moderation workspace. The global feed and ranking queries explicitly select unscoped posts. Department moderation actions call the existing versioned post and comment transitions after checking assignment and recent TOTP for the exact room. [Department contracts and permissions](DATABASE.md#phase-4a-official-department-communities)
+
 ## References
 
 - [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)

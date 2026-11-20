@@ -87,6 +87,13 @@
 - Keep pending evidence, original moderation decisions, and account and referral audits out of routine cleanup. Make manual maintenance category-specific, project-guarded and dry-run by default. Publish an approved retention and deletion policy before launch.
 - Use PostgreSQL minute buckets to share protective limits between API instances. Review guest bucket collisions, trusted proxy configuration, traffic limits and monitoring before public launch.
 
+## Official department spaces
+
+- Treat the department reference as authoritative. Seed one platform-operated room for each department and reserve creation of official spaces to versioned migrations.
+- Keep directory metadata public and room discussions members-only. Store room membership separately from profile locations, verification, and institutional affiliations. Require separate consent for listing a public profile.
+- Reuse the social post and moderation records with an explicit room foreign key. Exclude room posts from global Latest, Following, My Posts, and For You while keeping room-level chronological access.
+- Scope room staff permissions to the assigned room and require recent TOTP. Platform administrators assign roles with written audit reasons and handle community appeals independently of the original moderator.
+
 ## Open before public launch
 
 Phase 2B uses self-declared membership categories. A category grants no verification or privileges. Profile publication requires trusted visibility and explicit discoverability. Membership category display is a separate opt-in. Professional skills and recommendations remain outside the current onboarding flow.

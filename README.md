@@ -56,6 +56,8 @@ Posts and private drafts can include up to four still images with optional descr
 
 Members can block or mute another account from its profile and manage those choices in Account Settings. Members can appeal an active hide decision from **Account Settings → Moderation appeals**. The moderation workspace has a separate appeals queue. [Phase 3F behavior and maintenance](docs/DATABASE.md#phase-3f-member-safety-and-appeals)
 
+Open **Communities** to find Haiti’s ten official Ayinou department spaces. Joining is voluntary. Each room has a members-only discussion feed and an opt-in directory. [Phase 4A membership, moderation, and API](docs/DATABASE.md#phase-4a-official-department-communities)
+
 ## Key features by phase
 
 1. Registration, onboarding, profiles, language, optional geographic information

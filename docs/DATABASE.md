@@ -328,7 +328,50 @@ With the API environment configured and `AYINOU_MEDIA_PROJECT_REF` set to the in
 
 Appeal links restrict hard deletion of original decisions. A reviewed de-identification and account-deletion procedure is required before public launch. Technical image controls validate and bound decoding, strip metadata, and protect object access. Human review remains necessary for harmful imagery. Automatic content scanning and policy and staffing for appeal review remain launch decisions.
 
+## Phase 4A official department communities
+
+The migrations `20261120130000_phase4a_department_spaces.sql`, `20261120131000_phase4a_department_discussions.sql`, and `20261120132000_phase4a_department_moderation.sql` add official department communities, voluntary memberships, and scoped staff. The seed links one stable UUID and slug to each existing code in `public.departments`. The department foreign key and uniqueness constraint prevent a second official room for the same department. AyiNou operates these spaces. The official label does not imply government endorsement.
+
+| Department | Code | Slug |
+| --- | --- | --- |
+| Artibonite | HT-AR | `artibonite` |
+| Centre | HT-CE | `centre` |
+| Grand'Anse | HT-GA | `grand-anse` |
+| Nippes | HT-NI | `nippes` |
+| Nord | HT-ND | `nord` |
+| Nord-Est | HT-NE | `nord-est` |
+| Nord-Ouest | HT-NO | `nord-ouest` |
+| Ouest | HT-OU | `ouest` |
+| Sud | HT-SD | `sud` |
+| Sud-Est | HT-SE | `sud-est` |
+
+| Fastify endpoint | Contract |
+| --- | --- |
+| `GET /api/v1/communities` | Deterministic official directory. An optional bearer token adds the caller’s current membership and staff controls. |
+| `GET /api/v1/communities/:key` | Room detail by slug or UUID, with description and rules in `ht`, `fr`, `en`, and `es`. |
+| `GET /api/v1/me/communities` | The caller’s current memberships. |
+| `POST /api/v1/communities/:key/join` | Idempotent join by the eligible caller. |
+| `PATCH/DELETE /api/v1/communities/:key/membership` | Set the caller’s `directoryVisible` Boolean or leave idempotently. |
+| `GET /api/v1/communities/:key/members` | Eligible members see paginated, opt-in public-profile cards. |
+| `GET /api/v1/communities/:key/posts` | Current members see eligible posts in reverse chronological order using cursor pagination. |
+| `POST /api/v1/communities/:key/posts` | Current members submit `body`, `language`, optional `topics` and `attachments`, and an `Idempotency-Key` UUID. The room fixes the audience. |
+| `GET /api/v1/communities/:key/moderation` | Assigned staff with recent TOTP view scoped post or comment reports and hidden items. |
+| `PATCH /api/v1/communities/:key/moderation/:target/:id` | Assigned staff record a versioned decision within that room. |
+| `PATCH /api/v1/communities/:key/staff` | Platform administrators with recent TOTP grant, change, or revoke a staff role by public username with a written reason. |
+
+Room membership never changes residence, diaspora connection, or institutional affiliations. Members choose as many rooms as they wish without geographic or ancestry checks. Directory opt-in is off by default and also requires a currently discoverable profile. Only eligible room members can see that list. The membership summary excludes restricted accounts, withholds counts below ten, and rounds larger counts down to tens. It exposes no location breakdown.
+
+Discussion uses the existing posts, comments, reactions, media, reports, and notifications. An explicit `posts.community_id` binds posts to a room. The scope is part of the submission digest, and an edit cannot change a room post’s audience. Leaving ends discussion and media access while existing content remains in the room. Authors can still delete their own eligible content by known ID. Blocks and mutes affect room timelines. Existing reaction, comment, and reply events are delivered only when the recipient can still access the referenced content. There are no room-wide notifications.
+
+Global Latest, Following, My Posts, and For You omit room posts. A direct post or image request still checks membership. The room uses the same cursor, upload limits, request IDs, stale-version errors, and localized permission errors as the global feed. A room join, leave, or directory change shares a 15-per-minute member quota. Existing shared read quotas apply to the directory, room feed, and media.
+
+Room moderators and community administrators have the same scoped content-review powers in this phase. Neither assignment grants platform authority or allows staff to promote themselves. Platform administrators can oversee any room with recent TOTP. They handle room appeals through the existing independent-review workflow and cannot decide their own original moderation action. The ordinary global moderator role only covers global posts. Report evidence, staff audit reasons, and private profile fields remain restricted.
+
+The next group phase can extend the room kind and visibility checks without duplicating social records. Member-created rooms, suggested communities, room announcements, and production-scale load testing remain open.
+
 ## Testing and optional local stack
+
+With the hosted project guard set, run `npm run test:hosted:departments:sql` and `npm run test:hosted:departments`. The SQL suite uses rollback only. The hosted API suite exercises synthetic memberships, real TOTP, private Storage, and targeted fixture cleanup. Add `-- --preflight` to the SQL suite before applying these migrations to a clean preceding schema.
 
 Run `npm run test:hosted:safety:sql` and `npm run test:hosted:safety` with the existing hosted-project guard. The SQL tests roll back all writes. The API runner uses synthetic members and TOTP reviewers, and removes only known fixture identities, alerts, and image objects. Add `-- --preflight` to the SQL runner before applying the three Phase 3F migrations.
 

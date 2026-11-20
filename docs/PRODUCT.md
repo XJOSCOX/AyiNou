@@ -55,6 +55,8 @@ People can manage one institution and belong to others as members, volunteers, s
 
 ## User safety
 
+The department directory lists ten platform-operated Ayinou spaces. An official Ayinou community does not imply government endorsement. Eligible members in Haiti or elsewhere can choose several departments without disclosing residence, birthplace, or identity evidence. Joining enables access to that room’s discussions. Opting into its directory separately allows other room members to see an eligible public profile.
+
 The signed-in feed lets members publish short updates, choose an audience, and keep private drafts. Members can report visible posts. Authorized moderators can hide, restore, remove, or close reports with a written reason. Members may appeal a current hide of their own post or comment within 14 days. An independent reviewer decides the appeal and shares a written explanation.
 
 Blocking ends personal follows between the two members and stops their signed-in direct interactions. A signed-out viewer can still access eligible public content. Muting privately filters the member’s Latest, Following, and For You feeds while preserving their follow and interaction options.

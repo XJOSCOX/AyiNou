@@ -9,8 +9,12 @@ function query<T extends string>(scope: T, cursor: string | null) {
 export const loadFeed = (scope: FeedScope, cursor: string | null, signal: AbortSignal): Promise<FeedPage> =>
   (scope === "for_you" ? authorizedSocialRequest : authorizedRequest)(`/api/v1/feed?${query(scope, cursor)}`, { signal });
 
-export const createPost = (input: PostInput, key: string): Promise<{ id: string }> =>
-  authorizedRequest("/api/v1/posts", { method: "POST", headers: { "Idempotency-Key": key }, body: JSON.stringify(input) });
+export function createPost(input: PostInput, key: string, community?: string): Promise<{ id: string }> {
+  const { body, language, topics, attachments } = input;
+  return authorizedRequest(community ? `/api/v1/communities/${encodeURIComponent(community)}/posts` : "/api/v1/posts", {
+    method: "POST", headers: { "Idempotency-Key": key }, body: JSON.stringify(community ? { body, language, topics, attachments } : input),
+  });
+}
 
 export const editPost = (post: FeedPost, input: PostInput): Promise<void> =>
   authorizedRequest(`/api/v1/posts/${post.id}`, { method: "PATCH", body: JSON.stringify({ ...input, version: post.version }) });
@@ -24,11 +28,12 @@ export const reportPost = (id: string, category: ReportCategory, note: string): 
 export const loadFeedModerationAccess = (signal: AbortSignal): Promise<{ allowed: boolean }> =>
   authorizedRequest("/api/v1/me/feed-moderation", { signal });
 
-export const loadModeration = (scope: ModerationScope, target: "posts" | "comments", cursor: string | null, signal: AbortSignal): Promise<FeedReportPage> =>
-  authorizedSocialRequest(`/api/v1/moderation/feed?${query(scope, cursor)}&target=${target}`, { signal });
+export const loadModeration = (scope: ModerationScope, target: "posts" | "comments", cursor: string | null, signal: AbortSignal, community?: string): Promise<FeedReportPage> =>
+  authorizedSocialRequest(`${community ? `/api/v1/communities/${encodeURIComponent(community)}/moderation` : "/api/v1/moderation/feed"}?${query(scope, cursor)}&target=${target}`, { signal });
 
-export const moderateFeedContent = (target: "posts" | "comments", id: string, version: number, action: ModerationAction, reason: string): Promise<void> =>
-  authorizedSocialRequest(`/api/v1/moderation/${target}/${id}`, { method: "PATCH", body: JSON.stringify({ version, action, reason }) });
+export const moderateFeedContent = (target: "posts" | "comments", id: string, version: number, action: ModerationAction, reason: string, community?: string): Promise<void> =>
+  authorizedSocialRequest(`${community ? `/api/v1/communities/${encodeURIComponent(community)}/moderation` : "/api/v1/moderation"}/${target}/${id}`,
+    { method: "PATCH", body: JSON.stringify({ version, action, reason }) });
 
 export async function authorizedSocialRequest(path: string, init: RequestInit = {}) {
   const deadline = AbortSignal.timeout(12_000);
