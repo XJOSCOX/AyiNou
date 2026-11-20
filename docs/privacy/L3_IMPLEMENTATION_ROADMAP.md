@@ -33,6 +33,8 @@ L3.4 implements read-only dependency planning, a synthetic unapproved policy, sc
 
 ## L3.5 Operational verification
 
+Completed evidence review at the L3.4 baseline. Intake passed for disposable fixture subjects. Export and lifecycle are conditional within their synthetic scope. Production privacy operations, provider-backed restore, legal-policy readiness and launch remain blocked. Hosted work was restricted to read-only catalog verification. The next milestone after owner review is L4 policy revisions. [Final verification](L3_5_FINAL_VERIFICATION.md) · [Operational checklist](OPERATIONAL_PRIVACY_READINESS.md) · [Policy gap register](POLICY_IMPLEMENTATION_GAP_REGISTER.md)
+
 - **Model and candidate migration.** Retain signed test and reconciliation receipts with synthetic subjects and version references. No deployment migration presumed; use additive hardening only for an independently approved gap.
 - **API and experience.** Exercise intake, status, download, cancel, close and retry via their authorized entry points. Restricted operations use narrowly scoped reconciliation, audit and health views. No customer-facing operational controls or sensitive log content. Check all four languages, accessible status, deadlines and appeal notices.
 - **Authorization and recovery.** Assign independent operators and reviewers for restore and launch decisions. Validate explicit grants, MFA, report minimization, documented replay steps, failed-lease recovery, rotated keys and safe incident actions. Test every operation twice where applicable and compare effective outcomes.

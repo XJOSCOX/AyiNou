@@ -285,7 +285,8 @@ Feature development pauses here for owner review of the engineering results and 
 
 - Legal L3.2 adds a private, synthetic-only foundation for privacy case intake, tracking and withdrawal. Live intake, assigned review, data export and erasure remain gated. [L3.2 implementation report](docs/privacy/L3_2_IMPLEMENTATION_REPORT.md)
 - Legal L3.3 adds field-allowlisted synthetic exports with encrypted artifacts and authenticated downloads. Real export availability, legally approved disclosure categories and account erasure need separate approval. [L3.3 implementation report](docs/privacy/L3_3_IMPLEMENTATION_REPORT.md)
-- Legal L3.4 adds deletion dependency plans, independent synthetic hold authority and reversible reconciliation. Live erasure and retention enforcement are disabled. L3.5 requires separate authorization. [L3.4 implementation report](docs/privacy/L3_4_IMPLEMENTATION_REPORT.md)
+- Legal L3.4 adds deletion dependency plans, independent synthetic hold authority and reversible reconciliation. Live erasure and retention enforcement are disabled. [L3.4 implementation report](docs/privacy/L3_4_IMPLEMENTATION_REPORT.md)
+- Legal L3.5 verifies synthetic intake, export and lifecycle boundaries. Production privacy operations, provider-backed restoration, legal-policy readiness and public launch remain blocked. Owner review precedes L4 policy revisions. [L3.5 verification and readiness](docs/privacy/L3_5_FINAL_VERIFICATION.md)
 
 - [ ] Scope and acceptance criteria documented
 - [ ] Typecheck, lint, unit/integration tests and build pass locally
