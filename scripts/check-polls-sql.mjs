@@ -12,11 +12,13 @@ const migrations = process.argv.includes("--preflight") ? [
   "20261120210000_phase6d_poll_schema.sql",
   "20261120211000_phase6d_poll_workflow.sql",
   "20261120212000_phase6d_poll_access.sql",
-].map((file) => readFileSync(join("supabase/migrations", file), "utf8")).join("\n") : "";
+] : [];
+if (process.argv.includes("--scope-preflight")) migrations.push("20261120213000_phase6f6_poll_scope_listing.sql");
+const migrationSql = migrations.map((file) => readFileSync(join("supabase/migrations", file), "utf8")).join("\n");
 const test = process.argv.includes("--schema-only") ? "" : readFileSync("supabase/tests/polls_rollback.sql", "utf8");
 const file = join(tmpdir(), "ayinou-polls-" + randomUUID() + ".sql");
 try {
-  writeFileSync(file, "begin; set local lock_timeout='3s'; set local statement_timeout='25s';\n" + migrations + "\n" + test + "\nrollback;",
+  writeFileSync(file, "begin; set local lock_timeout='3s'; set local statement_timeout='25s';\n" + migrationSql + "\n" + test + "\nrollback;",
     { mode: 0o600, flag: "wx" });
   const result = spawnSync(process.execPath, ["node_modules/supabase/dist/supabase.js", "db", "query", "--remote", "--yes", "--file", file],
     { encoding: "utf8", timeout: 50_000 });

@@ -11,6 +11,7 @@ declare
     'resultPolicy','after_vote','language','en','opensAt',now()+interval '1 hour','closesAt',now()+interval '2 hours',
     'quorum',null,'threshold',null,'scopeId',null,'taskId',null,'options',jsonb_build_array('First option','Second option'));
   config jsonb; updated jsonb;
+  listing_cursor timestamptz;
   project_fields jsonb:='{"title":"Synthetic voting proposal","description":"A synthetic proposal description.","problem":"A synthetic problem statement.","solution":"A synthetic proposed solution.","objectives":"Synthetic objectives stated plainly.","beneficiaries":"Synthetic community beneficiaries.","outcomes":"A synthetic expected outcome.","category":"education","country":"HT","department":null,"startDate":null,"endDate":null,"references":[],"publishRequested":true}';
 begin
   if exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace
@@ -19,6 +20,8 @@ begin
       and (not c.relrowsecurity or has_table_privilege(role.name,c.oid,'select,insert,update,delete')))
     or has_function_privilege('anon','public.poll_detail_for_client(uuid)','execute')
     or has_function_privilege('anon','public.poll_vote_for_client(uuid,uuid)','execute')
+    or has_function_privilege('anon','public.polls_for_client(boolean,text,uuid,timestamptz,uuid)','execute')
+    or not has_function_privilege('authenticated','public.polls_for_client(boolean,text,uuid,timestamptz,uuid)','execute')
     or has_function_privilege('authenticated','private.poll_tally(private.polls,boolean)','execute')
     then raise exception 'poll grants too broad'; end if;
   foreach actor in array array[owner_id,first_id,second_id,outsider,newcomer] loop
@@ -119,10 +122,22 @@ begin
     raise exception 'cross-group ballot accepted';
   exception when sqlstate 'PVG04' then null; end;
   perform set_config('request.jwt.claims',first_claims,true);
+  select created_at into listing_cursor from private.polls where id=ordinary;
+  if not (public.polls_for_client(false,'community',group_id,null,null) @> jsonb_build_array(jsonb_build_object('id',ordinary)))
+    or public.polls_for_client(false,'community',group_id,listing_cursor,ordinary)<>'[]'
+    or public.polls_for_client(true,'community',group_id,null,null)<>'[]'
+    then raise exception 'community listing or cursor mismatch'; end if;
+  begin
+    perform public.polls_for_client(false,'community',group_id,listing_cursor,null);
+    raise exception 'incomplete cursor accepted';
+  exception when sqlstate 'PVG03' then null; end;
   first_option:=(public.poll_detail_for_client(ordinary)->'options'->0->>'id')::uuid;
   perform public.poll_vote_for_client(ordinary,first_option);
   perform set_config('request.jwt.claims',owner_claims,true);
   perform public.poll_transition_for_client(ordinary,'cancel',2,'Synthetic cancellation test',null);
+  if public.polls_for_client(false,'community',group_id,null,null)<>'[]'
+    or not (public.polls_for_client(true,'community',group_id,null,null) @> jsonb_build_array(jsonb_build_object('id',ordinary)))
+    then raise exception 'managed and public scopes disagree on cancelled poll'; end if;
   report:=public.poll_detail_for_client(ordinary);
   if report->>'status'<>'cancelled' or report->'results'<>'null'::jsonb
     or (select count(*) from private.poll_ballots b where b.poll_id=ordinary)<>1 then raise exception 'cancellation lost audit or disclosed totals'; end if;
@@ -230,7 +245,11 @@ begin
   update private.organizations set verification_status='verified' where id=org_id;
   org_poll:=(public.poll_save_for_client(null,config)->>'id')::uuid;
   perform public.poll_transition_for_client(org_poll,'publish',1,null,null);
+  if not (public.polls_for_client(false,'organization',org_id,null,null) @> jsonb_build_array(jsonb_build_object('id',org_poll)))
+    then raise exception 'organization listing omitted its own poll'; end if;
   perform set_config('request.jwt.claims',first_claims,true);
+  if public.polls_for_client(false,'organization',org_id,null,null)<>'[]'
+    then raise exception 'cross-organization listing leaked'; end if;
   begin
     perform public.poll_detail_for_client(org_poll);
     raise exception 'reviewed identity alone accessed organization ballot';
@@ -262,7 +281,12 @@ begin
   config:=config||jsonb_build_object('kind','decision','policy','governance','key',gen_random_uuid(),'taskId',task,'threshold',75);
   task_poll:=(public.poll_save_for_client(null,config)->>'id')::uuid;
   perform public.poll_transition_for_client(task_poll,'publish',1,null,null);
+  if not (public.polls_for_client(false,'project',project,null,null) @>
+    jsonb_build_array(jsonb_build_object('id',priority),jsonb_build_object('id',task_poll)))
+    then raise exception 'project listing omitted a poll'; end if;
   perform set_config('request.jwt.claims',first_claims,true);
+  if public.polls_for_client(false,'project',project,null,null)<>'[]'
+    then raise exception 'cross-project listing leaked'; end if;
   begin
     perform public.poll_detail_for_client(task_poll);
     raise exception 'project task poll was readable by unrelated member';

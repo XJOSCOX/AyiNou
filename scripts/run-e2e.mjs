@@ -88,6 +88,10 @@ async function main() {
     await run(cli, ["start", "--workdir", directory, "--output", "json",
       "--exclude", "studio,postgres-meta,edge-runtime,logflare,vector,realtime,mailpit"],
       { capture: true, timeout: 240_000 });
+    if (args.includes("--measure-polls")) {
+      await run(fromRoot("scripts", "measure-polls.mjs"), [project], { timeout: 300_000 });
+      return;
+    }
     const credentials = JSON.parse(await run(cli, ["status", "--workdir", directory, "--output", "json"],
       { capture: true, timeout: 30_000 }));
     const publicKey = credentials.PUBLISHABLE_KEY ?? credentials.ANON_KEY;

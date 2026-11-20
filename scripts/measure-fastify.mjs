@@ -3,24 +3,44 @@ import { createApp } from "../apps/api/src/app.ts";
 import { readConfig } from "../apps/api/src/config.ts";
 
 // Synthetic adapters measure Fastify and route work independently of hosted latency.
-const operations = { verify: 0, read: 0, rpc: 0 };
+const operations = { verify: 0, read: 0, rpc: 0, recommendations: 0 };
 const config = readConfig({ LOG_LEVEL: "silent" });
+const id = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const overrides = {
-  auth: { async verify() { operations.verify++; return "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"; } },
+  auth: { async verify(token) { operations.verify++; return "aaaaaaaa-aaaa-4aaa-8aaa-" + token.padStart(12, "0"); } },
   feed: {
     async read() { operations.read++; return []; },
+    async recommendations() {
+      operations.recommendations++;
+      return { snapshotId: id, algorithmVersion: "synthetic", rows: [] };
+    },
     async rpc(_token, operation) {
       operations.rpc++;
-      return operation === "notification_count_for_client" ? 0 : [];
+      const responses = {
+        notification_count_for_client: 0,
+        read_community_recommendations_for_client: { snapshotId: id, algorithmVersion: "synthetic", rows: [] },
+        poll_detail_for_client: { ownBallot: null },
+        poll_vote_for_client: { optionId: id },
+        project_work_for_client: { projectId: id },
+      };
+      return responses[operation] ?? [];
     },
   },
 };
 const cases = {
   status: { url: "/api/v1/status" },
   publicFeed: { url: "/api/v1/feed" },
-  following: { url: "/api/v1/feed?scope=following", headers: { authorization: "Bearer fixture" } },
-  notifications: { url: "/api/v1/me/notifications/unread-count", headers: { authorization: "Bearer fixture" } },
+  following: { url: "/api/v1/feed?scope=following", member: true },
+  forYou: { url: "/api/v1/feed?scope=for_you", member: true },
+  communities: { url: "/api/v1/communities/recommendations/list", member: true },
+  discoverPeople: { url: "/api/v1/discover/people", member: true },
+  discoverInstitutions: { url: "/api/v1/discover/institutions", member: true },
+  notifications: { url: "/api/v1/me/notifications/unread-count", member: true },
   projectDirectory: { url: "/api/v1/projects" },
+  projectWork: { url: "/api/v1/projects/" + id + "/work", member: true },
+  pollDirectory: { url: "/api/v1/polls", member: true },
+  pollDetail: { url: "/api/v1/polls/" + id, member: true },
+  pollVote: { method: "POST", url: "/api/v1/polls/" + id + "/ballot", payload: { optionId: id }, member: true },
 };
 const statistics = (values) => {
   const sorted = values.toSorted((a, b) => a - b);
@@ -50,9 +70,10 @@ for (let sample = 0; sample < 13; sample++) {
       listen.push(listening - afterReady);
     }
     for (let index = 0; index < 60; index++) {
-      for (const [name, request] of Object.entries(cases)) {
+      for (const [name, { member, ...request }] of Object.entries(cases)) {
         const start = performance.now();
-        const result = await app.inject({ ...request, remoteAddress: "127.0.0." + (index + 1) });
+        const result = await app.inject({ ...request, remoteAddress: "127.0.0." + (index + 1),
+          headers: member ? { authorization: "Bearer " + index } : undefined });
         const duration = performance.now() - start;
         if (result.statusCode !== 200) throw new Error(`${name} failed with ${result.statusCode}`);
         if (sample >= 2 && index >= 10) latency[name].push(duration);
