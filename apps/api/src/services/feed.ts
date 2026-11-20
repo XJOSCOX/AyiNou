@@ -66,6 +66,13 @@ export function feedDatabaseError(code: string): ApiError {
     case "PJP22": return new ApiError(403, "PROJECT_IDENTITY_REVOKED", "Identity verification is unavailable");
     case "PJP23": return new ApiError(403, "PROJECT_INSTITUTION_AUTHORITY_UNAVAILABLE", "Current institutional authority is required");
     case "PJP24": return new ApiError(403, "PROJECT_COMMUNITY_AUTHORITY_UNAVAILABLE", "Current community authority is required");
+    case "PJB01": return new ApiError(409, "PROJECT_WORK_INACTIVE", "Project is not active");
+    case "PJB02": return new ApiError(409, "PROJECT_INVITATION_EXPIRED", "Invitation expired");
+    case "PJB03": return new ApiError(404, "PROJECT_TEAM_UNAVAILABLE", "Team member or invitation unavailable");
+    case "PJB04": return new ApiError(409, "PROJECT_VOLUNTEER_UNAVAILABLE", "Opportunity or application unavailable");
+    case "PJB05": return new ApiError(404, "PROJECT_TASK_UNAVAILABLE", "Task unavailable");
+    case "PJB06": return new ApiError(409, "PROJECT_TASK_CHANGED", "Task changed");
+    case "PJB09": return new ApiError(409, "PROJECT_WORK_CONFLICT", "Project action unavailable in its current state");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");

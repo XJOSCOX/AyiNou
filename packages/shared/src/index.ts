@@ -99,7 +99,8 @@ export interface MemberNotification {
   kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "appeal_decided" |
     "verification_decided" | "verification_appeal_decided" | "representative_access_changed" |
     "ambassador_invited" | "ambassador_updated" | "organization_access_changed" |
-    "project_submitted" | "project_assigned" | "project_changes" | "project_approved" | "project_rejected" | null;
+    "project_submitted" | "project_assigned" | "project_changes" | "project_approved" | "project_rejected" | "project_operation" | null;
+  projectOperation?: { projectId: string; action: ProjectOperationEvent } | null;
   appealId?: string | null;
   postId: string | null;
   commentId: string | null;
@@ -411,10 +412,10 @@ export type AffiliationManagement = {
 };
 export const organizationPermissions = [
   "organization.view", "content.edit", "affiliations.manage", "affiliations.review", "affiliations.invite", "team.view", "roles.assign",
-  "projects.propose", "projects.edit", "projects.submit", "projects.view_private",
+  "projects.propose", "projects.edit", "projects.submit", "projects.view_private", "projects.operate",
 ] as const;
 export const futureOrganizationPermissions = [
-  "projects.manage", "tasks.assign", "volunteers.coordinate", "recruitment.manage", "finance.reports", "announcements.publish",
+  "tasks.assign", "volunteers.coordinate", "recruitment.manage", "finance.reports", "announcements.publish",
 ] as const;
 export const protectedOrganizationPermissions = ["ownership", "verification", "platform", "contacts", "membershipPolicy"] as const;
 export type OrganizationPermission = (typeof organizationPermissions)[number];
@@ -458,7 +459,7 @@ export type ProjectDetail = ProjectCard & {
   proposal: ProjectProposal; version: number | null; restricted: boolean; canEdit: boolean; canSubmit: boolean;
   submissionIdentity: ProjectIdentityState | null;
   publicationEligibility: "published" | "private" | "pending_institution_verification" | "unavailable" | null;
-  canDecide: boolean; canReport: boolean;
+  canDecide: boolean; canReport: boolean; canOpenWork?: boolean;
   history: { action: "submit" | "request_changes" | "approve" | "reject" | "restrict"; revision: number; reason: string | null; createdAt: string }[];
 };
 export type ProjectOptions = {
@@ -471,6 +472,38 @@ export type ProjectReviewItem = Pick<ProjectCard, "id" | "title" | "category" | 
 };
 export type ProjectReport = {
   id: string; projectId: string; title: string; version: number; restricted: boolean; category: ProjectReportCategory; explanation: string;
+};
+export const projectTeamRoles = ["manager", "supervisor", "contributor", "volunteer"] as const;
+export const projectExecutionStatuses = ["approved", "active", "paused", "completed", "archived"] as const;
+export const projectTaskPriorities = ["low", "normal", "high"] as const;
+export type ProjectTeamRole = (typeof projectTeamRoles)[number];
+export type ProjectExecutionStatus = (typeof projectExecutionStatuses)[number];
+export type ProjectTaskPriority = (typeof projectTaskPriorities)[number];
+export type ProjectOperationEvent = "execution_status" | "invite" | "invite_accept" | "invite_decline" | "invite_revoke" |
+  "member_revoke" | "opportunity_publish" | "opportunity_close" | "volunteer_apply" | "volunteer_offer" | "volunteer_reject" |
+  "volunteer_confirm" | "volunteer_withdraw" | "task_create" | "task_edit" | "task_assign" | "task_accept" | "task_decline" |
+  "task_progress" | "task_block" | "task_submit" | "task_approve" | "task_return" | "task_cancel" | "task_unassigned";
+export type ProjectWorkPerson = { id: string; name: string | null; handle: string | null };
+export type ProjectWorkTask = {
+  id: string; title: string; description: string; priority: ProjectTaskPriority; sensitive: boolean; dueOn: string | null;
+  status: "todo" | "in_progress" | "blocked" | "submitted" | "completed" | "cancelled";
+  version: number; assigned: boolean; mine: boolean; accepted: boolean; assignee: ProjectWorkPerson | null;
+};
+export type ProjectWork = {
+  projectId: string; title: string; status: ProjectExecutionStatus; version: number; role: ProjectTeamRole | "owner" | "delegate" | null;
+  identity: ProjectIdentityState; canApply: boolean;
+  team: { person: ProjectWorkPerson | null; role: ProjectTeamRole; eligible: boolean; mine: boolean }[];
+  invites: { id: string; role: ProjectTeamRole; expiresAt: string; recipient: ProjectWorkPerson | null; mine: boolean }[];
+  opportunities: { id: string; title: string; description: string; skills: string; commitment: string;
+    remote: boolean; capacity: number; closesOn: string | null; open: boolean }[];
+  applications: { id: string; opportunityId: string; status: "pending" | "offered" | "accepted" | "rejected" | "withdrawn";
+    feedback: string | null; title: string; applicant: ProjectWorkPerson | null; mine: boolean }[];
+  tasks: ProjectWorkTask[];
+  activity: { id: string; action: ProjectOperationEvent; date: string; taskId: string | null; detail: string | null }[];
+};
+export type ProjectWorkIndex = {
+  work: { id: string; title: string; status: ProjectExecutionStatus }[];
+  opportunities: { id: string; projectId: string; title: string; remote: boolean }[];
 };
 export const platformRoles = ["administrator", "moderator", "verification_reviewer"] as const;
 export type PlatformRole = (typeof platformRoles)[number];

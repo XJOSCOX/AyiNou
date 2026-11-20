@@ -47,6 +47,7 @@
   "grantDenied": "Ou pa gen otorizasyon pou bay oswa retire wòl sa a.",
   "relationshipUnavailable": "Moun nan bezwen yon afilyasyon oswa yon pozisyon reprezantan ki toujou aktif nan òganizasyon an.",
   "capabilities": {
+    "projects.operate": { "label": "Jere pwojè apwouve", "detail": "Aktive pwojè ki kalifye epi delege responsablite nan pwojè a." },
     "projects.propose": {
       "label": "Kreye pwopozisyon",
       "detail": "Kreye yon pwopozisyon nan non òganizasyon an."
@@ -100,7 +101,6 @@
     "membershipPolicy": "règ afilyasyon ak afilyasyon anplwaye"
   },
   "planned": {
-    "projects.manage": "jere pwojè",
     "tasks.assign": "bay travay",
     "volunteers.coordinate": "kowòdone volontè",
     "recruitment.manage": "jere rekritman",

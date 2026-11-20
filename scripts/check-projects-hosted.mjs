@@ -119,6 +119,14 @@ try {
   const plainPath = base + "/" + plainDraft.id;
   const plainDenied = await request(403, "POST", plainPath + "/submit", plainMember, { version: 1 });
   assert.equal(plainDenied.error.code, "PROJECT_IDENTITY_REQUIRED");
+  if (process.argv.includes("--work")) {
+    await request(401, "GET", "/api/v1/me/project-work");
+    const index = await request(200, "GET", "/api/v1/me/project-work", plainMember);
+    assert.ok(!index.work.some((item) => item.id === plainDraft.id));
+    await request(404, "GET", plainPath + "/work", plainMember);
+    await request(404, "POST", plainPath + "/work", plainMember, { action: "execution_status", status: "active", version: 0 });
+    console.log("Hosted Phase 6B API passed bearer-only work reads and draft activation denial.");
+  }
 
   if (process.argv.includes("--browser")) {
     const file = "supabase/.temp/phase6a1-browser.json";

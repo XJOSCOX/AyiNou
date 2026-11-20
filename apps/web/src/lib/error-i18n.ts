@@ -14,6 +14,7 @@ import { trustMessages } from "./trust-i18n";
 import { ambassadorMessages } from "./ambassador-i18n";
 import { organizationRoleMessages } from "./organization-role-i18n";
 import { projectMessages } from "./project-i18n";
+import { projectWorkMessages } from "./project-work-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -58,6 +59,13 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "PROJECT_IDENTITY_REVOKED": return projectMessages[locale].identity.revoked;
     case "PROJECT_INSTITUTION_AUTHORITY_UNAVAILABLE": return projectMessages[locale].institutionAuthorityUnavailable;
     case "PROJECT_COMMUNITY_AUTHORITY_UNAVAILABLE": return projectMessages[locale].communityAuthorityUnavailable;
+    case "PROJECT_WORK_INACTIVE": return projectWorkMessages[locale].errors.inactive;
+    case "PROJECT_INVITATION_EXPIRED": return projectWorkMessages[locale].errors.expired;
+    case "PROJECT_TEAM_UNAVAILABLE": return projectWorkMessages[locale].errors.teamUnavailable;
+    case "PROJECT_VOLUNTEER_UNAVAILABLE": return projectWorkMessages[locale].errors.volunteerUnavailable;
+    case "PROJECT_TASK_UNAVAILABLE": return projectWorkMessages[locale].errors.taskUnavailable;
+    case "PROJECT_TASK_CHANGED": return projectWorkMessages[locale].errors.taskChanged;
+    case "PROJECT_WORK_CONFLICT": return projectWorkMessages[locale].errors.conflict;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

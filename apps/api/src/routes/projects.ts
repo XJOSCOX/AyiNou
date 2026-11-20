@@ -6,6 +6,7 @@ import { ApiError } from "../services/api-error.js";
 import type { FeedRepository } from "../services/feed.js";
 import type { PostMediaService } from "../services/post-media.js";
 import type { ReadBudget } from "../services/read-budget.js";
+import { registerProjectWorkRoutes } from "./project-work.js";
 
 const id = z.strictObject({ id: z.uuid() });
 const version = z.number().int().positive().max(2147483647);
@@ -34,6 +35,7 @@ export function registerProjectRoutes(app: FastifyInstance, { viewer, repo, read
   read: ReadBudget;
   media: PostMediaService | null;
 }) {
+  registerProjectWorkRoutes(app, { viewer, repo, read });
   const root = "/api/v1/projects";
   const mine = "/api/v1/me/projects";
 

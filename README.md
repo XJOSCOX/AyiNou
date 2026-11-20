@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 6A.1 verified project eligibility with hosted Supabase for development
+**Status:** Phase 6B project teams, volunteer recruitment, and task coordination with hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -110,6 +110,8 @@ For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_R
 Open **Projects** to browse approved, eligible proposals. Manage private drafts and review status from **Manage proposals**. Reviewers use **Project reviews** with a verified authenticator. Run `npm run test:hosted:projects:sql` for rollback-only database checks and `npm run test:hosted:projects` for synthetic hosted API checks with targeted cleanup. Both use the linked project guard. [Project workflow, permissions, and API](docs/DATABASE.md#phase-6a-project-proposals)
 
 Members can save private drafts while identity review is pending. Submitting or resubmitting requires independently reviewed personal identity and current authority for the owner. Organization-owned proposals also require independent institutional verification for public listing. The red administrator icon identifies a platform role in signed-in views. The green check identifies reviewed personal claims. [Eligibility and publication rules](docs/DATABASE.md#phase-6a1-verified-project-eligibility)
+
+Open **Project work** from Projects to view your teams, invitations, and volunteer opportunities. Eligible owners can activate approved proposals, invite a team, and coordinate private work. Tasks and volunteer offers require recipient consent. Run `npm run test:hosted:project-work:sql` with the linked-project guard for the rollback-only operations suite. [Project work and permissions](docs/DATABASE.md#phase-6b-project-operations)
 
 The dashboard is at `http://localhost:4000/dashboard` after login. Public API routes are `GET /api/v1/community/stats`, `/api/v1/community/departments`, and `/api/v1/community/diaspora`. Geographic data is hidden together when any nonempty underlying location group has fewer than 10 members. Zero, suppressed, and unavailable are distinct states. See [docs/DATABASE.md](docs/DATABASE.md) for exact metric definitions.
 

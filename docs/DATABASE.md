@@ -655,3 +655,30 @@ Public directory, detail and cover reads recheck the current submitting actor, o
 The authenticated options RPC and authorized draft detail project the caller's own required, pending, revoked, or verified identity state. Public detail returns no internal eligibility values. Authorized owners see pending institutional verification for otherwise approved proposals when the institution is still unverified. Fastify maps submission denial from the transactional RPC to stable identity and scope errors. Unrelated callers receive the same unavailable response for inaccessible proposals. No verification evidence or another person's identity status is included.
 
 Independent identity reviewers must be staffed through the existing verification workflow. Synthetic approved claims exist only inside rolled-back SQL checks. Live API test accounts exercise ordinary drafts and denials without receiving reviewed identity or reviewer access.
+
+## Phase 6B project operations
+
+Migrations `20261120204000`, `20261120205000`, and `20261120206000` add the private operations model, its transactional workflow, then scoped reads, delegation permissions, and notifications. The execution row references the exact approved proposal revision. Its lifecycle moves from approved to active, then permits pausing, resuming, explicit completion, and archival. Completion takes a separate owner decision. Pausing prevents new work and permits revocations, declines, withdrawals, and opportunity closure. Completed and archived records remain readable while eligibility holds. Approval and proposal history retain their original state.
+
+| Actor | Project permissions |
+| --- | --- |
+| Individual owner or authorized community manager | Execution status, team delegation, recruitment, and task management |
+| Institutional operator who activated the project | Same scoped work while their organization permission remains current |
+| Other verified institutional delegates with `projects.operate` | Execution status and team delegation. An accepted project role is required to see private tasks. |
+| Project manager | Tasks, recruitment and ordinary invitations or removals |
+| Supervisor | Create, assign and review tasks they create and perform their own assignments |
+| Contributor and volunteer | Read, accept and update their own assignments |
+
+Identity and existing Phase 6A.1 accountability are rechecked at the database boundary. An institution must remain independently verified for execution. Privileged project appointments require current reviewed identity for both actor and appointee. Initial activation, operational status changes, team invitations, and revocations require recent TOTP. Delegated manager and supervisor privileges depend on a current verified sponsor with owner authority. Department and group participants need membership in the exact owning community and in any additional linked community. Project roles carry no institution or community-wide powers.
+
+Invitations bind to an existing member and expire after seven days. A caller-scoped request key protects retries. Accepting a distinct role invitation changes the role with consent. Disabling a member invalidates outstanding invitations and unassigns unfinished work. Opportunities inherit the proposal region or specify remote participation. They have a capacity and optional closing date. Applications are unique per member and opportunity. A manager's offer reserves a place, and confirmation creates volunteer access. The applicant may withdraw, which releases the place and removes opportunity-derived membership when no other accepted application supports it. Issued opportunity terms are immutable. Close the listing and publish new terms as a separate opportunity.
+
+Tasks use optimistic versions, consent-based assignment, and submission to a separate authorized reviewer. Reviews can approve, return, or cancel with a written reason. Supervisors coordinate their own tasks only. Sensitive assignments require reviewed identity for the assigning actor and assignee. Tasks cannot be edited while assigned. Unassign the task before changing its terms. The private audit log records operation and task events. Short scoped views show recent activity. Controlled text screening catches common decimal coordinates and email addresses. Managers must omit exact addresses, private contacts and beneficiary details from all operational content.
+
+| Fastify endpoint | Purpose |
+| --- | --- |
+| `GET /api/v1/me/project-work` | Eligible private work, invitations and applications, plus currently public volunteer listings |
+| `GET /api/v1/projects/:id/work` | Resource-scoped execution, team, tasks, recruitment and activity |
+| `POST /api/v1/projects/:id/work` | Versioned execution and task actions, invitations, and volunteer operations via a validated action payload |
+
+All work endpoints require a signed-in member. The public proposal directory contains no tasks, roster, or application details. In-app notifications target only the relevant recipient and recheck current access. They carry a scoped link and localized action label without task text, feedback, or actor data. Limits bound write frequency, team size, opportunity capacity, and task counts. Milestones, financial activity, external notifications, and staff appointments for identity review remain separate work.

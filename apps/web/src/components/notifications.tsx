@@ -1,9 +1,10 @@
 "use client";
 
-import { notificationPreferenceKeys, type MemberNotification } from "@ayinou/shared";
+import { notificationPreferenceKeys, type MemberNotification, type ProjectOperationEvent } from "@ayinou/shared";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { projectMessages } from "@/lib/project-i18n";
+import { projectWorkMessages } from "@/lib/project-work-i18n";
 import Link from "next/link";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
@@ -16,7 +17,7 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
-function notificationTarget({ available, kind, actor, postId, commentId, appealId }: MemberNotification) {
+function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation }: MemberNotification) {
   if (!available) return null;
   if (kind === "new_follower") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
   if (kind === "appeal_decided") return appealId ? `/settings/appeals#appeal-${appealId}` : null;
@@ -25,6 +26,11 @@ function notificationTarget({ available, kind, actor, postId, commentId, appealI
   if (kind === "ambassador_invited" || kind === "ambassador_updated") return "/settings/ambassadors";
   if (kind === "organization_access_changed") return "/institutions";
   if (kind === "project_assigned") return "/projects/review";
+  if (kind === "project_operation" && projectOperation) {
+    const section = projectOperation.action.startsWith("task_") ? "tasks" :
+      projectOperation.action.startsWith("volunteer_") ? "volunteers" : "team";
+    return "/projects/" + projectOperation.projectId + "/work?section=" + section;
+  }
   if (kind?.startsWith("project_")) return "/projects/manage";
   if (!postId) return null;
   return `/posts/${postId}${commentId ? `?comment=${commentId}` : ""}`;
@@ -63,6 +69,7 @@ export function NotificationCenter() {
         : item.kind === "ambassador_invited" ? ambassadorMessages[locale].invitedNotice
         : item.kind === "ambassador_updated" ? ambassadorMessages[locale].updatedNotice
         : item.kind === "organization_access_changed" ? organizationRoleMessages[locale].notification
+        : item.kind === "project_operation" ? operationMessage(locale, item.projectOperation?.action)
         : item.kind === "project_submitted" || item.kind === "project_assigned" || item.kind === "project_changes" ||
           item.kind === "project_approved" || item.kind === "project_rejected" ? projectMessages[locale].notices[item.kind]
         : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
@@ -83,6 +90,11 @@ export function NotificationCenter() {
     {resource.page?.nextCursor && <button type="button" disabled={resource.loadingMore} className={`${institutionAction} justify-self-start`}
       onClick={() => { void resource.more(); }}>{resource.loadingMore ? t.working : t.more}</button>}
   </section></MemberShell>;
+}
+
+function operationMessage(locale: keyof typeof projectWorkMessages, action?: ProjectOperationEvent) {
+  const { notices } = projectWorkMessages[locale];
+  return action && Object.hasOwn(notices, action) ? notices[action as keyof typeof notices] : notices.taskUpdate;
 }
 
 export function NotificationPreferencesPanel() {

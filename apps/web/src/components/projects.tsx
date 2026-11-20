@@ -11,6 +11,7 @@ import { useLocale } from "@/lib/locale-store";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { loadMyProjects, loadProject, loadProjectImage, loadProjectOptions, loadProjects, reportProject, submitProject, uploadProjectImage } from "@/lib/project-api";
 import { projectMessages } from "@/lib/project-i18n";
+import { projectWorkMessages } from "@/lib/project-work-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { DisplayControls } from "./display-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -61,6 +62,7 @@ export function ProjectsDirectory({ signedIn }: { signedIn: boolean }) {
       {signedIn && <div className="flex flex-wrap items-center gap-3">
         <Link href="/projects/new" className={institutionAction}>{t.newProject}</Link>
         <Link href="/projects/manage" className={institutionLink}>{t.manage}</Link>
+        <Link href="/projects/team" className={institutionLink}>{projectWorkMessages[locale].workspace}</Link>
       </div>}
     </header>
     <form className={`${institutionCard} grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]`} onSubmit={(event) => {
@@ -109,6 +111,7 @@ export function ManageProjectsScreen() {
       <h1 className="text-3xl font-semibold">{t.manage}</h1>
       <div className="flex flex-wrap items-center gap-3">
         <Link href="/projects" className={institutionLink}>{t.title}</Link>
+        <Link href="/projects/team" className={institutionLink}>{projectWorkMessages[locale].workspace}</Link>
         <Link href="/projects/new" className={institutionAction}>{t.newProject}</Link>
         {options.data?.canReview && <Link href="/projects/review" className={institutionLink}>{t.reviewQueue}</Link>}
       </div>
@@ -149,6 +152,9 @@ export function ProjectDetailScreen({ id, signedIn }: { id: string; signedIn: bo
           {data.publishedAt && <p className="mt-1 text-sm">{t.published} · {new Date(data.publishedAt).toLocaleDateString(locale)}</p>}
         </header>
         {data.status === "approved" && <p className="max-w-prose text-sm text-[var(--theme-body)]">{t.approvalHelp}</p>}
+        {signedIn && data.canOpenWork && <Link className={institutionLink} href={"/projects/" + id + "/work"}>
+          {projectWorkMessages[locale].workspace}
+        </Link>}
         {data.publicationEligibility === "pending_institution_verification" &&
           <p className="max-w-prose text-sm">{t.institutionVerificationPending}</p>}
         {data.publicationEligibility === "unavailable" && <p className="max-w-prose text-sm">{t.publicationUnavailable}</p>}

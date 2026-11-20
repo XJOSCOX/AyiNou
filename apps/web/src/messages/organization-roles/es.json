@@ -47,6 +47,7 @@
   "grantDenied": "Esta asignación excede tu autoridad delegada.",
   "relationshipUnavailable": "La persona necesita una afiliación o representación vigente en esta organización.",
   "capabilities": {
+    "projects.operate": { "label": "Gestionar proyectos aprobados", "detail": "Activa proyectos elegibles y delega responsabilidades limitadas al proyecto." },
     "projects.propose": {
       "label": "Crear propuestas",
       "detail": "Crear una propuesta en nombre de la organización."
@@ -100,7 +101,6 @@
     "membershipPolicy": "política de afiliación y afiliación del personal"
   },
   "planned": {
-    "projects.manage": "gestionar proyectos",
     "tasks.assign": "asignar tareas",
     "volunteers.coordinate": "coordinar voluntarios",
     "recruitment.manage": "gestionar contratación",

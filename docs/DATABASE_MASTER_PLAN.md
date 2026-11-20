@@ -258,12 +258,26 @@ All five tables are RLS-enabled without direct application-role grants. Authenti
 
 Phase 6A.1 adds no tables. Project rights derive from the existing reviewed identity outcome, institution verification applications and role assignments, and exact community membership and staff records. The internal submitter check requires a current independent identity claim. Public projection adds current accountable ownership, the submitter’s ability to represent that owner, and separate institution verification for organization-owned projects. A lost eligibility condition suppresses public projections without rewriting approval or history. Future manager and team changes must check verified identity and scoped authority in the same transaction. [Phase 6A.1 rules](DATABASE.md#phase-6a1-verified-project-eligibility)
 
-### Project execution and volunteering — future phases
+### Project execution and volunteering — Phase 6B
+
+The following RLS-enabled tables live in `private`, with no direct application-role grants.
+
+| Table | Primary keys, foreign keys and principal fields |
+| --- | --- |
+| `project_execution` | `project_id uuid PK/FK`, `operator_id uuid? FK→auth.users`, `approved_revision integer!` with composite proposal revision FK, `status text!`, `version integer!`, creation and update timestamps |
+| `project_team` | PK `(project_id uuid FK,user_id uuid FK)`, `role text!`, `membership_source text!`, `sponsor_id uuid? FK`, join and revocation timestamps. Active index by user and project. |
+| `project_invitations` | `id uuid PK`, project, inviter and recipient UUID FKs, `role text!`, `request_key uuid!`, `status text!`, expiry and creation timestamps. Unique inviter/request within project and one pending invite per recipient per project. |
+| `project_opportunities` | `id uuid PK`, project and manager UUID FKs, required title, description, skills, commitment, remote flag and capacity, nullable closing date/time, creation timestamp. Unique `(project_id,id)`. |
+| `project_applications` | `id uuid PK`, composite project/opportunity FK, applicant and reviewer UUID FKs, status and optional feedback, creation/update timestamps. Unique opportunity and applicant. |
+| `project_tasks` | `id uuid PK`, project UUID FK, title, description, status, priority, sensitivity, nullable composite project/assignee FK, creator and reviewer UUID FKs, optional acceptance and due dates, version and timestamps. Unique `(project_id,id)`. |
+| `project_operations_events` | `id uuid PK`, project, actor, recipient, invitation and application UUID FKs, optional composite project/task FK, action and optional detail, creation timestamp. Indexed by project and task timeline. |
+
+A recipient-scoped notification FK references an operation event. Projections filter by active role, owner scope, assignment and blocks. Cascading proposal deletion handles operational children, and actor references are nulled or removed through their ownership relationships. Adopt a retention schedule for invitations, applications, and activity before public operation. [Workflow and access matrix](DATABASE.md#phase-6b-project-operations)
+
+### Milestones, updates, project needs, and measured outcomes — future phases
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `projects` | `id uuid PK`, `proposal_id uuid! UQ`, `approved_revision integer!` forming an FK to `private.project_revisions(project_id,revision)`, `status text!`, `ca`, `ua`, `archived_at timestamptz?` | Reference the approved proposal and inherit accountable ownership. Define execution status and authorization before migration. |
-| `project_members` | `project_id uuid! FK→projects.id`, `user_id uuid! FK→profiles.user_id`, `role text!`, `status text!`, `ca`, `ua`; PK `(project_id,user_id)` | IX `(user_id,status)`; organizer/reviewer separation |
 | `project_milestones` | `id uuid PK`, `project_id uuid! FK→projects.id`, `title text!`, `due_at timestamptz?`, `status text!`, `completed_at timestamptz?`, `ca`, `ua` | IX `(project_id,status,due_at)` |
 | `project_updates` | `id uuid PK`, `project_id uuid! FK→projects.id`, `author_id uuid! FK→profiles.user_id`, `body text!`, `status text!`, `ca`, `ua`, `supersedes_id uuid? FK→project_updates.id` | IX `(project_id,created_at DESC)`; corrections linked, history retained |
 | `project_needs` | `id uuid PK`, `project_id uuid! FK→projects.id`, `need_type text!`, `description text!`, `quantity numeric(12,2)?`, `unit text?`, `status text!`, `ca`, `ua` | IX `(project_id,status)`; CHECK quantity>0 when set |
@@ -402,9 +416,15 @@ erDiagram
     community_projects ||--o{ project_images : stores_covers
     project_revisions ||--o{ project_events : audits
     community_projects ||--o{ project_reports : receives
-    project_revisions ||--o| projects : anchors_future_execution
-    projects ||--o{ project_milestones : tracks
-    projects ||--o{ project_needs : requests
+    project_revisions ||--o| project_execution : anchors
+    project_execution ||--o{ project_team : scopes
+    project_execution ||--o{ project_invitations : invites
+    project_execution ||--o{ project_tasks : coordinates
+    project_execution ||--o{ project_opportunities : lists
+    project_opportunities ||--o{ project_applications : receives
+    project_execution ||--o{ project_operations_events : audits
+    project_execution ||--o{ project_milestones : tracks
+    project_execution ||--o{ project_needs : requests
     project_needs ||--o{ volunteer_offers : meets
     community_claims ||--o{ claim_evidence : supported_by
     community_claims ||--o{ claim_attestations : receives
@@ -412,7 +432,7 @@ erDiagram
     organizations ||--o{ radio_stations : operates
     radio_stations ||--o{ radio_streams : broadcasts
     radio_stations ||--o{ radio_programs : schedules
-    projects ||--o{ funding_campaigns : funds
+    project_execution ||--o{ funding_campaigns : funds
     funding_campaigns ||--o{ contribution_records : receives
     moderation_cases ||--o{ moderation_actions : records
 ```
@@ -445,7 +465,7 @@ erDiagram
 | Organizations/representatives/ambassadors | Approved public facts | Public read | Authorized representative proposals | Verification review | Audited approval/revocation |
 | Verification applications/evidence/reviews | — | Own application status | Own organization submission | Assigned review/evidence | Restricted disposition/audit |
 | Phase 6A–6A.1 proposals | Approved eligible discovery | Own private drafts and eligible reports | Current proposal permissions and reviewed identity for submission | Assigned independent decisions with recent TOTP and current submitting authority for approval | Audited report restriction and eligible reviewer assignment |
-| Future project execution | Safe published read | Eligible offers | Scoped team edits | Independent oversight | Audited publish or close |
+| Phase 6B project execution | Published proposal only | Eligible opportunities, consent and own tasks | Verified scoped team and task workflows | Separate task review by an eligible project actor | No implicit task access from platform administration |
 | Claims/sources/attestations | Safety-approved summaries | Eligible submission/read | Own drafts/appeals | Assigned editorial review | Restricted publication control |
 | Claim evidence/safety actions | — | Own submission receipt | — | Assigned minimum-necessary access | Retention/redaction/audit |
 | Radio catalog/streams | Approved catalog read | Same | Representative proposals | Rights review | Approve/disable stream |
@@ -472,7 +492,7 @@ Tests per domain must exercise anonymous, owner, other member, blocked member, w
 4. **Phases 3A–3F** deliver text posts, moderation, durable quotas, comments, reactions, following, For You, private media and notifications, member safety lists, and appeals.
 5. **Phase 4:** Create communities, membership, rules, bans, scoped roles; then add posts' community FK and authorization checks. Seed department communities only after reviewed visibility/moderation policy.
 6. **Phase 5:** Extend the delivered institutional and review foundation with ambassador assignments and reviewed proof channels. Any evidence files depend on private media assets and retention approval. Radio stations later depend on approved organizations. Existing `verification_records` stays user-scoped.
-7. **Phase 6:** The proposal model follows community membership and organization roles, then adds workflow RPCs and scoped access. Future execution follows an approved, immutable revision. Create task, milestone, need, update, outcome, and volunteer records only when their access and lifecycle policies are implemented.
+7. **Phase 6:** The proposal model follows community membership and organization roles, then adds workflow RPCs and scoped access. Execution follows an approved immutable revision and provides project teams, volunteer recruitment, and tasks. Milestones, needs, updates, and outcomes follow in later releases.
 8. **Phase 7:** Create claims, sources, evidence, attestations, reviews, history, appeals, safety actions only with a crisis-publication policy and trained review process.
 9. **Phase 8:** Create stations, streams, programs, schedules, and later episodes after rights verification and media infrastructure.
 10. **Phase 9:** Create opportunities/applications after owner checks. Create campaign/contribution/webhook tables **only** after legal/payment-partner review, signed webhook design, reconciliation, and refund/dispute policy. No platform cash custody.
