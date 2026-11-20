@@ -283,6 +283,8 @@ Feature development pauses here for owner review of the engineering results and 
 
 ## Standard completion checklist for EVERY phase
 
+- Legal L3.2 adds a private, synthetic-only foundation for privacy case intake, tracking and withdrawal. Live intake, assigned review, data export and erasure remain gated. [L3.2 implementation report](docs/privacy/L3_2_IMPLEMENTATION_REPORT.md)
+
 - [ ] Scope and acceptance criteria documented
 - [ ] Typecheck, lint, unit/integration tests and build pass locally
 - [ ] Relevant RLS allow/deny and migration tests pass

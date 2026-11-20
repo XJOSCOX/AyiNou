@@ -736,3 +736,17 @@ Previews appear after the viewer's own ballot only where the published policy pe
 | `POST /polls/:id/nominations/:option` | The nominee accepts, declines or withdraws their own consent. |
 
 Organizers see versioned lifecycle and consent events without voter identities or ballot records. Notifications are limited to recipients with current access, including pending nominees, accepted candidates when results close, and a creator affected by another authorized manager's action. There is no notification broadcast or additional email channel. Poll creation, voting and management use shared database limits. Member directory reads use the existing discovery budget. Use `test:hosted:polls:sql` for rolled-back authorization and lifecycle checks, and `test:hosted:polls` for a live concurrency check with cleanup.
+
+## Legal L3.2 privacy intake
+
+Migration `20261120230000_l32_privacy_intake.sql` adds `private.privacy_cases`, `privacy_case_events`, `privacy_case_commands`, `privacy_case_assignments` and `privacy_intake_fixtures`. All five have RLS enabled and revoke direct table access for anonymous, authenticated and service roles. The migration seeds no rows. Two fixed-search-path service-only RPCs recheck current Supabase sessions and the developer-owned synthetic fixture allowlist. No general administrator or verification reviewer gains access.
+
+| API under `/api/v1` | Scope |
+| --- | --- |
+| `GET /me/privacy-requests[?after=UUID]` | Owner-only chronological list, up to 20 cases, with a subject-bound next cursor. |
+| `GET /me/privacy-requests/:id` | Owner-only case and safe event projection, with the same not-found response for nonexistent or unavailable IDs. |
+| `POST /me/privacy-requests` | Synthetic intake with a request kind and UUID `Idempotency-Key`. |
+| `POST /me/privacy-requests/:id/withdraw` | Synthetic withdrawal, requiring the case's current version and a UUID `Idempotency-Key`. |
+| `/admin/privacy-requests/*` | Denial boundary. In isolated mode, the route checks a live session and recent MFA before denying review. No queue or assignment operation. |
+
+Receipts contain the opaque case ID, state and version, and remain stable for an identical command retry. Creation begins at version 1 and can transition once to withdrawn at version 2. Structured audit events omit evidence and claimant-visible history omits internal request identifiers and reason codes. Case policy context is explicitly unresolved. [Scope and operations](privacy/L3_2_IMPLEMENTATION_REPORT.md)

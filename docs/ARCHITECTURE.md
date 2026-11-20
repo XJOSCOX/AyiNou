@@ -173,3 +173,9 @@ Phase 6C adds progress actions to the existing project boundary. The proposal-ro
 ### Polls and decision records
 
 Web and future native clients use the same Fastify poll endpoints and shared transport types. Fastify validates ranges and fields, then passes the requesting member's Supabase token to private-scope RPCs. The database holds the poll row lock for opening configuration, writes, withdrawal, cancellation and finalization. Higher-trust publication snapshots the electorate, while mutations recheck live identity, membership, blocks and activity. A previous accepted choice is returned to its own account on an identical retry. Notifications derive from recipient-specific events and recheck access on read. PostgREST table privileges stay revoked throughout. The only cross-domain writes are scoped notification and rate-limit records. An audited poll recommendation has no code path to project review, appointments or role assignment. [Poll schema and API](DATABASE.md#phase-6d-polls)
+
+### Privacy request intake
+
+Account Settings links to Privacy Requests. Hosted and production instances report that intake is closed. The disposable browser suite can enable an API mode for synthetic accounts with independent database allowlisting. Fastify verifies the live Supabase session and passes server-derived subject, session and assurance to narrowly granted RPCs. PostgreSQL rechecks the session and allowlist on every read or command. The browser uses uncached responses and clears the workspace when the signed-in subject changes.
+
+The only case states exposed here are received and withdrawn. Creation and withdrawal commit their versioned event and idempotency receipt in the same database transaction. Review URLs require recent MFA in the isolated mode and always deny access. Any future reviewer work requires independent authorization and operating rules. [L3.2 implementation report](privacy/L3_2_IMPLEMENTATION_REPORT.md)

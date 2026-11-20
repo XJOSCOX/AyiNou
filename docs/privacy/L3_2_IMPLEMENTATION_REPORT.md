@@ -1,0 +1,33 @@
+# Legal L3.2 privacy request intake
+
+Development scope only. Baseline `e68bed7ceed7f46d9ee6b2d768877b8227cc118c` on `main`. Account Settings → Privacy Requests is available in Haitian Creole, French, English and Spanish. The page displays the intake status and request categories. The pilot planning directions have no effect on registration, age eligibility, market eligibility, or launch.
+
+## Gate and data model
+
+The API defaults to `AYINOU_PRIVACY_INTAKE=disabled`. Synthetic mode is accepted only against the isolated loopback Supabase endpoint outside production. The disposable Playwright runner uses its independently created database with an initially empty, database-owner-controlled fixture allowlist. The fixture table is empty on migration. There is no hosted activation setting or operator UI for adding members to the allowlist. The database RPCs enforce the allowlist and current session independently of Fastify and are executable only by the service role. Recovery is to revert or disable the API first. Leave the empty additive schema in place pending separately reviewed SQL remediation; do not roll back by dropping case data.
+
+Migration `20261120230000_l32_privacy_intake.sql` adds five RLS-protected private tables for the fixture gate, cases, events, commands and reserved reviewer assignments. It modifies no prior table, role, security policy or migration. The case tracks the Auth subject, kind, status, version, creation time, assurance class and safe next action. The policy marker is always `unresolved`. The phase records no identity proofs, unrestricted notes, attachments, export contents, passwords or TOTP secrets. Approval of case-record retention remains pending.
+
+## Routes and behavior
+
+- `GET /api/v1/me/privacy-requests` returns a paginated list scoped to the live subject. `GET /api/v1/me/privacy-requests/:id` returns the case and its safe history. Responses use `Cache-Control: private, no-store`.
+- `POST /api/v1/me/privacy-requests` accepts one category from access, correction, portable export, closure, deletion, restriction/objection, or escalation/appeal and returns a version-1 received receipt. The selected category starts no operational processing.
+- `POST /api/v1/me/privacy-requests/:id/withdraw` requires the expected version and transitions a received case to withdrawn at version 2. No route sets accepted, approved, held, completed or any execution state.
+- Both writes require a UUID idempotency key. Within a transaction the actor's lock serializes concurrent commands even across independent Fastify processes. Matching actor/key/operation/case/payload/policy retries replay the original safe receipt. Reusing a key with different input conflicts. New keys allow distinct requests of the same kind. A stale withdrawal conflicts. Fastify uses the existing shared read budget and PostgreSQL limits new test cases per subject.
+- Events record previous/next state, category of actor, structured reason, request identifier, timestamp and version. The same transaction commits the case state and command receipt. Application roles have no event update/delete access. Member history projects only state, timestamp and version. Retries preserve the selected request type and pending key after a recoverable client failure. Private state is discarded on account changes and sign-out.
+
+## Review authority and future out-of-band intake
+
+The review boundary reserves paths under `/api/v1/admin/privacy-requests/`. It requires recent MFA in isolated mode and denies review without accessing case data, even for an administrator or verification reviewer. The assignment table grants no privileges. L3.2 has no staffing approvals, live assignments, triage, conflict resolution or approval commands.
+
+Before opening a separate channel for lost-access or representative requests, approve an independently staffed, secure intake and generic acknowledgment that reveals no account existence. Prefer supported Supabase recovery. Future evidence categories include proof of control of a previously bound channel or approved equivalent, verified representative identity, scoped mandate with expiry/revocation, and independent confirmation where applicable. Use case-specific secure references, minimal metadata and review with separation from the case subject. Keep evidence off ordinary email. Escalate insufficient proof without disclosing account status. Test unknown versus known claimant response equivalence, stale or revoked authority, conflicted reviewers, and malicious requests. Future hooks are opaque case IDs, versioned audit and assignment records, with no public recovery or delegate endpoint in this phase.
+
+## Validation and hosted schema status
+
+- Workspace typecheck, lint, shared contract compatibility, four-language parity, API and client tests, and both production builds passed. The full isolated Chromium suite passed all 32 cases. New coverage exercised 320px and desktop layouts, closed and synthetic intake, localized errors in four languages, a committed request with interrupted delivery, safe retry, history, withdrawal and auth-account changes.
+- The local database tests replayed all 57 migrations and verified RLS, grants, direct RPC denial, DB-gated non-fixtures, owner scoping, expired and revoked sessions, strict payloads, stale writes, fresh and missing MFA, inert conflicted reviewer assignments and safe event projections. Concurrent identical requests sent to separate Fastify processes shared one case and receipt. Conflicting key reuse failed and the original receipt remained stable after withdrawal. No hosted accounts were used in stateful tests.
+- A guarded read-only query verified the existing hosted session grants, profile RLS and ballot access. The CLI dry-run listed only this additive migration for project `hcbxulyfmdmuyccgrujs`. The migration was applied and a read-only postflight confirmed its history, all five RLS-enabled tables empty, and both public RPCs executable only by the service role among application roles. Stateful hosted suites were kept out of this phase.
+
+## Remaining approvals
+
+Real intake requires owner and legal approval of the operator, jurisdiction-specific rules, access and appeal time limits, exceptions, acceptable proof, ordinary and out-of-band channels, staffing, conflict checks, and case retention. L3.3 still needs approved disclosures, private artifact lifecycles, managed encryption and download assurance. L3.4 still needs reviewed dependency and retention rules, lawful holds, Auth and Storage disposition, and verified backup reconciliation. No export, closure, deletion, Auth removal, suspension, retention or hold worker is introduced here. [Separate phase roadmap](L3_IMPLEMENTATION_ROADMAP.md)
