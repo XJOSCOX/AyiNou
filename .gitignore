@@ -21,3 +21,5 @@ Thumbs.db
 supabase/.branches/
 supabase/.temp/
 supabase/.profiles/
+.e2e-run-*/
+apps/web/e2e-results/

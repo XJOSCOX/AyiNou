@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" source("..");
 
 :root {
   color-scheme: light;
@@ -62,7 +62,9 @@
   --theme-brand-red: #ca4b61;
 }
 
-html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
 body { position: relative; isolation: isolate; min-height: 100dvh; margin: 0; background: var(--theme-bg); color: var(--theme-text); font-family: "DM Sans Variable", Arial, Helvetica, sans-serif; }
 button { cursor: pointer; }
 ::selection { background: var(--theme-selected); color: var(--theme-text); }

@@ -92,6 +92,18 @@ On Windows, if npm scripts fail while launching Git Bash, set `npm_config_script
 
 Do not put real credentials, production database dumps, identity documents, or sensitive user content in source control.
 
+## Browser regression tests
+
+The Chromium suite uses pinned Playwright Test and a disposable local Supabase stack. Start Docker, then run these commands from the repository root.
+
+```sh
+npx playwright install chromium
+npm run test:e2e:smoke
+npm run test:e2e
+```
+
+Regular development and unit tests can run independently. Browser tests use separate ports, generated fixture accounts, and local Auth, Fastify, PostgreSQL and Storage. [Browser testing, targeted runs, and cleanup](docs/WORKFLOW.md#browser-regression-tests)
+
 ## Hosted Supabase database
 
 The pinned Supabase CLI is installed by `npm install`. The confirmed hosted project is **AyiNou** (`hcbxulyfmdmuyccgrujs`). To inspect and apply future versioned migrations, verify the target in CLI output and use:
@@ -105,7 +117,7 @@ npm run db:push       # review the CLI prompt before applying
 
 The hosted database has versioned migrations through Phase 2D.1. Remote migration commands never reset, drop, or seed the hosted database. Do not run `db reset --remote`. The SQL files and optional local pgTAP tests remain in `supabase/`. See [docs/DATABASE.md](docs/DATABASE.md).
 
-For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:accounts`. These scripts create uniquely named, confirmed synthetic Auth users, exclude them from public metrics, and delete only their returned IDs. The optional `npm run test:hosted:aggregation` requires an empty eligible-member baseline and rolls back its SQL assertions. Do not run the scripts against an unrelated project.
+For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:accounts`. These scripts create uniquely named, confirmed synthetic Auth users, exclude them from public metrics, and delete only their returned IDs. The optional `npm run test:hosted:aggregation` uses temporary cohorts and rolls back its SQL assertions. Do not run the scripts against an unrelated project.
 
 Open **Projects** to browse approved, eligible proposals. Manage private drafts and review status from **Manage proposals**. Reviewers use **Project reviews** with a verified authenticator. Run `npm run test:hosted:projects:sql` for rollback-only database checks and `npm run test:hosted:projects` for synthetic hosted API checks with targeted cleanup. Both use the linked project guard. [Project workflow, permissions, and API](docs/DATABASE.md#phase-6a-project-proposals)
 
