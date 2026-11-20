@@ -10,6 +10,7 @@ export type PostImageVariant = "thumbnail" | "display";
 export interface PostMediaService {
   upload(actor: string, id: string, raw: Buffer): Promise<void>;
   uploadProjectImage?(actor: string, id: string, version: number, raw: Buffer): Promise<number>;
+  uploadProjectProgress?(actor: string, id: string, entry: string, version: number, raw: Buffer): Promise<number>;
   download(id: string, variant: PostImageVariant): Promise<Buffer>;
   cleanup(): Promise<number>;
 }
@@ -83,6 +84,11 @@ export function createPostMediaService(config: ApiConfig): PostMediaService | nu
     async uploadProjectImage(actor, id, version, raw) {
       return processImage(raw, (image) => rpc<number>("project_image_for_api", {
         p_actor: actor, p_id: id, p_version: version, p_webp: image.display.toString("base64"),
+      }));
+    },
+    async uploadProjectProgress(actor, id, entry, version, raw) {
+      return processImage(raw, (image) => rpc<number>("project_progress_image_for_api", {
+        p_actor: actor, p_id: id, p_entry: entry, p_version: version, p_webp: image.display.toString("base64"),
       }));
     },
     async download(id, variant) {

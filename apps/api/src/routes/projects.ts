@@ -7,6 +7,7 @@ import type { FeedRepository } from "../services/feed.js";
 import type { PostMediaService } from "../services/post-media.js";
 import type { ReadBudget } from "../services/read-budget.js";
 import { registerProjectWorkRoutes } from "./project-work.js";
+import { registerProjectProgressRoutes } from "./project-progress.js";
 
 const id = z.strictObject({ id: z.uuid() });
 const version = z.number().int().positive().max(2147483647);
@@ -36,6 +37,7 @@ export function registerProjectRoutes(app: FastifyInstance, { viewer, repo, read
   media: PostMediaService | null;
 }) {
   registerProjectWorkRoutes(app, { viewer, repo, read });
+  registerProjectProgressRoutes(app, { viewer, repo, read, media });
   const root = "/api/v1/projects";
   const mine = "/api/v1/me/projects";
 

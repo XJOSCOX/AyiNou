@@ -28,6 +28,7 @@
     "test:hosted:organization-roles": "node --import tsx scripts/check-phase2d-hosted.mjs --roles",
     "test:hosted:projects:sql": "node scripts/check-projects-sql.mjs",
     "test:hosted:project-work:sql": "node scripts/check-project-work-sql.mjs",
+    "test:hosted:project-progress:sql": "node scripts/check-project-progress-sql.mjs",
     "test:hosted:projects": "node --import tsx scripts/check-projects-hosted.mjs",
     "test:hosted:affiliations:sql": "node scripts/check-affiliations-sql.mjs",
     "test:hosted:admin:sql": "node scripts/check-admin-sql.mjs",

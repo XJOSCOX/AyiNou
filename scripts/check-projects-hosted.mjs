@@ -127,6 +127,15 @@ try {
     await request(404, "POST", plainPath + "/work", plainMember, { action: "execution_status", status: "active", version: 0 });
     console.log("Hosted Phase 6B API passed bearer-only work reads and draft activation denial.");
   }
+  if (process.argv.includes("--progress")) {
+    await request(404, "GET", plainPath + "/progress");
+    await request(401, "GET", plainPath + "/progress/work");
+    await request(404, "GET", plainPath + "/progress/work", plainMember);
+    await request(404, "POST", plainPath + "/progress/metrics", plainMember,
+      { action: "metric_create", name: "Synthetic workshops", unit: "sessions", target: 2 });
+    await request(404, "GET", plainPath + "/progress/entries/" + randomUUID() + "/image");
+    console.log("Hosted Phase 6C API passed draft progress, unauthenticated private reads, and evidence visibility denials.");
+  }
 
   if (process.argv.includes("--browser")) {
     const file = "supabase/.temp/phase6a1-browser.json";

@@ -17,6 +17,7 @@ import { DisplayControls } from "./display-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { ProjectForm, ProjectIdentityNotice } from "./project-form";
+import { PublicProjectProgress } from "./project-progress";
 import { ReviewActionForm } from "./project-review";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
@@ -174,6 +175,7 @@ export function ProjectDetailScreen({ id, signedIn }: { id: string; signedIn: bo
           </li>)}</ul>
         </section>}
       </article>
+      {data.publishedAt && <PublicProjectProgress id={id} signedIn={signedIn} />}
       {data.history.length > 0 && <section className={institutionCard}>
         <h2 className="font-semibold">{t.history}</h2>
         <ul className="mt-2 grid gap-2">{data.history.map((event) => <li key={event.createdAt} className="border-t border-[var(--theme-border)] pt-2 text-sm">

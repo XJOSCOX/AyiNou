@@ -159,3 +159,7 @@ A lost identity, owner permission, or institutional verification removes public 
 ### Phase 6B execution, delegation and consent
 
 Keep execution and its version separate from proposal review. Allow each eligible individual owner to operate directly. In institutions, the activating operator can manage work while their permission remains current. Other authorized delegates can control lifecycle and delegation. Private tasks require a project-specific role. Manager and supervisor appointments remain attributable to a current verified sponsor. Use explicit acceptance for team membership, volunteer placements, and task assignments. An approved project, task, or volunteer role conveys only the corresponding Ayinou workflow outcome.
+
+### Phase 6C evidence and published outcomes
+
+Review completion and publication separately from the proposal decision. Keep photos behind their entry's authorization check and supporting evidence private. Record observations explicitly and preserve their self-reported provenance in public snapshots. Require a recorded execution completion to author a final report. Publish corrections as new reviewed versions and retain approved history. Any future voting feature will reference the applicable proposal or exact reviewed report version, subject to separate visibility, eligibility, and anti-abuse policy.

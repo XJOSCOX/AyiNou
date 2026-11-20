@@ -223,7 +223,8 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [ ] Staff independent identity review so eligible applicants can complete verification.
 - [ ] Set staffing, review targets, retention, and a publication restriction reconsideration process before public operation.
 - [x] Phase 6B adds project execution status, scoped teams, volunteer applications, and task assignment and review.
-- [ ] Add milestones, public progress updates, and documented outcomes in later phases.
+- [x] Phase 6C adds reviewed milestones, public progress updates, private evidence, self-reported measures, and versioned final reports.
+- [ ] Define independent outcomes validation, retention, and future voting governance.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
 **Gate:** An initiative can be proposed, reviewed, organized, updated, completed and archived with transparent responsibility.

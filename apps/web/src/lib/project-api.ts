@@ -24,14 +24,16 @@ export const saveProject = (id: string, version: number, proposal: ProjectPropos
   authorizedSocialRequest(`${root}/${id}`, body("PATCH", { version, proposal, removeImage }));
 export const submitProject = (id: string, version: number): Promise<{ version: number }> =>
   authorizedSocialRequest(`${root}/${id}/submit`, body("POST", { version }));
-export const uploadProjectImage = (id: string, version: number, file: File): Promise<{ version: number }> =>
+export const readProjectImage = (file: File) =>
   new Promise<string>((resolve, reject) => {
     if (file.size > 3_145_728) { reject(new Error("PAYLOAD_TOO_LARGE")); return; }
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result).split(",", 2)[1]);
     reader.onerror = () => reject(new Error("INVALID_IMAGE"));
     reader.readAsDataURL(file);
-  }).then((image) => authorizedSocialRequest(`${root}/${id}/image`, body("PUT", { version, image })));
+  });
+export const uploadProjectImage = (id: string, version: number, file: File): Promise<{ version: number }> =>
+  readProjectImage(file).then((image) => authorizedSocialRequest(`${root}/${id}/image`, body("PUT", { version, image })));
 export const loadProjectQueue = (signal: AbortSignal): Promise<{ items: ProjectReviewItem[] }> =>
   authorizedSocialRequest(root + "/review", { signal });
 export const reviewProject = (id: string, version: number, action: ProjectReviewAction, reason: string, reviewer: string | null = null) =>

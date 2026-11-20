@@ -73,6 +73,12 @@ export function feedDatabaseError(code: string): ApiError {
     case "PJB05": return new ApiError(404, "PROJECT_TASK_UNAVAILABLE", "Task unavailable");
     case "PJB06": return new ApiError(409, "PROJECT_TASK_CHANGED", "Task changed");
     case "PJB09": return new ApiError(409, "PROJECT_WORK_CONFLICT", "Project action unavailable in its current state");
+    case "PJC03": return new ApiError(403, "PROJECT_PROGRESS_REVIEW_CONFLICT", "Independent project review is required");
+    case "PJC04": return new ApiError(404, "PROJECT_PROGRESS_UNAVAILABLE", "Milestone or progress entry unavailable");
+    case "PJC05": return new ApiError(422, "PROJECT_METRIC_INVALID", "Invalid or overlapping project measurement");
+    case "PJC06": return new ApiError(404, "PROJECT_EVIDENCE_UNAVAILABLE", "Evidence unavailable");
+    case "PJC08": return new ApiError(409, "PROJECT_REPORT_UNAVAILABLE", "Recorded project completion is required");
+    case "PJC09": return new ApiError(409, "PROJECT_PROGRESS_CHANGED", "Project progress changed");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");

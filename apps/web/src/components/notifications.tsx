@@ -1,10 +1,11 @@
 "use client";
 
-import { notificationPreferenceKeys, type MemberNotification, type ProjectOperationEvent } from "@ayinou/shared";
+import { notificationPreferenceKeys, type MemberNotification, type ProjectOperationEvent, type ProjectProgressEvent } from "@ayinou/shared";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { projectMessages } from "@/lib/project-i18n";
 import { projectWorkMessages } from "@/lib/project-work-i18n";
+import { projectProgressMessages } from "@/lib/project-progress-i18n";
 import Link from "next/link";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
@@ -27,8 +28,11 @@ function notificationTarget({ available, kind, actor, postId, commentId, appealI
   if (kind === "organization_access_changed") return "/institutions";
   if (kind === "project_assigned") return "/projects/review";
   if (kind === "project_operation" && projectOperation) {
-    const section = projectOperation.action.startsWith("task_") ? "tasks" :
-      projectOperation.action.startsWith("volunteer_") ? "volunteers" : "team";
+    const action = projectOperation.action;
+    const section = action.startsWith("milestone_") ? "milestones" :
+      action.startsWith("report_") || action === "progress_project_completed" ? "outcomes" :
+      action.startsWith("entry_") || action === "team_update_shared" ? "updates" :
+      action.startsWith("task_") ? "tasks" : action.startsWith("volunteer_") ? "volunteers" : "team";
     return "/projects/" + projectOperation.projectId + "/work?section=" + section;
   }
   if (kind?.startsWith("project_")) return "/projects/manage";
@@ -92,7 +96,9 @@ export function NotificationCenter() {
   </section></MemberShell>;
 }
 
-function operationMessage(locale: keyof typeof projectWorkMessages, action?: ProjectOperationEvent) {
+function operationMessage(locale: keyof typeof projectWorkMessages, action?: ProjectOperationEvent | ProjectProgressEvent) {
+  const progress = projectProgressMessages[locale].actions;
+  if (action && Object.hasOwn(progress, action)) return progress[action as keyof typeof progress];
   const { notices } = projectWorkMessages[locale];
   return action && Object.hasOwn(notices, action) ? notices[action as keyof typeof notices] : notices.taskUpdate;
 }

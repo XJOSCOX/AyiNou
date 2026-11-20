@@ -15,6 +15,7 @@ import { ambassadorMessages } from "./ambassador-i18n";
 import { organizationRoleMessages } from "./organization-role-i18n";
 import { projectMessages } from "./project-i18n";
 import { projectWorkMessages } from "./project-work-i18n";
+import { projectProgressMessages } from "./project-progress-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -66,6 +67,12 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "PROJECT_TASK_UNAVAILABLE": return projectWorkMessages[locale].errors.taskUnavailable;
     case "PROJECT_TASK_CHANGED": return projectWorkMessages[locale].errors.taskChanged;
     case "PROJECT_WORK_CONFLICT": return projectWorkMessages[locale].errors.conflict;
+    case "PROJECT_PROGRESS_REVIEW_CONFLICT": return projectProgressMessages[locale].errors.reviewConflict;
+    case "PROJECT_PROGRESS_UNAVAILABLE": return projectProgressMessages[locale].errors.unavailable;
+    case "PROJECT_METRIC_INVALID": return projectProgressMessages[locale].errors.metricInvalid;
+    case "PROJECT_EVIDENCE_UNAVAILABLE": return projectProgressMessages[locale].errors.evidenceUnavailable;
+    case "PROJECT_REPORT_UNAVAILABLE": return projectProgressMessages[locale].errors.reportUnavailable;
+    case "PROJECT_PROGRESS_CHANGED": return projectProgressMessages[locale].errors.changed;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;
