@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { ApiConfig } from "../config.js";
 import { ApiError } from "./api-error.js";
+import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
 
 const thresholds = {
   feed: [90, 120], media: [120, 240], discovery: [30, 60], profile: [60, 120], notifications: [90, 90],
@@ -14,7 +15,8 @@ export function createReadBudget(config: ApiConfig): ReadBudget {
   const secret = config.SUPABASE_SECRET_KEY;
   const client = config.SUPABASE_URL && secret ? createClient(config.SUPABASE_URL, secret, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(5000) }) },
+    db: supabaseDatabaseOptions,
+    global: { fetch: supabaseFetch(5_000) },
   }) : null;
   const counts = new Map<string, number>();
   let windowEnds = 0;

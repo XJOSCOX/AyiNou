@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { CommunityStats } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
+import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
 
 const count = z.number().int().nonnegative();
 const statsSchema = z.object({
@@ -26,6 +27,8 @@ export function createCommunityRepository(config: ApiConfig): CommunityRepositor
   if (!config.SUPABASE_URL || !config.SUPABASE_SECRET_KEY) return null;
   const client = createClient(config.SUPABASE_URL, config.SUPABASE_SECRET_KEY, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    db: supabaseDatabaseOptions,
+    global: { fetch: supabaseFetch() },
   });
   return {
     async stats() {

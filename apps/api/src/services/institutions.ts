@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { Institution, InstitutionAccounts, InstitutionManagement } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { safeProfileImage } from "./profile-image.js";
+import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
 
 export class InstitutionError extends Error {
   constructor(readonly code: string, readonly statusCode: number) { super(code); }
@@ -26,6 +27,8 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
   if (!config.SUPABASE_URL || !config.SUPABASE_SECRET_KEY) return null;
   const client = createClient(config.SUPABASE_URL, config.SUPABASE_SECRET_KEY, {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    db: supabaseDatabaseOptions,
+    global: { fetch: supabaseFetch() },
   });
   const logos = client.storage.from("institution-logos");
 

@@ -4,6 +4,7 @@ import type { ApiConfig } from "../config.js";
 import { ApiError } from "./api-error.js";
 import { feedDatabaseError } from "./feed.js";
 import { safePostImage } from "./post-image.js";
+import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
 
 export type PostImageVariant = "thumbnail" | "display";
 
@@ -19,12 +20,8 @@ export function createPostMediaService(config: ApiConfig): PostMediaService | nu
   if (!config.SUPABASE_URL || !config.SUPABASE_SECRET_KEY) return null;
   const admin = createClient(config.SUPABASE_URL, config.SUPABASE_SECRET_KEY, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input, init) => {
-        const deadline = AbortSignal.timeout(20_000);
-        return fetch(input, { ...init, signal: init?.signal ? AbortSignal.any([init.signal, deadline]) : deadline });
-      },
-    },
+    db: supabaseDatabaseOptions,
+    global: { fetch: supabaseFetch(20_000) },
   });
   const bucket = admin.storage.from("post-media");
   let processing = 0;

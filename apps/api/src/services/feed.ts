@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { FeedAuthor, FeedPost, InterestCode, PostAttachment, ReactionSummary } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { ApiError } from "./api-error.js";
+import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
 
 type PostRow = Omit<FeedPost, "author"> & {
   author: (Omit<FeedAuthor, "avatarUrl"> & { avatarPath: string | null }) | null;
@@ -99,13 +100,17 @@ export function feedDatabaseError(code: string): ApiError {
 export function createFeedRepository(config: ApiConfig): FeedRepository | null {
   const { SUPABASE_URL: url, SUPABASE_PUBLISHABLE_KEY: key, SUPABASE_SECRET_KEY: secret } = config;
   if (!url || !key) return null;
-  const options = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } };
+  const options = {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    db: supabaseDatabaseOptions,
+    global: { fetch: supabaseFetch() },
+  };
   const publicClient = createClient(url, key, options);
   const avatars = secret ? createClient(url, secret, options).storage.from("member-avatars") : null;
 
   async function rpc<T>(token: string | null, name: string, params: Record<string, unknown> = {}) {
     const client = token ? createClient(url!, key!, {
-      ...options, global: { headers: { Authorization: `Bearer ${token}` } },
+      ...options, global: { ...options.global, headers: { Authorization: `Bearer ${token}` } },
     }) : publicClient;
     const { data, error } = await client.rpc(name, params);
     if (error) throw feedDatabaseError(error.code);

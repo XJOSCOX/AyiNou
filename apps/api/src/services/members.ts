@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
 import type { Department, MemberProfile, PersonalClaim, ProfileChanges, ProfilePreview, UpdateMemberProfile } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { accountRepository, type AccountRepository } from "./accounts.js";
@@ -52,7 +53,11 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
   if (!config.SUPABASE_URL || !config.SUPABASE_PUBLISHABLE_KEY || !config.SUPABASE_SECRET_KEY) return null;
   const url = config.SUPABASE_URL;
   const publicKey = config.SUPABASE_PUBLISHABLE_KEY;
-  const options = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } };
+  const options = {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    db: supabaseDatabaseOptions,
+    global: { fetch: supabaseFetch() },
+  };
   // This client never accepts a member session.
   const admin = createClient(url, config.SUPABASE_SECRET_KEY, options);
   const publicClient = createClient(url, publicKey, options);
@@ -60,7 +65,7 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
   function asMember(token: string) {
     return createClient(url, publicKey, {
       ...options,
-      global: { headers: { Authorization: `Bearer ${token}` } },
+      global: { ...options.global, headers: { Authorization: `Bearer ${token}` } },
     });
   }
 
