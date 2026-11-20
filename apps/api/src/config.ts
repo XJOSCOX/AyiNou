@@ -11,6 +11,7 @@ const environmentSchema = z.object({
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
   AYINOU_BOOTSTRAP_ADMIN_USER_ID: z.preprocess((value) => value === "" ? undefined : value, z.uuid().optional()),
+  AYINOU_PRIVACY_INTAKE: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
 });
 
 export type ApiConfig = z.infer<typeof environmentSchema>;
@@ -19,6 +20,10 @@ export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiCon
   const result = environmentSchema.safeParse(environment);
   if (!result.success) {
     throw new Error("Invalid API environment configuration. Check .env.example.");
+  }
+  if (result.data.AYINOU_PRIVACY_INTAKE === "synthetic" &&
+      (environment.NODE_ENV === "production" || result.data.SUPABASE_URL !== "http://127.0.0.1:55321")) {
+    return { ...result.data, AYINOU_PRIVACY_INTAKE: "disabled" };
   }
   return result.data;
 }

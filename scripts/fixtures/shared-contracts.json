@@ -150,6 +150,13 @@
     "PostStatus": "type:1d5a11fc1e491f2c1357a2c974dde0d83fe7638e3b59ddd79835a443a62bb95e",
     "postVisibilities": "value:b2885e76ac9409bf9d7fe73284b6467c3116ba5f4d317ad37b63944cff198f98",
     "PostVisibility": "type:314a18bbb4b9dabacb21123d9d4d2f67f9efb7b86fa22126b9e015c428600da9",
+    "PrivacyRequestDetail": "type:17ee437e52e1284f939865c5c847d9ad5a34e32c9c73da5261eecd9bba683576",
+    "PrivacyRequestKind": "type:99a82ee304ea6a22e8800c03429bb983d15c2b2c7d440d51f65d060737f5a527",
+    "privacyRequestKinds": "value:3cba942a58196d825e179444307861b80f5e4fa2c89b6b4e2cc7664520d7b6dd",
+    "PrivacyRequestPage": "type:9a11879e75f1584a80b3b4dfc81bc41043eb8f11682963154753a37a588ba37a",
+    "PrivacyRequestReceipt": "type:a6856909cc2cf7fd3c00e50a40e19976ed83361dddb651419d530ad96284c19c",
+    "PrivacyRequestState": "type:02dfee6fcfce93711e19aab4c959e5b6b22e869adbfef822e4d1c3f3e03fe3d9",
+    "PrivacyRequestSummary": "type:bd5c65e7a41381c6e1c211cd5a089606a10d3e8d43728c7a1036f2e578b2221e",
     "ProfileChanges": "type:da7f8eb64dcd5987c3050c3bcd6a65eaa2c46b7576df9c4e831c226345c41edc",
     "ProfilePreview": "type:6e9c4d7e6ccc1e00ac6f5ee0897e2c6b3bf0ac72669f4e004f03f5cfd76389d3",
     "ProjectCard": "type:f8d51b4b57db5ba1a2f7a463686e46424c34962fdd3d90ceb5ea645f7bedc01d",
@@ -449,6 +456,15 @@
       "public",
       "members_only",
       "private"
+    ],
+    "privacyRequestKinds": [
+      "access",
+      "correction",
+      "export",
+      "closure",
+      "deletion",
+      "restriction",
+      "appeal"
     ],
     "projectExecutionStatuses": [
       "approved",

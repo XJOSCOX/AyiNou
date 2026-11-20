@@ -15,10 +15,12 @@ import { registerFeedRoutes } from "./routes/feed.js";
 import { createFeedRepository, type FeedRepository } from "./services/feed.js";
 import { createPostMediaService, type PostMediaService } from "./services/post-media.js";
 import { createReadBudget } from "./services/read-budget.js";
+import { registerPrivacyRoutes } from "./routes/privacy.js";
+import { createPrivacyRepository, type PrivacyRepository } from "./services/privacy.js";
 
 export function createApp(config: ApiConfig, overrides?: {
   auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository; institutions?: InstitutionRepository; feed?: FeedRepository;
-  media?: PostMediaService;
+  media?: PostMediaService; privacy?: PrivacyRepository;
 }) {
   const app = Fastify({
     ...requestIdentification(),
@@ -35,6 +37,8 @@ export function createApp(config: ApiConfig, overrides?: {
   const feed = overrides?.feed ?? createFeedRepository(config);
   const media = overrides?.media ?? createPostMediaService(config);
   const readBudget = createReadBudget(config);
+  const privacyEnabled = config.AYINOU_PRIVACY_INTAKE === "synthetic" &&
+    config.SUPABASE_URL === "http://127.0.0.1:55321" && process.env.NODE_ENV !== "production";
 
   app.register(cors, {
     origin: config.WEB_ORIGINS,
@@ -47,6 +51,8 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions));
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));
+  app.register((instance) => registerPrivacyRoutes(instance, privacyEnabled, auth,
+    privacyEnabled ? overrides?.privacy ?? createPrivacyRepository(config) : null, readBudget));
   app.addHook("onClose", async () => { await members?.close(); });
 
   return app;
