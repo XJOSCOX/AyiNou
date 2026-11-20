@@ -11,6 +11,7 @@ import { discoveryMessages } from "@/lib/discovery-i18n";
 import { loadPlatformAccess } from "@/lib/admin-api";
 import { adminMessages } from "@/lib/admin-i18n";
 import { communityDirectoryMessages } from "@/lib/communities-i18n";
+import { projectMessages } from "@/lib/project-i18n";
 import { useInstitutionResource } from "./institution-ui";
 
 export function MemberSidebar() {
@@ -25,6 +26,7 @@ export function MemberSidebar() {
     { href: "/feed", label: feedMessages[locale].feed },
     { href: "/discover", label: discoveryMessages[locale].discover },
     { href: "/communities", label: communityDirectoryMessages[locale].title },
+    { href: "/projects", label: projectMessages[locale].title },
     { href: "/profile", label: t.myProfile },
     { href: "/institutions", label: institution.institutions },
     { href: "/verification", label: institution.verification },

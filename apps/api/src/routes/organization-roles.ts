@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import type { OperationalOrganization, OrganizationRoleWorkspace } from "@ayinou/shared";
+import { organizationPermissions, type OperationalOrganization, type OrganizationRoleWorkspace } from "@ayinou/shared";
 import { z } from "zod";
 import type { FeedRepository } from "../services/feed.js";
 import type { ReadBudget } from "../services/read-budget.js";
@@ -11,7 +11,7 @@ const version = z.number().int().positive().max(2147483647);
 const fields = z.strictObject({
   name: z.string().trim().min(2).max(64),
   description: z.string().trim().min(1).max(300).nullable(),
-  permissions: z.array(z.string().min(1).max(40)).min(1).max(7),
+  permissions: z.array(z.string().min(1).max(40)).min(1).max(organizationPermissions.length),
 });
 
 export function registerOrganizationRoleRoutes(app: FastifyInstance, { viewer, repo, read }: {

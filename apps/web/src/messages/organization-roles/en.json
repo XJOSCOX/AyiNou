@@ -47,6 +47,22 @@
   "grantDenied": "This assignment is outside your delegated authority.",
   "relationshipUnavailable": "The recipient needs a current affiliation or representative position in this organization.",
   "capabilities": {
+    "projects.propose": {
+      "label": "Create proposals",
+      "detail": "Create a proposal in the organization’s name."
+    },
+    "projects.edit": {
+      "label": "Edit proposals",
+      "detail": "Edit organization drafts."
+    },
+    "projects.submit": {
+      "label": "Submit proposals",
+      "detail": "Submit organization proposals for review."
+    },
+    "projects.view_private": {
+      "label": "View private proposals",
+      "detail": "Read the organization’s private proposals and history."
+    },
     "organization.view": {
       "label": "View organization workspace",
       "detail": "Open the scoped management summary."
@@ -84,7 +100,6 @@
     "membershipPolicy": "membership policy and staff affiliation"
   },
   "planned": {
-    "projects.create": "create projects",
     "projects.manage": "manage projects",
     "tasks.assign": "assign tasks",
     "volunteers.coordinate": "coordinate volunteers",

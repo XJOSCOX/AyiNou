@@ -212,13 +212,15 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Connect description editing and ordinary affiliation operations to separate capability checks.
 - [x] Require recent TOTP for role changes and audit assignments, edits, deactivation, and lifecycle revocations.
 - [x] Show authorized team details and private role notices.
-- [ ] Enable future project, task, volunteer, recruitment, finance, and announcement permissions alongside their backend workflows.
+- [x] Enable organization proposal permissions with Phase 6A.
+- [ ] Enable task, volunteer, recruitment, finance, and announcement permissions alongside their backend workflows.
 
 ## Phase 6 — Initiatives, projects and volunteers
 
-- [ ] Propose projects with location region (not dangerous exact coordinates), objectives and owners.
-- [ ] Project review, milestones, volunteer roles, updates, outcomes.
-- [ ] Moderation, conflict-of-interest disclosures and audit history.
+- [x] Phase 6A supports proposals with broad geography, an accountable owner, and immutable revisions.
+- [x] Phase 6A adds independent review, eligible public discovery, private reports, and audit history.
+- [ ] Set staffing, review targets, retention, and a publication restriction reconsideration process before public operation.
+- [ ] Add project execution, milestones, volunteer roles, updates, and outcomes in later phases.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
 **Gate:** An initiative can be proposed, reviewed, organized, updated, completed and archived with transparent responsibility.

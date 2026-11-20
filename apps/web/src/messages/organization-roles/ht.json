@@ -47,6 +47,22 @@
   "grantDenied": "Ou pa gen otorizasyon pou bay oswa retire wòl sa a.",
   "relationshipUnavailable": "Moun nan bezwen yon afilyasyon oswa yon pozisyon reprezantan ki toujou aktif nan òganizasyon an.",
   "capabilities": {
+    "projects.propose": {
+      "label": "Kreye pwopozisyon",
+      "detail": "Kreye yon pwopozisyon nan non òganizasyon an."
+    },
+    "projects.edit": {
+      "label": "Modifye pwopozisyon",
+      "detail": "Modifye bouyon òganizasyon an."
+    },
+    "projects.submit": {
+      "label": "Soumèt pwopozisyon",
+      "detail": "Voye pwopozisyon òganizasyon an pou revizyon."
+    },
+    "projects.view_private": {
+      "label": "Wè pwopozisyon prive",
+      "detail": "Li pwopozisyon prive òganizasyon an ak istwa yo."
+    },
     "organization.view": {
       "label": "Gade espas òganizasyon an",
       "detail": "Louvri rezime jesyon ki otorize a."
@@ -84,7 +100,6 @@
     "membershipPolicy": "règ afilyasyon ak afilyasyon anplwaye"
   },
   "planned": {
-    "projects.create": "kreye pwojè",
     "projects.manage": "jere pwojè",
     "tasks.assign": "bay travay",
     "volunteers.coordinate": "kowòdone volontè",

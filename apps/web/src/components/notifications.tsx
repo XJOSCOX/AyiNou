@@ -3,6 +3,7 @@
 import { notificationPreferenceKeys, type MemberNotification } from "@ayinou/shared";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { organizationRoleMessages } from "@/lib/organization-role-i18n";
+import { projectMessages } from "@/lib/project-i18n";
 import Link from "next/link";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
@@ -23,6 +24,8 @@ function notificationTarget({ available, kind, actor, postId, commentId, appealI
   if (kind === "representative_access_changed") return "/institutions";
   if (kind === "ambassador_invited" || kind === "ambassador_updated") return "/settings/ambassadors";
   if (kind === "organization_access_changed") return "/institutions";
+  if (kind === "project_assigned") return "/projects/review";
+  if (kind?.startsWith("project_")) return "/projects/manage";
   if (!postId) return null;
   return `/posts/${postId}${commentId ? `?comment=${commentId}` : ""}`;
 }
@@ -60,6 +63,8 @@ export function NotificationCenter() {
         : item.kind === "ambassador_invited" ? ambassadorMessages[locale].invitedNotice
         : item.kind === "ambassador_updated" ? ambassadorMessages[locale].updatedNotice
         : item.kind === "organization_access_changed" ? organizationRoleMessages[locale].notification
+        : item.kind === "project_submitted" || item.kind === "project_assigned" || item.kind === "project_changes" ||
+          item.kind === "project_approved" || item.kind === "project_rejected" ? projectMessages[locale].notices[item.kind]
         : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
       return <li key={item.id} className={`${institutionCard} flex flex-wrap items-center justify-between gap-3`}>
         <div className="min-w-0"><p className={`break-words ${newItem ? "font-semibold" : ""}`}>{text}</p>

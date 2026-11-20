@@ -137,3 +137,6 @@ Fastify uses the existing bearer boundary and stable shared contracts for candid
 ### Operational organization roles
 
 Fastify forwards caller tokens to the role RPCs and existing actor-bound institution handlers delegate scoped checks to PostgreSQL. Effective permissions combine foundational authority and relationship-bound custom grants. Role mutations serialize per organization with version checks, recent TOTP, audit, and private notices. Representative and ownership checks and independent verification still use the foundational model. The same scoped API and contracts can serve web and future mobile clients.
+## Phase 6A project proposals
+
+Web and future native clients share Fastify's project endpoints and TypeScript contracts. The API accepts a caller-controlled idempotency key for create and a server-issued version for updates. PostgreSQL serializes mutations on the proposal, records the exact content revision reviewed, and resolves organization capabilities and community scope from live records. The public directory, detail, and cover share one eligibility check. Private notifications re-evaluate access at read time. Approved snapshots can anchor future execution records without moving access control or review history into client state. [Project database and API](DATABASE.md#phase-6a-project-proposals)

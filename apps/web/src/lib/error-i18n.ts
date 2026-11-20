@@ -13,6 +13,7 @@ import { communityDiscoveryMessages } from "./community-discovery-i18n";
 import { trustMessages } from "./trust-i18n";
 import { ambassadorMessages } from "./ambassador-i18n";
 import { organizationRoleMessages } from "./organization-role-i18n";
+import { projectMessages } from "./project-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -47,6 +48,11 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "ORGANIZATION_ROLE_NAME_CONFLICT": return organizationRoleMessages[locale].duplicate;
     case "ORGANIZATION_GRANT_DENIED": return organizationRoleMessages[locale].grantDenied;
     case "ORGANIZATION_RELATIONSHIP_UNAVAILABLE": return organizationRoleMessages[locale].relationshipUnavailable;
+    case "PROJECT_INVALID": return projectMessages[locale].invalid;
+    case "PROJECT_UNAVAILABLE": return projectMessages[locale].unavailable;
+    case "PROJECT_CHANGED": return projectMessages[locale].changed;
+    case "PROJECT_OWNER_UNAVAILABLE": return projectMessages[locale].ownerUnavailable;
+    case "PROJECT_REVIEW_UNAVAILABLE": return projectMessages[locale].reviewUnavailable;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

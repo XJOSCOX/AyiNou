@@ -621,3 +621,25 @@ Future capabilities for project creation and management, tasks, volunteers, recr
 | `PATCH /api/v1/institutions/:id/roles/:roleId/assignments/:assignmentId` | Revoke a specific assignment. |
 
 Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` for the hosted checks. Apply `20261120190000`, `20261120191000` and `20261120192000` in order. Run `npm run test:hosted:organization-roles:sql -- --preflight` before application and the SQL command without `--preflight` afterward. The live `npm run test:hosted:organization-roles` exercises real TOTP with known synthetic institutions and cleans up those exact fixtures.
+## Phase 6A project proposals
+
+Migrations `20261120200000`, `20261120201000`, and `20261120202000` create the private proposal model, versioned writes, then scoped reads, delegated permissions, and notifications. Five RLS-enabled private tables have zero direct application-role grants. The API relays a verified Supabase session for caller-scoped RPCs. The one service-only write RPC accepts a sanitized cover and rechecks the authenticated actor's permission inside the transaction.
+
+Every proposal has exactly one immutable owner. Personal proposals belong to the authenticated person. An organization owner or authorized delegate can act within the four independent capabilities `projects.propose`, `projects.edit`, `projects.submit`, and `projects.view_private`. Official department proposals require current department membership and administrator authority. Member-created community proposals require current membership and owner or administrator authority. When a separate community is linked, the actor also needs eligible membership there. The creator and latest submitter are audited separately from the owner.
+
+The lifecycle is draft → submitted → under review, then changes requested, approved, or rejected. Changes requested allows revision and resubmission. Approval and rejection freeze the reviewed proposal. A current, independent platform administrator, moderator, or moderator of the owning community can claim an eligible review after recent TOTP. A platform administrator can assign an eligible reviewer. Decisions require an assignment and a written reason. Reviewers cannot decide their own or related work. Approval rechecks the submitter's current authority.
+
+Discovery projects only approved proposals with explicit publication consent and eligible public owners and linked communities. Private communities, suspended or restricted subjects, blocks, and moderation decisions affect visibility on every read. Public details omit staff, draft version, and audit history. Members can privately report misleading information, privacy disclosure, safety issues, or suspicious fundraising. An independent platform moderator with recent TOTP can dismiss a report or restrict the listing with a written reason. Reports and decision details stay out of public responses.
+
+All paths below are under `/api/v1`.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /projects`, `GET /projects/:id` | Filtered keyset directory and public or authorized detail |
+| `GET /me/projects`, `GET /me/projects/options` | Private workspace and eligible owner and community selections |
+| `POST /projects`, `PATCH /projects/:id`, `POST /projects/:id/submit` | Create with a caller-scoped UUID idempotency key, revise, submit or resubmit using the latest version |
+| `PUT /projects/:id/image`, `GET /projects/:id/image` | Replace the single cover and read its current authorized projection |
+| `GET /projects/review`, `POST /projects/:id/review` | Scoped queue, assignment, release, and disposition |
+| `GET /projects/reports`, `POST /projects/:id/reports`, `PATCH /projects/:id/reports/:report` | Staff report queue, private filing, and staff disposition |
+
+The editor accepts country and optional Haitian department, bounded text, dates, and up to three HTTPS links without query strings or fragments. It screens for common precise decimal coordinates. Reviewers check broader disclosures and suspicious claims. Cover uploads use the existing decoder, strip metadata, and store a private WebP of at most 512 KiB with its immutable revision. Every request checks scope before returning cover bytes. Draft creation, writes, uploads, reviews, and reports are rate-limited. Revisions are capped at 25 per proposal. No automated retention job or self-service moderation reconsideration ships in Phase 6A.

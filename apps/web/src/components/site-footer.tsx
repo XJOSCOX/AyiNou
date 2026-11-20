@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { fetchApiStatus } from "@/lib/api";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
+import { projectMessages } from "@/lib/project-i18n";
 import { messages } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
 import { SiteBrand } from "./site-brand";
@@ -36,6 +37,7 @@ export function SiteFooter() {
         <SiteBrand href="#top" />
         <p className="text-[var(--theme-body)]">{t.footer}</p>
         <Link href="/ambassadors" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{ambassadorMessages[locale].title}</Link>
+        <Link href="/projects" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{projectMessages[locale].title}</Link>
         <div className="text-[var(--theme-body)]" aria-live="polite">
           <p>{t.statusLabel} · {t[connection]}</p>
           {connection === "offline" && <p className="mt-1">{t.offlineHelp}</p>}

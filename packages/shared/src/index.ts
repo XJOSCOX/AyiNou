@@ -98,7 +98,8 @@ export interface MemberNotification {
   available: boolean;
   kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "appeal_decided" |
     "verification_decided" | "verification_appeal_decided" | "representative_access_changed" |
-    "ambassador_invited" | "ambassador_updated" | "organization_access_changed" | null;
+    "ambassador_invited" | "ambassador_updated" | "organization_access_changed" |
+    "project_submitted" | "project_assigned" | "project_changes" | "project_approved" | "project_rejected" | null;
   appealId?: string | null;
   postId: string | null;
   commentId: string | null;
@@ -410,9 +411,10 @@ export type AffiliationManagement = {
 };
 export const organizationPermissions = [
   "organization.view", "content.edit", "affiliations.manage", "affiliations.review", "affiliations.invite", "team.view", "roles.assign",
+  "projects.propose", "projects.edit", "projects.submit", "projects.view_private",
 ] as const;
 export const futureOrganizationPermissions = [
-  "projects.create", "projects.manage", "tasks.assign", "volunteers.coordinate", "recruitment.manage", "finance.reports", "announcements.publish",
+  "projects.manage", "tasks.assign", "volunteers.coordinate", "recruitment.manage", "finance.reports", "announcements.publish",
 ] as const;
 export const protectedOrganizationPermissions = ["ownership", "verification", "platform", "contacts", "membershipPolicy"] as const;
 export type OrganizationPermission = (typeof organizationPermissions)[number];
@@ -432,6 +434,39 @@ export type OrganizationRoleWorkspace = {
   activity: Array<{ id: string; roleId: string | null; event: "role_created" | "role_edited" | "role_deactivated" | "assigned" |
     "revoked" | "relationship_ended" | "ownership_ended"; before: OrganizationRoleInput | null; after: OrganizationRoleInput | null;
     occurredAt: string; actor: string | null; subject: string | null }>;
+};
+export const projectOwners = ["individual", "organization", "community"] as const;
+export const projectReviewActions = ["assign", "release", "request_changes", "approve", "reject"] as const;
+export const projectReportCategories = ["misleading", "privacy", "unsafe", "fundraising"] as const;
+export type ProjectOwnerKind = (typeof projectOwners)[number];
+export type ProjectReviewAction = (typeof projectReviewActions)[number];
+export type ProjectReportCategory = (typeof projectReportCategories)[number];
+export type ProjectStatus = "draft" | "submitted" | "under_review" | "changes_requested" | "approved" | "rejected";
+export type ProjectProposal = {
+  title: string; description: string; problem: string; solution: string; objectives: string; beneficiaries: string; outcomes: string;
+  category: InterestCode; country: string; department: string | null; startDate: string | null; endDate: string | null;
+  references: string[]; publishRequested: boolean;
+};
+export type ProjectDraft = { kind: ProjectOwnerKind; owner: string | null; association: string | null; proposal: ProjectProposal };
+export type ProjectCard = {
+  id: string; status: ProjectStatus; title: string; category: InterestCode; department: string | null; country: string;
+  publishedAt: string | null; hasImage: boolean; owner: { kind: ProjectOwnerKind; name: string | null; handle: string | null };
+  association: { name: string; handle: string } | null;
+};
+export type ProjectDetail = ProjectCard & {
+  proposal: ProjectProposal; version: number | null; restricted: boolean; canEdit: boolean; canSubmit: boolean;
+  canDecide: boolean; canReport: boolean;
+  history: { action: "submit" | "request_changes" | "approve" | "reject" | "restrict"; revision: number; reason: string | null; createdAt: string }[];
+};
+export type ProjectOptions = {
+  organizations: OperationalOrganization[]; communities: (OperationalOrganization & { canOwn: boolean })[];
+  canReview: boolean; canModerate: boolean; canAssignOthers: boolean;
+};
+export type ProjectReviewItem = Pick<ProjectCard, "id" | "title" | "category" | "status"> & {
+  version: number; assigned: boolean; assignedToMe: boolean; canClaim: boolean;
+};
+export type ProjectReport = {
+  id: string; projectId: string; title: string; version: number; restricted: boolean; category: ProjectReportCategory; explanation: string;
 };
 export const platformRoles = ["administrator", "moderator", "verification_reviewer"] as const;
 export type PlatformRole = (typeof platformRoles)[number];

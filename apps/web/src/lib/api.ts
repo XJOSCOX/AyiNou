@@ -100,8 +100,8 @@ export async function uploadAvatar(file: File): Promise<string> {
   return result.avatarUrl;
 }
 
-export async function fetchDepartments(): Promise<Department[]> {
-  const result: { departments: Department[] } = await publicRequest("/api/v1/departments");
+export async function fetchDepartments(signal?: AbortSignal): Promise<Department[]> {
+  const result: { departments: Department[] } = await publicRequest("/api/v1/departments", { signal });
   return result.departments;
 }
 

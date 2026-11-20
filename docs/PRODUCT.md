@@ -93,4 +93,8 @@ Organizational badges describe the category of an independently reviewed claim. 
 
 ### Operational organization roles
 
-Institutions can define internal duties and assign existing eligible members or representatives one or more operational roles. Team lists, role changes and internal titles stay private. The Roles & Permissions workspace shows the current capabilities and reserved controls. Description and ordinary affiliation work have separate permissions. Future project, volunteer, recruitment, finance and announcement capabilities follow the release of those features.
+Institutions can define internal duties and assign existing eligible members or representatives one or more operational roles. Team lists, role changes and internal titles stay private. The Roles & Permissions workspace shows the current capabilities and reserved controls. Description, ordinary affiliation work, and project proposal operations have separate permissions. Future volunteer, recruitment, finance and announcement capabilities follow the release of those features.
+
+### Community project proposals
+
+Members can propose a project personally or on behalf of a community or institution when authorized. The proposal records the problem, solution, objectives, beneficiaries, expected outcomes, and broad region. A reviewer evaluates clarity, expected benefit, feasibility, privacy, and credible references. Only approved proposals that meet publication rules and opt in appear in discovery. Approval describes the review of a proposal. Delivery, fundraising, volunteer enrollment, and official authorization follow separate processes. Members can report unsafe or misleading listings privately.

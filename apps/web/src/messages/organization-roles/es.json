@@ -47,6 +47,22 @@
   "grantDenied": "Esta asignación excede tu autoridad delegada.",
   "relationshipUnavailable": "La persona necesita una afiliación o representación vigente en esta organización.",
   "capabilities": {
+    "projects.propose": {
+      "label": "Crear propuestas",
+      "detail": "Crear una propuesta en nombre de la organización."
+    },
+    "projects.edit": {
+      "label": "Editar propuestas",
+      "detail": "Editar los borradores de la organización."
+    },
+    "projects.submit": {
+      "label": "Enviar propuestas",
+      "detail": "Enviar las propuestas de la organización a revisión."
+    },
+    "projects.view_private": {
+      "label": "Ver propuestas privadas",
+      "detail": "Consultar las propuestas privadas de la organización y su historial."
+    },
     "organization.view": {
       "label": "Ver el espacio de la organización",
       "detail": "Abre el resumen de gestión permitido."
@@ -84,7 +100,6 @@
     "membershipPolicy": "política de afiliación y afiliación del personal"
   },
   "planned": {
-    "projects.create": "crear proyectos",
     "projects.manage": "gestionar proyectos",
     "tasks.assign": "asignar tareas",
     "volunteers.coordinate": "coordinar voluntarios",

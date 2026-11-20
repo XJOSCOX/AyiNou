@@ -47,6 +47,22 @@
   "grantDenied": "Cette attribution dépasse votre autorité déléguée.",
   "relationshipUnavailable": "Le destinataire doit avoir une affiliation ou un mandat de représentation en cours dans cette organisation.",
   "capabilities": {
+    "projects.propose": {
+      "label": "Créer des propositions",
+      "detail": "Créer une proposition au nom de l’organisation."
+    },
+    "projects.edit": {
+      "label": "Modifier les propositions",
+      "detail": "Modifier les brouillons de l’organisation."
+    },
+    "projects.submit": {
+      "label": "Soumettre les propositions",
+      "detail": "Soumettre les propositions de l’organisation à examen."
+    },
+    "projects.view_private": {
+      "label": "Voir les propositions privées",
+      "detail": "Consulter les propositions privées de l’organisation et leur historique."
+    },
     "organization.view": {
       "label": "Voir l’espace d’organisation",
       "detail": "Ouvrir le récapitulatif de gestion autorisé."
@@ -84,7 +100,6 @@
     "membershipPolicy": "politique d’adhésion et affiliation du personnel"
   },
   "planned": {
-    "projects.create": "créer des projets",
     "projects.manage": "gérer des projets",
     "tasks.assign": "attribuer des tâches",
     "volunteers.coordinate": "coordonner les bénévoles",

@@ -9,6 +9,7 @@ export type PostImageVariant = "thumbnail" | "display";
 
 export interface PostMediaService {
   upload(actor: string, id: string, raw: Buffer): Promise<void>;
+  uploadProjectImage?(actor: string, id: string, version: number, raw: Buffer): Promise<number>;
   download(id: string, variant: PostImageVariant): Promise<Buffer>;
   cleanup(): Promise<number>;
 }
@@ -45,16 +46,20 @@ export function createPostMediaService(config: ApiConfig): PostMediaService | nu
     return ids.length;
   }
 
+  async function processImage<T>(raw: Buffer, save: (image: Awaited<ReturnType<typeof safePostImage>>) => Promise<T>) {
+    if (processing >= 2) throw new ApiError(503, "IMAGE_BUSY", "Image processing is busy");
+    processing++;
+    try { return await save(await safePostImage(raw)); }
+    finally { processing--; }
+  }
+
   return {
     cleanup() {
       cleaning ??= purge().finally(() => { cleaning = null; });
       return cleaning;
     },
     async upload(actor, id, raw) {
-      if (processing >= 2) throw new ApiError(503, "IMAGE_BUSY", "Image processing is busy");
-      processing++;
-      try {
-        const image = await safePostImage(raw);
+      return processImage(raw, async (image) => {
         const lease = randomUUID();
         const reserved = await rpc<boolean>("reserve_post_upload_for_api", {
           p_actor: actor, p_id: id, p_lease: lease, p_digest: createHash("sha256").update(raw).digest("hex"),
@@ -73,7 +78,12 @@ export function createPostMediaService(config: ApiConfig): PostMediaService | nu
           await rpc("finish_post_upload_for_api", { p_id: id, p_lease: lease, p_ready: false }).catch(() => undefined);
           throw cause instanceof ApiError ? cause : unavailable();
         }
-      } finally { processing--; }
+      });
+    },
+    async uploadProjectImage(actor, id, version, raw) {
+      return processImage(raw, (image) => rpc<number>("project_image_for_api", {
+        p_actor: actor, p_id: id, p_version: version, p_webp: image.display.toString("base64"),
+      }));
     },
     async download(id, variant) {
       const { data, error } = await bucket.download(path(id, variant));
