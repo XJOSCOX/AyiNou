@@ -4,6 +4,8 @@
 
 Closure restricts access and public visibility. Erasure applies a reviewed disposition to each copy and dependency. The formal case tracks both separately. Ordinary profile editing, sign-out, account restrictions and content moderation continue through their existing controls. The process below is proposed for L3.4.
 
+L3.4 implements the proposal's read-only discovery, case versioning and a two-marker simulation only. The design below remains the dependency checklist for any future real operation, including the segments that the simulation does not implement. [Implemented scope](L3_4_IMPLEMENTATION_REPORT.md)
+
 ## Current dependencies and proposed disposition
 
 | Resource | Observed behavior at the baseline | Required checkpoint before Auth deletion |

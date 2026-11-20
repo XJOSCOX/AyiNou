@@ -24,6 +24,8 @@ L3.3 implements a limited synthetic projection, encrypted temporary artifacts, s
 
 ## L3.4 Account deletion and data lifecycle
 
+L3.4 implements read-only dependency planning, a synthetic unapproved policy, scoped holds and reversible marker execution in disposable databases. Live erasure, approved retention enforcement and provider operations remain outside the implementation. [L3.4 implementation report](L3_4_IMPLEMENTATION_REPORT.md)
+
 - **Model and candidate migration.** Add versioned dependency plans, independently approved holds, item eligibility and lease/case journals, write fences and minimized erasure receipts. Use restricted service interfaces for verified actions. Design separately reviewed additive reference/tombstone migrations for actual conflicts and an external restore ledger.
 - **API and experience.** Proposed closure/deletion preview, confirm and cancel operations scoped to the case, and separate authorized plan/reconcile/hold endpoints. Expose pending, blocked, fenced, completed and incomplete states, safe dependency explanations, and completion receipts in all four locales. Secure post-closure communication needs approval and operational testing.
 - **Authorization and recovery.** Bind consent and reviewer approval to version, proof, authority and resource generations. Independent roles place/release holds, authorize execution and reconcile failures. Audit dispositions, effective legal rule, actor, holds and provider acknowledgements. Require storage and rewrite fences, exact dispatch intent IDs, verified outcomes and failure recovery, with Auth removal last. Prohibit blanket cascade, destructive action from ordinary support, silent orphaning, scope expansion and unfenced cleanup.

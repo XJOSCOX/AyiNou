@@ -764,3 +764,15 @@ Migration `20261120231000_l33_privacy_exports.sql` adds the empty `private.priva
 | `POST /me/privacy-exports/:id/revoke` | Terminal revocation for the verified subject using a UUID idempotency key, followed by bounded cleanup. |
 
 The bundle never contains case IDs, Storage object keys or ballot choices. See the field inventory and synthetic lifecycle in the [L3.3 implementation report](privacy/L3_3_IMPLEMENTATION_REPORT.md).
+
+## Legal L3.4 lifecycle simulation
+
+Migrations `20261120232000_l34_lifecycle_plans.sql` and `20261120233000_l34_synthetic_holds_and_execution.sql` add private fixture, policy, plan, audit, authority, hold, step and restore-check tables. RLS is enabled and application roles have no direct table grants. The only synthetic policy has no approved retention period or destruction authority. Owner paths use one service-only RPC; operator paths use a separate service-only RPC with independently scoped recent MFA authority.
+
+| API under `/api/v1/me/privacy-requests/:id` | Scope |
+| --- | --- |
+| `GET /deletion-preview`, `GET /deletion-status` | Owner-scoped lifecycle summary and safe codes. Actual record references, storage paths and votes are absent. |
+| `POST /deletion-plan` | Save a versioned read-only snapshot with a UUID idempotency key, case version and recent MFA. |
+| `POST /deletion-confirmation` | Confirm a specific compatible test plan with a UUID idempotency key and recent MFA. Simulation still requires a separate assigned approver. |
+
+Plan and hold updates serialize per subject, with version and snapshot revalidation. The operator RPC coordinates typed synthetic hold, approval, step and quarantine commands. No arbitrary table name or provider operation can be passed through this interface. Immutable lifecycle events carry actor, event kind and scope but no evidence text. [Dependency and recovery notes](privacy/L3_4_IMPLEMENTATION_REPORT.md)

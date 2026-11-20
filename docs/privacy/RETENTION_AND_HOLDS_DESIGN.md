@@ -4,6 +4,8 @@
 
 The lifecycle starts with the applicable owner- and counsel-approved rule for the data and jurisdiction. Duration, trigger, exception authority, hold review interval and deletion method are open decisions for every category. Existing expiration windows control particular features. They do not establish an approved retention schedule or prove physical erasure. [L2 retention matrix](../legal/RETENTION_AND_DELETION_MATRIX.md)
 
+L3.4 implements a synthetic-only policy record with no approved period or destruction authority, and case-scoped evidence-hold metadata for disposable testing. This does not implement a production hold, retention clock or cleanup worker. A synthetic hold remains active until an independent scoped release, even after a case withdrawal or its review date. [Implemented scope](L3_4_IMPLEMENTATION_REPORT.md)
+
 ## Category review
 
 The triggers below are candidates for legal review. Each row needs an approved policy version and a separately verified cleanup result.
