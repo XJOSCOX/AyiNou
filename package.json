@@ -58,12 +58,13 @@
     "test:hosted:feed": "node --import tsx scripts/check-feed-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",
     "lint": "npm run lint -ws --if-present",
+    "test:shared": "node --import tsx scripts/check-shared-contracts.mjs",
     "test:i18n": "node scripts/check-translations.mjs",
     "test:client-errors": "node --import tsx --test scripts/check-client-errors.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
     "test:e2e:smoke": "node scripts/run-e2e.mjs --grep @smoke",
     "test:e2e:headed": "node scripts/run-e2e.mjs --headed",
-    "test": "npm run test:i18n && npm run test:client-errors && npm run test -ws --if-present",
+    "test": "npm run test:shared && npm run test:i18n && npm run test:client-errors && npm run test -ws --if-present",
     "build": "npm run build -w @ayinou/api && npm run build -w @ayinou/web"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import type { Locale } from "./index.js";
+import type { Locale } from "./core.js";
 
 export type DepartmentCommunityContent = { description: string; rules: readonly string[] };
 

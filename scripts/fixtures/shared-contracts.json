@@ -1,0 +1,588 @@
+{
+  "package": {
+    "name": "@ayinou/shared",
+    "type": "module",
+    "types": "./src/index.ts",
+    "exports": {
+      ".": "./src/index.ts"
+    }
+  },
+  "symbols": {
+    "AccountStatus": "type:5af2f22f3f54680b0f22e3f7381031cc362aa3830ef4a946872505d5c9e0ce18",
+    "AdminAccount": "type:aa5bf3fcf27d8e7afafb3205fc88db02cadfc13730dc88e2280f460576ec9ce3",
+    "AdminAccountAction": "type:c8781d2d398c3170136f97fa0543f81aa17f54fb165444483508113805ba2ba8",
+    "AdminAuditEvent": "type:201a5c5452b465762fc136a9eb93a58ae94e335c66ef03667e30916308dfa42b",
+    "AdminOverview": "type:60d96b7d506175495c515c660846278b8c9aeef6b1b177c1244530f4656a4ae0",
+    "Affiliation": "type:4e3e28639f018629d35701ab5fd86b838a35609dec2723d34a5447818a2050a3",
+    "AffiliationAction": "type:73dd3fb29b2924aa5b4c67aaeb0b130d00b8330e754df12de25a8ca8fca1cd67",
+    "affiliationActions": "value:8c442690de3b00ab204f3157de1c351978a87cfac48960252e8d6c475ca72c2d",
+    "AffiliationAdmission": "type:5bec43f92b1e390fb84ccde3097e2fd3c6549fffb253343e67bc4c724303a847",
+    "AffiliationDirectory": "type:2786e509846345058918c087f9b615bfa2e55897364ef34ae35118b26b9d3204",
+    "AffiliationEvent": "type:47bf03e0b8e7e9f47f6942fd69b4cbbfd63b5202d20ab43fa039e16481759ab9",
+    "AffiliationManagement": "type:9313817c89b3d649d110360cfc25cf89bebdcefa46f1b88d4797be7a2dcc32ae",
+    "AffiliationStatus": "type:c44cc895491a1b69bb5b670146d8371e662fbf05071f9a9c9c9aa1515335ae07",
+    "AffiliationType": "type:b04f80908aee604daa8a07f8695561eeda5dd02cb6a741f2f924d4ac095d2e8d",
+    "affiliationTypes": "value:980b0ac3d45a51bf6b3b972f79ca92a3693e21851e27dcdebc2c6cd5cbfe4ccd",
+    "AmbassadorAdminAction": "type:2d2db30d6425d0123c88c4597c3996cccb2bf45f6f34f40f668f0cd291a740c7",
+    "ambassadorAdminActions": "value:da7a5ac73d10d7b9c0f1e81334ead17125914737ae86d4c04a939a86ec054fe1",
+    "AmbassadorAdminCase": "type:b8a2cb41937a606429a6bc9097b1967d4077a7e12863f08de9db97935e6b54f2",
+    "AmbassadorAdminPage": "type:25e5b066352f93c0fdbcc8058376d7c2dc002ed86f1af536aca5c37112aea39c",
+    "AmbassadorCase": "type:1118655b3d2954f882e9b23aabfb9fc78f6c9879db5cd2a29bdb0666ab3e347e",
+    "ambassadorCategories": "value:bded9a5591e86918c90c8709f86f00a10dda6bc160b3e1a3d26d0fe3e5285e60",
+    "AmbassadorCategory": "type:7db07c378c88de433bd4713636565b9dc311cce19394bedfc3337e0f9586965c",
+    "AmbassadorStatus": "type:8beae915933650f46013f1c6a2241533f39b18335d8d0b4f2e8081b2bba80a12",
+    "ApiErrorResponse": "type:0c823b20b52c15a4df19e182384ac92dbfdc5bc139afe625651f1c97b9fa1784",
+    "AppealKind": "type:c37e0aa7d6a6e5a025933c51e0a9cc7e21c657bc5556e64e65d8650b6870bdb9",
+    "AppealOutcome": "type:5b858aaf15b8219c8edd5a87a761c86e109626948796a87ea6901770ed507760",
+    "appealOutcomes": "value:a95a723469e73082a44302922c7d5c7cd3b91f8eea946efc783ffc222401e1cd",
+    "AppealPage": "type:49b4f6a7c1d2b8569d02636922a9d2977dcbeea22edcafa21c011c3f85a11c56",
+    "AppealReview": "type:84a5fae8d033720890f20542f9d474c1fc8140e2ae794c205210aeb73e109034",
+    "AttachmentInput": "type:151593b53e82f1cb1c1e81dfe251fbdfe92228573d342ea1da2d8086f70af0c6",
+    "commentBodyLimit": "value:f6565e364b20aa02da97d6a0ea229746f6bd6c8c2513f03ba4022d5f42ec27f6",
+    "CommentInput": "type:432f924b75fdae0ef516c3df52e5fc1237dabd31e9619bddf64b0208af7cf4b9",
+    "CommentPage": "type:ff2fdaff461d7730ec6aedaa75eeb1934283cf801206ba6da942bbaa23730eea",
+    "CommentTarget": "type:5216c49d930de8b3e23f2d134e9a11590750bab2e4d9f60e2cb6a62c663d836b",
+    "Community": "type:82e02fdf8656e7aff4f3738c1ea7a02bd2ded85a3fcb0098d9e50f3069257f80",
+    "CommunityCountryCount": "type:960589ddb9820cca9d1d055a019920b634b83f9f9e9c9ce14121cc723c03dc77",
+    "CommunityDepartmentCount": "type:f433639b14d89825d3fc640b94b4013b89be77bce0bc31e840c9d9d9637c8788",
+    "communityKinds": "value:3292a931ed22ae622f67369781c601ef921e65d596ccca3a1945a803a9e6f8c6",
+    "CommunityMembers": "type:2fb1a2b74421e3a21b638364833bf4c0fafc250291685b314ad6f1a24416980d",
+    "CommunityRecommendation": "type:552bf40879ae8ad083b1e9a6474d6f46ea3a248ec088e0086b582bbee5fdc543",
+    "CommunityRecommendationFeedbackAction": "type:b00e42c4b1a0d48a557ac51249b92e529046453cf20b251877f71f7ea8f3156a",
+    "communityRecommendationFeedbackActions": "value:00ebcd39c0219d32a66c868ab798562b06d45fcc174ea4e8e773414dfd57754b",
+    "CommunityRecommendationPage": "type:f790c8b4c6f8765fdd8854711b82e910c5d4a74e1413fef20ca356fe815125ab",
+    "CommunityRecommendationReason": "type:8cc7738921ebf2510f8b6563c5afdaaf5dd4ab974f115f45f5f7df727c0989cd",
+    "CommunityRecommendationSettings": "type:f76c9ad99aa04f8c0a2f0fa1e6ccab0efb73b970353092d5b72493fa511694ea",
+    "CommunityStaffRole": "type:52aa4054e448eaf0ab689636b152828efebd80500ecf79a7a687cea9e97e9777",
+    "communityStaffRoles": "value:34ef652e7ce0ad58b36cb4275e94044d9c48d12a15a02684d860a0cfba5483d2",
+    "CommunityStats": "type:f0817cb466f1990ae0a6aa2a84247d933c163bca45ed602691ad96f368e3ad10",
+    "Department": "type:1090f2a84d345ae4e8f0d32a713e0887c40a9b2df8af234b09a75b66f55b3f21",
+    "DepartmentCommunity": "type:1d85fe96df7c6736d6b60fb08f92d63bde7f69cfc87a9fa30d6c3bed85c96c28",
+    "departmentCommunityContent": "value:67bd3fedac063db9ef8e7701eeca5d6ea8ca7a7718beb00bc368554be2b77a01",
+    "DepartmentCommunityContent": "type:45afacd2a51d5ba02bd0597191e9f8e6ed70e45213cab735556dfa2886d3ee07",
+    "DiscoveryCard": "type:215ed4200f827c7f1bcd57ca176f657a674b8635cd7a9297e1b653e930310087",
+    "DiscoveryFilter": "type:b61b5c04c6f993c70370601dd1625c615546f23e9de50b0c88fbb2ed777b416a",
+    "DiscoveryKind": "type:a55a16bc73f059fcf2ca42b35ab8bf86f3d123d3c904c73303596a83ed1e2756",
+    "DiscoveryPage": "type:6647559d6b0a8bebd767d2c93499488ea3edb0244898b3f4bbfa9658cb9303a0",
+    "FeedAuthor": "type:b434f444a8cb1d17dbaf1eb208a06018563fff594e219babfb7aefaada08b45f",
+    "FeedComment": "type:895eb8c342bb526ab3e206c1c2a3fb94c08b44e9e47e559fa883eeab26a784b2",
+    "FeedPage": "type:e1184753223739dd8ab32bfe9a05d0c84c03ced5bb6575561949818fb30b6117",
+    "FeedPost": "type:947302215d2851333685e87f5a7e753df5770e2de9ee66cd7ea09820ec01534b",
+    "FeedReport": "type:02666541e3908f51475c989ba965877819f031b5bcc9a428205cc20b5574fc69",
+    "FeedReportPage": "type:22996d165b6ccaf225a568b4a382ec4eedf6015a88fd675c550860b22b070808",
+    "FeedScope": "type:e52f06d94deadbe720778295624ce8a8ec11fc058f3f87567a384ed86844f699",
+    "FollowList": "type:43edbaf5d1314f72e0795dfcc39a0c8087f5d01fe105e9112ff7569fc7e0e51a",
+    "FollowStatus": "type:69d82b502f1b0c2cfebca4aed7cc2430ae5e5a29f7b7acea6bba32be009176a7",
+    "FollowTarget": "type:7deb76e9e616e7f5dd59d1978b98aa86dfa555c4ff9fd9586e5248c02cd9e9bf",
+    "futureOrganizationPermissions": "value:18ab1c44d090af09f19489adc03ea5b63977a6570a7091cbce1e0d58971b5092",
+    "governmentKinds": "value:85ac07d20c53c0cca771cfabf292548ea2a6d96ac2351ebec7a4a689ee5ef39b",
+    "GroupInvitation": "type:34f98d2790c0a0b4037b373f12261817bb4f7de08715117cf5110b64f72fbd72",
+    "GroupKind": "type:903fc8e6cf3beb76db2408edfabae2d0dd5562114e738f82f7b4aad16c60a863",
+    "groupKinds": "value:fb68c33d677c6055eda12cca1ce94709eef9266cf51bd89f4c3f230388024e79",
+    "groupPolicies": "value:f5850547b593739d6cc77eb0e451594e2e3e245bc82ba28d10ccb68d9a732499",
+    "GroupPolicy": "type:f28813b0ca89f6558a20fa4453b16952f8ee886aa773757681b884c4a7922728",
+    "GroupRole": "type:4e61bcf38d91ed95ee7b17f058a04c84f9794474d9680ca80a43b27981b2ba0c",
+    "GroupSettings": "type:1c12c0f975cf4ee07c043c10b3cf902753e5db407a9662f449a7734f1c29e9e9",
+    "HealthResponse": "type:b0743691e03db14a3562fec4edefb2dd4c5475f2c7c30f9c063a6635a02f56e7",
+    "ImpersonationKind": "type:74f7746ae45667643293509d68094b47d561fbab2268526a6eea64ad7a152e2e",
+    "impersonationKinds": "value:f22c5a45538b89d6eac001e35e6e52a9179664816cf87e4bbc63fa261c3b18d9",
+    "ImpersonationRestriction": "type:09b089e925c27b015d32e2a8f66340fc51365cefb771aa655e45984debed5a06",
+    "impersonationRestrictions": "value:978f140e96ccb5c5e4c691a101881c440704c05bce2061bd9e6e3774a525b193",
+    "ImpersonationReview": "type:999b24fb547a8b08a7fd2fd4455ba5582085298ae144ad112c061e55b9d41522",
+    "Institution": "type:e26f4b2445247b0c306f975037bbebfe32f29f8ec03d7907d6bd932e604bb6df",
+    "InstitutionAccounts": "type:fae43049e58bf22a4ec2882b642e523689e2a85569f5379c950ee13be98c2c8e",
+    "institutionImpersonationKinds": "value:24955dfc81f6b6feda5585740cc19d242fefc673c56a3bb9bc832695887e5289",
+    "InstitutionInput": "type:cf87a4a42385c0c85e9268a79ef134597141edccbc37df4eead0a5af92659ea3",
+    "InstitutionManagement": "type:cf020602fc136d3b7de987e52d842ba2d131555c88517c9eb1a4579740743b0a",
+    "InterestCode": "type:4493220b9de0855ae62d0a08fc58946d3ff74f074d73a87f3916728fb4c33bad",
+    "interestCodes": "value:e331c81c2dcdb2fd6831ffee4308aab99c401d36677336a3da2c99cb4501481f",
+    "invitedRoles": "value:40a97bc77adde850045bd6e92f0eeaa71063d20e3e248eadd7ab3293346e8df8",
+    "Locale": "type:cfab49dcd47d920ceea4e43be327db91e984d065ac8cacc2b3b96ed984cfa489",
+    "locales": "value:5754755983d2448d8820de92be6a01aa90921ee2c1fb68db7dd90312482ab915",
+    "MemberAppealDecision": "type:543a5c9c62bb12534fba02ee5f75991857cb8c0cecb449adf87ab686dbdc0f42",
+    "MemberGroup": "type:237fc2e570d41cefad3bbb9ec69b01d8b091487088c127ea069aaab29a843a76",
+    "MemberNotification": "type:99ee433fa40fe56119a654129dd2b8fc9781251ff4bd6bc9cb04c4557c129aea",
+    "MemberProfile": "type:40b74db6dd4bf70207285394101a22cfbc18542ea35653d85046ac35958b8bb7",
+    "MemberSafetyEntry": "type:5008e6ae013e295ea930d305a4fc46830b51993b62f31870ae384c1be8262527",
+    "MemberSafetyPage": "type:7d1158d3a5117e6ba989afa2c0c58eb5f1cd9fa07ac79181be8e7547b126c1e6",
+    "MembershipCategory": "type:b9efa5630ea5f47f9dd4058e80a9773b6de099c610e6209e82459c5588e9a12b",
+    "membershipPolicies": "value:417e7e0fe3a3fc411158da2d090601673acb808cdfa0afe5afdb191f429f0920",
+    "MembershipPolicy": "type:1d976578610460f8754f78b22beadb03b88f188f4112d5775a3a387803550e77",
+    "ModerationAction": "type:4e9ec83f3339679e9718613ef273ad59a944e41c7e80555ae9d7596e559fbb19",
+    "moderationActions": "value:71e818bc8b0fc2f0eb8ded176c70acae75b69097f2f6f2f61080a5d3889f4b65",
+    "ModerationAppeal": "type:50dd87949779bc5f68bd52a29776f2732d0cd640cf3bb0a3590296db60ced06d",
+    "ModerationScope": "type:3ab63e4516193cd957a85d1fa4857072b9accbadf6645194aaf492580b736985",
+    "MyAffiliations": "type:e9d1a45bb46bfe782eb839867579b3bdccb797ba664a28e17395f98ecd71c801",
+    "NotificationPage": "type:c5f0a7c9792b4f9a5c960ca07de7025fe40127c8a6278197514bdab5e617ae5c",
+    "notificationPreferenceKeys": "value:d83761769909fe78d92c1747d6fcc55b02f9fe31673e6433a15716964c0026db",
+    "NotificationPreferences": "type:66ca9d9036b99c9fc012d347f4a5b6d917ca0a4746f9b395f0cafe464ad5f788",
+    "OperationalOrganization": "type:36aae11e957f1068123d1fa7e7ee46c60adc9a45470e9947d47498f21c192506",
+    "OrganizationCustomRole": "type:2e02c50812007acbf22f7c5166167811f7820bbef870f8d98d0e782489b11491",
+    "OrganizationKind": "type:8ce114f174050f9962148d62f31708e5c6a80e43ade5021fcb3334fb3bc7a6c6",
+    "organizationKinds": "value:c8bd152ba6fdf18386b9e58fe468155c398054a025625fc4ef526c0418c13272",
+    "OrganizationPermission": "type:9be71c00b90e2f9dd4f03baf8217d099e7f3123601a5ff9e2a980fa9259cfca9",
+    "organizationPermissions": "value:8b3df5ac1980a7c52bc4bce6e1d66f53619c5b649f2adea9dc4ea315d52d5900",
+    "OrganizationRole": "type:89815ad976e131d28c5d320411e0378cd688e3eb48f3178048227ca5ef697e36",
+    "OrganizationRoleInput": "type:1ee1ead60e5d64cd88363622f44e2235bb9903502e1a6a9847e1b40ad0764ddd",
+    "OrganizationRoleWorkspace": "type:63f395e5e48e8e85b2bfbb5b0d6008008449f6e6ff9198f34a99bc39d3868576",
+    "PersonalClaim": "type:bdbeee96d10078674adca30a9968666690fd548f585bf876ed376f7664e94df7",
+    "personalClaims": "value:5d06744b14e09be6ba7f284580b31d0d9cf67f5f3ed4e04f69e8a66faf6bc73e",
+    "PlatformAccess": "type:f38facf149ff034215f011259e0718dbfa87ab780f61c28ff15afd17448a1b95",
+    "PlatformRole": "type:2473d46104c7b706217bd0b192fd22cde8c8f24d8bc7440bf9bf979aab8d0ffc",
+    "platformRoles": "value:fb60ac1a18d4c44cc55ed616a10f6a001967bf074380ac189da46ea0f7ff037f",
+    "PollCard": "type:625686661c256fee89db9c9b793aa57b593fa279dad9befa6e09da7cf60b3327",
+    "PollConfigOptions": "type:09349449573ad315fe7ad6c59a485f5fb124939aafb6a3e225858886c17da7a9",
+    "PollConfiguration": "type:35b41647c2757b4dc9f747aa249181d9c66c8401429c75a5ecd495629f7de8f6",
+    "pollDecisions": "value:2d698e60e16a93826e6b6ecf327fee8bddeee8ffb8c6264e613e49df7a2fd83c",
+    "PollDetail": "type:150d05f3c846ca3869cd2c3e959c0e1e0fc0438c4343d1ed08fcf8c134e63e5c",
+    "PollEvent": "type:7612148412d96b031239f404ed706085adfd5693c4512bb6fed60678ec47ec57",
+    "PollKind": "type:162eb6b520aecbb01f3d2438c84d03a5b8789e5583f6beef69981fd946a6b7a4",
+    "pollKinds": "value:6818bf3d1e5ab04bcb1da8147ac4ff28f3b2194d692e4ad15f0ba3ca27b359e1",
+    "PollNomination": "type:8d37095ec15deeb515cea7fcf070d7ad0c7f17cb343824cfefad0c1945113add",
+    "PollNotice": "type:3503b0060dc3d7a1aa105ff5ea56c620c0981bb0896ba6a9b3c3675e36665d8f",
+    "PollResults": "type:bc3a2ea73ae932df63e068e2f9a7708f28668954fccd093ad5f28682cab5c837",
+    "PollScope": "type:1274b411c6c4e44a1059ef182d311a1d578922f3728ccfd8a8b19e83c11f91b6",
+    "pollScopes": "value:544eb394688206b18e107485d87d3da629ba85dd8a616689740bc740e42c72b2",
+    "PollStatus": "type:2c74884f6eb2bfe1472a92afce58e8667ebb67c1a792771e7c815423c6e3d732",
+    "PostAttachment": "type:a4b8db6831ed85615134e7ad5525bec9777f010d677e106798b278a59ecfc5c0",
+    "postBodyLimit": "value:9ff50d7c1fae4c3a3a38b1682bd59630e7ba46646e50af36082b77e304b524f7",
+    "PostInput": "type:b6590fc808227bc5b28861f5dbb40cd5fa464cb04b5461eab1a77fb23ae9c672",
+    "PostStatus": "type:1d5a11fc1e491f2c1357a2c974dde0d83fe7638e3b59ddd79835a443a62bb95e",
+    "postVisibilities": "value:b2885e76ac9409bf9d7fe73284b6467c3116ba5f4d317ad37b63944cff198f98",
+    "PostVisibility": "type:314a18bbb4b9dabacb21123d9d4d2f67f9efb7b86fa22126b9e015c428600da9",
+    "ProfileChanges": "type:da7f8eb64dcd5987c3050c3bcd6a65eaa2c46b7576df9c4e831c226345c41edc",
+    "ProfilePreview": "type:6e9c4d7e6ccc1e00ac6f5ee0897e2c6b3bf0ac72669f4e004f03f5cfd76389d3",
+    "ProjectCard": "type:f8d51b4b57db5ba1a2f7a463686e46424c34962fdd3d90ceb5ea645f7bedc01d",
+    "ProjectDetail": "type:7bf1cfd11c6ccafec8e70734e11ca5929134191a53be1c7941c41c9136f8cd66",
+    "ProjectDraft": "type:6c29fa54dc12b6eeb88b79aca78a090be33bfd139cbfd9f90d9e049e9118d5b6",
+    "ProjectExecutionStatus": "type:b79a839ef78e6bb96cf66f90e8b8fdc58f1cdcfade6225a493ca1330d94f86b9",
+    "projectExecutionStatuses": "value:d93e15a1dbfb2c9dc59778ea0094d1743b51d9b585fc0d1b588437d0f8bd328e",
+    "ProjectIdentityState": "type:a45410b08560b5aedb030e4844314cf07f2145d31e1a5f249d1c19f8971d827f",
+    "ProjectMeasurement": "type:e7c41d586eb4ca7167ded971347b4e1888028c47a5f7df0695683233ffc47b67",
+    "ProjectMetric": "type:1e6bca2c9c4881a173c8543941550c083bf50fbd7e9a265440b7bf1a7a020667",
+    "ProjectMilestone": "type:8c2ede05a0907c512233e2988a38d6fdba61639c8693138b6c5d0b63bae9f49e",
+    "ProjectOperationEvent": "type:0f7c9d3375bbe6e348caea71719e4e71ddb4e27c08dd9dd0b5a20eca0c59ef46",
+    "ProjectOptions": "type:f9171f0b03f11ede373178b14de09e15a23291979f7d3ee7ef0f2e16c43c547d",
+    "ProjectOwnerKind": "type:101eb23d9f5464cf918e732d98a9e6d88979411cda1eb4bac9837560c6ca9c52",
+    "projectOwners": "value:04d11a5b40c6f77564e0ddf324b2b11ef3de361094bbcb5063ddc17a78bd3d27",
+    "ProjectProgress": "type:3be78a06a8e3f69bde499711ab90ec22a2200cea6f8dfb04bb9acef538bb9669",
+    "ProjectProgressContent": "type:02bb737def7e9e2741d40b0b86a679fe8df7830fd04320bd47395dcb9e748532",
+    "ProjectProgressEntry": "type:00a9814f33a79b6c179a3857c0a58feb51be62d34b1369f1a72b68e71d07432c",
+    "ProjectProgressEvent": "type:f5fdbb23b847c2e8f491917976b83e0e8f4a4dc4823d1296cbc36cd8e91df0cb",
+    "projectProgressEvents": "value:baa2147154a167f38d05edd40fb5435ddad9d62384857ab15184912c0f4a0a3f",
+    "projectProgressKinds": "value:a2ef37004a1d77ec7bfdbf7c5990cffb8b51e9750b2c41c93151546595bd11d3",
+    "ProjectProposal": "type:bd1d70a31e0b7a304516f87238852deefc23dfdb15ebdf35441c3cddc735cb46",
+    "ProjectReport": "type:f8f2c3075b13c821bd9c96401b85b0d5eda43e200864846cc6d4625a7cceaae1",
+    "projectReportCategories": "value:e938567cdb54013a2ad1d6aefb09e311988b2ed0b4d1ffb8196650d647bfe385",
+    "ProjectReportCategory": "type:7e59b076acce12f7800261d67aa1feb956916a3ee625ae6d5026a5a2b6fab47a",
+    "ProjectReviewAction": "type:b51f739dd8a2a0fa217d0b1b845b192f41a62c7ca3e7d76b0a11365e0ebb15f3",
+    "projectReviewActions": "value:af2146eac0ec58929a4bea7b4908208de8b6abedac830cb064cc91529164b682",
+    "ProjectReviewItem": "type:715ce36957ecd5e5de5a666c757894d3235f7092f8721f8aa32af46d8d6942a7",
+    "ProjectStatus": "type:0092c5b54abf6f60b0be6cc90ff534e7ffedd323aa85e4b0e05df5509ccc9ba0",
+    "projectTaskPriorities": "value:a160f2bb1b023d9d4c7169f1c5848351bcda75c06bb9f50521b8b26e4e521799",
+    "ProjectTaskPriority": "type:f86b7590bb3eed160474afab135efcb0e61b495fdc139d40de3e11a56f68d9c7",
+    "ProjectTeamRole": "type:00f44d617dcb8a0b48866d9a81fc0c2ce36bf96ba71fb6404324c9db53d0f6a0",
+    "projectTeamRoles": "value:3b9b9fd0733616d903bbce6cc74f4bd8efdf9a9b6621491f786720bbcdb729b7",
+    "ProjectWork": "type:5e8698760f32f6b76e93b38f9f322ffbd3f6bdc7bc1bba70e5455fcdc81647f2",
+    "ProjectWorkIndex": "type:097c8d9e8bd82391a96133e71c82901826d7720d28acaedfc9cda39e068fb04b",
+    "ProjectWorkPerson": "type:73159827a78ffc9322ac05e0d6f103ee95fa984a935935b69808af22f8834471",
+    "ProjectWorkTask": "type:b119704eea46cf8c768c851b43770a712168e09d8839cb50fc9e2706bb098f14",
+    "protectedOrganizationPermissions": "value:2349d4473522a78d2a140c67e8425c702605dee823f736467000500222c0258c",
+    "PublicAmbassador": "type:56de0e00d7a9f5dbbb90cc863965891f93039cb6f0a17d5b2c2ebe20c041029e",
+    "ReactionKind": "type:a38170e353259f45e5c52a41b1557d9c3a78ea5e94dc49830efdd71ed95e7749",
+    "reactionKinds": "value:710fc09db62455ee107a2ab3fbcc8c359ee55a7f4ff359ec0503ba043c0bae41",
+    "ReactionSummary": "type:97a660fdaee6ef8844bece8da5fab295e5b0a6ccdc2b9c17c1abc4770a2e7eec",
+    "RecommendationAction": "type:99147794bff509a0c3949bfea100afe2ad4867339190b213b4ac5475955a6c0f",
+    "recommendationActions": "value:497a07a681795a149120bceed66fb28815be3031b7e50abfa6f4824d0474cdd5",
+    "RecommendationReason": "type:99dac0dd95bf88f438817bf9e27db431cd1bbc65a549d8fcbf963079cc078344",
+    "recommendationReasons": "value:d54722af933ff682d77a186326843c4d1cd2de89da75da35c67bd68701588574",
+    "RecommendationSettings": "type:36d357eb3a39498c86d528f53ee8223a4132e9d017446045d6ac8c0796920bbd",
+    "referralCodePattern": "value:514c97caa48307efd2b15c03ddfc301d5719a30bbbf93587534171248f57addd",
+    "ReferralSummary": "type:cf12fff9648cb304cadd2c4bf0fe26971044eb71092751249b76a501b602e8e4",
+    "reportCategories": "value:570a996fda6721611bbf86711e71e99280b9f5b08512ba0699dfbfe119e76ea2",
+    "ReportCategory": "type:f505c2ddd6dce47e3a6108421d771028c12c6698204d1d45f59a83068abd6c99",
+    "ReviewApplication": "type:5443f9c9ae438e3138a160f9edcedd960debe932d60bc90900bbffb1398612ef",
+    "ReviewDecision": "type:5ca6e29158541858c39d8be8a957dfe33b084ca5da4b1b72e5a57606f8d8204b",
+    "reviewDecisions": "value:4f6d5aad6b31fe1496a14de164416653068a88953e267a8e437cbd24e8f46d09",
+    "ReviewQueueMode": "type:c5706261237ed6ceabd4300a9446c768933a3ac642ea88c9f90d8e6512bb1e3b",
+    "reviewQueueModes": "value:5a0174121085e6d5554b82d201a50f37fb90fa76c6805ec5fe6b4d1f27424356",
+    "SafetyOverview": "type:80df23c82d201cbb6949b16421e3175b88f31cda3956831f705d42f2ef703b74",
+    "ServiceState": "type:8e4e093967250fcb588cdee02424bfe167060ee6e7dedf5ac5db47e6fbfb841e",
+    "StatusResponse": "type:bc13ad0e66a811fe283af87bbcf151d79cfa16d49663ff46b98018565d0459ff",
+    "UpdateMemberProfile": "type:c096b49445347f2052c4afc8e8b07d8317425e21c9f6cf09319f5f2af29daa90",
+    "VerificationAppeal": "type:14003233a9a40b18831272ef5d9454c973964b04bc833e058913310cc9dbcdac",
+    "VerificationAppealOutcome": "type:ba966aa46699d60e578921568e3f135976b456ef133fce6e123c260a30c447d7",
+    "verificationAppealOutcomes": "value:93225510c6e73111a41f578bcb2e227850c71c268fe8212947d6fe8d34a1c15b",
+    "VerificationApplication": "type:9cdb332f11827c86f2a05f0ac4cb368ea1c898c96d83e06e2b4109e770b64914",
+    "VerificationAssignment": "type:6a2e94eda1d819c5c869e1f981a684b37b2d7b1530c10be97a376e28e58d0858",
+    "VerificationKind": "type:c9ea5fcff649971cb2982a100656b0d569dd60faaba1e8e25d5ea7e22e5e0474",
+    "verificationKinds": "value:c93d14eefb9c0e90e975d6c988eec66cb38f31955455b312bb3691855041cdf0",
+    "VerificationStatus": "type:55cc0d8ac6bf0e410b154e6fc28de0b7b46a0680c6aedb5583f585d977a0cd90",
+    "VerifiedRepresentatives": "type:35d2e1ecf5c46c90907dd17200558c65dd040423daef25a5259b6f239297ec9b"
+  },
+  "privateTypes": {
+    "AffiliationInvitation": "860e596fca514ead3247be5fc03556d3c67d80f64e03ca927e20795b63bf1a4e",
+    "AffiliationOrganization": "b614eb61fe1eb08a4c1d14c10dd408d9741e194aad103596a4758c7bfb6d2656",
+    "AffiliationPersonPreview": "4199c9b5f3be7231f049f987e5b67d809e81fd5d0c6b76023e7606840ff5e1d9",
+    "CommentPosition": "5df097e303664afdbec2e7eafcbed3af365b9f11192eaa1f9774b335ec7815e5",
+    "DiscoveryCardBase": "69b892e7a10fb8f268aa238ac0e5d1ba769d657f5c6cee7dcd1811454eda3996",
+    "PollScopeOption": "22e329c97789758409c871c4d6468cc06d4c5408dd12dd84e7ca247e504b9a14"
+  },
+  "runtime": {
+    "affiliationActions": [
+      "suspend",
+      "reinstate",
+      "remove",
+      "change_type"
+    ],
+    "affiliationTypes": [
+      "member",
+      "volunteer",
+      "staff",
+      "supporter"
+    ],
+    "ambassadorAdminActions": [
+      "invite",
+      "revoke",
+      "suspend",
+      "resume",
+      "complete",
+      "uphold",
+      "allow_new_invitation"
+    ],
+    "ambassadorCategories": [
+      "community",
+      "education",
+      "culture",
+      "technology",
+      "service"
+    ],
+    "appealOutcomes": [
+      "upheld",
+      "overturned",
+      "closed"
+    ],
+    "commentBodyLimit": 1000,
+    "communityKinds": [
+      "department",
+      "diaspora",
+      "interest"
+    ],
+    "communityRecommendationFeedbackActions": [
+      "not_interested",
+      "hide",
+      "restore"
+    ],
+    "communityStaffRoles": [
+      "moderator",
+      "administrator"
+    ],
+    "departmentCommunityContent": {
+      "ht": {
+        "description": "Yon espas pou diskisyon ak nouvèl lokal ki gen rapò ak Centre $&.",
+        "rules": [
+          "Diskite sou lide ak respè. Rapòte asèlman oswa menas.",
+          "Pataje enfòmasyon prive sèlman ak pèmisyon.",
+          "Bay sous pou deklarasyon epi make enfòmasyon ki poko konfime."
+        ]
+      },
+      "fr": {
+        "description": "Un espace de discussion et d’actualités locales liées à Centre $&.",
+        "rules": [
+          "Échangez avec respect. Signalez le harcèlement et les menaces.",
+          "Partagez les informations privées uniquement avec autorisation.",
+          "Citez vos sources et signalez les informations non confirmées."
+        ]
+      },
+      "en": {
+        "description": "A space for discussions and local updates connected to Centre $&.",
+        "rules": [
+          "Discuss ideas with respect. Report harassment or threats.",
+          "Share private details only with permission.",
+          "Give sources for factual claims and label unconfirmed information."
+        ]
+      },
+      "es": {
+        "description": "Un espacio de conversación y novedades locales relacionadas con Centre $&.",
+        "rules": [
+          "Debate con respeto. Denuncia el acoso y las amenazas.",
+          "Comparte datos privados solo con permiso.",
+          "Cita tus fuentes e indica qué información está sin confirmar."
+        ]
+      }
+    },
+    "futureOrganizationPermissions": [
+      "tasks.assign",
+      "volunteers.coordinate",
+      "recruitment.manage",
+      "finance.reports",
+      "announcements.publish"
+    ],
+    "governmentKinds": [
+      "municipality",
+      "ministry",
+      "embassy",
+      "government_agency"
+    ],
+    "groupKinds": [
+      "diaspora",
+      "interest"
+    ],
+    "groupPolicies": [
+      "public",
+      "approval",
+      "private"
+    ],
+    "impersonationKinds": [
+      "profile",
+      "public_figure",
+      "badge",
+      "affiliation"
+    ],
+    "impersonationRestrictions": [
+      "identity",
+      "notable_person",
+      "restrict_institution"
+    ],
+    "institutionImpersonationKinds": [
+      "institution",
+      "representative",
+      "affiliation"
+    ],
+    "interestCodes": [
+      "education",
+      "peace",
+      "healthcare",
+      "agriculture",
+      "technology",
+      "entrepreneurship",
+      "employment",
+      "environment",
+      "infrastructure",
+      "culture"
+    ],
+    "invitedRoles": [
+      "administrator",
+      "editor",
+      "viewer"
+    ],
+    "locales": [
+      "ht",
+      "fr",
+      "en",
+      "es"
+    ],
+    "membershipPolicies": [
+      "open",
+      "approval_required",
+      "invitation_only"
+    ],
+    "moderationActions": [
+      "hide",
+      "restore",
+      "remove",
+      "dismiss"
+    ],
+    "notificationPreferenceKeys": [
+      "reactions",
+      "comments",
+      "replies",
+      "followers"
+    ],
+    "organizationKinds": [
+      "haitian_organization",
+      "international_organization",
+      "ngo",
+      "nonprofit",
+      "foundation",
+      "business",
+      "education",
+      "media",
+      "municipality",
+      "ministry",
+      "embassy",
+      "government_agency"
+    ],
+    "organizationPermissions": [
+      "organization.view",
+      "content.edit",
+      "affiliations.manage",
+      "affiliations.review",
+      "affiliations.invite",
+      "team.view",
+      "roles.assign",
+      "projects.propose",
+      "projects.edit",
+      "projects.submit",
+      "projects.view_private",
+      "projects.operate",
+      "polls.manage"
+    ],
+    "personalClaims": [
+      "identity",
+      "notable_person"
+    ],
+    "platformRoles": [
+      "administrator",
+      "moderator",
+      "verification_reviewer"
+    ],
+    "pollDecisions": [
+      "recommend",
+      "defer",
+      "decline"
+    ],
+    "pollKinds": [
+      "community",
+      "priority",
+      "decision",
+      "person"
+    ],
+    "pollScopes": [
+      "individual",
+      "community",
+      "organization",
+      "project"
+    ],
+    "postBodyLimit": 2000,
+    "postVisibilities": [
+      "public",
+      "members_only",
+      "private"
+    ],
+    "projectExecutionStatuses": [
+      "approved",
+      "active",
+      "paused",
+      "completed",
+      "archived"
+    ],
+    "projectOwners": [
+      "individual",
+      "organization",
+      "community"
+    ],
+    "projectProgressEvents": [
+      "milestone_create",
+      "milestone_edit",
+      "milestone_assigned",
+      "milestone_start",
+      "milestone_block",
+      "milestone_submit",
+      "milestone_submitted",
+      "milestone_approve",
+      "milestone_approved",
+      "milestone_return",
+      "milestone_returned",
+      "milestone_cancel",
+      "milestone_hide",
+      "task_milestone",
+      "metric_create",
+      "metric_edit",
+      "metric_observe",
+      "entry_create",
+      "entry_edit",
+      "entry_image",
+      "entry_submit",
+      "entry_approve",
+      "entry_return",
+      "entry_reject",
+      "entry_withdraw",
+      "entry_remove_image",
+      "team_update_shared",
+      "report_submitted",
+      "report_returned",
+      "report_rejected",
+      "report_published",
+      "progress_project_completed"
+    ],
+    "projectProgressKinds": [
+      "update",
+      "evidence",
+      "report"
+    ],
+    "projectReportCategories": [
+      "misleading",
+      "privacy",
+      "unsafe",
+      "fundraising"
+    ],
+    "projectReviewActions": [
+      "assign",
+      "release",
+      "request_changes",
+      "approve",
+      "reject"
+    ],
+    "projectTaskPriorities": [
+      "low",
+      "normal",
+      "high"
+    ],
+    "projectTeamRoles": [
+      "manager",
+      "supervisor",
+      "contributor",
+      "volunteer"
+    ],
+    "protectedOrganizationPermissions": [
+      "ownership",
+      "verification",
+      "platform",
+      "contacts",
+      "membershipPolicy"
+    ],
+    "reactionKinds": [
+      "like",
+      "love",
+      "support",
+      "celebrate"
+    ],
+    "recommendationActions": [
+      "not_interested",
+      "less_author",
+      "hide_author"
+    ],
+    "recommendationReasons": [
+      "topic",
+      "follow",
+      "language",
+      "recent"
+    ],
+    "referralCodePattern": {
+      "pattern": "^R1-[0-9A-F]{16}$",
+      "flags": ""
+    },
+    "reportCategories": [
+      "harassment",
+      "hate",
+      "spam",
+      "privacy",
+      "other"
+    ],
+    "reviewDecisions": [
+      "approve",
+      "reject",
+      "revoke"
+    ],
+    "reviewQueueModes": [
+      "pending",
+      "assigned",
+      "approved",
+      "rejected",
+      "revoked"
+    ],
+    "verificationAppealOutcomes": [
+      "upheld",
+      "reconsideration"
+    ],
+    "verificationKinds": [
+      "identity",
+      "notable_person",
+      "organization",
+      "government",
+      "representative",
+      "claim"
+    ]
+  }
+}
