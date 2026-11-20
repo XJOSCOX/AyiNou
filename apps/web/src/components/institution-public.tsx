@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import type { Institution } from "@ayinou/shared";
+import { useCallback } from "react";
+import { loadVerifiedRepresentatives, saveRepresentativeConsent } from "@/lib/institution-api";
+import { useFeedMutation } from "@/lib/feed-state";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
-import { InstitutionLogo, InstitutionStatus, institutionAction, institutionCard, institutionLink } from "./institution-ui";
+import { InstitutionLogo, InstitutionStatus, VerifiedBadge, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
+import { ApiErrorNotice } from "./api-error-notice";
+import { ImpersonationReportForm } from "./trust-workspace";
 import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
@@ -34,16 +39,18 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
               <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{org.handle}</p>
             </div>
           </div>
-          <InstitutionStatus status={org.verificationStatus} />
+          <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
         </header>
         <section className={institutionCard} aria-label={t.institutionProfile}>
           <p className="font-semibold">{[org.departmentName, country].filter(Boolean).join(" · ")}</p>
           {org.verificationStatus === "verified" && <p className="mt-2 text-sm text-[var(--theme-body)]">{trustMessages[locale].noEndorsement}</p>}
           {org.description && <p className="mt-3 max-w-4xl whitespace-pre-line break-words leading-7 text-[var(--theme-body)]">{org.description}</p>}
-          {org.website && <a href={org.website} target="_blank" rel="noreferrer" className={`${institutionLink} mt-4 inline-block`}>{t.website} <span aria-hidden="true">↗</span></a>}
+          {org.website && <a href={org.website} target="_blank" rel="noreferrer" className={`${institutionLink} mt-4 inline-block`}>{trustMessages[locale].listedWebsite} <span aria-hidden="true">↗</span></a>}
         </section>
         <PublicAffiliationPanel organization={org} signedIn={signedIn} />
+        {signedIn && <VerifiedRepresentativePanel organizationId={org.id} />}
         <ProfileFollowPanel target={{ kind: "institution", key: org.id }} signedIn={signedIn} />
+        {signedIn && <ImpersonationReportForm institutionHandle={org.handle} />}
         {org.verificationStatus !== "verified" && <div>
           <Link href={claim} className={institutionAction}>{t.claimProfile}</Link>
           {!signedIn && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.claimInstructions}</p>}
@@ -52,4 +59,31 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
       <SiteFooter />
     </div>
   );
+}
+
+function VerifiedRepresentativePanel({ organizationId }: { organizationId: string }) {
+  const [locale] = useLocale();
+  const t = trustMessages[locale];
+  const load = useCallback((signal: AbortSignal) => loadVerifiedRepresentatives(organizationId, signal), [organizationId]);
+  const { data, error, refresh } = useInstitutionResource(load);
+  const mutation = useFeedMutation();
+  const ownConsent = data?.ownConsent;
+  if (error === null && !mutation.error && !data?.representatives.length && ownConsent == null) return null;
+  return <section className={institutionCard}>
+    <h2 className="text-lg font-semibold">{t.verifiedRepresentatives}</h2>
+    <p className="mt-1 text-sm text-[var(--theme-body)]">{t.representativeMeaning}</p>
+    {error !== null && <ApiErrorNotice error={error} retry={refresh} />}
+    {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
+    {!!data?.representatives.length && <ul className="mt-3 grid gap-2">
+      {data.representatives.map((person) => <li key={person.username} className="flex flex-wrap items-center gap-2">
+        <Link className={`${institutionLink} break-all`} href={`/members/${encodeURIComponent(person.username)}`}>{person.displayName}</Link>
+        <VerifiedBadge label={t.representative} />
+      </li>)}
+    </ul>}
+    {ownConsent != null && <button type="button" aria-pressed={ownConsent} className={`${institutionAction} mt-3`}
+      disabled={mutation.busy} onClick={() => { void mutation.run(async () => {
+        await saveRepresentativeConsent(organizationId, !ownConsent);
+        refresh();
+      }); }}>{ownConsent ? t.hideRepresentation : t.showRepresentation}</button>}
+  </section>;
 }

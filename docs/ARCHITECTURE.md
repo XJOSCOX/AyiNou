@@ -125,3 +125,7 @@ The protected directory and existing public directory use Fastify and the same c
 ### Reviewed identity, impersonation and appeals
 
 Existing verification applications retain the two-reviewer approval model. Personal evidence access and votes require an active assignment. New private PostgreSQL records link verification appeals to exact historical decisions and log assignments. Impersonation cases store reporter identity privately and support an explicitly scoped badge publication hold. Fastify derives the actor from Supabase Auth. TOTP, role, and case checks apply within the database for the new privileged routes. In-app decision notices contain only a generic prompt to visit Verification.
+
+### Institutional trust and representation
+
+Institutional cases use the same assignment-gated work queue and independent approvals as personal verification. Fastify derives the actor from the bearer token. PostgreSQL rechecks current assignments, organization identity and owner grant within the review transaction. The organization role, ordinary affiliation, independently reviewed representative badge and platform reviewer role remain separate. Public projections use current state and representative consent. Impersonation restrictions use the existing private case queue. A substantiated, written administrative action can restrict public access and organization actions without deleting the review or membership history. Shared contracts support the same authorization and error behavior on web and future mobile clients.

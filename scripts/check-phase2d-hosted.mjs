@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import dotenv from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 import sharp from "sharp";
@@ -24,6 +24,7 @@ const password = `AyinouSynthetic9-${randomUUID()}`;
 const handle = `institution-hosted-${run}`;
 let org;
 let ordinaryOrg;
+let reportId;
 const ordinaryHandle = `affiliate-hosted-${run}`;
 
 async function fixture(label) {
@@ -39,7 +40,7 @@ async function fixture(label) {
   const client = createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY, options);
   const login = await client.auth.signInWithPassword({ email, password });
   assert.ifError(login.error);
-  return { id, client, username, headers: { authorization: `Bearer ${login.data.session.access_token}` } };
+  return { id, client, email, username, headers: { authorization: `Bearer ${login.data.session.access_token}` } };
 }
 
 async function send(method, url, expected, user, payload) {
@@ -69,6 +70,12 @@ try {
   assert.ok((await stranger.client.schema("private").from("verification_evidence").select("url")).error);
   assert.ok((await stranger.client.rpc("institution_manage_for_api", { p_actor: owner.id, p_org: org })).error);
   assert.ok((await publicClient.rpc("institution_public_for_api", { p_handle: handle })).error);
+  await send("GET", `${detail}/verified-representatives`, 401);
+  assert.deepEqual(await send("GET", `${detail}/verified-representatives`, 200, stranger), { representatives: [], ownConsent: null });
+  await send("PATCH", `${detail}/verified-representatives/me`, 409, owner, { publish: true });
+  await send("PATCH", `${detail}/verified-representatives/me`, 400, stranger, { publish: true, actorId: owner.id });
+  assert.ok((await stranger.client.rpc("institution_representative_consent_for_api",
+    { p_actor: owner.id, p_org: org, p_publish: true })).error);
   console.log("Hosted client grants and public projection privacy: pass");
 
   const invite = await send("POST", `${detail}/invitations`, 201, owner, { username: editor.username, role: "editor", termDays: 2 });
@@ -96,13 +103,21 @@ try {
   console.log("Bound invitation acceptance, scoped edits, private logo upload and revocation: pass");
 
   const verification = "/api/v1/me/verification";
-  const input = { kind: "government", organizationId: org, evidence: ["https://example.invalid/registry"] };
+  const input = { kind: "government", organizationId: org, evidence: ["https://example.invalid/registry", "https://authority.invalid/department"] };
+  assert.equal((await send("POST", verification, 400, owner, { ...input, evidence: input.evidence.slice(0, 1) })).error.code,
+    "INSTITUTION_EVIDENCE_REQUIRED");
   await send("POST", verification, 403, stranger, input);
   const application = await send("POST", verification, 201, owner, input);
   assert.equal(application.status, "pending");
   assert.equal((await send("GET", verification, 200, stranger)).applications.length, 0);
   assert.equal((await send("GET", verification, 200, owner)).applications[0]?.id, application.id);
   await send("GET", "/api/v1/verification/review", 403, owner);
+  const report = `${publicRoute}/impersonation-reports`;
+  const reportInput = { kind: "institution", explanation: "Synthetic institutional impersonation report.", references: [] };
+  reportId = (await send("POST", report, 201, stranger, reportInput)).id;
+  assert.match(reportId, /^[0-9a-f-]{36}$/);
+  await send("POST", report, 409, stranger, reportInput);
+  await send("GET", "/api/v1/trust/impersonation", 403, stranger);
   assert.equal((await send("GET", publicRoute, 200)).organization.verificationStatus, "unverified");
   console.log("Application privacy, restricted review, and no automatic badge: pass");
 
@@ -156,6 +171,17 @@ try {
   assert.ok(!JSON.stringify(await send("GET", directory, 200)).includes("Private synthetic message"));
   assert.equal((await send("GET", publicRoute, 200)).organization.verificationStatus, "unverified");
   console.log("Ordinary affiliation scope, concurrent join, approval, consent, invitations and audit history: pass");
+  if (process.argv.includes("--browser")) {
+    const file = "supabase/.temp/phase5b-browser.json";
+    try {
+      writeFileSync(file, JSON.stringify({ email: stranger.email, password, handle }), { mode: 0o600, flag: "wx" });
+      console.log("Browser fixture ready. Press Enter to clean up.");
+      await new Promise((resolve) => { process.stdin.resume(); process.stdin.once("data", resolve); });
+    } finally {
+      process.stdin.pause();
+      rmSync(file, { force: true });
+    }
+  }
 } finally {
   await app.close();
   assert.ok(users.every((id) => /^[0-9a-f-]{36}$/.test(id)));
@@ -170,7 +196,10 @@ try {
     assert.ok(fixtures.every((fixture) => /^[0-9a-f-]{36}$/.test(fixture.id) && /^[a-z0-9-]+$/.test(fixture.handle)));
     const cleanup = fixtures.map((fixture) => `delete from private.institution_audit where organization_id='${fixture.id}';
       delete from private.organizations where id='${fixture.id}' and handle='${fixture.handle}' and created_by='${fixture.owner}';`).join("\n");
-    const sql = `begin; ${cleanup} commit;`;
+    if (reportId) assert.match(reportId, /^[0-9a-f-]{36}$/);
+    const reports = users[2] ? `delete from private.impersonation_reports where organization_id='${org}'
+      and reporter_id='${users[2]}' and subject_id is null;` : "";
+    const sql = `begin; ${reports} ${cleanup} commit;`;
     const cleared = spawnSync(process.execPath, ["node_modules/supabase/dist/supabase.js", "db", "query", "--remote", "--yes", sql],
       { encoding: "utf8", timeout: 30_000 });
     assert.equal(cleared.status, 0, "fixture organization cleanup failed");

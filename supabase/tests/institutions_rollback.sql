@@ -12,6 +12,12 @@ declare
   invite uuid;
   claim_invite uuid;
   application uuid;
+  representative_application uuid;
+  competing_claim uuid;
+  report uuid;
+  review_factor uuid := gen_random_uuid();
+  review_session uuid := gen_random_uuid();
+  report_session uuid := gen_random_uuid();
   public_data jsonb;
   management jsonb;
   suffix text := substr(replace(gen_random_uuid()::text,'-',''),1,12);
@@ -41,7 +47,10 @@ begin
   insert into public.role_assignments(user_id,role) select id,'administrator' from unnest(array[creator,reviewer1,reviewer2]) s(id);
   insert into private.verification_reviewers(user_id) select id from unnest(array[creator,reviewer1,reviewer2]) s(id);
   insert into auth.mfa_factors(id,user_id,factor_type,status,secret,created_at,updated_at)
-    select gen_random_uuid(),id,'totp','verified','rollback-only',now(),now() from unnest(array[creator,reviewer1,reviewer2]) s(id);
+    select case when id=reviewer1 then review_factor else gen_random_uuid() end,
+      id,'totp','verified','rollback-only',now(),now() from unnest(array[creator,reviewer1,reviewer2]) s(id);
+  insert into auth.sessions(id,user_id,aal,factor_id)
+    values(review_session,reviewer1,'aal2',review_factor),(report_session,other_user,'aal1',null);
   actor_input := jsonb_build_object('handle',institute_handle,'name','Synthetic institution','kind','ministry',
     'countryCode','HT','departmentCode','HT-OU','contactEmail','private@example.invalid');
   org := public.institution_save_for_api(creator,null,actor_input);
@@ -82,14 +91,29 @@ begin
   perform public.institution_revoke_member_for_api(creator,org,(select id from private.organization_memberships where organization_id=org and user_id=delegate));
   if private.institution_role(delegate,org) is not null then raise exception 'revoked role was active'; end if;
 
-  application := public.verification_submit_for_api(creator,org,'government',array['https://example.invalid/registry']);
+  begin
+    perform public.verification_submit_for_api(creator,org,'government',array['https://example.invalid/registry','https://www.example.invalid/about']);
+    raise exception 'same evidence host accepted twice';
+  exception when sqlstate 'PVT11' then null; end;
+  begin
+    perform public.verification_submit_for_api(creator,org,'organization',array['https://example.invalid/registry','https://authority.invalid/department']);
+    raise exception 'government case accepted as ordinary organization';
+  exception when check_violation then null; end;
+  application := public.verification_submit_for_api(creator,org,'government',array['https://example.invalid/registry','https://authority.invalid/department']);
   begin
     perform public.verification_decide_for_api(creator,application,'approve','Synthetic conflict denial.',true);
     raise exception 'owner reviewed own institution';
   exception when insufficient_privilege then null; end;
   if jsonb_array_length(public.verification_queue_for_api(creator,'pending')) <> 0 then raise exception 'conflicted queue leak'; end if;
-  if not exists (select 1 from jsonb_array_elements(public.verification_queue_for_api(reviewer1,'pending')) entry where entry->>'id'=application::text)
-  then raise exception 'application missing from reviewer queue'; end if;
+  if not exists (select 1 from jsonb_array_elements(public.verification_queue_for_api(reviewer1,'pending')) entry
+    where entry->>'id'=application::text and entry->'evidence'='[]'::jsonb and entry->'reviews'='[]'::jsonb)
+  then raise exception 'institutional assignment privacy failed'; end if;
+  begin
+    perform public.verification_decide_for_api(reviewer1,application,'approve','Synthetic unassigned review.',true);
+    raise exception 'unassigned verification accepted';
+  exception when sqlstate 'PVT05' then null; end;
+  perform public.verification_work_for_api(reviewer1,application,true);
+  perform public.verification_work_for_api(reviewer2,application,true);
   if public.verification_decide_for_api(reviewer1,application,'approve','Synthetic initial approval.',true) <> 'pending'
     or public.institution_public_for_api(institute_handle)->>'verificationStatus' <> 'unverified'
   then raise exception 'single review conferred badge'; end if;
@@ -97,14 +121,42 @@ begin
   then raise exception 'second review did not approve'; end if;
   if public.institution_public_for_api(institute_handle)->>'verificationStatus' <> 'verified'
   then raise exception 'approved institution stayed unverified'; end if;
+  invite := public.institution_invite_for_api(creator,org,'delegate_'||suffix,'viewer',1);
+  perform public.institution_resolve_invite_for_api(delegate,invite,true);
+  update public.profiles set is_visible=true where user_id=delegate;
+  insert into public.user_settings(user_id,discoverable) values(delegate,true) on conflict(user_id) do update set discoverable=true;
+  representative_application := public.verification_submit_for_api(delegate,org,'representative',
+    array['https://example.invalid/appointment','https://authority.invalid/official']);
+  perform public.verification_work_for_api(reviewer1,representative_application,true);
+  perform public.verification_work_for_api(reviewer2,representative_application,true);
+  perform public.verification_decide_for_api(reviewer1,representative_application,'approve','Synthetic representative review.',true);
+  perform public.verification_decide_for_api(reviewer2,representative_application,'approve','Independent representative review.',true);
+  if public.institution_representatives_for_api(other_user,org)->'representatives'<>'[]'::jsonb then
+    raise exception 'unconsented representative leaked';
+  end if;
+  perform public.institution_representative_consent_for_api(delegate,org,true);
+  if public.institution_representatives_for_api(other_user,org)->'representatives'->0->>'username' is distinct from 'delegate_'||suffix
+    or public.institution_representatives_for_api(other_user,org)->'representatives'->0 ? 'userId'
+  then raise exception 'representative projection incorrect'; end if;
+  update private.organization_memberships set created_at=now()-interval '2 days',expires_at=now()-interval '1 day'
+    where organization_id=org and user_id=delegate and revoked_at is null;
+  if public.institution_representatives_for_api(other_user,org)->'representatives'<>'[]'::jsonb then
+    raise exception 'expired representative badge leaked';
+  end if;
+  if (select count(*) from feed_data.notifications n where n.recipient_id=delegate and n.kind='representative_access_changed'
+    and n.actor_id is null and feed_data.notification_visible(n))<2
+  then raise exception 'private representative notices missing'; end if;
   if public.verification_decide_for_api(reviewer1,application,'revoke','Synthetic independent revocation.',true) <> 'revoked'
   then raise exception 'manual revocation failed'; end if;
   if public.institution_public_for_api(institute_handle)->>'verificationStatus' <> 'revoked'
   then raise exception 'public badge remained active'; end if;
 
   claim_invite := public.institution_invite_for_api(creator,org,'delegate_'||suffix,'viewer',null);
-  application := public.verification_submit_for_api(claimant,org,'claim',array['https://example.invalid/authorized']);
+  application := public.verification_submit_for_api(claimant,org,'claim',array['https://example.invalid/authorized','https://authority.invalid/official']);
+  competing_claim := public.verification_submit_for_api(other_user,org,'claim',array['https://example.invalid/competing','https://authority.invalid/official']);
   if private.institution_role(claimant,org) is not null then raise exception 'submission granted access'; end if;
+  perform public.verification_work_for_api(reviewer1,application,true);
+  perform public.verification_work_for_api(reviewer2,application,true);
   perform public.verification_decide_for_api(reviewer1,application,'approve','Synthetic initial ownership review.',true);
   if private.institution_role(claimant,org) is not null then raise exception 'one review granted ownership'; end if;
   perform public.verification_decide_for_api(reviewer2,application,'approve','Synthetic independent ownership review.',true);
@@ -112,6 +164,12 @@ begin
     or (select state from private.organization_invitations where id=claim_invite) <> 'revoked'
     or public.institution_public_for_api(institute_handle)->>'verificationStatus' <> 'revoked'
   then raise exception 'ownership transfer leaked access or badge'; end if;
+  perform public.verification_work_for_api(reviewer1,competing_claim,true);
+  begin
+    perform public.verification_decide_for_api(reviewer1,competing_claim,'approve','Competing claim relies on an earlier owner grant.',true);
+    raise exception 'stale contested claim could advance';
+  exception when object_not_in_prerequisite_state then null; end;
+  perform public.verification_decide_for_api(reviewer1,competing_claim,'reject','Competing claim relies on an earlier owner grant.',true);
   application := public.verification_submit_for_api(claimant,null,'notable_person',
     array['https://example.invalid/public-bio','https://publisher.invalid/independent-profile']);
   perform public.verification_work_for_api(reviewer1,application,true);
@@ -122,5 +180,35 @@ begin
   then raise exception 'personal verification record missing'; end if;
   if not exists (select 1 from private.institution_audit where organization_id=org and event='ownership_transferred')
   then raise exception 'ownership audit missing'; end if;
+
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',other_user,'role','authenticated','aal','aal1','session_id',report_session)::text,true);
+  perform public.submit_verification_appeal_for_client(competing_claim,'Synthetic appeal of the contested claim decision.',array[]::text[]);
+  if private.institution_role(claimant,org) is distinct from 'owner' or private.institution_role(other_user,org) is not null then
+    raise exception 'filing an appeal changed ownership';
+  end if;
+  update private.organizations set status='archived' where id=org;
+  if public.institution_public_for_api(institute_handle) is not null or private.institution_role(claimant,org) is not null
+  then raise exception 'archive retained a public profile or representative authority'; end if;
+  update private.organizations set status='active' where id=org;
+  report := public.submit_institution_impersonation_for_client(institute_handle,'institution','Synthetic institution impersonation report.',array[]::text[]);
+  if public.institution_public_for_api(institute_handle) is null then raise exception 'report automatically hid institution'; end if;
+  begin
+    perform public.submit_institution_impersonation_for_client(institute_handle,'institution','Duplicate synthetic report.',array[]::text[]);
+    raise exception 'duplicate institution report accepted';
+  exception when unique_violation then null; end;
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',reviewer1,'role','authenticated','aal','aal1')::text,true);
+  begin
+    perform public.decide_impersonation_report_for_client(report,'substantiated','Synthetic decision without MFA.','restrict_institution');
+    raise exception 'restriction without MFA';
+  exception when sqlstate 'PCG05' then null; end;
+  perform set_config('request.jwt.claims',jsonb_build_object('sub',reviewer1,'role','authenticated','aal','aal2','session_id',review_session,'amr',
+    jsonb_build_array(jsonb_build_object('method','totp','timestamp',extract(epoch from clock_timestamp())::bigint)))::text,true);
+  if not exists(select 1 from jsonb_array_elements(public.impersonation_queue_for_client()) entry
+    where entry->>'id'=report::text and entry->>'organizationHandle'=institute_handle and not (entry ? 'reporterId'))
+  then raise exception 'institution report queue privacy failed'; end if;
+  perform public.decide_impersonation_report_for_client(report,'substantiated','Synthetic written institutional review.','restrict_institution');
+  if public.institution_public_for_api(institute_handle) is not null or private.institution_role(claimant,org) is not null
+    or not exists(select 1 from private.institution_audit where organization_id=org and subject_id=report and event='institution_restricted')
+  then raise exception 'restriction did not suspend publication and access'; end if;
 end;
 $$;

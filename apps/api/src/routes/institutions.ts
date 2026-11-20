@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { invitedRoles, organizationKinds, reviewDecisions, verificationKinds, type InstitutionInput,
-  type ReviewApplication, type VerificationApplication, type VerificationStatus } from "@ayinou/shared";
+  type ReviewApplication, type VerificationApplication, type VerificationStatus, type VerifiedRepresentatives } from "@ayinou/shared";
 import { z } from "zod";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
@@ -111,6 +111,17 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
     api.post(`${base}/:id/representatives/:member/revoke`, { bodyLimit: 256 }, async (request, reply) => {
       const { id, member } = resource.extend({ member: z.uuid() }).parse(request.params);
       await service.rpc("institution_revoke_member_for_api", { p_actor: request.authUserId, p_org: id, p_member: member });
+      return reply.code(204).send();
+    });
+    api.get(`${base}/:id/verified-representatives`, async (request) =>
+      service.rpc<VerifiedRepresentatives>("institution_representatives_for_api", {
+        p_actor: request.authUserId, p_org: resource.parse(request.params).id,
+      }));
+    api.patch(`${base}/:id/verified-representatives/me`, { bodyLimit: 256 }, async (request, reply) => {
+      const { publish } = z.strictObject({ publish: z.boolean() }).parse(request.body);
+      await service.rpc("institution_representative_consent_for_api", {
+        p_actor: request.authUserId, p_org: resource.parse(request.params).id, p_publish: publish,
+      });
       return reply.code(204).send();
     });
     api.get("/api/v1/me/verification", async (request) => ({

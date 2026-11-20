@@ -74,7 +74,7 @@ export function InstitutionHub() {
                       <Link className="break-words font-semibold text-[var(--theme-link)] hover:underline" href={`/institutions/${org.id}`}>{org.name}</Link>
                       <p className="mt-0.5 text-sm text-[var(--theme-body)]">{t[org.role]} · @{org.handle}</p>
                     </div>
-                    <InstitutionStatus status={org.verificationStatus} />
+                    <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
                   </li>)}
                 </ul>
               )}

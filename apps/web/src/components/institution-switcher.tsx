@@ -6,11 +6,10 @@ import { useEffect, useState } from "react";
 import type { InstitutionAccounts } from "@ayinou/shared";
 import { loadInstitutionAccounts } from "@/lib/institution-api";
 import { institutionMessages } from "@/lib/institution-i18n";
-import { trustMessages } from "@/lib/trust-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { useMemberIdentity } from "@/lib/member-display-name";
-import { PersonalClaimChecks, VerifiedCheck } from "./institution-ui";
+import { institutionBadgeLabel, PersonalClaimChecks, VerifiedCheck } from "./institution-ui";
 
 export function InstitutionSwitcher() {
   const [locale] = useLocale();
@@ -38,7 +37,7 @@ export function InstitutionSwitcher() {
     <details className="relative min-w-0" onToggle={(event) => setOpen(event.currentTarget.open)}>
       <summary className="max-w-52 cursor-pointer truncate rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] marker:text-[var(--theme-link)]">
         {selected?.name ?? t.switchAccount}
-        {selected?.verificationStatus === "verified" && <>{" "}<VerifiedCheck label={trustMessages[locale].organization} /></>}
+        {selected?.verificationStatus === "verified" && <>{" "}<VerifiedCheck label={institutionBadgeLabel(locale, selected.kind)} /></>}
       </summary>
       <div className="absolute end-0 z-20 mt-2 max-h-80 w-56 overflow-auto rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg max-sm:fixed max-sm:inset-x-4 max-sm:w-auto">
         <Link href="/dashboard" className={item}>{t.personalAccount} <PersonalClaimChecks claims={claims} /></Link>
@@ -46,7 +45,7 @@ export function InstitutionSwitcher() {
           : !accounts ? <p role="status" className="px-3 py-2 text-sm">{authMessages[locale].working}</p>
           : accounts.organizations.map((org) => <Link key={org.id} className={item} href={`/institutions/${org.id}`}
             aria-current={org.id === selected?.id ? "page" : undefined}>
-            {org.name}{org.verificationStatus === "verified" && <>{" "}<VerifiedCheck label={trustMessages[locale].organization} /></>}
+            {org.name}{org.verificationStatus === "verified" && <>{" "}<VerifiedCheck label={institutionBadgeLabel(locale, org.kind)} /></>}
           </Link>)}
         <Link href="/institutions" className={`${item} border-t border-[var(--theme-border)]`}>{t.institutions}</Link>
       </div>

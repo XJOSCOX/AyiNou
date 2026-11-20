@@ -18,6 +18,7 @@ function notificationTarget({ available, kind, actor, postId, commentId, appealI
   if (kind === "new_follower") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
   if (kind === "appeal_decided") return appealId ? `/settings/appeals#appeal-${appealId}` : null;
   if (kind === "verification_decided" || kind === "verification_appeal_decided") return "/verification";
+  if (kind === "representative_access_changed") return "/institutions";
   if (!postId) return null;
   return `/posts/${postId}${commentId ? `?comment=${commentId}` : ""}`;
 }
@@ -51,6 +52,7 @@ export function NotificationCenter() {
         : item.kind === "appeal_decided" ? safetyMessages[locale].appeal_decided
         : item.kind === "verification_decided" ? trustMessages[locale].verifyApplicationAlert
         : item.kind === "verification_appeal_decided" ? trustMessages[locale].verifyAppealAlert
+        : item.kind === "representative_access_changed" ? trustMessages[locale].representativeAlert
         : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
       return <li key={item.id} className={`${institutionCard} flex flex-wrap items-center justify-between gap-3`}>
         <div className="min-w-0"><p className={`break-words ${newItem ? "font-semibold" : ""}`}>{text}</p>

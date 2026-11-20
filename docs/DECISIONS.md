@@ -125,3 +125,10 @@ Phase 2B uses self-declared membership categories. A category grants no verifica
 - Verification appeals preserve the original decision and require an assigned reviewer uninvolved in the original review. A reconsideration result opens the path to a fresh application without badge restoration.
 - Impersonation reports require a written decision. A reviewer can hold the relevant badge publication while a dispute is reviewed. There is no automated sanction from report counts.
 - Independently deliverable proof-of-control challenges, raw-document handling, and a final evidence purge schedule remain deferred.
+
+### Phase 5B institutional trust
+
+- Require assignment and independent evidence review for institutional applications and ownership claims. Distinct websites are a minimum intake check. Reviewers establish the independence and authority of the sources.
+- Bind ownership review to the current identity and owner grant. Invalidate old representative grants and invitations on transfer. Public representative badges require separate review, a live grant and holder consent.
+- Use one private impersonation queue and one verification appeal workflow. A report does not change public status. A nonconflicted administrator can restrict an institution only with recent TOTP and a substantiated written decision. Restriction lifts and the final operational evidence retention schedule remain open decisions.
+- Keep real staffing separate from deployments and synthetic checks. Pending applications wait for eligible independent reviewers.

@@ -69,7 +69,7 @@ function DiscoveryAccount({ account, compact, onChange }: { account: DiscoveryCa
         {account.kind === "member" && !!account.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={account.personalClaims} /></>}
         <p className="break-all text-xs text-[var(--theme-body)]">@{account.handle}</p>
       </div>
-      {account.kind === "institution" && <InstitutionStatus status={account.verificationStatus} />}
+      {account.kind === "institution" && <InstitutionStatus status={account.verificationStatus} kind={account.category} />}
     </div>
     {account.kind === "institution" && <>
       <p className="mt-2 break-words text-sm text-[var(--theme-body)]">{[labels[account.category], country, account.departmentCode].filter(Boolean).join(" · ")}</p>

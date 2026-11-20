@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import type { Institution, PersonalClaim } from "@ayinou/shared";
+import type { Institution, Locale, OrganizationKind, PersonalClaim } from "@ayinou/shared";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
@@ -29,10 +29,21 @@ export function useInstitutionResource<T>(loader: (signal: AbortSignal) => Promi
   return { data, error, refresh: () => setVersion((value) => value + 1) };
 }
 
-export function InstitutionStatus({ status }: { status: Institution["verificationStatus"] }) {
+export function institutionBadgeLabel(locale: Locale, kind: OrganizationKind) {
+  const trust = trustMessages[locale];
+  return {
+    haitian_organization: trust.verifiedHaitian, international_organization: trust.verifiedInternational,
+    nonprofit: trust.verifiedNonprofit, ngo: trust.verifiedNGO, foundation: trust.verifiedFoundation,
+    business: trust.verifiedBusiness, education: trust.verifiedSchool, media: trust.verifiedMedia,
+    municipality: trust.verifiedGovernment, ministry: trust.verifiedGovernment,
+    embassy: trust.verifiedGovernment, government_agency: trust.verifiedGovernment,
+  }[kind];
+}
+
+export function InstitutionStatus({ status, kind }: { status: Institution["verificationStatus"]; kind: OrganizationKind }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
-  if (status === "verified") return <VerifiedBadge label={trustMessages[locale].organization} />;
+  if (status === "verified") return <VerifiedBadge label={institutionBadgeLabel(locale, kind)} />;
   return <span className={`inline-flex rounded-md px-2.5 py-1 text-xs font-bold ${status === "revoked"
     ? "bg-[var(--theme-error-bg)] text-[var(--theme-error-text)]"
     : "bg-[var(--theme-selected)] text-[var(--theme-link)]"}`}>{t[status]}</span>;

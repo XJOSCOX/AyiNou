@@ -119,6 +119,8 @@ Phase 2D hosted checks are `npm run test:hosted:institutions:sql` and `npm run t
 
 **Institutions** now separates the organizations you manage from the ones you belong to. Open a public organization page to join or apply when its policy allows. Membership invitations and private history appear on the Institutions page. Ordinary memberships never add an account to the representative switcher or grant institutional authority. Public directories require organization enablement and each member's opt-in. Run the guarded `npm run test:hosted:affiliations:sql` and the extended hosted institution suite to verify these workflows.
 
+Institutional verification uses category-specific badges and two independent reviewers. Verified representatives can choose whether signed-in visitors see their public name and handle on the institution's profile. Signed-in members can report impersonation from that profile. [Evidence, ownership and reviewer setup](docs/DATABASE.md#phase-5b-institutional-trust)
+
 Hosted Auth has email/password signup and confirmation enabled. Its site URL is `http://localhost:4000`, with `http://localhost:4000/auth/callback` and `http://localhost:4000/reset-password` allowed as redirects. The hosted default email sender reaches only organization team addresses and allows very few messages per hour; use a controlled team mailbox for limited testing or configure custom SMTP for reliable signup and password-reset testing. Do not turn off confirmation to bypass this. Local Mailpit is available only with the optional Docker stack; it is not the hosted project's inbox. See [docs/DATABASE.md](docs/DATABASE.md) for testing limits and troubleshooting.
 
 ## GitHub workflow: main only

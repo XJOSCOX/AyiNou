@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { impersonationKinds, personalClaims, verificationAppealOutcomes } from "@ayinou/shared";
+import { impersonationKinds, impersonationRestrictions, institutionImpersonationKinds, verificationAppealOutcomes } from "@ayinou/shared";
 import { z } from "zod";
 import type { FeedRepository } from "../services/feed.js";
 import type { ReadBudget } from "../services/read-budget.js";
@@ -47,6 +47,15 @@ export function registerTrustRoutes(app: FastifyInstance, context: {
     });
     return reply.code(201).send({ id });
   });
+  app.post("/api/v1/institutions/by-handle/:handle/impersonation-reports", { bodyLimit: 9_000 }, async (request, reply) => {
+    const { token } = await viewer(request, true);
+    const params = z.strictObject({ handle: z.string().regex(/^[a-z0-9][a-z0-9-]{2,39}$/) }).parse(request.params);
+    const input = explanation.extend({ kind: z.enum(institutionImpersonationKinds) }).parse(request.body);
+    const id = await repo().rpc(token, "submit_institution_impersonation_for_client", {
+      p_org: params.handle, p_kind: input.kind, p_explanation: input.explanation, p_refs: input.references,
+    });
+    return reply.code(201).send({ id });
+  });
   app.get(operations + "/application-assignments", async (request) => {
     const { actor, token } = await viewer(request, true);
     await read("profile", actor, request.ip);
@@ -89,7 +98,7 @@ export function registerTrustRoutes(app: FastifyInstance, context: {
   app.patch(operations + "/impersonation/:id/decision", { bodyLimit: 6_000 }, async (request, reply) => {
     const { token } = await viewer(request, true);
     const { id } = caseId.parse(request.params);
-    const input = z.strictObject({ outcome: z.enum(["dismissed", "substantiated"]), rationale: note(1000), hold: z.enum(personalClaims).nullable() }).parse(request.body);
+    const input = z.strictObject({ outcome: z.enum(["dismissed", "substantiated"]), rationale: note(1000), hold: z.enum(impersonationRestrictions).nullable() }).parse(request.body);
     await repo().rpc(token, "decide_impersonation_report_for_client", {
       p_id: id, p_outcome: input.outcome, p_rationale: input.rationale, p_hold: input.hold,
     });

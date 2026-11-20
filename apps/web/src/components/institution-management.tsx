@@ -87,7 +87,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <InstitutionStatus status={org.verificationStatus} />
+          <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
           <Link href={`/organization/${org.handle}`} className={institutionLink}>{t.publicProfile}</Link>
           {manageTeam && <Link href={`/institutions/${org.id}/affiliations`} className={institutionLink}>{affiliationMessages[locale].management}</Link>}
         </div>

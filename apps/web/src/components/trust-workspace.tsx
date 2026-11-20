@@ -1,6 +1,6 @@
 "use client";
 
-import { impersonationKinds, personalClaims, verificationAppealOutcomes, type ImpersonationKind, type ImpersonationReview,
+import { impersonationKinds, institutionImpersonationKinds, personalClaims, verificationAppealOutcomes, type ImpersonationKind, type ImpersonationRestriction, type ImpersonationReview,
   type VerificationAppeal, type VerificationApplication } from "@ayinou/shared";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
@@ -11,7 +11,8 @@ import { useFeedMutation } from "@/lib/feed-state";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { assignVerificationAppeal, assignVerificationApplication, decideImpersonation, decideVerificationAppeal, loadAppealQueue,
-  loadImpersonationQueue, loadVerificationAppeals, loadVerificationAssignments, submitImpersonationReport, submitVerificationAppeal } from "@/lib/trust-api";
+  loadImpersonationQueue, loadVerificationAppeals, loadVerificationAssignments, submitImpersonationReport,
+  submitInstitutionReport, submitVerificationAppeal } from "@/lib/trust-api";
 import { trustMessages } from "@/lib/trust-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -56,10 +57,10 @@ function PublicReferences({ references }: { references: string[] }) {
   </div>;
 }
 
-export function ImpersonationReportForm({ username }: { username: string }) {
+export function ImpersonationReportForm(target: { username: string } | { institutionHandle: string }) {
   const [locale] = useLocale();
   const t = trustMessages[locale];
-  const [kind, setKind] = useState<ImpersonationKind>("profile");
+  const [kind, setKind] = useState<ImpersonationKind>("institutionHandle" in target ? "institution" : "profile");
   const [saved, setSaved] = useState(false);
   const mutation = useFeedMutation();
   return <details className={institutionCard}>
@@ -68,17 +69,22 @@ export function ImpersonationReportForm({ username }: { username: string }) {
       event.preventDefault();
       const form = fields(event);
       void mutation.run(async () => {
-        await submitImpersonationReport(username, kind, kind === "affiliation" ? field(form, "institution") : null,
-          field(form, "explanation"), links(form));
+        if ("institutionHandle" in target) {
+          await submitInstitutionReport(target.institutionHandle, kind, field(form, "explanation"), links(form));
+        } else {
+          await submitImpersonationReport(target.username, kind, kind === "affiliation" ? field(form, "institution") : null,
+            field(form, "explanation"), links(form));
+        }
         setSaved(true);
       });
     }}>
       <label className="text-sm font-semibold">{t.reason}
         <select className={institutionField} value={kind} onChange={(event) => setKind(event.target.value as ImpersonationKind)}>
-          {impersonationKinds.map((value) => <option key={value} value={value}>{t[value]}</option>)}
+          {("institutionHandle" in target ? institutionImpersonationKinds : impersonationKinds).map((value) =>
+            <option key={value} value={value}>{value === "representative" ? t.representativeReport : t[value]}</option>)}
         </select>
       </label>
-      {kind === "affiliation" && <label className="text-sm font-semibold">{t.institutionHandle}
+      {kind === "affiliation" && "username" in target && <label className="text-sm font-semibold">{t.institutionHandle}
         <input name="institution" className={institutionField} minLength={3} maxLength={40} required />
       </label>}
       <ExplanationFields />
@@ -210,10 +216,10 @@ function ImpersonationReviewCard({ item, refresh }: { item: ImpersonationReview;
   const t = trustMessages[locale];
   const [outcome, setOutcome] = useState<"dismissed" | "substantiated">("dismissed");
   const mutation = useFeedMutation();
-  const holdOptions = personalClaims.filter((claim) => item.kind === "badge" ||
+  const holdOptions: ImpersonationRestriction[] = item.kind === "institution" ? ["restrict_institution"] : personalClaims.filter((claim) => item.kind === "badge" ||
     (item.kind === "profile" && claim === "identity") || (item.kind === "public_figure" && claim === "notable_person"));
   return <details className="break-words border-t border-[var(--theme-border)] pt-2">
-    <summary className="cursor-pointer font-semibold">{t[item.kind]} · @{item.subjectHandle ?? "—"}</summary>
+    <summary className="cursor-pointer font-semibold">{item.kind === "representative" ? t.representativeReport : t[item.kind]} · @{item.subjectHandle ?? item.organizationHandle ?? "—"}</summary>
     <p className="my-2 whitespace-pre-wrap">{item.explanation}</p>
     {item.organizationHandle && <p className="text-sm">@{item.organizationHandle}</p>}
     <PublicReferences references={item.references} />
@@ -228,7 +234,7 @@ function ImpersonationReviewCard({ item, refresh }: { item: ImpersonationReview;
           <option value="dismissed">{t.dismissed}</option><option value="substantiated">{t.substantiated}</option>
         </select>
       </label>
-      {outcome === "substantiated" && holdOptions.length > 0 && <label className="text-sm font-semibold">{t.hold}
+      {outcome === "substantiated" && holdOptions.length > 0 && <label className="text-sm font-semibold">{item.kind === "institution" ? t.institutionAction : t.hold}
         <select name="hold" className={institutionField}><option value="">{t.noHold}</option>
           {holdOptions.map((claim) => <option key={claim} value={claim}>{t[claim]}</option>)}
         </select>

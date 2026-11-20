@@ -1,4 +1,4 @@
-import type { ImpersonationKind, ImpersonationReview, PersonalClaim, VerificationAppeal, VerificationAppealOutcome, VerificationAssignment } from "@ayinou/shared";
+import type { ImpersonationKind, ImpersonationRestriction, ImpersonationReview, VerificationAppeal, VerificationAppealOutcome, VerificationAssignment } from "@ayinou/shared";
 import { authorizedSocialRequest } from "./feed-api";
 
 const personal = "/api/v1/me/verification/appeals";
@@ -11,6 +11,8 @@ export const submitVerificationAppeal = (applicationId: string, explanation: str
 export const submitImpersonationReport = (username: string, kind: ImpersonationKind, institution: string | null,
   explanation: string, references: string[]): Promise<{ id: string }> =>
   authorizedSocialRequest(`/api/v1/members/${path(username)}/impersonation-reports`, json("POST", { kind, institution, explanation, references }));
+export const submitInstitutionReport = (handle: string, kind: ImpersonationKind, explanation: string, references: string[]): Promise<{ id: string }> =>
+  authorizedSocialRequest(`/api/v1/institutions/by-handle/${path(handle)}/impersonation-reports`, json("POST", { kind, explanation, references }));
 export const loadVerificationAssignments = (signal: AbortSignal): Promise<{ applications: VerificationAssignment[] }> =>
   authorizedSocialRequest(`${ops}/application-assignments`, { signal });
 export const assignVerificationApplication = (id: string, reviewer: string, reason: string, assign: boolean): Promise<void> =>
@@ -23,5 +25,5 @@ export const decideVerificationAppeal = (id: string, outcome: VerificationAppeal
   authorizedSocialRequest(`${ops}/verification-appeals/${path(id)}/decision`, json("PATCH", { outcome, rationale }));
 export const loadImpersonationQueue = (signal: AbortSignal): Promise<{ reports: ImpersonationReview[] }> =>
   authorizedSocialRequest(`${ops}/impersonation`, { signal });
-export const decideImpersonation = (id: string, outcome: "dismissed" | "substantiated", rationale: string, hold: PersonalClaim | null): Promise<void> =>
+export const decideImpersonation = (id: string, outcome: "dismissed" | "substantiated", rationale: string, hold: ImpersonationRestriction | null): Promise<void> =>
   authorizedSocialRequest(`${ops}/impersonation/${path(id)}/decision`, json("PATCH", { outcome, rationale, hold }));

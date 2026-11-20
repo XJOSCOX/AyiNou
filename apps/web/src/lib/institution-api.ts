@@ -1,5 +1,5 @@
 import type { Institution, InstitutionAccounts, InstitutionInput, InstitutionManagement, OrganizationRole, ReviewApplication, ReviewQueueMode,
-  ReviewDecision, VerificationApplication, VerificationKind } from "@ayinou/shared";
+  ReviewDecision, VerificationApplication, VerificationKind, VerifiedRepresentatives } from "@ayinou/shared";
 import { authorizedRequest, encodeProfileImage, publicRequest } from "./api";
 
 const base = "/api/v1/institutions";
@@ -39,6 +39,10 @@ export const resolveInvitation = (id: string, action: "accept" | "revoke") =>
   post(`/api/v1/institution-invitations/${id}/${action}`);
 
 export const revokeRepresentative = (id: string, member: string) => post(`${base}/${id}/representatives/${member}/revoke`);
+export const loadVerifiedRepresentatives = (id: string, signal: AbortSignal): Promise<VerifiedRepresentatives> =>
+  authorizedRequest(`${base}/${id}/verified-representatives`, { signal });
+export const saveRepresentativeConsent = (id: string, publish: boolean): Promise<void> =>
+  authorizedRequest(`${base}/${id}/verified-representatives/me`, { method: "PATCH", body: JSON.stringify({ publish }) });
 
 export const loadApplications = async (signal?: AbortSignal): Promise<VerificationApplication[]> =>
   (await authorizedRequest(verify, { signal })).applications;

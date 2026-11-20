@@ -493,3 +493,17 @@ The three tables use RLS with no direct client or service-role privileges. Authe
 | `feed_data.notifications` | Optional application and appeal UUID FKs with cascade and partial reference indexes. Recipient-only visibility and existing deduplication. |
 
 All new private tables are RLS-enabled with explicit revocations from app roles. Subject access uses scoped RPC projections. Assignment, report and decision audits retain nullable actor IDs. Evidence has no public projection. Set a case retention and purge schedule before public launch.
+
+### Phase 5B institutional governance
+
+Reuse the existing Phase 2D and Phase 5A models. The additive migrations add private columns to existing RLS-protected tables and keep direct application-role table grants closed.
+
+| Existing relation | Phase 5B change |
+| --- | --- |
+| `private.verification_applications` | Nullable `reviewed_institution_snapshot jsonb` holds identity and owner-grant intake context. Personal and historical cases keep null. It has no public projection. |
+| `private.organizations` | The existing `status text` also permits `restricted`. Public and management eligibility still require active status. |
+| `private.impersonation_reports` | The existing `kind text` also accepts institution and representative reports. The existing nullable organization FK supports institution-only reports. The partial unique index `impersonation_one_open_institution` covers `(reporter_id, organization_id, kind)` for open organization-only cases. |
+| `private.organization_memberships` | `public_verified_rep boolean not null default false` records consent for one grant. A status or verification change clears it. |
+| `feed_data.notifications` | Nullable `representative_membership_id uuid` references the grant with ON DELETE CASCADE and a partial lookup index. The new kind is usable only for private recipient-bound access changes with no actor or content reference. |
+
+Deployment order is the assignment and evidence changes, institutional report types and restriction, then representative consent and notifications. Use the prior audit, review work, evidence, verification and appeal relations for all case history. See [the operational rules](DATABASE.md#phase-5b-institutional-trust).

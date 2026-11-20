@@ -35,6 +35,7 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "VERIFICATION_APPEAL_EXISTS": return trustMessages[locale].appealExists;
     case "VERIFICATION_APPEAL_EXPIRED": return trustMessages[locale].appealExpired;
     case "VERIFICATION_ASSIGNMENT_REQUIRED": return trustMessages[locale].assignmentRequired;
+    case "INSTITUTION_EVIDENCE_REQUIRED": return trustMessages[locale].institutionEvidenceRequired;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

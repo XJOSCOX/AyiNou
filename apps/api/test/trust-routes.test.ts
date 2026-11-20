@@ -32,6 +32,14 @@ test("trust routes keep identity and subject decisions server-bound", async () =
     const sent = await app.inject({ method: "POST", url: appeals, headers, payload: data });
     assert.equal(sent.statusCode, 201);
     assert.deepEqual(sent.json(), { id });
+    const report = "/api/v1/institutions/by-handle/sample-institution/impersonation-reports";
+    const reportData = { kind: "representative", explanation: data.explanation, references: data.references };
+    assert.equal((await app.inject({ method: "POST", url: report, payload: reportData })).statusCode, 401);
+    assert.equal((await app.inject({ method: "POST", url: report, headers, payload: { ...reportData, reporterId: user } })).statusCode, 400);
+    assert.equal((await app.inject({ method: "POST", url: report, headers, payload: { ...reportData, kind: "badge" } })).statusCode, 400);
+    const institutionalReport = await app.inject({ method: "POST", url: report, headers, payload: reportData });
+    assert.equal(institutionalReport.statusCode, 201);
+    assert.equal(calls.at(-1), "submit_institution_impersonation_for_client");
     const result = await app.inject({ method: "PATCH", url: `/api/v1/trust/verification-appeals/${id}/assignment`, headers,
       payload: { reviewer: "test_reviewer", reason: "Written assignment reason." } });
     assert.equal(result.statusCode, 404);

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { governmentKinds, verificationKinds, type InstitutionAccounts, type VerificationKind } from "@ayinou/shared";
 import { authMessages } from "@/lib/auth-i18n";
+import { apiErrorCode } from "@/lib/api-errors";
 import { loadApplications, loadInstitutionAccounts, readPublicInstitution, submitVerification } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -102,6 +103,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, initialClaim, refr
     setFailed(null);
     try {
       const references = evidence.split("\n").map((value) => value.trim()).filter(Boolean);
+      if ((needsOrganization || kind === "claim") && references.length < 2) throw new Error("INSTITUTION_EVIDENCE_REQUIRED");
       if (references.length < (kind === "notable_person" ? 2 : 1) || references.length > 3) throw new Error("INVALID_INPUT");
       let id: string | null = null;
       if (kind === "claim") {
@@ -149,7 +151,11 @@ function ApplicationForm({ accounts, initialKind, initialOrg, initialClaim, refr
       </label>
       <p id="verification-evidence-hint" className="text-sm text-[var(--theme-body)]">{t.evidenceHelp} {trustMessages[locale].evidenceStandard}</p>
       {kind === "notable_person" && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].notabilityReferences}</p>}
-      {failed !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failed)}</p>}
+      {kind !== "identity" && kind !== "notable_person" && <p className="text-sm text-[var(--theme-body)]">
+        {trustMessages[locale].institutionEvidenceRequired} {trustMessages[locale].institutionEvidenceHelp}
+      </p>}
+      {failed !== null && <p role="alert" className={institutionErrorBox}>{apiErrorCode(failed) === "INSTITUTION_EVIDENCE_REQUIRED"
+        ? trustMessages[locale].institutionEvidenceRequired : institutionError(t, failed)}</p>}
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.submitted}</p>}
       <button type="submit" className={institutionAction} disabled={busy || (needsOrganization && !eligible.length)}>{busy ? auth.working : t.submit}</button>
     </form>

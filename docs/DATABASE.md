@@ -502,7 +502,7 @@ Signed-in members can report public profiles for suspected impersonation, mislea
 
 An applicant can appeal an explicit rejection or revocation within 14 days, once per original written decision. The original application and decision stay in the private history. A platform administrator assigns the appeal to a currently eligible reviewer. The applicant, original reviewers and conflicted reviewers cannot decide it. Recent TOTP is required. A reconsideration decision permits a fresh application review. Filing, assignment, and reconsideration leave badges unchanged.
 
-Signed-in members receive generic in-app updates for completed application and appeal decisions. Notification rows are recipient-bound and deduplicated. They contain neither evidence, reviewer identities nor case excerpts. Existing notification cleanup applies. Access to open evidence stays limited to the current review assignment or eligible institutional reviewers under the existing policy. Delete sensitive evidence when its documented retention period ends, subject to an open appeal or explicit evidence hold. An operational purge process and final retention schedule remain launch prerequisites. No email, SMS or mobile push is sent.
+Signed-in members receive generic in-app updates for completed application and appeal decisions. Notification rows are recipient-bound and deduplicated. They contain neither evidence, reviewer identities nor case excerpts. Existing notification cleanup applies. Phase 5B limits institutional application evidence to currently assigned reviewers as well. Delete sensitive evidence when its documented retention period ends, subject to an open appeal or explicit evidence hold. An operational purge process and final retention schedule remain launch prerequisites. No email, SMS or mobile push is sent.
 
 ### Fastify additions
 
@@ -514,3 +514,42 @@ Signed-in members receive generic in-app updates for completed application and a
 - The existing personal badge response and member projections include typed reviewed claims. The older boolean remains a compatibility field.
 
 Run `npm run test:hosted:trust:sql -- --preflight` for the rollback rehearsal or omit `--preflight` after migration. Run `npm run test:hosted:trust` for the live Auth, TOTP, and Fastify checks. Both runners require the confirmed development project reference and use synthetic fixtures. No Docker, SMTP, identity provider or real identity document is needed.
+
+## Phase 5B institutional trust
+
+The Phase 2D institution catalog, profile, recipient-bound invitations and scoped roles are unchanged. Phase 2D.1 affiliations grant no representative authority. Phase 5B requires current case assignments for evidence and decisions on organization, government, representative and ownership applications. An applicant, institution founder, current or former delegate, or member with an affiliation cannot review a related case. The approval transaction checks both reviewers and their assignments again and counts only votes recorded during a current assignment. Fastify checks a recent TOTP-backed session before privileged application actions. The database checks recent TOTP again for caller-bound administrative, impersonation and appeal RPCs.
+
+### Evidence and public claims
+
+Every institutional application requires two or three public HTTPS references from at least two distinct hosts. A host check screens duplicate sources. Reviewers must confirm that the sources are independent and current, record what the evidence establishes, and explain the decision in writing. Keep identification documents, private organizational records, passwords and access tokens out of links and written notes. Review and appeal evidence stays private.
+
+| Application | Evidence the reviewer should corroborate |
+| --- | --- |
+| Haitian or international organization | Established public activities and consistent identity across authoritative public sources. Community groups without a formal website or public registry can use independent partner, community or established press references. |
+| NGO, nonprofit, foundation, business or school | Registry, regulator, accreditation or licensing references where applicable, plus an independent source. Record legal or accreditation checks only when actually performed. |
+| Media or radio | Public editorial or station identity and independent coverage or an appropriate regulator or licensing source. |
+| Government institution | Official government or diplomatic directory, appointment, legislation or comparable authoritative evidence of the office and its status. Registration category and applicant-supplied links alone confer no badge. |
+| Representative or ownership claim | Current public appointment, mandate or control evidence, corroborated independently. Relate the authority to the exact institution and position. A self-declared website, ordinary affiliation or invited role alone cannot establish independently verified authority. |
+
+Public profiles identify the institution category and broad location. The website is labeled as listed by the institution. Badge wording describes the approved category and conveys no assurance about posts, fundraising, registration or finances. Public institutional listings omit private contacts, case material and internal grant records. The verified representative list is available to signed-in viewers and returns only discoverable public usernames and display names with explicit consent. It respects blocks. Only the representative can change their own consent. Revocation or a changed verification stamp clears consent, and expiration, restriction or archival removes the badge from the projection immediately.
+
+### Lifecycle, ownership and appeals
+
+An ownership claim snapshots the institution identity and current owner grant. Reviewers must reject cases with insufficient or stale evidence and ask the applicant to submit a fresh case. Pending institutional cases from before Phase 5B have no ownership snapshot and need a new application after an assigned reviewer closes the old case. An approved ownership claim records the transfer, invalidates older grants and pending invitations, and appoints the claimant as sole owner. The former owner's grant is never restored automatically. A verified organization requires separate verification revocation before a claim can take effect. Institutional ownership and representative authority do not grant a personal badge or platform permissions.
+
+Signed-in members can report an institutional profile, a claimed representative or a misleading affiliation. Reviewers receive redacted report records in the existing trust queue. Only a nonconflicted administrator with recent TOTP can record a decision. An explicitly substantiated institution impersonation case can restrict the institution, hiding its public profile and suspending organization roles and outstanding invitations. Report submissions and counts never trigger sanctions. Individual representative and affiliation reports preserve the written finding for scoped follow-up in the existing verification and membership workflows. An institutional restriction has no self-serve lift or dedicated appeal in this phase. Formal verification rejection and revocation decisions, including eligible claim and representative decisions, continue through the existing 14-day independent appeal path. A reconsideration permits fresh review and changes no badge, role or ownership by itself.
+
+Organization, ownership and appeal decisions reuse the existing private alerts. Representative acceptance and explicit revocation also generate a generic alert for the holder. Expiration is enforced at read and write time without an expiry job or reminder. Notifications include no private references, contact information or reviewer identities. The append-only audit ledger records ownership, restrictions, assignments and consent events. Preserve written decisions and audit provenance for appeals. Remove expired evidence under the operational retention policy once adopted, accounting for unresolved cases and holds. No retention scheduler or new delivery channel is enabled.
+
+### API and operations
+
+| Endpoint | Authorization and effect |
+| --- | --- |
+| `GET /api/v1/institutions/:id/verified-representatives` | Signed-in viewer sees consented, current public representatives and their own consent when eligible. |
+| `PATCH /api/v1/institutions/:id/verified-representatives/me` | The bearer can publish or hide their own verified representation using a boolean `publish` field. |
+| `POST /api/v1/institutions/by-handle/:handle/impersonation-reports` | Eligible signed-in bearer submits a private report with kind, written explanation and optional public references. |
+| `PATCH /api/v1/trust/impersonation/:id/decision` | Existing admin decision endpoint accepts `restrict_institution` only for a substantiated institutional impersonation case. |
+
+Apply migrations `20261120170000`, `20261120171000` and `20261120172000` in that order. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` and run `npm run test:hosted:institutions:sql -- --preflight-5b` before application. Afterward run `npm run test:hosted:institutions:sql`, `npm run test:hosted:institutions`, and the Phase 5A trust regressions. The SQL suite uses randomized fixtures in a rolled-back transaction.
+
+No migration appoints a reviewer. A platform administrator with a fresh TOTP session can appoint real, eligible and trained reviewer accounts through the existing administrator workflow. Each reviewer needs an active account and a verified TOTP factor. Staff at least two independent reviewers per case and reserve an independent reviewer for appeals. Until there are two eligible, assigned reviewers, applications stay pending. Institution owners and administrators cannot grant platform reviewer access.

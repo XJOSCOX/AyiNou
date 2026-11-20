@@ -262,3 +262,11 @@ Activation of temporary proof challenges and external evidence delivery remains 
 ## Not included at launch
 
 Cryptocurrency, direct cash custody, official elections, algorithmic truth-by-majority, unattended crisis mapping, unverified celebrity endorsements, or sensitive-location tracking.
+
+## Phase 5B — Institutional verification and trust governance
+
+- [x] Apply assignment and evidence privacy rules to institutional, ownership and representative cases.
+- [x] Publish category-specific institution badges and opt-in representative badges that follow current authority.
+- [x] Record institutional impersonation decisions with independent administrator and authenticator checks.
+- [x] Reuse verification appeals and private decision notices for institutional cases.
+- [ ] Appoint eligible operational reviewers and adopt the evidence retention and restriction review procedures before public operation.

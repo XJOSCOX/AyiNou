@@ -97,7 +97,7 @@ export interface MemberNotification {
   readAt: string | null;
   available: boolean;
   kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "appeal_decided" |
-    "verification_decided" | "verification_appeal_decided" | null;
+    "verification_decided" | "verification_appeal_decided" | "representative_access_changed" | null;
   appealId?: string | null;
   postId: string | null;
   commentId: string | null;
@@ -283,7 +283,10 @@ export type VerificationStatus = "pending" | "approved" | "rejected" | "revoked"
 export const personalClaims = ["identity", "notable_person"] as const;
 export type PersonalClaim = (typeof personalClaims)[number];
 export const impersonationKinds = ["profile", "public_figure", "badge", "affiliation"] as const;
-export type ImpersonationKind = (typeof impersonationKinds)[number];
+export const institutionImpersonationKinds = ["institution", "representative", "affiliation"] as const;
+export const impersonationRestrictions = [...personalClaims, "restrict_institution"] as const;
+export type ImpersonationKind = (typeof impersonationKinds | typeof institutionImpersonationKinds)[number];
+export type ImpersonationRestriction = (typeof impersonationRestrictions)[number];
 export const verificationAppealOutcomes = ["upheld", "reconsideration"] as const;
 export type VerificationAppealOutcome = (typeof verificationAppealOutcomes)[number];
 export type VerificationAppeal = {
@@ -306,7 +309,11 @@ export type InstitutionInput = {
 };
 export type Institution = Omit<InstitutionInput, "contactEmail"> & {
   id: string; logoUrl: string | null; departmentName: string | null;
-  status: "active" | "archived"; verificationStatus: "unverified" | "verified" | "revoked";
+  status: "active" | "archived" | "restricted"; verificationStatus: "unverified" | "verified" | "revoked";
+};
+export type VerifiedRepresentatives = {
+  representatives: Array<{ username: string; displayName: string }>;
+  ownConsent: boolean | null;
 };
 export type InstitutionAccounts = {
   organizations: (Institution & { role: OrganizationRole; expiresAt: string | null })[];

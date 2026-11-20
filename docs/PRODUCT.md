@@ -84,3 +84,7 @@ Members can explore recommended communities, official departments, diaspora grou
 ### Reviewed identity and impersonation
 
 A member can request review of a personal identity or a public-figure claim. Institutions and their representatives use separate categories. Claim labels communicate the result of a review. They do not guarantee any post, statement or project. An eligible applicant can contest a rejection or revocation within 14 days. Members can report suspected impersonation privately. Staff must review the evidence and document any action.
+
+### Institutional trust profiles
+
+Organizational badges describe the category of an independently reviewed claim. A representative badge applies to a particular institution and current role. Only a verified representative can opt in to appearing by public name and handle on an institution profile for signed-in viewers. Members can report suspected institutional impersonation, unauthorized representation or misleading affiliations. Applicants can appeal eligible written decisions through the existing Verification workspace.
