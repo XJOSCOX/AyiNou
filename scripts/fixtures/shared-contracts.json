@@ -101,6 +101,10 @@
     "InterestCode": "type:4493220b9de0855ae62d0a08fc58946d3ff74f074d73a87f3916728fb4c33bad",
     "interestCodes": "value:e331c81c2dcdb2fd6831ffee4308aab99c401d36677336a3da2c99cb4501481f",
     "invitedRoles": "value:40a97bc77adde850045bd6e92f0eeaa71063d20e3e248eadd7ab3293346e8df8",
+    "LifecycleState": "type:103dc067c14949e1242616b50099a827c42c059417e6a0ff351dfb7afd186c76",
+    "LifecycleSummary": "type:cbde6c9ee37104f070c5681da4580cf98af12a1fb2e0e0deba0ff1082d9ad7f6",
+    "LifecycleWarning": "type:09021b7a19b70cd4fb864ef019b7dccedeeb189b5a808b5c056db98e90fb9fbc",
+    "lifecycleWarnings": "value:bde744d33d452182af5816ae238d933e123fb2fb644b8634ccd48e4f244ba4be",
     "Locale": "type:cfab49dcd47d920ceea4e43be327db91e984d065ac8cacc2b3b96ed984cfa489",
     "locales": "value:5754755983d2448d8820de92be6a01aa90921ee2c1fb68db7dd90312482ab915",
     "MemberAppealDecision": "type:543a5c9c62bb12534fba02ee5f75991857cb8c0cecb449adf87ab686dbdc0f42",
@@ -387,6 +391,22 @@
       "administrator",
       "editor",
       "viewer"
+    ],
+    "lifecycleWarnings": [
+      "last_administrator",
+      "privileged_role",
+      "institution_owner",
+      "institution_authority",
+      "group_owner",
+      "group_staff",
+      "third_party_discussion",
+      "personal_project",
+      "project_commitment",
+      "protected_evidence",
+      "shared_media",
+      "voting_integrity",
+      "inventory_limit",
+      "evidence_hold"
     ],
     "locales": [
       "ht",

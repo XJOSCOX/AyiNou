@@ -13,6 +13,7 @@ const environmentSchema = z.object({
   AYINOU_BOOTSTRAP_ADMIN_USER_ID: z.preprocess((value) => value === "" ? undefined : value, z.uuid().optional()),
   AYINOU_PRIVACY_INTAKE: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_PRIVACY_EXPORT: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
+  AYINOU_PRIVACY_LIFECYCLE: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_PRIVACY_EXPORT_TEST_KEY: z.string().optional(),
 });
 
@@ -25,7 +26,7 @@ export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiCon
   }
   if (result.data.AYINOU_PRIVACY_INTAKE === "synthetic" &&
       (environment.NODE_ENV === "production" || result.data.SUPABASE_URL !== "http://127.0.0.1:55321")) {
-    return { ...result.data, AYINOU_PRIVACY_INTAKE: "disabled", AYINOU_PRIVACY_EXPORT: "disabled" };
+    return { ...result.data, AYINOU_PRIVACY_INTAKE: "disabled", AYINOU_PRIVACY_EXPORT: "disabled", AYINOU_PRIVACY_LIFECYCLE: "disabled" };
   }
   return result.data;
 }
