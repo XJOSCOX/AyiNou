@@ -1,0 +1,38 @@
+{
+  "title": "Export de données personnelles",
+  "disabled": "Le traitement des exports est indisponible.",
+  "verify": "Vérifier avec votre authentificateur",
+  "expires": "Expire le",
+  "limited": "Export de test. Le texte, les médias, les preuves privées, les identifiants et les choix de vote sont exclus. Une catégorie peut être limitée à 100 éléments.",
+  "generate": "Générer un export de test",
+  "download": "Télécharger l’export de test",
+  "revoke": "Révoquer l’export",
+  "confirm": "Confirmer la révocation",
+  "cancel": "Annuler",
+  "refresh": "Actualiser le statut de l’export",
+  "loading": "Vérification de la disponibilité…",
+  "changed": "Les données sources ont changé. Révoquez cet export et déposez un nouveau dossier de test.",
+  "conflict": "Cette action est incompatible avec le dossier ou la session en cours.",
+  "failure": "L’export n’a pas pu être préparé ou lu. Vérifiez son statut et réessayez.",
+  "state": {
+    "none": "Aucun export de test.",
+    "queued": "En attente",
+    "generating": "Génération en cours",
+    "available": "Disponible",
+    "failed_retryable": "Échec de la préparation. Réessayez ou révoquez cet export de test.",
+    "expired": "Expiré",
+    "revoked": "Révoqué",
+    "cleaned": "Fichier temporaire supprimé"
+  },
+  "categories": {
+    "profile": "Paramètres du profil",
+    "residence": "Codes de résidence",
+    "preferences": "Préférences",
+    "interests": "Centres d’intérêt",
+    "posts": "Métadonnées des publications",
+    "comments": "Métadonnées des commentaires",
+    "affiliations": "Affiliations",
+    "privacyRequests": "Demandes de confidentialité",
+    "pollParticipation": "Participation aux sondages"
+  }
+}

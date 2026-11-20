@@ -1,0 +1,38 @@
+{
+  "title": "Ekspòtasyon done pèsonèl",
+  "disabled": "Tretman ekspòtasyon pa disponib.",
+  "verify": "Verifye ak aplikasyon otantifikasyon ou",
+  "expires": "Ekspire",
+  "limited": "Ekspòtasyon tès. Li pa gen tèks, medya, prèv prive, idantifyan oswa chwa vòt. Yon kategori ka limite a 100 dosye.",
+  "generate": "Jenere ekspòtasyon tès la",
+  "download": "Telechaje ekspòtasyon tès la",
+  "revoke": "Revoke ekspòtasyon an",
+  "confirm": "Konfime revokasyon an",
+  "cancel": "Anile",
+  "refresh": "Mete estati ekspòtasyon an ajou",
+  "loading": "N ap tcheke si ekspòtasyon disponib…",
+  "changed": "Done orijinal yo chanje. Revoke ekspòtasyon sa a epi soumèt yon lòt dosye tès.",
+  "conflict": "Aksyon sa a pa mache ak dosye oswa sesyon aktyèl la.",
+  "failure": "Nou pa t ka prepare oswa li ekspòtasyon an. Tcheke estati li epi eseye ankò.",
+  "state": {
+    "none": "Poko gen ekspòtasyon tès.",
+    "queued": "Nan lis datant",
+    "generating": "N ap jenere li",
+    "available": "Disponib",
+    "failed_retryable": "Preparasyon an echwe. Eseye ankò oswa revoke ekspòtasyon tès la.",
+    "expired": "Ekspire",
+    "revoked": "Revoke",
+    "cleaned": "Fichye tanporè a efase"
+  },
+  "categories": {
+    "profile": "Paramèt pwofil",
+    "residence": "Kòd rezidans",
+    "preferences": "Preferans",
+    "interests": "Enterè",
+    "posts": "Metadone piblikasyon",
+    "comments": "Metadone kòmantè",
+    "affiliations": "Afilyasyon",
+    "privacyRequests": "Demann sou vi prive",
+    "pollParticipation": "Patisipasyon nan sondaj"
+  }
+}

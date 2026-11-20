@@ -1,0 +1,38 @@
+{
+  "title": "Personal data export",
+  "disabled": "Export processing is unavailable.",
+  "verify": "Verify with your authenticator",
+  "expires": "Expires",
+  "limited": "Synthetic export. Text, media, private evidence, identifiers, and ballot choices are excluded. A category may be limited to 100 records.",
+  "generate": "Generate test export",
+  "download": "Download test export",
+  "revoke": "Revoke export",
+  "confirm": "Confirm revocation",
+  "cancel": "Cancel",
+  "refresh": "Refresh export status",
+  "loading": "Checking export availability…",
+  "changed": "The source data changed. Revoke this export and submit a new test case.",
+  "conflict": "This export action conflicts with the current case or session.",
+  "failure": "The export could not be prepared or read. Check its status and try again.",
+  "state": {
+    "none": "No test export yet.",
+    "queued": "Queued",
+    "generating": "Generating",
+    "available": "Available",
+    "failed_retryable": "Preparation failed. Retry or revoke this test export.",
+    "expired": "Expired",
+    "revoked": "Revoked",
+    "cleaned": "Temporary artifact cleared"
+  },
+  "categories": {
+    "profile": "Profile settings",
+    "residence": "Residence codes",
+    "preferences": "Preferences",
+    "interests": "Interests",
+    "posts": "Post metadata",
+    "comments": "Comment metadata",
+    "affiliations": "Affiliations",
+    "privacyRequests": "Privacy requests",
+    "pollParticipation": "Poll participation"
+  }
+}

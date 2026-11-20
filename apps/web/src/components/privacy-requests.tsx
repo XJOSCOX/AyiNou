@@ -5,27 +5,23 @@ import { privacyRequestKinds, type Locale, type PrivacyRequestDetail, type Priva
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { publicRequest } from "@/lib/api";
-import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
+import { apiErrorCode } from "@/lib/api-errors";
 import { localizedApiError } from "@/lib/error-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { privacyMessages } from "@/lib/privacy-i18n";
+import { exportMessages } from "@/lib/privacy-export-i18n";
+import { ownPrivacyRequest } from "@/lib/privacy-session";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
+import { PrivacyExportPanel } from "./privacy-export-panel";
 
 const collection = "/api/v1/me/privacy-requests";
 const card = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-4 sm:p-6";
 const action = "inline-flex min-h-11 items-center justify-center rounded-md border border-[var(--theme-button-border)] bg-[var(--theme-button)] px-4 py-2 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-button-hover)] disabled:opacity-60";
 
 async function ownRequest<T>(actor: string, path: string, init: RequestInit): Promise<T> {
-  init.signal?.throwIfAborted();
-  const { data, error } = await browserSupabase().auth.getSession();
-  init.signal?.throwIfAborted();
-  if (error || !data.session || data.session.user.id !== actor) throw new ApiRequestError("UNAUTHORIZED", 401);
-  const headers = new Headers(init.headers);
-  headers.set("Authorization", "Bearer " + data.session.access_token);
-  return publicRequest(collection + path, { ...init, cache: "no-store", headers });
+  return ownPrivacyRequest<T>(actor, collection + path, init);
 }
 
 function privacyError(locale: Locale, cause: unknown) {
@@ -173,6 +169,7 @@ function CaseWorkspace({ actor, locale }: { actor: string; locale: Locale }) {
     </section> : null}
     {result === "disabled" ? <section className={card}>
       <p role="status">{t.disabled}</p>
+      <p className="mt-2">{exportMessages[locale].disabled}</p>
       <dl className="mt-4 grid gap-4 md:grid-cols-2">
         {privacyRequestKinds.map((value) => <div key={value}>
           <dt className="font-semibold">{t.kinds[value].label}</dt>
@@ -218,10 +215,12 @@ function CaseWorkspace({ actor, locale }: { actor: string; locale: Locale }) {
                 <button className={action} type="button" disabled={working} onClick={() => setConfirmation(null)}>{t.cancel}</button>
               </div>
             </div>}
-            {detail?.id === item.id && <ol className="grid gap-1 text-sm">
+            {detail?.id === item.id && <><ol className="grid gap-1 text-sm">
               {detail.events.map((event) => <li key={event.version}>{t.status[event.state]} · <time dateTime={event.at}>
                 {new Date(event.at).toLocaleString(locale)}</time></li>)}
-            </ol>}
+            </ol>
+            {item.kind === "export" && <PrivacyExportPanel key={item.id} actor={actor} locale={locale} item={item} />}
+            </>}
           </li>)}
         </ul>
         {result.nextCursor && <button className={action + " justify-self-start"} type="button" disabled={working}

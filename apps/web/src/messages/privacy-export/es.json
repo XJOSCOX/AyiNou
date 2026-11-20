@@ -1,0 +1,38 @@
+{
+  "title": "Exportación de datos personales",
+  "disabled": "El procesamiento de exportaciones no está disponible.",
+  "verify": "Verificar con tu autenticador",
+  "expires": "Caduca el",
+  "limited": "Exportación de prueba. Se excluyen textos, archivos multimedia, pruebas privadas, identificadores y opciones de voto. Las categorías pueden limitarse a 100 registros.",
+  "generate": "Generar exportación de prueba",
+  "download": "Descargar exportación de prueba",
+  "revoke": "Revocar exportación",
+  "confirm": "Confirmar revocación",
+  "cancel": "Cancelar",
+  "refresh": "Actualizar el estado de la exportación",
+  "loading": "Comprobando la disponibilidad…",
+  "changed": "Los datos de origen cambiaron. Revoca esta exportación y presenta otro caso de prueba.",
+  "conflict": "Esta acción no es compatible con el caso o la sesión actuales.",
+  "failure": "No se pudo preparar o leer la exportación. Comprueba su estado y vuelve a intentarlo.",
+  "state": {
+    "none": "Aún no hay exportación de prueba.",
+    "queued": "En cola",
+    "generating": "En preparación",
+    "available": "Disponible",
+    "failed_retryable": "La preparación falló. Reintenta o revoca esta exportación de prueba.",
+    "expired": "Caducada",
+    "revoked": "Revocada",
+    "cleaned": "Archivo temporal eliminado"
+  },
+  "categories": {
+    "profile": "Configuración del perfil",
+    "residence": "Códigos de residencia",
+    "preferences": "Preferencias",
+    "interests": "Intereses",
+    "posts": "Metadatos de publicaciones",
+    "comments": "Metadatos de comentarios",
+    "affiliations": "Afiliaciones",
+    "privacyRequests": "Solicitudes de privacidad",
+    "pollParticipation": "Participación en encuestas"
+  }
+}
