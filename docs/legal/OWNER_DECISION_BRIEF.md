@@ -2,7 +2,17 @@
 
 **DRAFT — NOT APPROVED FOR PUBLICATION**
 
-Start with Priority A. For each line, record **approve to proceed with planning**, **modify** with replacement wording, or **defer** with a review date. A planning approval does not authorize filing, transfer, implementation or publication. Record the owner, date, exact scope, outstanding counsel/engineering dependencies and supporting evidence in the [decision register](POLICY_DECISIONS.md). Decisions are pending unless explicitly approved. Priorities indicate when an answer is needed. A decision can carry dependencies in several groups.
+Start with the remaining Priority A questions. For each, record **approve to proceed with planning**, **modify** with replacement wording, or **defer** with a review date. Record the owner, date, scope, remaining dependencies and supporting evidence. Priorities indicate when an answer is needed. [Decision register](POLICY_DECISIONS.md)
+
+## Recorded on November 20, 2026
+
+| ID | Owner direction | Classification |
+| --- | --- | --- |
+| L1-03 | Assess Haiti and the United States first. | OWNER-APPROVED PLANNING DIRECTION — SUBJECT TO LEGAL REVIEW AND IMPLEMENTATION APPROVAL. |
+| L1-04 | Plan an initial pilot for people aged 18 or older. | OWNER-APPROVED PLANNING DIRECTION — SUBJECT TO LEGAL REVIEW AND IMPLEMENTATION APPROVAL. |
+| L1-03 | Plan invitation-only pilot registration. | OWNER-APPROVED PLANNING DIRECTION — SUBJECT TO LEGAL REVIEW AND IMPLEMENTATION APPROVAL. |
+
+Launch, operational eligibility and registration changes remain pending. Ayinou has not incorporated or received federal tax exemption. Preserve the other L1 decisions as open. [Dated owner record](OWNER_APPROVED_PLANNING_DIRECTIONS.md)
 
 ## Priority A — Before final legal drafting
 
@@ -10,12 +20,12 @@ Start with Priority A. For each line, record **approve to proceed with planning*
 | --- | --- | --- |
 | L1-01 and governance | Have Texas counsel evaluate an independent board-managed nonprofit corporation without statutory voting members. Confirm actual ownership of the domain and code. Select initial directors, officers and registered agent separately. | Corporate structure, formation, charitable purpose, independence and asset arrangements. |
 | L1-02 | Approve role-owned support, privacy, safety, intellectual-property and legal contact channels. Confirm the person responsible for each. Provide official names and contact details only after verification. | Acceptable formal intake and service details. |
-| L1-03 and L1-04 | Choose a narrow adults-only, invitation-based pilot for explicitly named markets after local review. Treat Haiti and U.S. outreach as separate candidates and defer broad Canadian or EU rollout until reviewed. Age and geographic controls need separate authorization. | Local scope, capacity, children, market and registration requirements. |
+| L1-03 and L1-04 | Confirm what legal and operational obligations would apply to the recorded pilot directions. Seek separate authorization for market, age and invitation controls. | Local scope, capacity, children, market and registration requirements. |
 | L1-05 and L1-11 | Evaluate Texas law, preserving mandatory market rights. Use informal support and fair dispute handling before considering a stronger clause. Approve only operationally supported service commitments. | Forum, nonwaivable remedies, limitations, discontinuation and local consumer law. |
 | L1-07 and L1-08 | Use narrow content permissions and get counsel to define a rights complaint and response process. Clear brand and asset rights before production. | Scope, duration, rights complaints, operator standing and any agent or notice requirements. |
 | L1-13 and L1-17 | Approve a purpose-by-purpose privacy review and English as internal working source. Keep public language authority and applicable rights in each market pending legal review. | Lawful authority, required notices and local language precedence. |
 
-For this round, the owner can respond with just the proposed structure, the first markets to assess, and the intended adult-pilot direction. Supply contact and ownership evidence when available. [Nonprofit comparison](NONPROFIT_STRUCTURE_RESEARCH.md) · [Age and jurisdiction assessment](INTERNATIONAL_LEGAL_REVIEW.md)
+The next outstanding Priority A decisions include the structure, operator, and verified contacts. Supply ownership evidence when available. [Nonprofit comparison](NONPROFIT_STRUCTURE_RESEARCH.md) · [Age and jurisdiction assessment](INTERNATIONAL_LEGAL_REVIEW.md)
 
 ## Priority B — Before technical rights implementation
 

@@ -2,9 +2,19 @@
 
 **DRAFT — NOT APPROVED FOR PUBLICATION**
 
-English working register, updated in Legal Phase L2 from baseline `5cf9df620ee3dbb3e4b2456379dbdf0f6262dc63`. The original L1 questions below remain open. The owner has supplied planning facts, and those facts do not approve recommendations, appointments, markets or technical changes. Record the decision, evidence, approver, date and policy version for each item. See the [owner brief](OWNER_DECISION_BRIEF.md) for staged approval.
+English working register, updated in Legal Phase L3.1 from baseline `235138dc6eb3c34da8c6f6d71fbb3c307c797392`. The owner approved three planning directions on November 20, 2026. Other recommendations remain open. Record future decisions with scope, evidence, approver, date and policy version. See the [owner brief](OWNER_DECISION_BRIEF.md) for staged approval.
 
-## Operator, eligibility and legal scope
+## Planning directions recorded in L3.1
+
+- **L1-03 initial assessment markets.** Haiti and the United States. **OWNER-APPROVED PLANNING DIRECTION — SUBJECT TO LEGAL REVIEW AND IMPLEMENTATION APPROVAL.**
+- **L1-04 pilot age.** The intended pilot is for people aged 18 or older. **OWNER-APPROVED PLANNING DIRECTION — SUBJECT TO LEGAL REVIEW AND IMPLEMENTATION APPROVAL.**
+- **L1-03 pilot enrollment.** The intended pilot is invitation-only. **OWNER-APPROVED PLANNING DIRECTION — SUBJECT TO LEGAL REVIEW AND IMPLEMENTATION APPROVAL.**
+
+Market assessment grants no launch authorization. Age and invitation gating require separate implementation approval and are not current signup behavior. Ayinou remains unincorporated with no granted federal exemption. [Dated owner record](OWNER_APPROVED_PLANNING_DIRECTIONS.md)
+
+## L2 operator, eligibility and legal scope
+
+The following L2 entries retain the history of the proposals. Use the dated L3.1 entries above for the current status of the three planning choices.
 
 | ID | Decision and proposed direction | Approval or evidence required |
 | --- | --- | --- |
@@ -49,7 +59,7 @@ The engineering baseline records actual feature and access behavior. The documen
 
 ## L2 review of all seventeen decisions
 
-Use **Confirmed factual direction** for facts supplied by the owner, **Recommended, awaiting owner approval** for proposed defaults, **Requires legal review** and **Requires technical implementation** for separate dependencies, **Deferred** for decisions deliberately postponed, and **Approved only when explicitly authorized** as the approval rule. The statuses can coexist. No policy recommendation has received approval. Wider markets, minors, fundraising and optional vendors are recommended for deferral until separately scoped. [Formation evidence and facts](NONPROFIT_STRUCTURE_RESEARCH.md) · [International review](INTERNATIONAL_LEGAL_REVIEW.md)
+Use **Confirmed factual direction** for facts supplied by the owner, **Recommended, awaiting owner approval** for proposed defaults, **Requires legal review** and **Requires technical implementation** for separate dependencies, **Deferred** for decisions deliberately postponed, and **Approved only when explicitly authorized** as the approval rule. The L3.1 record above supersedes L2 recommendations only for the three stated planning choices. Wider markets, minors, fundraising and optional vendors are recommended for deferral until separately scoped. [Formation evidence and facts](NONPROFIT_STRUCTURE_RESEARCH.md) · [International review](INTERNATIONAL_LEGAL_REVIEW.md)
 
 ### L1-01 Legal operator
 
