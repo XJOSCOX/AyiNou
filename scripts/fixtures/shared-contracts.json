@@ -64,6 +64,10 @@
     "DiscoveryFilter": "type:b61b5c04c6f993c70370601dd1625c615546f23e9de50b0c88fbb2ed777b416a",
     "DiscoveryKind": "type:a55a16bc73f059fcf2ca42b35ab8bf86f3d123d3c904c73303596a83ed1e2756",
     "DiscoveryPage": "type:6647559d6b0a8bebd767d2c93499488ea3edb0244898b3f4bbfa9658cb9303a0",
+    "exportCategories": "value:67737dc65dcd30720c47c214caa8e4b689af9e79f4be93eee47b366d8177cf12",
+    "ExportCategory": "type:fd50ca33cc1a2f01629e0d33072f6ddeb582977d474c10da93f711eea5463f22",
+    "ExportState": "type:a3d4bb1d75024ef77ce73df9a90a31da158d99598aecb74798e1f8c9810316c9",
+    "ExportStatus": "type:d8372a141bfeff030745c4cba3a99ba50911a00eeb535e5e0fcfaf8e03c9a904",
     "FeedAuthor": "type:b434f444a8cb1d17dbaf1eb208a06018563fff594e219babfb7aefaada08b45f",
     "FeedComment": "type:895eb8c342bb526ab3e206c1c2a3fb94c08b44e9e47e559fa883eeab26a784b2",
     "FeedPage": "type:e1184753223739dd8ab32bfe9a05d0c84c03ced5bb6575561949818fb30b6117",
@@ -318,6 +322,17 @@
         ]
       }
     },
+    "exportCategories": [
+      "profile",
+      "residence",
+      "preferences",
+      "interests",
+      "posts",
+      "comments",
+      "affiliations",
+      "privacyRequests",
+      "pollParticipation"
+    ],
     "futureOrganizationPermissions": [
       "tasks.assign",
       "volunteers.coordinate",

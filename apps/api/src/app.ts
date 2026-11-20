@@ -17,6 +17,8 @@ import { createPostMediaService, type PostMediaService } from "./services/post-m
 import { createReadBudget } from "./services/read-budget.js";
 import { registerPrivacyRoutes } from "./routes/privacy.js";
 import { createPrivacyRepository, type PrivacyRepository } from "./services/privacy.js";
+import { createPrivacyExport } from "./services/privacy-export.js";
+import { registerPrivacyExportRoutes } from "./routes/privacy-export.js";
 
 export function createApp(config: ApiConfig, overrides?: {
   auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository; institutions?: InstitutionRepository; feed?: FeedRepository;
@@ -53,6 +55,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));
   app.register((instance) => registerPrivacyRoutes(instance, privacyEnabled, auth,
     privacyEnabled ? overrides?.privacy ?? createPrivacyRepository(config) : null, readBudget));
+  app.register((instance) => registerPrivacyExportRoutes(instance, createPrivacyExport(config, privacyEnabled), auth, readBudget));
   app.addHook("onClose", async () => { await members?.close(); });
 
   return app;

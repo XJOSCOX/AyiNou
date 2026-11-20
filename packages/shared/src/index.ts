@@ -10,4 +10,5 @@ export * from "./project-work";
 export * from "./voting";
 export * from "./notifications";
 export * from "./privacy";
+export * from "./privacy-export";
 export { departmentCommunityContent, type DepartmentCommunityContent } from "./department-community-content";

@@ -13,6 +13,7 @@ export interface VerifiedSession {
   actor: string;
   session: string;
   aal2: boolean;
+  totpAt?: number;
 }
 
 export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
@@ -44,20 +45,23 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
         !z.uuid().safeParse(claims.session_id).success ||
         !z.uuid().safeParse(claims.sub).success
       ) return null;
+      let totpAt: number | undefined;
       if (requireMfa) {
         const now = Date.now() / 1000;
-        const recentTotp = Array.isArray(claims.amr) && claims.amr.some((entry) =>
-          typeof entry === "object" && entry !== null && (entry.method === "totp" || entry.method === "mfa/totp") &&
-          typeof entry.timestamp === "number" && entry.timestamp <= now + 30 && entry.timestamp >= now - 900,
-        );
-        if (!recentTotp) return null;
+        for (const entry of Array.isArray(claims.amr) ? claims.amr : []) {
+          if (typeof entry === "object" && entry !== null && (entry.method === "totp" || entry.method === "mfa/totp") &&
+            typeof entry.timestamp === "number" && entry.timestamp <= now + 30 && entry.timestamp >= now - 900) {
+            totpAt = Math.max(totpAt ?? 0, Math.floor(entry.timestamp));
+          }
+        }
+        if (totpAt === undefined) return null;
       }
       const session = await security.rpc("account_session_for_api", {
         p_user: claims.sub, p_session: claims.session_id, p_aal2: claims.aal === "aal2", p_privileged: requireMfa,
       });
       if (session.status === 0 || session.status >= 500 || session.error?.code === "57014") throw unavailable();
       return !session.error && session.data === true
-        ? { actor: claims.sub, session: z.uuid().parse(claims.session_id), aal2: claims.aal === "aal2" } : null;
+        ? { actor: claims.sub, session: z.uuid().parse(claims.session_id), aal2: claims.aal === "aal2", totpAt } : null;
     } catch (cause) {
       if (cause instanceof ApiError) throw cause;
       if (isAuthRetryableFetchError(cause)) throw unavailable();
