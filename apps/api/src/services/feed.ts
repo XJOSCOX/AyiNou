@@ -34,6 +34,13 @@ export function feedDatabaseError(code: string): ApiError {
     case "PSF14": return new ApiError(410, "APPEAL_EXPIRED", "The appeal window has ended");
     case "PCM03": return new ApiError(403, "COMMUNITY_MEMBERSHIP_REQUIRED", "Join this community to continue");
     case "PCM04": return new ApiError(404, "COMMUNITY_UNAVAILABLE", "Community unavailable");
+    case "PCG01": return new ApiError(422, "GROUP_RESERVED", "This community name or slug is reserved");
+    case "PCG02": return new ApiError(409, "GROUP_CREATION_LIMIT", "Community creation limit reached");
+    case "PCG03": return new ApiError(409, "GROUP_NAME_IN_USE", "This community name or slug is unavailable");
+    case "PCG04": return new ApiError(410, "GROUP_INVITATION_UNAVAILABLE", "Invitation unavailable");
+    case "PCG05": return new ApiError(403, "MFA_REQUIRED", "Recent authenticator verification is required");
+    case "PCG06": return new ApiError(409, "GROUP_POLICY_CHANGED", "Community settings changed");
+    case "PCG07": return new ApiError(409, "GROUP_OWNER_REQUIRED", "Transfer ownership before leaving");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");

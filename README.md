@@ -150,3 +150,5 @@ Ayinou is not a political party or an official election system. Community polls 
 ## Ownership and licensing
 
 Licensing, legal entity, official organization, trademark, and domain ownership are **not yet decided/verified**. No open-source license is granted by this planning package. Confirm name/domain and legal readiness before public launch.
+
+Member-created diaspora and interest groups reuse the department discussion engine. Open **Communities** after sign-in to browse, create and manage groups, or use [the public directory](http://localhost:4000/community-directory). [Group policies and integration checks](docs/DATABASE.md#phase-4b-member-created-communities)

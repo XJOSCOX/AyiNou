@@ -1,13 +1,15 @@
 "use client";
 
-import { communityStaffRoles, departmentCommunityContent, type CommunityStaffRole, type DepartmentCommunity } from "@ayinou/shared";
+import { communityStaffRoles, departmentCommunityContent, type Community, type CommunityStaffRole } from "@ayinou/shared";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useState, type FormEvent } from "react";
 import { apiErrorCode } from "@/lib/api-errors";
 import { communityDirectoryMessages } from "@/lib/communities-i18n";
 import { changeDepartmentMembership, changeDepartmentPrivacy, changeDepartmentStaff, loadDepartmentCommunities,
   loadDepartmentCommunity, loadDepartmentFeed, loadDepartmentMembers } from "@/lib/department-community-api";
 import { feedMessages } from "@/lib/feed-i18n";
+import { groupMessages } from "@/lib/groups-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
@@ -16,14 +18,16 @@ import { PostCard } from "./feed-screen";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PostComposer } from "./post-composer";
+import { GroupManagement, GroupMetadata, GroupsDirectory, ReadOnlyGroupPost } from "./groups";
 
 function normalize(value: string) {
   return value.normalize("NFD").replace(/\p{M}/gu, "").replace(/[^\p{L}\p{N}]/gu, "").toLowerCase();
 }
 
-function CommunitySummary({ community }: { community: DepartmentCommunity }) {
+function CommunitySummary({ community }: { community: Community }) {
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
+  if (community.kind !== "department") return <GroupMetadata group={community} />;
   return <>
     <p className="text-sm leading-6 text-[var(--theme-body)]">{departmentCommunityContent(locale, community.name).description}</p>
     <p className="text-sm text-[var(--theme-body)]">{community.memberCount === null ? t.privateCount
@@ -34,29 +38,39 @@ function CommunitySummary({ community }: { community: DepartmentCommunity }) {
 export function DepartmentDirectory() {
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
+  const groups = groupMessages[locale];
   const resource = useInstitutionResource(loadDepartmentCommunities);
   const [query, setQuery] = useState("");
-  const [membershipsOnly, setMembershipsOnly] = useState(false);
-  const [changed, setChanged] = useState<Record<string, DepartmentCommunity>>({});
+  const [category, setCategory] = useState<"official" | "diaspora" | "interest" | "mine">("official");
+  const membershipsOnly = category === "mine";
+  const [changed, setChanged] = useState<Record<string, Community>>({});
   const needle = normalize(query);
   const rooms = resource.data?.communities
     .map((community) => changed[community.id] ?? community)
     .filter((community) => (!membershipsOnly || community.joined) &&
-      [community.name, community.departmentCode, community.slug].some((part) => normalize(part).includes(needle)));
+      [community.name, community.departmentCode ?? "", community.slug].some((part) => normalize(part).includes(needle)));
   return <MemberShell><div className="grid gap-5">
-    <header>
+    <header className="flex flex-wrap items-start justify-between gap-4">
+      <div>
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.title}</h1>
-      <p className="mt-2 text-sm text-[var(--theme-body)]">{t.intro}</p>
+      <p className="mt-2 text-sm text-[var(--theme-body)]">{groups.intro}</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Link href="/communities/new" className={institutionAction}>{groups.newGroup}</Link>
+        <Link href="/communities/invitations" className={institutionLink}>{groups.invitations}</Link>
+      </div>
     </header>
     <div className="flex flex-wrap items-end gap-3">
-      <label className="w-full max-w-sm text-sm font-semibold">{t.search}
+      <label className="w-full max-w-sm text-sm font-semibold">{category === "official" ? t.search : category === "mine" ? groups.searchCommunities : groups.searchGroups}
         <input type="search" className={institutionField} value={query} onChange={(event) => setQuery(event.target.value)} maxLength={80} />
       </label>
-      <label className="flex min-h-11 items-center gap-2 text-sm font-semibold">
-        <input type="checkbox" checked={membershipsOnly} onChange={(event) => setMembershipsOnly(event.target.checked)}
-          className="size-4 accent-[var(--theme-link)]" />{t.mine}
-      </label>
     </div>
+    <div className="flex flex-wrap gap-2" role="group" aria-label={t.title}>
+      {(["official", "diaspora", "interest", "mine"] as const).map((value) => <button key={value} type="button" aria-pressed={category === value}
+        className="min-h-10 rounded-md border border-[var(--theme-border)] px-3 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]"
+        onClick={() => setCategory(value)}>{value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
+    </div>
+    {(category === "official" || membershipsOnly) && <>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!rooms && resource.error === null && <p role="status">{t.loading}</p>}
     {rooms?.length === 0 && <p role="status">{membershipsOnly && !needle ? t.emptyMine : t.noMatches}</p>}
@@ -66,17 +80,27 @@ export function DepartmentDirectory() {
         <h2 className="text-xl font-semibold"><Link className="hover:underline" href={`/communities/${community.slug}`}>{community.name}</Link></h2>
         <CommunitySummary community={community} />
         {community.joined ? <p className="text-sm font-semibold text-[var(--theme-link)]">{t.joined}</p>
-          : <MembershipControl community={community} update={(next) => setChanged((items) => ({ ...items, [next.id]: next }))} />}
+          : <MembershipControl community={community} update={(next) => { if (next) setChanged((items) => ({ ...items, [next.id]: next })); }} />}
       </li>)}
     </ul>}
+    </>}
+    {category !== "official" && <GroupsDirectory key={category} search={query}
+      kind={category === "mine" ? undefined : category} mine={membershipsOnly} />}
   </div></MemberShell>;
 }
 
-function MembershipControl({ community, update }: { community: DepartmentCommunity; update: (next: DepartmentCommunity) => void }) {
+function MembershipControl({ community, update }: { community: Community; update: (next: Community | null) => void }) {
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
+  const groups = groupMessages[locale];
   const mutation = useFeedMutation();
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const group = community.kind === "department" ? null : community;
+  const pending = !community.joined && group?.requestStatus === "pending";
+  if (!community.joined && group?.policy === "private") return null;
+  if (!community.joined && group?.requestStatus === "rejected" && group.policy === "approval")
+    return <p className="text-sm">{groups.rejected}</p>;
+  if (group?.role === "owner") return <p className="text-sm font-semibold text-[var(--theme-link)]">{groups.owner}</p>;
   function change(join: boolean) {
     void mutation.run(async () => {
       const result = await changeDepartmentMembership(community.slug, join);
@@ -87,11 +111,12 @@ function MembershipControl({ community, update }: { community: DepartmentCommuni
   return <div className="mt-2 grid gap-2">
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
     {confirmLeave && <p className="text-sm font-semibold">{t.leaving}</p>}
+    {pending && <p role="status" className="text-sm">{groups.pending}</p>}
     <div className="flex flex-wrap items-center gap-3">
       <button type="button" className={institutionAction} disabled={mutation.busy} onClick={() => {
-        if (!community.joined || confirmLeave) change(!community.joined);
+        if (!community.joined || confirmLeave) change(!community.joined && !pending);
         else setConfirmLeave(true);
-      }}>{community.joined ? t.leave : t.join}</button>
+      }}>{community.joined ? t.leave : pending ? groups.cancelRequest : group?.policy === "approval" ? groups.request : t.join}</button>
       {confirmLeave && <button type="button" className={institutionLink} disabled={mutation.busy}
         onClick={() => setConfirmLeave(false)}>{feedMessages[locale].cancel}</button>}
     </div>
@@ -99,26 +124,35 @@ function MembershipControl({ community, update }: { community: DepartmentCommuni
 }
 
 export function DepartmentSpace({ slug }: { slug: string }) {
+  const router = useRouter();
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
+  const groups = groupMessages[locale];
   const load = useCallback((signal: AbortSignal) => loadDepartmentCommunity(slug, signal), [slug]);
   const resource = useInstitutionResource(load);
-  const [changed, setChanged] = useState<DepartmentCommunity | null>(null);
-  const [tab, setTab] = useState<"discussion" | "members">("discussion");
+  const [changed, setChanged] = useState<Community | null>(null);
+  const [tab, setTab] = useState<"discussion" | "members" | "manage">("discussion");
   const [visitedMembers, setVisitedMembers] = useState(false);
   const [directoryRevision, setDirectoryRevision] = useState(0);
   const privacy = useFeedMutation();
   const community = changed ?? resource.data?.community;
+  const group = community && community.kind !== "department" ? community : null;
+  const canManage = group?.role === "owner" || group?.role === "administrator";
+  const canRead = community?.joined || group?.discussionPublic;
   return <MemberShell><div className="grid gap-4">
     <Link className={`${institutionLink} justify-self-start`} href="/communities">← {t.title}</Link>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!community && resource.error === null && <p role="status">{t.loading}</p>}
     {community && <>
       <header className={`${institutionCard} grid gap-3`}>
-        <p className="text-xs font-semibold text-[var(--theme-link)]">{t.official}</p>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{community.name}</h1>
+        {!group && <p className="text-xs font-semibold text-[var(--theme-link)]">{t.official}</p>}
+        <h1 dir="auto" className="break-words text-3xl font-semibold tracking-tight sm:text-4xl">{community.name}</h1>
         <CommunitySummary community={community} />
-        <MembershipControl community={community} update={(next) => { setChanged(next); if (!next.joined) { setTab("discussion"); setVisitedMembers(false); } }} />
+        <MembershipControl community={community} update={(next) => {
+          if (!next) { router.replace("/communities"); return; }
+          setChanged(next);
+          if (!next.joined) { setTab("discussion"); setVisitedMembers(false); }
+        }} />
         {community.joined && <label className="flex items-start gap-2 text-sm text-[var(--theme-body)]">
           <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-[var(--theme-link)]" checked={community.directoryVisible}
             disabled={privacy.busy} onChange={(event) => {
@@ -131,28 +165,32 @@ export function DepartmentSpace({ slug }: { slug: string }) {
         </label>}
         {privacy.error !== null && <ApiErrorNotice error={privacy.error} />}
         {community.canModerate && <Link href={`/communities/${slug}/moderation`} className={institutionLink}>{t.moderation}</Link>}
+        {group && group.policy !== "private" && <Link href={`/community-directory/${slug}`} className={institutionLink}>{groups.copyLink}</Link>}
       </header>
       <details className={institutionCard}>
         <summary className="cursor-pointer font-semibold text-[var(--theme-link)]">{t.rules}</summary>
-        <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-[var(--theme-body)]">
+        {group ? <p dir="auto" className="mt-3 whitespace-pre-wrap break-words text-sm text-[var(--theme-body)]">{group.rules}</p>
+          : <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-[var(--theme-body)]">
           {departmentCommunityContent(locale, community.name).rules.map((rule) => <li key={rule}>{rule}</li>)}
-        </ul>
+        </ul>}
       </details>
-      {community.canManageRoles && <CommunityStaffForm slug={slug} />}
-      {community.joined ? <>
-        <div className="flex flex-wrap gap-2" role="group" aria-label={t.title}>
-          {(["discussion", "members"] as const).map((entry) => <button key={entry} type="button" aria-pressed={tab === entry}
+      {!group && community.canManageRoles && <CommunityStaffForm slug={slug} />}
+      {canRead ? <>
+        {community.joined && <div className="flex flex-wrap gap-2" role="group" aria-label={t.title}>
+          {(["discussion", "members", ...(canManage ? ["manage"] as const : [])] as const).map((entry) => <button key={entry} type="button" aria-pressed={tab === entry}
             className="min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]"
-            onClick={() => { setTab(entry); if (entry === "members") setVisitedMembers(true); }}>{t[entry]}</button>)}
-        </div>
-        <div hidden={tab !== "discussion"}><DepartmentDiscussion slug={slug} /></div>
+            onClick={() => { setTab(entry); if (entry === "members") setVisitedMembers(true); }}>{entry === "manage" ? groups.manage : t[entry]}</button>)}
+        </div>}
+        <div hidden={tab !== "discussion"}><DepartmentDiscussion key={String(community.joined)} slug={slug} joined={community.joined}
+          publicDiscussion={group?.discussionPublic ?? false} groupVersion={group?.version} /></div>
         {visitedMembers && <div hidden={tab !== "members"}><DepartmentMembers slug={slug} revision={directoryRevision} /></div>}
-      </> : <p className={institutionCard}>{t.joinRead}</p>}
+        {group && canManage && tab === "manage" && <GroupManagement group={group} onSaved={(updated) => { setChanged(updated); setDirectoryRevision((n) => n + 1); }} />}
+      </> : <p className={institutionCard}>{group ? groups.restrictedNotice : t.joinRead}</p>}
     </>}
   </div></MemberShell>;
 }
 
-function DepartmentDiscussion({ slug }: { slug: string }) {
+function DepartmentDiscussion({ slug, joined, publicDiscussion, groupVersion }: { slug: string; joined: boolean; publicDiscussion: boolean; groupVersion?: number }) {
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
   const f = feedMessages[locale];
@@ -168,12 +206,16 @@ function DepartmentDiscussion({ slug }: { slug: string }) {
     setRevision((value) => value + 1);
   }
   return <section className="grid gap-4" aria-label={t.discussion}>
-    <div className={`${institutionCard} max-sm:p-3`} aria-label={f.write}><PostComposer community={slug} onSaved={changed} /></div>
+    {joined && <div className={`${institutionCard} max-sm:p-3`} aria-label={f.write}>
+      {publicDiscussion && <p className="mb-3 text-sm text-[var(--theme-body)]">{groupMessages[locale].publicNote}</p>}
+      <PostComposer community={slug} groupVersion={groupVersion} onSaved={changed} />
+    </div>}
     {notice && <p role="status" className="text-sm text-[var(--theme-link)]">{f[notice]}</p>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
     {!resource.page && resource.error === null && <p role="status">{t.loading}</p>}
     {resource.page?.rows.length === 0 && <p className={institutionCard}>{t.emptyPosts}</p>}
-    {resource.error === null && resource.page?.rows.map((post) => <PostCard key={post.id} post={post} changed={changed} />)}
+    {resource.error === null && resource.page?.rows.map((post) => joined
+      ? <PostCard key={post.id} post={post} changed={changed} /> : <ReadOnlyGroupPost key={post.id} post={post} guest={false} />)}
     <CommunityMore resource={resource} />
   </section>;
 }

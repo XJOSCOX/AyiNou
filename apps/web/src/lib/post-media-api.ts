@@ -28,11 +28,11 @@ export async function stagePostImage(id: string, file: File) {
   }
 }
 
-export async function loadPostImage(post: string, id: string, variant: "thumbnail" | "display", review: boolean, signal: AbortSignal) {
+export async function loadPostImage(post: string, id: string, variant: "thumbnail" | "display", review: boolean, signal: AbortSignal, guest = false) {
   const deadline = AbortSignal.timeout(30_000);
   try {
     return await authorizedImage(`/api/v1/posts/${post}/attachments/${id}/image?variant=${variant}${review ? "&review=true" : ""}`,
-      AbortSignal.any([signal, deadline]));
+      AbortSignal.any([signal, deadline]), guest);
   } catch (cause) {
     if (deadline.aborted && !signal.aborted) throw new ApiRequestError("TIMEOUT", 0, true);
     throw cause;

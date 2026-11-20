@@ -113,3 +113,7 @@ The community view reuses the post composer, timeline cards, media, and moderati
 - [Supabase Next.js Auth](https://supabase.com/docs/guides/auth/quickstarts/nextjs)
 - [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)
 - [Supabase database migrations](https://supabase.com/docs/guides/deployment/database-migrations)
+
+### Member-created groups
+
+Fastify uses the same member identity and scoped post routes for department, diaspora and interest communities. Group metadata discovery, membership and discussion reading are independent checks. Public discussion begins at a policy timestamp enforced in PostgreSQL across post, comment and Storage reads. Group role mutations and recipient invitation responses serialize on the room row. Group staff carry no cross-room or platform authority. Public and protected Next.js views share theme tokens and call Fastify with the same API contracts available to mobile clients.

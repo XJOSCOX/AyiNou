@@ -21,8 +21,8 @@ function LocalPreview({ file, alt }: { file: File; alt: string }) {
   return url && <Image src={url} alt={alt} width={240} height={160} unoptimized className="aspect-[3/2] w-full rounded object-cover" />;
 }
 
-function RemotePreview({ post, id, alt, review, lazy, variant, onOpen, label }: {
-  post: string; id: string; alt: string; review: boolean; lazy: boolean; variant: "thumbnail" | "display"; onOpen?: () => void; label?: string;
+function RemotePreview({ post, id, alt, review, lazy, variant, onOpen, label, guest = false }: {
+  post: string; id: string; alt: string; review: boolean; lazy: boolean; variant: "thumbnail" | "display"; onOpen?: () => void; label?: string; guest?: boolean;
 }) {
   const [locale] = useLocale();
   const t = mediaNotificationMessages[locale];
@@ -46,13 +46,13 @@ function RemotePreview({ post, id, alt, review, lazy, variant, onOpen, label }: 
     if (!visible) return;
     const controller = new AbortController();
     let url: string | undefined;
-    loadPostImage(post, id, variant, review, controller.signal).then((blob) => {
+    loadPostImage(post, id, variant, review, controller.signal, guest).then((blob) => {
       if (controller.signal.aborted) return;
       url = URL.createObjectURL(blob);
       setResult({ url });
     }).catch((error) => { if (!controller.signal.aborted) setResult({ error }); });
     return () => { controller.abort(); if (url) URL.revokeObjectURL(url); };
-  }, [id, post, review, revision, variant, visible]);
+  }, [guest, id, post, review, revision, variant, visible]);
 
   const image = result && "url" in result && <Image src={result.url} alt={alt} width={variant === "display" ? 1440 : 480}
     height={variant === "display" ? 960 : 320} unoptimized
@@ -96,8 +96,8 @@ export function PostImageEditor({ post, images, onChange, busy }: {
   </fieldset>;
 }
 
-function ImageViewer({ post, attachment, review, alt, onClose }: {
-  post: string; attachment: PostAttachment; review: boolean; alt: string; onClose: () => void;
+function ImageViewer({ post, attachment, review, alt, onClose, guest }: {
+  post: string; attachment: PostAttachment; review: boolean; alt: string; onClose: () => void; guest: boolean;
 }) {
   const [locale] = useLocale();
   const t = mediaNotificationMessages[locale];
@@ -109,11 +109,11 @@ function ImageViewer({ post, attachment, review, alt, onClose }: {
   return <dialog ref={dialog} onClose={onClose} aria-label={alt}
     className="m-auto max-h-[95dvh] w-[min(95vw,64rem)] max-w-none rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-3 text-[var(--theme-text)] backdrop:bg-black/65">
     <div className="mb-2 flex justify-end"><button type="button" className={institutionLink} onClick={() => dialog.current?.close()}>{t.close}</button></div>
-    <RemotePreview post={post} id={attachment.id} alt={alt} review={review} lazy={false} variant="display" />
+    <RemotePreview post={post} id={attachment.id} alt={alt} review={review} lazy={false} variant="display" guest={guest} />
   </dialog>;
 }
 
-export function PostMediaGallery({ post, attachments, review = false }: { post: string; attachments: PostAttachment[]; review?: boolean }) {
+export function PostMediaGallery({ post, attachments, review = false, guest = false }: { post: string; attachments: PostAttachment[]; review?: boolean; guest?: boolean }) {
   const [locale] = useLocale();
   const t = mediaNotificationMessages[locale];
   const [active, setActive] = useState<string | null>(null);
@@ -122,7 +122,7 @@ export function PostMediaGallery({ post, attachments, review = false }: { post: 
   const alt = (item: PostAttachment, index: number) => item.alt || t.image.replace("{n}", String(index + 1));
   return <div className={`mt-4 grid gap-2 ${attachments.length > 1 ? "grid-cols-2" : "max-w-[42rem]"}`}>
     {attachments.map((item, index) => <RemotePreview key={item.id} id={item.id} post={post} alt={alt(item, index)} review={review}
-      lazy variant="thumbnail" onOpen={() => setActive(item.id)} label={t.open.replace("{n}", String(index + 1))} />)}
-    {selected && <ImageViewer post={post} attachment={selected} review={review} alt={alt(selected, attachments.indexOf(selected))} onClose={() => setActive(null)} />}
+      guest={guest} lazy variant="thumbnail" onOpen={() => setActive(item.id)} label={t.open.replace("{n}", String(index + 1))} />)}
+    {selected && <ImageViewer post={post} attachment={selected} review={review} guest={guest} alt={alt(selected, attachments.indexOf(selected))} onClose={() => setActive(null)} />}
   </div>;
 }

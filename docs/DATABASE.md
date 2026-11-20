@@ -399,3 +399,41 @@ npm run db:local:stop
 ```
 
 `db:local:reset` discards **only local** data and reapplies migrations. `supabase/config.toml` is for this optional stack. Run app validation with `npm run typecheck`, `npm run lint`, `npm test`, and `npm run build`. Account deletion/export, administrator assignment, and verification workflows remain future work. The proposed tables for later phases are in [DATABASE_MASTER_PLAN.md](DATABASE_MASTER_PLAN.md); they have not been migrated.
+
+## Phase 4B member-created communities
+
+Phase 4B extends `feed_data.communities` with `diaspora` and `interest` kinds. Departments retain their authoritative foreign key and unique stable slug. A member can create up to five groups per account. Creation uses a UUID idempotency key bound to the authenticated creator and normalized request. Group names are unique case-insensitively and slugs are globally unique. Official identities, department identifiers and platform navigation names are reserved. Slugs are fixed after creation. An optional country code or topic describes the group. General regions can be described in the group copy. Group membership has no effect on identity, verification, institutional authority or member location.
+
+| Policy | Discovery and metadata | Discussion read | Participation |
+| --- | --- | --- | --- |
+| Public | Anyone | Members by default. Owners can open new posts to visitors. | Eligible member joins directly. |
+| Approval required | Anyone | Current members | Apply, then receive approval from a group owner or administrator. |
+| Private | Current members. An eligible recipient sees only the name, purpose and expiry in their own invitation inbox. | Current members | Accept a current, recipient-bound invitation. |
+
+Public reading starts with a database timestamp under a room lock. Only posts created in the current public-reading period are public. Closing and reopening starts a new period. Changing settings never publishes restricted history. Eligible public posts and their visible comments and images are readable without a session, including by direct post APIs. All group posts stay out of global Latest, Following, For You, and My Posts. Group post creation accepts a group version so a policy change can require confirmation before a retry. Member directories require current membership, per-room opt-in and an eligible discoverable profile. Counts below ten are withheld and larger counts are rounded down to tens. Block and mute rules continue to apply.
+
+| Role | Access |
+| --- | --- |
+| Member | Participate and control room directory visibility. |
+| Moderator | Review exact-room reports and moderate eligible posts and comments with recent TOTP. |
+| Administrator | Moderator access plus approve or reject requests, invite eligible discoverable members, revoke membership invitations, and remove ordinary members with a reason. |
+| Owner | Administrator access plus profile and policy changes, scoped staff grants and revocations, staff removal, and ownership transfer. |
+| Platform administrator | Existing moderation and independent appeal authority with TOTP. Recovery may assign an active existing member only when a group has no eligible owner. |
+
+The single owner cannot leave or be removed until a current member accepts the ownership offer with recent TOTP. Offers and membership invitations expire after seven days. Responses are recipient-bound. The database rechecks issuer authority, current restrictions, and blocks and serializes competing changes on the group row. A same-answer invitation retry is safe and cannot restore removed membership. The former owner remains an ordinary member after transfer. An approved request can be followed by voluntary departure. Declined requests require an explicit later invitation while the group requires approval. Removal currently prevents reentry into the group. There is no self-service removal appeal or reinstatement workflow. Content-hide appeals use the existing independent platform-admin workflow. Membership invitations are available in the authenticated inbox. This phase sends no membership email, SMS, approval alerts or room-wide post notifications.
+
+Existing routes under `/api/v1/communities/:key` handle detail, join/request, leave or cancel, member-directory privacy, members, authenticated posts, and moderation. `GET /:key/public-posts` serves only the public-era projection without member authority. The existing department listing endpoints keep their department-only responses.
+
+| New Fastify endpoint | Contract |
+| --- | --- |
+| `GET /api/v1/communities/groups` | Cursor-paged groups by slug. Optional `kind`, `mine`, `search`, `country`, and `topic`. `mine=true` requires authentication. |
+| `POST /api/v1/communities` | Create a group using a UUID `Idempotency-Key`, returning its card. |
+| `PATCH /api/v1/communities/:key/settings` | Owner settings, recent TOTP and expected group `version`. |
+| `GET /api/v1/communities/:key/management/:section` | MFA-gated, cursor-paged `requests`, `invitations` and `staff`. |
+| `POST /api/v1/communities/:key/management` | Written reason and action-specific data for requests, invitations, staff, removal, ownership transfer, and orphan recovery. |
+| `GET /api/v1/me/community-invitations` | Recipient-only invitation summaries with a cursor. |
+| `PATCH /api/v1/me/community-invitations/:id` | Accept or decline, with recent TOTP for accepting an ownership offer. |
+
+The web pages use the same contracts that future Android and iOS clients can call. Public pages are `/community-directory` and `/community-directory/:slug`. The member workspace has creation, room management, invitations, and moderation under `/communities`. API errors include stable codes and request IDs. Supabase Auth remains the identity source.
+
+With the named hosted project confirmed, run `npm run test:hosted:groups:sql -- --preflight` before migrations or omit `--preflight` afterward. `npm run test:hosted:groups` exercises real Auth, Fastify and Storage with synthetic fixtures. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` as for the other hosted workflows. Use `npm run db:push:dry` to review changes. Never run database reset against hosted Supabase.

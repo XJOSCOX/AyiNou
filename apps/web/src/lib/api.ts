@@ -32,8 +32,8 @@ export async function authorizedRequest(path: string, init?: RequestInit) {
   return publicRequest(path, { ...init, headers: await sessionHeaders(init) });
 }
 
-export async function authorizedImage(path: string, signal: AbortSignal) {
-  const headers = await sessionHeaders();
+export async function authorizedImage(path: string, signal: AbortSignal, guest = false) {
+  const headers = guest ? new Headers() : await sessionHeaders();
   headers.set("Accept", "image/webp");
   const response = await requestResponse(`${apiBaseUrl}${path}`, { headers, signal });
   if (!response.headers.get("Content-Type")?.startsWith("image/webp")) throw new ApiRequestError("IMAGE_PROCESSING", 502);

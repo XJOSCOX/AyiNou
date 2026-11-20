@@ -72,3 +72,7 @@ Platform administrators can search a minimal account projection, investigate imp
 ## Success metrics
 
 Initial local testing covers the interface in four languages, access control, onboarding, and responsive layouts. After safe launch, measure retained members, diversity of department participation, verified projects completed, volunteer hours, and documented outcomes.
+
+### Member-created groups
+
+Members can organize around diaspora communities or interests. They choose open membership, approval, or private invitations. A public group can choose to open future discussions to visitors. Private groups are absent from discovery. Participation is voluntary and does not communicate anyone’s nationality, immigration status or location. Owners manage their groups. Platform administrators retain independent oversight of eligible content appeals.

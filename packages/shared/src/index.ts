@@ -137,6 +137,21 @@ export type DepartmentCommunity = {
   memberCount: number | null;
 };
 export type CommunityMembers = { accounts: DiscoveryCard[]; nextCursor: string | null };
+export const groupKinds = ["diaspora", "interest"] as const;
+export const groupPolicies = ["public", "approval", "private"] as const;
+export type GroupKind = (typeof groupKinds)[number];
+export type GroupPolicy = (typeof groupPolicies)[number];
+export type GroupRole = "owner" | CommunityStaffRole | "member";
+export type GroupSettings = {
+  name: string; description: string; rules: string; policy: GroupPolicy;
+  discussionPublic: boolean; countryCode: string | null; topic: InterestCode | null;
+};
+export type MemberGroup = Omit<DepartmentCommunity, "kind" | "departmentCode" | "role"> & GroupSettings & {
+  kind: GroupKind; departmentCode: null; role: GroupRole | null; version: number;
+  requestStatus: "pending" | "approved" | "rejected" | "cancelled" | null;
+};
+export type Community = DepartmentCommunity | MemberGroup;
+export type GroupInvitation = { id: string; purpose: "membership" | "ownership"; expiresAt: string };
 type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
 export type FeedComment = CommentPosition & (
   { available: true; body: string; language: Locale; editedAt: string | null; version: number;

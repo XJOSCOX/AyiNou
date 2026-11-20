@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import {
   commentBodyLimit, communityStaffRoles, departmentCommunityContent, interestCodes, locales, moderationActions, postBodyLimit, postVisibilities, reactionKinds,
   recommendationActions, reportCategories, type FeedComment, type FeedReport, type ReactionSummary, type RecommendationSettings,
-  type PostAttachment, type MemberNotification, type NotificationPreferences, type CommentTarget, type DepartmentCommunity, type DiscoveryCard,
+  type PostAttachment, type MemberNotification, type NotificationPreferences, type CommentTarget, type Community, type DepartmentCommunity, type DiscoveryCard,
 } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
@@ -12,6 +12,7 @@ import { registerDiscoveryRoutes } from "./discovery.js";
 import type { PostMediaService } from "../services/post-media.js";
 import type { ReadBudget } from "../services/read-budget.js";
 import { registerSafetyRoutes } from "./safety.js";
+import { registerGroupRoutes } from "./groups.js";
 
 const cursorShape = z.strictObject({ createdAt: z.iso.datetime({ offset: true }), id: z.uuid() });
 const pageCursor = z.string().max(250).regex(/^[A-Za-z0-9_-]+$/).optional();
@@ -125,6 +126,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
   registerDiscoveryRoutes(app, viewer, repo, read);
   registerSafetyRoutes(app, { viewer, moderator, repo, read });
+  registerGroupRoutes(app, { viewer, repo, read });
   app.get("/api/v1/communities", async (request) => {
     const { actor, token } = await viewer(request);
     await read("discovery", actor, request.ip);
@@ -140,9 +142,11 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     const { key } = communityParams.parse(request.params);
     const { actor, token } = await viewer(request);
     await read("discovery", actor, request.ip);
-    const community = await repo().rpc<DepartmentCommunity | null>(token, "department_community_for_client", { p_key: key });
+    const community = await repo().rpc<Community | null>(token, "department_community_for_client", { p_key: key });
     if (!community) throw feedDatabaseError("PCM04");
-    return { community, content: Object.fromEntries(locales.map((locale) => [locale, departmentCommunityContent(locale, community.name)])) };
+    return community.kind === "department"
+      ? { community, content: Object.fromEntries(locales.map((locale) => [locale, departmentCommunityContent(locale, community.name)])) }
+      : { community };
   });
   for (const [method, route, action] of [["POST", "/join", "join"], ["DELETE", "/membership", "leave"], ["PATCH", "/membership", "privacy"]] as const) {
     app.route({ method, url: department + route, bodyLimit: 1024, handler: async (request) => {
@@ -150,7 +154,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
       const { token } = await viewer(request, true);
       const visible = action === "privacy" ? z.strictObject({ directoryVisible: z.boolean() }).parse(request.body).directoryVisible : null;
       if (action !== "privacy" && request.body !== undefined) z.strictObject({}).parse(request.body);
-      const community = await repo().rpc<DepartmentCommunity>(token, "change_department_membership_for_client", {
+      const community = await repo().rpc<Community | null>(token, "change_department_membership_for_client", {
         p_key: key, p_action: action, p_visible: visible,
       });
       return { community };
@@ -169,24 +173,27 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
     const accounts = rows.slice(0, size);
     return { accounts, nextCursor: rows.length > size ? accounts.at(-1)?.handle ?? null : null };
   });
-  app.get(department + "/posts", async (request) => {
+  const roomPosts = (requiresMember: boolean) => async (request: FastifyRequest) => {
     const { key } = communityParams.parse(request.params);
-    const { actor, token } = await viewer(request, true);
+    const { actor, token } = requiresMember ? await viewer(request, true) : { actor: null, token: null };
     await read("feed", actor, request.ip);
     const query = feedQuery.omit({ scope: true }).parse(request.query);
     const size = query.limit ?? 20;
     const rows = await repo().read(token, { p_scope: "community", p_community: key, p_limit: size, ...before(query.cursor) });
     const { page, nextCursor } = paginate(rows, size);
     return { posts: page, nextCursor };
-  });
+  };
+  app.get(department + "/posts", roomPosts(true));
+  app.get(department + "/public-posts", roomPosts(false));
   app.post(department + "/posts", { bodyLimit: 16_384 }, async (request, reply) => {
     const { key } = communityParams.parse(request.params);
     const { token } = await viewer(request, true);
     const submission = z.uuid().parse(request.headers["idempotency-key"]);
-    const input = postInput.omit({ visibility: true }).parse(request.body);
+    const input = postInput.omit({ visibility: true }).extend({ groupVersion: version.optional() }).parse(request.body);
     content(input.body, postBodyLimit);
-    const id = await repo().rpc<string>(token, "create_department_post_for_client", {
+    const id = await repo().rpc<string>(token, input.groupVersion ? "create_group_post_for_client" : "create_department_post_for_client", {
       p_key: key, p_body: input.body, p_language: input.language, p_submission: submission, p_topics: input.topics ?? [], p_items: input.attachments ?? [],
+      ...(input.groupVersion ? { p_version: input.groupVersion } : {}),
     });
     return reply.code(201).send({ id });
   });

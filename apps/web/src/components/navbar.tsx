@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import { authMessages } from "@/lib/auth-i18n";
 import { messages } from "@/lib/i18n";
+import { groupMessages } from "@/lib/groups-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
@@ -49,6 +50,9 @@ export function Navbar() {
               {label}
             </a>
           ))}
+          <Link href="/community-directory" className="inline-flex min-h-10 items-center rounded-md px-1.5 text-xs font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] sm:px-3 sm:text-sm">
+            {groupMessages[locale].groups}
+          </Link>
         </nav>
         <div className="col-span-2 flex flex-wrap items-center gap-2 border-t border-[var(--theme-border)] pt-2 lg:col-span-1 lg:flex-nowrap lg:justify-self-end lg:border-t-0 lg:pt-0">
           <DisplayControls />

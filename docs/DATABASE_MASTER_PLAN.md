@@ -221,16 +221,20 @@ Challenge completion supplies a proof event only. Authorized reviewers remain re
 | `post_tags` / later | `post_id uuid! FK→posts.id`, `hashtag_id uuid! FK→hashtags.id`; PK `(post_id,hashtag_id)` | IX `(hashtag_id,post_id)` |
 | `push_devices` / 10 | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `platform text!`, `token_ciphertext bytea!`, `token_hash bytea! UQ`, `last_seen_at timestamptz!`, `revoked_at timestamptz?`, `ca`, `ua` | IX `(user_id,revoked_at)`; server-only token access |
 
-### Diaspora and topic group extensions — phase 4B
+### Phase 4B member-created diaspora and interest groups
 
-| Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
+| Existing table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| Extend `communities` | Add named diaspora or topic kinds, visibility, group status, and owner-authored descriptive content | Preserve the unique department association for official rooms |
-| Extend `community_memberships` | Add join review and lifecycle state if required by private group rules | Index by user and membership state |
-| Extend `community_staff` | Add group-specific roles only if Phase 4B requires delegated authority | Trusted grants with audit history |
-| `community_rules` | `id uuid PK`, `community_id uuid! FK→communities.id`, `rule_text text!`, `position smallint!`, `ca`, `ua` | UQ `(community_id,position)` |
-| `community_join_requests` / later | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `status text!`, `ca`, `ua` | Partial UQ one pending `(community_id,user_id)`; IX `(community_id,status,created_at)` |
-| `community_bans` | `id uuid PK`, `community_id uuid! FK→communities.id`, `user_id uuid! FK→profiles.user_id`, `issued_by uuid! FK→auth.users.id`, `reason_code text!`, `expires_at timestamptz?`, `revoked_at timestamptz?`, `ca` | Partial UQ one active ban `(community_id,user_id)`; IX `(user_id,expires_at)` |
+| `feed_data.communities` additions | `kind text!` department/diaspora/interest, `department_code text? UQ FK→departments.code`, `name text?`, `description text?`, `rules text?`, `country_code text?`, `topic text?`, `policy text!`, `public_since timestamptz?`, `owner_id uuid? FK→auth.users.id SET NULL`, `version integer!` | Keep `id` and unique `slug`. Partial UQ lower group name. Partial IX `(kind,slug)` for discoverable groups and `owner_id` for ownership. Kind-specific field and policy checks. |
+| `feed_data.group_creations` | `creator_id uuid! FK→auth.users.id CASCADE`, `submission_id uuid!`, `community_id uuid! UQ FK→communities.id CASCADE`, `digest bytea!`, PK `(creator_id,submission_id)` | Per-creator lifetime limit of five and atomic idempotency. |
+| `feed_data.group_requests` | `community_id uuid! FK→communities.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, `status text!`, `created_at timestamptz!`, PK `(community_id,user_id)` | Partial IX `(community_id,created_at,user_id)` for pending. |
+| `feed_data.group_invitations` | `id uuid PK`, `community_id uuid! FK→communities.id CASCADE`, `recipient_id uuid! FK→auth.users.id CASCADE`, `sender_id uuid? FK→auth.users.id SET NULL`, `purpose text!`, `status text!`, `created_at timestamptz!`, `expires_at timestamptz!` | Partial UQ `(community_id,recipient_id,purpose)` for pending. Partial inbox and group indexes by identity, creation time and ID. |
+| `feed_data.group_removals` | `community_id uuid! FK→communities.id CASCADE`, `user_id uuid! FK→auth.users.id CASCADE`, PK `(community_id,user_id)` | Blocks new participation. The reason is in the audit. |
+| `feed_data.group_audit` | `id bigint identity PK`, `community_id uuid! FK→communities.id CASCADE`, `actor_id uuid? FK→auth.users.id SET NULL`, `target_id uuid? FK→auth.users.id SET NULL`, `action text!`, `reason text?`, `created_at timestamptz!` | IX `(community_id,created_at desc,id desc)`. Append-only through authorized RPCs. |
+
+Group writes reuse `community_memberships`, `community_staff`, and `community_staff_audit`. Group storage tables have RLS enabled with no direct client or service-role grants. Public post reads use a restrictive audience function with the current timestamp boundary. Existing interaction, media and timeline functions enforce the matching scope. Migrations install group metadata and helpers first, governance second, and audience integration last. See the [role and policy matrix](DATABASE.md#phase-4b-member-created-communities).
+
+Self-service archival and purge of groups and a reinstatement or review path for membership removals remain future decisions. Group audit reasons are internal and may survive user deletion without user identifiers. Invitations and membership requests are retained for operation and abuse controls. Set a retention duration before public launch.
 
 ### Ambassador and evidence extensions — phase 5
 

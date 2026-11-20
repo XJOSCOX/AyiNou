@@ -170,8 +170,9 @@ Activation of temporary proof challenges and external evidence delivery remains 
 
 ## Phase 4B — Diaspora and topic groups
 
-- [ ] Define member-created group rules, governance, visibility, and discovery.
-- [ ] Support diaspora and topic communities with scoped moderation.
+- [x] Define group policy, discovery, ownership and scoped governance.
+- [x] Support group creation, public joins, requests, invitations, private discussions and scoped moderation.
+- [ ] Add a group archival and removal-review workflow if needed for launch.
 
 **Gate:** Group access and moderation policy tests pass; reporting/escalation is practical for moderators.
 

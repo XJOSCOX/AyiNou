@@ -34,8 +34,8 @@ function ComposerIcon({ name }: { name: keyof typeof paths }) {
   </svg>;
 }
 
-export function PostComposer({ post, community, onSaved, onCancel }: {
-  post?: FeedPost; community?: string; onSaved: (message: SavedPost) => void; onCancel?: () => void;
+export function PostComposer({ post, community, groupVersion, onSaved, onCancel }: {
+  post?: FeedPost; community?: string; groupVersion?: number; onSaved: (message: SavedPost) => void; onCancel?: () => void;
 }) {
   const [locale] = useLocale();
   const { displayName } = useMemberIdentity();
@@ -52,7 +52,7 @@ export function PostComposer({ post, community, onSaved, onCancel }: {
   const [fileError, setFileError] = useState<ApiRequestError | "limit" | null>(null);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const room = community ?? post?.community?.slug;
-  const [visibility, setVisibility] = useState<PostVisibility>(post?.visibility ?? (room ? "members_only" : "public"));
+  const [visibility, setVisibility] = useState<PostVisibility>(room ? "members_only" : post?.visibility ?? "public");
   const [languageChoice, setLanguage] = useState<Locale | null>(post?.language ?? null);
   const language = languageChoice ?? locale;
   const [editTarget] = useState(post);
@@ -91,7 +91,7 @@ export function PostComposer({ post, community, onSaved, onCancel }: {
       const value = JSON.stringify(input);
       const key = submissions.current.get(value) ?? crypto.randomUUID();
       submissions.current.set(value, key);
-      await createPost(input, key, room);
+      await createPost(input, key, room, groupVersion);
     });
     setProgress(null);
     if (!sent) return;

@@ -105,3 +105,10 @@ Phase 2B uses self-declared membership categories. A category grants no verifica
 - Validate translations with native Haitian Creole and French speakers.
 - Decide production hosting, monitoring, budget and incident response.
 - Confirm payment compliance and radio streaming rights before those features ship.
+
+### Phase 4B group governance and historical privacy
+
+- Public discovery and public discussion are separate. Opening public reading applies only to posts from the current public-reading period. Group content remains outside global timelines.
+- Store the single owner on the group and reuse room-scoped staff assignments. Ownership transfer requires existing membership, recipient acceptance and recent TOTP. Recovery is restricted to platform administrators when there is no eligible owner.
+- Invitations use a private recipient inbox. Membership removal prevents reentry in this phase. Group membership never sets personal geography or platform verification.
+- Store written decisions in a private append-only application audit. Account deletion clears mutable identity references where specified by the schema. A safe self-service group archival and deletion workflow remains open.

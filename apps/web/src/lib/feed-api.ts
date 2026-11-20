@@ -9,10 +9,10 @@ function query<T extends string>(scope: T, cursor: string | null) {
 export const loadFeed = (scope: FeedScope, cursor: string | null, signal: AbortSignal): Promise<FeedPage> =>
   (scope === "for_you" ? authorizedSocialRequest : authorizedRequest)(`/api/v1/feed?${query(scope, cursor)}`, { signal });
 
-export function createPost(input: PostInput, key: string, community?: string): Promise<{ id: string }> {
+export function createPost(input: PostInput, key: string, community?: string, groupVersion?: number): Promise<{ id: string }> {
   const { body, language, topics, attachments } = input;
   return authorizedRequest(community ? `/api/v1/communities/${encodeURIComponent(community)}/posts` : "/api/v1/posts", {
-    method: "POST", headers: { "Idempotency-Key": key }, body: JSON.stringify(community ? { body, language, topics, attachments } : input),
+    method: "POST", headers: { "Idempotency-Key": key }, body: JSON.stringify(community ? { body, language, topics, attachments, groupVersion } : input),
   });
 }
 
