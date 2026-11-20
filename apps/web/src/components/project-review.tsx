@@ -12,6 +12,7 @@ import { projectMessages } from "@/lib/project-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 function ReviewError({ error, retry }: { error: unknown; retry: () => void }) {
   const [locale] = useLocale();
@@ -29,9 +30,8 @@ export function ProjectReviewScreen() {
   const t = projectMessages[locale];
   const options = useInstitutionResource(loadProjectOptions);
   return <MemberShell><section className="grid gap-4">
-    <Link className={`${institutionLink} justify-self-start`} href="/projects/manage">{t.manage}</Link>
-    <h1 className="text-3xl font-semibold">{t.reviewQueue}</h1>
-    <p className="max-w-prose text-sm">{t.reviewHelp}</p>
+    <PageHeader title={t.reviewQueue} description={t.reviewHelp}
+      actions={<Link className={institutionLink} href="/projects/manage">{t.manage}</Link>} />
     <ReviewError error={options.error} retry={options.refresh} />
     {options.data?.canReview ? <Queue canAssignOthers={options.data.canAssignOthers} /> : options.data && <p>{t.reviewUnavailable}</p>}
     {options.data?.canModerate && <Reports />}

@@ -12,6 +12,7 @@ import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 const value = (form: FormData, field: string) => String(form.get(field) ?? "").trim();
 const handlePattern = "[a-z0-9][a-z0-9_]{2,23}";
@@ -45,11 +46,8 @@ export function MyAmbassadorWorkspace() {
   const resource = useInstitutionResource(loadMyAmbassadorCases);
   return <MemberShell>
     <section className="grid gap-4">
-      <header>
-        <h1 className="text-3xl font-semibold sm:text-4xl">{t.myProgram}</h1>
-        <p className="mt-2 max-w-prose">{t.responsibilities}</p>
-        <Link className={`${institutionLink} mt-2 inline-block`} href="/ambassadors">{t.about}</Link>
-      </header>
+      <PageHeader title={t.myProgram} description={t.responsibilities}
+        actions={<Link className={institutionLink} href="/ambassadors">{t.about}</Link>} />
       <AmbassadorFeedback error={resource.error} reload={resource.refresh} />
       {!resource.data && resource.error === null && <p role="status">{authMessages[locale].working}</p>}
       {resource.data?.cases.length === 0 && <p className={institutionCard}>{t.emptyMine}</p>}

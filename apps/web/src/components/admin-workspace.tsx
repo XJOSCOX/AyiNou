@@ -13,6 +13,7 @@ import { localizedApiError } from "@/lib/error-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { AdministratorMark, institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
 import { TrustAdministration } from "./trust-workspace";
 import { AmbassadorAdministration } from "./ambassador-workspaces";
@@ -32,7 +33,7 @@ export function AdminWorkspace() {
 
   return <MemberShell>
     <div className="grid gap-4">
-      <h1 className="text-3xl font-semibold sm:text-4xl">{t.administration}</h1>
+      <PageHeader title={t.administration} />
       {overview.error ? <AdminFeedback error={overview.error} totp={access.data?.totp} retry={refresh} />
         : !overview.data ? <p role="status">{authMessages[locale].working}</p> : <>
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">

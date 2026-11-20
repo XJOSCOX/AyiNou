@@ -13,13 +13,13 @@ import { loadMyProjects, loadProject, loadProjectImage, loadProjectOptions, load
 import { projectMessages } from "@/lib/project-i18n";
 import { projectWorkMessages } from "@/lib/project-work-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
-import { DisplayControls } from "./display-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { Navbar } from "./navbar";
+import { PageHeader } from "./page-header";
 import { ProjectForm, ProjectIdentityNotice } from "./project-form";
 import { PublicProjectProgress } from "./project-progress";
 import { ReviewActionForm } from "./project-review";
-import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
 
 const fields = ["description", "problem", "solution", "objectives", "beneficiaries", "outcomes"] as const;
@@ -27,10 +27,8 @@ const fields = ["description", "problem", "solution", "objectives", "beneficiari
 function ProjectShell({ signedIn, children }: { signedIn: boolean; children: ReactNode }) {
   if (signedIn) return <MemberShell>{children}</MemberShell>;
   return <div id="top" className="flex min-h-dvh flex-col">
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--theme-border)] bg-[var(--theme-surface)] px-4 py-3 sm:px-8">
-      <SiteBrand /><DisplayControls />
-    </header>
-    <main className="flex-1 px-4 py-5 sm:px-8 sm:py-8">{children}</main>
+    <Navbar />
+    <main className="w-full flex-1 px-4 py-5 sm:px-8 sm:py-8">{children}</main>
     <SiteFooter />
   </div>;
 }
@@ -57,15 +55,12 @@ export function ProjectsDirectory({ signedIn }: { signedIn: boolean }) {
     return { rows: response.projects, nextCursor: response.nextCursor };
   }, [signedIn, filter]);
   const { page, error, retry, more, loadingMore } = useCursorPage(loader);
-  return <ProjectShell signedIn={signedIn}><section className="grid gap-4">
-    <header className="flex flex-wrap items-start justify-between gap-3">
-      <div><h1 className="text-3xl font-semibold sm:text-4xl">{t.title}</h1><p className="mt-2 max-w-prose">{t.discoveryHelp}</p></div>
-      {signedIn && <div className="flex flex-wrap items-center gap-3">
+  return <ProjectShell signedIn={signedIn}><section className="grid min-w-0 gap-4">
+    <PageHeader title={t.title} description={t.discoveryHelp} actions={signedIn && <>
         <Link href="/projects/new" className={institutionAction}>{t.newProject}</Link>
         <Link href="/projects/manage" className={institutionLink}>{t.manage}</Link>
         <Link href="/projects/team" className={institutionLink}>{projectWorkMessages[locale].workspace}</Link>
-      </div>}
-    </header>
+    </>} />
     <form className={`${institutionCard} grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]`} onSubmit={(event) => {
       event.preventDefault();
       const values = new FormData(event.currentTarget);
@@ -108,15 +103,12 @@ export function ManageProjectsScreen() {
   const mine = resource.data?.projects.filter((item) => item.createdByMe);
   const manage = resource.data?.projects.filter((item) => !item.createdByMe);
   return <MemberShell><section className="grid gap-5">
-    <header className="flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-3xl font-semibold">{t.manage}</h1>
-      <div className="flex flex-wrap items-center gap-3">
+    <PageHeader title={t.manage} actions={<>
         <Link href="/projects" className={institutionLink}>{t.title}</Link>
         <Link href="/projects/team" className={institutionLink}>{projectWorkMessages[locale].workspace}</Link>
         <Link href="/projects/new" className={institutionAction}>{t.newProject}</Link>
         {options.data?.canReview && <Link href="/projects/review" className={institutionLink}>{t.reviewQueue}</Link>}
-      </div>
-    </header>
+    </>} />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {options.error !== null && <ApiErrorNotice error={options.error} retry={options.refresh} signIn />}
     {!resource.data && resource.error === null && <p role="status">{authMessages[locale].working}</p>}

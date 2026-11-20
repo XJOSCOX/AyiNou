@@ -17,11 +17,11 @@ import { useLocale } from "@/lib/locale-store";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { CommunityCard, GroupMetadata } from "./community-card";
-import { DisplayControls } from "./display-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PostMediaGallery } from "./post-media";
-import { SiteBrand } from "./site-brand";
+import { Navbar } from "./navbar";
+import { PageHeader } from "./page-header";
 import { SiteFooter } from "./site-footer";
 
 export function GroupMore({ resource }: { resource: { page: { nextCursor: string | null } | null; loadingMore: boolean; more(): Promise<void> } }) {
@@ -159,9 +159,9 @@ function GroupForm({ group, onSaved }: { group?: MemberGroup; onSaved(saved: Mem
 export function NewGroup() {
   const router = useRouter();
   const [locale] = useLocale();
-  return <MemberShell><div className="grid max-w-4xl gap-4">
-    <Link className={institutionLink} href="/communities">← {communityDirectoryMessages[locale].title}</Link>
-    <h1 className="text-3xl font-semibold">{groupMessages[locale].newGroup}</h1>
+  return <MemberShell><div className="grid min-w-0 gap-4">
+    <PageHeader title={groupMessages[locale].newGroup}
+      actions={<Link className={institutionLink} href="/communities">{communityDirectoryMessages[locale].title}</Link>} />
     <GroupForm onSaved={(group) => router.push(`/communities/${group.slug}`)} />
   </div></MemberShell>;
 }
@@ -187,7 +187,7 @@ export function GroupInvitationList({ standalone = false, onRespond }: { standal
   const resource = useCursorPage(load, revision);
   const entries = resource.error === null ? resource.page?.rows.filter(({ id }) => !handled.includes(id)) : null;
   return <section className="grid gap-4" aria-label={t.invitations}>
-    {standalone ? <h1 className="text-3xl font-semibold">{t.invitations}</h1> : <h2 className="text-xl font-semibold">{t.invitations}</h2>}
+    {standalone ? <PageHeader title={t.invitations} /> : <h2 className="text-xl font-semibold">{t.invitations}</h2>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
     {!resource.page && resource.error === null && <p role="status">{communityDirectoryMessages[locale].loading}</p>}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
@@ -353,15 +353,9 @@ export function ReadOnlyGroupPost({ post, guest }: { post: FeedPost; guest: bool
 }
 
 function PublicShell({ children }: { children: React.ReactNode }) {
-  const [locale] = useLocale();
   return <div id="top" className="flex min-h-dvh flex-col">
-    <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
-      <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-8">
-        <SiteBrand href="/" /><DisplayControls />
-        <Link href="/login" className={institutionAction}>{groupMessages[locale].signIn}</Link>
-      </div>
-    </header>
-    <main className="mx-auto grid w-full max-w-[1500px] flex-1 content-start gap-4 px-4 py-6 sm:px-8">{children}</main>
+    <Navbar />
+    <main className="grid w-full flex-1 content-start gap-4 px-4 py-6 sm:px-8">{children}</main>
     <SiteFooter />
   </div>;
 }
@@ -372,7 +366,7 @@ export function PublicGroups() {
   const [kind, setKind] = useState<GroupKind | "">("");
   const [search, setSearch] = useState("");
   return <PublicShell>
-    <h1 className="text-3xl font-semibold">{t.directory}</h1>
+    <PageHeader title={t.directory} />
     <div className="grid gap-3 sm:grid-cols-2">
       <label className="text-sm font-semibold">{t.searchGroups}
         <input type="search" className={institutionField} maxLength={80} value={search} onChange={(event) => setSearch(event.target.value)} />

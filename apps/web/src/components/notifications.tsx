@@ -18,6 +18,7 @@ import { loadNotificationPreferences, loadNotifications, markNotifications, save
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent }: MemberNotification) {
   if (!available) return null;
@@ -56,10 +57,8 @@ export function NotificationCenter() {
   }
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
   return <MemberShell><section className="grid gap-4" aria-label={t.notifications}>
-    <header className="flex flex-wrap items-center justify-between gap-3">
-      <h1 className="text-3xl font-semibold sm:text-4xl">{t.notifications}</h1>
-      {!!rows?.length && <button type="button" className={institutionAction} disabled={mutation.busy} onClick={() => { void mark(); }}>{t.markAll}</button>}
-    </header>
+    <PageHeader title={t.notifications}
+      actions={!!rows?.length && <button type="button" className={institutionAction} disabled={mutation.busy} onClick={() => { void mark(); }}>{t.markAll}</button>} />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
     {!rows && resource.error === null && <p role="status">{t.working}</p>}

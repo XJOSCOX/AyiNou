@@ -11,6 +11,7 @@ import { useLocale } from "@/lib/locale-store";
 import { AccountMfa } from "./account-mfa";
 import { AccountSecurity } from "./account-security";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { NotificationPreferencesPanel } from "./notifications";
 import { MemberSafetySettings } from "./member-safety";
 
@@ -60,10 +61,7 @@ export function AccountSettings() {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <header>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{a.settings}</h1>
-          <p className="mt-2 text-[var(--theme-body)]">{a.intro}</p>
-        </header>
+        <PageHeader title={a.settings} description={a.intro} />
         <div className="grid gap-3 md:grid-cols-3">
           {[
             { href: "/profile#personal", title: a.personal, help: a.personalHelp },

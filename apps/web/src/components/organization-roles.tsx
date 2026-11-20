@@ -17,6 +17,7 @@ import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 const field = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const affiliationPermissions: OrganizationPermission[] = ["affiliations.manage", "affiliations.review", "affiliations.invite"];
@@ -54,14 +55,12 @@ export function OrganizationRolesScreen({ id }: { id: string }) {
   const resource = useInstitutionResource(load);
   const data = resource.data;
   return <MemberShell><div className="grid min-w-0 gap-4">
-    <header>
+    <PageHeader title={t.title} description={data?.organization.name} actions={<>
       {data?.foundation ? <Link href={`/institutions/${id}`} className={institutionLink}>{fixed.institutionProfile}</Link>
         : <Link className={institutionLink} href="/institutions">{fixed.institutions}</Link>}
-      <h1 className="mt-2 break-words text-3xl font-semibold sm:text-4xl">{t.title}</h1>
-      {data && <p className="mt-2 break-words font-semibold">{data.organization.name}</p>}
       {data && affiliationPermissions.some((permission) => data.permissions.includes(permission)) &&
-        <Link className={`${institutionLink} mt-2 inline-block`} href={`/institutions/${id}/affiliations`}>{affiliationMessages[locale].management}</Link>}
-    </header>
+        <Link className={institutionLink} href={`/institutions/${id}/affiliations`}>{affiliationMessages[locale].management}</Link>}
+    </>} />
     <RoleFeedback organization={id} error={resource.error} refresh={resource.refresh} />
     {!data && resource.error === null && <p role="status">{authMessages[locale].working}</p>}
     {data && <>

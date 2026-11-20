@@ -15,6 +15,8 @@
   },
   "languageLabel": "Lang",
   "skip": "Ale nan kontni an",
+  "showSidebar": "Montre meni sou kote a",
+  "hideSidebar": "Kache meni sou kote a",
   "home": "Akèy",
   "about": "Konsènan AyiNou",
   "updates": "Nouvèl AyiNou",

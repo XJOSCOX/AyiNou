@@ -11,6 +11,7 @@ import { pollMessages } from "@/lib/poll-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { PollForm } from "./poll-form";
 
 const secondary = "min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold disabled:opacity-60";
@@ -25,19 +26,17 @@ export function PollDirectory({ mine = false, context = null }: { mine?: boolean
     return { rows: items, nextCursor };
   }, [mine, scope, scopeId]);
   const { page, error, more, retry, loadingMore } = useCursorPage(loader);
-  return <MemberShell><section className="grid gap-4">
-    <h1 className="text-3xl font-semibold">{mine ? t.mine : t.title}</h1>
-    <p>{t.rules}</p>
-    <div className="flex flex-wrap items-center gap-3">
+  return <MemberShell><section className="grid min-w-0 gap-4">
+    <PageHeader title={mine ? t.mine : t.title} description={t.rules} actions={<>
       <Link href="/polls/new" className={institutionAction}>{t.create}</Link>
-      {mine || context ? <Link href="/polls" className={institutionLink}>{t.title}</Link> :
-        <Link href="/polls/mine" className={institutionLink}>{t.mine}</Link>}
+      {(mine || context) && <Link href="/polls" className={institutionLink}>{t.title}</Link>}
+      {!mine && <Link href="/polls/mine" className={institutionLink}>{t.mine}</Link>}
       <Link href="/polls/nominations" className={institutionLink}>{t.nominations}</Link>
-    </div>
+    </>} />
     {error !== null && <ApiErrorNotice error={error} retry={retry} signIn />}
     {!page && error === null && <p role="status">{t.loading}</p>}
-    {page?.rows.length === 0 && <p>{t.empty}</p>}
-    <ul className="grid gap-3 lg:grid-cols-2">
+    {page?.rows.length === 0 && <p role="status" className={institutionCard + " text-[var(--theme-body)]"}>{t.empty}</p>}
+    {!!page?.rows.length && <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-3">
       {page?.rows.map((poll) => <li key={poll.id} className={institutionCard + " grid gap-2"}>
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
           <span>{t.kinds[poll.kind]}</span><span>{t.states[poll.status]}</span>
@@ -45,7 +44,7 @@ export function PollDirectory({ mine = false, context = null }: { mine?: boolean
         <Link lang={poll.language} className={institutionLink + " break-words text-lg"} href={"/polls/" + poll.id}>{poll.title}</Link>
         {poll.scopeName && <p className="break-words text-sm">{poll.scopeName}</p>}
       </li>)}
-    </ul>
+    </ul>}
     {page?.nextCursor && <button type="button" className={secondary + " justify-self-start"} disabled={loadingMore}
       onClick={() => void more()}>{loadingMore ? t.loading : t.more}</button>}
   </section></MemberShell>;
@@ -56,7 +55,7 @@ export function PollDetailScreen({ id }: { id: string }) {
   const t = pollMessages[locale];
   const loader = useCallback((signal: AbortSignal) => loadPoll(id, signal), [id]);
   const resource = useInstitutionResource(loader);
-  return <MemberShell><section className="grid gap-4">
+  return <MemberShell><section className="grid min-w-0 gap-4">
     <Link href="/polls" className={institutionLink}>{t.title}</Link>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {resource.data ? <PollDetailBody key={id} poll={resource.data} refresh={resource.refresh} /> :
@@ -195,13 +194,12 @@ export function PollNominations() {
   const [locale] = useLocale();
   const t = pollMessages[locale];
   const resource = useInstitutionResource(loadNominations);
-  return <MemberShell><section className="grid gap-4">
-    <Link href="/polls" className={institutionLink}>{t.title}</Link>
-    <h1 className="text-3xl font-semibold">{t.nominations}</h1>
-    <p>{t.consentHelp}</p>
+  return <MemberShell><section className="grid min-w-0 gap-4">
+    <PageHeader title={t.nominations} description={t.consentHelp}
+      actions={<Link href="/polls" className={institutionLink}>{t.title}</Link>} />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {resource.data?.nominations.map((item) => <Nomination key={item.id} item={item} refresh={resource.refresh} />)}
-    {resource.data?.nominations.length === 0 && <p>{t.noNominations}</p>}
+    {resource.data?.nominations.length === 0 && <p className={institutionCard}>{t.noNominations}</p>}
     {!resource.data && resource.error === null && <p role="status">{t.loading}</p>}
   </section></MemberShell>;
 }

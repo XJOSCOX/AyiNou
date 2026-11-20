@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack --hostname 127.0.0.1 --port 4000",
+    "dev": "next dev --hostname 127.0.0.1 --port 4000",
     "start": "next start --hostname 127.0.0.1 --port 4000",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

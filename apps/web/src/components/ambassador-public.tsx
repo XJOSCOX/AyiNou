@@ -10,9 +10,10 @@ import { authMessages } from "@/lib/auth-i18n";
 import { useCursorPage } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
-import { DisplayControls } from "./display-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
-import { SiteBrand } from "./site-brand";
+import { MemberShell } from "./member-shell";
+import { Navbar } from "./navbar";
+import { PageHeader } from "./page-header";
 import { SiteFooter } from "./site-footer";
 
 export function AmbassadorRecognition({ ambassador, compact = false }: {
@@ -42,27 +43,12 @@ export function AmbassadorDirectory({ signedIn }: { signedIn: boolean }) {
   }, [signedIn, filter]);
   const { page, error, retry, more, loadingMore } = useCursorPage(load);
 
-  return <div id="top" className="flex min-h-dvh flex-col">
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--theme-border)] bg-[var(--theme-surface)] px-4 py-3 sm:px-8">
-      <SiteBrand />
-      <DisplayControls />
-    </header>
-    <main className="grid flex-1 content-start gap-5 px-4 py-5 sm:px-8 sm:py-8">
-      <section className={institutionCard}>
-        <h1 className="text-3xl font-semibold sm:text-4xl">{t.title}</h1>
-        <p className="mt-3 max-w-prose">{t.meaning}</p>
-        <p className="mt-2 max-w-prose text-sm text-[var(--theme-body)]">{t.boundaries}</p>
-        <h2 className="mt-5 text-lg font-semibold">{t.criteriaTitle}</h2>
-        <ul className="mt-2 grid list-disc gap-1 ps-5 text-sm sm:grid-cols-2">
-          {Object.entries(t.criteria).map(([key, label]) => <li key={key}>{label}</li>)}
-        </ul>
-        <p className="mt-3 max-w-prose text-sm text-[var(--theme-body)]">{t.fairness}</p>
-        <p className="mt-2 max-w-prose text-sm text-[var(--theme-body)]">{t.selection}</p>
-        {signedIn && <Link className={`${institutionLink} mt-4 inline-block`} href="/settings/ambassadors">{t.myProgram}</Link>}
-      </section>
-      <section aria-labelledby="ambassador-directory">
+  const content = <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_clamp(20rem,32%,36rem)]">
+      <PageHeader className="xl:col-span-2" title={t.title} description={t.meaning}
+        actions={signedIn && <Link className={institutionAction} href="/settings/ambassadors">{t.myProgram}</Link>} />
+      <section aria-labelledby="ambassador-directory" className={institutionCard}>
         <h2 id="ambassador-directory" className="text-2xl font-semibold">{t.directory}</h2>
-        <form className="my-3 grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]" onSubmit={(event) => {
+        <form className="my-4 grid max-w-4xl items-end gap-3 sm:grid-cols-2 2xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto]" onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
           setFilter({ q: String(data.get("q") ?? "").trim(), category: String(data.get("category") ?? "") });
@@ -74,12 +60,12 @@ export function AmbassadorDirectory({ signedIn }: { signedIn: boolean }) {
               {ambassadorCategories.map((category) => <option key={category} value={category}>{t.categories[category]}</option>)}
             </select>
           </label>
-          <button className={institutionAction}>{t.search}</button>
+          <button className={institutionAction + " w-full sm:w-fit"}>{t.search}</button>
         </form>
         {error !== null && <ApiErrorNotice error={error} retry={retry} signIn={signedIn} />}
         {!page && error === null && <p role="status">{authMessages[locale].working}</p>}
-        {page?.rows.length === 0 && <p className={institutionCard}>{filter.q || filter.category ? t.noResults : t.emptyDirectory}</p>}
-        {!!page?.rows.length && <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {page?.rows.length === 0 && <p className="border-t border-[var(--theme-border)] pt-4 text-sm text-[var(--theme-body)]">{filter.q || filter.category ? t.noResults : t.emptyDirectory}</p>}
+        {!!page?.rows.length && <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,17rem),1fr))] gap-3">
           {page.rows.map((person) => <li key={person.username} className={institutionCard}>
             <div className="flex items-center gap-3">
               {person.avatarUrl && <Image src={person.avatarUrl} width={44} height={44} alt="" unoptimized className="size-11 shrink-0 rounded-full object-cover" />}
@@ -94,7 +80,25 @@ export function AmbassadorDirectory({ signedIn }: { signedIn: boolean }) {
         {page?.nextCursor && <button className={`${institutionAction} mt-3`} type="button" disabled={loadingMore}
           onClick={() => { void more(); }}>{loadingMore ? authMessages[locale].working : t.more}</button>}
       </section>
-    </main>
+      <section aria-labelledby="ambassador-criteria" className={institutionCard + " grid gap-4 text-sm leading-relaxed"}>
+        <div>
+          <h2 id="ambassador-criteria" className="text-xl font-semibold">{t.criteriaTitle}</h2>
+          <ul className="mt-3 list-disc space-y-1.5 ps-5">
+            {Object.entries(t.criteria).map(([key, label]) => <li key={key}>{label}</li>)}
+          </ul>
+        </div>
+        <div className="grid gap-3 border-t border-[var(--theme-border)] pt-4 text-[var(--theme-body)]">
+          <p>{t.fairness}</p>
+          <p>{t.selection}</p>
+          <p>{t.boundaries}</p>
+        </div>
+      </section>
+    </div>;
+
+  if (signedIn) return <MemberShell>{content}</MemberShell>;
+  return <div id="top" className="flex min-h-dvh flex-col">
+    <Navbar />
+    <main className="w-full flex-1 px-4 py-5 sm:px-8 sm:py-8">{content}</main>
     <SiteFooter />
   </div>;
 }

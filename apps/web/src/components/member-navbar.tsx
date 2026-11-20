@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
@@ -16,7 +17,8 @@ import { NotificationBell } from "./notification-bell";
 
 export function MemberNavbar() {
   const [locale] = useLocale();
-  const { displayName, claims, administrator } = useMemberIdentity();
+  const { displayName, avatarUrl, claims, administrator } = useMemberIdentity();
+  const [failedAvatar, setFailedAvatar] = useState<string | null>(null);
   const settings = accountMessages[locale].settings;
   const menuLabel = displayName || settings;
   const router = useRouter();
@@ -46,11 +48,13 @@ export function MemberNavbar() {
           }
         }}>
           <summary className="flex min-h-9 max-w-60 list-none items-center gap-2 rounded-md px-1.5 py-0.5 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)] [&::-webkit-details-marker]:hidden">
-            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--theme-selected)] text-[var(--theme-link)]">
+            <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--theme-selected)] text-[var(--theme-link)]">
+              {avatarUrl && avatarUrl !== failedAvatar ? <Image src={avatarUrl} alt="" width={32} height={32}
+                className="size-full object-cover" unoptimized onError={() => setFailedAvatar(avatarUrl)} /> :
               <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
                 <circle cx="12" cy="8" r="3.4" />
                 <path d="M5 20v-1a7 7 0 0 1 14 0v1" />
-              </svg>
+              </svg>}
             </span>
             <span className="line-clamp-2 min-w-0 break-words text-start leading-tight sm:line-clamp-none sm:truncate" title={menuLabel}>{menuLabel}</span>
             {displayName && <PersonalClaimChecks claims={claims} />}

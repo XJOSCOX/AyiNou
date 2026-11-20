@@ -15,6 +15,7 @@ import { useMemberIdentity } from "@/lib/member-display-name";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { AdministratorMark, PersonalClaimChecks } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 const input = "mt-2 w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-control)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]";
 const action = "rounded-xl bg-[var(--theme-primary)] px-5 py-3 font-semibold text-[var(--theme-on-primary)] disabled:opacity-60";
@@ -70,7 +71,7 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
 
   return (
     <MemberShell>
-      <div className={onboarding ? "mx-auto max-w-3xl rounded-3xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-9" : "min-w-0"}>
+      <div className={onboarding ? "min-w-0 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-9" : "min-w-0"}>
         {loaded ? <ProfileEditor {...loaded} onboarding={onboarding} /> : failed ? (
           <>
             <p role="alert" className={errorBox}>{t.loadError}</p>
@@ -86,7 +87,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
   profile: MemberProfile; departments: Department[]; onboarding: boolean;
 }) {
   const [locale, setLocale] = useLocale();
-  const { claims, administrator } = useMemberIdentity();
+  const { claims, administrator, setAvatarUrl } = useMemberIdentity();
   const t = authMessages[locale];
   const account = accountMessages[locale];
   const m = membershipMessages[locale];
@@ -173,7 +174,11 @@ function ProfileEditor({ profile, departments, onboarding }: {
     if (!file) return;
     setPhotoError("");
     setUploading(true);
-    try { setAvatar(await uploadAvatar(file)); }
+    try {
+      const url = await uploadAvatar(file);
+      setAvatar(url);
+      setAvatarUrl(url);
+    }
     catch (cause) {
       const code = cause instanceof Error ? cause.message : "";
       if (code === "UNAUTHORIZED") router.replace("/login");
@@ -355,8 +360,8 @@ function ProfileEditor({ profile, departments, onboarding }: {
 
   return (
     <>
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{onboarding ? t.onboardingTitle : t.profileTitle}</h1>
-      {all && <p className="mt-2 text-[var(--theme-body)]">{t.profileIntro}</p>}
+      {onboarding ? <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.onboardingTitle}</h1> :
+        <PageHeader title={t.profileTitle} description={t.profileIntro} />}
       {onboarding && <ol className="my-5 grid grid-cols-2 gap-2 text-xs font-semibold sm:grid-cols-4">
         {titles.map((title, index) => <li key={title} aria-current={index === step ? "step" : undefined}
           className={`rounded-lg px-3 py-2 ${index === step ? "bg-[var(--theme-selected)]" : "bg-[var(--theme-control)]"}`}>{title}</li>)}

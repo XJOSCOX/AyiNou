@@ -11,6 +11,7 @@ import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { MyVerificationAppeals } from "./trust-workspace";
 
 export function VerificationScreen({ initialKind, institution, claim }: {
@@ -26,13 +27,8 @@ export function VerificationScreen({ initialKind, institution, claim }: {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <header className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.verification}</h1>
-            <p className="mt-2 max-w-3xl text-[var(--theme-body)]">{t.verificationIntro}</p>
-          </div>
-          {accounts.data?.canReview && <Link className={institutionLink} href="/verification/review">{t.review}</Link>}
-        </header>
+        <PageHeader title={t.verification} description={t.verificationIntro}
+          actions={accounts.data?.canReview && <Link className={institutionLink} href="/verification/review">{t.review}</Link>} />
         <div className={`${institutionCard} grid gap-2 text-sm`}>
           <ul className="flex flex-wrap gap-x-4 gap-y-2 font-semibold">
             {(["identity", "notable_person", "organization", "representative"] as const).map((kind) => <li key={kind}>{trust[kind]}</li>)}

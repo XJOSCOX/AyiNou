@@ -11,6 +11,7 @@ import { safetyMessages } from "@/lib/safety-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { PostMediaGallery } from "./post-media";
 
 async function memberPage(cursor: string | null, signal: AbortSignal) {
@@ -24,10 +25,7 @@ export function MemberAppeals() {
   const [revision, setRevision] = useState(0);
   const resource = useCursorPage(memberPage, revision);
   return <MemberShell><section className="grid gap-4">
-    <header>
-      <h1 className="text-3xl font-semibold sm:text-4xl">{t.appeals}</h1>
-      <p className="mt-2 max-w-prose text-sm text-[var(--theme-body)]">{t.appealHelp}</p>
-    </header>
+    <PageHeader title={t.appeals} description={t.appealHelp} />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
     {!resource.page && resource.error === null && <p role="status">{t.loading}</p>}
     {resource.page?.rows.length === 0 && <p className={institutionCard}>{t.noDecisions}</p>}

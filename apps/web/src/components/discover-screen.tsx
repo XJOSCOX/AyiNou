@@ -11,6 +11,7 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { DiscoveryResults, FollowAccountList, discoveryTab } from "./discovery-accounts";
 import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 type View = DiscoveryKind | "following";
 const views = ["people", "institutions", "following"] as const;
@@ -23,10 +24,7 @@ export function DiscoverScreen({ initial }: { initial: View }) {
 
   return <MemberShell>
     <div className="grid min-w-0 gap-4">
-      <header>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.discover}</h1>
-        <p className="mt-2 text-sm text-[var(--theme-body)]">{t.intro}</p>
-      </header>
+      <PageHeader title={t.discover} description={t.intro} />
       <div role="group" aria-label={t.accounts} className="flex flex-wrap gap-2">
         {views.map((value) => <button key={value} type="button" className={discoveryTab} aria-pressed={value === view} onClick={() => setView(value)}>
           {value === "following" ? t.myFollowing : t[value]}

@@ -14,6 +14,7 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { PostMediaGallery } from "./post-media";
 import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { AppealReviewQueue } from "./moderation-appeals";
 
 const tabs = ["reports", "hidden"] as const;
@@ -37,11 +38,8 @@ export function FeedModeration({ community }: { community?: string }) {
 
   return <MemberShell>
     <div className="grid w-full min-w-0 gap-5">
-      <header>
-        <Link href={community ? `/communities/${community}` : "/feed"} className={institutionLink}>{community ? c.back : t.backToFeed}</Link>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{community ? c.moderation : t.moderation}</h1>
-        <p className="mt-2 text-sm text-[var(--theme-body)]">{t.moderationIntro}</p>
-      </header>
+      <PageHeader title={community ? c.moderation : t.moderation} description={t.moderationIntro}
+        actions={<Link href={community ? `/communities/${community}` : "/feed"} className={institutionLink}>{community ? c.back : t.backToFeed}</Link>} />
       {!community && <div role="group" aria-label={t.moderation} className="flex flex-wrap gap-2">
         <button type="button" className={choiceStyle} aria-pressed={!appeals} onClick={() => setAppeals(false)}>{t.pendingReports}</button>
         <button type="button" className={choiceStyle} aria-pressed={appeals} onClick={() => setAppeals(true)}>{safety.review}</button>

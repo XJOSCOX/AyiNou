@@ -12,6 +12,7 @@ import { trustMessages } from "@/lib/trust-i18n";
 import { localizedApiError } from "@/lib/error-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { AdminFeedback } from "./admin-workspace";
 import { VerificationAppealReview } from "./trust-workspace";
 
@@ -30,10 +31,7 @@ export function VerificationReview() {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <header>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.review}</h1>
-          <p className="mt-2 max-w-3xl text-[var(--theme-body)]">{t.reviewIntro}</p>
-        </header>
+        <PageHeader title={t.review} description={t.reviewIntro} />
         {!error && <div className="flex flex-wrap gap-2" role="group" aria-label={t.applications}>
           {reviewQueueModes.map((status) => <button key={status} type="button" aria-pressed={mode === status}
             className="rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]"

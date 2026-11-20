@@ -13,6 +13,7 @@ import { pollMessages } from "@/lib/poll-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { ProjectIdentityNotice } from "./project-form";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -29,9 +30,8 @@ function localInput(value?: string) {
 export function NewPoll() {
   const [locale] = useLocale();
   const t = pollMessages[locale];
-  return <MemberShell><section className="grid gap-4">
-    <Link className={institutionLink} href="/polls">{t.title}</Link>
-    <h1 className="text-3xl font-semibold">{t.create}</h1>
+  return <MemberShell><section className="grid min-w-0 gap-4">
+    <PageHeader title={t.create} actions={<Link className={institutionLink} href="/polls">{t.title}</Link>} />
     <div className={institutionCard}><PollForm /></div>
   </section></MemberShell>;
 }
@@ -115,16 +115,22 @@ export function PollForm({ detail, refresh }: { detail?: PollDetail; refresh?: (
         <option value="">{t.proposal}</option>{project?.tasks.map((task) => <option key={task.id} value={task.id}>{task.name}</option>)}
       </select></label>}
     </div>}
-    <label>{t.question}<input className={institutionField} name="title" defaultValue={detail?.title} minLength={3} maxLength={120} required /></label>
-    <label>{t.description}<textarea className={institutionField} name="description" defaultValue={detail?.description} minLength={3} maxLength={2000} rows={3} required /></label>
-    <label>{t.language}<select className={institutionField} name="language" defaultValue={detail?.language ?? locale}>
-      <option value="ht">Kreyòl ayisyen</option><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option>
-    </select></label>
-    <label>{kind === "person" ? t.nomineeHandles : t.options}
-      <textarea className={institutionField} name="options" rows={4} maxLength={1210} required={!detail}
-        defaultValue={detail && kind !== "person" ? detail.options.map((item) => item.label).join("\n") : ""} />
-      {kind === "person" && <span className="text-sm">{detail ? t.reconsent : t.consentHelp}</span>}
-    </label>
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid min-w-0 gap-4">
+        <label>{t.question}<input className={institutionField} name="title" defaultValue={detail?.title} minLength={3} maxLength={120} required /></label>
+        <label>{t.description}<textarea className={institutionField} name="description" defaultValue={detail?.description} minLength={3} maxLength={2000} rows={3} required /></label>
+      </div>
+      <div className="grid min-w-0 gap-4">
+        <label>{t.language}<select className={institutionField} name="language" defaultValue={detail?.language ?? locale}>
+          <option value="ht">Kreyòl ayisyen</option><option value="fr">Français</option><option value="en">English</option><option value="es">Español</option>
+        </select></label>
+        <label>{kind === "person" ? t.nomineeHandles : t.options}
+          <textarea className={institutionField} name="options" rows={4} maxLength={1210} required={!detail}
+            defaultValue={detail && kind !== "person" ? detail.options.map((item) => item.label).join("\n") : ""} />
+          {kind === "person" && <span className="text-sm">{detail ? t.reconsent : t.consentHelp}</span>}
+        </label>
+      </div>
+    </div>
     <div className="grid gap-3 sm:grid-cols-2">
       <label className="min-w-0">{t.opensAt}<input className={institutionField} name="opensAt" type="datetime-local" required defaultValue={localInput(detail?.opensAt)} /></label>
       <label className="min-w-0">{t.closesAt}<input className={institutionField} name="closesAt" type="datetime-local" required defaultValue={localInput(detail?.closesAt)} /></label>

@@ -14,6 +14,7 @@ import { useLocale } from "@/lib/locale-store";
 import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionStatus, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { MyAffiliationsPanel } from "./my-affiliations-panel";
 import { OperationalOrganizations } from "./organization-roles";
 
@@ -39,16 +40,10 @@ export function InstitutionHub() {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <header className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.institutions}</h1>
-            <p className="mt-2 max-w-3xl text-[var(--theme-body)]">{t.institutionsIntro}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link className={institutionLink} href="/discover?view=institutions">{discoveryMessages[locale].viewAll}</Link>
-            {!creating && <button type="button" className={institutionAction} onClick={() => setCreating(true)}>{t.create}</button>}
-          </div>
-        </header>
+        <PageHeader title={t.institutions} description={t.institutionsIntro} actions={<>
+          <Link className={institutionLink} href="/discover?view=institutions">{discoveryMessages[locale].viewAll}</Link>
+          {!creating && <button type="button" className={institutionAction} onClick={() => setCreating(true)}>{t.create}</button>}
+        </>} />
         {creating && <section className={institutionCard}>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-semibold">{t.create}</h2>

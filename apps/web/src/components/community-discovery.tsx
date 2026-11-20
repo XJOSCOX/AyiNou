@@ -15,7 +15,7 @@ import { membershipMessages } from "@/lib/membership-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { CommunityCard } from "./community-card";
 import { GroupInvitationList, GroupMore, TopicSelect } from "./groups";
-import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 
 type FeedbackChange = { id: string; action: CommunityRecommendationFeedbackAction } | { action: "reset" };
 
@@ -79,44 +79,46 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
     });
   }
   return <section className="grid gap-4" aria-label={t.recommended}>
-    <header>
-      <h2 className="text-xl font-semibold">{t.recommended}</h2>
-      <p className="mt-1 text-sm text-[var(--theme-body)]">{t.recommendIntro}</p>
-    </header>
-    <div className="grid gap-3 sm:max-w-2xl sm:grid-cols-2">
-      <label className="min-w-0 text-sm font-semibold">{groups.category}
-        <select value={kind} className={institutionField} onChange={(event) => {
-          setKind(event.target.value as Community["kind"] | "");
-          setCountry("");
-          setTopic("");
-        }}>
-          <option value="">{t.allCategories}</option>
-          {communityKinds.map((value) => <option key={value} value={value}>{value === "department" ? groups.officialDepartments : groups[value]}</option>)}
-        </select>
-      </label>
-      {kind === "interest" && <TopicSelect value={topic} change={setTopic} />}
-      {kind === "diaspora" && <label className="text-sm font-semibold">{groups.country}
-        <input value={country} onChange={(event) => setCountry(event.target.value.toUpperCase())} maxLength={2}
-          aria-invalid={invalidCountry} aria-describedby={invalidCountry ? countryError : undefined} className={institutionField} placeholder="HT" />
-        {invalidCountry && <span id={countryError} className="mt-1 block text-[var(--theme-body)]">{t.invalidCountry}</span>}
-      </label>}
-    </div>
-    <details className={institutionCard}>
-      <summary className="cursor-pointer font-semibold">{t.reset}</summary>
-      {settings.data && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.feedbackSummary
-        .replace("{hidden}", new Intl.NumberFormat(locale).format(settings.data.hidden))
-        .replace("{count}", new Intl.NumberFormat(locale).format(settings.data.notInterested))}</p>}
-      {settings.error !== null && <ApiErrorNotice error={settings.error} retry={settings.refresh} signIn />}
-      {confirmReset && <p className="my-2 text-sm">{t.resetConfirm}</p>}
-      <div className="mt-2 flex flex-wrap gap-3">
-        <button type="button" disabled={mutation.busy} className={institutionAction}
-          onClick={() => confirmReset ? submitFeedback({ action: "reset" }) : setConfirmReset(true)}>{t.reset}</button>
-        {confirmReset && <button type="button" className={institutionLink} onClick={() => {
-          setConfirmReset(false);
-          if (pendingFeedback?.action === "reset") setPendingFeedback(null);
-        }}>{feedMessages[locale].cancel}</button>}
+    <div className="grid items-start gap-4 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-4 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,25rem)]">
+      <header>
+        <h2 className="text-xl font-semibold">{t.recommended}</h2>
+        <p className="mt-1 max-w-prose text-sm text-[var(--theme-body)]">{t.recommendIntro}</p>
+      </header>
+      <div className="grid gap-3 sm:max-w-2xl sm:grid-cols-2">
+        <label className="min-w-0 text-sm font-semibold">{groups.category}
+          <select value={kind} className={institutionField} onChange={(event) => {
+            setKind(event.target.value as Community["kind"] | "");
+            setCountry("");
+            setTopic("");
+          }}>
+            <option value="">{t.allCategories}</option>
+            {communityKinds.map((value) => <option key={value} value={value}>{value === "department" ? groups.officialDepartments : groups[value]}</option>)}
+          </select>
+        </label>
+        {kind === "interest" && <TopicSelect value={topic} change={setTopic} />}
+        {kind === "diaspora" && <label className="text-sm font-semibold">{groups.country}
+          <input value={country} onChange={(event) => setCountry(event.target.value.toUpperCase())} maxLength={2}
+            aria-invalid={invalidCountry} aria-describedby={invalidCountry ? countryError : undefined} className={institutionField} placeholder="HT" />
+          {invalidCountry && <span id={countryError} className="mt-1 block text-[var(--theme-body)]">{t.invalidCountry}</span>}
+        </label>}
       </div>
-    </details>
+      <details className="border-t border-[var(--theme-border)] pt-3 lg:col-span-2">
+        <summary className="cursor-pointer text-sm font-semibold text-[var(--theme-link)]">{t.reset}</summary>
+        {settings.data && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.feedbackSummary
+          .replace("{hidden}", new Intl.NumberFormat(locale).format(settings.data.hidden))
+          .replace("{count}", new Intl.NumberFormat(locale).format(settings.data.notInterested))}</p>}
+        {settings.error !== null && <ApiErrorNotice error={settings.error} retry={settings.refresh} signIn />}
+        {confirmReset && <p className="my-2 text-sm">{t.resetConfirm}</p>}
+        <div className="mt-2 flex flex-wrap gap-3">
+          <button type="button" disabled={mutation.busy} className={institutionAction}
+            onClick={() => confirmReset ? submitFeedback({ action: "reset" }) : setConfirmReset(true)}>{t.reset}</button>
+          {confirmReset && <button type="button" className={institutionLink} onClick={() => {
+            setConfirmReset(false);
+            if (pendingFeedback?.action === "reset") setPendingFeedback(null);
+          }}>{feedMessages[locale].cancel}</button>}
+        </div>
+      </details>
+    </div>
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} retry={retryFeedback} signIn />}
     {notice && <div className="flex flex-wrap items-center gap-3">
       <p role="status" className="text-sm">{t[notice]}</p>
@@ -128,7 +130,7 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
       onClick={() => setRevision((value) => value + 1)}>{t.refresh}</button>}
     {!resource.page && resource.error === null && <p role="status">{c.loading}</p>}
     {rows?.length === 0 && <p role="status">{t.noRecommendations}</p>}
-    <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-3">
       {rows?.map(({ id, community, reason, recentPublicActivity }) => <CommunityCard key={id} community={community} update={(next) => {
         if (next) onMembership(next);
         if (next && (next.joined || (next.kind !== "department" && next.requestStatus === "pending")))

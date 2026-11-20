@@ -22,6 +22,7 @@ import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { PostTopicLabels, RecommendationActions, RecommendationSettingsPanel } from "./feed-recommendations";
 import { VerifiedCheck, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { PostComposer } from "./post-composer";
 import { PostMediaGallery } from "./post-media";
 
@@ -56,14 +57,9 @@ export function FeedScreen() {
   }
 
   return <MemberShell>
-    <div className="grid w-full min-w-0 gap-5 xl:grid-cols-[minmax(0,1fr)_clamp(20rem,30%,30rem)] xl:items-start xl:gap-x-8">
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--theme-border)] pb-5 xl:col-span-2">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.feed}</h1>
-          <p className="mt-2 text-sm text-[var(--theme-body)]">{t.intro}</p>
-        </div>
-        {access.data?.allowed && <Link href="/feed/moderation" className={institutionLink}>{t.moderation}</Link>}
-      </header>
+    <div className="grid w-full min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_clamp(17rem,28%,30rem)] xl:items-start xl:gap-5">
+      <PageHeader className="xl:col-span-2" title={t.feed} description={t.intro}
+        actions={access.data?.allowed && <Link href="/feed/moderation" className={institutionLink}>{t.moderation}</Link>} />
       <div className="grid min-w-0 gap-4">
         <section className={`${institutionCard} max-sm:p-3`} aria-label={t.write}>
           <PostComposer onSaved={changed} />

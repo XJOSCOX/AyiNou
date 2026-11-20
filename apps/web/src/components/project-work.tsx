@@ -16,6 +16,7 @@ import { projectProgressMessages } from "@/lib/project-progress-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { ProjectIdentityNotice } from "./project-form";
 import { progressTabs, ProjectProgressWork, type ProgressTab } from "./project-progress";
 
@@ -37,7 +38,7 @@ export function ProjectWorkIndexScreen() {
   const { t, locale } = useWorkMessages();
   const resource = useInstitutionResource(loadProjectWorkIndex);
   return <MemberShell><div className="grid gap-4">
-    <h1 className="text-3xl font-semibold">{t.workspace}</h1>
+    <PageHeader title={t.workspace} />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {!resource.data && resource.error === null && <p role="status">{authMessages[locale].working}</p>}
     {resource.data && <>
@@ -70,12 +71,11 @@ export function ProjectWorkScreen({ projectId, initialSection }: { projectId: st
   const hasProgress = work?.status !== "approved" && work?.role && work.role !== "delegate";
   const props = work ? { work, refresh: resource.refresh } : null;
   return <MemberShell><div className="grid gap-4">
-    <div className={actionsClass}>
+    <PageHeader title={work?.title ?? t.workspace} actions={<>
       <Link href={"/projects/" + projectId} className={institutionLink}>{t.proposal}</Link>
       <Link href="/projects/team" className={institutionLink}>{t.workspace}</Link>
       {work?.role && <Link href={"/polls?scope=project&scopeId=" + projectId} className={institutionLink}>{pollMessages[locale].title}</Link>}
-    </div>
-    <h1 className="break-words text-3xl font-semibold sm:text-4xl">{work?.title ?? t.workspace}</h1>
+    </>} />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {!work && resource.error === null && <p role="status">{authMessages[locale].working}</p>}
     {work && props && <>

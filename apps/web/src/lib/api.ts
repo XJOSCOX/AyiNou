@@ -47,9 +47,29 @@ export function publicRequest(path: string, init?: RequestInit) {
   return requestJson(`${apiBaseUrl}${path}`, { ...init, headers });
 }
 
-export async function fetchMyProfile(): Promise<MemberProfile> {
-  const result: { profile: MemberProfile } = await authorizedRequest("/api/v1/me/profile");
-  return result.profile;
+const pendingProfiles = new Map<string, Promise<MemberProfile>>();
+
+export async function fetchMyProfile(signal?: AbortSignal): Promise<MemberProfile> {
+  signal?.throwIfAborted();
+  const headers = await sessionHeaders();
+  signal?.throwIfAborted();
+  const authorization = headers.get("Authorization")!;
+  let pending = pendingProfiles.get(authorization);
+  if (!pending) {
+    // The page and the navbar can request the same profile. Share only the current read for this token.
+    const deadline = AbortSignal.timeout(10_000);
+    pending = publicRequest("/api/v1/me/profile", { headers, signal: deadline })
+      .then((result: { profile: MemberProfile }) => result.profile)
+      .catch((cause: unknown) => {
+        if (deadline.aborted) throw new ApiRequestError("TIMEOUT", 0, true);
+        throw cause;
+      })
+      .finally(() => pendingProfiles.delete(authorization));
+    pendingProfiles.set(authorization, pending);
+  }
+  const profile = await pending;
+  signal?.throwIfAborted();
+  return profile;
 }
 
 export async function fetchAccountCodes(signal: AbortSignal) {

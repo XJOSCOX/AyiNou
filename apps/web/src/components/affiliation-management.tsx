@@ -15,6 +15,7 @@ import { useLocale } from "@/lib/locale-store";
 import { AffiliationFeedback, AffiliationTypeSelect, useAffiliationAction } from "./affiliation-ui";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 export function AffiliationManagementScreen({ id }: { id: string }) {
   const [locale] = useLocale();
@@ -47,11 +48,9 @@ export function AffiliationManagementScreen({ id }: { id: string }) {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <header>
+        <PageHeader title={t.management} description={t.authorityNote} actions={
           <Link className={institutionLink} href={`/institutions/${id}/roles`}>{organizationRoleMessages[locale].title}</Link>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">{t.management}</h1>
-          <p className="mt-2 max-w-3xl text-[var(--theme-body)]">{t.authorityNote}</p>
-        </header>
+        } />
         {resource.error ? <div className={institutionCard}>
           <p role="alert" className={institutionErrorBox}>{institutionError(system, resource.error)}</p>
           <button type="button" className={`${institutionLink} mt-2`} onClick={resource.refresh}>{auth.retry}</button>

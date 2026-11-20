@@ -14,6 +14,7 @@ import { projectMessages } from "@/lib/project-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 
 const sections = ["description","problem","solution","objectives","beneficiaries","outcomes"] as const;
 const get = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -33,8 +34,7 @@ export function NewProjectScreen() {
   const [locale] = useLocale();
   const t = projectMessages[locale];
   return <MemberShell><div className="grid gap-4">
-    <Link className={institutionLink} href="/projects">{t.title}</Link>
-    <h1 className="text-3xl font-semibold sm:text-4xl">{t.newProject}</h1>
+    <PageHeader title={t.newProject} actions={<Link className={institutionLink} href="/projects">{t.title}</Link>} />
     <ProjectForm />
   </div></MemberShell>;
 }

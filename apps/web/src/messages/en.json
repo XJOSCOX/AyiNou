@@ -15,6 +15,8 @@
   },
   "languageLabel": "Language",
   "skip": "Skip to content",
+  "showSidebar": "Show sidebar",
+  "hideSidebar": "Hide sidebar",
   "home": "Home",
   "about": "About AyiNou",
   "updates": "AyiNou updates",

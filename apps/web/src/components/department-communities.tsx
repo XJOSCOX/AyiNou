@@ -19,6 +19,7 @@ import { DiscoveryAccounts } from "./discovery-accounts";
 import { PostCard } from "./feed-screen";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { PageHeader } from "./page-header";
 import { CommunityCard, CommunitySummary, MembershipControl } from "./community-card";
 import { MyGroupActivities, RecommendedCommunities } from "./community-discovery";
 import { PostComposer } from "./post-composer";
@@ -49,26 +50,20 @@ export function DepartmentDirectory() {
     .map((community) => changed[community.id] ?? community)
     .filter((community) => (!membershipsOnly || community.joined) &&
       [community.name, community.departmentCode ?? "", community.slug].some((part) => normalize(part).includes(needle)));
-  return <MemberShell><div className="grid gap-5">
-    <header className="flex flex-wrap items-start justify-between gap-4">
-      <div>
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.title}</h1>
-      <p className="mt-2 text-sm text-[var(--theme-body)]">{groups.intro}</p>
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Link href="/communities/new" className={institutionAction}>{groups.newGroup}</Link>
-        <Link href="/communities/invitations" className={institutionLink}>{groups.invitations}</Link>
-      </div>
-    </header>
-    <div className="flex flex-wrap items-end gap-3">
+  return <MemberShell><div className="grid min-w-0 gap-4">
+    <PageHeader title={t.title} description={groups.intro} actions={<>
+      <Link href="/communities/new" className={institutionAction}>{groups.newGroup}</Link>
+      <Link href="/communities/invitations" className={institutionLink}>{groups.invitations}</Link>
+    </>} />
+    <div className="grid gap-3 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-4">
       <label className="w-full max-w-sm text-sm font-semibold">{category === "official" ? t.search : category === "mine" ? groups.searchCommunities : groups.searchGroups}
         <input type="search" className={institutionField} value={query} onChange={(event) => setQuery(event.target.value)} maxLength={80} />
       </label>
-    </div>
-    <div className="flex flex-wrap gap-2" role="group" aria-label={t.title}>
-      {(["recommended", "official", "diaspora", "interest", "mine"] as const).map((value) => <button key={value} type="button" aria-pressed={category === value}
-        className="min-h-10 rounded-md border border-[var(--theme-border)] px-3 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]"
-        onClick={() => setCategory(value)}>{value === "recommended" ? discovery.recommended : value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
+      <div className="flex flex-wrap gap-2 border-t border-[var(--theme-border)] pt-3" role="group" aria-label={t.title}>
+        {(["recommended", "official", "diaspora", "interest", "mine"] as const).map((value) => <button key={value} type="button" aria-pressed={category === value}
+          className="min-h-10 rounded-md px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]"
+          onClick={() => setCategory(value)}>{value === "recommended" ? discovery.recommended : value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
+      </div>
     </div>
     {category === "recommended" && <RecommendedCommunities search={search} onMembership={(next) =>
       setChanged((items) => ({ ...items, [next.id]: next }))} explore={(next) => {
@@ -82,7 +77,7 @@ export function DepartmentDirectory() {
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!rooms && resource.error === null && <p role="status">{t.loading}</p>}
     {rooms?.length === 0 && <p role="status">{membershipsOnly && !needle ? t.emptyMine : t.noMatches}</p>}
-    {!!rooms?.length && <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+    {!!rooms?.length && <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-3">
       {rooms.map((community) => <CommunityCard key={community.id} community={community}
         update={(next) => { if (next) setChanged((items) => ({ ...items, [next.id]: next })); }} />)}
     </ul>}
