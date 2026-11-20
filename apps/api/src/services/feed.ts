@@ -9,6 +9,7 @@ type PostRow = Omit<FeedPost, "author"> & {
 
 export interface FeedRepository {
   rpc<T>(token: string | null, name: string, params?: Record<string, unknown>): Promise<T>;
+  signAvatars?(paths: string[]): Promise<Map<string, string>>;
   read(token: string | null, params: Record<string, unknown>): Promise<FeedPost[]>;
   recommendations(token: string | null, params: Record<string, unknown>): Promise<{
     snapshotId: string; algorithmVersion: string; rows: { position: number; post: FeedPost }[];
@@ -46,6 +47,9 @@ export function feedDatabaseError(code: string): ApiError {
     case "PVT04": return new ApiError(404, "TRUST_CASE_UNAVAILABLE", "This case or review action is unavailable");
     case "PVT09": return new ApiError(409, "VERIFICATION_APPEAL_EXISTS", "An appeal already exists for this decision");
     case "PVT14": return new ApiError(410, "VERIFICATION_APPEAL_EXPIRED", "The verification appeal window has ended");
+    case "PAB04": return new ApiError(404, "AMBASSADOR_UNAVAILABLE", "Program case unavailable");
+    case "PAB09": return new ApiError(409, "AMBASSADOR_CASE_CHANGED", "Program case changed or action unavailable");
+    case "PAB11": return new ApiError(409, "AMBASSADOR_PUBLIC_ELIGIBILITY", "Public eligibility is required");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");
@@ -69,23 +73,26 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
     return data as T;
   }
 
+  async function signAvatars(paths: string[]) {
+    const signed = new Map<string, string>();
+    if (avatars && paths.length) {
+      try {
+        const { data } = await avatars.createSignedUrls([...new Set(paths)], 120);
+        for (const row of data ?? []) if (row.path && row.signedUrl) signed.set(row.path, row.signedUrl);
+      } catch { /* A storage outage can omit avatars without affecting the response. */ }
+    }
+    return signed;
+  }
+
   async function hydrate<T extends PostRow>(token: string | null, posts: T[]) {
     const eligible = posts.filter(({ status }) => status === "published").map(({ id }) => id);
     const ids = posts.map(({ id }) => id);
-    const paths = [...new Set(posts.flatMap(({ author }) => author?.avatarPath ? [author.avatarPath] : []))];
-    const signed = new Map<string, string>();
-    async function signAvatars() {
-      if (!avatars || !paths.length) return;
-      try {
-        const { data } = await avatars.createSignedUrls(paths, 120);
-        for (const row of data ?? []) if (row.path && row.signedUrl) signed.set(row.path, row.signedUrl);
-      } catch { /* A storage outage can omit avatars without affecting posts. */ }
-    }
-    const [summaries, tags, media] = await Promise.all([
+    const paths = posts.flatMap(({ author }) => author?.avatarPath ? [author.avatarPath] : []);
+    const [summaries, tags, media, signed] = await Promise.all([
       eligible.length ? rpc<Partial<Record<string, ReactionSummary>>>(token, "post_reactions_for_client", { p_ids: eligible }) : undefined,
       ids.length ? rpc<Partial<Record<string, InterestCode[]>>>(token, "post_topics_for_client", { p_ids: ids }) : undefined,
       ids.length ? rpc<Partial<Record<string, PostAttachment[]>>>(token, "post_attachments_for_client", { p_ids: ids }) : undefined,
-      signAvatars(),
+      signAvatars(paths),
     ]);
     return posts.map(({ author, ...post }) => {
       const reactions = summaries?.[post.id];
@@ -99,6 +106,7 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
 
   return {
     rpc,
+    signAvatars,
     async read(token, params) {
       const { p_scope, p_id, p_community, ...page } = params;
       const posts = p_scope === "community"

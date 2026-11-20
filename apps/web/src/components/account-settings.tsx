@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
+import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { fetchAccountCodes } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -82,6 +83,7 @@ export function AccountSettings() {
         </section>
         <NotificationPreferencesPanel />
         <MemberSafetySettings />
+        <Link href="/settings/ambassadors" className={`${secondaryAction} justify-self-start`}>{ambassadorMessages[locale].myProgram}</Link>
         {failed ? (
           <div className={card}>
             <p role="alert" className="text-[var(--theme-error-text)]">{t.loadError}</p>

@@ -132,3 +132,10 @@ Phase 2B uses self-declared membership categories. A category grants no verifica
 - Bind ownership review to the current identity and owner grant. Invalidate old representative grants and invitations on transfer. Public representative badges require separate review, a live grant and holder consent.
 - Use one private impersonation queue and one verification appeal workflow. A report does not change public status. A nonconflicted administrator can restrict an institution only with recent TOTP and a substantiated written decision. Restriction lifts and the final operational evidence retention schedule remain open decisions.
 - Keep real staffing separate from deployments and synthetic checks. Pending applications wait for eligible independent reviewers.
+
+### Phase 5C Founding Ambassadors
+
+- Recognize constructive participation through a separate voluntary program. Apply the same platform access and ranking rules to all members.
+- Use private proposals, an explicit invitation, and recipient-only acceptance. Begin participation privately and require separate public consent and independently reviewed identity.
+- Keep a versioned, append-only audit trail. A different active administrator with recent TOTP can reconsider a revoked designation. A favorable outcome only permits a fresh invitation and consent.
+- Use in-app notices. Real reviewer staffing and retention for private decision notes remain operational requirements.

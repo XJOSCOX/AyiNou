@@ -11,6 +11,7 @@ import { communityDirectoryMessages } from "./communities-i18n";
 import { groupMessages } from "./groups-i18n";
 import { communityDiscoveryMessages } from "./community-discovery-i18n";
 import { trustMessages } from "./trust-i18n";
+import { ambassadorMessages } from "./ambassador-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -36,6 +37,9 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "VERIFICATION_APPEAL_EXPIRED": return trustMessages[locale].appealExpired;
     case "VERIFICATION_ASSIGNMENT_REQUIRED": return trustMessages[locale].assignmentRequired;
     case "INSTITUTION_EVIDENCE_REQUIRED": return trustMessages[locale].institutionEvidenceRequired;
+    case "AMBASSADOR_UNAVAILABLE": return ambassadorMessages[locale].unavailable;
+    case "AMBASSADOR_CASE_CHANGED": return ambassadorMessages[locale].changed;
+    case "AMBASSADOR_PUBLIC_ELIGIBILITY": return ambassadorMessages[locale].eligibility;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

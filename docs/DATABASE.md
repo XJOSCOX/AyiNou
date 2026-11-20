@@ -553,3 +553,36 @@ Organization, ownership and appeal decisions reuse the existing private alerts. 
 Apply migrations `20261120170000`, `20261120171000` and `20261120172000` in that order. Set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` and run `npm run test:hosted:institutions:sql -- --preflight-5b` before application. Afterward run `npm run test:hosted:institutions:sql`, `npm run test:hosted:institutions`, and the Phase 5A trust regressions. The SQL suite uses randomized fixtures in a rolled-back transaction.
 
 No migration appoints a reviewer. A platform administrator with a fresh TOTP session can appoint real, eligible and trained reviewer accounts through the existing administrator workflow. Each reviewer needs an active account and a verified TOTP factor. Staff at least two independent reviewers per case and reserve an independent reviewer for appeals. Until there are two eligible, assigned reviewers, applications stay pending. Institution owners and administrators cannot grant platform reviewer access.
+
+## Phase 5C Founding Ambassadors
+
+The program recognizes voluntary support for peaceful community collaboration. Administrators use documented, nonpartisan criteria covering constructive contributions, respect for platform rules and others' privacy, relevant experience, and accurate representation. Locations and professions can be considered as broad community context. Do not collect sensitive demographic data or use wealth, follower count, popularity, political affiliation, ethnicity or religion to qualify candidates.
+
+### State and permissions
+
+| Actor | Permitted actions |
+| --- | --- |
+| Public visitor | Read the program explanation and eligible directory or profile designation. |
+| Signed-in recipient | View their own issued invitations and participation history. Accept or decline once before expiry. Opt in or hide publicity, edit the optional public statement, withdraw, or submit one timely reconsideration request. |
+| Platform administrator with recent TOTP | Review candidates by exact username. Propose, issue and revoke invitations. Suspend, resume privately, revoke or complete participation with a written reason. Read the most recent 20 audited changes per case in the workspace. |
+| Independent platform administrator with recent TOTP | Decide an eligible reconsideration with a written reason. The original revoking administrator and the participant are excluded. |
+
+A proposal is private to administrators. Issuing it sends a private in-app notice and starts a 14-day expiry. Acceptance starts active and private. Decline, expiry, completion, revocation and withdrawal close the case. A suspended participation can resume privately. A new case starts independently and cannot bypass the 30-day cooling-off period after decline or withdrawal. An accepted case that was revoked prevents a new nomination unless an independent administrator permits a fresh invitation after reconsideration. The participant can request that review once within 14 days. The original designation stays revoked and a new invitation requires separate recipient consent. No automatic term scheduler runs.
+
+Public displays require an active designation, explicit consent, current active and discoverable profile, and the existing independently reviewed identity claim. Bootstrap trust, MFA, a public-figure badge alone and institution verification cannot satisfy this check. Account restrictions, a held or revoked identity claim, a blocked viewer, or removal of discoverability immediately suppress the public projection at read time. Program suspension clears consent. Clearing consent removes the statement. Existing member profile, moderation, verification and feed ranking rules are unchanged. User-written statements keep their original language.
+
+Each successful change commits a versioned audit event with the state change. Locking, one open case per recipient and version checks reject duplicate or stale writes. The administrator audit includes written reasons and actor references. Notification previews include neither the candidate nor reviewer identity, selection notes, or private reasons. Notifications are scoped to the recipient and deduplicated by case and version. Application roles have no direct grants on the private relations. On account deletion, recipient IDs are cleared and the public statement and consent are erased. A retention schedule for private written notes remains operational work. No external invitations or real appointments are seeded.
+
+### Fastify API and operations
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/v1/ambassadors` | Eligible directory with category, name or username search, and cursor pagination. |
+| `GET /api/v1/members/:username/ambassador` | Eligible category and optional public statement, or null. |
+| `GET /api/v1/me/ambassadors` | Recipient-bound program state and history. |
+| `PATCH /api/v1/me/ambassadors/:id` | Recipient action and required current version. |
+| `GET /api/v1/admin/ambassadors` | Private candidate lookup and paged cases and audit history. |
+| `POST /api/v1/admin/ambassadors` | Propose a private invitation. |
+| `PATCH /api/v1/admin/ambassadors/:id` | Record a privileged decision with the current version and reason. |
+
+Apply `20261120180000` then `20261120181000`. With `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs`, run `npm run test:hosted:ambassadors:sql -- --preflight` before applying and `npm run test:hosted:ambassadors:sql` afterward. The live `npm run test:hosted:ambassadors` suite reuses scoped synthetic Trust fixtures and removes the exact test records. Real public participation requires operational identity reviewers. Independent reconsideration needs a second active TOTP-backed platform administrator.

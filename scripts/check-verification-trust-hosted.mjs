@@ -22,6 +22,7 @@ const password = `Synthetic-Trust!9-${randomUUID()}`;
 const base = "/api/v1/trust";
 const own = "/api/v1/me/verification";
 const queue = "/api/v1/verification/review";
+const ambassadors = process.argv.includes("--ambassadors");
 
 function query(statement) {
   const result = spawnSync(process.execPath, ["node_modules/supabase/dist/supabase.js", "db", "query", "--remote", "--yes", statement],
@@ -120,6 +121,44 @@ try {
   assert.equal((await decision(second, "approve")).status, "approved");
   assert.deepEqual((await request(200, "GET", own + "-badge", applicant)).personalClaims, ["identity"]);
   const member = `/api/v1/members/${applicant.username}`;
+  if (ambassadors) {
+    const operations = "/api/v1/admin/ambassadors";
+    const mine = "/api/v1/me/ambassadors";
+    const nomination = { username: applicant.username, category: "community", reason: rationale };
+    await request(403, "POST", operations, runner, nomination);
+    const attempts = await Promise.all([send("POST", operations, operator, nomination), send("POST", operations, operator, nomination)]);
+    assert.deepEqual(attempts.map(({ statusCode }) => statusCode).sort(), [201, 409]);
+    const id = attempts.find(({ statusCode }) => statusCode === 201).json().id;
+    assert.match(id, /^[0-9a-f-]{36}$/);
+    const staff = (await request(200, "GET", `${operations}?handle=${applicant.username}`, operator)).cases.find((item) => item.id === id);
+    assert.equal(staff.history[0].reason, rationale);
+    assert.deepEqual((await request(200, "GET", mine, applicant)).cases, []);
+    await request(204, "PATCH", `${operations}/${id}`, operator, { action: "invite", version: 1, reason: rationale });
+    assert.deepEqual((await request(200, "GET", mine, runner)).cases, []);
+    await request(404, "PATCH", `${mine}/${id}`, runner, { action: "accept", version: 2 });
+    const invitation = (await request(200, "GET", mine, applicant)).cases[0];
+    assert.equal(invitation.status, "invited");
+    assert.ok(!JSON.stringify(invitation).includes(rationale));
+    await request(204, "PATCH", `${mine}/${id}`, applicant, { action: "accept", version: 2 });
+    await request(409, "PATCH", `${mine}/${id}`, applicant, { action: "accept", version: 2 });
+    assert.equal((await request(200, "GET", member + "/ambassador")).ambassador, null);
+    const statement = "Synthetic ambassador integration statement.";
+    await request(204, "PATCH", `${mine}/${id}`, applicant, { action: "publish", version: 3, publish: true, statement });
+    assert.deepEqual((await request(200, "GET", member + "/ambassador")).ambassador, { category: "community", statement });
+    const listed = (await request(200, "GET", `/api/v1/ambassadors?q=${applicant.username}&category=community`)).ambassadors;
+    assert.deepEqual(listed.map(({ username }) => username), [applicant.username]);
+    assert.ok(!JSON.stringify(listed).includes(rationale));
+    await request(204, "PATCH", `${operations}/${id}`, operator, { action: "suspend", version: 4, reason: rationale });
+    assert.equal((await request(200, "GET", member + "/ambassador")).ambassador, null);
+    await request(204, "PATCH", `${operations}/${id}`, operator, { action: "resume", version: 5, reason: rationale });
+    assert.equal((await request(200, "GET", member + "/ambassador")).ambassador, null);
+    const notifications = (await request(200, "GET", "/api/v1/me/notifications", applicant)).notifications;
+    assert.equal(notifications.filter(({ kind }) => kind === "ambassador_invited").length, 1);
+    assert.equal(notifications.filter(({ kind }) => kind === "ambassador_updated").length, 3);
+    assert.ok(!JSON.stringify(notifications).includes(rationale));
+    assert.equal((await request(200, "GET", "/api/v1/me/feed-moderation", applicant)).allowed, false);
+    console.log("Hosted ambassador API, concurrent nomination, TOTP, acceptance, publication, suspension and private notices passed.");
+  }
   assert.deepEqual((await request(200, "GET", member + "/follow")).personalClaims, ["identity"]);
   const impersonation = { kind: "profile", institution: null, explanation: "Synthetic report with no personal information.", references: ["https://example.invalid/report"] };
   const sent = await request(201, "POST", member + "/impersonation-reports", runner, impersonation);
@@ -173,6 +212,9 @@ try {
     const expected = users.map(({ id, email }) => `('${id}'::uuid,'${email}')`).join(",");
     query(`begin; create temporary table trust_fixture_users on commit drop as
       select u.id from auth.users u join (values ${expected}) f(id,email) on u.id=f.id and u.email=f.email;
+      ${ambassadors ? `delete from private.ambassador_audit where case_id in (
+        select id from private.ambassador_cases where recipient_id in (select id from trust_fixture_users));
+      delete from private.ambassador_cases where recipient_id in (select id from trust_fixture_users);` : ""}
       delete from private.impersonation_reports where reporter_id in (select id from trust_fixture_users) and subject_id in (select id from trust_fixture_users);
       delete from private.institution_audit where actor_id in (select id from trust_fixture_users);
       delete from private.verification_applications where applicant_id in (select id from trust_fixture_users);

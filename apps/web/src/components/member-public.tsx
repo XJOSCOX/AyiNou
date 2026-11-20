@@ -2,11 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { FollowStatus, ProfilePreview } from "@ayinou/shared";
+import type { FollowStatus, ProfilePreview, PublicAmbassador } from "@ayinou/shared";
 import { discoveryMessages } from "@/lib/discovery-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { DisplayControls } from "./display-controls";
+import { AmbassadorRecognition } from "./ambassador-public";
 import { ProfileFollowPanel } from "./discovery-accounts";
 import { MemberSafetyControls } from "./member-safety";
 import { VerifiedBadge, institutionCard, institutionLink } from "./institution-ui";
@@ -14,8 +15,9 @@ import { ImpersonationReportForm } from "./trust-workspace";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
 
-export function MemberPublic({ profile, username, social, signedIn }: {
+export function MemberPublic({ profile, username, social, ambassador, signedIn }: {
   profile: ProfilePreview; username: string; social: FollowStatus; signedIn: boolean;
+  ambassador: Pick<PublicAmbassador, "category" | "statement"> | null;
 }) {
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
@@ -42,6 +44,7 @@ export function MemberPublic({ profile, username, social, signedIn }: {
           <p className="text-sm text-[var(--theme-body)]">{trust.noEndorsement}</p>
         </div>}
         {profile.biography && <p className="mt-4 max-w-prose whitespace-pre-line break-words" dir="auto">{profile.biography}</p>}
+        {ambassador && <AmbassadorRecognition ambassador={ambassador} />}
       </section>
       <ProfileFollowPanel target={{ kind: "member", key: username }} initial={social} signedIn={signedIn} />
       {signedIn && social.canFollow && <MemberSafetyControls username={username} />}

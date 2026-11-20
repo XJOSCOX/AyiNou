@@ -43,7 +43,9 @@ Members can attach and reorder up to four still images on a post or draft and wr
 
 ## Public figures and ambassadors
 
-Invite media hosts, musicians, artists, athletes, educators, business/community leaders, and others from varied regions. Invitations and platform amplification must follow objective, documented, nonpartisan standards. Authenticity verification should be distinct from being selected as an ambassador.
+The Founding Ambassador program recognizes voluntary contributions to peaceful collaboration. Selection considers constructive work, rule compliance, respect for safety and privacy, relevant experience, and accurate representation of the role. Ayinou welcomes a range of communities and professions using documented, nonpartisan criteria. Participation comes with the same platform access and ranking as other members.
+
+Administrators send invitations privately after documenting their decisions. Participants can accept, decline, withdraw, and control publicity from Settings. The public program page explains the criteria and lists only participants who consent and meet current identity and profile visibility requirements. Personal, public-figure and institutional verification retain their separate meanings.
 
 Future identity verification will use time-bound proof of control through an approved channel. Proof supports a verification application. Badge approval requires a separate authorized review. Supabase sign-in MFA only protects account access.
 

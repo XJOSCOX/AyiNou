@@ -129,3 +129,7 @@ Existing verification applications retain the two-reviewer approval model. Perso
 ### Institutional trust and representation
 
 Institutional cases use the same assignment-gated work queue and independent approvals as personal verification. Fastify derives the actor from the bearer token. PostgreSQL rechecks current assignments, organization identity and owner grant within the review transaction. The organization role, ordinary affiliation, independently reviewed representative badge and platform reviewer role remain separate. Public projections use current state and representative consent. Impersonation restrictions use the existing private case queue. A substantiated, written administrative action can restrict public access and organization actions without deleting the review or membership history. Shared contracts support the same authorization and error behavior on web and future mobile clients.
+
+### Founding Ambassador program
+
+Fastify uses the existing bearer boundary and stable shared contracts for candidate lookup, invitation decisions, and member consent. PostgreSQL owns every transition, validates recent TOTP for privileged actions, and appends private audit history and recipient-only notices in the same transaction. The public directory and profile designation share one eligibility query against the current independent identity claim and discoverability rules, with role and ranking services kept separate. The UI uses the shared theme, locale controls and error translations.

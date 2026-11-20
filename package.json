@@ -44,6 +44,8 @@
     "test:hosted:community-recommendations:sql": "node scripts/check-community-recommendations-sql.mjs",
     "test:hosted:community-recommendations": "node --import tsx scripts/check-community-recommendations-hosted.mjs",
     "test:hosted:trust:sql": "node scripts/check-verification-trust-sql.mjs",
+    "test:hosted:ambassadors:sql": "node scripts/check-ambassadors-sql.mjs",
+    "test:hosted:ambassadors": "node --import tsx scripts/check-verification-trust-hosted.mjs --ambassadors",
     "test:hosted:trust": "node --import tsx scripts/check-verification-trust-hosted.mjs",
     "test:hosted:feed": "node --import tsx scripts/check-feed-hosted.mjs",
     "typecheck": "npm run typecheck -ws --if-present",

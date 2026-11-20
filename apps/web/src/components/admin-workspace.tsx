@@ -5,6 +5,7 @@ import { useCallback, useState, type FormEvent } from "react";
 import { platformRoles, type AccountStatus, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
 import { adminMessages } from "@/lib/admin-i18n";
+import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { apiErrorCode } from "@/lib/api-errors";
@@ -14,11 +15,12 @@ import { institutionAction, institutionCard, institutionErrorBox, institutionFie
 import { MemberShell } from "./member-shell";
 import { SafetyOverviewPanel } from "./moderation-appeals";
 import { TrustAdministration } from "./trust-workspace";
+import { AmbassadorAdministration } from "./ambassador-workspaces";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
-type AdminTab = "overview" | "accounts" | "audit" | "trust";
-const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust"];
+type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors";
+const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors"];
 
 export function AdminWorkspace() {
   const [locale] = useLocale();
@@ -36,7 +38,7 @@ export function AdminWorkspace() {
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">
             {tabs.map((section) => <button key={section} type="button" aria-pressed={tab === section} onClick={() => setTab(section)}
               className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">
-              {section === "trust" ? trustMessages[locale].trustWorkspace : t[section]}</button>)}
+              {section === "trust" ? trustMessages[locale].trustWorkspace : section === "ambassadors" ? ambassadorMessages[locale].title : t[section]}</button>)}
             {access.data?.reviewer && <Link className={institutionLink} href="/verification/review">{t.reviewWorkspace}</Link>}
           </nav>
           {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -48,6 +50,7 @@ export function AdminWorkspace() {
           {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
           {tab === "audit" && <AuditFeed />}
           {tab === "trust" && <TrustAdministration />}
+          {tab === "ambassadors" && <AmbassadorAdministration />}
         </>}
     </div>
   </MemberShell>;

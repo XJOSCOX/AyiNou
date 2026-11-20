@@ -190,15 +190,21 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [ ] Establish an approved independent channel for proof-of-control challenges and an operational evidence-retention schedule.
 - [ ] Staff independent review before launch.
 
-## Later Phase 5 work — Founding ambassadors
+## Phase 5B — Institutional verification and trust governance
 
-- [ ] Verification application process for public figures, radio stations, and organizations.
-- [ ] Manual review with reproducible evidence and audit history; do not sell authenticity badges.
-- [ ] Distinguish `Identity verified`, `Notable public figure`, and `Verified organization`.
-- [ ] Founding Ambassador invitations and transparent selection criteria; no special voting power.
-- [ ] Impersonation reporting and revocation/appeal procedures.
+- [x] Apply assignment and evidence privacy rules to institutional, ownership and representative cases.
+- [x] Publish category-specific institution badges and opt-in representative badges that follow current authority.
+- [x] Record institutional impersonation decisions with independent administrator and authenticator checks.
+- [x] Reuse verification appeals and private decision notices for institutional cases.
+- [ ] Appoint eligible operational reviewers and adopt the evidence retention and restriction review procedures before public operation.
 
-**Gate:** Badges mean what policies say; impersonation and appeals tested; sensitive evidence is not exposed.
+## Phase 5C — Founding Ambassadors
+
+- [x] Publish nonpartisan selection criteria and a searchable, opt-in directory.
+- [x] Record private nominations and recipient-bound invitations with written reasons and recent TOTP.
+- [x] Require independently reviewed identity for public recognition while allowing private participation.
+- [x] Support voluntary withdrawal, suspension, revocation, and independent reconsideration.
+- [ ] Staff identity review and independent program reconsideration before inviting real participants.
 
 ## Phase 6 — Initiatives, projects and volunteers
 
@@ -254,7 +260,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [ ] Scope and acceptance criteria documented
 - [ ] Typecheck, lint, unit/integration tests and build pass locally
 - [ ] Relevant RLS allow/deny and migration tests pass
-- [ ] Accessibility and all three locales checked
+- [ ] Accessibility and all four locales checked
 - [ ] Security, privacy and abuse cases considered
 - [ ] README, roadmap, decisions and migration notes updated
 - [ ] Small meaningful commits pushed directly to `main` after review
@@ -262,11 +268,3 @@ Activation of temporary proof challenges and external evidence delivery remains 
 ## Not included at launch
 
 Cryptocurrency, direct cash custody, official elections, algorithmic truth-by-majority, unattended crisis mapping, unverified celebrity endorsements, or sensitive-location tracking.
-
-## Phase 5B — Institutional verification and trust governance
-
-- [x] Apply assignment and evidence privacy rules to institutional, ownership and representative cases.
-- [x] Publish category-specific institution badges and opt-in representative badges that follow current authority.
-- [x] Record institutional impersonation decisions with independent administrator and authenticator checks.
-- [x] Reuse verification appeals and private decision notices for institutional cases.
-- [ ] Appoint eligible operational reviewers and adopt the evidence retention and restriction review procedures before public operation.

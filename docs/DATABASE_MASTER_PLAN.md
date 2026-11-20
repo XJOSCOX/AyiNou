@@ -236,12 +236,10 @@ Group writes reuse `community_memberships`, `community_staff`, and `community_st
 
 Self-service archival and purge of groups and a reinstatement or review path for membership removals remain future decisions. Group audit reasons are internal and may survive user deletion without user identifiers. Invitations and membership requests are retained for operation and abuse controls. Set a retention duration before public launch.
 
-### Ambassador and evidence extensions — phase 5
+### Evidence extensions — planned
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
 | --- | --- | --- |
-| `ambassador_invitations` | `id uuid PK`, `invitee_email_ciphertext bytea?`, `invitee_user_id uuid? FK→profiles.user_id`, `sponsor_id uuid! FK→auth.users.id`, `status text!`, `expires_at timestamptz!`, `ca`, `ua` | CHECK one invitee reference; IX `(sponsor_id,status)`; private contact only |
-| `ambassador_assignments` | `id uuid PK`, `user_id uuid! FK→profiles.user_id`, `scope text!`, `status text!`, `starts_at timestamptz!`, `ends_at timestamptz?`, `ca`, `ua` | IX `(user_id,status)`; partial UQ active `(user_id,scope)`; no admin power |
 | `verification_evidence_files` / conditional | `id uuid PK`, `application_id uuid! FK→verification_applications.id`, `media_asset_id uuid! FK→media_assets.id`, `evidence_kind text!`, `retention_deadline timestamptz!`, `ca` | UQ `(application_id,media_asset_id)`; private bucket, no public URL |
 
 ### Projects and volunteering — phase 6
@@ -507,3 +505,13 @@ Reuse the existing Phase 2D and Phase 5A models. The additive migrations add pri
 | `feed_data.notifications` | Nullable `representative_membership_id uuid` references the grant with ON DELETE CASCADE and a partial lookup index. The new kind is usable only for private recipient-bound access changes with no actor or content reference. |
 
 Deployment order is the assignment and evidence changes, institutional report types and restriction, then representative consent and notifications. Use the prior audit, review work, evidence, verification and appeal relations for all case history. See [the operational rules](DATABASE.md#phase-5b-institutional-trust).
+
+### Phase 5C Founding Ambassador program
+
+| Applied relation | Columns and constraints |
+| --- | --- |
+| `private.ambassador_cases` | `id uuid PK` random; nullable `recipient_id uuid` FK auth.users SET NULL; checked `category text` and `status text`; positive `version integer`; `created_at`, `updated_at`, optional `invite_expires_at` and `accepted_at timestamptz`; `public_opt_in boolean` default false; optional `statement text` up to 500 characters; optional checked `reconsideration text`. Partial unique open case per recipient, recipient history index and created-time keyset index. |
+| `private.ambassador_audit` | `case_id uuid` FK RESTRICT to case and `version integer` composite PK; nullable `actor_id uuid` FK auth.users SET NULL; checked `event text`; optional written `reason text` up to 1000; `created_at timestamptz`. Actor and time index supports daily write limits. |
+| `feed_data.notifications` | Optional `ambassador_case_id uuid` FK CASCADE to case, partial lookup index, two recipient-scoped notification kinds and constraints excluding other references. |
+
+Version 1 uses a fixed program with an account-bound lifecycle record. No email recipient or separate assignment table is used. Both private tables have RLS and no direct application-role privileges. Migration order is program and scoped RPCs, then notification integration. Public reads recheck current identity, profile eligibility and consent without editing verification or ranking records.

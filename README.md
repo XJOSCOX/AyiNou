@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 2B welcome and member profiles with hosted Supabase for development
+**Status:** Phase 5C Founding Ambassadors with hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -15,7 +15,7 @@ Ayinou is a Haitian-first, multilingual community platform. It connects people a
 3. **Trust with evidence:** Account verification proves identity; claim verification assesses specific evidence; neither guarantees a person's opinions are true.
 4. **Privacy and safety:** Users choose a broad location; GPS is optional and never a condition of joining. Never publish sensitive precise locations by default.
 5. **Practical impact:** Measure completed projects and real outcomes—not only engagement.
-6. **Equal participation:** Invite prominent figures as launch ambassadors, but give ordinary members equal access to participation and proposals.
+6. **Equal participation:** All members have equal access to participation and proposals. Founding Ambassadors are invited for constructive community contributions.
 
 ## Supported languages
 
@@ -120,6 +120,8 @@ Phase 2D hosted checks are `npm run test:hosted:institutions:sql` and `npm run t
 **Institutions** now separates the organizations you manage from the ones you belong to. Open a public organization page to join or apply when its policy allows. Membership invitations and private history appear on the Institutions page. Ordinary memberships never add an account to the representative switcher or grant institutional authority. Public directories require organization enablement and each member's opt-in. Run the guarded `npm run test:hosted:affiliations:sql` and the extended hosted institution suite to verify these workflows.
 
 Institutional verification uses category-specific badges and two independent reviewers. Verified representatives can choose whether signed-in visitors see their public name and handle on the institution's profile. Signed-in members can report impersonation from that profile. [Evidence, ownership and reviewer setup](docs/DATABASE.md#phase-5b-institutional-trust)
+
+**Founding Ambassadors** at `/ambassadors` explains the program, selection criteria and public directory. Invitations are sent privately in the app. Participation starts privately, and only members with independently reviewed identity and a discoverable profile can opt in to public recognition. The member controls are under **Settings → My ambassador participation**. [Program rules, permissions and testing](docs/DATABASE.md#phase-5c-founding-ambassadors)
 
 Hosted Auth has email/password signup and confirmation enabled. Its site URL is `http://localhost:4000`, with `http://localhost:4000/auth/callback` and `http://localhost:4000/reset-password` allowed as redirects. The hosted default email sender reaches only organization team addresses and allows very few messages per hour; use a controlled team mailbox for limited testing or configure custom SMTP for reliable signup and password-reset testing. Do not turn off confirmation to bypass this. Local Mailpit is available only with the optional Docker stack; it is not the hosted project's inbox. See [docs/DATABASE.md](docs/DATABASE.md) for testing limits and troubleshooting.
 

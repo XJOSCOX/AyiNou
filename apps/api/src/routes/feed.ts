@@ -14,6 +14,7 @@ import type { ReadBudget } from "../services/read-budget.js";
 import { registerSafetyRoutes } from "./safety.js";
 import { registerGroupRoutes } from "./groups.js";
 import { registerTrustRoutes } from "./trust.js";
+import { registerAmbassadorRoutes } from "./ambassadors.js";
 
 const cursorShape = z.strictObject({ createdAt: z.iso.datetime({ offset: true }), id: z.uuid() });
 const pageCursor = z.string().max(250).regex(/^[A-Za-z0-9_-]+$/).optional();
@@ -129,6 +130,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   registerSafetyRoutes(app, { viewer, moderator, repo, read });
   registerGroupRoutes(app, { viewer, repo, read });
   registerTrustRoutes(app, { viewer, repo, read });
+  registerAmbassadorRoutes(app, { viewer, repo, read });
   app.get("/api/v1/communities", async (request) => {
     const { actor, token } = await viewer(request);
     await read("discovery", actor, request.ip);
