@@ -230,6 +230,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Phase 6F.1 consolidates responsive workspaces, improves local request performance, refreshes scheduled polls and navbar avatars, and isolates the aggregation regression fixture.
 - [x] Phase 6F.2 adds automated browser regression tests with an isolated local Supabase stack and verified fixture cleanup.
 - [x] Phase 6F.3 splits Fastify Feed and Project Review into domain modules and verifies the existing route contracts.
+- [x] Phase 6F.4 extracts project, community, profile, trust, and Feed media modules while preserving the web routes and client entry points. [Test and build comparison](docs/audits/PHASE_6E_AUDIT.md#phase-6f4-results)
 - [ ] Define independent outcomes validation, retention, fraud escalation, quorum standards, and operational voting governance.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 

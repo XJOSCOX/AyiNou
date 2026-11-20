@@ -61,6 +61,14 @@ The runner stops its own project with `--no-backup`, checks for leftover project
 
 Failures keep screenshots, a trace, and the JSON report under the ignored `apps/web/e2e-results/` directory. Treat traces as sensitive because they can contain temporary sessions and fixture inputs. Review errors locally before sharing plain summaries. The suite complements Fastify and SQL checks. It covers Chromium, representative axe rules and layout widths, controlled session failures and browser timing. Screen-reader speech, zoom, other engines, genuine access-token and signed URL expiry, and hosted email delivery still require separate testing.
 
+## Frontend refactoring checks
+
+Read `apps/web/AGENTS.md` and the relevant installed Next.js documentation before changing App Router behavior. Keep route entries and shared UI in their existing directories. Use feature folders for forms, views, and hooks that belong to a single workflow. Preserve client boundaries, resource ownership, and existing public exports when extracting a feature.
+
+Run translation parity and the affected Chromium specs for each batch. For example, run `npm run test:e2e -- project-progress.spec.ts` for milestone version conflicts, outcome rendering, request counts, and image disposal. The group spec uses a real TOTP session for invitations. The project work spec checks server-supplied contributor controls, and the onboarding and trust specs cover draft recovery and access denial.
+
+Compare production artifacts from clean exports of both revisions using the same Node version, dependencies, and build command. Check the App Router manifest and the unique JavaScript chunks listed per route in the client reference manifests. Record browser timing separately from build size, including environment and sample size. Keep hosted authorization checks in the guarded rollback-only suites.
+
 ## Before every push
 
 - [ ] On `main` with clean known history; no unrelated files

@@ -256,3 +256,78 @@ Each revision made 1,560 verifier calls, 1,560 repository reads and 1,560 RPC-ad
 Final checks passed for typecheck, lint, translation parity, 33 API tests, seven client tests, both production builds, 24 isolated Chromium scenarios and 15 guarded hosted SQL suites. The local browser project and its fixtures were removed. Hosted suites rolled back across Feed, engagement, media and notifications, recommendations, departments, groups, safety, institutions, custom roles, trust, projects, project work, progress, polls and administration.
 
 Members, Groups, Institutions and the Feed repository remain larger modules. Keep their distinct authorization and lifecycle behavior explicit if they are split in later work. The frontend portions of 6E-05 remain for a separate phase, including the Feed presentation, group workspaces, profile, project workspaces and their shared contract boundaries. Findings 6E-06, 6E-07 and 6E-09 remain open. [Backend module boundaries](../ARCHITECTURE.md#text-feed-and-error-handling)
+
+## Phase 6F.4 results
+
+The clean frontend baseline was `ea2c3a0b39e15fe68de852f1d5aa6b1aecca4f6d` on local and remote `main`. Typecheck, lint, translation parity, seven client tests, 33 Fastify tests, both production builds, and the original 24 Chromium scenarios passed. Existing browser logs include a smooth-scroll warning and a React script-tag warning on client navigation.
+
+### Extracted modules and compatibility exports
+
+The original files below remain client entry points under `apps/web/src/components`. The destinations are under `apps/web/src/features`. The line counts include imports and blank lines. The extraction adds file boundaries and explicit imports, so the largest module per feature is a more useful size comparison than the sum of lines.
+
+| Existing entry point | Old → entry lines | Feature folder and extracted responsibilities | New files | Largest new file |
+| --- | ---: | --- | ---: | ---: |
+| `project-progress.tsx` | 417 → 3 | `projects/progress` has the public and private panel, milestone actions and review, metrics and observations, update and outcome forms, evidence display, and scoped mutation controls | 6 | 120 |
+| `groups.tsx` | 423 → 9 | `communities` has directory, group form and settings, invitations, membership and governance, guest routes, and public discussion | 7 | 111 |
+| `profile-form.tsx` | 393 → 3 | `profile` has the loader, editor, location fields, previews, form styles, and avatar upload | 6 | 255 |
+| `project-work.tsx` | 314 → 4 | `projects/work` has the work index, workspace and progress navigation, team and invitations, volunteer applications and opportunities, tasks, execution management, and scoped mutation controls | 7 | 71 |
+| `trust-workspace.tsx` | 293 → 6 | `verification` has impersonation reporting, member appeals, administrative assignment and cases, reviewer appeals, and trust form controls | 5 | 117 |
+| `post-media.tsx` | 128 → 4 | `feed/media` has the editor, gallery and dialog, and local and remote previews | 3 | 60 |
+
+- Progress exports `progressTabs`, `ProgressTab`, `PublicProjectProgress` and `ProjectProgressWork`.
+- Groups exports `GroupMore`, `TopicSelect`, `GroupsDirectory`, `NewGroup`, `GroupInbox`, `GroupInvitationList`, `GroupManagement`, `ReadOnlyGroupPost`, `PublicGroups` and `PublicGroupRoom`.
+- Profile and work export `ProfileForm`, `ProjectWorkIndexScreen` and `ProjectWorkScreen` through their respective entry points.
+- Trust exports `ImpersonationReportForm`, `MyVerificationAppeals`, `TrustAdministration` and `VerificationAppealReview`. Feed media exports `PostImageEditor` and `PostMediaGallery`.
+
+The client state still follows the existing loader and mutation boundaries. Project and group forms preserve their request keys, resource invalidation, permission checks, and localized errors. Browser image previews own their abort signals and object URLs. Profile draft state and validation remain together in the editor, and avatar updates use the same member identity provider. The public panels consume the existing server-filtered projections. Organization roles, verification applications, and platform bootstrap each keep their existing authorization path.
+
+### Production build comparison
+
+Both builds used clean Git exports on Node 22.18 with the same installed dependencies. The component and feature source inventory grew from 67 files and 8,949 lines to 101 files and 9,234 lines. All 51 App Router manifest entries matched. Compiled CSS hashes matched byte for byte.
+
+The route rows sum unique JavaScript chunks referenced by each route's Next.js client manifest, including shared chunks. These are raw emitted sizes and include chunks that can load after the initial request.
+
+| Output | Baseline bytes | Refactor bytes |
+| --- | ---: | ---: |
+| All emitted web JavaScript, 100 files in each build | 2,275,280 | 2,276,283 |
+| API JavaScript build | 166,268 | 166,268 |
+| `/` | 433,054 | 433,054 |
+| `/feed` | 748,579 | 748,580 |
+| `/profile` | 622,824 | 623,731 |
+| `/onboarding` | 622,823 | 623,730 |
+| `/communities` | 790,349 | 790,369 |
+| `/communities/new` | 790,588 | 790,610 |
+| `/projects/[id]` | 755,408 | 755,418 |
+| `/projects/[id]/work` | 772,244 | 772,278 |
+| `/verification/review` | 750,586 | 750,608 |
+
+### Local browser measurements
+
+The same Playwright scenario ran three times per clean revision in fresh Chromium contexts. It used Next.js development mode and a disposable local API and Auth stack. The work and progress responses used the test's controlled fixture. The sidebar navigation to My Profile used the local API. The table reports medians. Chromium layout and style counters cover the project interaction and image cleanup. The heap was sampled after explicit garbage collection.
+
+| Measurement | Baseline | Refactor |
+| --- | ---: | ---: |
+| Open project work until the milestone appears | 390 ms | 342 ms |
+| Switch to Outcomes until the report appears | 63 ms | 62 ms |
+| Navigate to My Profile from the sidebar until the heading appears | 144 ms | 250 ms |
+| Project work reads | 1 | 1 |
+| Project progress reads | 1 | 1 |
+| Chromium layouts | 28 | 28 |
+| Chromium style recalculations | 44 | 43 |
+| Post-collection JavaScript heap | 11.32 MiB | 11.31 MiB |
+
+The profile navigation median was slower in the refactor sample. The ranges overlapped at 143–349 ms on the baseline and 118–879 ms on the candidate. The dev server can compile on demand, and these measurements characterize this local scenario only.
+
+### Regression checks
+
+The candidate passed typecheck, lint, translation parity across 24 namespaces and four languages, seven client tests, 33 Fastify tests, both production builds, and all 30 Chromium scenarios. All 23 compatibility exports matched the baseline. The 210 web source modules had no local import cycles. The browser suite exercised 320, 768, 1440, and 2560px, both themes, keyboard and reduced-motion behavior, locale persistence, and draft and session recovery.
+
+Six browser scenarios cover stale milestone edits, outcome display and evidence URL cleanup, private group creation and TOTP-protected invitation acceptance, onboarding failure and resumption, project team and volunteer controls, direct admin and reviewer denial, and a published Feed image with a comment and reaction. Profile plus navbar still make one profile and one platform-access read on the checked initial load. The project team and volunteer tabs share a single project work read.
+
+Seventeen hosted SQL suites passed in rollback-only transactions. The checks covered project eligibility, work, private evidence and independent publication, polling, official departments, member groups, community recommendations, Feed, engagement, following, recommendations, media and notifications, safety, institution authority, organization roles, verification trust, and administration. The production API, shared contracts, and database files had no diff. Hosted migration changes were outside this phase.
+
+The layout checks were structural and included a compilation-level CSS comparison. Pixel diffs, individual React component profiling, cross-engine testing, screen-reader speech, natural token expiry, hosted email delivery, and production load remain outside this validation.
+
+### Open work
+
+6E-05 progressed across the six frontend entry points above. The Feed timeline and discussion still warrant review after the local icon work is integrated. Institutional management, organization roles, and verification applications were reviewed. Their existing forms and permission boundaries remain in their current modules. The profile editor, polls, project directory and detail, official department workspace, and authentication screens still have larger modules. Findings 6E-06, 6E-07 and 6E-09 remain open. Shared contracts belong to the next phase. [Frontend structure](../ARCHITECTURE.md#frontend-feature-modules)

@@ -32,7 +32,7 @@ Phase 2B keeps Auth credential handling in Supabase. `PATCH /api/v1/me/profile/d
 apps/
   api/src/{config.ts,app.ts,server.ts,routes/,modules/,services/}
   api/test/
-  web/src/{app/,components/,lib/,messages/}
+  web/src/{app/,components/,features/,lib/,messages/}
 packages/shared/src/
 scripts/check-hosted.mjs
 supabase/{config.toml,migrations/,tests/}
@@ -43,6 +43,14 @@ The database includes `departments`, `profiles`, `member_private`, `role_assignm
 Phase 2C stores member codes, referral codes, and attribution in three private-schema tables. Fastify's account endpoints derive the caller from the verified bearer token and invoke narrowly scoped server-only RPCs. Anonymous referral validation accepts a code in the request body and returns a rate-limited boolean. The account creation transaction captures a valid initial code. Later Auth metadata edits cannot rewrite attribution, and the authenticated completion endpoint accepts no referrer or code. Native clients can use the same versioned API and submit the optional `referral_code` during Supabase signup.
 
 The site uses fluid page layouts that adapt to phones, tablets, and wide monitors. New signed-in pages use `MemberShell` for the full-width workspace, navbar, responsive sidebar, and footer. Use shrinkable grid columns and apply line-length limits to text inside the layout. My Profile uses the shared workspace and keeps its public preview separate from private fields. Account Settings links to editor sections, uses Supabase Auth for recovery and authenticator enrollment, and keeps the private member code out of profile and dashboard payloads.
+
+### Frontend feature modules
+
+Next.js route groups and server layouts live in `apps/web/src/app`. Shared interface elements, including the workspace shell, page header, and API error notice, live in `apps/web/src/components`. Existing client entry points in that directory continue to export the same names. Their implementations live under `features/projects/progress`, `features/projects/work`, `features/communities`, `features/profile`, `features/verification`, and `features/feed/media`.
+
+Project panels share their existing resource loader and keep form mutations scoped to each operation. Community modules separate the group directory, settings, invitations, governance, and guest discussion from official department authorization. The profile editor owns the draft and onboarding progression. Its preview, location fields, and avatar upload use the editor's state and the existing member identity provider. Trust views keep applicant, reviewer, and administrator workflows distinct. Feed image selection and viewing share preview components that own and dispose of their browser object URLs.
+
+Authentication, request paths, translations, and theme variables remain shared through the existing libraries. Fastify and PostgreSQL enforce access, including private evidence, project roles, moderation, and reviewer independence. [Phase 6F.4 mapping and validation](audits/PHASE_6E_AUDIT.md#phase-6f4-results)
 
 ### Institutional authorization
 
