@@ -108,6 +108,8 @@ The app keeps route entry points in `apps/web/src/app`, shared UI in `apps/web/s
 
 Backend contract checks run in `npm run test -w @ayinou/api`. The Feed and Project Review modules share the existing Fastify registration scopes and the versioned endpoints. [API structure and contract checks](docs/ARCHITECTURE.md#text-feed-and-error-handling)
 
+Run `npm run test:shared` to check the shared TypeScript exports and runtime constants used by the web and API workspaces. [Shared contract checks](docs/WORKFLOW.md#shared-contract-checks)
+
 ## Hosted Supabase database
 
 The pinned Supabase CLI is installed by `npm install`. The confirmed hosted project is **AyiNou** (`hcbxulyfmdmuyccgrujs`). To inspect and apply future versioned migrations, verify the target in CLI output and use:

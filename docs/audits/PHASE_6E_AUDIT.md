@@ -331,3 +331,65 @@ The layout checks were structural and included a compilation-level CSS compariso
 ### Open work
 
 6E-05 progressed across the six frontend entry points above. The Feed timeline and discussion still warrant review after the local icon work is integrated. Institutional management, organization roles, and verification applications were reviewed. Their existing forms and permission boundaries remain in their current modules. The profile editor, polls, project directory and detail, official department workspace, and authentication screens still have larger modules. Findings 6E-06, 6E-07 and 6E-09 remain open. Shared contracts belong to the next phase. [Frontend structure](../ARCHITECTURE.md#frontend-feature-modules)
+
+## Phase 6F.5 results
+
+The local and remote baseline was `37e58c22b1306625c2ad348977d9838fa4e7f1b4`. The audit inventoried all 139 tracked TypeScript consumers of `@ayinou/shared`, with 107 in the web workspace and 32 in the API workspace. Both apps continue to use the same import path. The nine user-owned local files were recorded by hash and excluded from phase commits.
+
+### Contract mapping
+
+The former 625-line `packages/shared/src/index.ts` is a 12-line compatibility barrel. The extraction adds 11 domain files. The largest is the 115-line Feed module. Department content keeps its existing export and localized behavior, with its `Locale` type imported from core.
+
+| Module in `packages/shared/src` | Contracts moved from `index.ts` |
+| --- | --- |
+| `core.ts` | Health and status responses, error envelope, locales |
+| `accounts.ts` | Membership and interests, private and public profile shapes, referrals, platform accounts and administration |
+| `institutions.ts` | Institutions, representatives, affiliations, organization permissions and role workspaces |
+| `trust.ts` | Verification kinds and applications, reviews, claims, impersonation and appeals |
+| `ambassadors.ts` | Ambassador cases, actions and public projections |
+| `communities.ts` | Departments, aggregate counts, groups, discovery and following projections, recommendations and invitations |
+| `feed.ts` | Post and comment inputs, media references, reactions, recommendations, moderation and safety appeals |
+| `projects.ts` | Proposals, ownership, public and private project views, and review |
+| `project-work.ts` | Execution status, teams, volunteer opportunities, tasks, progress events, milestones, metrics and outcomes |
+| `voting.ts` | Polls, nominees, ballots and decisions |
+| `notifications.ts` | Recipient projections, preference keys and notification pages |
+
+The domain graph has 17 type-only links and no cycles. The barrel is the only module with runtime links between files. Core, trust, institutions and ambassadors have no internal imports. Project work and progress share a module because their payloads refer to each other's roles, statuses and events. The former department-content type import through the barrel now points directly to core.
+
+### Compatibility and utilities
+
+`npm run test:shared` checks **211 public declarations**, including **161 type-only exports and 50 runtime exports**, plus six private helpers referenced by the public shapes. It checks TypeScript declaration fingerprints, runtime identity and values, tuple ordering, the referral pattern, localized department copy, and package entry points. TypeScript compilation catches conflicting re-exports. The guard also checks both type and runtime dependency cycles. Both application workspaces compile against the package. [Reproducing the contract inventory](../WORKFLOW.md#shared-contract-checks)
+
+Cursor helpers stayed in their existing layers. Feed keyset cursors, community recommendation snapshots, and the browser cursor loader differ in bounds, ordering, validation, and cancellation. Fastify's error envelope and the client's retry and localization logic serve different callers. Request parsing, date formatting, idempotency keys, and scoped identifiers remain with their existing workflows because their ownership or failure behavior differs. No shared utility or dependency was added.
+
+### Production build comparison
+
+Clean Git exports used Node 22.18 and the same installed dependencies. The two Next.js route manifests contained the same 51 entries. Compiled CSS hashes matched. Route rows below sum unique client JavaScript referenced in the route manifests. The numbers describe raw artifacts and include shared chunks.
+
+| Output | Baseline bytes | Refactor bytes |
+| --- | ---: | ---: |
+| Web JavaScript, 100 files in each build | 2,276,267 | 2,276,269 |
+| Fastify JavaScript | 166,268 | 166,731 |
+| `/feed` | 748,582 | 748,578 |
+| `/profile` | 623,735 | 623,729 |
+| `/communities` | 790,373 | 790,367 |
+| `/institutions` | 733,388 | 733,382 |
+| `/verification/review` | 750,612 | 750,606 |
+| `/ambassadors` | 700,989 | 700,983 |
+| `/projects/[id]/work` | 772,282 | 772,276 |
+| `/polls/new` | 735,780 | 735,772 |
+| `/notifications` | 698,085 | 698,079 |
+
+The Fastify increase comes from generated source-section comments and blank lines. Removing those from both artifacts leaves 166,096 bytes in each. The `next-build` trace measured 25.16 seconds before and 25.48 seconds after in one local build per revision.
+
+### Source import measurements
+
+Five alternating fresh Node processes per revision imported the shared TypeScript entry through `tsx` after one warmup per revision. All imports exposed 50 runtime values. Median import time rose from 4.70 ms to 15.05 ms. Median post-collection heap growth rose from 70.05 KiB to 148.23 KiB. This local tooling probe includes the source loader and module evaluation.
+
+### Final validation and open findings
+
+The baseline and candidate passed workspace typecheck, lint, both production builds, four-language translation parity, seven client tests, 33 Fastify tests, and all 30 Chromium scenarios. The candidate also passed the shared contract check. The fixture reproduced exactly from the baseline. The check rejected four isolated mutations covering locale order, a wire type, an ambiguous export, and a type cycle. The tracked consumer import inventory matched byte for byte. The browser suite retained the existing single-read profile and project checks.
+
+All 19 guarded hosted SQL suites passed and rolled back. The phase changed no API route, application source, migration, RLS policy, or permission rule. No hosted migration was applied. The nine previously recorded local files match their starting hashes.
+
+This phase addresses the shared-contract portion of 6E-05. The other outstanding refactoring candidates from Phase 6F.4 remain in the audit. Findings 6E-06 on poll scaling, 6E-07 on the build dependency advisory, and 6E-09 on failure and recovery evidence remain open. Docker pgTAP, non-Chromium browsers, production load, and a fresh dependency install were outside this validation.

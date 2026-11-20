@@ -52,6 +52,14 @@ Project panels share their existing resource loader and keep form mutations scop
 
 Authentication, request paths, translations, and theme variables remain shared through the existing libraries. Fastify and PostgreSQL enforce access, including private evidence, project roles, moderation, and reviewer independence. [Phase 6F.4 mapping and validation](audits/PHASE_6E_AUDIT.md#phase-6f4-results)
 
+### Shared TypeScript contracts
+
+Both applications import `@ayinou/shared`. The package exports one entry point, `packages/shared/src/index.ts`, which re-exports domain contracts. The domain files own their literal tuples and inferred types together. Cross-domain links inside the package use type-only imports. Core health, error, and locale declarations have no feature dependencies.
+
+Accounts, Feed, voting, and department content use core types. Communities and social discovery reference account interests, institution kinds, and public trust claims. Project proposals reference interests and operational organizations. Project work and progress share one module because the work payload uses progress events and the progress payload uses work roles and statuses. Notifications reference the author, project-event, and poll-notice types. The package uses the ES2022 standard library.
+
+Fastify retains server validation, authorization, and cursor handling. The web app retains request transport, cancellation, and localized presentation. [Domain mapping and compatibility results](audits/PHASE_6E_AUDIT.md#phase-6f5-results)
+
 ### Institutional authorization
 
 A Supabase subject always represents a person. The switcher navigates to one institution workspace and conveys no authority by itself. Each Fastify request verifies the bearer subject before it calls a service-only RPC. Institutional mutations lock the organization row, recheck active membership and term, and derive all application changes from the checked actor and resource. The anonymous public projection has a separate route and omits contact, membership, invitations, applications, and evidence. Mobile clients can use the same resource IDs and REST endpoints.

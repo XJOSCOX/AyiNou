@@ -69,6 +69,12 @@ Run translation parity and the affected Chromium specs for each batch. For examp
 
 Compare production artifacts from clean exports of both revisions using the same Node version, dependencies, and build command. Check the App Router manifest and the unique JavaScript chunks listed per route in the client reference manifests. Record browser timing separately from build size, including environment and sample size. Keep hosted authorization checks in the guarded rollback-only suites.
 
+## Shared contract checks
+
+Run `npm run test:shared` after a change to `packages/shared`. The check is included in `npm test`. It compiles the package with strict TypeScript, compares the public declaration inventory and runtime values, checks value identity and tuple ordering, and rejects ambiguous exports and circular dependencies. Run workspace typecheck as well to verify the package entry point from both apps.
+
+The checked-in fixture comes from the Phase 6F.5 baseline. To inspect or reproduce the inventory, export the known revision to a separate directory and run `node --import tsx scripts/check-shared-contracts.mjs <export>/packages/shared --print`. Review any contract difference as an API change before updating the fixture. Run the affected API tests and locale checks alongside each extraction.
+
 ## Before every push
 
 - [ ] On `main` with clean known history; no unrelated files
