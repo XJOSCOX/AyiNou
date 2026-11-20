@@ -11,7 +11,8 @@ declare
   proposal jsonb:='{"title":"Synthetic project proposal","description":"A synthetic proposal description.","problem":"A synthetic problem statement.","solution":"A synthetic proposed solution.","objectives":"Synthetic objectives stated plainly.","beneficiaries":"Members of the synthetic public community.","outcomes":"A synthetic expected outcome.","category":"education","country":"HT","department":"HT-OU","startDate":null,"endDate":null,"references":["https://example.invalid/public-reference"],"publishRequested":true}';
   note text:='Synthetic written review decision.';
   key uuid:=gen_random_uuid(); project uuid; org_project uuid; group_project uuid; department_project uuid;
-  org uuid; group_id uuid; department_id uuid; role_id uuid; affiliation uuid; report uuid; payload jsonb;
+  org uuid; pending_org_project uuid; draft uuid; identity_case uuid;
+  group_id uuid; department_id uuid; role_id uuid; affiliation uuid; report uuid; payload jsonb;
   suffix text:=left(replace(author_id::text,'-',''),10);
 begin
   if exists(select 1 from pg_class c,unnest(array['anon','authenticated','service_role']) r(name)
@@ -20,6 +21,7 @@ begin
       and (not c.relrowsecurity or has_table_privilege(r.name,c.oid,'select,insert,update,delete')))
     or has_function_privilege('authenticated','public.project_image_for_api(uuid,uuid,integer,text)','execute')
     or has_function_privilege('anon','public.project_create_for_client(uuid,text,uuid,uuid,jsonb)','execute')
+    or has_function_privilege('authenticated','private.project_identity_state(uuid)','execute')
   then raise exception 'project grants too broad'; end if;
   insert into auth.users(id,email,email_confirmed_at,created_at,updated_at)
     select id,id::text||'@project-rollback.invalid',now(),now(),now() from unnest(array[author_id,reviewer,stranger,delegate]) u(id);
@@ -44,9 +46,14 @@ begin
     perform public.project_create_for_client(key,'individual',null,null,proposal||'{"title":"Changed proposal"}');
     raise exception 'reused idempotency key accepted a different request';
   exception when sqlstate 'PJP09' then null; end;
-  insert into feed_data.write_limits(actor_id,action,window_started,total)
-    values(stranger,'project_create',now(),5);
   perform set_config('request.jwt.claims',stranger_jwt,true);
+  draft:=public.project_create_for_client(gen_random_uuid(),'individual',null,null,proposal);
+  perform public.project_edit_for_client(draft,1,proposal||'{"title":"Private draft editing allowed"}',false);
+  begin
+    perform public.project_submit_for_client(draft,2);
+    raise exception 'confirmed email alone allowed submission';
+  exception when sqlstate 'PJP20' then null; end;
+  update feed_data.write_limits set total=5 where actor_id=stranger and action='project_create';
   begin
     perform public.project_create_for_client(gen_random_uuid(),'individual',null,null,proposal);
     raise exception 'proposal creation exceeded rate limit';
@@ -56,6 +63,36 @@ begin
     perform public.project_detail_for_client(project);
     raise exception 'anonymous draft leak';
   exception when sqlstate 'PJP04' then null; end;
+  perform set_config('request.jwt.claims',author_jwt,true);
+  begin
+    perform public.project_submit_for_client(project,1);
+    raise exception 'MFA alone allowed submission';
+  exception when sqlstate 'PJP20' then null; end;
+  insert into public.verification_records(user_id,verification_type,status,verified_at,source)
+    values(author_id,'identity','verified',now(),'first_account_bootstrap');
+  begin
+    perform public.project_submit_for_client(project,1);
+    raise exception 'bootstrap trust allowed submission';
+  exception when sqlstate 'PJP20' then null; end;
+  insert into private.verification_applications(applicant_id,kind)
+    values(author_id,'identity') returning id into identity_case;
+  payload:=public.project_detail_for_client(project);
+  if payload->>'submissionIdentity'<>'pending' or (payload->>'canSubmit')::boolean
+    or payload::text like '%review_application_id%' then raise exception 'pending identity projection invalid'; end if;
+  begin
+    perform public.project_submit_for_client(project,1);
+    raise exception 'pending identity allowed submission';
+  exception when sqlstate 'PJP21' then null; end;
+  update private.verification_applications set status='approved',decided_at=now() where id=identity_case;
+  update public.verification_records set reviewed_by=reviewer,review_application_id=identity_case
+    where user_id=author_id and verification_type='identity';
+  insert into public.verification_records(user_id,verification_type,status,reviewed_by,verified_at)
+    values(delegate,'identity','verified',reviewer,now()),(stranger,'notable_person','verified',reviewer,now());
+  perform set_config('request.jwt.claims',stranger_jwt,true);
+  begin
+    perform public.project_submit_for_client(draft,2);
+    raise exception 'public-figure claim substituted for reviewed identity';
+  exception when sqlstate 'PJP20' then null; end;
   perform set_config('request.jwt.claims',author_jwt,true);
   perform public.project_submit_for_client(project,1);
   begin
@@ -79,15 +116,38 @@ begin
     perform public.project_edit_for_client(project,4,proposal,false);
     raise exception 'stale update succeeded';
   exception when sqlstate 'PJP09' then null; end;
+  update public.verification_records set status='revoked',verified_at=null where user_id=author_id and verification_type='identity';
+  begin
+    perform public.project_submit_for_client(project,5);
+    raise exception 'revoked identity allowed resubmission';
+  exception when sqlstate 'PJP22' then null; end;
+  update public.verification_records set status='verified',verified_at=now() where user_id=author_id and verification_type='identity';
   perform public.project_submit_for_client(project,5);
   perform set_config('request.jwt.claims',review_jwt,true);
   perform public.project_review_for_client(project,6,'assign',note,null);
+  update public.verification_records set publication_held_at=now() where user_id=author_id and verification_type='identity';
+  begin
+    perform public.project_review_for_client(project,7,'approve',note,null);
+    raise exception 'approval bypassed identity publication hold';
+  exception when sqlstate 'PJP13' then null; end;
+  update public.verification_records set publication_held_at=null where user_id=author_id and verification_type='identity';
   perform public.project_review_for_client(project,7,'approve',note,null);
   perform set_config('request.jwt.claims','{}',true);
   payload:=public.project_detail_for_client(project);
   if payload->>'status'<>'approved' or payload->>'publishedAt' is null or payload->'history'<>'[]'::jsonb or payload->>'version' is not null
+    or payload->>'submissionIdentity' is not null or payload->>'publicationEligibility' is not null
     or not exists(select 1 from jsonb_array_elements(public.projects_list_for_client('education','HT','HT-OU',null,null)) e where e->>'id'=project::text)
   then raise exception 'public projection missing or too broad'; end if;
+  update public.verification_records set publication_held_at=now() where user_id=author_id and verification_type='identity';
+  begin
+    perform public.project_detail_for_client(project);
+    raise exception 'approved project kept public during owner hold';
+  exception when sqlstate 'PJP04' then null; end;
+  perform set_config('request.jwt.claims',author_jwt,true);
+  payload:=public.project_detail_for_client(project);
+  if payload->>'publicationEligibility'<>'unavailable' or jsonb_array_length(payload->'history')<4
+    then raise exception 'visibility change affected stored approval history'; end if;
+  update public.verification_records set publication_held_at=null where user_id=author_id and verification_type='identity';
 
   perform set_config('request.jwt.claims',stranger_jwt,true);
   report:=public.project_report_for_client(project,'fundraising','Synthetic misleading fundraising report.');
@@ -122,6 +182,10 @@ begin
   perform public.project_submit_for_client(org_project,1);
   perform public.affiliation_own_action_for_api(delegate,org,true,false);
   begin
+    perform public.project_submit_for_client(org_project,2);
+    raise exception 'revoked delegate could submit using an existing session';
+  exception when sqlstate 'PJP23' then null; end;
+  begin
     perform public.project_detail_for_client(org_project);
     raise exception 'revoked delegate retained project access';
   exception when sqlstate 'PJP04' then null; end;
@@ -132,6 +196,42 @@ begin
     raise exception 'organization approval bypassed current submitting authority';
   exception when sqlstate 'PJP13' then null; end;
   perform public.project_review_for_client(org_project,3,'reject',note,null);
+  perform set_config('request.jwt.claims',author_jwt,true);
+  pending_org_project:=public.project_create_for_client(gen_random_uuid(),'organization',org,null,proposal);
+  perform set_config('request.jwt.claims',delegate_jwt,true);
+  begin
+    perform public.project_submit_for_client(pending_org_project,1);
+    raise exception 'verified unrelated member permitted to submit';
+  exception when sqlstate 'PJP04' then null; end;
+  perform set_config('request.jwt.claims',author_jwt,true);
+  perform public.project_submit_for_client(pending_org_project,1);
+  perform set_config('request.jwt.claims',review_jwt,true);
+  perform public.project_review_for_client(pending_org_project,2,'assign',note,null);
+  perform public.project_review_for_client(pending_org_project,3,'approve',note,null);
+  perform set_config('request.jwt.claims',author_jwt,true);
+  if public.project_detail_for_client(pending_org_project)->>'publicationEligibility'<>'pending_institution_verification'
+    then raise exception 'unverified organization publication is not pending'; end if;
+  insert into private.verification_applications(applicant_id,organization_id,kind,status,decided_at)
+    values(author_id,org,'organization','approved',now());
+  update private.organizations set verification_status='verified' where id=org;
+  perform set_config('request.jwt.claims','{}',true);
+  if public.project_detail_for_client(pending_org_project)->>'publishedAt' is null
+    then raise exception 'independently verified organization did not become eligible'; end if;
+  update private.organizations set verification_status='revoked' where id=org;
+  begin
+    perform public.project_detail_for_client(pending_org_project);
+    raise exception 'revoked organization project remained public';
+  exception when sqlstate 'PJP04' then null; end;
+  insert into private.organization_memberships(organization_id,user_id,role,created_at,expires_at)
+    values(org,delegate,'administrator',now()-interval '2 days',now()+interval '1 day');
+  perform set_config('request.jwt.claims',delegate_jwt,true);
+  org_project:=public.project_create_for_client(gen_random_uuid(),'organization',org,null,proposal);
+  update private.organization_memberships set expires_at=now()-interval '1 day'
+    where organization_id=org and user_id=delegate;
+  begin
+    perform public.project_submit_for_client(org_project,1);
+    raise exception 'expired representative term allowed submission';
+  exception when sqlstate 'PJP23' then null; end;
 
   insert into feed_data.communities(slug,kind,name,description,rules,policy,owner_id)
     values('project-group-'||suffix,'interest','Synthetic project group '||suffix,'Synthetic group description.','Synthetic group rules.','private',author_id)
@@ -143,6 +243,12 @@ begin
   group_project:=public.project_create_for_client(gen_random_uuid(),'community',group_id,null,proposal);
   department_project:=public.project_create_for_client(gen_random_uuid(),'community',department_id,null,proposal);
   perform public.project_submit_for_client(group_project,1);
+  delete from feed_data.community_staff where community_id=department_id and user_id=author_id;
+  begin
+    perform public.project_submit_for_client(department_project,1);
+    raise exception 'community membership substituted for current administrator authority';
+  exception when sqlstate 'PJP24' then null; end;
+  insert into feed_data.community_staff(community_id,user_id,role) values(department_id,author_id,'administrator');
   perform public.project_submit_for_client(department_project,1);
   delete from feed_data.community_memberships where community_id=department_id and user_id=author_id;
   perform set_config('request.jwt.claims',review_jwt,true);

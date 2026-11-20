@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { Institution, Locale, OrganizationKind, PersonalClaim } from "@ayinou/shared";
 import { institutionMessages } from "@/lib/institution-i18n";
+import { adminMessages } from "@/lib/admin-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
 
@@ -63,6 +64,13 @@ export function VerifiedCheck({ label }: { label?: string }) {
     <Image src="/verified-badge.png" width={18} height={18} alt={label ?? ""} title={label} unoptimized
       className="inline-block size-[18px] shrink-0 align-middle" />
   );
+}
+
+export function AdministratorMark() {
+  const [locale] = useLocale();
+  const label = adminMessages[locale].administrator;
+  return <Image src="/admin-verified.png" width={18} height={18} alt={label} title={label} unoptimized
+    className="inline-block size-[18px] shrink-0 align-middle" />;
 }
 
 export function PersonalClaimChecks({ claims }: { claims: readonly PersonalClaim[] }) {

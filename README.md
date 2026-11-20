@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 6A community project proposals with hosted Supabase for development
+**Status:** Phase 6A.1 verified project eligibility with hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -107,7 +107,9 @@ The hosted database has versioned migrations through Phase 2D.1. Remote migratio
 
 For non-destructive hosted integration checks, set `AYINOU_HOSTED_TEST_PROJECT_REF=hcbxulyfmdmuyccgrujs` in the shell and run `npm run test:hosted` and `npm run test:hosted:accounts`. These scripts create uniquely named, confirmed synthetic Auth users, exclude them from public metrics, and delete only their returned IDs. The optional `npm run test:hosted:aggregation` requires an empty eligible-member baseline and rolls back its SQL assertions. Do not run the scripts against an unrelated project.
 
-Open **Projects** to browse approved, eligible proposals. Signed-in members can submit their own proposals or act for an organization or community when they have current permission. Manage drafts and review status from **Manage proposals**. Reviewers use **Project reviews** with a verified authenticator. Run `npm run test:hosted:projects:sql` for rollback-only database checks and `npm run test:hosted:projects` for synthetic hosted API checks with targeted cleanup. Both use the linked project guard. [Project workflow, permissions, and API](docs/DATABASE.md#phase-6a-project-proposals)
+Open **Projects** to browse approved, eligible proposals. Manage private drafts and review status from **Manage proposals**. Reviewers use **Project reviews** with a verified authenticator. Run `npm run test:hosted:projects:sql` for rollback-only database checks and `npm run test:hosted:projects` for synthetic hosted API checks with targeted cleanup. Both use the linked project guard. [Project workflow, permissions, and API](docs/DATABASE.md#phase-6a-project-proposals)
+
+Members can save private drafts while identity review is pending. Submitting or resubmitting requires independently reviewed personal identity and current authority for the owner. Organization-owned proposals also require independent institutional verification for public listing. The red administrator icon identifies a platform role in signed-in views. The green check identifies reviewed personal claims. [Eligibility and publication rules](docs/DATABASE.md#phase-6a1-verified-project-eligibility)
 
 The dashboard is at `http://localhost:4000/dashboard` after login. Public API routes are `GET /api/v1/community/stats`, `/api/v1/community/departments`, and `/api/v1/community/diaspora`. Geographic data is hidden together when any nonempty underlying location group has fewer than 10 members. Zero, suppressed, and unavailable are distinct states. See [docs/DATABASE.md](docs/DATABASE.md) for exact metric definitions.
 

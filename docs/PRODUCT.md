@@ -98,3 +98,5 @@ Institutions can define internal duties and assign existing eligible members or 
 ### Community project proposals
 
 Members can propose a project personally or on behalf of a community or institution when authorized. The proposal records the problem, solution, objectives, beneficiaries, expected outcomes, and broad region. A reviewer evaluates clarity, expected benefit, feasibility, privacy, and credible references. Only approved proposals that meet publication rules and opt in appear in discovery. Approval describes the review of a proposal. Delivery, fundraising, volunteer enrollment, and official authorization follow separate processes. Members can report unsafe or misleading listings privately.
+
+Members can draft privately while applying for identity verification. A reviewed identity and current authority for the owner are required to submit. Public listing of an organization-owned project also requires verification of the organization itself. Review staffing is a launch dependency. The red role icon in signed-in account views denotes platform administration. The green badge describes a reviewed personal claim.

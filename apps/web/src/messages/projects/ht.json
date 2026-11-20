@@ -1,4 +1,16 @@
 {
+  "identity": {
+    "verified": "Revizyon idantite a fini. Ou ka soumèt si ou gen otorizasyon pou pwopozisyon an.",
+    "required": "Ou ka anrejistre bouyon prive. Mande verifikasyon idantite anvan ou soumèt.",
+    "pending": "Demann verifikasyon idantite ou a ap tann revizyon. Ou ka kontinye modifye bouyon prive ou a.",
+    "revoked": "Verifikasyon idantite ou te resevwa a pa disponib. Ou ka anrejistre bouyon prive epi tcheke estati verifikasyon ou."
+  },
+  "requestIdentity": "Mande verifikasyon idantite",
+  "openVerification": "Ale nan verifikasyon",
+  "institutionVerificationPending": "Òganizasyon ou a dwe fini pwòp verifikasyon li anvan pwopozisyon apwouve sa a ka parèt piblikman.",
+  "publicationUnavailable": "Pwopozisyon apwouve sa a rete prive pou kounye a paske li poko satisfè kondisyon piblikasyon yo.",
+  "institutionAuthorityUnavailable": "Otorizasyon ou genyen kounye a pa pèmèt ou soumèt pwopozisyon pou òganizasyon sa a.",
+  "communityAuthorityUnavailable": "Otorizasyon ou genyen kounye a pa pèmèt ou soumèt pwopozisyon pou kominote sa a.",
   "title": "Pwojè",
   "newProject": "Nouvo pwopozisyon",
   "manage": "Jere pwopozisyon yo",

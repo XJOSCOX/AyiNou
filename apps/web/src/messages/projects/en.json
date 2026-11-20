@@ -1,4 +1,16 @@
 {
+  "identity": {
+    "verified": "Identity review complete. You can submit when you have authority for the proposal.",
+    "required": "You can save private drafts. Request identity verification before submitting.",
+    "pending": "Your identity application is awaiting review. You can keep editing your private draft.",
+    "revoked": "Your reviewed identity is unavailable. You can save private drafts and check your verification status."
+  },
+  "requestIdentity": "Request identity verification",
+  "openVerification": "Open verification",
+  "institutionVerificationPending": "Your organization must complete its own verification before this approved proposal can appear publicly.",
+  "publicationUnavailable": "This approved proposal is currently private because publication requirements are unmet.",
+  "institutionAuthorityUnavailable": "Your current permissions do not allow you to submit for this organization.",
+  "communityAuthorityUnavailable": "Your current permissions do not allow you to submit for this community.",
   "title": "Projects",
   "newProject": "New proposal",
   "manage": "Manage proposals",

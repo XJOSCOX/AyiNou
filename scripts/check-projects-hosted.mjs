@@ -78,7 +78,6 @@ async function request(status, method, url, user, payload, extra) {
 }
 
 
-const rationale = "Synthetic project review decision.";
 const title = `Synthetic proposal ${slug}`;
 const narrative = "Community members will coordinate a synthetic education proposal.";
 const proposal = {
@@ -89,11 +88,7 @@ const proposal = {
 
 try {
   const applicant = await fixture("author", true);
-  const reviewer = await fixture("review", true);
-  const reporter = await fixture("report");
-  const eligible = [applicant, reviewer].map(({ id, email }) => `('${id}'::uuid,'${email}')`).join(",");
-  query(`insert into public.role_assignments(user_id,role)
-    select u.id,'moderator' from auth.users u join (values ${eligible}) f(id,email) on f.id=u.id and f.email=u.email;`);
+  const plainMember = await fixture("draft");
 
   const headers = { "idempotency-key": randomUUID() };
   const body = { kind: "individual", owner: null, association: null, proposal };
@@ -104,7 +99,7 @@ try {
   assert.equal(first.id, second.id);
   const path = base + "/" + first.id;
   await request(404, "GET", path);
-  await request(404, "GET", path, reporter);
+  await request(404, "GET", path, plainMember);
 
   const image = await sharp({ create: { width: 32, height: 24, channels: 3, background: "#226599" } }).png().toBuffer();
   const uploaded = await request(200, "PUT", path + "/image", applicant, { version: 1, image: image.toString("base64") });
@@ -113,32 +108,23 @@ try {
   assert.equal((await sharp(cover.rawPayload).metadata()).format, "webp");
   await request(404, "GET", path + "/image");
   await request(409, "PATCH", path, applicant, { version: 1, proposal, removeImage: false });
-  await request(200, "POST", path + "/submit", applicant, { version: 2 });
-  const assign = { version: 3, action: "assign", reason: rationale };
-  await request(403, "POST", path + "/review", applicant, assign);
-  const lowClient = createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY, options);
-  const lowSession = await lowClient.auth.signInWithPassword({ email: reviewer.email, password });
-  assert.ifError(lowSession.error);
-  const lowReview = await send("POST", path + "/review", { token: lowSession.data.session.access_token }, assign);
-  assert.ok([401, 403].includes(lowReview.statusCode), "password-only session must not claim a review");
-  const queue = await request(200, "GET", base + "/review", reviewer);
-  assert.ok(queue.items.some((item) => item.id === first.id));
-  await request(200, "POST", path + "/review", reviewer, assign);
-  await request(200, "POST", path + "/review", reviewer, { version: 4, action: "approve", reason: rationale });
-  const detail = await request(200, "GET", path);
-  assert.equal(detail.status, "approved");
-  assert.deepEqual(detail.history, []);
-  assert.equal(detail.version, null);
-  assert.ok(!JSON.stringify(detail).includes(rationale));
-  const list = await request(200, "GET", base + "?category=education&country=HT&department=HT-OU");
-  assert.ok(list.projects.some((item) => item.id === first.id));
-  await request(200, "GET", path + "/image");
+  const denied = await request(403, "POST", path + "/submit", applicant, { version: 2 });
+  assert.equal(denied.error.code, "PROJECT_IDENTITY_REQUIRED");
+  assert.equal((await request(200, "GET", path, applicant)).submissionIdentity, "required");
+  const revised = await request(200, "PATCH", path, applicant, {
+    version: 2, proposal: { ...proposal, title: title + " revised" }, removeImage: false,
+  });
+  assert.equal(revised.version, 3);
+  const plainDraft = await request(201, "POST", base, plainMember, body, { "idempotency-key": randomUUID() });
+  const plainPath = base + "/" + plainDraft.id;
+  const plainDenied = await request(403, "POST", plainPath + "/submit", plainMember, { version: 1 });
+  assert.equal(plainDenied.error.code, "PROJECT_IDENTITY_REQUIRED");
 
   if (process.argv.includes("--browser")) {
-    const file = "supabase/.temp/phase6a-browser.json";
+    const file = "supabase/.temp/phase6a1-browser.json";
     try {
-      writeFileSync(file, JSON.stringify({ email: applicant.email, password, project: first.id, title }), { mode: 0o600, flag: "wx" });
-      console.log("Phase 6A browser fixture ready. Press Enter to continue to moderation and cleanup.");
+      writeFileSync(file, JSON.stringify({ email: plainMember.email, password, project: plainDraft.id, title }), { mode: 0o600, flag: "wx" });
+      console.log("Phase 6A.1 browser fixture ready. Press Enter to continue and clean up.");
       await new Promise((resolve) => { process.stdin.resume(); process.stdin.once("data", resolve); });
     } finally {
       process.stdin.pause();
@@ -146,22 +132,27 @@ try {
     }
   }
 
-  const report = await request(201, "POST", path + "/reports", reporter,
-    { category: "privacy", explanation: "Synthetic privacy concern for moderation." });
-  const reports = await request(200, "GET", base + "/reports", reviewer);
-  assert.ok(reports.reports.some((item) => item.id === report.id));
-  assert.ok(!JSON.stringify(reports.reports.find((item) => item.id === report.id)).includes(reporter.id));
-  await request(204, "PATCH", path + "/reports/" + report.id, reviewer, { version: 5, restrict: true, reason: rationale });
-  await request(404, "GET", path);
-  await request(404, "GET", path + "/image");
-  console.log("Hosted project API passed concurrent creation, private media, real TOTP review, public discovery, reporting, and immediate withdrawal.");
+  await request(201, "POST", "/api/v1/me/verification", plainMember, {
+    kind: "identity", organizationId: null, evidence: ["https://example.invalid/project-identity-fixture"],
+  });
+  const latest = await request(200, "GET", plainPath, plainMember);
+  const pending = await request(403, "POST", plainPath + "/submit", plainMember, { version: latest.version });
+  assert.equal(pending.error.code, "PROJECT_IDENTITY_PENDING");
+  const detail = await request(200, "GET", plainPath, plainMember);
+  assert.equal(detail.submissionIdentity, "pending");
+  assert.equal(detail.canSubmit, false);
+  assert.ok(!JSON.stringify(detail).includes("project-identity-fixture"));
+  await request(404, "GET", plainPath);
+  const list = await request(200, "GET", base + "?category=education&country=HT&department=HT-OU");
+  assert.ok(!list.projects.some((item) => item.id === plainDraft.id || item.id === first.id));
+  console.log("Hosted project API passed concurrent draft creation, private media, confirmed-email and MFA-only denial, and pending identity privacy.");
 } finally {
   await app.close();
   if (users.length) {
     const expected = users.map(({ id, email }) => `('${id}'::uuid,'${email}')`).join(",");
     query(`begin; create temporary table project_fixture_users on commit drop as
       select u.id from auth.users u join (values ${expected}) f(id,email) on u.id=f.id and u.email=f.email;
-      delete from public.role_assignments where user_id in (select id from project_fixture_users);
+      delete from private.verification_applications where applicant_id in (select id from project_fixture_users);
       delete from feed_data.read_limits where subject in (select 'member:'||id::text from project_fixture_users);
       commit;`);
   }

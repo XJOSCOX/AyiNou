@@ -1,4 +1,16 @@
 {
+  "identity": {
+    "verified": "Votre identité a été vérifiée. Vous pouvez soumettre la proposition si vous y êtes autorisé.",
+    "required": "Vous pouvez enregistrer des brouillons privés. Demandez une vérification d’identité avant de soumettre la proposition.",
+    "pending": "Votre demande de vérification d’identité est en cours d’examen. Vous pouvez continuer à modifier votre brouillon privé.",
+    "revoked": "Votre vérification d’identité est indisponible. Vous pouvez enregistrer des brouillons privés et consulter votre statut."
+  },
+  "requestIdentity": "Demander une vérification d’identité",
+  "openVerification": "Ouvrir la vérification",
+  "institutionVerificationPending": "Votre organisation doit terminer sa propre vérification avant que cette proposition approuvée puisse être publiée.",
+  "publicationUnavailable": "Cette proposition approuvée reste privée pour le moment, car les conditions de publication ne sont pas remplies.",
+  "institutionAuthorityUnavailable": "Vos autorisations actuelles ne vous permettent pas de soumettre une proposition pour cette organisation.",
+  "communityAuthorityUnavailable": "Vos autorisations actuelles ne vous permettent pas de soumettre une proposition pour cette communauté.",
   "title": "Projets",
   "newProject": "Nouvelle proposition",
   "manage": "Gérer les propositions",

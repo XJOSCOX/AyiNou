@@ -53,6 +53,11 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "PROJECT_CHANGED": return projectMessages[locale].changed;
     case "PROJECT_OWNER_UNAVAILABLE": return projectMessages[locale].ownerUnavailable;
     case "PROJECT_REVIEW_UNAVAILABLE": return projectMessages[locale].reviewUnavailable;
+    case "PROJECT_IDENTITY_REQUIRED": return projectMessages[locale].identity.required;
+    case "PROJECT_IDENTITY_PENDING": return projectMessages[locale].identity.pending;
+    case "PROJECT_IDENTITY_REVOKED": return projectMessages[locale].identity.revoked;
+    case "PROJECT_INSTITUTION_AUTHORITY_UNAVAILABLE": return projectMessages[locale].institutionAuthorityUnavailable;
+    case "PROJECT_COMMUNITY_AUTHORITY_UNAVAILABLE": return projectMessages[locale].communityAuthorityUnavailable;
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

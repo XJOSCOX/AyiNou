@@ -61,6 +61,11 @@ export function feedDatabaseError(code: string): ApiError {
     case "PJP09": return new ApiError(409, "PROJECT_CHANGED", "The proposal or submission has changed");
     case "PJP13": return new ApiError(403, "PROJECT_OWNER_UNAVAILABLE", "Current authority for this owner is required");
     case "PJP14": return new ApiError(403, "PROJECT_REVIEW_UNAVAILABLE", "Independent project review is required");
+    case "PJP20": return new ApiError(403, "PROJECT_IDENTITY_REQUIRED", "Reviewed identity verification is required");
+    case "PJP21": return new ApiError(403, "PROJECT_IDENTITY_PENDING", "Identity verification is awaiting review");
+    case "PJP22": return new ApiError(403, "PROJECT_IDENTITY_REVOKED", "Identity verification is unavailable");
+    case "PJP23": return new ApiError(403, "PROJECT_INSTITUTION_AUTHORITY_UNAVAILABLE", "Current institutional authority is required");
+    case "PJP24": return new ApiError(403, "PROJECT_COMMUNITY_AUTHORITY_UNAVAILABLE", "Current community authority is required");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");

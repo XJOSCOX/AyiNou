@@ -1,4 +1,16 @@
 {
+  "identity": {
+    "verified": "Se ha verificado tu identidad. Puedes enviar la propuesta si tienes autorización.",
+    "required": "Puedes guardar borradores privados. Solicita la verificación de identidad antes de enviar la propuesta.",
+    "pending": "Tu solicitud de verificación de identidad está pendiente de revisión. Puedes seguir editando tu borrador privado.",
+    "revoked": "Tu verificación de identidad no está disponible. Puedes guardar borradores privados y consultar tu estado."
+  },
+  "requestIdentity": "Solicitar verificación de identidad",
+  "openVerification": "Abrir verificación",
+  "institutionVerificationPending": "Tu organización debe completar su propia verificación antes de que esta propuesta aprobada pueda publicarse.",
+  "publicationUnavailable": "Esta propuesta aprobada permanece privada porque todavía no cumple los requisitos de publicación.",
+  "institutionAuthorityUnavailable": "Tus permisos actuales no te permiten enviar propuestas para esta organización.",
+  "communityAuthorityUnavailable": "Tus permisos actuales no te permiten enviar propuestas para esta comunidad.",
   "title": "Proyectos",
   "newProject": "Nueva propuesta",
   "manage": "Gestionar propuestas",

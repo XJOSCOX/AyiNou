@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
-import { interestCodes, projectOwners, type ProjectDetail, type ProjectOwnerKind, type ProjectProposal } from "@ayinou/shared";
+import { interestCodes, projectOwners, type ProjectDetail, type ProjectIdentityState, type ProjectOwnerKind, type ProjectProposal } from "@ayinou/shared";
 import { fetchDepartments } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useFeedMutation } from "@/lib/feed-state";
@@ -17,6 +17,17 @@ import { MemberShell } from "./member-shell";
 
 const sections = ["description","problem","solution","objectives","beneficiaries","outcomes"] as const;
 const get = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
+
+export function ProjectIdentityNotice({ state }: { state: ProjectIdentityState }) {
+  const [locale] = useLocale();
+  const t = projectMessages[locale];
+  return <div className="grid gap-1 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm text-[var(--theme-body)]">
+    <p>{t.identity[state]}</p>
+    {state !== "verified" && <Link className={`${institutionLink} justify-self-start`} href="/verification">
+      {state === "required" ? t.requestIdentity : t.openVerification}
+    </Link>}
+  </div>;
+}
 
 export function NewProjectScreen() {
   const [locale] = useLocale();
@@ -78,6 +89,7 @@ export function ProjectForm({ detail, refresh, onDirty }: { detail?: ProjectDeta
     {departments.error !== null && <ApiErrorNotice error={departments.error} retry={departments.refresh} />}
     {!detail && <>
       {options.error !== null && <ApiErrorNotice error={options.error} retry={options.refresh} signIn />}
+      {options.data && <ProjectIdentityNotice state={options.data.submissionIdentity} />}
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="min-w-0 text-sm font-semibold">{t.owner}
           <select value={kind} className={institutionField} onChange={(event) => {
@@ -154,5 +166,5 @@ export function ProjectForm({ detail, refresh, onDirty }: { detail?: ProjectDeta
 }
 
 const emptyOptions: typeof loadProjectOptions = async () => ({
-  organizations: [], communities: [], canReview: false, canModerate: false, canAssignOthers: false,
+  organizations: [], communities: [], canReview: false, canModerate: false, canAssignOthers: false, submissionIdentity: "required",
 });

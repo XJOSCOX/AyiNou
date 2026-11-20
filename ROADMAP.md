@@ -219,6 +219,8 @@ Activation of temporary proof challenges and external evidence delivery remains 
 
 - [x] Phase 6A supports proposals with broad geography, an accountable owner, and immutable revisions.
 - [x] Phase 6A adds independent review, eligible public discovery, private reports, and audit history.
+- [x] Phase 6A.1 keeps ordinary drafts private and gates submission and publication on reviewed identity and current accountability.
+- [ ] Staff independent identity review so eligible applicants can complete verification.
 - [ ] Set staffing, review targets, retention, and a publication restriction reconsideration process before public operation.
 - [ ] Add project execution, milestones, volunteer roles, updates, and outcomes in later phases.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.

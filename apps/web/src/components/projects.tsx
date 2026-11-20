@@ -15,7 +15,7 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { DisplayControls } from "./display-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
-import { ProjectForm } from "./project-form";
+import { ProjectForm, ProjectIdentityNotice } from "./project-form";
 import { ReviewActionForm } from "./project-review";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
@@ -149,6 +149,9 @@ export function ProjectDetailScreen({ id, signedIn }: { id: string; signedIn: bo
           {data.publishedAt && <p className="mt-1 text-sm">{t.published} · {new Date(data.publishedAt).toLocaleDateString(locale)}</p>}
         </header>
         {data.status === "approved" && <p className="max-w-prose text-sm text-[var(--theme-body)]">{t.approvalHelp}</p>}
+        {data.publicationEligibility === "pending_institution_verification" &&
+          <p className="max-w-prose text-sm">{t.institutionVerificationPending}</p>}
+        {data.publicationEligibility === "unavailable" && <p className="max-w-prose text-sm">{t.publicationUnavailable}</p>}
         {data.hasImage && <ProjectCover key={`${id}:${data.version ?? "published"}`} id={id} signedIn={signedIn} />}
         <dl className="grid gap-4 md:grid-cols-2">
           {fields.filter((key) => data.proposal[key]).map((key) => <div className="min-w-0" key={key}>
@@ -172,7 +175,7 @@ export function ProjectDetailScreen({ id, signedIn }: { id: string; signedIn: bo
           {event.reason && <p className="whitespace-pre-line break-words" dir="auto">{event.reason}</p>}
         </li>)}</ul>
       </section>}
-      {(data.canEdit || data.canSubmit) && <ProjectOwnerControls key={data.id} data={data} refresh={resource.refresh} />}
+      {(data.canEdit || data.submissionIdentity) && <ProjectOwnerControls key={data.id} data={data} refresh={resource.refresh} />}
       {data.canDecide && data.version !== null && <ReviewActionForm id={id} version={data.version} actions={["request_changes", "approve", "reject", "release"]} refresh={resource.refresh} />}
       {data.canReport && <ReportProjectForm id={id} />}
     </>}
@@ -207,6 +210,7 @@ function ProjectOwnerControls({ data, refresh }: { data: ProjectDetail; refresh:
       <ProjectForm detail={data} refresh={refresh} onDirty={setDirty} />
     </details>}
     <section className={`${institutionCard} grid gap-3`}>
+      {data.submissionIdentity && <ProjectIdentityNotice state={data.submissionIdentity} />}
       {data.canEdit && <form className="grid gap-3" onSubmit={(event) => {
         event.preventDefault();
         const form = event.currentTarget;

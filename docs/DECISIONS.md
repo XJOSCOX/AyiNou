@@ -149,3 +149,9 @@ Phase 2B uses self-declared membership categories. A category grants no verifica
 ### Phase 6A accountable owners and independent review
 
 Bind each proposal to one owner when created and keep creator and submitter as separate actors in its history. Use one current, assigned, independent reviewer with recent TOTP for proposal decisions. Continue using the separate verification workflow for identity, institutional recognition, and representative badges. Require explicit publication consent and reapply live visibility to each directory, detail, and media read. Keep revision history and report reasons in the private schema. Staff assignments, review timelines, retention windows, and independent reconsideration of restrictions remain governance decisions before public operation. Future milestones, tasks, and volunteer offers should reference the approved proposal and its exact revision.
+
+### Phase 6A.1 action eligibility
+
+Ordinary participation and private drafts require active membership plus resource scope where applicable. Public project submission and future sensitive team actions require independently reviewed identity and current authority. Organization publication also requires independent verification of the organization. Future financial, official leadership and public broadcasting decisions require separately defined approvals. Keep these checks tied to reviewed outcomes so future approved verification methods can qualify without changing project contracts.
+
+A lost identity, owner permission, or institutional verification removes public access while preserving proposals and review history. A platform role is separate from identity eligibility. The red icon is shown in signed-in account views and the authorized administration roster. Independent verification reviewer staffing remains an operational dependency.

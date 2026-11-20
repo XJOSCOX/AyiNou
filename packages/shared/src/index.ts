@@ -453,12 +453,16 @@ export type ProjectCard = {
   publishedAt: string | null; hasImage: boolean; owner: { kind: ProjectOwnerKind; name: string | null; handle: string | null };
   association: { name: string; handle: string } | null;
 };
+export type ProjectIdentityState = "verified" | "required" | "pending" | "revoked";
 export type ProjectDetail = ProjectCard & {
   proposal: ProjectProposal; version: number | null; restricted: boolean; canEdit: boolean; canSubmit: boolean;
+  submissionIdentity: ProjectIdentityState | null;
+  publicationEligibility: "published" | "private" | "pending_institution_verification" | "unavailable" | null;
   canDecide: boolean; canReport: boolean;
   history: { action: "submit" | "request_changes" | "approve" | "reject" | "restrict"; revision: number; reason: string | null; createdAt: string }[];
 };
 export type ProjectOptions = {
+  submissionIdentity: ProjectIdentityState;
   organizations: OperationalOrganization[]; communities: (OperationalOrganization & { canOwn: boolean })[];
   canReview: boolean; canModerate: boolean; canAssignOthers: boolean;
 };

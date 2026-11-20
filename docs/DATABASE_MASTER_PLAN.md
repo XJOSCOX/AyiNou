@@ -254,6 +254,10 @@ Self-service archival and purge of groups and a reinstatement or review path for
 
 All five tables are RLS-enabled without direct application-role grants. Authenticated owners and currently authorized managers use scoped RPCs. Assigned independent reviewers have recent MFA and separate write authority. Guests see eligible public projections. Project alerts reference the recipient-scoped `feed_data.notifications.project_event_id` and recheck proposal access. Project deletion cascades its child rows. Personal owner deletion cascades their proposals, while creator, submitter, reporter, and reviewer references in surviving records are nulled. A separately associated community is deletion-restricted while referenced. Retention and reconsideration policy need operational approval before public use. [Matrix and status rules](DATABASE.md#phase-6a-project-proposals)
 
+#### Phase 6A.1 eligibility
+
+Phase 6A.1 adds no tables. Project rights derive from the existing reviewed identity outcome, institution verification applications and role assignments, and exact community membership and staff records. The internal submitter check requires a current independent identity claim. Public projection adds current accountable ownership, the submitter’s ability to represent that owner, and separate institution verification for organization-owned projects. A lost eligibility condition suppresses public projections without rewriting approval or history. Future manager and team changes must check verified identity and scoped authority in the same transaction. [Phase 6A.1 rules](DATABASE.md#phase-6a1-verified-project-eligibility)
+
 ### Project execution and volunteering — future phases
 
 | Planned table | Columns (types, PK/FK/UQ) | Additional indexes / conditions |
@@ -440,7 +444,7 @@ erDiagram
 | Communities/members/rules/bans | Public communities/rules | Eligible membership/read | Scoped member actions | Assigned community moderation | Audited role/bans |
 | Organizations/representatives/ambassadors | Approved public facts | Public read | Authorized representative proposals | Verification review | Audited approval/revocation |
 | Verification applications/evidence/reviews | — | Own application status | Own organization submission | Assigned review/evidence | Restricted disposition/audit |
-| Phase 6A proposals | Approved eligible discovery | Own personal submissions and eligible reports | Current proposal permissions | Assigned independent decisions with recent TOTP | Audited report restriction and eligible reviewer assignment |
+| Phase 6A–6A.1 proposals | Approved eligible discovery | Own private drafts and eligible reports | Current proposal permissions and reviewed identity for submission | Assigned independent decisions with recent TOTP and current submitting authority for approval | Audited report restriction and eligible reviewer assignment |
 | Future project execution | Safe published read | Eligible offers | Scoped team edits | Independent oversight | Audited publish or close |
 | Claims/sources/attestations | Safety-approved summaries | Eligible submission/read | Own drafts/appeals | Assigned editorial review | Restricted publication control |
 | Claim evidence/safety actions | — | Own submission receipt | — | Assigned minimum-necessary access | Retention/redaction/audit |

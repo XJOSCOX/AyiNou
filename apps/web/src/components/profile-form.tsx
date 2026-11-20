@@ -13,7 +13,7 @@ import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { useMemberIdentity } from "@/lib/member-display-name";
 import { browserSupabase } from "@/lib/supabase/browser";
-import { PersonalClaimChecks } from "./institution-ui";
+import { AdministratorMark, PersonalClaimChecks } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
 const input = "mt-2 w-full rounded-xl border border-[var(--theme-border)] bg-[var(--theme-control)] px-4 py-3 focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]";
@@ -86,7 +86,7 @@ function ProfileEditor({ profile, departments, onboarding }: {
   profile: MemberProfile; departments: Department[]; onboarding: boolean;
 }) {
   const [locale, setLocale] = useLocale();
-  const { claims } = useMemberIdentity();
+  const { claims, administrator } = useMemberIdentity();
   const t = authMessages[locale];
   const account = accountMessages[locale];
   const m = membershipMessages[locale];
@@ -188,7 +188,8 @@ function ProfileEditor({ profile, departments, onboarding }: {
       <div className="mt-4 flex items-center gap-4">
         {avatar && <Image src={avatar} alt={m.photoAlt} width={56} height={56} className="rounded-full" unoptimized />}
         <div>
-          <p className="font-bold">{saved.displayName}{saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} /></>}</p>
+          <p className="font-bold">{saved.displayName}{saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} /></>}
+            {administrator && <>{" "}<AdministratorMark /></>}</p>
           {saved.username && <p className="text-sm text-[var(--theme-body)]">@{saved.username}</p>}
         </div>
       </div>
@@ -219,7 +220,8 @@ function ProfileEditor({ profile, departments, onboarding }: {
           </div>
           <h2 className="mt-3 text-sm font-semibold text-[var(--theme-link)]">{m.preview}</h2>
           <p className="mt-1 break-words text-2xl font-semibold leading-tight tracking-tight">
-            {display || t.displayName}{display && display === saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} /></>}
+            {display || t.displayName}{display && display === saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} />
+              {administrator && <AdministratorMark />}</>}
           </p>
           {username.trim() && <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{username.trim().toLowerCase()}</p>}
           {biography.trim() && <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[var(--theme-body)]">{biography.trim()}</p>}
