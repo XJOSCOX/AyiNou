@@ -1,0 +1,66 @@
+{
+  "title": "Demandes relatives à la vie privée",
+  "settings": "Consultez les types de demandes et vos propres dossiers lorsque le dépôt est ouvert.",
+  "back": "Paramètres du compte",
+  "loading": "Vérification de la disponibilité…",
+  "signedOut": "Connectez-vous pour vérifier la disponibilité du dépôt.",
+  "disabled": "Le dépôt de demandes est actuellement fermé. Vous ne pouvez pas déposer de dossier ici.",
+  "synthetic": "Dépôt réservé aux comptes de test. L’envoi crée uniquement un dossier de test. Il ne lance aucun examen, export, fermeture ou effacement.",
+  "kind": "Type de demande",
+  "submit": "Envoyer la demande de test",
+  "retry": "Réessayer",
+  "retrySame": "Le nouvel essai reprend la même demande et conserve le type sélectionné.",
+  "cases": "Vos demandes",
+  "empty": "Vous n’avez aucune demande de test.",
+  "details": "Voir l’historique",
+  "withdraw": "Retirer",
+  "confirm": "Retirer cette demande de test ?",
+  "confirmAction": "Confirmer le retrait",
+  "cancel": "Annuler",
+  "more": "Autres demandes",
+  "keyConflict": "Cet identifiant d’envoi a déjà servi pour une autre action.",
+  "stateConflict": "Le dossier a changé. Actualisez vos demandes avant de réessayer.",
+  "reviewUnavailable": "L’examen des demandes est indisponible.",
+  "success": {
+    "received": "Demande de test enregistrée. Référence",
+    "withdrawn": "Demande de test retirée. Référence"
+  },
+  "status": {
+    "received": "Reçue",
+    "withdrawn": "Retirée"
+  },
+  "next": {
+    "await_policy": "Les règles de traitement sont en attente d’approbation. Aucun traitement n’est prévu.",
+    "none": "Aucune autre action."
+  },
+  "kinds": {
+    "access": {
+      "label": "Accès",
+      "description": "Demander l’accès aux données personnelles admissibles."
+    },
+    "correction": {
+      "label": "Rectification",
+      "description": "Demander la rectification de données personnelles."
+    },
+    "export": {
+      "label": "Portabilité",
+      "description": "Demander une copie portable des données admissibles."
+    },
+    "closure": {
+      "label": "Fermeture du compte",
+      "description": "Demander la fermeture de votre compte."
+    },
+    "deletion": {
+      "label": "Effacement",
+      "description": "Demander l’effacement des données personnelles admissibles."
+    },
+    "restriction": {
+      "label": "Limitation ou opposition",
+      "description": "Demander une limitation du traitement ou s’y opposer, selon le cas."
+    },
+    "appeal": {
+      "label": "Réexamen ou recours",
+      "description": "Demander un réexamen lorsqu’une procédure approuvée s’applique."
+    }
+  }
+}

@@ -7,6 +7,7 @@ import { accountMessages } from "@/lib/account-i18n";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { fetchAccountCodes } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
+import { privacyMessages } from "@/lib/privacy-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AccountMfa } from "./account-mfa";
 import { AccountSecurity } from "./account-security";
@@ -67,6 +68,7 @@ export function AccountSettings() {
             { href: "/profile#personal", title: a.personal, help: a.personalHelp },
             { href: "/profile#public-profile", title: a.publicProfile, help: a.publicHelp },
             { href: "/profile#privacy", title: a.privacy, help: a.privacyHelp },
+            { href: "/settings/privacy-requests", title: privacyMessages[locale].title, help: privacyMessages[locale].settings },
           ].map(({ href, title, help }) => (
             <Link key={href} href={href} className={`${card} block hover:border-[var(--theme-link)]`}>
               <h2 className="font-semibold text-[var(--theme-link)]">{title} <span aria-hidden="true">↗</span></h2>

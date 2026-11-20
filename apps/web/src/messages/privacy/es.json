@@ -1,0 +1,66 @@
+{
+  "title": "Solicitudes de privacidad",
+  "settings": "Consulta los tipos de solicitud y tus propios casos cuando se habilite la recepción.",
+  "back": "Configuración de la cuenta",
+  "loading": "Comprobando la disponibilidad…",
+  "signedOut": "Inicia sesión para comprobar si se aceptan solicitudes.",
+  "disabled": "La recepción de solicitudes de privacidad está cerrada por ahora. No puedes presentar un caso aquí.",
+  "synthetic": "Recepción reservada para cuentas de prueba. El envío solo crea un caso de prueba. No inicia ninguna revisión, exportación, cierre ni eliminación.",
+  "kind": "Tipo de solicitud",
+  "submit": "Enviar solicitud de prueba",
+  "retry": "Reintentar",
+  "retrySame": "El nuevo intento usa la misma solicitud y conserva el tipo seleccionado.",
+  "cases": "Tus solicitudes",
+  "empty": "No tienes solicitudes de prueba.",
+  "details": "Ver historial",
+  "withdraw": "Retirar",
+  "confirm": "¿Retirar esta solicitud de prueba?",
+  "confirmAction": "Confirmar retirada",
+  "cancel": "Cancelar",
+  "more": "Más solicitudes",
+  "keyConflict": "Este identificador de envío ya se usó en otra acción.",
+  "stateConflict": "El caso cambió. Actualiza tus solicitudes antes de volver a intentarlo.",
+  "reviewUnavailable": "La revisión de privacidad no está disponible.",
+  "success": {
+    "received": "Solicitud de prueba registrada. Referencia",
+    "withdrawn": "Solicitud de prueba retirada. Referencia"
+  },
+  "status": {
+    "received": "Recibida",
+    "withdrawn": "Retirada"
+  },
+  "next": {
+    "await_policy": "Las reglas de tramitación están pendientes de aprobación. No hay tramitación programada.",
+    "none": "No hay más acciones."
+  },
+  "kinds": {
+    "access": {
+      "label": "Acceso",
+      "description": "Solicitar acceso a los datos personales elegibles."
+    },
+    "correction": {
+      "label": "Rectificación",
+      "description": "Solicitar la rectificación de datos personales."
+    },
+    "export": {
+      "label": "Portabilidad",
+      "description": "Solicitar una copia portable de los datos elegibles."
+    },
+    "closure": {
+      "label": "Cierre de cuenta",
+      "description": "Solicitar el cierre de tu cuenta."
+    },
+    "deletion": {
+      "label": "Eliminación",
+      "description": "Solicitar la eliminación de los datos personales elegibles."
+    },
+    "restriction": {
+      "label": "Limitación u oposición",
+      "description": "Solicitar una limitación del tratamiento u oponerse cuando corresponda."
+    },
+    "appeal": {
+      "label": "Revisión o recurso",
+      "description": "Solicitar una revisión adicional cuando sea aplicable un procedimiento aprobado."
+    }
+  }
+}

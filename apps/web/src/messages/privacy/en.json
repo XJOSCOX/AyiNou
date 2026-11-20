@@ -1,0 +1,66 @@
+{
+  "title": "Privacy requests",
+  "settings": "Learn about privacy request types and view your own cases when intake is available.",
+  "back": "Account settings",
+  "loading": "Checking availability…",
+  "signedOut": "Sign in to check privacy request availability.",
+  "disabled": "Privacy request intake is currently closed. You cannot submit a case here.",
+  "synthetic": "Test intake for synthetic accounts. A submission creates a test case only. It starts no review, export, closure or deletion.",
+  "kind": "Request type",
+  "submit": "Submit test request",
+  "retry": "Retry",
+  "retrySame": "Retry uses the same submission. The selected request type is preserved.",
+  "cases": "Your requests",
+  "empty": "You have no test requests.",
+  "details": "View history",
+  "withdraw": "Withdraw",
+  "confirm": "Withdraw this test request?",
+  "confirmAction": "Confirm withdrawal",
+  "cancel": "Cancel",
+  "more": "More requests",
+  "keyConflict": "This submission ID was already used for another action.",
+  "stateConflict": "The case changed. Refresh your requests before trying again.",
+  "reviewUnavailable": "Privacy review is unavailable.",
+  "success": {
+    "received": "Test request recorded. Receipt",
+    "withdrawn": "Test request withdrawn. Receipt"
+  },
+  "status": {
+    "received": "Received",
+    "withdrawn": "Withdrawn"
+  },
+  "next": {
+    "await_policy": "Processing rules are pending approval. No processing is scheduled.",
+    "none": "No further action."
+  },
+  "kinds": {
+    "access": {
+      "label": "Access",
+      "description": "Request access to eligible personal data."
+    },
+    "correction": {
+      "label": "Correction",
+      "description": "Request a correction to personal data."
+    },
+    "export": {
+      "label": "Portable export",
+      "description": "Request a portable copy of eligible data."
+    },
+    "closure": {
+      "label": "Account closure",
+      "description": "Request closure of your account."
+    },
+    "deletion": {
+      "label": "Deletion",
+      "description": "Request deletion of eligible personal data."
+    },
+    "restriction": {
+      "label": "Restriction or objection",
+      "description": "Request a restriction on processing or raise an objection where applicable."
+    },
+    "appeal": {
+      "label": "Escalation or appeal",
+      "description": "Request further review where an approved process applies."
+    }
+  }
+}

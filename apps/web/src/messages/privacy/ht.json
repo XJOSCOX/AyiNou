@@ -1,0 +1,66 @@
+{
+  "title": "Demann sou vi prive",
+  "settings": "Gade kalite demann yo ak pwòp dosye ou lè sèvis la ap resevwa demann.",
+  "back": "Paramèt kont",
+  "loading": "N ap tcheke si sèvis la disponib…",
+  "signedOut": "Konekte pou tcheke si ou ka soumèt yon demann.",
+  "disabled": "Sèvis demann sou vi prive a fèmen pou kounye a. Ou pa ka soumèt yon dosye isit la.",
+  "synthetic": "Sèvis sa a rezève pou kont tès. Lè ou soumèt yon demann, li kreye yon dosye tès sèlman. Li pa lanse okenn revizyon, ekspòtasyon, fèmti oswa efasman.",
+  "kind": "Kalite demann",
+  "submit": "Soumèt demann tès la",
+  "retry": "Eseye ankò",
+  "retrySame": "Lè ou eseye ankò, w ap voye menm demann lan. Kalite ou chwazi a rete menm jan.",
+  "cases": "Demann ou yo",
+  "empty": "Ou pa gen okenn demann tès.",
+  "details": "Gade istorik la",
+  "withdraw": "Retire",
+  "confirm": "Retire demann tès sa a?",
+  "confirmAction": "Konfime retrè a",
+  "cancel": "Anile",
+  "more": "Plis demann",
+  "keyConflict": "Idantifyan sa a te deja sèvi pou yon lòt aksyon.",
+  "stateConflict": "Dosye a chanje. Mete lis demann ou yo ajou anvan ou eseye ankò.",
+  "reviewUnavailable": "Revizyon demann sou vi prive pa disponib.",
+  "success": {
+    "received": "Nou anrejistre demann tès la. Referans",
+    "withdrawn": "Nou retire demann tès la. Referans"
+  },
+  "status": {
+    "received": "Resevwa",
+    "withdrawn": "Retire"
+  },
+  "next": {
+    "await_policy": "Règ pou trete demann yo ap tann apwobasyon. Pa gen tretman ki pwograme.",
+    "none": "Pa gen lòt aksyon."
+  },
+  "kinds": {
+    "access": {
+      "label": "Aksè",
+      "description": "Mande aksè ak done pèsonèl ki kalifye yo."
+    },
+    "correction": {
+      "label": "Koreksyon",
+      "description": "Mande koreksyon nan done pèsonèl ou yo."
+    },
+    "export": {
+      "label": "Ekspòtasyon pòtab",
+      "description": "Mande yon kopi pòtab nan done ki kalifye yo."
+    },
+    "closure": {
+      "label": "Fèmen kont",
+      "description": "Mande pou yo fèmen kont ou."
+    },
+    "deletion": {
+      "label": "Efase done",
+      "description": "Mande pou yo efase done pèsonèl ki kalifye yo."
+    },
+    "restriction": {
+      "label": "Restriksyon oswa objeksyon",
+      "description": "Mande yon limit sou tretman done oswa fè objeksyon kote sa aplikab."
+    },
+    "appeal": {
+      "label": "Referans oswa apèl",
+      "description": "Mande yon lòt revizyon lè gen yon pwosedi apwouve ki aplikab."
+    }
+  }
+}
