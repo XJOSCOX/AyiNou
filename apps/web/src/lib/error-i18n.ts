@@ -16,6 +16,7 @@ import { organizationRoleMessages } from "./organization-role-i18n";
 import { projectMessages } from "./project-i18n";
 import { projectWorkMessages } from "./project-work-i18n";
 import { projectProgressMessages } from "./project-progress-i18n";
+import { pollMessages } from "./poll-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
 
@@ -73,6 +74,16 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "PROJECT_EVIDENCE_UNAVAILABLE": return projectProgressMessages[locale].errors.evidenceUnavailable;
     case "PROJECT_REPORT_UNAVAILABLE": return projectProgressMessages[locale].errors.reportUnavailable;
     case "PROJECT_PROGRESS_CHANGED": return projectProgressMessages[locale].errors.changed;
+    case "POLL_INVALID":
+    case "POLL_UNAVAILABLE":
+    case "POLL_NOT_OPEN":
+    case "POLL_CLOSED":
+    case "POLL_BALLOT_EXISTS":
+    case "POLL_NOT_ELIGIBLE":
+    case "POLL_CHANGED":
+    case "POLL_RESULT_UNAVAILABLE":
+    case "POLL_NOMINEE_UNAVAILABLE":
+    case "POLL_CANCELLED": return pollMessages[locale].errors[code];
     case "GROUP_RESERVED": return groupMessages[locale].reservedError;
     case "GROUP_CREATION_LIMIT": return groupMessages[locale].limitError;
     case "GROUP_NAME_IN_USE": return groupMessages[locale].duplicateError;

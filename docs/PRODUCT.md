@@ -104,3 +104,8 @@ Members can draft privately while applying for identity verification. A reviewed
 Approved projects can organize a private team and list volunteer opportunities once active. Individual project owners can run the same workflows as eligible institution and community owners. People choose whether to join, confirm a volunteer offer, or accept work. Task completion requires review and project completion requires an explicit owner transition. Volunteer roles describe participation and confer no employment relationship or professional credentials.
 
 Project teams can document work through milestones, updates, supporting evidence, and reported measurements. Eligible public projects can show only reviewed public milestones, progress and final reports. Measurements remain labeled as team-reported. A final report distinguishes unfinished work and challenges from achievements, and a project archived without completion retains that distinction.
+
+
+### Community voting and recommendations
+
+Members can hold opinion polls, prioritize eligible projects, discuss a proposal or task through a scoped decision poll, and nominate eligible Ayinou members who consent to appear. Each eligible account gets one private ballot. The poll shows the audience, eligibility and result rules before members vote. Final results explain a tie, a missed requirement or a candidate withdrawal. The accountable organizer can record a recommendation, defer a decision, or decline the recommendation. Communities and institutions continue to use their existing appointments and approval processes. Ayinou polls are for internal participation and do not establish eligibility for public office or official election results.

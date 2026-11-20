@@ -1,0 +1,142 @@
+{
+  "title": "Sondages",
+  "mine": "Mes sondages",
+  "create": "Créer un sondage",
+  "rules": "Les sondages Ayinou éclairent les échanges et les décisions de projet. Chaque compte admissible dispose d’un vote privé.",
+  "verifiedHelp": "Certains sondages exigent une identité vérifiée.",
+  "scope": "Périmètre",
+  "owner": "Responsable du sondage",
+  "choose": "Choisissez une option",
+  "type": "Type de sondage",
+  "policy": "Règle de décision",
+  "task": "Objet de la décision",
+  "proposal": "Proposition de projet",
+  "question": "Question du sondage",
+  "description": "Description",
+  "language": "Langue du sondage",
+  "options": "Options, une par ligne (2 à 10)",
+  "nomineeHandles": "Identifiants publics, un par ligne (2 à 10)",
+  "reconsent": "Laissez les identifiants vides pour conserver les candidatures. Modifier la question ou la description exige un nouveau consentement.",
+  "consentHelp": "Les candidats doivent consentir avant que leur nom apparaisse. Ils peuvent se retirer à tout moment.",
+  "opensAt": "Ouverture du vote",
+  "closesAt": "Fin du vote",
+  "audience": "Qui peut voir ce sondage",
+  "eligibility": "Qui peut voter",
+  "results": "Résultats",
+  "quorum": "Nombre minimal de votes (facultatif)",
+  "threshold": "Part minimale pour gagner, % (facultative)",
+  "frozenHelp": "La publication fige la liste des votants admissibles. Les résultats apparaissent après la clôture officielle. La gestion exige une vérification récente par authentificateur.",
+  "verify": "Vérifier avec votre authentificateur",
+  "save": "Enregistrer le brouillon",
+  "nominations": "Mes candidatures",
+  "loading": "Chargement…",
+  "empty": "Aucun sondage à afficher ici.",
+  "more": "Afficher la suite",
+  "unavailableOption": "Option indisponible",
+  "electorate": "Admissibles à la publication",
+  "cancel": "Annuler le sondage",
+  "optionsTitle": "Options de vote",
+  "receipt": "Votre vote",
+  "finalBallot": "Vérifiez votre choix. Un vote soumis est définitif.",
+  "vote": "Valider le vote",
+  "cannotVote": "Votre compte ne remplit pas actuellement les conditions de ce sondage.",
+  "previewResults": "Résultats provisoires",
+  "total": "Votes au total",
+  "recordDecision": "Décision consignée",
+  "edit": "Modifier le brouillon",
+  "publishHelp": "La publication verrouille la question, les options et les paramètres.",
+  "publish": "Publier le sondage",
+  "finalize": "Finaliser les résultats",
+  "reason": "Motif",
+  "disposition": "Décision",
+  "history": "Historique du sondage",
+  "noNominations": "Vous n’avez aucune candidature à examiner.",
+  "unavailableNomination": "Détails de la candidature indisponibles",
+  "accept": "Accepter la candidature",
+  "decline": "Refuser la candidature",
+  "withdraw": "Retirer la candidature",
+  "scopes": {
+    "individual": "Personnel",
+    "community": "Communauté",
+    "organization": "Organisation",
+    "project": "Projet"
+  },
+  "kinds": {
+    "community": "Avis de la communauté",
+    "priority": "Priorité du projet",
+    "decision": "Décision sur une tâche ou une proposition",
+    "person": "Sélection de candidats"
+  },
+  "policies": {
+    "advisory": "Consultatif",
+    "governance": "Recommandation consignée sans effet contraignant"
+  },
+  "audiences": {
+    "scope": "Membres de cet espace",
+    "members": "Membres Ayinou connectés"
+  },
+  "eligible": {
+    "active": "Comptes actifs admissibles",
+    "verified": "Comptes admissibles ayant une identité vérifiée"
+  },
+  "resultPolicies": {
+    "after_close": "Après la clôture officielle",
+    "after_vote": "Après votre vote ou la clôture officielle"
+  },
+  "states": {
+    "draft": "Brouillon",
+    "scheduled": "Programmé",
+    "open": "Ouvert",
+    "awaiting_close": "En attente de clôture officielle",
+    "closed": "Clôturé",
+    "cancelled": "Annulé"
+  },
+  "consents": {
+    "pending": "En attente du consentement",
+    "accepted": "Acceptée",
+    "declined": "Refusée",
+    "withdrawn": "Retirée"
+  },
+  "outcomes": {
+    "no_votes": "Aucun vote n’a été soumis.",
+    "no_quorum": "Le quorum n’a pas été atteint.",
+    "tie": "Des options sont arrivées premières à égalité.",
+    "withdrawn_leads": "La candidature en tête était indisponible à la clôture.",
+    "below_threshold": "L’option en tête n’a pas atteint la part requise.",
+    "winner": "Option arrivée en tête"
+  },
+  "dispositions": {
+    "recommend": "Recommander l’option arrivée en tête",
+    "defer": "Reporter la décision",
+    "decline": "Décliner la recommandation"
+  },
+  "events": {
+    "created": "Brouillon créé",
+    "edited": "Brouillon modifié",
+    "published": "Sondage publié",
+    "finalized": "Résultats finalisés",
+    "cancelled": "Sondage annulé",
+    "decision_recorded": "Décision consignée",
+    "nomination_accepted": "Candidature acceptée",
+    "nomination_declined": "Candidature refusée",
+    "nomination_withdrawn": "Candidature retirée"
+  },
+  "notices": {
+    "nomination_requested": "Vous avez une candidature à examiner.",
+    "finalized": "Les résultats du sondage sont disponibles.",
+    "cancelled": "Un sondage a été annulé.",
+    "decision_recorded": "Une décision du sondage a été consignée."
+  },
+  "errors": {
+    "POLL_INVALID": "Vérifiez les paramètres, les dates et les options du sondage.",
+    "POLL_UNAVAILABLE": "Ce sondage est indisponible pour votre compte.",
+    "POLL_NOT_OPEN": "Le vote n’est pas encore ouvert.",
+    "POLL_CLOSED": "Le vote est terminé.",
+    "POLL_BALLOT_EXISTS": "Votre compte a déjà soumis un vote définitif.",
+    "POLL_NOT_ELIGIBLE": "Votre compte ne remplit pas les conditions de ce sondage.",
+    "POLL_CHANGED": "Ce sondage a changé. Actualisez-le avant de réessayer.",
+    "POLL_RESULT_UNAVAILABLE": "Les résultats sont encore indisponibles.",
+    "POLL_NOMINEE_UNAVAILABLE": "Une candidature est indisponible. Vérifiez les options et les consentements avant de continuer.",
+    "POLL_CANCELLED": "Ce sondage a été annulé."
+  }
+}

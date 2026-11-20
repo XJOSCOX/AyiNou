@@ -2,6 +2,7 @@
 
 import { communityStaffRoles, departmentCommunityContent, type Community, type CommunityStaffRole, type InterestCode } from "@ayinou/shared";
 import Link from "next/link";
+import { pollMessages } from "@/lib/poll-i18n";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { apiErrorCode } from "@/lib/api-errors";
@@ -134,6 +135,7 @@ export function DepartmentSpace({ slug }: { slug: string }) {
         </label>}
         {privacy.error !== null && <ApiErrorNotice error={privacy.error} />}
         {community.canModerate && <Link href={`/communities/${slug}/moderation`} className={institutionLink}>{t.moderation}</Link>}
+        {community.joined && <Link href={"/polls?scope=community&scopeId=" + community.id} className={institutionLink}>{pollMessages[locale].title}</Link>}
         {group && group.policy !== "private" && <Link href={`/community-directory/${slug}`} className={institutionLink}>{groups.copyLink}</Link>}
       </header>
       <details className={institutionCard}>

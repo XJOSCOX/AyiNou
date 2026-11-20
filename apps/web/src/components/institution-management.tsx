@@ -12,6 +12,7 @@ import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
 import { organizationRoleMessages } from "@/lib/organization-role-i18n";
+import { pollMessages } from "@/lib/poll-i18n";
 import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, InstitutionLogo,
   InstitutionStatus, useInstitutionResource, VerifiedBadge } from "./institution-ui";
@@ -91,6 +92,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
           <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
           <Link href={`/organization/${org.handle}`} className={institutionLink}>{t.publicProfile}</Link>
           <Link href={`/institutions/${org.id}/roles`} className={institutionLink}>{organizationRoleMessages[locale].title}</Link>
+          {org.verificationStatus === "verified" && <Link href={"/polls?scope=organization&scopeId=" + org.id} className={institutionLink}>{pollMessages[locale].title}</Link>}
           {manageTeam && <Link href={`/institutions/${org.id}/affiliations`} className={institutionLink}>{affiliationMessages[locale].management}</Link>}
         </div>
       </header>

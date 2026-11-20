@@ -224,10 +224,15 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [ ] Set staffing, review targets, retention, and a publication restriction reconsideration process before public operation.
 - [x] Phase 6B adds project execution status, scoped teams, volunteer applications, and task assignment and review.
 - [x] Phase 6C adds reviewed milestones, public progress updates, private evidence, self-reported measures, and versioned final reports.
-- [ ] Define independent outcomes validation, retention, and future voting governance.
+- [x] Phase 6D adds scoped polls and private ballots, frozen higher-trust eligibility, nominee consent, and auditable recommendations.
+- [ ] Phase 6E audits the codebase, architecture, authorization, privacy, tests, and operational readiness.
+- [ ] Phase 6F addresses audit findings through controlled refactoring, bug fixes, and optimization.
+- [ ] Define independent outcomes validation, retention, fraud escalation, quorum standards, and operational voting governance.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
 **Gate:** An initiative can be proposed, reviewed, organized, updated, completed and archived with transparent responsibility.
+
+Feature development pauses after Phase 6D. Complete the Phase 6E audit and Phase 6F remediation before advancing the product roadmap.
 
 ## Phase 7 — Community reports and evidence-based verification
 

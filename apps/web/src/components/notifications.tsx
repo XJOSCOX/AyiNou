@@ -6,6 +6,7 @@ import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { projectMessages } from "@/lib/project-i18n";
 import { projectWorkMessages } from "@/lib/project-work-i18n";
 import { projectProgressMessages } from "@/lib/project-progress-i18n";
+import { pollMessages } from "@/lib/poll-i18n";
 import Link from "next/link";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
@@ -18,8 +19,9 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
-function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation }: MemberNotification) {
+function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent }: MemberNotification) {
   if (!available) return null;
+  if (kind === "poll_event") return pollEvent ? pollEvent.action === "nomination_requested" ? "/polls/nominations" : "/polls/" + pollEvent.pollId : null;
   if (kind === "new_follower") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
   if (kind === "appeal_decided") return appealId ? `/settings/appeals#appeal-${appealId}` : null;
   if (kind === "verification_decided" || kind === "verification_appeal_decided") return "/verification";
@@ -74,6 +76,7 @@ export function NotificationCenter() {
         : item.kind === "ambassador_updated" ? ambassadorMessages[locale].updatedNotice
         : item.kind === "organization_access_changed" ? organizationRoleMessages[locale].notification
         : item.kind === "project_operation" ? operationMessage(locale, item.projectOperation?.action)
+        : item.kind === "poll_event" ? item.pollEvent ? pollMessages[locale].notices[item.pollEvent.action] : t.unavailable
         : item.kind === "project_submitted" || item.kind === "project_assigned" || item.kind === "project_changes" ||
           item.kind === "project_approved" || item.kind === "project_rejected" ? projectMessages[locale].notices[item.kind]
         : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);

@@ -17,6 +17,7 @@ import { registerTrustRoutes } from "./trust.js";
 import { registerAmbassadorRoutes } from "./ambassadors.js";
 import { registerOrganizationRoleRoutes } from "./organization-roles.js";
 import { registerProjectRoutes } from "./projects.js";
+import { registerPollRoutes } from "./polls.js";
 
 const cursorShape = z.strictObject({ createdAt: z.iso.datetime({ offset: true }), id: z.uuid() });
 const pageCursor = z.string().max(250).regex(/^[A-Za-z0-9_-]+$/).optional();
@@ -135,6 +136,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   registerAmbassadorRoutes(app, { viewer, repo, read });
   registerOrganizationRoleRoutes(app, { viewer, repo, read });
   registerProjectRoutes(app, { viewer, repo, read, media });
+  registerPollRoutes(app, { viewer, repo, read });
   app.get("/api/v1/communities", async (request) => {
     const { actor, token } = await viewer(request);
     await read("discovery", actor, request.ip);

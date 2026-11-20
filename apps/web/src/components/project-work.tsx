@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { pollMessages } from "@/lib/poll-i18n";
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import {
   projectTaskPriorities, projectTeamRoles, type ProjectOperationEvent, type ProjectWork, type ProjectWorkTask,
@@ -72,6 +73,7 @@ export function ProjectWorkScreen({ projectId, initialSection }: { projectId: st
     <div className={actionsClass}>
       <Link href={"/projects/" + projectId} className={institutionLink}>{t.proposal}</Link>
       <Link href="/projects/team" className={institutionLink}>{t.workspace}</Link>
+      {work?.role && <Link href={"/polls?scope=project&scopeId=" + projectId} className={institutionLink}>{pollMessages[locale].title}</Link>}
     </div>
     <h1 className="break-words text-3xl font-semibold sm:text-4xl">{work?.title ?? t.workspace}</h1>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}

@@ -1,7 +1,7 @@
 # Ayinou 🇭🇹
 
 **Domain (planned):** ayinou.com
-**Status:** Phase 6C project milestones, progress evidence, and outcome reports with hosted Supabase for development
+**Status:** Phase 6D community polls and auditable recommendations with hosted Supabase for development
 **Mission:** Unite Haitians in Haiti and the diaspora around peaceful dialogue, trust, collaboration, and measurable community progress.
 
 > Yon sèl pèp. Yon sèl avni. Ansanm pou Ayiti.
@@ -114,6 +114,8 @@ Members can save private drafts while identity review is pending. Submitting or 
 Open **Project work** from Projects to view your teams, invitations, and volunteer opportunities. Eligible owners can activate approved proposals, invite a team, and coordinate private work. Tasks and volunteer offers require recipient consent. Run `npm run test:hosted:project-work:sql` with the linked-project guard for the rollback-only operations suite. [Project work and permissions](docs/DATABASE.md#phase-6b-project-operations)
 
 In an eligible project workspace, use **Milestones**, **Project progress**, **Updates and evidence**, and **Outcomes** to document work. The public proposal page shows eligible reviewed progress. Measurements are labeled as self-reported. Run `npm run test:hosted:project-progress:sql` for rollback-only Phase 6C checks. [Progress, evidence and reporting rules](docs/DATABASE.md#phase-6c-project-progress)
+
+The member **Polls** workspace supports community opinions, project priorities, task or proposal decisions, and consent-based candidate selection. Eligible accounts can submit one private, final ballot. Organizers publish rules before voting opens and explicitly finalize results after voting ends. High-trust polls require reviewed identity and a frozen electorate. Recorded recommendations leave operational decisions to the existing review and appointment workflows. For the linked project, set `AYINOU_HOSTED_TEST_PROJECT_REF` to its project reference and run `npm run test:hosted:polls:sql` for rollback fixtures or `npm run test:hosted:polls` for a synthetic private-group concurrency test. [Poll rules and endpoints](docs/DATABASE.md#phase-6d-polls)
 
 The dashboard is at `http://localhost:4000/dashboard` after login. Public API routes are `GET /api/v1/community/stats`, `/api/v1/community/departments`, and `/api/v1/community/diaspora`. Geographic data is hidden together when any nonempty underlying location group has fewer than 10 members. Zero, suppressed, and unavailable are distinct states. See [docs/DATABASE.md](docs/DATABASE.md) for exact metric definitions.
 

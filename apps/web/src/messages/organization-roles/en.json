@@ -47,6 +47,7 @@
   "grantDenied": "This assignment is outside your delegated authority.",
   "relationshipUnavailable": "The recipient needs a current affiliation or representative position in this organization.",
   "capabilities": {
+    "polls.manage": { "label": "Manage polls", "detail": "Create and manage polls for an eligible organization." },
     "projects.operate": { "label": "Operate approved projects", "detail": "Activate eligible projects and delegate project-scoped responsibilities." },
     "projects.propose": {
       "label": "Create proposals",

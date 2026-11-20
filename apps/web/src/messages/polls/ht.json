@@ -1,0 +1,142 @@
+{
+  "title": "Sondaj",
+  "mine": "Sondaj mwen yo",
+  "create": "Kreye yon sondaj",
+  "rules": "Sondaj Ayinou yo gide diskisyon kominotè ak desizyon sou pwojè. Chak kont ki kalifye gen yon vòt prive.",
+  "verifiedHelp": "Gen sondaj ki mande yon idantite verifye.",
+  "scope": "Espas",
+  "owner": "Mèt sondaj la",
+  "choose": "Chwazi yon opsyon",
+  "type": "Kalite sondaj",
+  "policy": "Règ pou desizyon",
+  "task": "Sijè desizyon an",
+  "proposal": "Pwopozisyon pwojè",
+  "question": "Kesyon sondaj la",
+  "description": "Deskripsyon",
+  "language": "Lang sondaj la",
+  "options": "Opsyon, youn pa liy (2–10)",
+  "nomineeHandles": "Non itilizatè piblik, youn pa liy (2–10)",
+  "reconsent": "Kite non yo vid pou kenbe nominasyon yo. Si kesyon an oswa deskripsyon an chanje, moun yo dwe bay konsantman yo ankò.",
+  "consentHelp": "Kandida yo dwe bay konsantman yo anvan non yo parèt. Yo ka retire tèt yo nenpòt lè.",
+  "opensAt": "Ouvèti vòt",
+  "closesAt": "Fen vòt",
+  "audience": "Ki moun ki ka wè sondaj la",
+  "eligibility": "Ki moun ki ka vote",
+  "results": "Rezilta",
+  "quorum": "Kantite vòt minimòm (si ou vle)",
+  "threshold": "Pousantaj minimòm pou genyen (si ou vle)",
+  "frozenHelp": "Lè sondaj la pibliye, lis moun ki ka vote a fiks. Rezilta yo parèt apre validasyon final. Pou jere sondaj la, ou bezwen yon verifikasyon resan nan aplikasyon otantifikasyon an.",
+  "verify": "Verifye ak aplikasyon otantifikasyon ou",
+  "save": "Anrejistre bouyon an",
+  "nominations": "Nominasyon mwen yo",
+  "loading": "Ap chaje…",
+  "empty": "Pa gen sondaj pou montre isit la.",
+  "more": "Chaje plis",
+  "unavailableOption": "Opsyon ki pa disponib",
+  "electorate": "Moun ki te kalifye lè li pibliye",
+  "cancel": "Anile sondaj la",
+  "optionsTitle": "Chwa pou vote",
+  "receipt": "Vòt ou",
+  "finalBallot": "Tcheke chwa ou. Yon fwa ou vote, chwa a final.",
+  "vote": "Voye vòt la",
+  "cannotVote": "Kont ou pa kalifye pou sondaj sa a kounye a.",
+  "previewResults": "Rezilta pou kounye a",
+  "total": "Total vòt",
+  "recordDecision": "Dosye desizyon",
+  "edit": "Modifye bouyon an",
+  "publishHelp": "Piblikasyon bloke kesyon an, opsyon yo ak paramèt yo.",
+  "publish": "Pibliye sondaj",
+  "finalize": "Finalize rezilta yo",
+  "reason": "Rezon",
+  "disposition": "Desizyon",
+  "history": "Istwa sondaj la",
+  "noNominations": "Ou pa gen nominasyon pou revize.",
+  "unavailableNomination": "Detay nominasyon sa a pa disponib",
+  "accept": "Aksepte nominasyon an",
+  "decline": "Refize nominasyon an",
+  "withdraw": "Retire nominasyon an",
+  "scopes": {
+    "individual": "Pèsonèl",
+    "community": "Kominote",
+    "organization": "Òganizasyon",
+    "project": "Pwojè"
+  },
+  "kinds": {
+    "community": "Opinyon kominote a",
+    "priority": "Priyorite pwojè",
+    "decision": "Desizyon sou travay oswa pwopozisyon",
+    "person": "Seleksyon kandida"
+  },
+  "policies": {
+    "advisory": "Pou bay opinyon",
+    "governance": "Rekòmandasyon ekri ki pa obligatwa"
+  },
+  "audiences": {
+    "scope": "Manm espas sa a",
+    "members": "Manm Ayinou ki konekte"
+  },
+  "eligible": {
+    "active": "Kont aktif ki kalifye",
+    "verified": "Kont ki kalifye ak idantite verifye"
+  },
+  "resultPolicies": {
+    "after_close": "Apre validasyon final",
+    "after_vote": "Apre vòt ou oswa validasyon final"
+  },
+  "states": {
+    "draft": "Bouyon",
+    "scheduled": "Pwograme",
+    "open": "Ouvè",
+    "awaiting_close": "Ap tann validasyon final",
+    "closed": "Finalize",
+    "cancelled": "Anile"
+  },
+  "consents": {
+    "pending": "Ap tann konsantman",
+    "accepted": "Aksepte",
+    "declined": "Refize",
+    "withdrawn": "Retire"
+  },
+  "outcomes": {
+    "no_votes": "Pèsonn pa vote.",
+    "no_quorum": "Pa gen ase moun ki vote.",
+    "tie": "Plizyè opsyon fini premye ak menm kantite vòt.",
+    "withdrawn_leads": "Kandida ki te devan an pa t disponib lè rezilta yo finalize.",
+    "below_threshold": "Opsyon ki te devan an pa rive nan pousantaj yo mande a.",
+    "winner": "Opsyon ki devan an"
+  },
+  "dispositions": {
+    "recommend": "Rekòmande opsyon ki devan an",
+    "defer": "Ranvwaye desizyon an",
+    "decline": "Refize rekòmandasyon an"
+  },
+  "events": {
+    "created": "Bouyon kreye",
+    "edited": "Bouyon modifye",
+    "published": "Sondaj pibliye",
+    "finalized": "Rezilta yo finalize",
+    "cancelled": "Sondaj anile",
+    "decision_recorded": "Desizyon anrejistre",
+    "nomination_accepted": "Nominasyon aksepte",
+    "nomination_declined": "Nominasyon refize",
+    "nomination_withdrawn": "Nominasyon retire"
+  },
+  "notices": {
+    "nomination_requested": "Ou gen yon nominasyon pou revize.",
+    "finalized": "Rezilta sondaj la pare.",
+    "cancelled": "Yon sondaj anile.",
+    "decision_recorded": "Yo anrejistre yon desizyon sou sondaj la."
+  },
+  "errors": {
+    "POLL_INVALID": "Tcheke paramèt, dat ak opsyon sondaj la.",
+    "POLL_UNAVAILABLE": "Sondaj sa a pa disponib pou kont ou.",
+    "POLL_NOT_OPEN": "Vòt la poko ouvè.",
+    "POLL_CLOSED": "Vòt la fini.",
+    "POLL_BALLOT_EXISTS": "Kont ou deja voye yon vòt final.",
+    "POLL_NOT_ELIGIBLE": "Kont ou pa satisfè kondisyon sondaj sa a.",
+    "POLL_CHANGED": "Sondaj la chanje. Rafrechi li anvan ou eseye ankò.",
+    "POLL_RESULT_UNAVAILABLE": "Rezilta yo poko disponib.",
+    "POLL_NOMINEE_UNAVAILABLE": "Yon nominasyon oswa yon kandida pa disponib. Tcheke opsyon yo ak konsantman yo anvan ou kontinye.",
+    "POLL_CANCELLED": "Sondaj sa a anile."
+  }
+}

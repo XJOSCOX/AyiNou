@@ -47,6 +47,7 @@
   "grantDenied": "Esta asignación excede tu autoridad delegada.",
   "relationshipUnavailable": "La persona necesita una afiliación o representación vigente en esta organización.",
   "capabilities": {
+    "polls.manage": { "label": "Gestionar encuestas", "detail": "Crear y gestionar encuestas de una organización habilitada." },
     "projects.operate": { "label": "Gestionar proyectos aprobados", "detail": "Activa proyectos elegibles y delega responsabilidades limitadas al proyecto." },
     "projects.propose": {
       "label": "Crear propuestas",

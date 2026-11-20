@@ -47,6 +47,7 @@
   "grantDenied": "Ou pa gen otorizasyon pou bay oswa retire wòl sa a.",
   "relationshipUnavailable": "Moun nan bezwen yon afilyasyon oswa yon pozisyon reprezantan ki toujou aktif nan òganizasyon an.",
   "capabilities": {
+    "polls.manage": { "label": "Jere sondaj", "detail": "Kreye epi jere sondaj pou yon òganizasyon ki kalifye." },
     "projects.operate": { "label": "Jere pwojè apwouve", "detail": "Aktive pwojè ki kalifye epi delege responsablite nan pwojè a." },
     "projects.propose": {
       "label": "Kreye pwopozisyon",

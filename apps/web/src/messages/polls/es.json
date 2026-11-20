@@ -1,0 +1,142 @@
+{
+  "title": "Encuestas",
+  "mine": "Mis encuestas",
+  "create": "Crear una encuesta",
+  "rules": "Las encuestas de Ayinou orientan los debates y las decisiones de los proyectos. Cada cuenta habilitada dispone de un voto privado.",
+  "verifiedHelp": "Algunas encuestas requieren una identidad verificada.",
+  "scope": "Ámbito",
+  "owner": "Responsable de la encuesta",
+  "choose": "Elige una opción",
+  "type": "Tipo de encuesta",
+  "policy": "Regla de decisión",
+  "task": "Objeto de la decisión",
+  "proposal": "Propuesta de proyecto",
+  "question": "Pregunta de la encuesta",
+  "description": "Descripción",
+  "language": "Idioma de la encuesta",
+  "options": "Opciones, una por línea (2–10)",
+  "nomineeHandles": "Nombres de usuario públicos, uno por línea (2–10)",
+  "reconsent": "Deja los nombres vacíos para conservar las candidaturas. Cambiar la pregunta o la descripción exige un nuevo consentimiento.",
+  "consentHelp": "Las personas candidatas deben dar su consentimiento antes de que aparezca su nombre. Pueden retirarse en cualquier momento.",
+  "opensAt": "Apertura de la votación",
+  "closesAt": "Fin de la votación",
+  "audience": "Quién puede ver la encuesta",
+  "eligibility": "Quién puede votar",
+  "results": "Resultados",
+  "quorum": "Mínimo de votos (opcional)",
+  "threshold": "Porcentaje mínimo para ganar (opcional)",
+  "frozenHelp": "La publicación fija la lista de votantes habilitados. Los resultados aparecen tras el cierre definitivo. La gestión exige una comprobación reciente con el autenticador.",
+  "verify": "Verificar con tu autenticador",
+  "save": "Guardar borrador",
+  "nominations": "Mis candidaturas",
+  "loading": "Cargando…",
+  "empty": "No hay encuestas para mostrar aquí.",
+  "more": "Cargar más",
+  "unavailableOption": "Opción no disponible",
+  "electorate": "Personas habilitadas al publicar",
+  "cancel": "Cancelar encuesta",
+  "optionsTitle": "Opciones de voto",
+  "receipt": "Tu voto",
+  "finalBallot": "Revisa tu elección. El voto enviado es definitivo.",
+  "vote": "Enviar voto",
+  "cannotVote": "Tu cuenta no cumple actualmente los requisitos de esta encuesta.",
+  "previewResults": "Resultados provisionales",
+  "total": "Total de votos",
+  "recordDecision": "Registro de la decisión",
+  "edit": "Editar borrador",
+  "publishHelp": "Publicar bloquea la pregunta, las opciones y los ajustes.",
+  "publish": "Publicar encuesta",
+  "finalize": "Finalizar resultados",
+  "reason": "Motivo",
+  "disposition": "Decisión",
+  "history": "Historial de la encuesta",
+  "noNominations": "No tienes candidaturas que revisar.",
+  "unavailableNomination": "Detalles de la candidatura no disponibles",
+  "accept": "Aceptar candidatura",
+  "decline": "Rechazar candidatura",
+  "withdraw": "Retirar candidatura",
+  "scopes": {
+    "individual": "Personal",
+    "community": "Comunidad",
+    "organization": "Organización",
+    "project": "Proyecto"
+  },
+  "kinds": {
+    "community": "Opinión de la comunidad",
+    "priority": "Prioridad del proyecto",
+    "decision": "Decisión sobre una tarea o propuesta",
+    "person": "Selección de candidaturas"
+  },
+  "policies": {
+    "advisory": "Consultiva",
+    "governance": "Recomendación registrada sin efecto vinculante"
+  },
+  "audiences": {
+    "scope": "Miembros de este espacio",
+    "members": "Miembros de Ayinou con sesión iniciada"
+  },
+  "eligible": {
+    "active": "Cuentas activas habilitadas",
+    "verified": "Cuentas habilitadas con identidad verificada"
+  },
+  "resultPolicies": {
+    "after_close": "Tras el cierre definitivo",
+    "after_vote": "Tras tu voto o el cierre definitivo"
+  },
+  "states": {
+    "draft": "Borrador",
+    "scheduled": "Programada",
+    "open": "Abierta",
+    "awaiting_close": "A la espera del cierre definitivo",
+    "closed": "Finalizada",
+    "cancelled": "Cancelada"
+  },
+  "consents": {
+    "pending": "A la espera del consentimiento",
+    "accepted": "Aceptada",
+    "declined": "Rechazada",
+    "withdrawn": "Retirada"
+  },
+  "outcomes": {
+    "no_votes": "No se emitieron votos.",
+    "no_quorum": "No se alcanzó el cuórum.",
+    "tie": "Hubo un empate en el primer puesto.",
+    "withdrawn_leads": "La candidatura más votada no estaba disponible al cierre.",
+    "below_threshold": "La opción más votada quedó por debajo del porcentaje requerido.",
+    "winner": "Opción más votada"
+  },
+  "dispositions": {
+    "recommend": "Recomendar la opción más votada",
+    "defer": "Aplazar la decisión",
+    "decline": "Rechazar la recomendación"
+  },
+  "events": {
+    "created": "Borrador creado",
+    "edited": "Borrador editado",
+    "published": "Encuesta publicada",
+    "finalized": "Resultados finalizados",
+    "cancelled": "Encuesta cancelada",
+    "decision_recorded": "Decisión registrada",
+    "nomination_accepted": "Candidatura aceptada",
+    "nomination_declined": "Candidatura rechazada",
+    "nomination_withdrawn": "Candidatura retirada"
+  },
+  "notices": {
+    "nomination_requested": "Tienes una candidatura que revisar.",
+    "finalized": "Los resultados de la encuesta están disponibles.",
+    "cancelled": "Se canceló una encuesta.",
+    "decision_recorded": "Se registró una decisión de la encuesta."
+  },
+  "errors": {
+    "POLL_INVALID": "Revisa los ajustes, las fechas y las opciones.",
+    "POLL_UNAVAILABLE": "Esta encuesta no está disponible para tu cuenta.",
+    "POLL_NOT_OPEN": "La votación aún no ha comenzado.",
+    "POLL_CLOSED": "La votación ha terminado.",
+    "POLL_BALLOT_EXISTS": "Tu cuenta ya envió un voto definitivo.",
+    "POLL_NOT_ELIGIBLE": "Tu cuenta no cumple los requisitos de esta encuesta.",
+    "POLL_CHANGED": "La encuesta cambió. Actualízala antes de volver a intentarlo.",
+    "POLL_RESULT_UNAVAILABLE": "Los resultados aún no están disponibles.",
+    "POLL_NOMINEE_UNAVAILABLE": "Una candidatura no está disponible. Revisa las opciones y los consentimientos antes de continuar.",
+    "POLL_CANCELLED": "Esta encuesta fue cancelada."
+  }
+}

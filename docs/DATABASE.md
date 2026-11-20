@@ -704,3 +704,33 @@ Paused projects retain readable progress and disallow new work changes. Complete
 | `GET /entries/:entry/image`, `PUT /entries/:entry/image` | Scoped evidence read and authenticated sanitized upload |
 
 Milestone assignments, reviews, relevant progress, reports, and completion reuse recipient-bound notifications without personal information or supporting text in the preview. Operational audio, voting, financial flows, independent evidence validation, and scheduled retention are outside this phase. Public operation still needs independent identity reviewers and project teams with enough qualified people to review one another’s submissions.
+
+
+## Phase 6D polls
+
+Migrations `20261120210000`, `20261120211000` and `20261120212000` create the private voting tables, transactional commands, scope-checked projections and recipient-only notifications. Authenticated callers use the versioned Fastify API with their own bearer token. All direct table grants are revoked and RLS is enabled. PostgreSQL owns authorization, election state, rate windows, and tally calculation.
+
+| Poll owner | Types and audience | Current management and voting requirements |
+| --- | --- | --- |
+| Individual | Advisory community opinion, visible to signed-in members | Creator manages. Eligible active accounts can vote according to published rules. |
+| Community | Community opinion or consent-based candidate selection | Current department or group managers manage. Exact membership is required to vote. Wider signed-in visibility is available for opinion polls in eligible public groups and departments. |
+| Organization | Scoped organization opinion or recommendation | Institution must remain independently verified. Organizers need `polls.manage`, reviewed identity and recent TOTP. Current representatives or active affiliates with reviewed identity can vote if included at publication. |
+| Project | Priority, proposal or task decision, or candidate selection | Current project owner or authorized manager with reviewed identity and recent TOTP manages a poll pinned to the approved revision. Voting requires current scoped team access and a frozen electorate entry. For task ballots, the creator, current assignee or recorded reviewer must also have access to the task. |
+
+The question, description, original language, two to ten ordered options, audience, eligibility, dates and result policy are locked at publication. Publication is explicit and precedes the opening time. Opens within 90 days, with up to 30 days of voting. The row lock serializes votes, consent changes, close and cancellation. The unique account/poll constraint and immutable choice enforce one accepted ballot per eligible account. Repeating the same choice returns the existing receipt. A different choice conflicts. Managers can cancel with a written reason. A cancelled poll retains private ballots and audit history while suppressing totals. Global moderation can cancel a visible published member-directory poll with recent TOTP and a reason. It grants no private scope access.
+
+Ordinary advisory opinion polls use current eligibility. High-trust polls are organization polls, project polls, candidate selections and polls with recorded recommendations. These require independently reviewed identity and freeze up to 5,000 eligible accounts at publication. Current scope, blocks, restrictions and identity are checked again before casting. Late arrivals cannot join the snapshot and already accepted ballots remain counted after eligibility changes. Nominees must be eligible discoverable members who individually accept. Withdrawal or loss of eligible public identity removes the name from current reads and blocks new selections. Historical counts remain attached to the anonymized option. Candidate replacement is limited to drafts, and changing a candidate poll's question or description requires renewed consent. Voting represents eligible Ayinou accounts. Separate anti-fraud review is necessary for claims about unique people.
+
+Previews appear after the viewer's own ballot only where the published policy permits. Final results require an explicit close after the deadline. Results include valid ballot totals, per-option counts, and percentages rounded to two decimal places. Quorum is an optional minimum ballot count, capped by the frozen electorate size. An optional threshold uses the leading option's share of counted ballots. No ballots, missing quorum, a tie, an unavailable leading candidate, or a missed threshold yield an inconclusive result. A recorded recommendation, deferral, or declination requires an eligible manager, recent TOTP and a written reason. The command records an immutable decision row. Project approval, appointments and permission changes use their existing independent workflows.
+
+| API under `/api/v1` | Operations |
+| --- | --- |
+| `GET /polls`, `GET /me/polls` | Paginate visible polls or currently manageable polls. Optional `scope` and `scopeId` filter a single resource. |
+| `GET /me/polls/options`, `GET /me/polls/nominations` | Available ownership targets and the current account's consent requests. |
+| `POST /polls`, `PATCH /polls/:id` | Create with a request key and content fingerprint, or update a draft with its version. |
+| `GET /polls/:id`, `GET /polls/:id/ballot`, `GET /polls/:id/results` | Scoped detail, current account's receipt, and eligible aggregate results. |
+| `POST /polls/:id/ballot` | Submit an option ID for the authenticated account. |
+| `POST /polls/:id/transition` | Publish, finalize, cancel, moderate a visible poll, or record a recommendation. |
+| `POST /polls/:id/nominations/:option` | The nominee accepts, declines or withdraws their own consent. |
+
+Organizers see versioned lifecycle and consent events without voter identities or ballot records. Notifications are limited to recipients with current access, including pending nominees, accepted candidates when results close, and a creator affected by another authorized manager's action. There is no notification broadcast or additional email channel. Poll creation, voting and management use shared database limits. Member directory reads use the existing discovery budget. Use `test:hosted:polls:sql` for rolled-back authorization and lifecycle checks, and `test:hosted:polls` for a live concurrency check with cleanup.

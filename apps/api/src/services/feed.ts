@@ -79,6 +79,16 @@ export function feedDatabaseError(code: string): ApiError {
     case "PJC06": return new ApiError(404, "PROJECT_EVIDENCE_UNAVAILABLE", "Evidence unavailable");
     case "PJC08": return new ApiError(409, "PROJECT_REPORT_UNAVAILABLE", "Recorded project completion is required");
     case "PJC09": return new ApiError(409, "PROJECT_PROGRESS_CHANGED", "Project progress changed");
+    case "PVG03": return new ApiError(422, "POLL_INVALID", "Check the poll configuration");
+    case "PVG04": return new ApiError(404, "POLL_UNAVAILABLE", "Poll unavailable");
+    case "PVG05": return new ApiError(409, "POLL_NOT_OPEN", "Voting has not opened");
+    case "PVG06": return new ApiError(409, "POLL_CLOSED", "Poll action unavailable at this time");
+    case "PVG07": return new ApiError(409, "POLL_BALLOT_EXISTS", "A ballot is already recorded");
+    case "PVG08": return new ApiError(403, "POLL_NOT_ELIGIBLE", "Current poll eligibility required");
+    case "PVG09": return new ApiError(409, "POLL_CHANGED", "Poll configuration changed or is frozen");
+    case "PVG10": return new ApiError(409, "POLL_RESULT_UNAVAILABLE", "Result or decision unavailable");
+    case "PVG11": return new ApiError(409, "POLL_NOMINEE_UNAVAILABLE", "Nominee consent required or option unavailable");
+    case "PVG12": return new ApiError(409, "POLL_CANCELLED", "Poll cancelled");
     case "22023": return new ApiError(400, "INVALID_INPUT", "Check the submitted fields");
     case "23514": return new ApiError(422, "INVALID_CONTENT", "Content does not meet posting requirements");
     case "PGRST301": case "PGRST303": return new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");

@@ -583,3 +583,34 @@ Version 1 uses a fixed program with an account-bound lifecycle record. No email 
 | `feed_data.notifications` | Optional organization role audit event FK with cascade, partial index, and scope constraints preventing unrelated references. |
 
 The representative table gains a composite scope key for assignment references. Private role tables are RLS-enabled and expose no direct application-role table permissions. The deployment sequence is schema and guarded writes, scoped views and existing function integration, then notices. [Roles and permissions](DATABASE.md#phase-5d-custom-organization-roles)
+
+
+### Community voting — Phase 6D implemented
+
+The first migration creates six private tables. The second adds serialized writes and the third adds capability, notification and API projections. Current access derives from live community, organization and approved project relationships. All six tables have RLS and application roles have no direct grants. [Voting permissions and APIs](DATABASE.md#phase-6d-polls)
+
+| Table | Columns, constraints and indexes |
+| --- | --- |
+| `polls` | `id uuid PK`, nullable `creator_id uuid` Auth FK, `request_key uuid`, `request_digest bytea`, text `scope,kind,policy,audience,eligibility,result_policy,title,description,language,status`, optional `community_id,organization_id,project_id,task_id uuid`, nullable `proposal_revision integer`, `opens_at,closes_at,created_at,updated_at timestamptz`, nullable `published_at,finalized_at timestamptz`, `quorum,threshold,electorate_size integer`, `final_result jsonb`, `version integer`. Exclusive scope FKs and composite project/revision and project/task FKs. Unique creator/request key. Indexed by creation and ID, creator timeline and each scoped owner timeline. |
+| `poll_options` | `id uuid PK`, `poll_id uuid` FK, `position smallint`, nullable `label,consent,consented_name,consented_handle text`, optional `nominee_id uuid` Auth FK and `decided_at timestamptz`. Unique poll/ID, poll/position, poll/nominee and indexed by nominee/poll. |
+| `poll_electorate` | Composite PK `(poll_id,user_id)` with poll and Auth UUID FKs. Reverse member/poll index. A published size remains available as the original count. |
+| `poll_ballots` | `id uuid PK`, `poll_id uuid` FK, nullable `voter_id uuid` Auth FK, `option_id uuid`, `cast_at timestamptz`. Composite poll/option FK, unique poll/voter, tally index on poll/option. |
+| `poll_events` | `id uuid PK`, `poll_id uuid` FK, nullable Auth FKs `actor_id,recipient_id uuid`, nullable option FK `nomination_id uuid`, `action text`, optional `reason text`, `version integer`, `created_at timestamptz`. Indexed by poll timeline and by actor/time for nomination limits. Ballot event payloads omit the selected option. |
+| `poll_decisions` | `poll_id uuid PK/FK`, nullable `actor_id uuid` Auth FK, `disposition,reason text`, optional `recommended_option uuid` with composite poll/option FK, `created_at timestamptz`. Exactly one recommendation, deferral or declination per poll. |
+
+```mermaid
+erDiagram
+    COMMUNITIES o|--o{ POLLS : owns
+    ORGANIZATIONS o|--o{ POLLS : owns
+    APPROVED_PROJECT_REVISIONS o|--o{ POLLS : scopes
+    PROJECT_TASKS o|--o{ POLLS : restricts
+    POLLS ||--|{ POLL_OPTIONS : provides
+    POLLS ||--o{ POLL_ELECTORATE : freezes
+    POLLS ||--o{ POLL_BALLOTS : counts
+    POLL_OPTIONS ||--o{ POLL_BALLOTS : selected
+    POLLS ||--o{ POLL_EVENTS : audits
+    POLLS ||--o| POLL_DECISIONS : records
+    POLL_EVENTS ||--o{ NOTIFICATIONS : triggers
+```
+
+Account deletion nulls voter links and retained actor references. Anonymized ballots remain included in existing totals. Unavailable identities are omitted from nominee projections. Legitimate parent resource deletion cascades to scoped poll records. Decide retention, export and dispute procedures before wider governance use. Existing notification reads apply their 30-day window.

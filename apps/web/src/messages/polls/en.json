@@ -1,0 +1,142 @@
+{
+  "title": "Polls",
+  "mine": "My polls",
+  "create": "Create a poll",
+  "rules": "Ayinou polls guide community discussions and project decisions. Each eligible account has one private ballot.",
+  "verifiedHelp": "Some polls require a reviewed identity.",
+  "scope": "Scope",
+  "owner": "Poll owner",
+  "choose": "Choose an option",
+  "type": "Poll type",
+  "policy": "Decision policy",
+  "task": "Decision subject",
+  "proposal": "Project proposal",
+  "question": "Poll question",
+  "description": "Description",
+  "language": "Poll language",
+  "options": "Options, one per line (2–10)",
+  "nomineeHandles": "Public user handles, one per line (2–10)",
+  "reconsent": "Leave handles blank to keep existing nominations. Editing the question or description requires new consent.",
+  "consentHelp": "Candidates must consent before their names appear. They may withdraw at any time.",
+  "opensAt": "Voting opens",
+  "closesAt": "Voting ends",
+  "audience": "Who can see this poll",
+  "eligibility": "Who can vote",
+  "results": "Results",
+  "quorum": "Minimum ballots (optional)",
+  "threshold": "Minimum share to win, % (optional)",
+  "frozenHelp": "Publication fixes the eligible voter list. Totals appear after finalization. Management requires a recent authenticator check.",
+  "verify": "Verify with your authenticator",
+  "save": "Save draft",
+  "nominations": "My nominations",
+  "loading": "Loading…",
+  "empty": "There are no polls to show here.",
+  "more": "Load more",
+  "unavailableOption": "Unavailable option",
+  "electorate": "Eligible at publication",
+  "cancel": "Cancel poll",
+  "optionsTitle": "Ballot options",
+  "receipt": "Your ballot",
+  "finalBallot": "Check your choice. A submitted ballot is final.",
+  "vote": "Submit ballot",
+  "cannotVote": "Your account is currently ineligible for this poll.",
+  "previewResults": "Results so far",
+  "total": "Total ballots",
+  "recordDecision": "Record of decision",
+  "edit": "Edit draft",
+  "publishHelp": "Publishing locks the question, options and settings.",
+  "publish": "Publish poll",
+  "finalize": "Finalize results",
+  "reason": "Reason",
+  "disposition": "Decision",
+  "history": "Poll history",
+  "noNominations": "You have no nominations to review.",
+  "unavailableNomination": "Nomination details unavailable",
+  "accept": "Accept nomination",
+  "decline": "Decline nomination",
+  "withdraw": "Withdraw nomination",
+  "scopes": {
+    "individual": "Personal",
+    "community": "Community",
+    "organization": "Organization",
+    "project": "Project"
+  },
+  "kinds": {
+    "community": "Community opinion",
+    "priority": "Project priority",
+    "decision": "Task or proposal decision",
+    "person": "Candidate selection"
+  },
+  "policies": {
+    "advisory": "Advisory",
+    "governance": "Recorded, nonbinding recommendation"
+  },
+  "audiences": {
+    "scope": "Members of this scope",
+    "members": "Signed-in Ayinou members"
+  },
+  "eligible": {
+    "active": "Eligible active accounts",
+    "verified": "Eligible accounts with reviewed identity"
+  },
+  "resultPolicies": {
+    "after_close": "After finalization",
+    "after_vote": "After your ballot or finalization"
+  },
+  "states": {
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "open": "Open",
+    "awaiting_close": "Awaiting finalization",
+    "closed": "Finalized",
+    "cancelled": "Cancelled"
+  },
+  "consents": {
+    "pending": "Awaiting consent",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "withdrawn": "Withdrawn"
+  },
+  "outcomes": {
+    "no_votes": "No ballots were cast.",
+    "no_quorum": "Quorum was not reached.",
+    "tie": "Options tied for first place.",
+    "withdrawn_leads": "The leading candidate was unavailable at finalization.",
+    "below_threshold": "The leading option fell below the required share.",
+    "winner": "Leading option"
+  },
+  "dispositions": {
+    "recommend": "Recommend the leading option",
+    "defer": "Defer the decision",
+    "decline": "Decline the recommendation"
+  },
+  "events": {
+    "created": "Draft created",
+    "edited": "Draft edited",
+    "published": "Poll published",
+    "finalized": "Results finalized",
+    "cancelled": "Poll cancelled",
+    "decision_recorded": "Decision recorded",
+    "nomination_accepted": "Nomination accepted",
+    "nomination_declined": "Nomination declined",
+    "nomination_withdrawn": "Nomination withdrawn"
+  },
+  "notices": {
+    "nomination_requested": "You have a nomination to review.",
+    "finalized": "Poll results are ready.",
+    "cancelled": "A poll was cancelled.",
+    "decision_recorded": "A poll decision was recorded."
+  },
+  "errors": {
+    "POLL_INVALID": "Review the poll settings, dates and options.",
+    "POLL_UNAVAILABLE": "This poll is unavailable to your account.",
+    "POLL_NOT_OPEN": "Voting has not opened yet.",
+    "POLL_CLOSED": "Voting has ended.",
+    "POLL_BALLOT_EXISTS": "Your account already submitted a final ballot.",
+    "POLL_NOT_ELIGIBLE": "Your account does not meet this poll’s eligibility rules.",
+    "POLL_CHANGED": "This poll changed. Refresh it before trying again.",
+    "POLL_RESULT_UNAVAILABLE": "The results are still unavailable.",
+    "POLL_NOMINEE_UNAVAILABLE": "A nomination or candidate is unavailable. Review the options and consent before continuing.",
+    "POLL_CANCELLED": "This poll was cancelled."
+  }
+}

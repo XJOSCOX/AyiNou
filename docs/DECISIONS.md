@@ -163,3 +163,8 @@ Keep execution and its version separate from proposal review. Allow each eligibl
 ### Phase 6C evidence and published outcomes
 
 Review completion and publication separately from the proposal decision. Keep photos behind their entry's authorization check and supporting evidence private. Record observations explicitly and preserve their self-reported provenance in public snapshots. Require a recorded execution completion to author a final report. Publish corrections as new reviewed versions and retain approved history. Any future voting feature will reference the applicable proposal or exact reviewed report version, subject to separate visibility, eligibility, and anti-abuse policy.
+
+
+### Phase 6D voting integrity
+
+Use immutable, single-choice private ballots and return the receipt only to the submitting account. A retry with the same choice is idempotent. Higher-trust scopes use independently reviewed identities and an electorate frozen at explicit publication, with current eligibility rechecked for each cast. Preserve accepted votes when eligibility changes and mask withdrawn candidates while preserving historical totals. The stored close outcome governs later recommendations. A recommendation of a previously leading person requires that their consent and eligible public identity still hold. Whole-poll cancellation retains internal records and suppresses voter-visible aggregates. The data model records scoped recommendations with written reasons. There is no automatic operational effect, election certification, weighted voting, or proof of unique individual participation. Revisit retention, fraud escalation, review staffing and broader governance after the Phase 6E audit and Phase 6F remediation.
