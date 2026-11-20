@@ -710,6 +710,8 @@ Milestone assignments, reviews, relevant progress, reports, and completion reuse
 
 Migrations `20261120210000`, `20261120211000` and `20261120212000` create the private voting tables, transactional commands, scope-checked projections and recipient-only notifications. Authenticated callers use the versioned Fastify API with their own bearer token. All direct table grants are revoked and RLS is enabled. PostgreSQL owns authorization, election state, rate windows, and tally calculation.
 
+Migration `20261120213000` replaces the body of `polls_for_client`. Single-resource listings filter the appropriate community, organization, or project ID through existing partial indexes. The separate global query keeps its chronological listing. Both preserve the visibility and management predicates and the descending `(created_at, id)` cursor. The function keeps its existing grants, security-definer search path, and output contract. This migration adds no table or index. [Comparison and rollback validation](audits/PHASE_6E_AUDIT.md#phase-6f6-results)
+
 | Poll owner | Types and audience | Current management and voting requirements |
 | --- | --- | --- |
 | Individual | Advisory community opinion, visible to signed-in members | Creator manages. Eligible active accounts can vote according to published rules. |

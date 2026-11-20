@@ -40,6 +40,14 @@ Run `npm run test -w @ayinou/api` for the Fastify injection tests. The route inv
 
 Run `node --expose-gc --import tsx scripts/measure-fastify.mjs` in each clean revision to compare warm registration, loopback startup, representative injection latency, dependency call counts, and post-close heap. It uses synthetic repository and authentication adapters and requires no credentials. Hosted rollback suites and the local browser suite cover real authorization separately.
 
+Run `npm run test:e2e -- --measure-polls` in a clean Phase 6F.6 checkout for the seeded poll comparison. It benchmarks both listing functions on the same disposable Docker database and exercises voting and finalization. Run `npm run test:hosted:polls:sql -- --scope-preflight` only on the intended linked project before applying the listing migration. It executes the migration and poll assertions inside a transaction that rolls back. The ordinary guarded poll SQL command checks the current hosted schema without applying migrations.
+
+## Main branch checks
+
+`Main checks` runs on direct pushes to `main`. Three jobs run workspace typecheck, lint and tests, an npm audit and both builds, and the Chromium smoke suite with isolated Docker Supabase. Each job uses Node 22.18.0 and `npm ci`. The build job fails on reported npm advisories at low severity or higher. The workflow uses SHA-pinned actions and a read-only repository token. Browser artifacts contain only result counts and expire after three days. The workflow uses no hosted credentials and performs no deployment or hosted migration.
+
+Follow the pushed commit in the repository's Actions tab or run `gh run list --workflow main-checks.yml --branch main`. Use `gh run view <run-id> --log-failed` when a job fails. Reproduce the job locally with `npm run typecheck`, `npm run lint`, `npm test`, `npm audit --audit-level=low`, `npm run build`, or `npm run test:e2e:smoke`. Continue to run the full Chromium suite for locally validated releases.
+
 ## Browser regression tests
 
 The suite in `apps/web/e2e/` uses Playwright Test **1.65.1** with Chromium and axe **4.14.0**. Use the repository's Node and npm versions and a running local Docker Engine. The phase baseline was verified on Node 22.18. Install dependencies with `npm ci` and Chromium with `npx playwright install chromium`. On a Linux test host that needs browser libraries, use `npx playwright install --with-deps chromium`.

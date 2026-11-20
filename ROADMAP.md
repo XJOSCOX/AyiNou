@@ -232,6 +232,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Phase 6F.3 splits Fastify Feed and Project Review into domain modules and verifies the existing route contracts.
 - [x] Phase 6F.4 extracts project, community, profile, trust, and Feed media modules while preserving the web routes and client entry points. [Test and build comparison](docs/audits/PHASE_6E_AUDIT.md#phase-6f4-results)
 - [x] Phase 6F.5 organizes shared TypeScript contracts by domain and adds automated checks for public compatibility. [Contract and build comparison](docs/audits/PHASE_6E_AUDIT.md#phase-6f5-results)
+- [x] Phase 6F.6 improves scoped poll lookups, updates the affected build dependency, bounds remote API calls, and adds main-branch CI. [Performance and reliability validation](docs/audits/PHASE_6E_AUDIT.md#phase-6f6-results)
 - [ ] Define independent outcomes validation, retention, fraud escalation, quorum standards, and operational voting governance.
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 

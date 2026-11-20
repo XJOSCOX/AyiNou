@@ -160,6 +160,7 @@ Hosted Auth has email/password signup and confirmation enabled. Its site URL is 
 - **One branch: `main`.** No pull requests, no feature/development branches, no automatic merges.
 - Develop and validate locally; commit small, reviewed increments to local `main`.
 - Run required checks before pushing to GitHub `main`.
+- Each direct push runs TypeScript, lint, tests, production builds, an npm advisory audit, and an isolated Chromium smoke suite in GitHub Actions. [CI and reproduction commands](docs/WORKFLOW.md#main-branch-checks)
 - Never push `.env.local`, secrets, tokens, service-role keys, uploaded identity documents, production data, or locally generated confidential artifacts.
 - Schema changes are versioned migrations with tests; fixes are committed as new commits rather than rewriting shared history.
 - Use meaningful commit messages, e.g. `feat(auth): add multilingual registration`.

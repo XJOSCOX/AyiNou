@@ -393,3 +393,73 @@ The baseline and candidate passed workspace typecheck, lint, both production bui
 All 19 guarded hosted SQL suites passed and rolled back. The phase changed no API route, application source, migration, RLS policy, or permission rule. No hosted migration was applied. The nine previously recorded local files match their starting hashes.
 
 This phase addresses the shared-contract portion of 6E-05. The other outstanding refactoring candidates from Phase 6F.4 remain in the audit. Findings 6E-06 on poll scaling, 6E-07 on the build dependency advisory, and 6E-09 on failure and recovery evidence remain open. Docker pgTAP, non-Chromium browsers, production load, and a fresh dependency install were outside this validation.
+
+## Phase 6F.6 results
+
+The starting commit on local and remote `main` was `f6de643264ee3a6d8f963afc46379f162edc91c1`. Seventeen existing local files, including branding, Feed icons, sidebar and navbar edits, screenshots, and the database blueprint, were excluded from the phase and checked by hash.
+
+### 6E-06 poll listing and contention
+
+The disposable Docker database held 12,030 seeded directory polls, including 30 older records in a sparse department and 12,000 newer records in another, plus one dedicated ballot poll. It used 4,840 synthetic accounts and 4,800 preloaded ballots. The harness applied the original and revised function to the same seeded database. It recorded 12 samples after three warmups per workload, using custom planning for the global listing and generic planning for the other calls. The measurements are PostgreSQL execution times without network latency. [Reproduce the poll benchmark](../WORKFLOW.md#api-refactoring-checks)
+
+| Poll RPC | Baseline median / p95, ms | Candidate median / p95, ms |
+| --- | ---: | ---: |
+| Directory with an eligible viewer | 17.882 / 20.430 | 18.153 / 18.764 |
+| Sparse department first page | 24.679 / 26.521 | 24.987 / 26.943 |
+| Sparse department next page | 9.110 / 9.755 | 8.004 / 9.419 |
+| Private scope denied | 25.576 / 31.780 | 21.210 / 25.612 |
+| Detail for a non-voter on the 4,800-ballot poll | 2.314 / 2.909 | 2.660 / 3.179 |
+
+The predicate comparison with `EXPLAIN (ANALYZE, BUFFERS)` confirmed the avoided work. The coalesced predicate scanned the global directory index, discarded 12,000 rows, and used 523 shared-buffer hits in 1.405 ms. A direct department predicate used `polls_community`, inspected 22 rows, and used 13 shared-buffer hits in 0.076 ms. The migration routes scoped requests to the corresponding existing partial index. Permission checks dominate the first page at this data size. The sparse next page and denied-scope samples moved down, while global, first-page and detail differences were small and inconclusive. Earlier generic-plan batches exceeded their 40- and 60-second combined budgets. The measured global comparison reflects an eligible viewer and custom planning. Large inaccessible global directories remain a scaling risk.
+
+Sixteen simultaneous votes took 79.351 ms median and 131.104 ms p95 including row-lock wait. The receipt could be read again after identical resubmission and the final private total was 4,816. Finalization completed alongside eight late attempts, all rejected, in 268 ms of harness wall time including process startup. Another operation built a 4,839-account electorate in 2.748 seconds. These cases validate serialization at this sample size. The benchmark retains the existing row lock and makes no production-throughput estimate. It created no hosted fixtures.
+
+Migration `20261120213000_phase6f6_poll_scope_listing.sql` updates only the listing RPC. Scope, management, current visibility, ordering, pagination, ballot secrecy, and grants were tested in the poll rollback suite. The hosted dry run showed only this migration for `hcbxulyfmdmuyccgrujs`. The rollback preflight passed before application. The rollback suite passed again afterward and the final dry run reported an up-to-date schema. [Database behavior and API](../DATABASE.md#phase-6d-polls)
+
+### 6E-07 build dependency
+
+`npm audit` initially found one low-severity advisory on esbuild 0.27.7, reachable through the affected standalone esbuild development server on Windows. Ayinou uses `next dev` and `tsx watch` for development and uses tsup to build the API. The audited server path is absent from those scripts. A clean tsup 9 trial cleared the advisory but raised the supported Node minimum. The checked-in override pins esbuild 0.28.2, which was already in the lockfile through tsx, for the existing toolchain. A fresh `npm ci`, both builds, and the lockfile-based audit passed with zero reported advisories. [esbuild advisory](https://github.com/advisories/GHSA-g7r4-m6w7-qqqr) · [tsup 9 requirements](https://github.com/egoist/tsup/releases/tag/v9.0.0)
+
+### 6E-09 failure handling
+
+The transport applies per-fetch deadlines across authentication, live-session checks, read quotas, ordinary repositories and post media. It propagates the existing caller signal through response-body reads. The application stops PostgREST automatic retries and distinguishes temporary upstream authorization outages from expired and revoked credentials. Authorization and quota checks still fail closed. Tests covered canceled database reads, unavailable Auth and quota stores, interrupted uploads and lease cleanup, private image delivery failures, and an ambiguous ballot response followed by an authoritative receipt read. API responses preserve the safe error envelope and request ID. Browser regressions exercise transient API failures, network interruption, and recovery of unsent work. [Transport policy](../ARCHITECTURE.md#text-feed-and-error-handling)
+
+### Fastify and production artifacts
+
+Three alternating runs per revision used Windows, Node 22.18.0, and synthetic in-process adapters. Each run sampled 550 requests per endpoint after warmup, and 11 startup and post-GC heap samples. The table shows the median of the three runs' median and p95 values. Both revisions performed the same number of adapter calls per run, including 7,800 authentication checks, 1,560 Feed reads, 7,020 RPCs and 780 recommendation calls across the fixture. These measurements separate Fastify overhead from real database and network time. No material Fastify throughput change was established.
+
+| Request or process measurement | Baseline median / p95 | Candidate median / p95 |
+| --- | ---: | ---: |
+| Public Feed, ms | 0.061 / 0.129 | 0.061 / 0.131 |
+| Following, ms | 0.056 / 0.121 | 0.056 / 0.127 |
+| For You, ms | 0.052 / 0.115 | 0.052 / 0.117 |
+| Community discovery, ms | 0.256 / 0.408 | 0.250 / 0.382 |
+| People discovery, ms | 0.079 / 0.151 | 0.079 / 0.154 |
+| Institution discovery, ms | 0.060 / 0.128 | 0.058 / 0.133 |
+| Project directory, ms | 0.163 / 0.275 | 0.159 / 0.256 |
+| Project workspace, ms | 0.073 / 0.136 | 0.071 / 0.136 |
+| Poll directory, ms | 0.059 / 0.120 | 0.056 / 0.129 |
+| Poll detail, ms | 0.054 / 0.120 | 0.052 / 0.113 |
+| Poll vote, ms | 0.199 / 1.383 | 0.185 / 0.713 |
+| Unread notification count, ms | 0.052 / 0.109 | 0.048 / 0.119 |
+| Health status, ms | 0.067 / 0.145 | 0.064 / 0.143 |
+| Fastify creation, ms | 1.064 / 2.151 | 1.018 / 2.019 |
+| Route registration, ms | 14.143 / 18.493 | 13.965 / 19.374 |
+| Loopback listen, ms | 0.740 / 1.135 | 0.711 / 1.055 |
+| Post-close heap, MiB | 33.694 / 35.837 | 34.202 / 35.826 |
+
+The clean Next.js builds both emitted 51 route entries and 100 JavaScript files. Raw web JavaScript was 2,276,269 bytes before and 2,276,332 bytes after. The client-manifest JavaScript footprints were 748,572 → 748,601 bytes for Feed, 623,723 → 623,741 for Profile, 735,517 → 735,538 for poll details and 772,270 → 772,283 for project work. Raw Fastify output increased from 166,731 to 167,768 bytes with the transport handling.
+
+### Shared package loading
+
+Comparing the original single-file contract layout with the current 13-module graph in five alternating fresh processes after warmup, the median source import using `tsx` with its transform cache disabled increased from 25.96 to 42.97 ms. Median post-GC heap growth rose from 70.03 to 148.20 KiB. This cold-cache measurement differs from the Phase 6F.5 source timing and shows the added per-module loader cost. Bundling both entry points into plain JavaScript with esbuild 0.28.2 and importing with native Node gave medians of 3.50 and 3.88 ms. The small bundle timing difference and nearly unchanged application artifacts do not establish a meaningful production regression. The API production file embeds its shared runtime values. Both layouts expose 50 runtime values, and the compatibility check covers all 211 exports. Existing imports and the domain organization were retained.
+
+### Authenticated navigation
+
+Three Chromium runs per revision used the local Next.js dev server and disposable Supabase. Initial project-workspace loads took 1,323 and 1,550 ms on the first sample, then 339–407 and 406–431 ms on the warmed runs. The project progress tab medians were 63 and 71 ms. Navigation from the sidebar to My Profile had medians of 257 and 270 ms, with first samples of 362 and 880 ms and warmed ranges of 255–257 and 250–270 ms. Compiler work, browser startup, and local service variance affect the first samples. The warmed navigation ranges overlap and this sample does not establish a persistent regression. Chromium recorded a median of 27 and 28 project-page layouts and 11.32 and 11.92 MiB of retained page heap after collection. Each workspace run fetched project work and progress once, and the profile regression continued to enforce one profile read and one access read. No private-response caching was introduced.
+
+### Validation and remaining work
+
+Workspace typecheck, lint, four-language parity, 211 shared exports, seven client tests, 36 API tests and both production builds passed. All 30 Chromium scenarios passed on the baseline and on the candidate, with zero retries or skips. Docker Desktop stopped during the first candidate run. After restoring it and removing the interrupted disposable project, the full rerun passed and removed its fixture. Eighteen guarded hosted SQL suites passed, covering institutions, account security and trust, communities, social features and projects. The polls suite passed before and after applying the migration, for 19 distinct hosted SQL suites in total. GitHub Actions runs the host-independent quality checks and the seven Chromium smoke scenarios on direct pushes to `main`. [CI workflow and commands](../WORKFLOW.md#main-branch-checks)
+
+Cross-engine browsing, Docker pgTAP, production peak load, cross-worker recovery and restoration from backups remain open. Browser timing samples are from the local dev server and include Next.js route compilation when applicable. Phase 6F.7 remains a separate stabilization review.
