@@ -1,81 +1,16 @@
 import type { InterestCode } from "./accounts.js";
 import type { Locale } from "./core.js";
-import type { OperationalOrganization, OrganizationKind } from "./institutions.js";
-import type { PersonalClaim } from "./trust.js";
+import type { FeedAuthor } from "./feed.js";
+import type { OperationalOrganization } from "./institutions.js";
 export * from "./core";
 export * from "./trust";
 export * from "./accounts";
 export * from "./institutions";
 export * from "./ambassadors";
+export * from "./communities";
+export * from "./feed";
 export { departmentCommunityContent, type DepartmentCommunityContent } from "./department-community-content";
 
-export const postVisibilities = ["public", "members_only", "private"] as const;
-export const reportCategories = ["harassment", "hate", "spam", "privacy", "other"] as const;
-export const moderationActions = ["hide", "restore", "remove", "dismiss"] as const;
-export const postBodyLimit = 2_000;
-export const commentBodyLimit = 1_000;
-export const reactionKinds = ["like", "love", "support", "celebrate"] as const;
-export type ReactionKind = (typeof reactionKinds)[number];
-export type ReactionSummary = { counts: Record<ReactionKind, number>; mine: ReactionKind | null };
-export type PostVisibility = (typeof postVisibilities)[number];
-export type ReportCategory = (typeof reportCategories)[number];
-export type ModerationAction = (typeof moderationActions)[number];
-export type PostStatus = "draft" | "published" | "hidden" | "removed";
-export type FeedScope = "feed" | "mine" | "following" | "for_you";
-export type ModerationScope = "reports" | "hidden";
-export const recommendationReasons = ["topic", "follow", "language", "recent"] as const;
-export type RecommendationReason = (typeof recommendationReasons)[number];
-export const recommendationActions = ["not_interested", "less_author", "hide_author"] as const;
-export type RecommendationAction = (typeof recommendationActions)[number];
-export type RecommendationSettings = { topics: InterestCode[]; feedbackCount: number };
-export type AttachmentInput = { id: string; alt?: string | null };
-export type PostAttachment = { id: string; alt: string | null; width: number; height: number };
-export type PostInput = {
-  body: string; language: Locale; visibility: PostVisibility; topics?: InterestCode[]; attachments?: AttachmentInput[];
-};
-export interface FeedAuthor {
-  personalClaims?: PersonalClaim[];
-  displayName: string;
-  username: string | null;
-  avatarUrl: string | null;
-  verified: boolean;
-}
-export interface FeedPost extends PostInput {
-  attachments?: PostAttachment[];
-  community?: { id: string; slug: string } | null;
-  id: string;
-  status: PostStatus;
-  createdAt: string;
-  publishedAt: string | null;
-  editedAt: string | null;
-  version: number;
-  own: boolean;
-  author: FeedAuthor | null;
-  reactions?: ReactionSummary;
-  recommendationReason?: RecommendationReason;
-}
-export interface FeedPage {
-  posts: FeedPost[];
-  nextCursor: string | null;
-  algorithmVersion?: string;
-}
-export interface FeedReport {
-  attachments?: PostAttachment[];
-  id: string;
-  postId: string;
-  commentId?: string;
-  body: string;
-  language: Locale;
-  status: PostStatus;
-  deleted: boolean;
-  own: boolean;
-  version: number;
-  category: ReportCategory | null;
-  note: string | null;
-  createdAt: string;
-  lastAction: { action: ModerationAction; reason: string; createdAt: string } | null;
-}
-export type CommentInput = Pick<PostInput, "body" | "language">;
 export const notificationPreferenceKeys = ["reactions", "comments", "replies", "followers"] as const;
 export type NotificationPreferences = Record<(typeof notificationPreferenceKeys)[number], boolean>;
 export interface MemberNotification {
@@ -95,126 +30,6 @@ export interface MemberNotification {
   actor: Omit<FeedAuthor, "avatarUrl"> | null;
 }
 export type NotificationPage = { notifications: MemberNotification[]; nextCursor: string | null };
-export const appealOutcomes = ["upheld", "overturned", "closed"] as const;
-export type AppealOutcome = (typeof appealOutcomes)[number];
-export type AppealKind = "post" | "comment";
-export type MemberSafetyEntry = { id: string; username: string | null; name: string | null; createdAt: string };
-export type MemberSafetyPage = { accounts: MemberSafetyEntry[]; nextCursor: string | null };
-export interface ModerationAppeal {
-  id: string;
-  reason: string;
-  outcome: "pending" | AppealOutcome;
-  explanation: string | null;
-  createdAt: string;
-  decidedAt: string | null;
-}
-export type MemberAppealDecision = {
-  id: string; kind: AppealKind; createdAt: string; deadline: string; eligible: boolean; appeal: ModerationAppeal | null;
-};
-export type AppealReview = ModerationAppeal & {
-  kind: AppealKind; postId: string; commentId: string | null; body: string; language: Locale;
-  originalReason: string; originalAt: string; conflict: boolean; canRestore: boolean;
-  attachments?: PostAttachment[];
-};
-export type AppealPage<T> = { decisions: T[]; nextCursor: string | null };
-export type SafetyOverview = {
-  pendingPostReports: number; pendingCommentReports: number; pendingAppeals: number;
-  restrictedAccounts: number; moderationActions30Days: number; cleanupBacklog: number;
-};
-export type CommentTarget = { id: string; body: string; language: Locale; createdAt: string };
-export const communityStaffRoles = ["moderator", "administrator"] as const;
-export type CommunityStaffRole = (typeof communityStaffRoles)[number];
-export type DepartmentCommunity = {
-  id: string; slug: string; kind: "department"; departmentCode: string; name: string; joined: boolean;
-  directoryVisible: boolean; role: CommunityStaffRole | null; canModerate: boolean; canManageRoles: boolean;
-  memberCount: number | null;
-};
-export type CommunityMembers = { accounts: DiscoveryCard[]; nextCursor: string | null };
-export const groupKinds = ["diaspora", "interest"] as const;
-export const groupPolicies = ["public", "approval", "private"] as const;
-export type GroupKind = (typeof groupKinds)[number];
-export type GroupPolicy = (typeof groupPolicies)[number];
-export type GroupRole = "owner" | CommunityStaffRole | "member";
-export type GroupSettings = {
-  name: string; description: string; rules: string; policy: GroupPolicy;
-  discussionPublic: boolean; countryCode: string | null; topic: InterestCode | null;
-};
-export type MemberGroup = Omit<DepartmentCommunity, "kind" | "departmentCode" | "role"> & GroupSettings & {
-  kind: GroupKind; departmentCode: null; role: GroupRole | null; version: number;
-  requestStatus: "pending" | "approved" | "rejected" | "cancelled" | null;
-};
-export type Community = DepartmentCommunity | MemberGroup;
-export const communityKinds = ["department", ...groupKinds] as const;
-export const communityRecommendationFeedbackActions = ["not_interested", "hide", "restore"] as const;
-export type CommunityRecommendationFeedbackAction = (typeof communityRecommendationFeedbackActions)[number];
-export type CommunityRecommendationReason = "interest" | "related_topic" | "public_activity" | "explore";
-export type CommunityRecommendation = {
-  community: Community; reason: CommunityRecommendationReason; recentPublicActivity: boolean;
-};
-export type CommunityRecommendationPage = {
-  recommendations: CommunityRecommendation[]; nextCursor: string | null; algorithmVersion: string;
-};
-export type CommunityRecommendationSettings = { hidden: number; notInterested: number };
-export type GroupInvitation = { id: string; purpose: "membership" | "ownership"; expiresAt: string };
-type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
-export type FeedComment = CommentPosition & (
-  { available: true; body: string; language: Locale; editedAt: string | null; version: number;
-    own: boolean; author: Omit<FeedAuthor, "avatarUrl"> | null; reactions: ReactionSummary }
-  | { available: false; body: null; language: null; editedAt: null; version: null;
-    own: false; author: null; reactions: null }
-);
-export interface CommentPage {
-  comments: FeedComment[];
-  nextCursor: string | null;
-}
-export interface FeedReportPage {
-  reports: FeedReport[];
-  nextCursor: string | null;
-}
-
-export interface Department {
-  code: string;
-  name: string;
-}
-
-export interface CommunityDepartmentCount extends Department {
-  members: number;
-}
-
-export interface CommunityCountryCount {
-  code: string;
-  members: number;
-}
-
-export interface CommunityStats {
-  updatedAt: string;
-  minimumCohort: 10;
-  registered: number | null;
-  active: number | null;
-  verified: number | null;
-  geographyAvailable: boolean;
-  haiti: number | null;
-  diaspora: number | null;
-  unknown: number | null;
-  representedDepartments: number | null;
-  departments: CommunityDepartmentCount[] | null;
-  diasporaCountries: CommunityCountryCount[] | null;
-  membership?: { haitian: number; internationalSupporter: number; unspecified: number } | null;
-}
-
-export type DiscoveryKind = "people" | "institutions";
-export type DiscoveryFilter = { kind: DiscoveryKind; q?: string; verified?: boolean; category?: OrganizationKind; country?: string; department?: string };
-type DiscoveryCardBase = { id: string; handle: string; name: string; verified: boolean; following: boolean };
-export type DiscoveryCard = DiscoveryCardBase & (
-  { kind: "member"; self: boolean; personalClaims?: PersonalClaim[] }
-  | { kind: "institution"; targetId: string; verificationStatus: "verified" | "unverified"; category: OrganizationKind;
-      countryCode: string; departmentCode: string | null; description: string | null }
-);
-export type DiscoveryPage = { accounts: DiscoveryCard[]; nextCursor: string | null };
-export type FollowTarget = { kind: "member" | "institution"; key: string };
-export type FollowStatus = { following: boolean; canFollow: boolean; verified: boolean; personalClaims?: PersonalClaim[];
-  followerCount: number; followingCount: number | null };
-export type FollowList = "followers" | "following";
 
 export const projectOwners = ["individual", "organization", "community"] as const;
 export const projectReviewActions = ["assign", "release", "request_changes", "approve", "reject"] as const;
