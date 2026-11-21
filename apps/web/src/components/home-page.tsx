@@ -59,13 +59,6 @@ export function HomePage() {
                 ))}
               </div>
             </section>
-
-            <section id="about" className="mt-8 max-w-3xl scroll-mt-4 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-7 lg:scroll-mt-22">
-              <h2 className="text-lg font-bold">{t.about}</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{t.missionBody}</p>
-              <h3 className="mt-5 font-bold">{m.how}</h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{m.howBody}</p>
-            </section>
           </div>
           <UpdatesSidebar />
         </div>

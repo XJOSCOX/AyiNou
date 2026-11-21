@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
 import { authMessages } from "@/lib/auth-i18n";
 import { messages } from "@/lib/i18n";
 import { groupMessages } from "@/lib/groups-i18n";
@@ -12,32 +11,17 @@ import { useLocale } from "@/lib/locale-store";
 import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
 
-function subscribeToHash(onChange: () => void) {
-  window.addEventListener("hashchange", onChange);
-  return () => window.removeEventListener("hashchange", onChange);
-}
-
-function readHash() {
-  return window.location.hash;
-}
-
-function initialHash() {
-  return "";
-}
-
 const navLink = "inline-flex min-h-10 items-center rounded-md px-2 text-xs font-semibold leading-tight text-[var(--theme-body)] transition-colors hover:bg-[var(--theme-control)] hover:text-[var(--theme-link)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)] [&[aria-current]]:bg-[var(--theme-selected)] [&[aria-current]]:text-[var(--theme-link)] min-[360px]:text-sm sm:px-3";
 
 export function Navbar() {
   const [locale] = useLocale();
-  const hash = useSyncExternalStore(subscribeToHash, readHash, initialHash);
   const pathname = usePathname();
   const t = messages[locale];
   const auth = authMessages[locale];
   const home = pathname === "/";
-  const aboutIsCurrent = home && hash === "#about";
   const sections = [
-    { href: home ? "#top" : "/", label: t.home, current: home && !aboutIsCurrent },
-    { href: home ? "#about" : "/#about", label: t.about, current: aboutIsCurrent },
+    { href: home ? "#top" : "/", label: t.home, current: home },
+    { href: "/about", label: t.about, current: pathname === "/about" },
     { href: "/community-directory", label: groupMessages[locale].groups, current: pathname.startsWith("/community-directory") },
     { href: "/projects", label: projectMessages[locale].title, current: pathname === "/projects" || pathname.startsWith("/projects/") },
     { href: "/ambassadors", label: ambassadorMessages[locale].title, current: pathname === "/ambassadors" },

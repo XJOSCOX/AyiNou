@@ -1,0 +1,46 @@
+{
+  "intro": {
+    "title": "Acerca de AyiNou",
+    "body": "Un espacio para que las personas haitianas en Haití y en la diáspora, junto con quienes las apoyan desde otros países, conviertan ideas compartidas en acciones comunitarias organizadas."
+  },
+  "what": {
+    "title": "¿Qué es AyiNou?",
+    "body": "AyiNou es una plataforma comunitaria centrada en la población haitiana. Ofrece un espacio para conectar, aprender unos de otros y colaborar más allá de las fronteras."
+  },
+  "mission": {
+    "title": "Nuestra misión",
+    "body": "Reunir a las personas para colaborar de manera pacífica, compartir conocimientos y llevar a cabo acciones concretas que respondan a las necesidades de sus comunidades."
+  },
+  "vision": {
+    "title": "Nuestra visión",
+    "body": "Queremos que la población haitiana, dentro y fuera del país, comparta conocimientos, tiempo y habilidades para convertir más ideas en proyectos con objetivos claros y avances visibles."
+  },
+  "why": {
+    "title": "Por qué existe AyiNou",
+    "body": "Las buenas ideas pueden perderse cuando las conversaciones, las personas voluntarias y los registros de los proyectos están dispersos. AyiNou reúne estos elementos para que las comunidades puedan hablar de una necesidad, organizarse y seguir los avances."
+  },
+  "members": {
+    "title": "Qué pueden hacer los miembros",
+    "body": "Los miembros pueden compartir novedades, participar en conversaciones constructivas, descubrir comunidades y organizaciones, seguir proyectos y encontrar oportunidades de voluntariado cuando estén disponibles. Quienes cumplan los requisitos también pueden participar en encuestas comunitarias."
+  },
+  "organizations": {
+    "title": "Organizaciones y colaboración comunitaria",
+    "body": "Los grupos comunitarios y las instituciones pueden presentar su trabajo y conectar con los miembros. Los perfiles de organizaciones y los proyectos comunitarios permiten explicar objetivos, identificar responsables y compartir avances."
+  },
+  "values": {
+    "title": "Nuestros valores",
+    "body": "Valoramos el diálogo pacífico, el respeto, la educación, el intercambio de conocimientos, la rendición de cuentas y la participación responsable. Animamos a las personas a explicar sus afirmaciones, citar sus fuentes y escuchar a quienes se ven afectados por las decisiones comunitarias."
+  },
+  "trust": {
+    "title": "Nuestro compromiso con la confianza y la privacidad",
+    "body": "Procuramos que los roles y las verificaciones sean claros, facilitar el reporte de problemas y proteger la información privada. AyiNou es independiente del gobierno y no sustituye a las instituciones públicas ni a sus servicios."
+  },
+  "future": {
+    "title": "El futuro de AyiNou",
+    "body": "A medida que la plataforma crezca, planeamos desarrollar herramientas para colaborar, coordinar el voluntariado e informar con transparencia. Aspiramos a constituir una organización independiente sin fines de lucro en Texas. AyiNou aún no se ha constituido legalmente ni ha recibido el reconocimiento del IRS conforme a la sección 501(c)(3)."
+  },
+  "contact": {
+    "title": "Contáctanos",
+    "body": "Para consultas generales sobre AyiNou, escribe a la dirección que aparece abajo. Evita enviar por correo electrónico convencional documentos sensibles de identidad, salud o finanzas."
+  }
+}

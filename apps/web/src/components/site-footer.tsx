@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchApiStatus } from "@/lib/api";
 import { messages } from "@/lib/i18n";
@@ -41,6 +42,7 @@ export function SiteFooter({ member = false }: { member?: boolean }) {
           <SiteBrand href="#top" />
           <p className="text-[var(--theme-body)]">{t.footer}</p>
         </div>
+        <Link href="/about" className="inline-flex min-h-11 items-center font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.about}</Link>
         <div className="text-[var(--theme-body)]" aria-live="polite">
           <p>{t.statusLabel} · {t[connection]}</p>
           {connection === "offline" && <p className="mt-1">{t.offlineHelp}</p>}
