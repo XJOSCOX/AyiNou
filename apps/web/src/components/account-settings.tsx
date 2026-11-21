@@ -15,6 +15,7 @@ import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { NotificationPreferencesPanel } from "./notifications";
 import { MemberSafetySettings } from "./member-safety";
+import { GovernanceInvitations } from "./platform-governance";
 
 const card = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
 const secondaryAction = "rounded-md border border-[var(--theme-button-border)] bg-[var(--theme-button)] px-3 py-2 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-button-hover)]";
@@ -83,6 +84,7 @@ export function AccountSettings() {
         </section>
         <NotificationPreferencesPanel />
         <MemberSafetySettings />
+        <GovernanceInvitations />
         <Link href="/settings/ambassadors" className={`${secondaryAction} justify-self-start`}>{ambassadorMessages[locale].myProgram}</Link>
         {failed ? (
           <div className={card}>

@@ -44,3 +44,8 @@ Source snapshot `e57d16740a56f2426ee83cc3300d724a7366dc53`. Coverage describes c
 This matrix was checked against write functions, tables, grant declarations, and route bindings in [migrations](../../supabase/migrations) and [Fastify routes](../../apps/api/src/routes). The listed function names and phase identifiers identify the source families and their replacements. [Architecture](../ARCHITECTURE.md) and [database notes](../DATABASE.md) provide cross-module context. Verify field-level grants and retention before onboarding a source to an audit projection.
 
 Founder Verified, the Early Partner Program, Organization Programs, medical referrals, payment/financial assistance integrations, radio and native apps remain planned. They have no implemented audit sources to list.
+
+
+## O5 administrative corrections and governance
+
+O5 uses the `private.platform_governance_events` ledger for correction consent and outcomes, proposals and independent decisions, target acceptance, scope provisioning and revocation, and claim hold placement and release. Preview reads are redacted and nonmutating. Effective expiry is determined by timestamp. See [O5 audit evidence](../organizations/O5_IMPLEMENTATION_REPORT.md#permissions-and-audit).

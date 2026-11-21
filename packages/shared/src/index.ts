@@ -4,6 +4,7 @@ export * from "./accounts";
 export * from "./institutions";
 export * from "./organization-onboarding";
 export * from "./founder-identity";
+export * from "./administration-governance";
 export * from "./ambassadors";
 export * from "./communities";
 export * from "./feed";

@@ -336,3 +336,8 @@ S1 establishes repository-wide [engineering standards](docs/standards/ENGINEERIN
 - [ ] Expanded community reporting, radio and media, and native mobile apps.
 
 These initiatives remain planned. [S1 implementation report](docs/standards/S1_IMPLEMENTATION_REPORT.md)
+
+
+## O5 administrative corrections and governance
+
+O5 adds auditable administrative corrections and governance proposals. Hosted migration rollout and approval of operational recovery remain separate milestones. See [O5 implementation](docs/organizations/O5_IMPLEMENTATION_REPORT.md).

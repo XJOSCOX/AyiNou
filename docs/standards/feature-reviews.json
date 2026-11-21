@@ -219,6 +219,178 @@
           "rolloutAndRollback": "Hosted dry run orders O2, O3, O4 without writes. Deploy matching API and client after the database postflight. Roll forward with a closed creation policy to preserve receipts and avoid reopening legacy paths."
         }
       ]
+    },
+    {
+      "id": "o5",
+      "report": "docs/organizations/O5_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/onboarding-corrections",
+          "contract": "GET /api/v1/me/onboarding-corrections - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Redacted read only."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "A different member cannot act on the subject's case. Acceptance requires recent MFA."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/onboarding-corrections",
+          "contract": "POST /api/v1/me/onboarding-corrections 4608 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The audit event and request receipt commit with the decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "A different member cannot act on the subject's case. Acceptance requires recent MFA."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/onboarding-corrections/:id/withdraw",
+          "contract": "POST /api/v1/me/onboarding-corrections/:id/withdraw 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The audit event and request receipt commit with the decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "A different member cannot act on the subject's case. Acceptance requires recent MFA."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/organization-onboarding/corrections",
+          "contract": "GET /api/v1/admin/organization-onboarding/corrections - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Redacted read only."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "Members with MFA lack administrator authority. Privileged decisions require scope and independence."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/organization-onboarding/:id/correction-preview",
+          "contract": "GET /api/v1/admin/organization-onboarding/:id/correction-preview - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Redacted read only."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "Members with MFA lack administrator authority. Privileged decisions require scope and independence."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/organization-onboarding/:id/corrections",
+          "contract": "POST /api/v1/admin/organization-onboarding/:id/corrections 1536 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The audit event and request receipt commit with the decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "Members with MFA lack administrator authority. Privileged decisions require scope and independence."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/governance",
+          "contract": "GET /api/v1/admin/governance - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Redacted read only."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "Members with MFA lack administrator authority. Privileged decisions require scope and independence."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/governance/proposals",
+          "contract": "POST /api/v1/admin/governance/proposals 1536 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The audit event and request receipt commit with the decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "Members with MFA lack administrator authority. Privileged decisions require scope and independence."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/governance/proposals/:id/actions",
+          "contract": "POST /api/v1/admin/governance/proposals/:id/actions 1536 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The audit event and request receipt commit with the decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "Members with MFA lack administrator authority. Privileged decisions require scope and independence."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/governance/claim-holds/:id",
+          "contract": "POST /api/v1/admin/governance/claim-holds/:id 1536 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The audit event and request receipt commit with the decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "Members with MFA lack administrator authority. Privileged decisions require scope and independence."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/governance-invitations",
+          "contract": "GET /api/v1/me/governance-invitations - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Redacted read only."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "A different member cannot act on the subject's case. Acceptance requires recent MFA."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/governance-invitations/:id/accept",
+          "contract": "POST /api/v1/me/governance-invitations/:id/accept 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The audit event and request receipt commit with the decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/administration-governance.spec.ts",
+            "denialScenario": "A different member cannot act on the subject's case. Acceptance requires recent MFA."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121050000_o5_administration_governance.sql",
+          "rlsAndGrants": "Private RLS tables and service-only RPC execution.",
+          "authorization": "Live session, recent MFA where privileged, assigned scope and independence enforced in SQL.",
+          "compatibility": "Preserves existing roles, ownership, verification and drafts. High-impact legacy actions close.",
+          "validation": "Disposable Supabase and Chromium tests plus hosted migration dry run.",
+          "rolloutAndRollback": "Apply in migration order then deploy API and web. Roll forward while retaining audit history and closed execution gates."
+        }
+      ]
     }
   ]
 }

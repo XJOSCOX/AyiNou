@@ -11,6 +11,7 @@ import { communityDirectoryMessages } from "./communities-i18n";
 import { groupMessages } from "./groups-i18n";
 import { communityDiscoveryMessages } from "./community-discovery-i18n";
 import { trustMessages } from "./trust-i18n";
+import { governanceMessages } from "./governance-i18n";
 import { ambassadorMessages } from "./ambassador-i18n";
 import { organizationRoleMessages } from "./organization-role-i18n";
 import { projectMessages } from "./project-i18n";
@@ -33,6 +34,8 @@ export function localizedApiError(locale: Locale, cause: unknown) {
   const code = apiErrorCode(cause);
   const safety = safetyMessages[locale];
   switch (code) {
+    case "GOVERNANCE_REQUIRED": return governanceMessages[locale].protectedRole;
+    case "CLAIM_APPROVAL_HELD": return governanceMessages[locale].claimHeld;
     case "COMMUNITY_UNAVAILABLE": return communityDirectoryMessages[locale].unavailable;
     case "COMMUNITY_MEMBERSHIP_REQUIRED": return communityDirectoryMessages[locale].membership;
     case "COMMUNITY_RECOMMENDATIONS_EXPIRED": return communityDiscoveryMessages[locale].expired;

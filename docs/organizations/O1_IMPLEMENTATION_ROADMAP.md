@@ -14,3 +14,8 @@ O1 documents the baseline and proposed design. Each later phase requires separat
 For O4, enumerate callers of institution write, read, directory, follow, representative and logo RPCs before migration. Deploy compatible server responses and gated write handlers, then expose the wizard. Keep read-only access to old intents and verified provenance if a rollout is paused. Rollback should disable new actions before restoring a compatible prior application version; never erase case history or silently restore an old ungated create path. Treat grants, partner participation and retained drafts as separate records with approved retention and safe deletion handling.
 
 Read the [architecture](O1_ONBOARDING_ARCHITECTURE.md), [capability matrix](O1_CAPABILITY_MATRIX.md), [threat tests](O1_SECURITY_THREAT_MODEL.md) and [owner approvals](O1_OWNER_DECISION_BRIEF.md) before promotion.
+
+
+## O5 administrative corrections and governance
+
+O5 implements correction and governance foundations in code. O2 through O5 hosted deployment requires separate approval, and O6 requires its own program decisions. See [O5 implementation](O5_IMPLEMENTATION_REPORT.md).

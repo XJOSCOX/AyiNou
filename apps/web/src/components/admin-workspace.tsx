@@ -21,11 +21,14 @@ import { LegalAdminPanel } from "./legal-admin-panel";
 import { legalAdminMessages } from "@/lib/legal-admin-i18n";
 import { founderMessages } from "@/lib/founder-i18n";
 import { FounderIdentityPanel } from "./founder-identity";
+import { AdminOnboardingCorrections } from "./onboarding-corrections";
+import { PlatformGovernance } from "./platform-governance";
+import { governanceMessages } from "@/lib/governance-i18n";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
-type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder";
-const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder"];
+type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance";
+const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder", "corrections", "governance"];
 
 export function AdminWorkspace() {
   const [locale] = useLocale();
@@ -43,7 +46,7 @@ export function AdminWorkspace() {
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">
             {tabs.map((section) => <button key={section} type="button" aria-pressed={tab === section} onClick={() => setTab(section)}
               className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">
-              {section === "trust" ? trustMessages[locale].trustWorkspace : section === "ambassadors" ? ambassadorMessages[locale].title : section === "legal" ? legalAdminMessages[locale].title : section === "founder" ? founderMessages[locale].adminTitle : t[section]}</button>)}
+              {section === "trust" ? trustMessages[locale].trustWorkspace : section === "ambassadors" ? ambassadorMessages[locale].title : section === "legal" ? legalAdminMessages[locale].title : section === "founder" ? founderMessages[locale].adminTitle : section === "governance" || section === "corrections" ? governanceMessages[locale][section] : t[section]}</button>)}
             {access.data?.reviewer && <Link className={institutionLink} href="/verification/review">{t.reviewWorkspace}</Link>}
           </nav>
           {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -58,6 +61,8 @@ export function AdminWorkspace() {
           {tab === "ambassadors" && <AmbassadorAdministration />}
           {tab === "legal" && <LegalAdminPanel />}
           {tab === "founder" && <FounderIdentityPanel admin />}
+          {tab === "corrections" && <AdminOnboardingCorrections />}
+          {tab === "governance" && <PlatformGovernance />}
         </>}
     </div>
   </MemberShell>;
@@ -141,7 +146,8 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
 function AccountAction({ account, onChange }: { account: AdminAccount; onChange: () => void }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
-  const [kind, setKind] = useState<"status" | "roles">("status");
+  const protectedAccount = account.roles.includes("administrator");
+  const [kind, setKind] = useState<"status" | "roles">(protectedAccount ? "roles" : "status");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
@@ -167,21 +173,20 @@ function AccountAction({ account, onChange }: { account: AdminAccount; onChange:
   return <form onSubmit={submit} className="mt-3 grid gap-3 border-t border-[var(--theme-border)] pt-3 sm:max-w-xl" aria-busy={busy}>
     <label className="text-sm font-semibold">{t.action}
       <select className={institutionField} value={kind} disabled={busy} onChange={(event) => setKind(event.target.value === "roles" ? "roles" : "status")}>
-        <option value="status">{t.changeStatus}</option><option value="roles">{t.changeRole}</option>
+        {!protectedAccount && <option value="status">{t.changeStatus}</option>}<option value="roles">{t.changeRole}</option>
       </select>
     </label>
     <label className="text-sm font-semibold">{t.value}
       <select key={kind} className={institutionField} name="value" required defaultValue="" disabled={busy}>
         <option value="" disabled>{t.select}</option>
         {kind === "status" ? statuses.filter((status) => status !== account.status).map((status) =>
-          <option key={status} value={status}>{t[status]}</option>) : platformRoles.map((role: PlatformRole) =>
-          <option key={role} value={role} disabled={!account.roles.includes(role) && (!account.totp || (role === "administrator" && !account.verified))}>
+          <option key={status} value={status}>{t[status]}</option>) : platformRoles.filter((role) => role !== "administrator").map((role: PlatformRole) =>
+          <option key={role} value={role} disabled={!account.roles.includes(role) && !account.totp}>
             {account.roles.includes(role) ? t.revoke : t.grant} · {t[role]}
           </option>)}
       </select>
     </label>
-    {kind === "roles" && !account.verified && !account.roles.includes("administrator") &&
-      <p className="text-sm text-[var(--theme-body)]">{t.adminVerificationRequired}</p>}
+    <p className="text-sm text-[var(--theme-body)]">{governanceMessages[locale].protectedRole}</p>
     <label className="text-sm font-semibold">{t.reason}
       <input name="reason" className={institutionField} required minLength={10} maxLength={500} disabled={busy} placeholder={t.reasonHelp} />
     </label>

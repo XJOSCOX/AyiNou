@@ -17,7 +17,7 @@ const save = command.extend({
 }).refine(({ id, expectedVersion }) => (id === null) === (expectedVersion === 0));
 
 const handle = z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9-]{2,39}$/);
-const draft = z.discriminatedUnion("mode", [
+export const organizationSetupDraft = z.discriminatedUnion("mode", [
   z.strictObject({
     mode: z.literal("new"),
     handle: handle.optional(),
@@ -70,7 +70,7 @@ export function registerOrganizationOnboarding(app: FastifyInstance, auth: AuthV
   });
   app.put(base + "/:id/details", { bodyLimit: 4096 }, (request) => {
     const { id } = z.strictObject({ id: z.uuid() }).parse(request.params);
-    const input = command.extend({ draft }).parse(request.body);
+    const input = command.extend({ draft: organizationSetupDraft }).parse(request.body);
     return call<OrganizationSetupReceipt>(request, "organization_setup_command_for_api", {
       p_id: id, p_action: "save_details", p_expected: input.expectedVersion, p_request: input.requestId, p_payload: input.draft,
     });

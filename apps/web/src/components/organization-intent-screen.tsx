@@ -13,6 +13,7 @@ import { institutionAction, institutionCard, institutionLink } from "./instituti
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { OrganizationSetupPanel } from "./organization-setup-panel";
+import { MemberOnboardingCorrections } from "./onboarding-corrections";
 
 const path = "/api/v1/me/organization-onboarding";
 type Command = {
@@ -147,6 +148,7 @@ export function OrganizationIntentScreen({ subject, profileComplete, claim }: { 
         </section>
         {!sessionLost && profileComplete && intent !== undefined && <OrganizationSetupPanel subject={subject} intent={intent} claim={claim}
           onReceipt={(receipt) => setIntent((current) => receipt.result ? null : current && { ...current, version: receipt.version, stage: "drafting" })} />}
+        {!sessionLost && intent !== undefined && <MemberOnboardingCorrections subject={subject} intent={intent} refreshSetup={reload} />}
       </div>
     </MemberShell>
   );

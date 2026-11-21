@@ -15,8 +15,11 @@ GET /api/v1/admin/accounts - -
 GET /api/v1/admin/ambassadors - -
 GET /api/v1/admin/audit - -
 GET /api/v1/admin/founder-identity - -
+GET /api/v1/admin/governance - -
 GET /api/v1/admin/legal - -
 GET /api/v1/admin/legal/audit - -
+GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
+GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
 GET /api/v1/admin/privacy-requests/* 512 -
 GET /api/v1/admin/safety - -
@@ -58,6 +61,7 @@ GET /api/v1/me/community-recommendation-settings - -
 GET /api/v1/me/feed-moderation - -
 GET /api/v1/me/following - -
 GET /api/v1/me/founder-identity - -
+GET /api/v1/me/governance-invitations - -
 GET /api/v1/me/institution-accounts - -
 GET /api/v1/me/member-code - -
 GET /api/v1/me/moderation-appeals - -
@@ -65,6 +69,7 @@ GET /api/v1/me/muted - -
 GET /api/v1/me/notification-preferences - -
 GET /api/v1/me/notifications - -
 GET /api/v1/me/notifications/unread-count - -
+GET /api/v1/me/onboarding-corrections - -
 GET /api/v1/me/organization-onboarding - -
 GET /api/v1/me/organization-onboarding/matches - -
 GET /api/v1/me/organization-onboarding/setup - -
@@ -127,8 +132,11 @@ HEAD /api/v1/admin/accounts - onSend
 HEAD /api/v1/admin/ambassadors - onSend
 HEAD /api/v1/admin/audit - onSend
 HEAD /api/v1/admin/founder-identity - onSend
+HEAD /api/v1/admin/governance - onSend
 HEAD /api/v1/admin/legal - onSend
 HEAD /api/v1/admin/legal/audit - onSend
+HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
+HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend
 HEAD /api/v1/admin/privacy-requests/* 512 onSend
 HEAD /api/v1/admin/safety - onSend
@@ -170,6 +178,7 @@ HEAD /api/v1/me/community-recommendation-settings - onSend
 HEAD /api/v1/me/feed-moderation - onSend
 HEAD /api/v1/me/following - onSend
 HEAD /api/v1/me/founder-identity - onSend
+HEAD /api/v1/me/governance-invitations - onSend
 HEAD /api/v1/me/institution-accounts - onSend
 HEAD /api/v1/me/member-code - onSend
 HEAD /api/v1/me/moderation-appeals - onSend
@@ -177,6 +186,7 @@ HEAD /api/v1/me/muted - onSend
 HEAD /api/v1/me/notification-preferences - onSend
 HEAD /api/v1/me/notifications - onSend
 HEAD /api/v1/me/notifications/unread-count - onSend
+HEAD /api/v1/me/onboarding-corrections - onSend
 HEAD /api/v1/me/organization-onboarding - onSend
 HEAD /api/v1/me/organization-onboarding/matches - onSend
 HEAD /api/v1/me/organization-onboarding/setup - onSend
@@ -271,7 +281,11 @@ PATCH /api/v1/verification/review/:id/work 256 -
 POST /api/v1/admin/ambassadors 6000 -
 POST /api/v1/admin/founder-identity 1024 -
 POST /api/v1/admin/founder-identity/:id/actions 1024 -
+POST /api/v1/admin/governance/claim-holds/:id 1536 -
+POST /api/v1/admin/governance/proposals 1536 -
+POST /api/v1/admin/governance/proposals/:id/actions 1536 -
 POST /api/v1/admin/legal/actions 4096 -
+POST /api/v1/admin/organization-onboarding/:id/corrections 1536 -
 POST /api/v1/admin/privacy-requests/* 512 -
 POST /api/v1/affiliation-invitations/:id/:action 256 -
 POST /api/v1/comments/:id/reports 4096 -
@@ -291,7 +305,10 @@ POST /api/v1/institutions/:id/roles 4096 -
 POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
 POST /api/v1/me/founder-identity/:id/actions 1024 -
+POST /api/v1/me/governance-invitations/:id/accept 512 -
 POST /api/v1/me/notifications/read-all 1024 -
+POST /api/v1/me/onboarding-corrections 4608 -
+POST /api/v1/me/onboarding-corrections/:id/withdraw 512 -
 POST /api/v1/me/organization-onboarding/:id/change-path 1024 -
 POST /api/v1/me/organization-onboarding/:id/complete 4096 -
 POST /api/v1/me/post-media 4200000 onRequest

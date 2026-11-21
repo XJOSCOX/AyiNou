@@ -207,3 +207,8 @@ Founder-specific authority and proof receipts sit behind service-only SQL and us
 ## O4 organization setup boundary
 
 One canonical SQL completion command binds the live personal identity, intent version and authority declaration. It either creates the ordinary organization with its initial owner and audit or invokes the independent existing claim procedure. Legacy create and direct claim calls fail closed. Institution registration declarations use private role-scoped projections only. [O4 implementation](organizations/O4_IMPLEMENTATION_REPORT.md)
+
+
+## O5 administrative corrections and governance
+
+O5 adds scoped member-confirmed onboarding corrections and independent platform governance decisions through service-only RPCs. The existing account roles retain their purpose. The governance ledger cannot activate high-impact changes. See [O5 implementation](organizations/O5_IMPLEMENTATION_REPORT.md).

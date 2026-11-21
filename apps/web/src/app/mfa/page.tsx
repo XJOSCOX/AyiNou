@@ -9,7 +9,7 @@ export default async function MfaPage({ searchParams }: { searchParams: Promise<
   const requested = typeof search.next === "string" ? search.next : "";
   const privileged = requested === "/admin" || requested === "/verification/review" || requested === "/feed/moderation"
     || requested === "/projects/review"
-    || requested === "/settings/privacy-requests"
+    || requested === "/settings" || requested === "/settings/privacy-requests"
     || requested === "/polls/new"
     || /^\/polls\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(requested)
     || /^\/projects\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/work$/i.test(requested)

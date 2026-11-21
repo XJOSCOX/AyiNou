@@ -100,7 +100,7 @@ function ReviewCard({ item, refresh }: { item: ReviewApplication; refresh: () =>
       </button>}
       {failed !== null && (failed instanceof Error && failed.message === "MFA_REQUIRED"
         ? <AdminFeedback error={failed} next="/verification/review" />
-        : <p role="alert" className={institutionErrorBox}>{failed instanceof Error && failed.message === "VERIFICATION_ASSIGNMENT_REQUIRED"
+        : <p role="alert" className={institutionErrorBox}>{failed instanceof Error && ["VERIFICATION_ASSIGNMENT_REQUIRED", "CLAIM_APPROVAL_HELD"].includes(failed.message)
           ? localizedApiError(locale, failed) : institutionError(t, failed)}</p>)}
       {item.assignmentRequired && !item.assignedToMe && <p className="mt-2 text-sm">{trustMessages[locale].assignmentRequired}</p>}
       {item.eligibleReviewers != null && item.eligibleReviewers < 2 && item.status === "pending" &&

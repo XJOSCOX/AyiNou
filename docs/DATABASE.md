@@ -792,3 +792,8 @@ Migration `20261121020000_o2_organization_intents.sql` creates private signup ch
 ## O4 organization setup
 
 `20261121040000_o4_organization_setup.sql` extends institutions, O2 intents and the institution ledger. Organizations use a private claimed registration state and version. Completed intent receipts are retained separately from open drafts. SQL locks and current reviewed identity guard decisive writes and claim approvals, and the existing reviewer flow handles ownership transfer. [Database and API details](organizations/O4_IMPLEMENTATION_REPORT.md)
+
+
+## O5 administrative corrections and governance
+
+O5 adds six private RLS tables for onboarding correction consent, the governance singleton, scope grants, proposals, claim holds and transactional events. The additive migration follows O4. See [O5 data model and API](organizations/O5_IMPLEMENTATION_REPORT.md#data-model-and-api).

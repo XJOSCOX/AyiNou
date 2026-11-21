@@ -135,3 +135,8 @@ Exercise founder proof and grant only in the disposable Chromium suite. The host
 ## O4 migration and deployment
 
 The hosted release sequence is O2, O3, then O4 after separate authorization. Verify live identity rules, empty founder activation, legacy management roles, and the closed SQL create/claim routes before deploying the matching API and UI. Roll forward with the legacy guard in place to avoid opening creation during recovery. [O4 rollout](organizations/O4_IMPLEMENTATION_REPORT.md)
+
+
+## O5 administrative corrections and governance
+
+Verify the hosted O2 through O5 migration order read-only before any authorized rollout. Apply with separate production approval and deploy matching API and web. Recovery and high-impact execution remain closed. See [O5 operations](organizations/O5_IMPLEMENTATION_REPORT.md#documentation-and-operations).

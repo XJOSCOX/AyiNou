@@ -56,6 +56,8 @@
     "CommunityStaffRole": "type:52aa4054e448eaf0ab689636b152828efebd80500ecf79a7a687cea9e97e9777",
     "communityStaffRoles": "value:34ef652e7ce0ad58b36cb4275e94044d9c48d12a15a02684d860a0cfba5483d2",
     "CommunityStats": "type:f0817cb466f1990ae0a6aa2a84247d933c163bca45ed602691ad96f368e3ad10",
+    "CorrectionPreview": "type:5c0daa36537809cb67a8ddceee30b903b04894061b8ab44d0bc9949273fe2b00",
+    "CorrectionQueue": "type:a6dbaebcae4f81f9c253a64659a5286968705a4ced45103951a76866d182420a",
     "Department": "type:1090f2a84d345ae4e8f0d32a713e0887c40a9b2df8af234b09a75b66f55b3f21",
     "DepartmentCommunity": "type:1d85fe96df7c6736d6b60fb08f92d63bde7f69cfc87a9fa30d6c3bed85c96c28",
     "departmentCommunityContent": "value:67bd3fedac063db9ef8e7701eeca5d6ea8ca7a7718beb00bc368554be2b77a01",
@@ -89,6 +91,10 @@
     "founderReviewActions": "value:912ce6c4ff2ddac6b980362e28bfbf838f9565a4ec89d2922a07ceb0120c19a4",
     "FounderReviewCase": "type:99f0211faa13da008f32c2d08950ca8ec22bbcb992cfc7e73f1904b059fb1f01",
     "futureOrganizationPermissions": "value:18ab1c44d090af09f19489adc03ea5b63977a6570a7091cbce1e0d58971b5092",
+    "GovernanceProposal": "type:e047c08e578289403fbcf4a0853d1c516b341081fd2f0df9b84c7d6dd8155d0d",
+    "GovernanceProposalKind": "type:56c4438d2800827faad89124af0d9efa8c19202f56e3f0225981618c7cea48d3",
+    "governanceProposalKinds": "value:67fa469ade2c360094eff122642d774cef98665e7f9930b8145c0da69fe12cd2",
+    "GovernanceStatus": "type:6fdcb98b7a302dd821636872fcd3ec38a115335029d0d247f9e7c84d17c0130f",
     "governmentKinds": "value:85ac07d20c53c0cca771cfabf292548ea2a6d96ac2351ebec7a4a689ee5ef39b",
     "GroupInvitation": "type:34f98d2790c0a0b4037b373f12261817bb4f7de08715117cf5110b64f72fbd72",
     "GroupKind": "type:903fc8e6cf3beb76db2408edfabae2d0dd5562114e738f82f7b4aad16c60a863",
@@ -134,6 +140,8 @@
     "NotificationPage": "type:c5f0a7c9792b4f9a5c960ca07de7025fe40127c8a6278197514bdab5e617ae5c",
     "notificationPreferenceKeys": "value:d83761769909fe78d92c1747d6fcc55b02f9fe31673e6433a15716964c0026db",
     "NotificationPreferences": "type:66ca9d9036b99c9fc012d347f4a5b6d917ca0a4746f9b395f0cafe464ad5f788",
+    "OnboardingCorrection": "type:65b03edd412d27be32645970e376f3c3df88dfd19d787452bbf7bcab412bb78f",
+    "OnboardingCorrectionRequest": "type:3e7a703bb9fe9a3c6a7cff032277ae1d477c60a2a6b68ee6d7224263766d46e2",
     "OperationalOrganization": "type:36aae11e957f1068123d1fa7e7ee46c60adc9a45470e9947d47498f21c192506",
     "OrganizationCustomRole": "type:2e02c50812007acbf22f7c5166167811f7820bbef870f8d98d0e782489b11491",
     "OrganizationIntentReceipt": "type:0c59badbff381457d5fac18b95b3bdd03d57e35c3fcfed0ffbec8a9985315b32",
@@ -399,6 +407,14 @@
       "recruitment.manage",
       "finance.reports",
       "announcements.publish"
+    ],
+    "governanceProposalKinds": [
+      "appoint",
+      "revoke",
+      "suspend",
+      "succession",
+      "distributed",
+      "recovery"
     ],
     "governmentKinds": [
       "municipality",

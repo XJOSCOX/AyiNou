@@ -121,3 +121,8 @@ Founder Verified is a separate designation for confirmation of identity and Ayin
 ## Organization registration and authority
 
 Members can resume a private organization draft, review public matches, and confirm authority to create an ordinary organization or request an existing organization claim. Independently reviewed identity is required to finish. A new organization appears as unverified, and registered, informal or pursuing status is a private declaration. An existing claim remains pending until independently approved. [O4 workflow](organizations/O4_IMPLEMENTATION_REPORT.md)
+
+
+## O5 administrative corrections and governance
+
+Members can authorize an exact organization draft correction, withdraw consent and view its receipt. Administrators can address eligible drafts and record protected cases. The Governance tab records independent decisions and explains closed operational actions. See [O5 implementation](organizations/O5_IMPLEMENTATION_REPORT.md).
