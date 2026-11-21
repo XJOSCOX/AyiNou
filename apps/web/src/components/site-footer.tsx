@@ -1,51 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { fetchApiStatus } from "@/lib/api";
 import { messages } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
-import { SiteBrand } from "./site-brand";
+import { publicContactEmail } from "@/lib/public-contact";
 
-type Connection = "checking" | "online" | "offline";
-type ResolvedConnection = Exclude<Connection, "checking">;
-let lastCheck: { result: ResolvedConnection; expires: number } | undefined;
-let pendingCheck: Promise<ResolvedConnection> | undefined;
-
-function checkConnection() {
-  if (lastCheck && Date.now() < lastCheck.expires) return Promise.resolve(lastCheck.result);
-  pendingCheck ??= fetchApiStatus(AbortSignal.timeout(5000))
-    .then(() => "online" as const, () => "offline" as const)
-    .then((result) => {
-      lastCheck = { result, expires: Date.now() + (result === "online" ? 30_000 : 5000) };
-      return result;
-    })
-    .finally(() => { pendingCheck = undefined; });
-  return pendingCheck;
-}
+const footerLink = "inline-flex min-h-11 items-center font-semibold text-[var(--theme-link)] underline-offset-4 hover:underline focus-visible:underline";
 
 export function SiteFooter({ member = false }: { member?: boolean }) {
   const [locale] = useLocale();
   const t = messages[locale];
-  const [connection, setConnection] = useState<Connection>("checking");
-
-  useEffect(() => {
-    let cancelled = false;
-    void checkConnection().then((result) => { if (!cancelled) setConnection(result); });
-    return () => { cancelled = true; };
-  }, []);
+  const layout = member ? "px-4 sm:px-6 xl:px-10" : "mx-auto max-w-[1500px] px-4 sm:px-8";
 
   return (
-    <footer className="border-t border-[var(--theme-border)] bg-[var(--theme-surface)]">
-      <div className={`flex w-full flex-wrap items-center gap-x-6 gap-y-3 py-4 text-sm ${member ? "px-4 sm:px-6 xl:px-10" : "mx-auto max-w-[1500px] px-4 sm:px-8"}`}>
-        <div className="flex min-w-0 flex-1 basis-64 flex-wrap items-center gap-x-4 gap-y-2">
-          <SiteBrand href="#top" />
-          <p className="text-[var(--theme-body)]">{t.footer}</p>
+    <footer className="border-t border-[var(--theme-border)] bg-[var(--theme-surface)] text-[var(--theme-text)]">
+      <div className={`flex w-full flex-wrap items-center justify-between gap-x-8 gap-y-2 py-5 sm:py-6 ${layout}`}>
+        <div className="min-w-0">
+          <p className="font-bold tracking-tight">AyiNou</p>
+          <p className="mt-1 max-w-[60ch] text-sm text-[var(--theme-body)]">{t.footer}</p>
         </div>
-        <Link href="/about" className="inline-flex min-h-11 items-center font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.about}</Link>
-        <div className="text-[var(--theme-body)]" aria-live="polite">
-          <p>{t.statusLabel} · {t[connection]}</p>
-          {connection === "offline" && <p className="mt-1">{t.offlineHelp}</p>}
+        <div className="flex flex-wrap items-center gap-x-5 text-sm">
+          <Link href="/about" className={footerLink}>{t.about}</Link>
+          <a href={`mailto:${publicContactEmail}`} className={footerLink}>{publicContactEmail}</a>
         </div>
       </div>
     </footer>

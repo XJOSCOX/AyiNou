@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "@/lib/locale-store";
+import { publicContactEmail } from "@/lib/public-contact";
 import en from "@/messages/about/en.json";
 import es from "@/messages/about/es.json";
 import fr from "@/messages/about/fr.json";
@@ -8,7 +9,6 @@ import ht from "@/messages/about/ht.json";
 
 const copy = { en, es, fr, ht };
 const sections = ["what", "mission", "vision", "why", "members", "organizations", "values", "trust", "future"] as const;
-const email = "contact@ayinou.com";
 
 export function AboutContent() {
   const [locale] = useLocale();
@@ -30,8 +30,8 @@ export function AboutContent() {
       <section className="rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6">
         <h2 className="text-xl font-semibold">{t.contact.title}</h2>
         <p className="mt-2 max-w-[68ch] leading-relaxed text-[var(--theme-body)]">{t.contact.body}</p>
-        <a href={`mailto:${email}`} className="mt-2 inline-flex min-h-11 items-center font-semibold text-[var(--theme-link)] underline underline-offset-4">
-          {email}
+        <a href={`mailto:${publicContactEmail}`} className="mt-2 inline-flex min-h-11 items-center font-semibold text-[var(--theme-link)] underline underline-offset-4">
+          {publicContactEmail}
         </a>
       </section>
     </div>

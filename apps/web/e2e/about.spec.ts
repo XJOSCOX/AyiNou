@@ -24,8 +24,11 @@ test("About is a standalone public page with localized content and a reachable c
     await page.setViewportSize({ width, height: 800 });
     await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   }
-  const contact = page.getByRole("link", { name: "contact@ayinou.com", exact: true });
+  const contact = page.getByRole("main").getByRole("link", { name: "contact@ayinou.com", exact: true });
   await expect(contact).toHaveAttribute("href", "mailto:contact@ayinou.com");
+  const footer = page.getByRole("contentinfo");
+  await expect(footer.locator("img")).toHaveCount(0);
+  await expect(footer.getByRole("link", { name: "contact@ayinou.com" })).toHaveAttribute("href", "mailto:contact@ayinou.com");
   await page.getByRole("main").locator("h1").click();
   await page.keyboard.press("Tab");
   await expect(contact).toBeFocused();
