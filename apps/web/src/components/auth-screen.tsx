@@ -4,7 +4,8 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Factor } from "@supabase/supabase-js";
-import { referralCodePattern } from "@ayinou/shared";
+import { referralCodePattern, type SignupPath } from "@ayinou/shared";
+import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { AuthShell } from "./auth-shell";
 import { accountMessages } from "@/lib/account-i18n";
 import { validateReferralCode } from "@/lib/api";
@@ -41,6 +42,8 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [referral, setReferral] = useState(initialReferral);
+  const [signupPath, setSignupPath] = useState<SignupPath>("individual");
+  const signup = organizationOnboardingMessages[locale];
   const [visiblePassword, setVisiblePassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<keyof typeof errors | "">("");
@@ -92,6 +95,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
             data: {
               display_name: displayName.trim(), preferred_locale: locale, first_name: firstName.trim(), last_name: lastName.trim(),
+              signup_path: signupPath,
               ...(code ? { referral_code: code } : {}),
             },
           },
@@ -159,6 +163,20 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
         <Link href="/login" className={`${primaryActionClass} mt-6 block text-center`}>{t.backLogin}</Link>
       ) : (
         <form onSubmit={submit} className={`mt-6 ${mode === "register" ? "space-y-4" : "space-y-5"}`} aria-busy={loading} noValidate>
+          {mode === "register" && (
+            <fieldset className="grid min-w-0 gap-2" disabled={loading} aria-describedby="signup-path-help">
+              <legend className="mb-2 font-semibold">{signup.choice}</legend>
+              {(["individual", "organization"] as const).map((path) => (
+                <label key={path} className="flex cursor-pointer items-start gap-3 rounded-md border border-[var(--theme-border)] p-3 has-checked:bg-[var(--theme-control)]">
+                  <input type="radio" name="signup-path" value={path} checked={signupPath === path}
+                    onChange={() => setSignupPath(path)} className="mt-1" />
+                  <span><strong className="block">{signup[path]}</strong>
+                    <span className="block text-sm text-[var(--theme-body)]">{signup[`${path}Help`]}</span></span>
+                </label>
+              ))}
+              <p id="signup-path-help" className="text-sm text-[var(--theme-body)]">{signup.explanation}</p>
+            </fieldset>
+          )}
           {mode === "register" && (
             <>
               <div className="grid gap-4 sm:grid-cols-2">

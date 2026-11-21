@@ -11,6 +11,7 @@ import { discoveryMessages } from "@/lib/discovery-i18n";
 import { createInstitution, loadInstitutionAccounts, resolveInvitation } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionStatus, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -41,6 +42,7 @@ export function InstitutionHub() {
     <MemberShell>
       <div className="grid gap-5">
         <PageHeader title={t.institutions} description={t.institutionsIntro} actions={<>
+          <Link className={institutionLink} href="/organization-onboarding">{organizationOnboardingMessages[locale].resume}</Link>
           <Link className={institutionLink} href="/discover?view=institutions">{discoveryMessages[locale].viewAll}</Link>
           {!creating && <button type="button" className={institutionAction} onClick={() => setCreating(true)}>{t.create}</button>}
         </>} />

@@ -14,6 +14,7 @@ import { browserSupabase } from "@/lib/supabase/browser";
 import { type MemberProfile, type Department, type MembershipCategory, type InterestCode, type ProfileChanges, interestCodes } from "@ayinou/shared";
 import Image from "next/image";
 import Link from "next/link";
+import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
@@ -130,6 +131,7 @@ export function ProfileEditor({ profile, departments, onboarding }: {
       <p className="mt-6 text-sm text-[var(--theme-body)]">{m.upcoming}</p>
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <Link className={action} href="/dashboard">{m.stats}</Link>
+        <Link className="font-semibold text-[var(--theme-link)] underline" href="/organization-onboarding">{organizationOnboardingMessages[locale].resume}</Link>
         <Link className="font-semibold text-[var(--theme-link)] underline" href="/profile">{t.myProfile}</Link>
       </div>
     </>
