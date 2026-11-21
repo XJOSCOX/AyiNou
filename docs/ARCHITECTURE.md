@@ -1,5 +1,7 @@
 # Technical Architecture — Hosted Supabase Development
 
+The platform recognizes one Founder from trusted bootstrap provenance and preserves separate scopes for ordinary administration, institutional roles, and independent review. Founder verification and independent identity review use separately assigned authority and distinct proof. The optional member supersession choice binds a pending application revision, and the Founder grant commits any authorized closure and its audit entries atomically. [Founder verification policy](organizations/FOUNDER_VERIFICATION_POLICY_UPDATE.md)
+
 ```text
 Browser → Next.js App Router (localhost:4000, ht/fr/en/es)
    │         │ Supabase SSR cookies, PKCE callback, refresh

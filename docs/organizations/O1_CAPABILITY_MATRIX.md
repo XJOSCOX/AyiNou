@@ -16,6 +16,8 @@ The table describes O4 behavior and prospective founder parity for new onboardin
 | Volunteer coordination | Existing permitted roles | Same | May qualify for reviewed-identity roles | Project execution rules, consent, scope and sensitive task checks |
 | High-trust institutional representation | No FV/IV substitution | No FV substitution | May qualify | Current reviewed/approved representative relationship and organization safeguards |
 
+A Founder grant can supersede a pending regular identity application only with the member’s application-specific consent and a matching revision. Closure carries Founder provenance and does not change this capability matrix. A Founder acting as an ordinary reviewer uses an independent reviewer and work assignment. [Supersession policy](FOUNDER_VERIFICATION_POLICY_UPDATE.md)
+
 ## SQL and authorization inventory
 
 - **Enforced in O4:** `private.organization_setup_identity_eligible` gates the canonical completion RPC and claim approvals. The former institution create branch and legacy claim submission are closed. Authority declarations and registration are private. Future FV parity has its own closed SQL gate. [Implementation report](O4_IMPLEMENTATION_REPORT.md)

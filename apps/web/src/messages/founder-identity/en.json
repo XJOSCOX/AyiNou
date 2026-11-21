@@ -1,4 +1,20 @@
 {
+  "verificationPaths": "Founder Verified confirms identity and account control through the founding administrator. Identity Verified requires approval from two eligible independent reviewers.",
+  "supersessionExplanation": "If granted, Founder Verified has different privileges from independently reviewed identity. You can close your pending identity application and keep its history, or leave it open for independent review.",
+  "supersessionChoice": "Close this pending application if Founder Verified is granted.",
+  "regularApplication": "Regular identity application",
+  "supersessionAgreed": "Member agreed to close this application.",
+  "supersessionNotAgreed": "Member has not agreed to close this application.",
+  "supersessionReady": "The current application can be closed when the Founder designation is granted.",
+  "supersededMemberNotice": "Your previous identity verification application was closed because you accepted Founder Verified. It was not independently approved.",
+  "supersessionResults": {
+    "no_consent": "The application was kept open or no eligible application was present.",
+    "superseded_by_founder_verification": "Superseded by Founder Verified with the member’s consent.",
+    "application_completed": "The application already received a decision.",
+    "stale_application": "The application or its review changed after consent.",
+    "application_held": "An active hold prevents closing this application."
+  },
+  "founderIssuanceOnly": "Only the Founder can issue this designation after all verification requirements are met.",
   "activeCases": "Active cases",
   "caseHistory": "Case history",
   "lastUpdated": "Last updated",
@@ -39,6 +55,7 @@
     "withdrawn": "Consent withdrawn"
   },
   "actions": {
+    "supersede": "Close my regular identity application",
     "open": "Case opened",
     "consent": "Give consent",
     "visibility": "Save visibility",
@@ -61,6 +78,7 @@
     "corrected": "The earlier decision was corrected."
   },
   "prompts": {
+    "supersede": "Confirm closing this pending application because you accepted Founder Verified. Its history will be preserved and its independent review will end.",
     "consent": "Confirm your choice to proceed with this founder review.",
     "withdraw": "Withdraw your consent and remove any public Founder Verified designation?",
     "correction": "Request independent review of this decision?"

@@ -1,4 +1,20 @@
 {
+  "verificationPaths": "Founder Verified confirme l’identité et le contrôle du compte par l’administrateur fondateur. La vérification d’identité indépendante exige l’approbation de deux examinateurs indépendants habilités.",
+  "supersessionExplanation": "La distinction Founder Verified ouvre des droits différents de ceux de la vérification d’identité indépendante. Vous pouvez clore votre demande d’identité en conservant son historique, ou poursuivre l’examen indépendant.",
+  "supersessionChoice": "Clore cette demande en cours si la distinction Founder Verified m’est attribuée.",
+  "regularApplication": "Demande de vérification d’identité ordinaire",
+  "supersessionAgreed": "Le membre a accepté la clôture de cette demande.",
+  "supersessionNotAgreed": "Le membre n’a pas accepté la clôture de cette demande.",
+  "supersessionReady": "La demande actuelle peut être clôturée lors de l’attribution de la distinction Founder Verified.",
+  "supersededMemberNotice": "Votre demande précédente de vérification d’identité a été clôturée parce que vous avez accepté la distinction Founder Verified. Elle n’a pas été approuvée par des examinateurs indépendants.",
+  "supersessionResults": {
+    "no_consent": "La demande est restée ouverte ou aucune demande admissible n’était présente.",
+    "superseded_by_founder_verification": "Demande remplacée par Founder Verified avec le consentement du membre.",
+    "application_completed": "Une décision a déjà été rendue sur la demande.",
+    "stale_application": "La demande ou son examen a changé après le consentement.",
+    "application_held": "Une mesure active empêche la clôture de cette demande."
+  },
+  "founderIssuanceOnly": "Seule la personne fondatrice peut attribuer cette distinction après satisfaction de toutes les conditions de vérification.",
   "activeCases": "Dossiers en cours",
   "caseHistory": "Historique des dossiers",
   "lastUpdated": "Dernière mise à jour",
@@ -39,6 +55,7 @@
     "withdrawn": "Consentement retiré"
   },
   "actions": {
+    "supersede": "Clore ma demande de vérification d’identité ordinaire",
     "open": "Dossier ouvert",
     "consent": "Donner mon consentement",
     "visibility": "Enregistrer la visibilité",
@@ -61,6 +78,7 @@
     "corrected": "La décision précédente a été corrigée."
   },
   "prompts": {
+    "supersede": "Confirmez la clôture de cette demande en cours parce que vous avez accepté la distinction Founder Verified. Son historique sera conservé et l’examen indépendant prendra fin.",
     "consent": "Confirmer votre choix de procéder à cette vérification par le fondateur.",
     "withdraw": "Retirer votre consentement et supprimer toute mention de vérification par le fondateur de votre profil public ?",
     "correction": "Demander un examen indépendant de cette décision ?"

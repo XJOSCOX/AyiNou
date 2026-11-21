@@ -51,6 +51,10 @@ Local validation passed typecheck, lint, shared-contract compatibility, four-loc
 
 Hosted project `hcbxulyfmdmuyccgrujs` still requires `20261121020000_o2_organization_intents.sql`, followed by `20261121030000_o3_founder_identity.sql`. O3 uses existing live-session and review functions, not O2 tables. The ordered CLI deploy plan requires separately approved hosted writes. After approval, verify tables/execute grants, policy false, empty authority/case tables and unchanged legal availability. If the client is deployed first, existing public profiles omit the founder field until the SQL is present. To contain a later release, close publication and issuance together, revoke affected authority if appropriate and preserve case/audit history via a forward correction.
 
+## Addendum for Founder reviewer eligibility and application supersession
+
+Founder scope and ordinary reviewer scope remain distinct. Member consent to supersession is optional, versioned and binds the exact application. The grant transaction preserves older review decisions and applies closure only to an eligible pending application. Hosted issuance remains disabled. [Policy update](FOUNDER_VERIFICATION_POLICY_UPDATE.md) · [Implementation evidence](FOUNDER_REVIEWER_AND_SUPERSESSION_REPORT.md)
+
 ## Remaining blockers
 
 Operational identity/account-control ceremony, approved founder delegation and succession, conflict escalation, proof and audit retention/export/deletion, independent appeal assignment and safe contact delivery still require approval and validation. No environment setting can turn this implementation on. O4 would need its own narrow create/claim eligibility checks, with policy, live account, consent, grant and hold rechecked in the command transaction. No organization setup, project eligibility, voting rights or platform permissions were changed.

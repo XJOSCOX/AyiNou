@@ -15,7 +15,11 @@ const revision = z.strictObject({
 const username = z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/);
 const open = z.strictObject({ username, requestId: z.uuid(), reason: z.literal("member_request") });
 const memberAction = z.discriminatedUnion("action", [
-  revision.extend({ action: z.enum(["consent", "visibility"]), disclose: z.boolean() }),
+  revision.extend({ action: z.literal("consent"), disclose: z.boolean(), supersession: z.strictObject({
+    applicationId: z.uuid(), revision: z.number().int().min(1).max(2_147_483_647),
+  }).optional() }),
+  revision.extend({ action: z.literal("supersede"), applicationId: z.uuid(), revision: z.number().int().min(1).max(2_147_483_647) }),
+  revision.extend({ action: z.literal("visibility"), disclose: z.boolean() }),
   revision.extend({ action: z.enum(["withdraw", "correction"]) }),
 ]);
 const review = revision.extend({
@@ -40,7 +44,7 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
     try {
       return await repo.rpc<T>(rpc, {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp_at: session.totpAt ?? null,
-        p_admin: privileged, ...input,
+        ...(rpc.startsWith("founder_supersession_") ? {} : { p_admin: privileged }), ...input,
       });
     } catch (cause) {
       if (cause instanceof InstitutionError) throw new ApiError(cause.statusCode, cause.code, "Founder identity request could not be completed");
@@ -60,6 +64,18 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
   app.post(member + "/:id/actions", { bodyLimit: 1024 }, (request) => {
     const { id } = caseId.parse(request.params);
     const input = memberAction.parse(request.body);
+    if (input.action === "supersede") {
+      return call<FounderIdentityReceipt>(request, false, "founder_supersession_after_grant_for_api", {
+        p_id: id, p_expected: input.expectedVersion, p_policy: input.policyVersion, p_request: input.requestId,
+        p_application: input.applicationId, p_revision: input.revision,
+      });
+    }
+    if (input.action === "consent" && input.supersession) {
+      return call<FounderIdentityReceipt>(request, false, "founder_supersession_consent_for_api", {
+        p_id: id, p_expected: input.expectedVersion, p_policy: input.policyVersion, p_request: input.requestId,
+        p_disclose: input.disclose, p_application: input.supersession.applicationId, p_revision: input.supersession.revision,
+      });
+    }
     return call<FounderIdentityReceipt>(request, false, "founder_identity_command_for_api", {
       p_id: id, p_username: null, p_action: input.action, p_expected: input.expectedVersion, p_policy: input.policyVersion,
       p_request: input.requestId, p_reason: null, p_disclose: "disclose" in input ? input.disclose : null, p_no_conflict: null,

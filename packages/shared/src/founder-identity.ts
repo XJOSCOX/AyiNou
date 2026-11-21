@@ -1,6 +1,8 @@
+import type { VerificationStatus } from "./trust.ts";
+
 export const founderCaseStates = ["consent_pending", "proof_pending", "ready_for_review", "granted", "held", "revoked", "denied", "withdrawn"] as const;
 export const founderDecisions = ["confirmed", "insufficient_proof", "conflict", "account_risk", "member_request", "corrected"] as const;
-export const founderMemberActions = ["consent", "visibility", "withdraw", "correction"] as const;
+export const founderMemberActions = ["consent", "visibility", "withdraw", "correction", "supersede"] as const;
 export const founderReviewActions = ["grant", "hold", "release", "revoke", "deny", "conflict"] as const;
 
 type Decision = typeof founderDecisions[number];
@@ -17,6 +19,9 @@ export interface FounderIdentityCase {
   correctionPending: boolean;
   decision: Decision | null;
   updatedAt: string;
+  regularApplication?: { id: string; revision: number; status: VerificationStatus } | null;
+  supersessionConsented?: boolean;
+  supersessionOutcome?: "no_consent" | "superseded_by_founder_verification" | "application_completed" | "stale_application" | "application_held" | null;
 }
 
 export interface FounderReviewCase extends FounderIdentityCase {
@@ -34,6 +39,7 @@ export interface FounderReviewCase extends FounderIdentityCase {
 
 export interface FounderIdentityQueue<T extends FounderIdentityCase = FounderIdentityCase> {
   issuanceEnabled: boolean;
+  canIssue?: boolean;
   cases: T[];
 }
 

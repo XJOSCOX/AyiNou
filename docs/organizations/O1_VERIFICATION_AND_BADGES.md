@@ -1,5 +1,9 @@
 # O1 verification and badges
 
+## Founder reviewer eligibility and supersession
+
+Trusted Founder provenance, scoped O3 case authority, and ordinary reviewer eligibility are independently enforced. The formal Founder role adds a distinct leadership mark. The existing bootstrap confirmation and the two verification paths retain their original provenance. A founder with active ordinary eligibility and work assignment contributes at most one of two independent approvals. The member can explicitly opt in to closing a named pending identity application at its current revision when a valid Founder grant occurs. A member may also confirm supersession after a valid grant while eligibility remains current. The application and decision history remain available. [Updated Founder policy](FOUNDER_VERIFICATION_POLICY_UPDATE.md)
+
 ## Current enforcement
 
 Phase 5A `private.reviewed_personal_claims` requires an active account, source `review`, verified status and no publication hold. Phase 5B replaces the decision RPC and rechecks active reviewer eligibility, assignment and conflicts, plus a second distinct eligible assigned approval before approval is final. Institutional submissions require two distinct public reference hosts and decision-time snapshot checks. Reference-host counts indicate source diversity only. Claim approval can revoke current memberships and invitations and replace ownership. The claim path therefore needs a material dependency check and notice before it can be presented as routine onboarding. Verified organizations and existing representatives face separate claim restrictions.

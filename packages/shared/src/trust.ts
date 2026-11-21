@@ -30,10 +30,12 @@ export type ImpersonationReview = {
 
 export type VerificationApplication = {
   id: string; kind: VerificationKind; status: VerificationStatus; createdAt: string; organizationName: string | null;
+  closureReason?: "superseded_by_founder_verification" | null;
   decidedAt: string | null; rationale: string | null; canAppeal?: boolean; eligibleApprovals?: number | null;
 };
 export type ReviewApplication = Omit<VerificationApplication, "decidedAt" | "rationale"> & {
   decidedAt?: string | null;
+  founderVerified?: boolean;
   assignedToMe: boolean;
   assignmentRequired?: boolean;
   eligibleReviewers?: number | null;

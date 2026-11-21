@@ -1,4 +1,20 @@
 {
+  "verificationPaths": "Founder Verified konfime idantite ak kontwòl kont lan atravè administratè fondatè a. Verifikasyon idantite endepandan mande apwobasyon de moun ki kalifye pou fè revizyon endepandan.",
+  "supersessionExplanation": "Si yo ba ou Founder Verified, ou gen privilèj ki diferan de verifikasyon idantite endepandan. Ou ka fèmen demann idantite ou a epi konsève istwa li, oswa kite l ouvè pou revizyon endepandan.",
+  "supersessionChoice": "Fèmen demann sa a ki annatant si yo ban mwen Founder Verified.",
+  "regularApplication": "Demann verifikasyon idantite regilye",
+  "supersessionAgreed": "Manm nan dakò pou yo fèmen demann sa a.",
+  "supersessionNotAgreed": "Manm nan poko dakò pou yo fèmen demann sa a.",
+  "supersessionReady": "Yo ka fèmen demann sa a lè yo bay Founder Verified.",
+  "supersededMemberNotice": "Yo te fèmen ansyen demann verifikasyon idantite ou a paske ou te aksepte Founder Verified. Demann nan pa t resevwa apwobasyon endepandan.",
+  "supersessionResults": {
+    "no_consent": "Yo kite demann nan ouvè oswa pa t gen yon demann ki kalifye.",
+    "superseded_by_founder_verification": "Founder Verified ranplase demann nan avèk konsantman manm nan.",
+    "application_completed": "Yo te deja pran yon desizyon sou demann nan.",
+    "stale_application": "Demann nan oswa revizyon li chanje apre konsantman an.",
+    "application_held": "Yon mezi ki an vigè anpeche yo fèmen demann nan."
+  },
+  "founderIssuanceOnly": "Se sèlman Fondatè a ki ka bay distenksyon sa a lè tout kondisyon verifikasyon yo satisfè.",
   "activeCases": "Dosye aktif",
   "caseHistory": "Istwa dosye yo",
   "lastUpdated": "Dènye mizajou",
@@ -39,6 +55,7 @@
     "withdrawn": "Konsantman an retire"
   },
   "actions": {
+    "supersede": "Fèmen demann idantite regilye mwen an",
     "open": "Dosye a louvri",
     "consent": "Bay konsantman",
     "visibility": "Anrejistre chwa afichaj la",
@@ -61,6 +78,7 @@
     "corrected": "Yo korije desizyon anvan an."
   },
   "prompts": {
+    "supersede": "Konfime ou vle fèmen demann ki annatant lan paske ou te aksepte Founder Verified. Y ap konsève istwa demann nan epi revizyon endepandan an ap fini.",
     "consent": "Konfime ou dakò pou fondatè a fè egzamen sa a.",
     "withdraw": "Retire konsantman ou epi retire tout mak verifikasyon fondatè sou pwofil piblik ou?",
     "correction": "Mande yon moun endepandan egzamine desizyon sa a?"

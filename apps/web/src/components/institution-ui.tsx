@@ -66,6 +66,13 @@ export function VerifiedCheck({ label }: { label?: string }) {
   );
 }
 
+export function FounderMark() {
+  const [locale] = useLocale();
+  return <span className="inline-flex w-fit items-center rounded-md border border-[var(--theme-border)] bg-[var(--theme-selected)] px-2 py-0.5 align-middle text-xs font-semibold text-[var(--theme-text)]">
+    {adminMessages[locale].founder}
+  </span>;
+}
+
 export function AdministratorMark() {
   const [locale] = useLocale();
   const label = adminMessages[locale].administrator;

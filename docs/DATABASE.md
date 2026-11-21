@@ -789,6 +789,10 @@ Migration `20261121020000_o2_organization_intents.sql` creates private signup ch
 
 `20261121030000_o3_founder_identity.sql` adds scoped founder authorities, cases, proof receipts, grants and one durable event ledger. Service-only read and command RPCs bind case scope, live session, version and UUID command receipt. The public profile projection rechecks live consent, state and policy. Production policy is closed, with no method, authority or cases seeded. [Schema, endpoints and validation](organizations/O3_IMPLEMENTATION_REPORT.md)
 
+`20261121090000_founder_supersession_consent.sql` adds the private revision-bound opt-in and resolution ledger. Pending regular identity applications close only on a successful grant with the current application revision and the member’s consent. The separate ordinary reviewer assignments and approval provenance are preserved. [Schema and operating boundary](organizations/FOUNDER_REVIEWER_AND_SUPERSESSION_REPORT.md)
+
+`20261121100000_platform_founder_role.sql` recognizes Founder from `private.platform_bootstrap` and its matching platform audit record. It reuses the platform administration checks and gates Founder issuance separately. A Founder case’s authenticated subject can explicitly confirm supersession after an eligible grant. [Founder powers and compatibility](governance/FOUNDER_AUTHORITY_AND_POWERS.md)
+
 ## O4 organization setup
 
 `20261121040000_o4_organization_setup.sql` extends institutions, O2 intents and the institution ledger. Organizations use a private claimed registration state and version. Completed intent receipts are retained separately from open drafts. SQL locks and current reviewed identity guard decisive writes and claim approvals, and the existing reviewer flow handles ownership transfer. [Database and API details](organizations/O4_IMPLEMENTATION_REPORT.md)

@@ -1,0 +1,11 @@
+# Founder verification policy update
+
+Ayinou uses two separately assigned verification paths. Founder Verified records the founding administrator’s confirmation of a member’s identity and account control. Regular Identity Verified records approvals from two distinct, eligible, assigned, unconflicted reviewers. A founder with separate ordinary reviewer eligibility can cast one vote under those same controls. [Formal Founder provenance](../governance/FOUNDER_AUTHORITY_AND_POWERS.md) supplies the unique issuance role. Founder authority carries its own case assignment, live administrator session, recent MFA, versioned consent, conflict clearance and current proof. Both paths prohibit self-review.
+
+When a member accepts a Founder case, the optional supersession choice names one pending regular identity application and its current revision. Members can accept Founder verification while retaining the application for independent review. A successful grant checks the opt-in again and closes only the named, still-pending, current application. A member who keeps the application open may later explicitly confirm closure while the grant and application remain eligible. A changed revision, completed decision, active hold or missing authorization preserves the ordinary application. The grant and any closure commit with their audit evidence. Earlier regular approval remains governed by the independent review rules.
+
+Founder Verified has its own provenance and public disclosure. When both public designations are valid, the reviewed identity badge takes precedence. Founder Verified provides no independently reviewed project or verified-poll eligibility, administrator or representative scope, organizational verification, legal publishing or privacy authority. O4 Founder parity and hosted Founder issuance stay disabled.
+
+Supersession preserves the original submission, review assignments and decisions, evidence references, and closure provenance. A later hold or revocation leaves that history intact. A member can use the existing regular application path if eligible. The Founder correction process remains available. Approved real-world proof, independently assigned appeals, retention and succession remain prerequisites for a separate issuance decision.
+
+[Implementation and verification report](FOUNDER_REVIEWER_AND_SUPERSESSION_REPORT.md)

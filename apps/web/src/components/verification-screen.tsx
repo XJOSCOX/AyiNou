@@ -8,6 +8,7 @@ import { apiErrorCode } from "@/lib/api-errors";
 import { loadApplications, loadInstitutionAccounts, submitVerification } from "@/lib/institution-api";
 import { institutionError, institutionMessages, type InstitutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { founderMessages } from "@/lib/founder-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -34,6 +35,7 @@ export function VerificationScreen({ initialKind, institution }: {
           <ul className="flex flex-wrap gap-x-4 gap-y-2 font-semibold">
             {(["identity", "notable_person", "organization", "representative"] as const).map((kind) => <li key={kind}>{trust[kind]}</li>)}
           </ul>
+          <p className="text-[var(--theme-body)]">{founderMessages[locale].verificationPaths}</p>
           <p className="text-[var(--theme-body)]">{trust.noEndorsement}</p>
         </div>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(17rem,2fr)]">
@@ -54,7 +56,7 @@ export function VerificationScreen({ initialKind, institution }: {
               : <ApplicationHistory applications={applications.data} locale={locale} messages={t} />}
           </section>
         </div>
-        <FounderIdentityPanel />
+        <FounderIdentityPanel onSuperseded={applications.refresh} />
         {applications.data && <MyVerificationAppeals applications={applications.data} />}
       </div>
     </MemberShell>
@@ -79,7 +81,9 @@ function ApplicationHistory({ applications, locale, messages: t }: {
       {app.status === "pending" && app.eligibleApprovals != null && <p>
         {trustMessages[locale].approvalProgress.replace("{count}", String(app.eligibleApprovals))}
       </p>}
-      {app.status === "closed" && <p className="text-[var(--theme-body)]">{t.founderClosureReason}</p>}
+      {app.status === "closed" && <p className="text-[var(--theme-body)]">
+        {app.closureReason ? founderMessages[locale].supersededMemberNotice : t.founderClosureReason}
+      </p>}
       {app.rationale && <p className="whitespace-pre-line break-words text-[var(--theme-body)]">{app.rationale}</p>}
     </li>;
   }

@@ -1,4 +1,20 @@
 {
+  "verificationPaths": "Founder Verified confirma la identidad y el control de la cuenta a través del administrador fundador. La verificación de identidad independiente requiere la aprobación de dos revisores independientes habilitados.",
+  "supersessionExplanation": "La distinción Founder Verified otorga permisos distintos a los de la verificación de identidad independiente. Puedes cerrar tu solicitud pendiente y conservar su historial, o dejarla abierta para una revisión independiente.",
+  "supersessionChoice": "Cerrar esta solicitud pendiente si recibo la distinción Founder Verified.",
+  "regularApplication": "Solicitud ordinaria de verificación de identidad",
+  "supersessionAgreed": "La persona aceptó cerrar esta solicitud.",
+  "supersessionNotAgreed": "La persona no ha aceptado cerrar esta solicitud.",
+  "supersessionReady": "La solicitud actual puede cerrarse al concederse la distinción Founder Verified.",
+  "supersededMemberNotice": "Tu solicitud anterior de verificación de identidad se cerró porque aceptaste la distinción Founder Verified. La solicitud no recibió una aprobación independiente.",
+  "supersessionResults": {
+    "no_consent": "La solicitud quedó abierta o no había una solicitud apta.",
+    "superseded_by_founder_verification": "Solicitud sustituida por Founder Verified con el consentimiento de la persona.",
+    "application_completed": "La solicitud ya recibió una decisión.",
+    "stale_application": "La solicitud o su revisión cambió después del consentimiento.",
+    "application_held": "Una medida vigente impide cerrar esta solicitud."
+  },
+  "founderIssuanceOnly": "Solo la persona fundadora puede conceder esta distinción cuando se cumplan todos los requisitos de verificación.",
   "activeCases": "Casos activos",
   "caseHistory": "Historial de casos",
   "lastUpdated": "Última actualización",
@@ -39,6 +55,7 @@
     "withdrawn": "Consentimiento retirado"
   },
   "actions": {
+    "supersede": "Cerrar mi solicitud ordinaria de identidad",
     "open": "Expediente abierto",
     "consent": "Dar consentimiento",
     "visibility": "Guardar visibilidad",
@@ -61,6 +78,7 @@
     "corrected": "Se corrigió la decisión anterior."
   },
   "prompts": {
+    "supersede": "Confirma el cierre de esta solicitud pendiente porque aceptaste la distinción Founder Verified. Se conservará su historial y finalizará su revisión independiente.",
     "consent": "Confirme que desea continuar con la revisión del fundador.",
     "withdraw": "¿Retirar su consentimiento y eliminar de su perfil público la distinción del fundador?",
     "correction": "¿Solicitar una revisión independiente de esta decisión?"

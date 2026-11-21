@@ -27,6 +27,10 @@ Use separate versioned proposal and distinct-approver records for high-impact ch
 If a second admin is unavailable, ordinary operations continue and high-impact approvals remain pending. Design a future recovery channel with separately appointed custodians, provider-backed recovery, scoped time limit, second proof and mandatory retrospective review. Avoid shared accounts or broad fallback credentials, preserve last-admin continuity, and require a rehearsal before activation. Irreversible actions need a versioned plan, holds/dependencies recheck and separate approval under the applicable domain. Software roles do not constitute the future nonprofit board or convey corporate signing authority.
 
 
+## Founder and Administrator roles
+
+The canonical Founder is derived from the existing committed bootstrap receipt and its matching immutable audit event. Eligible Founders receive routine Administrator capabilities under the normal session and MFA rules. Founder issuance remains separately gated and requires formal Founder provenance as well as O3 scope. Founder transfer, new support and program scopes, and O5 execution require distinct governance decisions. Preserve the unused Super Administrator concept for compatibility while review considers formally reserving it. [Founder authority and powers](../governance/FOUNDER_AUTHORITY_AND_POWERS.md) · [Capability matrix](../governance/FOUNDER_CAPABILITY_MATRIX.md)
+
 ## O5 administrative corrections and governance
 
 O5 implements member-authorized correction, independent governance proposals and a narrow temporary claim-approval hold. Administrator appointment, suspension, removal, mode changes and operational recovery remain gated pending approved execution and recovery procedures. See [O5 implementation](O5_IMPLEMENTATION_REPORT.md).

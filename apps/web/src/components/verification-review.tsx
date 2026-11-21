@@ -8,6 +8,7 @@ import { authMessages } from "@/lib/auth-i18n";
 import { decideApplication, loadReviewQueue, setReviewWork } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { founderMessages } from "@/lib/founder-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { localizedApiError } from "@/lib/error-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -102,8 +103,9 @@ function ReviewCard({ item, refresh }: { item: ReviewApplication; refresh: () =>
         ? <AdminFeedback error={failed} next="/verification/review" />
         : <p role="alert" className={institutionErrorBox}>{failed instanceof Error && ["VERIFICATION_ASSIGNMENT_REQUIRED", "CLAIM_APPROVAL_HELD"].includes(failed.message)
           ? localizedApiError(locale, failed) : institutionError(t, failed)}</p>)}
+      {item.founderVerified && <p className="mt-2 text-sm font-semibold">{founderMessages[locale].badge}</p>}
       {item.status === "closed" && <div className="mt-2 grid gap-1 text-sm">
-        <p>{t.founderClosureReason}</p>
+        <p>{item.closureReason ? founderMessages[locale].supersessionResults.superseded_by_founder_verification : t.founderClosureReason}</p>
         <p>{t.applicationSubmitted} <time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString(locale)}</time></p>
         {item.decidedAt && <p>{t.applicationResolved} <time dateTime={item.decidedAt}>{new Date(item.decidedAt).toLocaleString(locale)}</time></p>}
       </div>}

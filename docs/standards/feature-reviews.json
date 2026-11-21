@@ -55,11 +55,11 @@
           "access": "restricted",
           "audit": {
             "kind": "durable",
-            "detail": "The consent, disclosure, withdrawal or correction event is the command receipt."
+            "detail": "The consent, disclosure, withdrawal or correction event is the command receipt. An opt-in to supersession also records a revision-bound member consent event."
           },
           "authorization": {
             "file": "apps/web/e2e/founder-identity.spec.ts",
-            "denialScenario": "An authenticated subject cannot consent to another account’s case."
+            "denialScenario": "An authenticated subject cannot consent to another account’s case or supersede another member’s application."
           }
         },
         {
@@ -553,6 +553,29 @@
           "compatibility": "Adds a closed status and private provenance. Pending and previously decided applications retain their existing behavior.",
           "validation": "Disposable Chromium lifecycle test covers ineligible grants, reviewer and member history, retained evidence, stale approval, replay and subsequent revocation.",
           "rolloutAndRollback": "Apply with separate hosted approval before deploying the closed filter. Preserve closed records and event references if rolling back application code."
+        }
+      ]
+    },
+    {
+      "id": "founder-verification-policy",
+      "report": "docs/organizations/FOUNDER_REVIEWER_AND_SUPERSESSION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121090000_founder_supersession_consent.sql",
+          "rlsAndGrants": "Private audit ledger uses RLS with no direct application-role grants. The new consent RPC is service-only.",
+          "authorization": "Binds opt-in to the live member, owned Founder case and exact pending identity application revision. Independent reviews keep existing assignment, eligibility and MFA checks.",
+          "compatibility": "Existing consent without opt-in leaves regular applications pending. Prior closed records preserve original provenance.",
+          "validation": "Disposable Founder lifecycle and ordinary reviewer independence, stale consent, completed application, replay and competing decision tests.",
+          "rolloutAndRollback": "Requires separate hosted approval. Keep issuance and organizational parity disabled. Preserve the audit ledger and opt-in requirement in any forward correction."
+        },
+        {
+          "file": "supabase/migrations/20261121100000_platform_founder_role.sql",
+          "rlsAndGrants": "Retains existing bootstrap and audit RLS. The authenticated member action uses a service-only RPC and accepts no caller-supplied authority.",
+          "authorization": "Derives the sole Founder from the bootstrap and its committed security event. Scope, MFA, proof, case version and protected governance predicates remain mandatory where applicable.",
+          "compatibility": "Preserves ordinary administrator assignments, O5 records, independent reviewer decisions and the existing closed gates.",
+          "validation": "Disposable Founder recognition, administrator parity, ordinary-scoped issuer denial, post-grant consent, audit atomicity and account restriction tests.",
+          "rolloutAndRollback": "Requires separate approval. Preserve authenticated provenance and keep both issuance and O4 parity disabled."
         }
       ]
     }

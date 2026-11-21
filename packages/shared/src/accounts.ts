@@ -51,10 +51,11 @@ export const platformRoles = ["administrator", "moderator", "verification_review
 
 export type PlatformRole = (typeof platformRoles)[number];
 export type AccountStatus = "active" | "suspended" | "banned";
-export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: boolean };
+export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: boolean; founder?: boolean };
 export type AdminOverview = Record<"members" | "organizations" | "recentMembershipEvents" | "pendingVerifications" | "restrictedAccounts" | "recentAdminActions", number>;
 export interface AdminAccount {
   bootstrapTrust?: boolean;
+  founder?: boolean;
   id: string;
   username: string | null;
   displayName: string | null;

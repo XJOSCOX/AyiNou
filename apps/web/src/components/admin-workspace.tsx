@@ -11,7 +11,7 @@ import { useLocale } from "@/lib/locale-store";
 import { apiErrorCode } from "@/lib/api-errors";
 import { localizedApiError } from "@/lib/error-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
-import { AdministratorMark, institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
+import { AdministratorMark, FounderMark, institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
@@ -42,7 +42,7 @@ export function AdminWorkspace() {
 
   return <MemberShell>
     <div className="grid gap-4">
-      <PageHeader title={t.administration} />
+      <PageHeader title={t.administration} actions={access.data?.founder && <FounderMark />} />
       {overview.error ? <AdminFeedback error={overview.error} totp={access.data?.totp} retry={refresh} />
         : !overview.data ? <p role="status">{authMessages[locale].working}</p> : <>
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">
@@ -120,7 +120,7 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{account.verified && <>{" "}<VerifiedCheck label={t.identityVerified} /></>}
-              {account.roles.includes("administrator") && <>{" "}<AdministratorMark /></>}</h2>
+              {account.founder ? <>{" "}<FounderMark /></> : account.roles.includes("administrator") && <>{" "}<AdministratorMark /></>}</h2>
             {account.bootstrapTrust && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].bootstrapTrust}</p>}
             {account.username && <p className="break-all text-sm">@{account.username}</p>}
             <p className="break-all text-xs text-[var(--theme-body)]">{account.id}</p>
@@ -149,7 +149,7 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
 function AccountAction({ account, onChange }: { account: AdminAccount; onChange: () => void }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
-  const protectedAccount = account.roles.includes("administrator");
+  const protectedAccount = account.founder || account.roles.includes("administrator");
   const [kind, setKind] = useState<"status" | "roles">(protectedAccount ? "roles" : "status");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);

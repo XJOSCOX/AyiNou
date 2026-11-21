@@ -67,12 +67,16 @@ const founderTest = test.extend<{ administrators: { founder: Administrator; ordi
     try {
       const founder = await elevate(leader);
       const ordinaryAdmin = await elevate(ordinary);
+      sql(`insert into private.platform_bootstrap(user_id) values ('${founder.id}');
+        insert into private.platform_admin_audit(subject_id,event,reason)
+          values ('${founder.id}','first_account_bootstrapped','Disposable verified founding provenance');`);
       await provide({ founder, ordinaryAdmin });
     } finally {
       // Keep this test's platform roles out of later tests using the same disposable database.
       sql(`insert into private.account_restrictions(user_id,status,reason) values
         ('${leader.id}','suspended','Disposable fixture retired'),
         ('${ordinary.id}','suspended','Disposable fixture retired');
+        delete from private.platform_bootstrap where user_id='${leader.id}';
         delete from public.role_assignments where user_id in ('${leader.id}','${ordinary.id}') and role='administrator';`);
     }
   },
@@ -142,6 +146,8 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await panel.getByLabel(founderMessages.en.publicChoice).check();
   await panel.getByRole("button", { name: founderMessages.en.actions.consent }).click();
+  await expect(panel.getByLabel(founderMessages.en.supersessionChoice)).not.toBeChecked();
+  await panel.getByLabel(founderMessages.en.supersessionChoice).check();
   await panel.getByRole("button", { name: founderMessages.en.confirm }).click();
   await expect(panel.getByText(founderMessages.en.states.proof_pending)).toBeVisible();
   expect(() => recordProof(caseId)).toThrow();
@@ -188,9 +194,9 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
     await panel.getByText(founderMessages.en.caseHistory, { exact: true }).click();
     await expect(panel.getByText(founderMessages.en.states.granted, { exact: true })).toBeVisible();
     const t = institutionMessages.en;
-    await expect(page.getByText(t.founderClosureReason)).toBeHidden();
+    await expect(page.getByText(founderMessages.en.supersededMemberNotice)).toBeHidden();
     await page.getByText(t.applicationHistory, { exact: true }).click();
-    await expect(page.getByText(t.founderClosureReason)).toBeVisible();
+    await expect(page.getByText(founderMessages.en.supersededMemberNotice)).toBeVisible();
     expect(await publicProfile(member)).toMatchObject({ founderVerified: true });
     expect(sql(`select private.organization_setup_founder_candidate('${member.id}')::text || ':' ||
       private.organization_setup_identity_eligible('${member.id}')::text;`)).toBe("true:false");
@@ -306,6 +312,172 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
     setSyntheticPolicy(false);
     await guestContext.close();
   }
+});
+
+
+founderTest("founder authority and ordinary review are independent, and supersession respects current consent", async ({
+  makeMember, administrators: { founder, ordinaryAdmin },
+}) => {
+  test.setTimeout(100_000);
+  const applicationPath = "/api/v1/me/verification";
+  const queue = "/api/v1/verification/review";
+  const submit = async (member: Member) => (await apiCall(member, applicationPath, 201, "POST", {
+    organizationId: null, kind: "identity", evidence: ["https://example.org/private-reference"],
+  })).id as string;
+  const claim = (reviewer: Member, application: string, status = 204) =>
+    apiCall(reviewer, queue + "/" + application + "/work", status, "PATCH", { claim: true });
+  const reviewPayload = (action: "approve" | "reject") => ({
+    decision: action, conflictFree: true, rationale: "Disposable independent identity decision.",
+  });
+  const review = (reviewer: Member, application: string, action: "approve" | "reject" = "approve", status = 200) =>
+    apiCall(reviewer, queue + "/" + application, status, "POST", reviewPayload(action));
+  const read = async (member: Member, application: string) =>
+    (await apiCall(member, applicationPath, 200)).applications.find((item: { id: string }) => item.id === application);
+
+  assign(founder);
+  await apiCall(founder, queue, 403);
+  sql(`insert into private.verification_reviewers(user_id) values ('${founder.id}'),('${ordinaryAdmin.id}');`);
+  const self = await submit(founder);
+  await claim(founder, self, 403);
+  setSyntheticPolicy(true);
+  try {
+    for (const scenario of ["declined", "stale", "approved", "race", "rejected", "prior_vote", "restricted"] as const) {
+      const member = await makeMember({ visible: true });
+      const application = await submit(member);
+      const started = await openCase(founder, member);
+      const mine = actionPath(ownerPath, started.caseId);
+      const grantUrl = actionPath(adminPath, started.caseId);
+      await review(founder, application, "approve", 403);
+      await claim(founder, application);
+      await claim(ordinaryAdmin, application);
+      const preVote = scenario === "race" || scenario === "approved" || scenario === "prior_vote";
+      if (preVote) {
+        expect(await review(founder, application)).toMatchObject({ status: "pending" });
+        await review(founder, application, "approve", 409);
+      }
+      const item = (await apiCall(member, ownerPath, 200)).cases[0];
+      const request = { ...version(1), action: "consent", disclose: true };
+      const optIn = { ...request, supersession: { applicationId: application, revision: item.regularApplication.revision } };
+      if (scenario === "declined") {
+        await apiCall(member, mine, 409, "POST", { ...optIn, supersession: { applicationId: application, revision: 99 } });
+        await apiCall(member, mine, 404, "POST", { ...optIn, supersession: { applicationId: self, revision: 1 } });
+        expect((await apiCall(member, ownerPath, 200)).cases[0].state).toBe("consent_pending");
+        await apiCall(member, mine, 200, "POST", request);
+        await apiCall(member, mine, 409, "POST", optIn);
+      } else {
+        const receipt = await apiCall(member, mine, 200, "POST", optIn);
+        expect(await apiCall(member, mine, 200, "POST", optIn)).toEqual(receipt);
+        await apiCall(member, mine, 409, "POST", request);
+      }
+      recordProof(started.caseId);
+      const payload = decision("grant", 3, "confirmed");
+      if (scenario === "stale") expect(await review(founder, application)).toMatchObject({ status: "pending" });
+      if (scenario === "approved") expect(await review(ordinaryAdmin, application)).toMatchObject({ status: "approved" });
+      if (scenario === "rejected") expect(await review(ordinaryAdmin, application, "reject")).toMatchObject({ status: "rejected" });
+      if (scenario === "restricted") {
+        sql(`insert into private.account_restrictions(user_id,status,reason)
+          values ('${member.id}','suspended','Disposable restricted subject');`);
+        await apiCall(founder, grantUrl, 409, "POST", payload);
+        expect(sql(`select count(*) from private.founder_identity_events where case_id='${started.caseId}' and action='grant';`)).toBe("0");
+        expect(sql(`select status from private.verification_applications where id='${application}';`)).toBe("pending");
+        continue;
+      }
+      if (scenario === "race") {
+        const [grant, second] = await Promise.all([
+          apiCall(founder, grantUrl, 200, "POST", payload),
+          fetch(api + queue + "/" + application, { method: "POST", headers: {
+            Authorization: "Bearer " + ordinaryAdmin.token, "Content-Type": "application/json",
+          }, body: JSON.stringify(reviewPayload("approve")) }),
+        ]);
+        expect(grant.auditId).toBeTruthy();
+        const status = (await read(member, application)).status;
+        expect(["closed", "approved"]).toContain(status);
+        expect(second.status).toBe(status === "closed" ? 409 : 200);
+      } else {
+        await apiCall(founder, grantUrl, 200, "POST", payload);
+        const outcome = scenario === "approved" ? "approved" : scenario === "rejected" ? "rejected" : scenario === "prior_vote" ? "closed" : "pending";
+        expect(await read(member, application)).toMatchObject({ status: outcome });
+      }
+      expect(await publicProfile(member)).toMatchObject({ founderVerified: true });
+      const finalStatus = (await read(member, application)).status;
+      expect(sql(`select cardinality(private.reviewed_personal_claims('${member.id}'));`)).toBe(finalStatus === "approved" ? "1" : "0");
+      expect(sql(`select count(*) from private.verification_reviews where application_id='${application}';`))
+        .toBe(scenario === "declined" ? "0" : finalStatus === "approved" ? "2" : "1");
+      const audit = sql(`select string_agg(s.event||':'||s.reason,',' order by s.event)
+        from private.founder_supersession_events s join private.founder_identity_events e on e.id=s.founder_event_id
+        where e.case_id='${started.caseId}';`);
+      expect(audit).toContain("grant_initiated:founder_confirmed");
+      expect(audit).toContain("grant_committed:founder_confirmed");
+      expect(audit).toContain("application_resolved:" + (
+        scenario === "declined" ? "no_consent" : scenario === "stale" ? "stale_application" :
+          finalStatus === "closed" ? "superseded_by_founder_verification" : "application_completed"
+      ));
+      expect(audit.includes("member_consented:member_opted_in")).toBe(scenario !== "declined");
+      if (scenario === "declined") {
+        const archived = (await apiCall(member, ownerPath, 200)).cases[0];
+        const late = { ...version(archived.version), action: "supersede", applicationId: application,
+          revision: archived.regularApplication.revision };
+        await apiCall(ordinaryAdmin, mine, 404, "POST", late);
+        const receipt = await apiCall(member, mine, 200, "POST", late);
+        expect(await apiCall(member, mine, 200, "POST", late)).toEqual(receipt);
+        await apiCall(member, mine, 409, "POST", { ...late, revision: late.revision + 1 });
+        expect(await read(member, application)).toMatchObject({
+          status: "closed", closureReason: "superseded_by_founder_verification",
+        });
+        expect(sql(`select e.action from private.verification_applications a
+          join private.founder_identity_events e on e.id=a.closed_by_founder_event_id where a.id='${application}';`)).toBe("grant");
+      }
+    }
+  } finally {
+    setSyntheticPolicy(false);
+  }
+});
+
+
+founderTest("formal Founder provenance gives routine admin authority and reserves Founder issuance", async ({
+  makeMember, administrators: { founder, ordinaryAdmin },
+}) => {
+  const reason = "Synthetic routine authority and protected role test.";
+  const accessPath = "/api/v1/me/platform-access";
+  const action = (actor: Member, subject: Member, request: object, status: number) =>
+    apiCall(actor, "/api/v1/admin/accounts/" + subject.id, status, "PATCH", { ...request, reason });
+
+  sql(`delete from public.role_assignments where user_id='${founder.id}' and role='administrator';`);
+  expect(await apiCall(founder, accessPath, 200)).toMatchObject({ founder: true, administrator: true, reviewer: false });
+  expect(await apiCall(ordinaryAdmin, accessPath, 200)).toMatchObject({ founder: false, administrator: true, reviewer: false });
+  await apiCall(founder, "/api/v1/admin/overview", 200);
+  await apiCall(ordinaryAdmin, "/api/v1/admin/overview", 200);
+  const member = await makeMember();
+  await action(founder, member, { action: "status", value: "suspended" }, 204);
+  await action(ordinaryAdmin, member, { action: "status", value: "active" }, 204);
+  expect(sql(`select count(*) from private.platform_admin_audit where subject_id='${member.id}'
+    and event in ('account_suspended','account_reinstated');`)).toBe("2");
+  await action(ordinaryAdmin, founder, { action: "status", value: "suspended" }, 409);
+  await action(ordinaryAdmin, founder, { action: "revoke", value: "founder" }, 400);
+  await action(ordinaryAdmin, member, { action: "grant", value: "founder" }, 400);
+  expect(sql(`select count(*) from private.platform_admin_audit where subject_id='${founder.id}' and event='account_suspended';`)).toBe("0");
+
+  assign(ordinaryAdmin);
+  const { caseId } = await openCase(ordinaryAdmin, member);
+  await apiCall(member, actionPath(ownerPath, caseId), 200, "POST", { ...version(1), action: "consent", disclose: true });
+  setSyntheticPolicy(true);
+  try {
+    recordProof(caseId);
+    expect((await apiCall(ordinaryAdmin, adminPath, 200)).canIssue).toBe(false);
+    await apiCall(ordinaryAdmin, actionPath(adminPath, caseId), 403, "POST", decision("grant", 3, "confirmed"));
+    expect(sql(`select count(*) from private.founder_identity_events where case_id='${caseId}' and action='grant';`)).toBe("0");
+  } finally {
+    setSyntheticPolicy(false);
+  }
+  expect(sql(`select private.platform_founder('${founder.id}')::text || ':' ||
+    private.platform_admin('${founder.id}')::text from (select 1) only_row;`)).toBe("true:true");
+  sql(`insert into private.account_restrictions(user_id,status,reason)
+    values ('${founder.id}','suspended','Disposable Auth containment')
+    on conflict(user_id) do update set status=excluded.status,reason=excluded.reason;`);
+  expect(sql(`select private.platform_founder('${founder.id}')::text || ':' || private.platform_admin('${founder.id}')::text;`))
+    .toBe("true:false");
+  await apiCall(founder, "/api/v1/admin/overview", 401);
+  sql(`delete from private.account_restrictions where user_id='${founder.id}';`);
 });
 
 founderTest("an assigned founder reviewer opens consent without a member application", async ({
