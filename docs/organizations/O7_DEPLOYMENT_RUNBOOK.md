@@ -10,6 +10,8 @@ Run `npm run test:e2e -- --organization-rollout organization-integration.spec.ts
 
 ## Deployment after approval
 
+Use the [D1 deployment approval checklist](../deployment/D1_DEPLOYMENT_APPROVAL_CHECKLIST.md) for the current sequence. Keep legacy creation and claim writers paused from before O2 through postflight. The D1 recovery and Auth prerequisites are still open.
+
 1. Pin the release commit and check maintenance window, recovery owner, reviewer readiness and backup custody. Run the hosted dry run and read-only checks again.
 2. Apply exactly the separately approved SQL sequence. Verify history, definer grants, existing owner roles, session and Auth triggers, closed Founder and Partner gates, empty public legal registry, and the absence of real privacy execution.
 3. Deploy the matching Fastify and Next.js release. Verify public pages and anonymous denial, member sign-in, MFA, current organization membership and invitation views. A real email delivery exercise needs its own authorized recipient and delivery approval.

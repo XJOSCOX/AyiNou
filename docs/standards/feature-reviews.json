@@ -514,6 +514,12 @@
           "rolloutAndRollback": "Apply after O2–O6 with separate approval. Retain additive data and audit records during any app rollback."
         }
       ]
+    },
+    {
+      "id": "d1",
+      "report": "docs/deployment/D1_FINAL_REPORT.md",
+      "routes": [],
+      "migrations": []
     }
   ]
 }

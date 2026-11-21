@@ -221,3 +221,7 @@ O6 isolates pilot participation from verification, projects and polls. Scoped op
 ## O7 authentication and organization boundaries
 
 Authentication screens use a shared responsive shell and theme variables. The reset action checks Supabase recovery claims and session liveness again at submission. MFA refreshes the page with the same account and session at AAL2. Organization actions independently check live authorization and current grant or invitation expiry. [O7 authorization matrix](organizations/O7_AUTHORIZATION_MATRIX.md)
+
+## D1 rollout boundary
+
+Pause legacy institution and ownership-claim writers before applying O2. O4 installs the database-level refusal for the old API. Complete database postflight before releasing the pinned API and web artifacts or resuming writes. [D1 rollout and containment](deployment/D1_DEPLOYMENT_APPROVAL_CHECKLIST.md)

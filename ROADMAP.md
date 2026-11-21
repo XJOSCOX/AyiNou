@@ -351,6 +351,10 @@ O6 implements synthetic-first Early Partner participation. Real enrollment, an e
 
 O7 pairs the organization migration rollout with disposable end-to-end tests and shared authentication screens. Hosted rollout and operational feature decisions remain separate. [O7 readiness](docs/organizations/O7_READINESS_MATRIX.md)
 
+## D1 controlled deployment preparation
+
+The reviewed six-file database rollout has read-only hosted evidence and disposable compatibility tests. Production remains blocked on verified recovery, Auth readiness and separate operator approval. [D1 readiness](docs/deployment/D1_MIGRATION_READINESS.md)
+
 ## Future Session Security milestone
 
 Plan opt-in remembered devices, absolute role-based session limits, session management and authorized private workflow links. Activation depends on test evidence across Supabase Auth, Next.js, Fastify and PostgreSQL. [Implementation plan](docs/security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)

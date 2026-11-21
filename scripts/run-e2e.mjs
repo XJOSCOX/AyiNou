@@ -15,8 +15,9 @@ const ports = new Map([[54320, 55320], [54321, 55321], [54322, 55322], [54323, 5
 const project = "ayinou-e2e-" + randomUUID().slice(0, 12);
 const cli = fromRoot("node_modules", "supabase", "dist", "supabase.js");
 const playwright = fromRoot("node_modules", "@playwright", "test", "cli.js");
-const organizationRollout = process.argv.includes("--organization-rollout");
-const args = process.argv.slice(2).filter((argument) => argument !== "--organization-rollout");
+const deploymentRehearsal = process.argv.includes("--deployment-rehearsal");
+const organizationRollout = deploymentRehearsal || process.argv.includes("--organization-rollout");
+const args = process.argv.slice(2).filter((argument) => argument !== "--organization-rollout" && argument !== "--deployment-rehearsal");
 const organizationBaseline = "20261121010000";
 // Source configuration comes from the newly started stack, never from development credentials.
 const env = Object.fromEntries(Object.entries(process.env).filter(([name]) =>
@@ -78,6 +79,12 @@ async function prepare(directory) {
   return web;
 }
 
+async function rehearsalSql(file) {
+  const input = await readFile(fromRoot("scripts", file), "utf8");
+  return execFileSync("docker", ["exec", "-i", "supabase_db_" + project, "psql", "-XqAt", "-U", "postgres",
+    "-d", "postgres", "-v", "ON_ERROR_STOP=1"], { env, input, encoding: "utf8", timeout: 30_000, windowsHide: true }).trim();
+}
+
 async function main() {
   const config = fromRoot("apps", "web", "e2e", "playwright.config.ts");
   if (args.includes("--list")) {
@@ -100,9 +107,18 @@ async function main() {
         "select (to_regprocedure('public.organization_intent_for_api(uuid,uuid,boolean)') is null)::text || ':' || max(version) from supabase_migrations.schema_migrations"],
         { env, encoding: "utf8", timeout: 10_000, windowsHide: true }).trim();
       if (oldCatalog !== "true:" + organizationBaseline) throw new Error("Unexpected organization rehearsal baseline");
+      if (deploymentRehearsal) {
+        console.log("D1 baseline catalog " + await rehearsalSql("d1-catalog.sql"));
+        await rehearsalSql("d1-legacy-fixture.sql");
+      }
       await cp(fromRoot("supabase", "migrations"), join(directory, "supabase", "migrations"), { recursive: true });
       // The disposable work directory has no linked project and migration up targets local by default.
       await run(cli, ["migration", "up", "--workdir", directory], { timeout: 120_000 });
+      if (deploymentRehearsal) {
+        await rehearsalSql("d1-legacy-assertions.sql");
+        console.log("D1 legacy owner, old-route denial, audit and closed-gate checks passed");
+        console.log("D1 upgraded catalog " + await rehearsalSql("d1-catalog.sql"));
+      }
       console.log("Upgraded the disposable L6.2A database before starting the matching API and web applications");
     }
     if (args.includes("--measure-polls")) {
