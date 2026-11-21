@@ -1,0 +1,63 @@
+{
+  "title": "Identité vérifiée par le fondateur",
+  "adminTitle": "Dossiers de vérification du fondateur",
+  "badge": "Vérifié par le fondateur",
+  "badgeMeaning": "L’administrateur fondateur d’Ayinou a confirmé l’identité de ce membre et son contrôle de son compte Ayinou.",
+  "disabled": "L’attribution de cette mention est suspendue. Une procédure approuvée de vérification de l’identité et du contrôle du compte est nécessaire.",
+  "noInvitation": "Ce compte ne dispose d’aucun dossier de vérification par le fondateur.",
+  "noAssigned": "Aucun dossier ne vous est attribué au titre de l’autorité du fondateur.",
+  "username": "Nom d’utilisateur du membre",
+  "receipt": "Reçu d’audit",
+  "verifySession": "Vérifier avec votre application d’authentification",
+  "confirm": "Confirmer",
+  "cancel": "Annuler",
+  "open": "Ouvrir une demande de consentement",
+  "proofReady": "Attestation de preuve valide enregistrée",
+  "proofMissing": "Aucune attestation de preuve valide",
+  "consentRecorded": "Consentement enregistré",
+  "consentMissing": "Consentement requis",
+  "history": "Historique des décisions et de l’audit",
+  "reviewAction": "Décision",
+  "choose": "Choisir une action",
+  "noConflict": "Je n’ai aucun conflit d’intérêts dans ce dossier.",
+  "publicChoice": "Afficher la mention sur mon profil public si elle est accordée",
+  "consentExplanation": "Je consens à la vérification de mon identité et du contrôle de mon compte par le fondateur selon la version {version} de la politique. L’affichage public est facultatif. Je peux retirer mon consentement.",
+  "correctionPending": "Votre demande de correction est en attente. Elle doit être examinée par une personne indépendante de la décision précédente.",
+  "states": {
+    "consent_pending": "Consentement en attente",
+    "proof_pending": "Preuve en attente",
+    "ready_for_review": "Prêt pour examen",
+    "granted": "Mention accordée",
+    "held": "Mention suspendue",
+    "revoked": "Mention révoquée",
+    "denied": "Demande refusée",
+    "withdrawn": "Consentement retiré"
+  },
+  "actions": {
+    "open": "Dossier ouvert",
+    "consent": "Donner mon consentement",
+    "visibility": "Enregistrer la visibilité",
+    "withdraw": "Retirer mon consentement",
+    "correction": "Demander une correction",
+    "proof_recorded": "Preuve reçue",
+    "grant": "Accorder la mention",
+    "hold": "Suspendre la mention",
+    "release": "Lever la suspension",
+    "revoke": "Révoquer la mention",
+    "deny": "Refuser la demande",
+    "conflict": "Déclarer un conflit"
+  },
+  "reasons": {
+    "confirmed": "L’identité et le contrôle du compte ont été confirmés selon la procédure approuvée.",
+    "insufficient_proof": "Les preuves requises concernant l’identité ou le contrôle du compte sont incomplètes.",
+    "conflict": "Un conflit d’intérêts empêche cette personne de prendre une décision.",
+    "account_risk": "Un problème concernant le compte ou l’identité nécessite cette mesure.",
+    "member_request": "Le membre a demandé un examen.",
+    "corrected": "La décision précédente a été corrigée."
+  },
+  "prompts": {
+    "consent": "Confirmer votre choix de procéder à cette vérification par le fondateur.",
+    "withdraw": "Retirer votre consentement et supprimer toute mention de vérification par le fondateur de votre profil public ?",
+    "correction": "Demander un examen indépendant de cette décision ?"
+  }
+}

@@ -19,11 +19,13 @@ import { TrustAdministration } from "./trust-workspace";
 import { AmbassadorAdministration } from "./ambassador-workspaces";
 import { LegalAdminPanel } from "./legal-admin-panel";
 import { legalAdminMessages } from "@/lib/legal-admin-i18n";
+import { founderMessages } from "@/lib/founder-i18n";
+import { FounderIdentityPanel } from "./founder-identity";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
-type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal";
-const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal"];
+type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder";
+const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder"];
 
 export function AdminWorkspace() {
   const [locale] = useLocale();
@@ -41,7 +43,7 @@ export function AdminWorkspace() {
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">
             {tabs.map((section) => <button key={section} type="button" aria-pressed={tab === section} onClick={() => setTab(section)}
               className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">
-              {section === "trust" ? trustMessages[locale].trustWorkspace : section === "ambassadors" ? ambassadorMessages[locale].title : section === "legal" ? legalAdminMessages[locale].title : t[section]}</button>)}
+              {section === "trust" ? trustMessages[locale].trustWorkspace : section === "ambassadors" ? ambassadorMessages[locale].title : section === "legal" ? legalAdminMessages[locale].title : section === "founder" ? founderMessages[locale].adminTitle : t[section]}</button>)}
             {access.data?.reviewer && <Link className={institutionLink} href="/verification/review">{t.reviewWorkspace}</Link>}
           </nav>
           {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -55,6 +57,7 @@ export function AdminWorkspace() {
           {tab === "trust" && <TrustAdministration />}
           {tab === "ambassadors" && <AmbassadorAdministration />}
           {tab === "legal" && <LegalAdminPanel />}
+          {tab === "founder" && <FounderIdentityPanel admin />}
         </>}
     </div>
   </MemberShell>;

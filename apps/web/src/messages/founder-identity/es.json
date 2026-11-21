@@ -1,0 +1,63 @@
+{
+  "title": "Verificación de identidad por el fundador",
+  "adminTitle": "Expedientes de verificación del fundador",
+  "badge": "Verificado por el fundador",
+  "badgeMeaning": "El administrador fundador de Ayinou confirmó la identidad de este miembro y su control de la cuenta de Ayinou.",
+  "disabled": "La emisión de esta distinción está cerrada. Antes de emitirla, se necesita un proceso aprobado para confirmar la identidad y el control de la cuenta.",
+  "noInvitation": "Esta cuenta no tiene un expediente de verificación por el fundador.",
+  "noAssigned": "No hay expedientes asignados a su autorización de fundador.",
+  "username": "Nombre de usuario del miembro",
+  "receipt": "Comprobante de auditoría",
+  "verifySession": "Verificar con su aplicación de autenticación",
+  "confirm": "Confirmar",
+  "cancel": "Cancelar",
+  "open": "Abrir solicitud de consentimiento",
+  "proofReady": "Constancia de prueba vigente registrada",
+  "proofMissing": "No hay una constancia de prueba vigente",
+  "consentRecorded": "Consentimiento registrado",
+  "consentMissing": "Se requiere consentimiento",
+  "history": "Historial de decisiones y auditoría",
+  "reviewAction": "Decisión",
+  "choose": "Elegir una acción",
+  "noConflict": "No tengo ningún conflicto de intereses en este caso.",
+  "publicChoice": "Mostrar la distinción en mi perfil público si se concede",
+  "consentExplanation": "Acepto que el fundador verifique mi identidad y el control de mi cuenta según la versión {version} de la política. La publicación es opcional. Puedo retirar mi consentimiento.",
+  "correctionPending": "Su solicitud de corrección está pendiente. Debe examinarla una persona independiente de la decisión anterior.",
+  "states": {
+    "consent_pending": "Consentimiento pendiente",
+    "proof_pending": "Prueba pendiente",
+    "ready_for_review": "Listo para revisión",
+    "granted": "Distinción concedida",
+    "held": "Distinción suspendida",
+    "revoked": "Distinción revocada",
+    "denied": "Solicitud denegada",
+    "withdrawn": "Consentimiento retirado"
+  },
+  "actions": {
+    "open": "Expediente abierto",
+    "consent": "Dar consentimiento",
+    "visibility": "Guardar visibilidad",
+    "withdraw": "Retirar consentimiento",
+    "correction": "Solicitar una corrección",
+    "proof_recorded": "Prueba recibida",
+    "grant": "Conceder distinción",
+    "hold": "Suspender distinción",
+    "release": "Levantar suspensión",
+    "revoke": "Revocar distinción",
+    "deny": "Denegar solicitud",
+    "conflict": "Declarar conflicto"
+  },
+  "reasons": {
+    "confirmed": "La identidad y el control de la cuenta se confirmaron mediante el proceso aprobado.",
+    "insufficient_proof": "Falta parte de la prueba necesaria de identidad o control de la cuenta.",
+    "conflict": "Un conflicto de intereses impide que esta persona decida el caso.",
+    "account_risk": "Un problema relacionado con la cuenta o la identidad requiere esta medida.",
+    "member_request": "El miembro solicitó una revisión.",
+    "corrected": "Se corrigió la decisión anterior."
+  },
+  "prompts": {
+    "consent": "Confirme que desea continuar con la revisión del fundador.",
+    "withdraw": "¿Retirar su consentimiento y eliminar de su perfil público la distinción del fundador?",
+    "correction": "¿Solicitar una revisión independiente de esta decisión?"
+  }
+}

@@ -11,6 +11,7 @@ import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { FounderIdentityPanel } from "./founder-identity";
 import { PageHeader } from "./page-header";
 import { MyVerificationAppeals } from "./trust-workspace";
 
@@ -66,6 +67,7 @@ export function VerificationScreen({ initialKind, institution, claim }: {
               </ol>}
           </section>
         </div>
+        <FounderIdentityPanel />
         {applications.data && <MyVerificationAppeals applications={applications.data} />}
       </div>
     </MemberShell>

@@ -8,6 +8,7 @@ import { trustMessages } from "@/lib/trust-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { DisplayControls } from "./display-controls";
 import { AmbassadorRecognition } from "./ambassador-public";
+import { FounderVerifiedBadge } from "./founder-verified-badge";
 import { ProfileFollowPanel } from "./discovery-accounts";
 import { MemberSafetyControls } from "./member-safety";
 import { VerifiedBadge, institutionCard, institutionLink } from "./institution-ui";
@@ -43,6 +44,7 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
           <div className="flex flex-wrap gap-2">{social.personalClaims.map((claim) => <VerifiedBadge key={claim} label={trust[claim]} />)}</div>
           <p className="text-sm text-[var(--theme-body)]">{trust.noEndorsement}</p>
         </div>}
+        {profile.founderVerified && !social.personalClaims?.includes("identity") && <FounderVerifiedBadge />}
         {profile.biography && <p className="mt-4 max-w-prose whitespace-pre-line break-words" dir="auto">{profile.biography}</p>}
         {ambassador && <AmbassadorRecognition ambassador={ambassador} />}
       </section>

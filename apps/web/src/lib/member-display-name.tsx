@@ -9,6 +9,7 @@ import { loadPlatformAccess } from "./admin-api";
 import { browserSupabase } from "./supabase/browser";
 
 type Identity = {
+  memberId: string | null;
   displayName: string | null;
   avatarUrl: string | null;
   setAvatarUrl: (url: string) => void;
@@ -103,6 +104,7 @@ export function MemberDisplayNameProvider({ memberId = null, name, children }: {
   }
 
   return <MemberIdentity.Provider value={{
+    memberId: member,
     displayName: member ? name ?? profile.displayName : null, avatarUrl: member ? profile.avatarUrl : null,
     setAvatarUrl, claims: member ? claims : [], administrator: !!member && access.administrator, reviewer: !!member && access.reviewer,
   }}>{children}</MemberIdentity.Provider>;

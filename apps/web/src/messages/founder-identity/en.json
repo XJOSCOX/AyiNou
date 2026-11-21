@@ -1,0 +1,63 @@
+{
+  "title": "Founder identity",
+  "adminTitle": "Founder identity cases",
+  "badge": "Founder Verified",
+  "badgeMeaning": "Ayinou’s founding administrator confirmed this member’s identity and control of their Ayinou account.",
+  "disabled": "Founder Verified issuance is closed. An approved identity and account-control process is required before any designation can be issued.",
+  "noInvitation": "There is no founder verification case for this account.",
+  "noAssigned": "No cases are assigned to your founder authority.",
+  "username": "Member username",
+  "receipt": "Audit receipt",
+  "verifySession": "Verify with your authenticator",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "open": "Open consent request",
+  "proofReady": "Current proof receipt recorded",
+  "proofMissing": "Current proof receipt unavailable",
+  "consentRecorded": "Consent recorded",
+  "consentMissing": "Consent needed",
+  "history": "Decision and audit history",
+  "reviewAction": "Decision",
+  "choose": "Choose an action",
+  "noConflict": "I have no conflict of interest in this case.",
+  "publicChoice": "Show the designation on my public profile if granted",
+  "consentExplanation": "I agree to Founder Verified identity and account-control review under policy version {version}. Public display is optional. I can withdraw this consent.",
+  "correctionPending": "Your correction request is pending. A reviewer independent of the earlier decision must handle it.",
+  "states": {
+    "consent_pending": "Consent pending",
+    "proof_pending": "Proof pending",
+    "ready_for_review": "Ready for review",
+    "granted": "Granted",
+    "held": "Designation on hold",
+    "revoked": "Designation revoked",
+    "denied": "Request denied",
+    "withdrawn": "Consent withdrawn"
+  },
+  "actions": {
+    "open": "Case opened",
+    "consent": "Give consent",
+    "visibility": "Save visibility",
+    "withdraw": "Withdraw consent",
+    "correction": "Request a correction",
+    "proof_recorded": "Proof received",
+    "grant": "Grant designation",
+    "hold": "Place on hold",
+    "release": "Release hold",
+    "revoke": "Revoke designation",
+    "deny": "Deny request",
+    "conflict": "Declare conflict"
+  },
+  "reasons": {
+    "confirmed": "Identity and control were confirmed through the approved process.",
+    "insufficient_proof": "The required identity or account-control evidence is incomplete.",
+    "conflict": "A conflict prevents this reviewer from making a decision.",
+    "account_risk": "An account or identity concern requires this action.",
+    "member_request": "The member requested review.",
+    "corrected": "The earlier decision was corrected."
+  },
+  "prompts": {
+    "consent": "Confirm your choice to proceed with this founder review.",
+    "withdraw": "Withdraw your consent and remove any public Founder Verified designation?",
+    "correction": "Request independent review of this decision?"
+  }
+}

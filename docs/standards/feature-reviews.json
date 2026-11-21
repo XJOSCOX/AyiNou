@@ -19,8 +19,8 @@
             "detail": "Read-only subject projection. It exposes current state and localized decision codes to the live account owner."
           },
           "authorization": {
-            "file": "apps/api/test/founder-identity.test.ts",
-            "denialScenario": "An unauthenticated request is rejected before reaching the repository."
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "An unauthenticated request is rejected, and another account sees no cases."
           }
         },
         {
@@ -32,8 +32,8 @@
             "detail": "Read-only bounded projection. The assigned authority is checked before history is read."
           },
           "authorization": {
-            "file": "apps/api/test/founder-identity.test.ts",
-            "denialScenario": "An unauthenticated request is rejected before reaching the repository."
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "An ordinary administrator with recent MFA cannot read founder cases."
           }
         },
         {
@@ -45,8 +45,8 @@
             "detail": "The opening event and scoped case commit in the same transaction."
           },
           "authorization": {
-            "file": "apps/api/test/founder-identity.test.ts",
-            "denialScenario": "Strict input validation rejects attempts to supply actor, proof, or founder authority."
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "An ordinary administrator and a founder targeting their own account are denied."
           }
         },
         {
@@ -58,8 +58,8 @@
             "detail": "The consent, disclosure, withdrawal or correction event is the command receipt."
           },
           "authorization": {
-            "file": "apps/api/test/founder-identity.test.ts",
-            "denialScenario": "Strict input validation rejects attempts to supply actor, proof, or founder authority."
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "An authenticated subject cannot consent to another account’s case."
           }
         },
         {
@@ -71,8 +71,8 @@
             "detail": "The scoped decision event and material SQL mutation are committed together."
           },
           "authorization": {
-            "file": "apps/api/test/founder-identity.test.ts",
-            "denialScenario": "Strict input validation rejects attempts to supply actor, proof, or founder authority."
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "Caller-supplied proof fields are rejected and a stale case cannot be granted."
           }
         }
       ],

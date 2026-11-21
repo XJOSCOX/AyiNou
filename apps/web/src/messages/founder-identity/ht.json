@@ -1,0 +1,63 @@
+{
+  "title": "Idantite fondatè a verifye",
+  "adminTitle": "Dosye verifikasyon fondatè a",
+  "badge": "Fondatè a verifye",
+  "badgeMeaning": "Administratè fondatè Ayinou a te konfime idantite manm sa a ak kontwòl li sou kont Ayinou li.",
+  "disabled": "Yo poko ka bay mak verifikasyon fondatè a. Fòk yo apwouve yon pwosedi pou verifye idantite ak kontwòl sou kont lan anvan.",
+  "noInvitation": "Pa gen dosye verifikasyon fondatè pou kont sa a.",
+  "noAssigned": "Pa gen dosye ki asiyen nan kad otorizasyon ou kòm fondatè.",
+  "username": "Non itilizatè manm nan",
+  "receipt": "Resi odit",
+  "verifySession": "Verifye ak aplikasyon otantifikasyon ou",
+  "confirm": "Konfime",
+  "cancel": "Anile",
+  "open": "Louvri demann konsantman an",
+  "proofReady": "Yo anrejistre yon resi prèv ki valab",
+  "proofMissing": "Pa gen resi prèv ki valab",
+  "consentRecorded": "Yo anrejistre konsantman an",
+  "consentMissing": "Konsantman nesesè",
+  "history": "Istwa desizyon ak odit",
+  "reviewAction": "Desizyon",
+  "choose": "Chwazi yon aksyon",
+  "noConflict": "Mwen pa gen okenn konfli enterè nan dosye sa a.",
+  "publicChoice": "Montre mak la sou pwofil piblik mwen si yo ban mwen li",
+  "consentExplanation": "Mwen dakò pou fondatè a verifye idantite mwen ak kontwòl mwen sou kont lan dapre vèsyon {version} règleman an. Montre mak la an piblik se yon chwa. Mwen ka retire konsantman mwen.",
+  "correctionPending": "Demann koreksyon ou an ap tann. Se yon moun ki pa t patisipe nan desizyon anvan an ki dwe egzamine l.",
+  "states": {
+    "consent_pending": "Ap tann konsantman",
+    "proof_pending": "Ap tann prèv",
+    "ready_for_review": "Pare pou egzamen",
+    "granted": "Yo bay mak la",
+    "held": "Mak la sou poz",
+    "revoked": "Yo retire mak la",
+    "denied": "Yo refize demann nan",
+    "withdrawn": "Konsantman an retire"
+  },
+  "actions": {
+    "open": "Dosye a louvri",
+    "consent": "Bay konsantman",
+    "visibility": "Anrejistre chwa afichaj la",
+    "withdraw": "Retire konsantman",
+    "correction": "Mande yon koreksyon",
+    "proof_recorded": "Yo resevwa prèv",
+    "grant": "Bay mak la",
+    "hold": "Mete mak la sou poz",
+    "release": "Retire poz la",
+    "revoke": "Retire mak la",
+    "deny": "Refize demann nan",
+    "conflict": "Deklare yon konfli"
+  },
+  "reasons": {
+    "confirmed": "Yo konfime idantite ak kontwòl sou kont lan dapre pwosedi apwouve a.",
+    "insufficient_proof": "Prèv ki nesesè sou idantite oswa kontwòl sou kont lan pa konplè.",
+    "conflict": "Yon konfli enterè anpeche responsab la pran yon desizyon.",
+    "account_risk": "Gen yon pwoblèm ak kont lan oswa idantite a ki mande aksyon sa a.",
+    "member_request": "Manm nan mande yon egzamen.",
+    "corrected": "Yo korije desizyon anvan an."
+  },
+  "prompts": {
+    "consent": "Konfime ou dakò pou fondatè a fè egzamen sa a.",
+    "withdraw": "Retire konsantman ou epi retire tout mak verifikasyon fondatè sou pwofil piblik ou?",
+    "correction": "Mande yon moun endepandan egzamine desizyon sa a?"
+  }
+}
