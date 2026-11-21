@@ -4,6 +4,8 @@
 
 Revision brief for the preserved English drafts. Priority statuses and recommendation approval are in the [decision register](POLICY_DECISIONS.md). Sources for jurisdictional questions were reviewed November 20, 2026. Use the existing terms, privacy and community drafts as editorial starting points. Link specialized rules from a single canonical clause. Define conflicts and precedence at approval rather than copying obligations across documents.
 
+L4 has prepared the expanded English drafts and specialized policies. Use the [draft inventory](L4_FINAL_REPORT.md#draft-inventory), [shared terminology](L4_POLICY_GLOSSARY.md) and [approval register](L4_APPROVAL_AND_GAP_REGISTER.md) for the current review. Keep the future capability annex and governance instruments out of the public agreement.
+
 ## Terms revision map
 
 | Section for counsel | Verified behavior to carry forward | Changes or approval needed before a final clause |

@@ -287,6 +287,7 @@ Feature development pauses here for owner review of the engineering results and 
 - Legal L3.3 adds field-allowlisted synthetic exports with encrypted artifacts and authenticated downloads. Real export availability, legally approved disclosure categories and account erasure need separate approval. [L3.3 implementation report](docs/privacy/L3_3_IMPLEMENTATION_REPORT.md)
 - Legal L3.4 adds deletion dependency plans, independent synthetic hold authority and reversible reconciliation. Live erasure and retention enforcement are disabled. [L3.4 implementation report](docs/privacy/L3_4_IMPLEMENTATION_REPORT.md)
 - Legal L3.5 verifies synthetic intake, export and lifecycle boundaries. Production privacy operations, provider-backed restoration, legal-policy readiness and public launch remain blocked. Owner review precedes L4 policy revisions. [L3.5 verification and readiness](docs/privacy/L3_5_FINAL_VERIFICATION.md)
+- Legal L4 expands the English core policies and prepares specialized policy, internal governance, and future-capability drafts. Everything remains pending owner and qualified legal review. L5 translation and approval preparation is a separate milestone. [L4 report](docs/legal/L4_FINAL_REPORT.md) · [Approval register](docs/legal/L4_APPROVAL_AND_GAP_REGISTER.md)
 
 - [ ] Scope and acceptance criteria documented
 - [ ] Typecheck, lint, unit/integration tests and build pass locally
