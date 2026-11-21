@@ -187,3 +187,7 @@ L3.3 adds a separate export gate and fixture allowlist. Fastify verifies the sub
 ### Synthetic account lifecycle
 
 L3.4 adds a synthetic-only planning gate independent of export. A received closure or deletion case can preview coarse warning codes and save a private versioned snapshot. Recent TOTP is required to save or confirm. The database binds the snapshot to the live subject and checks the case version, dependencies and evidence holds before simulation. Case-scoped test authorities are distinct from platform administration. The execution journal only changes two fictional markers. No lifecycle service invokes Auth removal, Storage mutation, account restrictions or production data erasure. [L3.4 implementation report](privacy/L3_4_IMPLEMENTATION_REPORT.md)
+# Legal Center (L6.1)
+
+Public legal routes read only `apps/web/src/lib/legal/published-releases.json`, which starts empty. `publication.ts` validates immutable packages against separately trusted evidence; no `docs/legal` working draft is imported by runtime code. See [L6.1 architecture](legal/L6_1_LEGAL_CENTER_ARCHITECTURE.md) and [security model](legal/L6_1_PUBLICATION_SECURITY_MODEL.md).
+

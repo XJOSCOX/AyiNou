@@ -117,3 +117,7 @@ The checked-in fixture comes from the Phase 6F.5 baseline. To inspect or reprodu
 ## Releases
 
 A GitHub push is not a deployment. Production hosting is postponed until explicit approval. Use Git tags for stable milestones if helpful; tags do not create branches or pull requests.
+# Legal publication boundary (L6.1)
+
+Committing a legal draft, passing translation tests, or building the site does not approve or publish it. Production release and evidence registries remain empty. Run `npm run test:legal-center` and `python scripts/validate-legal-l5.py` before any legal code change; CI enforces both. L6.2 requires separate owner, legal and publication decisions. See [L6.1 security model](legal/L6_1_PUBLICATION_SECURITY_MODEL.md).
+

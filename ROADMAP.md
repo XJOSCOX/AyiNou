@@ -301,3 +301,7 @@ Feature development pauses here for owner review of the engineering results and 
 ## Not included at launch
 
 Cryptocurrency, direct cash custody, official elections, algorithmic truth-by-majority, unattended crisis mapping, unverified celebrity endorsements, or sensitive-location tracking.
+# L6.1 Legal Center infrastructure
+
+Public, anonymous legal routes and a fail-closed empty release registry are implemented. Actual policy publication and versioned acceptance remain gated for L6.2. See [L6.1 report](docs/legal/L6_1_IMPLEMENTATION_REPORT.md).
+

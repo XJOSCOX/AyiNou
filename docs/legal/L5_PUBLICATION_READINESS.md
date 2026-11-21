@@ -18,3 +18,7 @@ Every gate currently fails or lacks evidence. This checklist reports readiness; 
 | Authorized publication decision and rollback/archive procedure | Pending. |
 
 An automated check may reject missing files, section IDs, placeholders, hashes or links. Passing it does not demonstrate legal equivalence, accurate local law or authorization. No policy package should change to approved merely because a script returns zero. Real privacy intake, export, account closure, erasure and retention enforcement remain unavailable. The future Early Partner Program, organization signup choice, Founder Verified, beneficiary programs and medical referrals remain unimplemented.
+# L6.1 update
+
+The Legal Center shell and an empty publication registry are implemented. This does not change any L5 readiness gate: all translations remain working drafts and no policy is published, effective, or accepted. See [L6.1 report](L6_1_IMPLEMENTATION_REPORT.md).
+
