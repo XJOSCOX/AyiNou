@@ -316,6 +316,7 @@ The platform administrator can inspect versioned publication settings and audit 
 - [x] O1 design and database impact review. [Architecture](docs/organizations/O1_ONBOARDING_ARCHITECTURE.md) · [Owner decisions](docs/organizations/O1_OWNER_DECISION_BRIEF.md)
 - [x] O2 personal signup paths and resumable organization intent. [Implementation report](docs/organizations/O2_IMPLEMENTATION_REPORT.md)
 - [x] O3 Founder Verified provenance and synthetic lifecycle. Real issuance awaits separate approval.
+- [x] [Archive regular identity applications after a Founder Verified grant](docs/organizations/FOUNDER_APPLICATION_CLOSURE_IMPLEMENTATION_REPORT.md). The migration is applied in hosted development with issuance disabled.
 - [x] [O4 identity-gated setup](docs/organizations/O4_IMPLEMENTATION_REPORT.md), private registration declarations and reviewed claims. Hosted rollout awaits approval.
 - [ ] O5 safe pathway corrections, bootstrap governance and succession.
 - [ ] O6 Early Partner Program.

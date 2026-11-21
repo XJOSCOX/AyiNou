@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { governmentKinds, verificationKinds, type InstitutionAccounts, type VerificationKind } from "@ayinou/shared";
+import { type Locale, governmentKinds, verificationKinds, type InstitutionAccounts, type VerificationApplication, type VerificationKind } from "@ayinou/shared";
 import { authMessages } from "@/lib/auth-i18n";
 import { apiErrorCode } from "@/lib/api-errors";
 import { loadApplications, loadInstitutionAccounts, submitVerification } from "@/lib/institution-api";
-import { institutionError, institutionMessages } from "@/lib/institution-i18n";
+import { institutionError, institutionMessages, type InstitutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedBadge } from "./institution-ui";
@@ -51,20 +51,7 @@ export function VerificationScreen({ initialKind, institution }: {
               <p role="alert" className={institutionErrorBox}>{institutionError(t, applications.error)}</p>
               <button type="button" className={`${institutionLink} mt-3`} onClick={applications.refresh}>{auth.retry}</button>
             </div> : !applications.data ? <p role="status" className="mt-3">{auth.working}</p>
-              : applications.data.length === 0 ? <p className="mt-3 text-[var(--theme-body)]">{t.noApplications}</p>
-              : <ol className="mt-3 divide-y divide-[var(--theme-border)]">
-                {applications.data.map((app) => <li key={app.id} className="py-3">
-                  <p className="break-words font-semibold">{t[app.kind]}{app.organizationName && ` · ${app.organizationName}`}</p>
-                  <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-[var(--theme-link)]">
-                    {app.status === "approved" ? <VerifiedBadge label={t.approved} /> : <span>{t[app.status]}</span>}
-                    <time dateTime={app.createdAt}>{new Date(app.createdAt).toLocaleDateString(locale)}</time>
-                  </p>
-                  {app.status === "pending" && app.eligibleApprovals != null && <p className="mt-1 text-sm">
-                    {trust.approvalProgress.replace("{count}", String(app.eligibleApprovals))}
-                  </p>}
-                  {app.rationale && <p className="mt-2 whitespace-pre-line break-words text-sm text-[var(--theme-body)]">{app.rationale}</p>}
-                </li>)}
-              </ol>}
+              : <ApplicationHistory applications={applications.data} locale={locale} messages={t} />}
           </section>
         </div>
         <FounderIdentityPanel />
@@ -72,6 +59,38 @@ export function VerificationScreen({ initialKind, institution }: {
       </div>
     </MemberShell>
   );
+}
+
+function ApplicationHistory({ applications, locale, messages: t }: {
+  applications: VerificationApplication[]; locale: Locale; messages: InstitutionMessages;
+}) {
+  if (applications.length === 0) return <p className="mt-3 text-[var(--theme-body)]">{t.noApplications}</p>;
+  const pending = applications.filter((app) => app.status === "pending");
+  const history = applications.filter((app) => app.status !== "pending");
+
+  function renderApplication(app: VerificationApplication) {
+    return <li key={app.id} className="grid gap-1 py-3 text-sm">
+      <p className="break-words font-semibold">{t[app.kind]}{app.organizationName && ` · ${app.organizationName}`}</p>
+      <p className="text-[var(--theme-link)]">
+        {app.status === "approved" ? <VerifiedBadge label={t.approved} /> : t[app.status]}
+      </p>
+      <p>{t.applicationSubmitted} <time dateTime={app.createdAt}>{new Date(app.createdAt).toLocaleString(locale)}</time></p>
+      {app.decidedAt && <p>{t.applicationResolved} <time dateTime={app.decidedAt}>{new Date(app.decidedAt).toLocaleString(locale)}</time></p>}
+      {app.status === "pending" && app.eligibleApprovals != null && <p>
+        {trustMessages[locale].approvalProgress.replace("{count}", String(app.eligibleApprovals))}
+      </p>}
+      {app.status === "closed" && <p className="text-[var(--theme-body)]">{t.founderClosureReason}</p>}
+      {app.rationale && <p className="whitespace-pre-line break-words text-[var(--theme-body)]">{app.rationale}</p>}
+    </li>;
+  }
+
+  return <>
+    {pending.length > 0 && <ol className="mt-3 divide-y divide-[var(--theme-border)]">{pending.map(renderApplication)}</ol>}
+    {history.length > 0 && <details className="mt-3 border-t border-[var(--theme-border)] pt-3">
+      <summary className="cursor-pointer font-semibold">{t.applicationHistory}</summary>
+      <ol className="mt-2 divide-y divide-[var(--theme-border)]">{history.map(renderApplication)}</ol>
+    </details>}
+  </>;
 }
 
 function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {

@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { invitedRoles, organizationKinds, reviewDecisions, verificationKinds, type InstitutionInput,
+import { invitedRoles, organizationKinds, reviewDecisions, reviewQueueModes, verificationKinds, type InstitutionInput,
   type ReviewApplication, type VerificationApplication, type VerificationStatus, type VerifiedRepresentatives } from "@ayinou/shared";
 import { z } from "zod";
 import type { AuthVerifier } from "../services/auth.js";
@@ -138,7 +138,7 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
         if (await auth?.verify(request.authToken!, true) !== request.authUserId) throw new InstitutionError("MFA_REQUIRED", 403);
       });
       reviewer.get("/api/v1/verification/review", async (request) => {
-        const { status } = z.object({ status: z.enum(["pending", "assigned", "approved", "rejected", "revoked"]).default("pending") }).parse(request.query);
+        const { status } = z.object({ status: z.enum(reviewQueueModes).default("pending") }).parse(request.query);
         return { applications: await service.rpc<ReviewApplication[]>("verification_queue_for_api", { p_actor: request.authUserId, p_status: status }) };
       });
       reviewer.patch("/api/v1/verification/review/:id/work", { bodyLimit: 256 }, async (request, reply) => {

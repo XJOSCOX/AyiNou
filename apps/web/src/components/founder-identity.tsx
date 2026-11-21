@@ -16,17 +16,13 @@ import { institutionAction, institutionCard, institutionField, institutionLink, 
 
 type Review = { action: FounderReviewAction; reason: NonNullable<FounderIdentityCase["decision"]> };
 type Send = (path: string, body: Record<string, unknown>) => Promise<void>;
+const activeStates: ReadonlySet<FounderIdentityCase["state"]> = new Set([
+  "consent_pending", "proof_pending", "ready_for_review", "held",
+]);
 
 export function FounderIdentityPanel({ admin = false }: { admin?: boolean }) {
   const { memberId } = useMemberIdentity();
-  const [locale] = useLocale();
-  const t = founderMessages[locale];
-  return <section className={`${institutionCard} grid gap-4`} aria-label={admin ? t.adminTitle : t.title}>
-    <h2 className="text-xl font-semibold">{admin ? t.adminTitle : t.title}</h2>
-    <p className="max-w-prose text-sm text-[var(--theme-body)]">{t.badgeMeaning}</p>
-    {memberId ? <FounderCases key={memberId} actor={memberId} admin={admin} />
-      : <p role="status">{authMessages[locale].working}</p>}
-  </section>;
+  return memberId ? <FounderCases key={memberId} actor={memberId} admin={admin} /> : null;
 }
 
 function FounderCases({ actor, admin }: { actor: string; admin: boolean }) {
@@ -73,12 +69,25 @@ function FounderCases({ actor, admin }: { actor: string; admin: boolean }) {
   };
 
   const fault = error ?? resource.error;
-  return <>
-    {fault && <ApiErrorNotice error={fault} retry={resource.refresh} signIn />}
+  const notDeployed = apiErrorCode(fault) === "FOUNDER_IDENTITY_NOT_DEPLOYED";
+  const reviewAccessRequired = admin && !resource.data && apiErrorCode(resource.error) === "FORBIDDEN";
+  if (!admin && !resource.data?.cases.length && (!fault || notDeployed)) return null;
+
+  const title = admin ? t.adminTitle : t.title;
+  const activeCases = resource.data?.cases.filter((item) => activeStates.has(item.state)) ?? [];
+  const caseHistory = resource.data?.cases.filter((item) => !activeStates.has(item.state)) ?? [];
+  const renderCase = (item: FounderReviewCase) => <FounderCase key={item.id + ":" + item.version} item={item}
+    admin={admin} busy={busy} enabled={resource.data?.issuanceEnabled === true} send={send} />;
+  return <section className={`${institutionCard} grid gap-4`} aria-label={title}>
+    <h2 className="text-xl font-semibold">{title}</h2>
+    {reviewAccessRequired ? <p role="status" className="max-w-prose text-sm">{t.reviewAccessRequired}</p>
+      : notDeployed ? <p role="status">{t.notDeployed}</p>
+      : fault != null && <ApiErrorNotice error={fault} retry={resource.refresh} signIn />}
     {admin && apiErrorCode(fault) === "MFA_REQUIRED" && <Link className={institutionLink} href="/mfa?next=/admin">{t.verifySession}</Link>}
     {!resource.data && !fault && <p role="status">{authMessages[locale].working}</p>}
     {resource.data && <>
       {!resource.data.issuanceEnabled && <p role="status" className="max-w-prose text-sm">{t.disabled}</p>}
+      {admin && <p className="max-w-prose text-sm">{t.openHelp}</p>}
       {admin && <form className="flex flex-wrap items-end gap-3" onSubmit={(event) => {
         event.preventDefault();
         void send("", { username: username.trim().toLowerCase(), reason: "member_request" });
@@ -90,12 +99,17 @@ function FounderCases({ actor, admin }: { actor: string; admin: boolean }) {
         <button className={institutionAction} disabled={busy}>{t.open}</button>
       </form>}
       {receipt && <p role="status" className="break-words text-sm">{t.receipt} <code>{receipt.auditId}</code></p>}
-      {!resource.data.cases.length && <p>{admin ? t.noAssigned : t.noInvitation}</p>}
-      {resource.data.cases.map((item) =>
-        <FounderCase key={item.id + ":" + item.version} item={item} admin={admin} busy={busy}
-          enabled={resource.data!.issuanceEnabled} send={send} />)}
+      {admin && !resource.data.cases.length && <p>{t.noAssigned}</p>}
+      {activeCases.length > 0 && <section aria-label={t.activeCases} className="grid gap-3">
+        <h3 className="font-semibold">{t.activeCases}</h3>
+        {activeCases.map(renderCase)}
+      </section>}
+      {caseHistory.length > 0 && <details className="rounded-md border border-[var(--theme-border)] p-3 sm:p-4">
+        <summary className="cursor-pointer font-semibold">{t.caseHistory}</summary>
+        <div className="mt-3 grid gap-3">{caseHistory.map(renderCase)}</div>
+      </details>}
     </>}
-  </>;
+  </section>;
 }
 
 function reviewActions(item: FounderReviewCase, enabled: boolean): Review[] {
@@ -140,6 +154,9 @@ function FounderCase({ item, admin, enabled, busy, send }: {
   return <article className="grid min-w-0 gap-3 rounded-md border border-[var(--theme-border)] p-3 sm:p-4">
     <h3 className="break-words font-semibold">{admin && item.username ? `@${item.username} · ` : ""}{t.states[item.state]}</h3>
     {item.decision && <p className="text-sm">{t.reasons[item.decision]}</p>}
+    {!activeStates.has(item.state) && <p className="text-sm text-[var(--theme-body)]">
+      {t.lastUpdated} · <time dateTime={item.updatedAt}>{new Date(item.updatedAt).toLocaleString(locale)}</time>
+    </p>}
     {item.correctionPending && <p className="max-w-prose text-sm">{t.correctionPending}</p>}
     {admin ? <>
       <p className="text-sm">{item.consented ? t.consentRecorded : t.consentMissing} · {item.proofReady ? t.proofReady : t.proofMissing}</p>
@@ -165,6 +182,7 @@ function FounderCase({ item, admin, enabled, busy, send }: {
           {item.history.map((entry) => <li key={entry.id} className="break-words">
             {t.actions[entry.action]} · <time dateTime={entry.occurredAt}>{new Date(entry.occurredAt).toLocaleString(locale)}</time>
             {" · "}<code>{entry.id}</code>
+            {entry.reason && entry.action !== "open" && <p className="mt-1 text-[var(--theme-body)]">{t.reasons[entry.reason]}</p>}
           </li>)}
         </ul>
       </details>

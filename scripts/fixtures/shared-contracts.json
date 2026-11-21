@@ -255,11 +255,11 @@
     "ReferralSummary": "type:cf12fff9648cb304cadd2c4bf0fe26971044eb71092751249b76a501b602e8e4",
     "reportCategories": "value:570a996fda6721611bbf86711e71e99280b9f5b08512ba0699dfbfe119e76ea2",
     "ReportCategory": "type:f505c2ddd6dce47e3a6108421d771028c12c6698204d1d45f59a83068abd6c99",
-    "ReviewApplication": "type:5443f9c9ae438e3138a160f9edcedd960debe932d60bc90900bbffb1398612ef",
+    "ReviewApplication": "type:202f941d8fbde7668102ce13232911e23fd71cb8e04bb103fc2500ebc838c502",
     "ReviewDecision": "type:5ca6e29158541858c39d8be8a957dfe33b084ca5da4b1b72e5a57606f8d8204b",
     "reviewDecisions": "value:4f6d5aad6b31fe1496a14de164416653068a88953e267a8e437cbd24e8f46d09",
     "ReviewQueueMode": "type:c5706261237ed6ceabd4300a9446c768933a3ac642ea88c9f90d8e6512bb1e3b",
-    "reviewQueueModes": "value:5a0174121085e6d5554b82d201a50f37fb90fa76c6805ec5fe6b4d1f27424356",
+    "reviewQueueModes": "value:1c2449683981396432c5fd8472db1c6b119ee092137eafd2b6fde9af04bd59f5",
     "SafetyOverview": "type:80df23c82d201cbb6949b16421e3175b88f31cda3956831f705d42f2ef703b74",
     "ServiceState": "type:8e4e093967250fcb588cdee02424bfe167060ee6e7dedf5ac5db47e6fbfb841e",
     "SignupPath": "type:c249b0e99290040736a8305eb062808769e3a3fd4b97384fae6c9aff4bbbecb5",
@@ -272,7 +272,7 @@
     "VerificationAssignment": "type:6a2e94eda1d819c5c869e1f981a684b37b2d7b1530c10be97a376e28e58d0858",
     "VerificationKind": "type:c9ea5fcff649971cb2982a100656b0d569dd60faaba1e8e25d5ea7e22e5e0474",
     "verificationKinds": "value:c93d14eefb9c0e90e975d6c988eec66cb38f31955455b312bb3691855041cdf0",
-    "VerificationStatus": "type:55cc0d8ac6bf0e410b154e6fc28de0b7b46a0680c6aedb5583f585d977a0cd90",
+    "VerificationStatus": "type:8ed940092989a0d58bfe3ab2dc780dbe6dcb43f54ad416b090abcad67746580f",
     "VerifiedRepresentatives": "type:35d2e1ecf5c46c90907dd17200558c65dd040423daef25a5259b6f239297ec9b"
   },
   "privateTypes": {
@@ -723,7 +723,8 @@
       "assigned",
       "approved",
       "rejected",
-      "revoked"
+      "revoked",
+      "closed"
     ],
     "verificationAppealOutcomes": [
       "upheld",

@@ -102,10 +102,15 @@ function ReviewCard({ item, refresh }: { item: ReviewApplication; refresh: () =>
         ? <AdminFeedback error={failed} next="/verification/review" />
         : <p role="alert" className={institutionErrorBox}>{failed instanceof Error && ["VERIFICATION_ASSIGNMENT_REQUIRED", "CLAIM_APPROVAL_HELD"].includes(failed.message)
           ? localizedApiError(locale, failed) : institutionError(t, failed)}</p>)}
-      {item.assignmentRequired && !item.assignedToMe && <p className="mt-2 text-sm">{trustMessages[locale].assignmentRequired}</p>}
+      {item.status === "closed" && <div className="mt-2 grid gap-1 text-sm">
+        <p>{t.founderClosureReason}</p>
+        <p>{t.applicationSubmitted} <time dateTime={item.createdAt}>{new Date(item.createdAt).toLocaleString(locale)}</time></p>
+        {item.decidedAt && <p>{t.applicationResolved} <time dateTime={item.decidedAt}>{new Date(item.decidedAt).toLocaleString(locale)}</time></p>}
+      </div>}
+      {item.status !== "closed" && item.assignmentRequired && !item.assignedToMe && <p className="mt-2 text-sm">{trustMessages[locale].assignmentRequired}</p>}
       {item.eligibleReviewers != null && item.eligibleReviewers < 2 && item.status === "pending" &&
         <p className="mt-2 text-sm">{trustMessages[locale].reviewersNeeded}</p>}
-      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+      {(item.status !== "closed" || item.assignedToMe) && <div className="mt-4 grid gap-4 xl:grid-cols-2">
         <div>
           <h3 className="font-semibold">{t.evidence}</h3>
           <ul className="mt-2 space-y-1">{item.evidence.map((url) => <li key={url} className="break-all">
@@ -129,7 +134,7 @@ function ReviewCard({ item, refresh }: { item: ReviewApplication; refresh: () =>
           {saved && <p role="status" className="text-sm">{t.reviewRecorded}</p>}
           <button type="submit" disabled={busy} className={institutionAction}>{t.submitDecision}</button>
         </form>}
-      </div>
+      </div>}
     </article>
   );
 }

@@ -82,7 +82,7 @@ const sid = JSON.parse(Buffer.from(session.access_token.split(".")[1], "base64ur
 assert.match(user, uuid);
 assert.match(sid, uuid);
 const versionSql = "select count(*) || ':' || max(version) from supabase_migrations.schema_migrations;";
-assert.equal(sql(source, versionSql), "67:20261121070000");
+assert.equal(sql(source, "select count(*) || ':' || max(version) from supabase_migrations.schema_migrations where version <= '20261121070000';"), "67:20261121070000");
 
 sql(source, `
   insert into private.organizations(id,handle,name,kind,country_code,created_by)

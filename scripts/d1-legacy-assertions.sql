@@ -5,7 +5,7 @@ declare
   editor_id constant uuid := 'd1000000-0000-4000-8000-000000000002';
   org_id constant uuid := 'd1000000-0000-4000-8000-000000000003';
 begin
-  if (select max(version) from supabase_migrations.schema_migrations) <> '20261121070000'
+  if (select max(version) from supabase_migrations.schema_migrations where version <= '20261121070000') <> '20261121070000'
     or (select count(*) from supabase_migrations.schema_migrations where version between '20261121020000' and '20261121070000') <> 6
     or not exists (select 1 from private.organizations where id=org_id and handle='d1-disposable-legacy'
       and created_by=owner_id and claimed_registration_status='unknown' and registration_version=0)

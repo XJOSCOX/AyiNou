@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } from "@ayinou/shared";
+import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
 import { messages } from "../src/lib/i18n";
 import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
@@ -90,6 +91,24 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
   await apiCall(member, adminPath, 403);
   assign(founder);
   await apiCall(founder, adminPath, 403, "POST", { username: founder.handle, requestId: randomUUID(), reason: "member_request" });
+  const applicationsPath = "/api/v1/me/verification";
+  const reviewQueue = "/api/v1/verification/review";
+  const evidence = "https://example.org/synthetic-identity";
+  const { id: applicationId } = await apiCall(member, applicationsPath, 201, "POST", {
+    organizationId: null, kind: "identity", evidence: [evidence],
+  });
+  const { id: publicFigureId } = await apiCall(member, applicationsPath, 201, "POST", {
+    organizationId: null, kind: "notable_person", evidence: ["https://example.org/synthetic-figure", "https://example.net/synthetic-figure"],
+  });
+  const { id: otherApplicationId } = await apiCall(other, applicationsPath, 201, "POST", {
+    organizationId: null, kind: "identity", evidence: [evidence],
+  });
+  await apiCall(member, reviewQueue + "?status=closed", 403);
+  await apiCall(ordinaryAdmin, reviewQueue + "?status=closed", 403);
+  sql(`insert into private.verification_reviewers(user_id) values ('${ordinaryAdmin.id}');`);
+  expect((await apiCall(ordinaryAdmin, reviewQueue, 200)).applications).toContainEqual(
+    expect.objectContaining({ id: applicationId, status: "pending" }));
+  await apiCall(ordinaryAdmin, reviewQueue + "/" + applicationId + "/work", 204, "PATCH", { claim: true });
   const { caseId } = await openCase(founder, member);
   const mine = actionPath(ownerPath, caseId);
   const review = actionPath(adminPath, caseId);
@@ -142,11 +161,36 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
     expect(() => recordProof(caseId, true)).toThrow();
     recordProof(caseId);
     await apiCall(founder, review, 409, "POST", decision("grant", 2, "confirmed"));
+    expect((await apiCall(member, applicationsPath, 200)).applications).toContainEqual(
+      expect.objectContaining({ id: applicationId, status: "pending" }));
     const payload = decision("grant", 3, "confirmed");
     const first = await apiCall(founder, review, 200, "POST", payload);
     expect(await apiCall(founder, review, 200, "POST", payload)).toEqual(first);
     await apiCall(founder, review, 409, "POST", { ...payload, expectedVersion: 4 });
     await apiCall(founder, review, 409, "POST", decision("grant", 4, "confirmed"));
+    const applications = (await apiCall(member, applicationsPath, 200)).applications;
+    expect(applications).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: applicationId, status: "closed", decidedAt: expect.any(String), canAppeal: false }),
+      expect.objectContaining({ id: publicFigureId, status: "pending" }),
+    ]));
+    expect((await apiCall(ordinaryAdmin, reviewQueue, 200)).applications.map((app: { id: string }) => app.id))
+      .not.toContain(applicationId);
+    expect((await apiCall(ordinaryAdmin, reviewQueue + "?status=closed", 200)).applications).toContainEqual(
+      expect.objectContaining({ id: applicationId, status: "closed", evidence: [evidence], decidedAt: expect.any(String) }));
+    await apiCall(ordinaryAdmin, reviewQueue + "/" + applicationId, 409, "POST", {
+      decision: "approve", conflictFree: true, rationale: "Synthetic stale approval must fail.",
+    });
+    expect(sql(`select a.status || ':' || coalesce(e.action,'missing') || ':' || coalesce(e.reason,'missing')
+      from private.verification_applications a left join private.founder_identity_events e on e.id=a.closed_by_founder_event_id
+      where a.id='${applicationId}';`)).toBe("closed:grant:confirmed");
+    expect(sql(`select status from private.verification_applications where id='${otherApplicationId}';`)).toBe("pending");
+    await page.reload();
+    await panel.getByText(founderMessages.en.caseHistory, { exact: true }).click();
+    await expect(panel.getByText(founderMessages.en.states.granted, { exact: true })).toBeVisible();
+    const t = institutionMessages.en;
+    await expect(page.getByText(t.founderClosureReason)).toBeHidden();
+    await page.getByText(t.applicationHistory, { exact: true }).click();
+    await expect(page.getByText(t.founderClosureReason)).toBeVisible();
     expect(await publicProfile(member)).toMatchObject({ founderVerified: true });
     expect(sql(`select private.organization_setup_founder_candidate('${member.id}')::text || ':' ||
       private.organization_setup_identity_eligible('${member.id}')::text;`)).toBe("true:false");
@@ -179,12 +223,16 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
       '{"scope":"individual","creator_id":"${founder.id}","eligibility":"verified"}'),'${member.id}')::text;`)).toBe("true:false");
     await guest.goto("/members/" + member.handle);
     await expect(guest.getByText(founderMessages.en.badge, { exact: true })).toBeVisible();
+    const badgeIcon = guest.locator('img[src="/founder-verified.png"]');
+    await expect(badgeIcon).toBeVisible();
+    await expect.poll(() => badgeIcon.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
 
     await apiCall(founder, review, 200, "POST", decision("hold", 4, "account_risk"));
     expect(await publicProfile(member)).not.toHaveProperty("founderVerified");
     expect((await apiCall(founder, discoveryPath, 200)).accounts).toEqual(discovery.accounts);
     await guest.reload();
     await expect(guest.getByText(founderMessages.en.badge, { exact: true })).toHaveCount(0);
+    await expect(badgeIcon).toHaveCount(0);
     await apiCall(founder, review, 409, "POST", decision("release", 5, "confirmed"));
     recordProof(caseId);
     await apiCall(founder, review, 200, "POST", decision("release", 6, "confirmed"));
@@ -196,6 +244,8 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
     expect(await publicProfile(member)).not.toHaveProperty("founderVerified");
     await apiCall(member, mine, 200, "POST", { ...version(10), action: "correction" });
     expect((await apiCall(member, ownerPath, 200)).cases[0]).toMatchObject({ correctionPending: true, state: "revoked" });
+    expect((await apiCall(member, applicationsPath, 200)).applications).toContainEqual(
+      expect.objectContaining({ id: applicationId, status: "closed" }));
     expect(sql(`select count(*) from private.founder_identity_grants where case_id='${caseId}';`)).toBe("1");
     expect(sql(`select count(*) from private.founder_identity_events e join private.founder_identity_cases c
       on c.id=e.case_id where c.id='${caseId}' and e.case_version<=c.version;`)).toBe("11");
@@ -241,7 +291,11 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
       await staff.goto("/admin");
       await staff.getByRole("button", { name: founderMessages.en.adminTitle }).click();
       const workspace = staff.getByRole("region", { name: founderMessages.en.adminTitle });
-      await expect(workspace.getByText("@" + member.handle + " · " + founderMessages.en.states.revoked)).toBeVisible();
+      await workspace.getByText(founderMessages.en.caseHistory, { exact: true }).click();
+      const archived = workspace.getByRole("article").filter({ hasText: "@" + member.handle });
+      await expect(archived.getByText("@" + member.handle + " · " + founderMessages.en.states.revoked)).toBeVisible();
+      await archived.getByText(founderMessages.en.history, { exact: true }).click();
+      await expect(archived.getByText(founderMessages.en.reasons.confirmed, { exact: false })).not.toHaveCount(0);
       await expect(workspace.getByText(founderMessages.en.correctionPending)).toBeVisible();
     } finally {
       await staffContext.close();
@@ -253,3 +307,86 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
     await guestContext.close();
   }
 });
+
+founderTest("an assigned founder reviewer opens consent without a member application", async ({
+  page, makeMember, administrators: { founder },
+}) => {
+  const member = await makeMember();
+  finishPersonalOnboarding(founder);
+  await inEnglish(page.context());
+  await login(page, founder);
+  await solveMfa(page, founder.secret);
+  await page.goto("/admin");
+  const t = founderMessages.en;
+  const tab = page.getByRole("button", { name: t.adminTitle, exact: true });
+  const panel = page.getByRole("region", { name: t.adminTitle, exact: true });
+  await tab.click();
+  await expect(panel.getByRole("status")).toHaveText(t.reviewAccessRequired);
+  await expect(panel.getByLabel(t.username)).toHaveCount(0);
+
+  assign(founder);
+  await page.reload();
+  await tab.click();
+  await expect(panel.getByText(t.openHelp)).toBeVisible();
+  await expect(panel.getByText(t.disabled)).toBeVisible();
+  expect(sql(`select count(*) from private.verification_applications where applicant_id='${member.id}';`)).toBe("0");
+  await panel.getByLabel(t.username).fill(member.handle);
+  await panel.getByRole("button", { name: t.open, exact: true }).click();
+  await expect(panel.getByText("@" + member.handle + " · " + t.states.consent_pending)).toBeVisible();
+  const { cases } = await apiCall(member, ownerPath, 200) as FounderIdentityQueue;
+  expect(cases[0]).toMatchObject({ state: "consent_pending", consented: false });
+  expect(sql(`select count(*) from private.verification_applications where applicant_id='${member.id}';`)).toBe("0");
+});
+
+founderTest("Founder identity hides empty member panels and reports a missing migration only in administration",
+  async ({ page, browser, makeMember, administrators: { founder } }) => {
+    const member = await makeMember();
+    finishPersonalOnboarding(member);
+    finishPersonalOnboarding(founder);
+    await inEnglish(page.context());
+    await login(page, member);
+    await expect(page).toHaveURL(/\/dashboard/);
+
+    async function openVerification(current: typeof page, status: number) {
+      const response = current.waitForResponse((result) => result.url() === api + ownerPath && result.request().method() === "GET");
+      await current.goto("/verification");
+      expect((await response).status()).toBe(status);
+      await expect(current.getByRole("region", { name: founderMessages.en.title, exact: true })).toHaveCount(0);
+      await expect(current.getByText(founderMessages.en.badgeMeaning)).toHaveCount(0);
+    }
+
+    await openVerification(page, 200);
+    const rpc = "public.founder_identity_read_for_api(uuid,uuid,boolean,bigint,boolean)";
+    sql(`alter function ${rpc} rename to founder_identity_read_disposable;
+      notify pgrst, 'reload schema';`);
+    try {
+      await expect.poll(async () => {
+        const response = await fetch(api + ownerPath, { headers: { Authorization: "Bearer " + member.token } });
+        return [response.status, (await response.json()).error?.code];
+      }).toEqual([503, "FOUNDER_IDENTITY_NOT_DEPLOYED"]);
+
+      await openVerification(page, 503);
+      const adminPage = await browser.newPage();
+      try {
+        await inEnglish(adminPage.context());
+        await login(adminPage, founder);
+        await solveMfa(adminPage, founder.secret);
+        await openVerification(adminPage, 503);
+        await adminPage.goto("/admin");
+        await adminPage.getByRole("button", { name: founderMessages.en.adminTitle, exact: true }).click();
+        const tab = adminPage.getByRole("region", { name: founderMessages.en.adminTitle, exact: true });
+        await expect(tab.getByRole("status")).toHaveText(founderMessages.en.notDeployed);
+        await expect(tab.getByText(founderMessages.en.badgeMeaning)).toHaveCount(0);
+      } finally {
+        await adminPage.close();
+      }
+    } finally {
+      sql(`alter function ${rpc.replace("founder_identity_read_for_api", "founder_identity_read_disposable")}
+        rename to founder_identity_read_for_api;
+        notify pgrst, 'reload schema';`);
+      await expect.poll(async () => {
+        const response = await fetch(api + ownerPath, { headers: { Authorization: "Bearer " + member.token } });
+        return response.status;
+      }).toBe(200);
+    }
+  });

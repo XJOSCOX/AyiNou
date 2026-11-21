@@ -3,7 +3,7 @@ export const reviewDecisions = ["approve", "reject", "revoke"] as const;
 
 export type VerificationKind = typeof verificationKinds[number];
 export type ReviewDecision = typeof reviewDecisions[number];
-export type VerificationStatus = "pending" | "approved" | "rejected" | "revoked";
+export type VerificationStatus = "pending" | "approved" | "rejected" | "revoked" | "closed";
 export const personalClaims = ["identity", "notable_person"] as const;
 export type PersonalClaim = (typeof personalClaims)[number];
 export const impersonationKinds = ["profile", "public_figure", "badge", "affiliation"] as const;
@@ -33,6 +33,7 @@ export type VerificationApplication = {
   decidedAt: string | null; rationale: string | null; canAppeal?: boolean; eligibleApprovals?: number | null;
 };
 export type ReviewApplication = Omit<VerificationApplication, "decidedAt" | "rationale"> & {
+  decidedAt?: string | null;
   assignedToMe: boolean;
   assignmentRequired?: boolean;
   eligibleReviewers?: number | null;
@@ -41,5 +42,5 @@ export type ReviewApplication = Omit<VerificationApplication, "decidedAt" | "rat
   reviews: { decision: ReviewDecision; rationale: string; createdAt: string; isSelf: boolean }[];
 };
 
-export const reviewQueueModes = ["pending", "assigned", "approved", "rejected", "revoked"] as const;
+export const reviewQueueModes = ["pending", "assigned", "approved", "rejected", "revoked", "closed"] as const;
 export type ReviewQueueMode = (typeof reviewQueueModes)[number];

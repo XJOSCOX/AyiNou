@@ -526,6 +526,35 @@
       "report": "docs/deployment/D2_FINAL_READINESS.md",
       "routes": [],
       "migrations": []
+    },
+    {
+      "id": "founder-application-closure",
+      "report": "docs/organizations/FOUNDER_APPLICATION_CLOSURE_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/verification/review",
+          "contract": "GET /api/v1/verification/review - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only queue history. Original review and Founder grant events record the mutations."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "A member without MFA and a platform administrator without the regular reviewer assignment both receive 403 when reading closed applications."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121080000_founder_application_closure.sql",
+          "rlsAndGrants": "Retains existing private table RLS and service-only queue RPC privileges. Revokes all app-role execution on the private trigger function.",
+          "authorization": "Closure follows an audited authorized grant. The reviewer history RPC retains the MFA, reviewer, conflict and evidence checks.",
+          "compatibility": "Adds a closed status and private provenance. Pending and previously decided applications retain their existing behavior.",
+          "validation": "Disposable Chromium lifecycle test covers ineligible grants, reviewer and member history, retained evidence, stale approval, replay and subsequent revocation.",
+          "rolloutAndRollback": "Apply with separate hosted approval before deploying the closed filter. Preserve closed records and event references if rolling back application code."
+        }
+      ]
     }
   ]
 }
