@@ -776,3 +776,7 @@ Migrations `20261120232000_l34_lifecycle_plans.sql` and `20261120233000_l34_synt
 | `POST /deletion-confirmation` | Confirm a specific compatible test plan with a UUID idempotency key and recent MFA. Simulation still requires a separate assigned approver. |
 
 Plan and hold updates serialize per subject, with version and snapshot revalidation. The operator RPC coordinates typed synthetic hold, approval, step and quarantine commands. No arbitrary table name or provider operation can be passed through this interface. Immutable lifecycle events carry actor, event kind and scope but no evidence text. [Dependency and recovery notes](privacy/L3_4_IMPLEMENTATION_REPORT.md)
+
+## Legal L6.2A publication settings
+
+Migration `20261121010000_l62a_legal_publication_controls.sql` creates `private.legal_publication_settings` (one disabled global row), `private.legal_policy_settings` (nine disabled draft rows), and `private.legal_publication_audit` (initially empty). RLS is enabled and direct grants are revoked. Service-role-only RPCs `legal_availability_for_api`, `admin_legal_settings_for_api`, `admin_legal_audit_for_api` and `admin_legal_action_for_api` expose bounded projections and serialized audited actions. The action RPC uses revision comparison and unique request IDs. No approval or text record is inserted. [Full gate](legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md)

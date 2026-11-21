@@ -3,6 +3,7 @@ import { z } from "zod";
 import { platformRoles, type PlatformAccess } from "@ayinou/shared";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
+import { registerAdminLegalRoutes } from "./legal-publication.js";
 
 const reason = z.string().trim().min(10).max(500).refine((value) => !/\p{Cc}/u.test(value));
 const actionInput = z.discriminatedUnion("action", [
@@ -61,5 +62,6 @@ export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifi
     admin.get("/api/v1/admin/audit", async (request) => ({
       events: await repo!.rpc("admin_audit_for_api", { p_actor: request.authUserId, p_before: null }),
     }));
+    registerAdminLegalRoutes(admin, repo!);
   });
 }

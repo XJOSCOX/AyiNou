@@ -22,3 +22,7 @@ An automated check may reject missing files, section IDs, placeholders, hashes o
 
 The Legal Center shell and an empty publication registry are implemented. This does not change any L5 readiness gate: all translations remain working drafts and no policy is published, effective, or accepted. See [L6.1 report](L6_1_IMPLEMENTATION_REPORT.md).
 
+## L6.2A update
+
+An administrator can inspect disabled publication settings and missing prerequisites. The settings do not satisfy any approval gate. Both immutable publication registries remain empty, so operational activation is rejected. See [publication controls](L6_2A_ADMIN_PUBLICATION_CONTROLS.md).
+

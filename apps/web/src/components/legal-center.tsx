@@ -23,8 +23,9 @@ const names: Record<Locale, Record<PolicyId, string>> = {
   es: { terms: "Términos y condiciones", privacy: "Política de privacidad", "community-guidelines": "Normas comunitarias", organizations: "Organizaciones", "projects-and-volunteers": "Proyectos y voluntariado", voting: "Votaciones", verification: "Verificación", cookies: "Cookies", "data-rights": "Derechos sobre los datos" },
 };
 
-type Props = { policyId?: PolicyId; history?: boolean; release?: LegalRelease; versions?: { policyId?: PolicyId; version: string; effectiveDate: string }[] };
-export function LegalCenter({ policyId, history = false, release, versions = [] }: Props) {
+type ListedVersion = { policyId?: PolicyId; version: string; effectiveDate: string };
+type Props = { policyId?: PolicyId; history?: boolean; release?: LegalRelease; versions?: ListedVersion[]; available?: ListedVersion[] };
+export function LegalCenter({ policyId, history = false, release, versions = [], available = [] }: Props) {
   const [locale, setLocale] = useLocale();
   const router = useRouter();
   const t = copy[locale];
@@ -47,7 +48,9 @@ export function LegalCenter({ policyId, history = false, release, versions = [] 
           {versions.length > 1 && <nav aria-label={t.history}>{versions.map((item) => <Link key={item.version} href={`${policyPaths[release.policyId]}?version=${encodeURIComponent(item.version)}`}>{t.version} {item.version}</Link>)}</nav>}
           {variant.document.sections.map((section) => <section id={section.id} key={section.id} className={styles.section}><h3>{section.title}</h3>{section.blocks.map((block, index) => <LegalContentBlock block={block} key={index} />)}</section>)}
         </article><aside className={styles.panel}><h2>{t.contents}</h2><nav aria-label={t.contents}>{variant.document.sections.map((section) => <a href={`#${section.id}`} key={section.id}>{section.title}</a>)}</nav></aside>
-      </div> : <section className={styles.panel}><p>{policyId ? t.unavailable : t.intro}</p></section>}
+      </div> : <section className={styles.panel}>{!policyId && available.length ?
+        <ul>{available.map((item) => <li key={`${item.policyId}:${item.version}`}><Link href={policyPaths[item.policyId!]}>{names[locale][item.policyId!]} · {item.version}</Link> · {item.effectiveDate}</li>)}</ul>
+        : <p>{policyId ? t.unavailable : t.intro}</p>}</section>}
     <nav className={styles.related} aria-label={t.related}><h2>{t.related}</h2><div>{(Object.keys(policyPaths) as PolicyId[]).map((id) => <Link href={policyPaths[id]} key={id}>{names[locale][id]}</Link>)}<Link href="/legal/history">{t.history}</Link></div></nav>
   </div>;
 }

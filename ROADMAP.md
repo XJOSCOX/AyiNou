@@ -305,3 +305,7 @@ Cryptocurrency, direct cash custody, official elections, algorithmic truth-by-ma
 
 Public, anonymous legal routes and a fail-closed empty release registry are implemented. Actual policy publication and versioned acceptance remain gated for L6.2. See [L6.1 report](docs/legal/L6_1_IMPLEMENTATION_REPORT.md).
 
+## L6.2A legal administration foundation
+
+The platform administrator can inspect versioned publication settings and audit history. All policies start as disabled drafts. Public release visibility requires both the server control and an approved immutable release. Legal approval, acceptance collection and privacy processing remain separate gated work. [L6.2A controls](docs/legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md)
+

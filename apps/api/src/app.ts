@@ -10,6 +10,7 @@ import { registerCommunityRoutes } from "./routes/community.js";
 import { registerInstitutionRoutes } from "./routes/institutions.js";
 import { createInstitutionRepository, type InstitutionRepository } from "./services/institutions.js";
 import { registerAdminRoutes } from "./routes/admin.js";
+import { registerPublicLegalRoutes } from "./routes/legal-publication.js";
 import { registerErrorHandling, requestIdentification } from "./services/api-error.js";
 import { registerFeedRoutes } from "./routes/feed.js";
 import { createFeedRepository, type FeedRepository } from "./services/feed.js";
@@ -54,6 +55,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerCommunityRoutes(instance, community));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions));
+  app.register((instance) => registerPublicLegalRoutes(instance, institutions));
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));
   app.register((instance) => registerPrivacyRoutes(instance, privacyEnabled, auth,
     privacyEnabled ? overrides?.privacy ?? createPrivacyRepository(config) : null, readBudget));

@@ -121,3 +121,5 @@ A GitHub push is not a deployment. Production hosting is postponed until explici
 
 Committing a legal draft, passing translation tests, or building the site does not approve or publish it. Production release and evidence registries remain empty. Run `npm run test:legal-center` and `python scripts/validate-legal-l5.py` before any legal code change; CI enforces both. L6.2 requires separate owner, legal and publication decisions. See [L6.1 security model](legal/L6_1_PUBLICATION_SECURITY_MODEL.md).
 
+L6.2A adds an administrator status and availability workspace. Its disabled database defaults and empty immutable registries reject activation. Review migration dry runs and disposable database/browser checks before hosted application. A future release requires separate written legal, translation, owner and publication decisions; the operational switch alone cannot publish. See [L6.2A controls](legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md).
+

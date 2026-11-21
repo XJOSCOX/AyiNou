@@ -191,3 +191,7 @@ L3.4 adds a synthetic-only planning gate independent of export. A received closu
 
 Public legal routes read only `apps/web/src/lib/legal/published-releases.json`, which starts empty. `publication.ts` validates immutable packages against separately trusted evidence; no `docs/legal` working draft is imported by runtime code. See [L6.1 architecture](legal/L6_1_LEGAL_CENTER_ARCHITECTURE.md) and [security model](legal/L6_1_PUBLICATION_SECURITY_MODEL.md).
 
+### L6.2A operational publication gate
+
+The administrator workspace calls Fastify, which checks current platform authority and recent TOTP and delegates versioned changes to audited private PostgreSQL RPCs. Public legal pages additionally require the uncached API availability response and an exact matching immutable release version. The database starts disabled and contains no approvals or release content. See [publication controls](legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md).
+
