@@ -23,6 +23,18 @@ def sha(path: Path) -> str:
     return hashlib.sha256(path.read_text(encoding="utf-8").encode("utf-8")).hexdigest()
 
 
+def historical_snapshot_error(record: dict) -> str | None:
+    baseline = subprocess.run(
+        ["git", "show", f"{record['source_commit']}:{record['source_path']}"],
+        cwd=ROOT, capture_output=True, check=False,
+    )
+    if baseline.returncode:
+        return f"snapshot unavailable: {record['id']} (fetch full Git history)"
+    if hashlib.sha256(baseline.stdout).hexdigest() != record["source_sha256"]:
+        return f"snapshot hash mismatch: {record['id']}"
+    return None
+
+
 def section_ids(body: str) -> list[str]:
     return HEAD.findall(body)
 
@@ -68,12 +80,9 @@ def main() -> int:
         body = source.read_text(encoding="utf-8")
         if record["class"] not in ("public_core", "public_specialized"):
             continue
-        baseline = subprocess.run(
-            ["git", "show", f"{record['source_commit']}:{record['source_path']}"],
-            cwd=ROOT, capture_output=True, check=False,
-        )
-        if baseline.returncode or hashlib.sha256(baseline.stdout).hexdigest() != record["source_sha256"]:
-            errors.append(f"snapshot hash mismatch: {record['id']}")
+        snapshot_error = historical_snapshot_error(record)
+        if snapshot_error:
+            errors.append(snapshot_error)
         if sha(source) != record["source_sha256"]:
             errors.append(f"source changed: {record['id']}")
         if section_ids(body) != record["section_ids"]:
