@@ -203,3 +203,7 @@ The organization choice extends the same Supabase Auth registration. A private t
 ## O3 founder identity boundary
 
 Founder-specific authority and proof receipts sit behind service-only SQL and use the existing verified Supabase session and administrator checks. Verification and Administration display restricted case projections. The public profile adds a live Founder Verified flag through the existing visibility path. Independent claims and downstream authorization continue to use their existing provenance. [Implementation report](organizations/O3_IMPLEMENTATION_REPORT.md)
+
+## O4 organization setup boundary
+
+One canonical SQL completion command binds the live personal identity, intent version and authority declaration. It either creates the ordinary organization with its initial owner and audit or invokes the independent existing claim procedure. Legacy create and direct claim calls fail closed. Institution registration declarations use private role-scoped projections only. [O4 implementation](organizations/O4_IMPLEMENTATION_REPORT.md)

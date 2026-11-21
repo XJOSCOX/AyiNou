@@ -117,3 +117,7 @@ Members choose Individual or Organization at registration and create the same pe
 ## Founder Verified
 
 Founder Verified is a separate designation for confirmation of identity and Ayinou account control by the authorized founding administrator. Consent and optional public display are member choices. Independent Identity Verified takes visual precedence when both exist, while both provenance records remain intact. The synthetic lifecycle is implemented. Real issuance, independently assigned appeals and any future onboarding eligibility require separate approval. [O3 status](organizations/O3_IMPLEMENTATION_REPORT.md)
+
+## Organization registration and authority
+
+Members can resume a private organization draft, review public matches, and confirm authority to create an ordinary organization or request an existing organization claim. Independently reviewed identity is required to finish. A new organization appears as unverified, and registered, informal or pursuing status is a private declaration. An existing claim remains pending until independently approved. [O4 workflow](organizations/O4_IMPLEMENTATION_REPORT.md)

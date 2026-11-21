@@ -316,7 +316,7 @@ The platform administrator can inspect versioned publication settings and audit 
 - [x] O1 design and database impact review. [Architecture](docs/organizations/O1_ONBOARDING_ARCHITECTURE.md) · [Owner decisions](docs/organizations/O1_OWNER_DECISION_BRIEF.md)
 - [x] O2 personal signup paths and resumable organization intent. [Implementation report](docs/organizations/O2_IMPLEMENTATION_REPORT.md)
 - [x] O3 Founder Verified provenance and synthetic lifecycle. Real issuance awaits separate approval.
-- [ ] O4 registration status, institutional authority and completion gates.
+- [x] [O4 identity-gated setup](docs/organizations/O4_IMPLEMENTATION_REPORT.md), private registration declarations and reviewed claims. Hosted rollout awaits approval.
 - [ ] O5 safe pathway corrections, bootstrap governance and succession.
 - [ ] O6 Early Partner Program.
 - [ ] O7 integration, security validation and rollout review.
@@ -328,7 +328,7 @@ Future implementation depends on documented owner decisions and separate authori
 S1 establishes repository-wide [engineering standards](docs/standards/ENGINEERING_STANDARDS.md), [audit coverage review](docs/standards/AUDIT_COVERAGE_MATRIX.md), and a [completion checklist](docs/standards/FEATURE_COMPLETION_CHECKLIST.md) for O3–O7 and all later phases. Maintain the feature review register, run the standards gate, and track deployment and unresolved policy decisions.
 
 - [x] [O3 Founder Verified infrastructure](docs/organizations/O3_IMPLEMENTATION_REPORT.md). Production authority and proof activation are separately gated.
-- [ ] O4 institution authority and registration checks, including the legacy create path.
+- [x] O4 institution authority and registration checks with legacy creation and claim entry points closed.
 - [ ] O5 signup corrections, bootstrap administration and succession.
 - [ ] O6 Early Partner organizations and O7 rollout verification.
 - [ ] Unified Audit Center with permission-scoped read projections and approved summary export.

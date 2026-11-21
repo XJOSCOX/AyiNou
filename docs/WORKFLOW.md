@@ -131,3 +131,7 @@ Use the disposable Chromium runner with its local mail catcher for O2 signup and
 ## O3 founder identity release boundary
 
 Exercise founder proof and grant only in the disposable Chromium suite. The hosted dry run must list O2 before O3 while both remain pending. Obtain explicit authorization for hosted application and verify the closed policy and empty authority/case tables after rollout. Deployment does not approve proof policy, authority provisioning, real issuance or O4 eligibility. [Release and recovery details](organizations/O3_IMPLEMENTATION_REPORT.md)
+
+## O4 migration and deployment
+
+The hosted release sequence is O2, O3, then O4 after separate authorization. Verify live identity rules, empty founder activation, legacy management roles, and the closed SQL create/claim routes before deploying the matching API and UI. Roll forward with the legacy guard in place to avoid opening creation during recovery. [O4 rollout](organizations/O4_IMPLEMENTATION_REPORT.md)
