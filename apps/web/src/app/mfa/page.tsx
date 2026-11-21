@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { MfaChallenge } from "@/components/mfa-challenge";
 import { serverSupabase } from "@/lib/supabase/server";
+import { recoverySessionId } from "@/lib/recovery-claims";
 
 export default async function MfaPage({ searchParams }: { searchParams: Promise<{ next?: string; claim?: string; join?: string }> }) {
   const search = await searchParams;
@@ -19,12 +20,15 @@ export default async function MfaPage({ searchParams }: { searchParams: Promise<
     : join ? `/organization/${join}` : "/dashboard";
   const supabase = await serverSupabase();
   const claims = await supabase.auth.getClaims();
-  if (claims.error || !claims.data?.claims.sub || claims.data.claims.is_anonymous === true) redirect("/login");
-  if (claims.data.claims.aal === "aal2" && !privileged) redirect(next);
-  const user = await supabase.auth.getUser();
-  if (user.error || !user.data.user) redirect("/login");
+  const session = claims.data?.claims;
+  if (claims.error || !session?.sub || typeof session.session_id !== "string" || session.is_anonymous) redirect("/login");
+  if (requested === "/reset-password" && !recoverySessionId(session)) redirect("/forgot-password?error=verification");
+  const [user, { data: live }] = await Promise.all([supabase.auth.getUser(), supabase.rpc("account_session_active")]);
+  if (!live || user.error || user.data.user?.id !== session.sub) redirect("/login");
+  if (session.aal === "aal2" && !privileged) redirect(next);
   const factors = user.data.user.factors?.filter((factor) => factor.status === "verified") ?? [];
   if (privileged && !factors.some((factor) => factor.factor_type === "totp")) redirect("/settings");
   if (!factors.length) redirect(next);
-  return <MfaChallenge factorIds={factors.filter((factor) => factor.factor_type === "totp").map((factor) => factor.id)} next={next} />;
+  return <MfaChallenge factorIds={factors.filter((factor) => factor.factor_type === "totp").map((factor) => factor.id)}
+    next={next} subject={session.sub} sessionId={session.session_id} />;
 }

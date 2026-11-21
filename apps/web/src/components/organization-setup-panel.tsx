@@ -16,8 +16,8 @@ import { institutionAction, institutionCard, institutionField, institutionLink, 
 const kinds = organizationKinds.filter((kind) => !governmentKinds.includes(kind));
 type Command = { operation: "details" | "complete"; body: object };
 
-export function OrganizationSetupPanel({ subject, intent, claim, onReceipt }: {
-  subject: string; intent: OrganizationOnboardingIntent | null; claim: string;
+export function OrganizationSetupPanel({ subject, intent, claim, intentBusy, onReceipt }: {
+  subject: string; intent: OrganizationOnboardingIntent | null; claim: string; intentBusy: boolean;
   onReceipt: (receipt: OrganizationSetupReceipt) => void;
 }) {
   const [locale] = useLocale();
@@ -54,7 +54,7 @@ export function OrganizationSetupPanel({ subject, intent, claim, onReceipt }: {
 
   async function send(command: Command) {
     const controller = active.current;
-    if (!controller || !intentId || controller.signal.aborted || writing.current) return;
+    if (!controller || !intentId || controller.signal.aborted || intentBusy || writing.current) return;
     writing.current = true;
     setBusy(true);
     setError(null);
@@ -96,7 +96,7 @@ export function OrganizationSetupPanel({ subject, intent, claim, onReceipt }: {
   const current = view?.intentId === intentId && view?.version === intentVersion ? view : null;
   const result = !intentId ? view?.result : null;
   if (!intentId && !result) return null;
-  const blocked = busy || !!pending || code === "STALE_VERSION" || code === "IDEMPOTENCY_CONFLICT";
+  const blocked = intentBusy || busy || !!pending || code === "STALE_VERSION" || code === "IDEMPOTENCY_CONFLICT";
 
   return <section className={`${institutionCard} grid gap-4`} aria-busy={busy}>
     <h2 ref={resultHeading} tabIndex={-1} className="text-xl font-semibold">{result ? t.resultTitle : t.detailsTitle}</h2>

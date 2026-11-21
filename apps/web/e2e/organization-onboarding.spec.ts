@@ -34,6 +34,7 @@ for (const kind of ["individual", "organization"] as const) {
     await page.locator("#display-name").fill("O2 Fixture");
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
+    await page.locator("#confirm-password").fill(password);
     await page.locator('input[autocomplete="off"]').last().fill(referralCode);
     await page.getByRole("main").getByRole("button", { name: t.register, exact: true }).click();
     await expect(page).toHaveURL(/\/verify-email/);

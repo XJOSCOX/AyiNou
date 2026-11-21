@@ -459,6 +459,61 @@
           "rolloutAndRollback": "Apply O2 through O6 only after separate approval. Roll forward with the production gate closed and retain scoped durable audit records."
         }
       ]
+    },
+    {
+      "id": "o7",
+      "report": "docs/organizations/O7_INTEGRATION_REPORT.md",
+      "routes": [
+        {
+          "route": "POST /api/v1/institution-invitations/:id/:action",
+          "contract": "POST /api/v1/institution-invitations/:id/:action 256 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Invitation acceptance and membership creation commit with the scoped institution audit event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-integration.spec.ts",
+            "denialScenario": "Expired invitations and expired inviter grants cannot create membership."
+          }
+        },
+        {
+          "route": "PUT /api/v1/me/organization-onboarding",
+          "contract": "PUT /api/v1/me/organization-onboarding 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The versioned intent and its subject-scoped command receipt commit together. The receipt is the durable intent evidence."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-integration.spec.ts",
+            "denialScenario": "An inactive session cannot write or replay a completed command."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/organization-onboarding/:id/change-path",
+          "contract": "POST /api/v1/me/organization-onboarding/:id/change-path 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The versioned path change and idempotent receipt commit together. The receipt records the prior version and resulting state."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-integration.spec.ts",
+            "denialScenario": "A foreign or revoked session cannot change the account path."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121070000_o7_organization_hardening.sql",
+          "rlsAndGrants": "Keeps existing policies and explicit service-role-only grants for the replaced public RPCs.",
+          "authorization": "Current live session and current representative authority are checked before writing or returning a replay receipt.",
+          "compatibility": "Additive migration retains existing RPC signatures, table shape and successful command responses.",
+          "validation": "Disposable staged rollout, catalog privilege assertions and timed expiry and revocation coverage.",
+          "rolloutAndRollback": "Apply after O2–O6 with separate approval. Retain additive data and audit records during any app rollback."
+        }
+      ]
     }
   ]
 }

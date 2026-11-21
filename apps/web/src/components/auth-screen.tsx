@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { Factor } from "@supabase/supabase-js";
+import { completePasswordRecovery } from "@/app/reset-password/actions";
 import { referralCodePattern, type SignupPath } from "@ayinou/shared";
 import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { AuthShell } from "./auth-shell";
@@ -14,6 +14,9 @@ import { useLocale } from "@/lib/locale-store";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { isLocale, languageNames, locales } from "@/lib/i18n";
+import { validNewPassword } from "@/lib/password-policy";
+import { passwordSecurityMessages } from "@/lib/password-security-i18n";
+import { PasswordRequirements } from "./password-requirements";
 import styles from "./auth-screen.module.css";
 
 export type AuthMode = "register" | "login" | "verify" | "forgot" | "reset";
@@ -22,15 +25,19 @@ const fieldClass = "block w-full rounded-md border border-[var(--theme-border)] 
 const floatingFieldClass = `${fieldClass} ${styles.floatingInput} pb-2 pt-6`;
 const primaryActionClass = "w-full rounded-md bg-[var(--theme-primary)] px-6 py-3.5 font-semibold text-[var(--theme-on-primary)] hover:bg-[var(--theme-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]";
 
-export function AuthScreen({ mode, invalidLink = false, initialReferral = "", claimHandle, joinHandle }: {
+export function AuthScreen({ mode, invalidLink = false, initialReferral = "", claimHandle, joinHandle, recoverySession, passwordReset }: {
   mode: AuthMode; invalidLink?: boolean; initialReferral?: string; claimHandle?: string; joinHandle?: string;
+  recoverySession?: string; passwordReset?: boolean;
 }) {
   const [locale, setLocale] = useLocale();
   const t = authMessages[locale];
   const m = membershipMessages[locale];
   const account = accountMessages[locale];
+  const passwordCopy = passwordSecurityMessages[locale];
+  const creatingPassword = mode === "register" || mode === "reset";
   const errors = {
-    invalidEmail: t.invalidEmail, invalidPassword: t.invalidPassword, invalidName: t.invalidName,
+    invalidEmail: t.invalidEmail, invalidPassword: passwordCopy.invalid, invalidName: t.invalidName,
+    mismatch: passwordCopy.mismatch, samePassword: passwordCopy.samePassword, signOutPending: passwordCopy.signOutPending,
     invalidCredentials: t.invalidCredentials, invalidReferral: account.invalidReferral,
     invalidPrivateNames: m.invalidPrivateNames, confirmationUnavailable: t.confirmationUnavailable,
     sessionNeeded: t.sessionNeeded, rateLimited: m.rateLimited, serviceError: m.serviceError, genericError: t.genericError,
@@ -38,6 +45,8 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordChanged, setPasswordChanged] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -47,7 +56,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const [visiblePassword, setVisiblePassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<keyof typeof errors | "">("");
-  const [success, setSuccess] = useState<"resetSent" | "resetDone" | "">("");
+  const [success, setSuccess] = useState<"resetSent" | "resetDone" | "">(passwordReset ? "resetDone" : "");
   const [showLinkError, setShowLinkError] = useState(invalidLink);
 
   const title = {
@@ -61,17 +70,15 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (loading) return;
+    if (loading || passwordChanged) return;
     setShowLinkError(false);
     setError("");
     setSuccess("");
     if (mode !== "reset" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       setError("invalidEmail"); return;
     }
-    if (["register", "reset"].includes(mode) &&
-      (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password))) {
-      setError("invalidPassword"); return;
-    }
+    if (creatingPassword && !validNewPassword(password)) { setError("invalidPassword"); return; }
+    if (creatingPassword && password !== confirmPassword) { setError("mismatch"); return; }
     if (mode === "login" && !password) { setError("invalidCredentials"); return; }
     if (mode === "register" && [firstName, lastName].some((name) =>
       !name.trim() || name.trim().length > 80 || /\p{Cc}/u.test(name.trim()))) {
@@ -104,6 +111,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           setError("confirmationUnavailable");
           return;
         }
+        if (authError?.code === "weak_password") { setError("invalidPassword"); return; }
         if (authError) throw authError;
         router.push("/verify-email");
       } else if (mode === "login") {
@@ -131,19 +139,22 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
         }
         setSuccess("resetSent");
       } else if (mode === "reset") {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError || !userData.user) { setError("sessionNeeded"); return; }
-        const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (assurance.error) throw assurance.error;
-        if (userData.user.factors?.some((factor: Factor) => factor.status === "verified") && assurance.data.currentLevel !== "aal2") {
-          router.replace("/mfa?next=/reset-password");
-          return;
-        }
-        const { error: resetError } = await supabase.auth.updateUser({ password });
-        if (resetError) throw resetError;
-        await supabase.auth.signOut();
-        setSuccess("resetDone");
-        setPassword("");
+        if (!recoverySession) { setError("sessionNeeded"); return; }
+        const result = await completePasswordRecovery(password, confirmPassword, recoverySession);
+        if (result === "mfa") { window.location.replace("/mfa?next=/reset-password"); return; }
+        if (result === "done" || result === "signOutPending") {
+          setPasswordChanged(true);
+          setPassword("");
+          setConfirmPassword("");
+          if (result === "done") {
+            window.location.replace("/login?reset=done");
+            return;
+          }
+          const current = await supabase.auth.getClaims();
+          if (current.data?.claims.session_id === recoverySession &&
+            !(await supabase.auth.signOut({ scope: "local" })).error) window.location.replace("/login?reset=done");
+          else setError("signOutPending");
+        } else setError(result);
       }
     } catch (cause) {
       const status = typeof cause === "object" && cause && "status" in cause ? Number(cause.status) : 0;
@@ -217,7 +228,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
             <div>
               <div className="relative">
                 <input id="password" type={visiblePassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className={`${floatingFieldClass} ${styles.passwordInput} pe-14`}
-                  placeholder=" " autoComplete={mode === "login" ? "current-password" : "new-password"} aria-describedby={mode !== "login" ? "password-hint" : undefined} required />
+                  placeholder=" " autoComplete={mode === "login" ? "current-password" : "new-password"} aria-describedby={creatingPassword ? "password-hint" : undefined} required />
                 <label htmlFor="password" className={styles.fieldLabel}>{mode === "reset" ? t.newPassword : t.password}</label>
                 <button type="button" aria-controls="password" aria-label={visiblePassword ? m.hidePassword : m.showPassword}
                   className="absolute end-1 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-md text-[var(--theme-body)] hover:bg-[var(--theme-selected)] hover:text-[var(--theme-link)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]"
@@ -236,9 +247,15 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
                   </svg>
                 </button>
               </div>
-              {mode !== "login" && <p id="password-hint" className="mt-2 text-xs text-[var(--theme-body)]">{t.passwordHint}</p>}
+              {creatingPassword && <PasswordRequirements password={password} />}
             </div>
           )}
+          {creatingPassword && <label className="relative block" htmlFor="confirm-password">
+            <input id="confirm-password" type={visiblePassword ? "text" : "password"} value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)} className={floatingFieldClass}
+              placeholder=" " autoComplete="new-password" aria-invalid={error === "mismatch" || undefined} required />
+            <span className={styles.fieldLabel}>{passwordCopy.confirm}</span>
+          </label>}
           {mode === "register" && (
             <label className="relative block">
               <input value={referral} onChange={(event) => setReferral(event.target.value)} className={floatingFieldClass}
@@ -249,7 +266,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           {(error || showLinkError) && <p role="alert" className="rounded-md bg-[var(--theme-error-bg)] p-3 text-sm text-[var(--theme-error-text)]">{error ? errors[error] : t.sessionNeeded}</p>}
           {success && <p role="status" className="rounded-md bg-[var(--theme-control)] p-3 text-sm text-[var(--theme-link)]">{t[success]}</p>}
           {mode === "login" && <p className="text-right text-sm"><Link href="/forgot-password" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.forgotLink}</Link></p>}
-          <button type="submit" disabled={loading} className={`${primaryActionClass} disabled:opacity-60`}>
+          <button type="submit" disabled={loading || passwordChanged} className={`${primaryActionClass} disabled:opacity-60`}>
             {loading ? t.working : { register: t.register, login: t.login, forgot: t.sendReset, reset: t.savePassword, verify: "" }[mode]}
           </button>
           {mode === "login" && <p className="border-t border-[var(--theme-border)] pt-5 text-center text-sm text-[var(--theme-body)]">{t.needAccount} <Link href="/register" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.register}</Link></p>}

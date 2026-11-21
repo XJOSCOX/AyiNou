@@ -1,0 +1,14 @@
+{
+  "confirm": "Confirmer le mot de passe",
+  "mismatch": "Les mots de passe ne correspondent pas.",
+  "requirements": "Exigences du mot de passe",
+  "progress": "Exigences satisfaites",
+  "length": "Au moins 8 caractères",
+  "uppercase": "Une lettre majuscule",
+  "lowercase": "Une lettre minuscule",
+  "number": "Un chiffre",
+  "symbol": "Un symbole",
+  "invalid": "Utilisez au moins 8 caractères avec une majuscule, une minuscule, un chiffre et un symbole. Le maximum est de 72 octets.",
+  "samePassword": "Choisissez un mot de passe différent de votre mot de passe actuel.",
+  "signOutPending": "Le mot de passe a été modifié. La session de récupération n’a pas pu être fermée. Déconnectez-vous avant de continuer."
+}

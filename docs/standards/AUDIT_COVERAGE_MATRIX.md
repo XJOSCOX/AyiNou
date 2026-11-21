@@ -54,3 +54,7 @@ O5 uses the `private.platform_governance_events` ledger for correction consent a
 ## O6 Early Partners
 
 O6 records program and operator provenance, nomination, offer, refusal, consent and scope, suspension, withdrawal, expiry, feedback access revocation and feedback resolution in `private.early_partner_events`. Read projections omit restricted notes and authors. Exact requests reconcile to the same committed receipt. See [O6 audit evidence](../organizations/O6_IMPLEMENTATION_REPORT.md#permissions-and-audit).
+
+## O7 organization integration
+
+O7 reconciles onboarding receipts with durable organization audit events and reviews the authorization, redaction and lifecycle boundaries shared by O2 through O6. [O7 audit reconciliation](../organizations/O7_AUDIT_RECONCILIATION.md)

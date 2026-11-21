@@ -131,3 +131,7 @@ Members can authorize an exact organization draft correction, withdraw consent a
 ## O6 Early Partners
 
 Early Partners is a future limited organization pilot. The test workflow covers nominations, private offers, exact owner consent, withdrawal, feedback and offboarding. Participation does not imply verification, legal status or additional voting or data access. See [O6 implementation](organizations/O6_IMPLEMENTATION_REPORT.md).
+
+## O7 signup and account recovery
+
+Sign-in, signup, verification and recovery use the same adaptable layout and theme. Signup and reset show localized password requirements and ask members to confirm their password. Accounts with an enrolled authenticator must confirm it before a recovery password change. [O7 readiness](organizations/O7_READINESS_MATRIX.md)

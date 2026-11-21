@@ -1,0 +1,14 @@
+{
+  "confirm": "Confirmar contraseña",
+  "mismatch": "Las contraseñas no coinciden.",
+  "requirements": "Requisitos de la contraseña",
+  "progress": "Requisitos cumplidos",
+  "length": "Al menos 8 caracteres",
+  "uppercase": "Una letra mayúscula",
+  "lowercase": "Una letra minúscula",
+  "number": "Un número",
+  "symbol": "Un símbolo",
+  "invalid": "Usa al menos 8 caracteres con una mayúscula, una minúscula, un número y un símbolo. El máximo es de 72 bytes.",
+  "samePassword": "Elige una contraseña distinta de la actual.",
+  "signOutPending": "La contraseña se actualizó. No se pudo cerrar la sesión de recuperación. Cierra sesión antes de continuar."
+}

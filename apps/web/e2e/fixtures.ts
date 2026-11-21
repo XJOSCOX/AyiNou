@@ -82,7 +82,7 @@ export async function logout(page: Page) {
 export async function solveMfa(page: Page, secret: string) {
   const t = accountMessages.en;
   await expect(page.getByRole("heading", { name: t.mfaTitle })).toBeVisible();
-  await page.getByLabel(t.mfaCode).fill(totp(secret));
+  await page.getByLabel(t.mfaChallengeCode).fill(totp(secret));
   await page.getByRole("button", { name: t.mfaSubmit }).click();
   await expect(page).toHaveURL(/\/dashboard/);
 }

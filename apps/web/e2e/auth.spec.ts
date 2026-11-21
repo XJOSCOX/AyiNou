@@ -1,5 +1,6 @@
 import { accountMessages } from "../src/lib/account-i18n";
 import { authMessages } from "../src/lib/auth-i18n";
+import { messages } from "../src/lib/i18n";
 import { apiCall, enroll, expect, inEnglish, login, logout, solveMfa, sql, test } from "./fixtures";
 
 test("guest access redirects before rendering protected screens @smoke", async ({ page, context }) => {
@@ -44,8 +45,49 @@ test("enrolled member completes a real TOTP challenge", async ({ page, context, 
   const member = await makeMember();
   const secret = await enroll(member);
   await inEnglish(context);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const shell = page.locator("main > div").first();
+  await page.goto("/register");
+  const signUpSize = await shell.boundingBox();
+  await page.goto("/login");
+  const signInSize = await shell.boundingBox();
+  expect(signInSize).not.toBeNull();
+  expect(signUpSize).toMatchObject({ width: signInSize!.width, height: signInSize!.height });
   await login(page, member);
   await expect(page).toHaveURL(/\/mfa/);
+  expect(await shell.boundingBox()).toMatchObject({ width: signInSize!.width, height: signInSize!.height });
+  for (const [locale, width] of [["ht", 320], ["fr", 768], ["es", 1440], ["en", 320]] as const) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.getByRole("combobox").selectOption(locale);
+    const copy = accountMessages[locale];
+    const panel = page.getByRole("region", { name: copy.mfaTitle });
+    const confirm = panel.getByRole("button", { name: copy.mfaSubmit });
+    await expect(panel).toBeVisible();
+    await expect(confirm).toBeDisabled();
+    const panelBox = (await panel.boundingBox())!;
+    const codeBox = (await panel.getByLabel(copy.mfaChallengeCode).boundingBox())!;
+    const confirmBox = (await confirm.boundingBox())!;
+    expect(Math.abs(codeBox.x + codeBox.width / 2 - (panelBox.x + panelBox.width / 2))).toBeLessThan(1);
+    expect(Math.abs(codeBox.x - confirmBox.x)).toBeLessThan(1);
+    expect(Math.abs(codeBox.width - confirmBox.width)).toBeLessThan(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+  }
+  await page.getByRole("button", { name: messages.en.switchToDark }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const code = page.getByLabel(accountMessages.en.mfaChallengeCode);
+  await expect(code).toHaveAccessibleDescription(accountMessages.en.mfaHelp);
+  await code.focus();
+  await expect(code).toBeFocused();
+  const slots = page.getByLabel(accountMessages.en.mfaChallengeCode).locator("..").locator("[data-active]");
+  await expect(slots).toHaveCount(6);
+  expect(await slots.evaluateAll((items) => items.map((item) => item.parentElement?.children.length))).toEqual([3, 3, 3, 3, 3, 3]);
+  await code.fill("012 345");
+  await expect(code).toHaveValue("012345");
+  await expect(slots).toHaveText(["0", "1", "2", "3", "4", "5"]);
+  await code.press("End");
+  await code.press("Backspace");
+  await expect(code).toHaveValue("01234");
+  await expect(page.getByRole("button", { name: accountMessages.en.mfaSubmit })).toBeDisabled();
   await solveMfa(page, secret);
   await page.reload();
   await expect(page).toHaveURL(/\/dashboard/);

@@ -146,7 +146,7 @@ export function OrganizationIntentScreen({ subject, profileComplete, claim }: { 
               </div>
             </>}
         </section>
-        {!sessionLost && profileComplete && intent !== undefined && <OrganizationSetupPanel subject={subject} intent={intent} claim={claim}
+        {!sessionLost && profileComplete && intent !== undefined && <OrganizationSetupPanel subject={subject} intent={intent} claim={claim} intentBusy={busy}
           onReceipt={(receipt) => setIntent((current) => receipt.result ? null : current && { ...current, version: receipt.version, stage: "drafting" })} />}
         {!sessionLost && intent !== undefined && <MemberOnboardingCorrections subject={subject} intent={intent} refreshSetup={reload} />}
       </div>

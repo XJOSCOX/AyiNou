@@ -217,3 +217,7 @@ O5 adds scoped member-confirmed onboarding corrections and independent platform 
 ## O6 Early Partners
 
 O6 isolates pilot participation from verification, projects and polls. Scoped operators and organization roles are rechecked through authenticated Fastify routes and SQL. The scope-specific feedback entitlement has a closed production gate. See [O6 implementation](organizations/O6_IMPLEMENTATION_REPORT.md).
+
+## O7 authentication and organization boundaries
+
+Authentication screens use a shared responsive shell and theme variables. The reset action checks Supabase recovery claims and session liveness again at submission. MFA refreshes the page with the same account and session at AAL2. Organization actions independently check live authorization and current grant or invitation expiry. [O7 authorization matrix](organizations/O7_AUTHORIZATION_MATRIX.md)

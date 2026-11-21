@@ -346,3 +346,7 @@ O5 adds auditable administrative corrections and governance proposals. Hosted mi
 ## O6 Early Partners
 
 O6 implements synthetic-first Early Partner participation. Real enrollment, an effective legal release, public opt-in visibility and O7 organization-program policy remain separate milestones. See [O6 implementation](docs/organizations/O6_IMPLEMENTATION_REPORT.md).
+
+## O7 integration and release readiness
+
+O7 pairs the organization migration rollout with disposable end-to-end tests and shared authentication screens. Hosted rollout and operational feature decisions remain separate. [O7 readiness](docs/organizations/O7_READINESS_MATRIX.md)

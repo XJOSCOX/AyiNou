@@ -2,3 +2,55 @@
   background: var(--theme-surface);
   box-shadow: 0 24px 64px -32px color-mix(in srgb, var(--theme-text) 38%, transparent);
 }
+
+
+.entryPanel {
+  max-inline-size: 90rem;
+  grid-template-columns: minmax(0, 1fr);
+  --auth-form-gutter: clamp(1rem, 4vw, 3.5rem);
+}
+
+.gallerySlot {
+  block-size: clamp(10rem, 32vw, 18rem);
+  min-inline-size: 0;
+}
+
+.entryForm {
+  border-block-start: 1px solid var(--theme-border);
+}
+
+.entryControls {
+  flex: none;
+  padding: 1rem var(--auth-form-gutter) 0;
+}
+
+.formScroll {
+  display: flex;
+  flex: 1;
+  min-block-size: 0;
+  flex-direction: column;
+  padding: 1rem var(--auth-form-gutter) 1.75rem;
+}
+
+@media (min-width: 64rem) {
+  .entryPanel {
+    block-size: clamp(44rem, calc(100dvh - 4rem), 58rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .gallerySlot {
+    flex: 1;
+    block-size: auto;
+    min-block-size: 0;
+  }
+
+  .entryForm {
+    border-block-start: 0;
+    border-inline-start: 1px solid var(--theme-border);
+  }
+
+  .formScroll {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+  }
+}

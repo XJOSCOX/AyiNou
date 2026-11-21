@@ -24,3 +24,7 @@ O5 implements correction and governance foundations in code. O2 through O5 hoste
 ## O6 Early Partners
 
 O6 implements and tests the pilot with disposable fixtures. Real enrollment, public visibility and an effective terms release remain owner decisions. O7 depends on separate organization program authorization and data governance. See [O6 implementation](O6_IMPLEMENTATION_REPORT.md).
+
+## O7 integration and security hardening
+
+The O7 review covers organization signup, scoped representation, independent review, recovery and audit receipt replay. Hosted migration approval and operational enrollment decisions remain open. [Integration report](O7_INTEGRATION_REPORT.md)

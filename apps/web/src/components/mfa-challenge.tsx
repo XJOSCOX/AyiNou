@@ -1,17 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { AuthShell } from "./auth-shell";
 import { AuthenticatorCode } from "./authenticator-code";
+import styles from "./mfa-challenge.module.css";
 
-export function MfaChallenge({ factorIds, next }: { factorIds: string[]; next: string }) {
+export function MfaChallenge({ factorIds, next, subject, sessionId }: {
+  factorIds: string[]; next: string; subject: string; sessionId: string;
+}) {
   const [locale] = useLocale();
   const t = accountMessages[locale];
-  const router = useRouter();
   const [factorId, setFactorId] = useState(factorIds[0] ?? "");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -21,33 +22,57 @@ export function MfaChallenge({ factorIds, next }: { factorIds: string[]; next: s
     setBusy(true);
     setFailed(false);
     try {
-      const { error } = await browserSupabase().auth.mfa.challengeAndVerify({ factorId, code });
+      const client = browserSupabase();
+      const current = await client.auth.getClaims();
+      if (current.data?.claims.sub !== subject || current.data.claims.session_id !== sessionId) {
+        window.location.replace("/login");
+        return;
+      }
+      const { data, error } = await client.auth.mfa.challengeAndVerify({ factorId, code });
       if (error) throw error;
-      router.replace(next);
-      router.refresh();
+      const refreshed = await client.auth.getClaims(data.access_token);
+      if (refreshed.data?.claims.sub !== subject || refreshed.data.claims.session_id !== sessionId ||
+        refreshed.data.claims.aal !== "aal2") { setFailed(true); return; }
+      window.location.replace(next);
     } catch { setFailed(true); }
     finally { setBusy(false); }
   }
 
   async function cancel() {
-    await browserSupabase().auth.signOut({ scope: "local" });
-    router.replace("/login");
-    router.refresh();
+    if (busy) return;
+    setBusy(true);
+    try {
+      const client = browserSupabase();
+      const current = await client.auth.getClaims();
+      if (current.data?.claims.sub === subject && current.data.claims.session_id === sessionId) {
+        const { error } = await client.auth.signOut({ scope: "local" });
+        if (error) throw error;
+      }
+      window.location.replace("/login");
+    } catch { setFailed(true); }
+    finally { setBusy(false); }
   }
 
   return (
     <AuthShell>
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.mfaTitle}</h1>
-      <p className="mt-3 text-sm text-[var(--theme-body)]">{factorIds.length ? t.mfaHelp : t.mfaUnavailable}</p>
-      {factorIds.length > 1 && <label className="mt-4 grid gap-2 text-sm">
-        {t.authenticator}
-        <select value={factorId} onChange={(event) => setFactorId(event.target.value)} className="rounded-md bg-[var(--theme-control)] p-2">
-          {factorIds.map((id, index) => <option key={id} value={id}>{t.authenticator} {index + 1}</option>)}
-        </select>
-      </label>}
-      {factorId && <AuthenticatorCode busy={busy} submitCode={(code) => { void verify(code); }} />}
-      {failed && <p role="alert" className="mt-3 text-sm text-[var(--theme-error-text)]">{t.mfaError}</p>}
-      <button type="button" disabled={busy} onClick={() => { void cancel(); }} className="mt-5 text-sm font-semibold text-[var(--theme-link)] underline">{t.cancel}</button>
+      <section className={styles.challenge} aria-labelledby="mfa-title">
+        <header className={styles.header}>
+          <span className={styles.lock} aria-hidden="true" />
+          <h1 id="mfa-title" className={styles.title}>{t.mfaTitle}</h1>
+          <p id="mfa-help" className={styles.help}>{factorIds.length ? t.mfaHelp : t.mfaUnavailable}</p>
+        </header>
+        {factorIds.length > 1 && <label className={styles.factor}>
+          {t.authenticator}
+          <select value={factorId} disabled={busy} onChange={(event) => setFactorId(event.target.value)}>
+            {factorIds.map((id, index) => <option key={id} value={id}>{t.authenticator} {index + 1}</option>)}
+          </select>
+        </label>}
+        {factorId && <AuthenticatorCode busy={busy} submitCode={(code) => { void verify(code); }}
+          challenge={{ label: t.mfaChallengeCode, descriptionId: "mfa-help", error: failed ? t.mfaError : undefined }} />}
+        <footer className={styles.footer}>
+          <button type="button" disabled={busy} onClick={() => { void cancel(); }} className={styles.cancel}>{t.cancel}</button>
+        </footer>
+      </section>
     </AuthShell>
   );
 }

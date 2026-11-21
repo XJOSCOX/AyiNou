@@ -802,3 +802,7 @@ O5 adds six private RLS tables for onboarding correction consent, the governance
 ## O6 Early Partners
 
 O6 adds immutable program versions, scoped operator grants, organization enrollments, private feedback and a transactional event ledger. Its five private tables are RLS-protected. The migration follows O5 and adds pilot obligations to the existing correction safeguards. See [O6 data model and API](organizations/O6_IMPLEMENTATION_REPORT.md#data-model-and-api).
+
+## O7 organization hardening
+
+Migration `20261121070000_o7_organization_hardening.sql` preserves existing data and RPC signatures. It serializes intent writes with session revocation and checks invitation and inviter expiration at decision time. [Deployment runbook](organizations/O7_DEPLOYMENT_RUNBOOK.md)

@@ -15,7 +15,9 @@ const ports = new Map([[54320, 55320], [54321, 55321], [54322, 55322], [54323, 5
 const project = "ayinou-e2e-" + randomUUID().slice(0, 12);
 const cli = fromRoot("node_modules", "supabase", "dist", "supabase.js");
 const playwright = fromRoot("node_modules", "@playwright", "test", "cli.js");
-const args = process.argv.slice(2);
+const organizationRollout = process.argv.includes("--organization-rollout");
+const args = process.argv.slice(2).filter((argument) => argument !== "--organization-rollout");
+const organizationBaseline = "20261121010000";
 // Source configuration comes from the newly started stack, never from development credentials.
 const env = Object.fromEntries(Object.entries(process.env).filter(([name]) =>
   !/^(SUPABASE_|NEXT_PUBLIC_|AYINOU_|WEB_ORIGINS$|API_(HOST|PORT)$|NODE_ENV$|NODE_OPTIONS$|DOCKER_HOST$|DOCKER_CONTEXT$)/i.test(name)));
@@ -66,7 +68,10 @@ async function prepare(directory) {
   }
   await Promise.all([
     writeFile(join(supabase, "config.toml"), config),
-    cp(fromRoot("supabase", "migrations"), join(supabase, "migrations"), { recursive: true }),
+    cp(fromRoot("supabase", "migrations"), join(supabase, "migrations"), {
+      recursive: true,
+      filter: (path) => !organizationRollout || !/^\d{14}_/.test(basename(path)) || basename(path).slice(0, 14) <= organizationBaseline,
+    }),
     ...["src", "public", "next.config.ts", "postcss.config.mjs", "tsconfig.json", "package.json"].map((name) =>
       cp(fromRoot("apps", "web", name), join(web, name), { recursive: true })),
   ]);
@@ -89,6 +94,17 @@ async function main() {
     await run(cli, ["start", "--workdir", directory, "--output", "json",
       "--exclude", "studio,postgres-meta,edge-runtime,logflare,vector,realtime"],
       { capture: true, timeout: 240_000 });
+    if (organizationRollout) {
+      const oldCatalog = execFileSync("docker", ["exec", "supabase_db_" + project, "psql", "-U", "postgres",
+        "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-Atc",
+        "select (to_regprocedure('public.organization_intent_for_api(uuid,uuid,boolean)') is null)::text || ':' || max(version) from supabase_migrations.schema_migrations"],
+        { env, encoding: "utf8", timeout: 10_000, windowsHide: true }).trim();
+      if (oldCatalog !== "true:" + organizationBaseline) throw new Error("Unexpected organization rehearsal baseline");
+      await cp(fromRoot("supabase", "migrations"), join(directory, "supabase", "migrations"), { recursive: true });
+      // The disposable work directory has no linked project and migration up targets local by default.
+      await run(cli, ["migration", "up", "--workdir", directory], { timeout: 120_000 });
+      console.log("Upgraded the disposable L6.2A database before starting the matching API and web applications");
+    }
     if (args.includes("--measure-polls")) {
       await run(fromRoot("scripts", "measure-polls.mjs"), [project], { timeout: 300_000 });
       return;

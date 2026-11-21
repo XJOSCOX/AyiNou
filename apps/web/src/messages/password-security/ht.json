@@ -1,0 +1,14 @@
+{
+  "confirm": "Konfime modpas la",
+  "mismatch": "Modpas yo pa menm.",
+  "requirements": "Kondisyon pou modpas la",
+  "progress": "Kondisyon modpas ki satisfè",
+  "length": "Omwen 8 karaktè",
+  "uppercase": "Yon lèt majiskil",
+  "lowercase": "Yon lèt miniskil",
+  "number": "Yon chif",
+  "symbol": "Yon senbòl",
+  "invalid": "Sèvi ak omwen 8 karaktè, yon lèt majiskil, yon lèt miniskil, yon chif ak yon senbòl. Maksimòm nan se 72 oktè.",
+  "samePassword": "Chwazi yon modpas ki diferan ak modpas ou genyen kounye a.",
+  "signOutPending": "Modpas ou mete ajou. Sesyon rekiperasyon an pa t ka fèmen. Dekonekte anvan ou kontinye."
+}

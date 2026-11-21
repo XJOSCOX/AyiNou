@@ -145,3 +145,7 @@ Verify the hosted O2 through O5 migration order read-only before any authorized 
 ## O6 Early Partners
 
 Check hosted migration history and the O2 through O6 dry run before any approved rollout. Deploy matched applications after the database postflight. Real partner enrollment, publication and public visibility remain separately gated. See [O6 operations](organizations/O6_IMPLEMENTATION_REPORT.md#documentation-and-operations).
+
+## O7 organization rollout rehearsal
+
+Run `npm run test:e2e -- --organization-rollout organization-integration.spec.ts auth-recovery.spec.ts` to install the L6.2A baseline, apply O2–O7 incrementally on disposable Supabase and test the new app. A hosted dry run verifies ordering. Production deployment requires separate authorization. [O7 deployment runbook](organizations/O7_DEPLOYMENT_RUNBOOK.md)
