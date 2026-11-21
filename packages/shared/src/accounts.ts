@@ -25,6 +25,7 @@ export interface MemberProfile {
 }
 
 export interface ProfilePreview {
+  founderVerified?: true;
   displayName: string | null;
   username: string | null;
   biography: string | null;

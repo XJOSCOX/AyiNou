@@ -78,6 +78,16 @@
     "FollowList": "type:43edbaf5d1314f72e0795dfcc39a0c8087f5d01fe105e9112ff7569fc7e0e51a",
     "FollowStatus": "type:69d82b502f1b0c2cfebca4aed7cc2430ae5e5a29f7b7acea6bba32be009176a7",
     "FollowTarget": "type:7deb76e9e616e7f5dd59d1978b98aa86dfa555c4ff9fd9586e5248c02cd9e9bf",
+    "founderCaseStates": "value:370559e6e750ae70f5eb92b689377023eb013384ab63878189c8ae0108f9957a",
+    "founderDecisions": "value:0946f85014551973c0f4ea0ce24d06e3a7c70c17367cb2f79b3e7b70517d95e8",
+    "FounderIdentityCase": "type:5b0ae1829459736ddabcd3ae0c6c5bae24ecce742858d79b0269d32394892d0d",
+    "FounderIdentityQueue": "type:1c1c86a4f3c1d4f4d3fe1a25b72a4bd53963e906ae6d9f0ee4ef7428766e2d91",
+    "FounderIdentityReceipt": "type:df7927bc65c6789e9bca38d877e2232076379536fcae67b492f17982d0cb160b",
+    "FounderMemberAction": "type:dcf3f513aa06249e12c4a24a01abe30fa43d7c77ca3ee26cfc081fb227fe173b",
+    "founderMemberActions": "value:ddbd23c0c191cc032beca9806ef3a2fbb1c3df666a54972ba068e890c0439f6c",
+    "FounderReviewAction": "type:d19c9036da8c98ff1337b7cc540369c2706c7873492f6b31229df5eff06b725d",
+    "founderReviewActions": "value:912ce6c4ff2ddac6b980362e28bfbf838f9565a4ec89d2922a07ceb0120c19a4",
+    "FounderReviewCase": "type:99f0211faa13da008f32c2d08950ca8ec22bbcb992cfc7e73f1904b059fb1f01",
     "futureOrganizationPermissions": "value:18ab1c44d090af09f19489adc03ea5b63977a6570a7091cbce1e0d58971b5092",
     "governmentKinds": "value:85ac07d20c53c0cca771cfabf292548ea2a6d96ac2351ebec7a4a689ee5ef39b",
     "GroupInvitation": "type:34f98d2790c0a0b4037b373f12261817bb4f7de08715117cf5110b64f72fbd72",
@@ -170,7 +180,7 @@
     "PrivacyRequestState": "type:02dfee6fcfce93711e19aab4c959e5b6b22e869adbfef822e4d1c3f3e03fe3d9",
     "PrivacyRequestSummary": "type:bd5c65e7a41381c6e1c211cd5a089606a10d3e8d43728c7a1036f2e578b2221e",
     "ProfileChanges": "type:da7f8eb64dcd5987c3050c3bcd6a65eaa2c46b7576df9c4e831c226345c41edc",
-    "ProfilePreview": "type:6e9c4d7e6ccc1e00ac6f5ee0897e2c6b3bf0ac72669f4e004f03f5cfd76389d3",
+    "ProfilePreview": "type:8c23f25cc1e074622b3f0796cb34e085868783b5ab8c14db3967792e8c1ae91a",
     "ProjectCard": "type:f8d51b4b57db5ba1a2f7a463686e46424c34962fdd3d90ceb5ea645f7bedc01d",
     "ProjectDetail": "type:7bf1cfd11c6ccafec8e70734e11ca5929134191a53be1c7941c41c9136f8cd66",
     "ProjectDraft": "type:6c29fa54dc12b6eeb88b79aca78a090be33bfd139cbfd9f90d9e049e9118d5b6",
@@ -245,6 +255,7 @@
     "AffiliationOrganization": "b614eb61fe1eb08a4c1d14c10dd408d9741e194aad103596a4758c7bfb6d2656",
     "AffiliationPersonPreview": "4199c9b5f3be7231f049f987e5b67d809e81fd5d0c6b76023e7606840ff5e1d9",
     "CommentPosition": "5df097e303664afdbec2e7eafcbed3af365b9f11192eaa1f9774b335ec7815e5",
+    "Decision": "ef732a66483fce22eaa7fe869ec1e5096016fd2e9199574440cf40ed2b7f11b5",
     "DiscoveryCardBase": "69b892e7a10fb8f268aa238ac0e5d1ba769d657f5c6cee7dcd1811454eda3996",
     "PollScopeOption": "22e329c97789758409c871c4d6468cc06d4c5408dd12dd84e7ca247e504b9a14"
   },
@@ -341,6 +352,38 @@
       "affiliations",
       "privacyRequests",
       "pollParticipation"
+    ],
+    "founderCaseStates": [
+      "consent_pending",
+      "proof_pending",
+      "ready_for_review",
+      "granted",
+      "held",
+      "revoked",
+      "denied",
+      "withdrawn"
+    ],
+    "founderDecisions": [
+      "confirmed",
+      "insufficient_proof",
+      "conflict",
+      "account_risk",
+      "member_request",
+      "corrected"
+    ],
+    "founderMemberActions": [
+      "consent",
+      "visibility",
+      "withdraw",
+      "correction"
+    ],
+    "founderReviewActions": [
+      "grant",
+      "hold",
+      "release",
+      "revoke",
+      "deny",
+      "conflict"
     ],
     "futureOrganizationPermissions": [
       "tasks.assign",

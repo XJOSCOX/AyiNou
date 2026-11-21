@@ -14,6 +14,7 @@ DELETE /api/v1/recommendations/feedback - -
 GET /api/v1/admin/accounts - -
 GET /api/v1/admin/ambassadors - -
 GET /api/v1/admin/audit - -
+GET /api/v1/admin/founder-identity - -
 GET /api/v1/admin/legal - -
 GET /api/v1/admin/legal/audit - -
 GET /api/v1/admin/overview - -
@@ -56,6 +57,7 @@ GET /api/v1/me/community-invitations - -
 GET /api/v1/me/community-recommendation-settings - -
 GET /api/v1/me/feed-moderation - -
 GET /api/v1/me/following - -
+GET /api/v1/me/founder-identity - -
 GET /api/v1/me/institution-accounts - -
 GET /api/v1/me/member-code - -
 GET /api/v1/me/moderation-appeals - -
@@ -122,6 +124,7 @@ GET /health - -
 HEAD /api/v1/admin/accounts - onSend
 HEAD /api/v1/admin/ambassadors - onSend
 HEAD /api/v1/admin/audit - onSend
+HEAD /api/v1/admin/founder-identity - onSend
 HEAD /api/v1/admin/legal - onSend
 HEAD /api/v1/admin/legal/audit - onSend
 HEAD /api/v1/admin/overview - onSend
@@ -164,6 +167,7 @@ HEAD /api/v1/me/community-invitations - onSend
 HEAD /api/v1/me/community-recommendation-settings - onSend
 HEAD /api/v1/me/feed-moderation - onSend
 HEAD /api/v1/me/following - onSend
+HEAD /api/v1/me/founder-identity - onSend
 HEAD /api/v1/me/institution-accounts - onSend
 HEAD /api/v1/me/member-code - onSend
 HEAD /api/v1/me/moderation-appeals - onSend
@@ -261,6 +265,8 @@ PATCH /api/v1/trust/verification-appeals/:id/assignment 4096 -
 PATCH /api/v1/trust/verification-appeals/:id/decision 6000 -
 PATCH /api/v1/verification/review/:id/work 256 -
 POST /api/v1/admin/ambassadors 6000 -
+POST /api/v1/admin/founder-identity 1024 -
+POST /api/v1/admin/founder-identity/:id/actions 1024 -
 POST /api/v1/admin/legal/actions 4096 -
 POST /api/v1/admin/privacy-requests/* 512 -
 POST /api/v1/affiliation-invitations/:id/:action 256 -
@@ -280,6 +286,7 @@ POST /api/v1/institutions/:id/representatives/:member/revoke 256 -
 POST /api/v1/institutions/:id/roles 4096 -
 POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
+POST /api/v1/me/founder-identity/:id/actions 1024 -
 POST /api/v1/me/notifications/read-all 1024 -
 POST /api/v1/me/organization-onboarding/:id/change-path 1024 -
 POST /api/v1/me/post-media 4200000 onRequest

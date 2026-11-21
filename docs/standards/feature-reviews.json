@@ -5,6 +5,87 @@
       "report": "docs/standards/S1_IMPLEMENTATION_REPORT.md",
       "routes": [],
       "migrations": []
+    },
+    {
+      "id": "o3",
+      "report": "docs/organizations/O3_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/founder-identity",
+          "contract": "GET /api/v1/me/founder-identity - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only subject projection. It exposes current state and localized decision codes to the live account owner."
+          },
+          "authorization": {
+            "file": "apps/api/test/founder-identity.test.ts",
+            "denialScenario": "An unauthenticated request is rejected before reaching the repository."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/founder-identity",
+          "contract": "GET /api/v1/admin/founder-identity - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only bounded projection. The assigned authority is checked before history is read."
+          },
+          "authorization": {
+            "file": "apps/api/test/founder-identity.test.ts",
+            "denialScenario": "An unauthenticated request is rejected before reaching the repository."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/founder-identity",
+          "contract": "POST /api/v1/admin/founder-identity 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The opening event and scoped case commit in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/api/test/founder-identity.test.ts",
+            "denialScenario": "Strict input validation rejects attempts to supply actor, proof, or founder authority."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/founder-identity/:id/actions",
+          "contract": "POST /api/v1/me/founder-identity/:id/actions 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The consent, disclosure, withdrawal or correction event is the command receipt."
+          },
+          "authorization": {
+            "file": "apps/api/test/founder-identity.test.ts",
+            "denialScenario": "Strict input validation rejects attempts to supply actor, proof, or founder authority."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/founder-identity/:id/actions",
+          "contract": "POST /api/v1/admin/founder-identity/:id/actions 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The scoped decision event and material SQL mutation are committed together."
+          },
+          "authorization": {
+            "file": "apps/api/test/founder-identity.test.ts",
+            "denialScenario": "Strict input validation rejects attempts to supply actor, proof, or founder authority."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121030000_o3_founder_identity.sql",
+          "rlsAndGrants": "Five private RLS tables without application grants. Three narrowly scoped service-only RPCs use explicit empty search paths.",
+          "authorization": "Live actor and session, recent TOTP, assigned founder authority, consent, approved receipt, policy and conflict are checked before grant.",
+          "compatibility": "Independent review, bootstrap records, discovery, project and poll permissions are unchanged. The profile designation is an optional additive field.",
+          "validation": "Disposable Chromium and SQL cover direct permissions, scope, expired and revoked sessions, concurrent state changes, receipts and public display.",
+          "rolloutAndRollback": "No hosted write. Apply the ordered O2 and O3 sequence only after separate authorization. Preserve history and use a forward policy closure or recovery migration."
+        }
+      ]
     }
   ]
 }
