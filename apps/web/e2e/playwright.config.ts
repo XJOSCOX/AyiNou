@@ -51,6 +51,7 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_URL: supabase!,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: publishable!,
       NEXT_PUBLIC_API_URL: api!,
+      WEB_ORIGIN: web!,
       NEXT_TELEMETRY_DISABLED: "1",
       AYINOU_E2E_SUPABASE_SECRET: "",
       AYINOU_E2E_EXPORT_KEY: "",

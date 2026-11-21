@@ -56,6 +56,7 @@ async function prepare(directory) {
   await Promise.all([mkdir(supabase), mkdir(web)]);
   const config = (await readFile(fromRoot("supabase", "config.toml"), "utf8"))
     .replace(/^project_id\s*=.*$/m, `project_id = "${project}"`)
+    .replaceAll("http://127.0.0.1:4000", webUrl)
     .replace(/^(port|shadow_port|inspector_port)\s*=\s*(\d+)$/gm,
       (line, key, value) => ports.has(Number(value)) ? `${key} = ${ports.get(Number(value))}` : line)
     .replace(/(\[auth.mfa.totp\]\s*\r?\n)enroll_enabled = false\s*\r?\nverify_enabled = false/,
@@ -86,7 +87,7 @@ async function main() {
     startAttempted = true;
     console.log(`Starting disposable Supabase project ${project}`);
     await run(cli, ["start", "--workdir", directory, "--output", "json",
-      "--exclude", "studio,postgres-meta,edge-runtime,logflare,vector,realtime,mailpit"],
+      "--exclude", "studio,postgres-meta,edge-runtime,logflare,vector,realtime"],
       { capture: true, timeout: 240_000 });
     if (args.includes("--measure-polls")) {
       await run(fromRoot("scripts", "measure-polls.mjs"), [project], { timeout: 300_000 });
