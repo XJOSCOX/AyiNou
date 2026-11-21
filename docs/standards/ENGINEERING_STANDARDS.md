@@ -24,3 +24,7 @@ Measure costly paths before optimizing. Bound payloads, query counts, database s
 Use feature switches only where they serve a rollout decision. Give production-relevant switches a safe default, a named owner, authorization at the server and a retirement plan. A flag cannot override authorization or legal approval. Plan application/schema compatibility, smoke checks, stop conditions and reversible mitigations. Use forward corrective SQL or approved recovery if a migration cannot safely be reversed. Preserve evidence and restrict access when full rollback is unsafe.
 
 Run the [completion checklist](FEATURE_COMPLETION_CHECKLIST.md). Keep the existing CI quality, builds, disposable Chromium smoke, dependency audit and legal integrity checks. S1 adds a lightweight declarations check. It establishes that specified evidence and reviews are present, while tests and human review establish behavior.
+
+## Session and private workflow engineering
+
+Inspect actual Supabase Auth settings, refresh behavior, the Next.js cookie/session adapters, Fastify authorization and PostgreSQL session-backed writes before changing authentication. Establish a trusted original sign-in clock and check current role and session policy at each enforcement point. Test concurrent refresh, privilege changes, logout, session revocation and cross-account workflow access. Keep session and workflow activation behind a separately reviewed rollout. [Session Security implementation plan](../security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)

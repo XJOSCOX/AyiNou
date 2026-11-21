@@ -8,3 +8,13 @@
 6. Document response owners, safe evidence collection, containment and alert thresholds before enabling sensitive workflows. For incidents, limit access and duration, preserve scoped evidence, restore service with current consent and grants, and record follow-up and decision history.
 
 Use reviewed releases and runtime gates for legal and privacy operations. Legal approval, acceptance records, data rights, beneficiary processing, health referrals and payments each require a separately approved capability and operating policy. L3 synthetic testing is isolated, and L6 publication requires its existing immutable evidence and availability gates. [Privacy readiness](../privacy/L3_5_FINAL_VERIFICATION.md) · [Publication controls](../legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md).
+
+## Session and private workflow policy
+
+The Session Security milestone will add an opt-in, unchecked-by-default “Remember this device” control. Remembered ordinary-member sessions may persist for at most 30 days from the original trusted sign-in. Nonremembered sessions use nonpersistent browser credentials and a finite, server-enforced maximum. Sign-out and revocation remain available in both modes. Browser close is not reliable server-side evidence.
+
+Active Platform Administrator and Super Administrator assignments require a six-hour absolute limit from the original server-trusted sign-in, including when remembering a device. Refresh cannot extend the deadline. Recheck current authority, constrain or revoke pre-promotion sessions before allowing privileged access, and remove privileges immediately on revocation. Prompt for login and applicable MFA after expiry. Preserve the existing 15-minute TOTP freshness check and action-specific step-up.
+
+Private workflow links use `/s/{flowId}/{step}` with random opaque references. Bind the workflow to a user or authorized participant and, when sensitivity requires it, the initiating session. Check identity, live authorization, expiry, revocation, completion and MFA on each read and write. Ordinary account-owned drafts may resume on another device. Keep credentials, tokens, raw session IDs and OTPs out of URLs. Return nondisclosing errors for unauthorized access.
+
+Activation depends on verified provider support and consistent Next.js, Fastify and PostgreSQL enforcement. [Implementation and tests](../security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
