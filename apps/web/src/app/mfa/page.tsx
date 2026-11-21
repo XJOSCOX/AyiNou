@@ -13,7 +13,7 @@ export default async function MfaPage({ searchParams }: { searchParams: Promise<
     || requested === "/polls/new"
     || /^\/polls\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(requested)
     || /^\/projects\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/work$/i.test(requested)
-    || /^\/institutions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}\/roles$/i.test(requested)
+    || /^\/institutions\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}(?:\/roles)?$/i.test(requested)
     || (requested.length <= 65 && /^\/communities\/[a-z0-9]+(?:-[a-z0-9]+)*(?:\/moderation)?$/.test(requested));
   const next = privileged || requested === "/reset-password" ? requested : claim ? `/verification?claim=${claim}`
     : join ? `/organization/${join}` : "/dashboard";

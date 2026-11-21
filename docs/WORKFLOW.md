@@ -140,3 +140,8 @@ The hosted release sequence is O2, O3, then O4 after separate authorization. Ver
 ## O5 administrative corrections and governance
 
 Verify the hosted O2 through O5 migration order read-only before any authorized rollout. Apply with separate production approval and deploy matching API and web. Recovery and high-impact execution remain closed. See [O5 operations](organizations/O5_IMPLEMENTATION_REPORT.md#documentation-and-operations).
+
+
+## O6 Early Partners
+
+Check hosted migration history and the O2 through O6 dry run before any approved rollout. Deploy matched applications after the database postflight. Real partner enrollment, publication and public visibility remain separately gated. See [O6 operations](organizations/O6_IMPLEMENTATION_REPORT.md#documentation-and-operations).

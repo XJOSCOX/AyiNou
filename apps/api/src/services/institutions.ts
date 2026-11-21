@@ -49,6 +49,9 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
       if (error.code === "O5001") throw new InstitutionError("MFA_REQUIRED", 403);
       if (error.code === "O5002") throw new InstitutionError("GOVERNANCE_REQUIRED", 409);
       if (error.code === "O5003") throw new InstitutionError("CLAIM_APPROVAL_HELD", 409);
+      if (error.code === "O6001") throw new InstitutionError("EARLY_PARTNER_CLOSED", 409);
+      if (error.code === "O6002") throw new InstitutionError("EARLY_PARTNER_INELIGIBLE", 409);
+      if (error.code === "O6003") throw new InstitutionError("EARLY_PARTNER_FULL", 409);
       if (error.code === "42501") throw new InstitutionError("FORBIDDEN", 403);
       if (error.code === "PVE01") throw new InstitutionError("VERIFICATION_REQUIRED", 409);
       if (error.code === "PVT05") throw new InstitutionError("VERIFICATION_ASSIGNMENT_REQUIRED", 403);

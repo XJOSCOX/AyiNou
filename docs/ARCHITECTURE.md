@@ -212,3 +212,8 @@ One canonical SQL completion command binds the live personal identity, intent ve
 ## O5 administrative corrections and governance
 
 O5 adds scoped member-confirmed onboarding corrections and independent platform governance decisions through service-only RPCs. The existing account roles retain their purpose. The governance ledger cannot activate high-impact changes. See [O5 implementation](organizations/O5_IMPLEMENTATION_REPORT.md).
+
+
+## O6 Early Partners
+
+O6 isolates pilot participation from verification, projects and polls. Scoped operators and organization roles are rechecked through authenticated Fastify routes and SQL. The scope-specific feedback entitlement has a closed production gate. See [O6 implementation](organizations/O6_IMPLEMENTATION_REPORT.md).

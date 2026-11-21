@@ -14,6 +14,7 @@ DELETE /api/v1/recommendations/feedback - -
 GET /api/v1/admin/accounts - -
 GET /api/v1/admin/ambassadors - -
 GET /api/v1/admin/audit - -
+GET /api/v1/admin/early-partners - -
 GET /api/v1/admin/founder-identity - -
 GET /api/v1/admin/governance - -
 GET /api/v1/admin/legal - -
@@ -44,6 +45,7 @@ GET /api/v1/discover/suggestions - -
 GET /api/v1/feed - -
 GET /api/v1/institutions/:id - -
 GET /api/v1/institutions/:id/affiliations/manage - -
+GET /api/v1/institutions/:id/early-partner - -
 GET /api/v1/institutions/:id/roles - -
 GET /api/v1/institutions/:id/verified-representatives - -
 GET /api/v1/institutions/:key/follow - -
@@ -131,6 +133,7 @@ GET /health - -
 HEAD /api/v1/admin/accounts - onSend
 HEAD /api/v1/admin/ambassadors - onSend
 HEAD /api/v1/admin/audit - onSend
+HEAD /api/v1/admin/early-partners - onSend
 HEAD /api/v1/admin/founder-identity - onSend
 HEAD /api/v1/admin/governance - onSend
 HEAD /api/v1/admin/legal - onSend
@@ -161,6 +164,7 @@ HEAD /api/v1/discover/suggestions - onSend
 HEAD /api/v1/feed - onSend
 HEAD /api/v1/institutions/:id - onSend
 HEAD /api/v1/institutions/:id/affiliations/manage - onSend
+HEAD /api/v1/institutions/:id/early-partner - onSend
 HEAD /api/v1/institutions/:id/roles - onSend
 HEAD /api/v1/institutions/:id/verified-representatives - onSend
 HEAD /api/v1/institutions/:key/follow - onSend
@@ -279,6 +283,7 @@ PATCH /api/v1/trust/verification-appeals/:id/assignment 4096 -
 PATCH /api/v1/trust/verification-appeals/:id/decision 6000 -
 PATCH /api/v1/verification/review/:id/work 256 -
 POST /api/v1/admin/ambassadors 6000 -
+POST /api/v1/admin/early-partners 2048 -
 POST /api/v1/admin/founder-identity 1024 -
 POST /api/v1/admin/founder-identity/:id/actions 1024 -
 POST /api/v1/admin/governance/claim-holds/:id 1536 -
@@ -298,6 +303,7 @@ POST /api/v1/institution-invitations/:id/:action 256 -
 POST /api/v1/institutions 4096 -
 POST /api/v1/institutions/:id/affiliations 4096 -
 POST /api/v1/institutions/:id/affiliations/invitations 512 -
+POST /api/v1/institutions/:id/early-partner 2048 -
 POST /api/v1/institutions/:id/invitations 1024 -
 POST /api/v1/institutions/:id/logo 2800000 -
 POST /api/v1/institutions/:id/representatives/:member/revoke 256 -

@@ -18,3 +18,8 @@ Screen copy: “Early Partner pilot”, “Review pilot participation”, “You
 ## Compatibility with later programs
 
 Use organization IDs and scoped roles as references when designing programs, configurable applications, beneficiary waitlists, evaluations, volunteer coordination, provider directories and authorized portals, education/counseling support, referrals and funding/impact reports. Use separate domains, minimized projections, individual consent and purpose-specific access. Require approved data handling and provider governance before confidential evaluations or medical referrals. Keep onboarding fields limited to account setup, organization identity and mandate. Intake for health or financial assistance requires separate authorization and data governance. The existing [L6.2A legal controls](../legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md) exclude the Early Partner policy from publication settings. Program launch depends on independent legal, policy and pilot approval.
+
+
+## O6 Early Partners
+
+O6 implements scoped nomination, independent offer review, synthetic owner acceptance, expiry, withdrawal, suspension and private feedback. Real enrollment and public visibility remain closed. A future verified terms release must specify consent, eligibility, termination, appeal, support, data protection and optional public wording. Connect its immutable approved version and digest to participation only after publication authority and readiness are approved. The suggested public label is “Early Partner · Participating in Ayinou’s development pilot.” A future projection must require current eligibility, active participation, explicit opt-in and the institution’s existing visibility checks. See [O6 implementation](O6_IMPLEMENTATION_REPORT.md).

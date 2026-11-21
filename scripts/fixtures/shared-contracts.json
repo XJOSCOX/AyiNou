@@ -66,6 +66,15 @@
     "DiscoveryFilter": "type:b61b5c04c6f993c70370601dd1625c615546f23e9de50b0c88fbb2ed777b416a",
     "DiscoveryKind": "type:a55a16bc73f059fcf2ca42b35ab8bf86f3d123d3c904c73303596a83ed1e2756",
     "DiscoveryPage": "type:6647559d6b0a8bebd767d2c93499488ea3edb0244898b3f4bbfa9658cb9303a0",
+    "EarlyPartnerCategory": "type:ee768ef2ef13a883c76c4c24b42044e54eab46593d4e9ec4644b3ed86c3c3cd9",
+    "EarlyPartnerEnrollment": "type:ce31a295b5f008ed93f685b21167c65efc8383ed4b77ca2dff9849668195c04d",
+    "EarlyPartnerFeature": "type:e732228fe3b277abe21aa8b013e4714a8cb5387fce211a415993ed22371ae8ac",
+    "earlyPartnerFeatures": "value:70448f705805f3a19cf1295c0ad9afaf252adcf969232b38fc00aab2b3aa2138",
+    "EarlyPartnerFeedback": "type:9ad5903c1c1b7b078ec8925cc829b5b7b99be0c5472dcf4cb70e6e6080eac4bb",
+    "earlyPartnerFeedbackCategories": "value:ca4c230760f2c0aa996b00d1711ae6df49934e211fd5dc03b2760b01b0456678",
+    "EarlyPartnerProgram": "type:345a9e39734248a60af7aa90e15ded1e0001233a99f6051269ae59459e1e10bd",
+    "EarlyPartnerState": "type:e6a22a1f98ee0ad300b17a398022df1500a31a1db09c41172e8cc0b82db13da0",
+    "EarlyPartnerWorkspace": "type:1abf5040b136f35a32e58f229c6ea4267acd24aa0e0aac601c7a53c56313accb",
     "exportCategories": "value:67737dc65dcd30720c47c214caa8e4b689af9e79f4be93eee47b366d8177cf12",
     "ExportCategory": "type:fd50ca33cc1a2f01629e0d33072f6ddeb582977d474c10da93f711eea5463f22",
     "ExportState": "type:a3d4bb1d75024ef77ce73df9a90a31da158d99598aecb74798e1f8c9810316c9",
@@ -358,6 +367,21 @@
         ]
       }
     },
+    "earlyPartnerFeatures": [
+      "pilot_feedback",
+      "guided_onboarding",
+      "feature_preview",
+      "volunteer_testing",
+      "program_preview",
+      "pilot_documents",
+      "beta_interface"
+    ],
+    "earlyPartnerFeedbackCategories": [
+      "usability",
+      "accessibility",
+      "defect",
+      "suggestion"
+    ],
     "exportCategories": [
       "profile",
       "residence",

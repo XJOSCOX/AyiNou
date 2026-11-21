@@ -797,3 +797,8 @@ Migration `20261121020000_o2_organization_intents.sql` creates private signup ch
 ## O5 administrative corrections and governance
 
 O5 adds six private RLS tables for onboarding correction consent, the governance singleton, scope grants, proposals, claim holds and transactional events. The additive migration follows O4. See [O5 data model and API](organizations/O5_IMPLEMENTATION_REPORT.md#data-model-and-api).
+
+
+## O6 Early Partners
+
+O6 adds immutable program versions, scoped operator grants, organization enrollments, private feedback and a transactional event ledger. Its five private tables are RLS-protected. The migration follows O5 and adds pilot obligations to the existing correction safeguards. See [O6 data model and API](organizations/O6_IMPLEMENTATION_REPORT.md#data-model-and-api).

@@ -11,6 +11,7 @@ import { registerInstitutionRoutes } from "./routes/institutions.js";
 import { createInstitutionRepository, type InstitutionRepository } from "./services/institutions.js";
 import { registerAdminRoutes } from "./routes/admin.js";
 import { registerAdministrationGovernance } from "./routes/administration-governance.js";
+import { registerEarlyPartners } from "./routes/early-partners.js";
 import { registerOrganizationOnboarding } from "./routes/organization-onboarding.js";
 import { registerFounderIdentity } from "./routes/founder-identity.js";
 import { registerPublicLegalRoutes } from "./routes/legal-publication.js";
@@ -59,6 +60,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions));
   app.register((instance) => registerAdministrationGovernance(instance, auth, institutions));
+  app.register((instance) => registerEarlyPartners(instance, auth, institutions));
   app.register((instance) => registerOrganizationOnboarding(instance, auth, institutions, readBudget));
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
   app.register((instance) => registerPublicLegalRoutes(instance, institutions));

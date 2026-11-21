@@ -49,3 +49,8 @@ Founder Verified, the Early Partner Program, Organization Programs, medical refe
 ## O5 administrative corrections and governance
 
 O5 uses the `private.platform_governance_events` ledger for correction consent and outcomes, proposals and independent decisions, target acceptance, scope provisioning and revocation, and claim hold placement and release. Preview reads are redacted and nonmutating. Effective expiry is determined by timestamp. See [O5 audit evidence](../organizations/O5_IMPLEMENTATION_REPORT.md#permissions-and-audit).
+
+
+## O6 Early Partners
+
+O6 records program and operator provenance, nomination, offer, refusal, consent and scope, suspension, withdrawal, expiry, feedback access revocation and feedback resolution in `private.early_partner_events`. Read projections omit restricted notes and authors. Exact requests reconcile to the same committed receipt. See [O6 audit evidence](../organizations/O6_IMPLEMENTATION_REPORT.md#permissions-and-audit).

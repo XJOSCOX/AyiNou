@@ -341,3 +341,8 @@ These initiatives remain planned. [S1 implementation report](docs/standards/S1_I
 ## O5 administrative corrections and governance
 
 O5 adds auditable administrative corrections and governance proposals. Hosted migration rollout and approval of operational recovery remain separate milestones. See [O5 implementation](docs/organizations/O5_IMPLEMENTATION_REPORT.md).
+
+
+## O6 Early Partners
+
+O6 implements synthetic-first Early Partner participation. Real enrollment, an effective legal release, public opt-in visibility and O7 organization-program policy remain separate milestones. See [O6 implementation](docs/organizations/O6_IMPLEMENTATION_REPORT.md).

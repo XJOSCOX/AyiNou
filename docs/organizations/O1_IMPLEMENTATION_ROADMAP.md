@@ -19,3 +19,8 @@ Read the [architecture](O1_ONBOARDING_ARCHITECTURE.md), [capability matrix](O1_C
 ## O5 administrative corrections and governance
 
 O5 implements correction and governance foundations in code. O2 through O5 hosted deployment requires separate approval, and O6 requires its own program decisions. See [O5 implementation](O5_IMPLEMENTATION_REPORT.md).
+
+
+## O6 Early Partners
+
+O6 implements and tests the pilot with disposable fixtures. Real enrollment, public visibility and an effective terms release remain owner decisions. O7 depends on separate organization program authorization and data governance. See [O6 implementation](O6_IMPLEMENTATION_REPORT.md).

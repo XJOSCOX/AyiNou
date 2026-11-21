@@ -391,6 +391,74 @@
           "rolloutAndRollback": "Apply in migration order then deploy API and web. Roll forward while retaining audit history and closed execution gates."
         }
       ]
+    },
+    {
+      "id": "o6",
+      "report": "docs/organizations/O6_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/early-partners",
+          "contract": "GET /api/v1/admin/early-partners - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Bounded read-only scoped projection. It creates no access or decisions."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/early-partners.spec.ts",
+            "denialScenario": "Generic administrators with recent MFA and no program scope cannot read the inventory."
+          }
+        },
+        {
+          "route": "GET /api/v1/institutions/:id/early-partner",
+          "contract": "GET /api/v1/institutions/:id/early-partner - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Bounded read-only scoped projection. It creates no access or decisions."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/early-partners.spec.ts",
+            "denialScenario": "A member cannot read another organization’s private enrollment."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/early-partners",
+          "contract": "POST /api/v1/admin/early-partners 2048 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Versioned decisions, exact request receipts and state change commit with a restricted Early Partner event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/early-partners.spec.ts",
+            "denialScenario": "The nominator cannot approve their own offer. Closed gates and stale revisions deny changes."
+          }
+        },
+        {
+          "route": "POST /api/v1/institutions/:id/early-partner",
+          "contract": "POST /api/v1/institutions/:id/early-partner 2048 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Versioned decisions, exact request receipts and state change commit with a restricted Early Partner event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/early-partners.spec.ts",
+            "denialScenario": "Delegated organization administrators cannot accept an offer. Cross-organization and expired sessions are rejected."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121060000_o6_early_partners.sql",
+          "rlsAndGrants": "Five private RLS tables with app-role revokes. Only two narrowly scoped early partner RPCs grant service execute.",
+          "authorization": "Liveness, recent MFA, program operator scope, independent review, conflict and existing organization ownership are enforced in SQL.",
+          "compatibility": "Existing verification, organization, project eligibility and ballot permission functions remain intact. The O5 correction check becomes aware of live participation obligations.",
+          "validation": "Disposable O6 Playwright tests cover state, role, row privileges, retries and concurrence. Read-only hosted preflight verifies migration ordering.",
+          "rolloutAndRollback": "Apply O2 through O6 only after separate approval. Roll forward with the production gate closed and retain scoped durable audit records."
+        }
+      ]
     }
   ]
 }

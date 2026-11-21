@@ -15,6 +15,7 @@ import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import { InstitutionForm } from "./institution-form";
 import { OrganizationRegistrationPanel } from "./organization-registration-panel";
+import { OrganizationEarlyPartners } from "./early-partner-workspace";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, InstitutionLogo,
   InstitutionStatus, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -132,6 +133,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
               <Link className={institutionLink} href={`/verification?institution=${org.id}&kind=representative`}>{t.representative}</Link>
             </div>
           </section>
+          {manageTeam && <OrganizationEarlyPartners organizationId={org.id} />}
           {manageTeam && <section className={institutionCard}>
             <h2 className="text-xl font-semibold">{t.activity}</h2>
             {detail.activity.length ? <ul className="mt-3 divide-y divide-[var(--theme-border)]">

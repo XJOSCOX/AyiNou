@@ -126,3 +126,8 @@ Members can resume a private organization draft, review public matches, and conf
 ## O5 administrative corrections and governance
 
 Members can authorize an exact organization draft correction, withdraw consent and view its receipt. Administrators can address eligible drafts and record protected cases. The Governance tab records independent decisions and explains closed operational actions. See [O5 implementation](organizations/O5_IMPLEMENTATION_REPORT.md).
+
+
+## O6 Early Partners
+
+Early Partners is a future limited organization pilot. The test workflow covers nominations, private offers, exact owner consent, withdrawal, feedback and offboarding. Participation does not imply verification, legal status or additional voting or data access. See [O6 implementation](organizations/O6_IMPLEMENTATION_REPORT.md).
