@@ -29,7 +29,7 @@ export function Navbar() {
 
   return (
     <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)] lg:sticky lg:top-0 lg:z-30">
-      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-2 px-4 py-2 sm:px-8 lg:min-h-18 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-x-4">
+      <div className="public-container grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-2 py-2 lg:min-h-18 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-x-4">
         <div className="flex min-w-0 justify-self-start">
           <SiteBrand href={home ? "#top" : "/"} />
         </div>

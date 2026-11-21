@@ -17,7 +17,7 @@ import { useState, useCallback } from "react";
 function PublicShell({ children }: { children: React.ReactNode }) {
   return <div id="top" className="flex min-h-dvh flex-col">
     <Navbar />
-    <main className="grid w-full flex-1 content-start gap-4 px-4 py-6 sm:px-8">{children}</main>
+    <main className="public-container grid flex-1 grid-cols-[minmax(0,1fr)] content-start gap-4 py-6 sm:py-8">{children}</main>
     <SiteFooter />
   </div>;
 }
@@ -33,7 +33,7 @@ export function PublicGroups() {
       <label className="text-sm font-semibold">{t.searchGroups}
         <input type="search" className={institutionField} maxLength={80} value={search} onChange={(event) => setSearch(event.target.value)} />
       </label>
-      <label className="text-sm font-semibold">{t.category}
+      <label className="min-w-0 text-sm font-semibold">{t.category}
         <select className={institutionField} value={kind} onChange={(event) => setKind(event.target.value as GroupKind | "")}>
           <option value="">{t.all}</option>{groupKinds.map((value) => <option key={value} value={value}>{t[value]}</option>)}
         </select>

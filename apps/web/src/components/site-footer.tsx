@@ -10,7 +10,7 @@ const footerLink = "inline-flex min-h-11 items-center font-semibold text-[var(--
 export function SiteFooter({ member = false }: { member?: boolean }) {
   const [locale] = useLocale();
   const t = messages[locale];
-  const layout = member ? "px-4 sm:px-6 xl:px-10" : "mx-auto max-w-[1500px] px-4 sm:px-8";
+  const layout = member ? "px-4 sm:px-6 xl:px-10" : "public-container";
 
   return (
     <footer className="border-t border-[var(--theme-border)] bg-[var(--theme-surface)] text-[var(--theme-text)]">

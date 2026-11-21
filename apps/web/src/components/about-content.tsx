@@ -14,7 +14,7 @@ export function AboutContent() {
   const [locale] = useLocale();
   const t = copy[locale];
   return (
-    <div className="mx-auto grid w-full max-w-[1500px] gap-4 px-4 py-6 sm:gap-6 sm:px-8 sm:py-10">
+    <div className="public-container grid gap-4 py-6 sm:gap-6 sm:py-10">
       <header className="rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-9">
         <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">{t.intro.title}</h1>
         <p className="mt-4 max-w-[68ch] text-lg leading-relaxed text-[var(--theme-body)]">{t.intro.body}</p>

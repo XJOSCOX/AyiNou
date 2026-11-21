@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { messages } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -10,6 +9,7 @@ import { UpdatesSidebar } from "./updates-sidebar";
 import { SiteFooter } from "./site-footer";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { WelcomeStats } from "./welcome-stats";
+import { HomeSlideshow } from "./home-slideshow";
 import styles from "./home-page.module.css";
 
 export function HomePage() {
@@ -35,9 +35,7 @@ export function HomePage() {
               <a href="#building" className="rounded-md border border-[var(--theme-border)] px-4 py-3 text-sm font-semibold text-[var(--theme-link)] transition-colors hover:bg-[var(--theme-control)]">{t.building}</a>
             </div>
           </div>
-          <div className="relative m-2 aspect-[16/9] overflow-hidden rounded-lg bg-[var(--theme-hero)] md:aspect-auto md:min-h-[424px]">
-            <Image src="/ayinou-coast.webp" alt="" fill sizes="(min-width: 1500px) 720px, (min-width: 768px) 50vw, 100vw" className="object-cover object-[center_62%]" preload />
-          </div>
+          <HomeSlideshow locale={locale} />
         </section>
 
         <WelcomeStats />

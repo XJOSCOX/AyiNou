@@ -18,6 +18,7 @@ import { recommendationMessages } from "@/lib/recommendation-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { DiscoveryAccounts } from "./discovery-accounts";
 import { ContentReportForm } from "./content-report-form";
+import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
 import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { PostTopicLabels, RecommendationActions, RecommendationSettingsPanel } from "./feed-recommendations";
 import { VerifiedCheck, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -182,15 +183,10 @@ export function PostCard({ post, changed, recommendation }: { post: FeedPost; ch
           {post.author?.username && <p className="break-all text-xs text-[var(--theme-body)]">@{post.author.username}</p>}
         </div>
       </div>
-      {!mode && (editable || (!post.own && !reported)) && <details className="text-sm">
-        <summary className="cursor-pointer text-[var(--theme-link)]">{t.postActions}</summary>
-        <div className="mt-2 flex flex-wrap gap-3">
-          {editable ? <>
-            <button type="button" className={institutionLink} onClick={() => setMode("edit")}>{t.edit}</button>
-            <button type="button" className={institutionLink} onClick={() => setMode("delete")}>{t.delete}</button>
-          </> : <button type="button" className={institutionLink} onClick={() => setMode("report")}>{t.report}</button>}
-        </div>
-      </details>}
+      {!mode && (editable || (!post.own && !reported)) && <FeedActions label={t.postActions} actions={editable ? [
+        { icon: "edit", label: t.edit, run: () => setMode("edit") },
+        { icon: "delete", label: t.delete, run: () => setMode("delete") },
+      ] : [{ icon: "report", label: t.report, run: () => setMode("report") }]} />}
     </header>
     <p className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-xs text-[var(--theme-body)]">
       <Link className="hover:underline" href={`/posts/${post.id}`} aria-label={mediaNotificationMessages[locale].openPost}>
@@ -210,7 +206,9 @@ export function PostCard({ post, changed, recommendation }: { post: FeedPost; ch
       <p>{t.confirmDelete}</p>
       {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
       <div className="flex flex-wrap gap-3">
-        <button type="button" className={institutionAction} disabled={mutation.busy} onClick={() => { void remove(); }}>{t.delete}</button>
+        <button type="button" className={feedIconButton} aria-label={t.delete} title={t.delete} disabled={mutation.busy} onClick={() => { void remove(); }}>
+          <FeedIcon name="delete" />
+        </button>
         <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => setMode(null)}>{t.cancel}</button>
       </div>
     </div>}

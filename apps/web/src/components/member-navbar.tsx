@@ -3,9 +3,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
+import { adminMessages } from "@/lib/admin-i18n";
 import { authMessages } from "@/lib/auth-i18n";
+import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { useMemberIdentity } from "@/lib/member-display-name";
 import { browserSupabase } from "@/lib/supabase/browser";
@@ -18,10 +20,20 @@ import { NotificationBell } from "./notification-bell";
 
 export function MemberNavbar() {
   const [locale] = useLocale();
-  const { displayName, avatarUrl, claims, administrator, founder, founderVerified } = useMemberIdentity();
+  const { displayName, avatarUrl, claims, administrator, founder, founderVerified, reviewer } = useMemberIdentity();
+  const accountMenu = useRef<HTMLDetailsElement>(null);
   const [failedAvatar, setFailedAvatar] = useState<string | null>(null);
   const settings = accountMessages[locale].settings;
+  const auth = authMessages[locale];
+  const institution = institutionMessages[locale];
   const menuLabel = displayName || settings;
+  const accountLinks = [
+    { href: "/profile", label: auth.myProfile },
+    { href: "/settings", label: settings },
+    { href: "/verification", label: institution.verification },
+  ];
+  if (administrator) accountLinks.push({ href: "/admin", label: adminMessages[locale].administration });
+  if (reviewer) accountLinks.push({ href: "/verification/review", label: institution.review });
   const router = useRouter();
   const [logoutFailed, setLogoutFailed] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
@@ -42,7 +54,7 @@ export function MemberNavbar() {
     <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
       <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto] sm:gap-x-3 sm:px-6 xl:px-10">
         <div className="justify-self-start"><SiteBrand href="/dashboard" /></div>
-        <details className="relative min-w-0 max-w-full justify-self-end" onKeyDown={(event) => {
+        <details ref={accountMenu} className="relative min-w-0 max-w-full justify-self-end" onKeyDown={(event) => {
           if (event.key === "Escape" && event.currentTarget.open) {
             event.currentTarget.open = false;
             event.currentTarget.querySelector("summary")?.focus();
@@ -63,12 +75,18 @@ export function MemberNavbar() {
             {founderVerified && !claims.includes("identity") && <FounderVerifiedMark compact />}
             <span aria-hidden="true" className="me-1 size-1.5 shrink-0 -translate-y-px rotate-45 border-e border-b border-current" />
           </summary>
-          <div className="absolute end-0 z-30 mt-2 grid w-48 max-w-[calc(100vw-2rem)] gap-0.5 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg">
-            <Link href="/settings" className="rounded px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">{settings}</Link>
+          <div className="absolute end-0 z-30 mt-2 grid w-56 max-w-[calc(100vw-2rem)] gap-0.5 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg">
+            {accountLinks.map(({ href, label }) => (
+              <Link key={href} href={href} prefetch={false} onNavigate={() => {
+                if (accountMenu.current) accountMenu.current.open = false;
+              }} className="rounded px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
+                {label}
+              </Link>
+            ))}
             <button type="button" onClick={logout} disabled={signingOut} className="rounded px-3 py-2 text-start text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
-              {authMessages[locale].logout}
+              {auth.logout}
             </button>
-            {logoutFailed && <p role="alert" className="px-3 text-xs text-[var(--theme-error-text)]">{authMessages[locale].loadError}</p>}
+            {logoutFailed && <p role="alert" className="px-3 text-xs text-[var(--theme-error-text)]">{auth.loadError}</p>}
           </div>
         </details>
         <NotificationBell />

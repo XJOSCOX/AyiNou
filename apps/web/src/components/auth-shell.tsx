@@ -6,6 +6,7 @@ import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
+import { HomeSlideshow } from "./home-slideshow";
 import styles from "./auth-shell.module.css";
 
 export function AuthShell({ children }: { children: ReactNode }) {
@@ -22,7 +23,7 @@ export function AuthShell({ children }: { children: ReactNode }) {
               {t.backHome} <span aria-hidden="true">↗</span>
             </Link>
           </div>
-          <div aria-hidden="true" className={`${styles.gallerySlot} bg-[url('/ayinou-coast.webp')] bg-cover bg-[center_58%]`} />
+          <div className={styles.gallerySlot}><HomeSlideshow locale={locale} /></div>
           <div className="px-4 py-3 sm:px-6 md:py-6">
             <p className="hidden text-xs font-semibold uppercase tracking-[0.14em] text-[var(--theme-link)] md:block">{t.brandEyebrow}</p>
             <p className="text-xl font-semibold leading-tight tracking-tight md:mt-2 md:text-3xl">{t.brandTitle}</p>

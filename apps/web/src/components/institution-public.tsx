@@ -18,6 +18,7 @@ import { PublicAffiliationPanel } from "./public-affiliation-panel";
 import { ProfileFollowPanel } from "./discovery-accounts";
 
 export function InstitutionPublic({ organization: org, signedIn }: { organization: Institution; signedIn: boolean }) {
+  const layout = signedIn ? "w-full px-4 sm:px-8" : "public-container";
   const [locale] = useLocale();
   const t = institutionMessages[locale];
   const country = new Intl.DisplayNames([locale], { type: "region", fallback: "code" }).of(org.countryCode);
@@ -25,11 +26,13 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
 
   return (
     <div id="top" className="flex min-h-dvh flex-col">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--theme-border)] bg-[var(--theme-surface)] px-4 py-3 sm:px-8">
-        <SiteBrand />
-        <DisplayControls />
+      <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
+        <div className={`flex flex-wrap items-center justify-between gap-3 py-3 ${layout}`}>
+          <SiteBrand />
+          <DisplayControls />
+        </div>
       </header>
-      <main className="grid flex-1 content-start gap-4 px-4 py-5 sm:px-8 sm:py-8">
+      <main className={`grid flex-1 content-start gap-4 py-5 sm:py-8 ${layout}`}>
         <header className={`${institutionCard} flex flex-wrap items-center justify-between gap-4`}>
           <div className="flex min-w-0 items-center gap-4">
             <InstitutionLogo organization={org} />
@@ -56,7 +59,7 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
           {!signedIn && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.claimInstructions}</p>}
         </div>}
       </main>
-      <SiteFooter />
+      <SiteFooter member={signedIn} />
     </div>
   );
 }

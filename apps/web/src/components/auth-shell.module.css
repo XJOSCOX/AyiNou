@@ -15,6 +15,14 @@
   min-inline-size: 0;
 }
 
+.gallerySlot > section {
+  margin: 0;
+  min-block-size: 0;
+  block-size: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
 .entryForm {
   border-block-start: 1px solid var(--theme-border);
 }

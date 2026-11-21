@@ -21,15 +21,18 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
   profile: ProfilePreview; username: string; social: FollowStatus; signedIn: boolean;
   ambassador: Pick<PublicAmbassador, "category" | "statement"> | null;
 }) {
+  const layout = signedIn ? "w-full px-4 sm:px-8" : "public-container";
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
   const trust = trustMessages[locale];
   return <div id="top" className="flex min-h-dvh flex-col">
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--theme-border)] bg-[var(--theme-surface)] px-4 py-3 sm:px-8">
-      <SiteBrand />
-      <DisplayControls />
+    <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
+      <div className={`flex flex-wrap items-center justify-between gap-3 py-3 ${layout}`}>
+        <SiteBrand />
+        <DisplayControls />
+      </div>
     </header>
-    <main className="grid flex-1 content-start gap-4 px-4 py-5 sm:px-8 sm:py-8">
+    <main className={`grid flex-1 content-start gap-4 py-5 sm:py-8 ${layout}`}>
       {signedIn && <Link className={institutionLink} href="/discover">{t.discover}</Link>}
       <section className={institutionCard}>
         <div className="flex flex-wrap items-center gap-4">
@@ -59,6 +62,6 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
       {signedIn && social.canFollow && <MemberSafetyControls username={username} />}
       {signedIn && social.canFollow && <ImpersonationReportForm username={username} />}
     </main>
-    <SiteFooter />
+    <SiteFooter member={signedIn} />
   </div>;
 }

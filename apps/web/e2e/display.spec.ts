@@ -32,10 +32,32 @@ for (const viewport of viewports) {
       expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(viewport.width + 1);
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     }
-    const show = page.getByRole("button", { name: messages.en.showSidebar });
-    if (await show.isVisible()) await show.click();
-    await page.getByRole("navigation", { name: "Dashboard" }).getByRole("link", { name: "Polls" }).click();
+    const expand = page.getByRole("button", { name: messages.en.showSidebar });
+    const collapse = page.getByRole("button", { name: messages.en.hideSidebar });
+    const sidebar = page.getByRole("navigation", { name: authMessages.en.dashboard, exact: true });
+    const polls = sidebar.getByRole("link", { name: pollMessages.en.title, exact: true });
+    if (await expand.isVisible()) await expand.click();
+    await expect(collapse).toHaveAttribute("aria-expanded", "true");
+    await expect(polls.locator("span")).not.toHaveClass("sr-only");
+    await collapse.press("Enter");
+    await expect(expand).toHaveAttribute("aria-expanded", "false");
+    await expect(expand).toBeFocused();
+    await expect(polls.locator("svg")).toBeVisible();
+    await expect(polls.locator("span")).toHaveClass("sr-only");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await polls.press("Enter");
     await expect(page).toHaveURL(/\/polls$/);
+    await expect(polls).toHaveAttribute("aria-current", "page");
+    await expect(expand).toHaveAttribute("aria-expanded", "false");
+    await expand.click();
+    await expect(polls.locator("span")).not.toHaveClass("sr-only");
+    const menu = page.getByRole("banner").locator("details").first();
+    await menu.locator("summary").click();
+    const profile = menu.getByRole("link", { name: authMessages.en.myProfile, exact: true });
+    await expect(profile).toBeVisible();
+    const profileBounds = (await profile.boundingBox())!;
+    expect(profileBounds.x).toBeGreaterThanOrEqual(0);
+    expect(profileBounds.x + profileBounds.width).toBeLessThanOrEqual(viewport.width + 1);
     expect(signedIn.handle).toMatch(/^e2e_/);
   });
 }

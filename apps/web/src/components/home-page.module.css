@@ -1,3 +1,22 @@
 .hero {
   box-shadow: 0 14px 44px -30px color-mix(in srgb, var(--theme-text) 32%, transparent);
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .slideControls {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .gallery:hover .slideControls,
+  .gallery:focus-within .slideControls {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slideControls {
+    transition: opacity 160ms ease;
+  }
+}

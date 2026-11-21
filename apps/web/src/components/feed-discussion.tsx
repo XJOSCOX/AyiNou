@@ -7,6 +7,7 @@ import {
 } from "@ayinou/shared";
 import { ApiErrorNotice } from "./api-error-notice";
 import { ContentReportForm } from "./content-report-form";
+import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
 import { VerifiedCheck, institutionAction, institutionField, institutionLink } from "./institution-ui";
 import { apiErrorCode } from "@/lib/api-errors";
 import { createComment, deleteComment, editComment, loadComments, loadReaction, reportComment, setReaction } from "@/lib/feed-api";
@@ -16,20 +17,21 @@ import { isLocale, languageNames } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
 import { reconcileReaction } from "@/lib/reaction-state";
 
-const compact = "min-h-9 rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-2.5 py-1.5 text-sm text-[var(--theme-link)] focus-visible:outline-2 aria-pressed:bg-[var(--theme-selected)]";
-const reactionSymbols: Record<ReactionKind, string> = { like: "👍", love: "❤️", support: "🤝", celebrate: "🎉" };
+const compact = "inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-2.5 py-1.5 text-start text-sm font-medium text-[var(--theme-link)] hover:bg-[var(--theme-selected)] focus-visible:outline-2 aria-expanded:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)] disabled:opacity-60";
 type VisibleComment = Extract<FeedComment, { available: true }>;
 
 export function ReactionPicker({ target, id, summary }: { target: "posts" | "comments"; id: string; summary: ReactionSummary }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const panelId = useId();
-  const [expanded, setExpanded] = useState(false);
+  const [openMode, setOpenMode] = useState<"hover" | "explicit" | null>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
   const [local, setLocal] = useState<{ base: ReactionSummary; value: ReactionSummary } | null>(null);
   const mutation = useFeedMutation();
   const state = local?.base === summary ? local.value : summary;
   const total = reactionKinds.reduce((sum, kind) => sum + state.counts[kind], 0);
   const number = new Intl.NumberFormat(locale);
+  const reactionLabel = state.mine ? `${t.reactionPicked} ${t[state.mine]}` : t.reactions;
 
   async function choose(kind: ReactionKind | null) {
     await mutation.run(() => reconcileReaction(kind, () => setReaction(target, id, kind),
@@ -37,22 +39,50 @@ export function ReactionPicker({ target, id, summary }: { target: "posts" | "com
   }
 
   return <div className="min-w-0">
-    <button type="button" aria-expanded={expanded} aria-controls={panelId} className={compact} onClick={() => setExpanded(!expanded)}>
-      <span aria-hidden="true">{state.mine ? reactionSymbols[state.mine] : "♡"}</span>{" "}
-      {state.mine ? <><span className="sr-only">{t.reactionPicked}{" "}</span>{t[state.mine]}</> : t.reactions}
-      {total > 0 && <>{" · "}{number.format(total)}</>}
-    </button>
-    <div id={panelId} hidden={!expanded}>
-      <div role="group" aria-label={t.reactions} aria-busy={mutation.busy} className="mt-2 flex flex-wrap gap-2">
-        {reactionKinds.map((kind) => <button key={kind} type="button" aria-pressed={state.mine === kind} className={compact} disabled={mutation.busy}
-          onClick={() => { void choose(state.mine === kind ? null : kind); }}>
-          <span aria-hidden="true">{reactionSymbols[kind]}</span>{" "}{t[kind]}{" "}{number.format(state.counts[kind])}
-        </button>)}
-        {state.mine && <button type="button" className={compact} disabled={mutation.busy} onClick={() => { void choose(null); }}>{t.removeReaction}</button>}
+    <div className="relative w-fit" onPointerLeave={(event) => {
+      if (event.pointerType === "mouse") setOpenMode((mode) => mode === "hover" ? null : mode);
+    }} onBlur={(event) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) setOpenMode(null);
+    }} onKeyDown={(event) => {
+      if (event.key === "Escape" && openMode) {
+        setOpenMode(null);
+        trigger.current?.focus();
+      }
+    }}>
+      <button ref={trigger} type="button" aria-expanded={openMode !== null} aria-controls={panelId} className={feedIconButton}
+        aria-label={total ? `${reactionLabel} ${number.format(total)}` : reactionLabel} title={reactionLabel}
+        data-selected={state.mine !== null}
+        onPointerEnter={(event) => {
+          if (event.pointerType === "mouse") setOpenMode((mode) => mode ?? "hover");
+        }} onClick={(event) => {
+          const keyboard = event.detail === 0;
+          setOpenMode((mode) => mode === "hover" && !keyboard ? mode : mode ? null : "explicit");
+        }}>
+        <FeedIcon name={state.mine ?? "like"} />
+        {total > 0 && <ReactionCount value={number.format(total)} />}
+      </button>
+      <div id={panelId} hidden={!openMode} className="absolute start-0 top-full z-20 w-48 pt-1 sm:w-60">
+        <div role="group" aria-label={t.reactions} aria-busy={mutation.busy}
+          className="flex w-fit flex-wrap gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1 shadow-lg">
+          {reactionKinds.map((kind) => <button key={kind} type="button" aria-pressed={state.mine === kind} aria-label={`${t[kind]} ${number.format(state.counts[kind])}`}
+            title={t[kind]} className={`${feedIconButton} size-10`} disabled={mutation.busy}
+            onClick={() => { void choose(state.mine === kind ? null : kind); }}>
+            <FeedIcon name={kind} />
+            {state.counts[kind] > 0 && <ReactionCount value={number.format(state.counts[kind])} />}
+          </button>)}
+          {state.mine && <button type="button" className={`${feedIconButton} size-10`} title={t.removeReaction} aria-label={t.removeReaction}
+            disabled={mutation.busy} onClick={() => { void choose(null); }}>
+            <FeedIcon name="remove" />
+          </button>}
+        </div>
       </div>
     </div>
     {mutation.error !== null && <div className="mt-2"><ApiErrorNotice error={mutation.error} /></div>}
   </div>;
+}
+
+function ReactionCount({ value }: { value: string }) {
+  return <span aria-hidden="true" className="absolute end-0 top-0 max-w-full truncate rounded-sm bg-[var(--theme-surface)] px-0.5 text-[10px] leading-3 tabular-nums">{value}</span>;
 }
 
 export function PostDiscussion({ postId, children }: { postId: string; children: ReactNode }) {
@@ -64,10 +94,10 @@ export function PostDiscussion({ postId, children }: { postId: string; children:
 
   return <div className="mt-4 border-t border-[var(--theme-border)] pt-3">
     <div className="flex flex-wrap items-start gap-2">
-      <button type="button" className={compact} aria-controls={panelId} aria-expanded={open} onClick={() => {
+      <button type="button" className={feedIconButton} aria-label={t.comments} title={t.comments} aria-controls={panelId} aria-expanded={open} onClick={() => {
         setOpen(!open);
         setLoaded(true);
-      }}>{t.comments}</button>
+      }}><FeedIcon name="comments" /></button>
       {children}
     </div>
     <div id={panelId} hidden={!open}>
@@ -214,27 +244,24 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
 
       <div className="mt-2 flex min-w-0 flex-wrap items-start gap-2">
         <ReactionPicker target="comments" id={value.id} summary={value.reactions} />
-        {!value.parentId && <button type="button" className={compact} aria-expanded={replying} aria-controls={replyId} onClick={() => {
-          setReplying(!replying);
-          if (!replying) { setReplies(true); setLoadedReplies(true); }
-        }}>{t.reply}</button>}
-        {!action && (value.own || !reported) && <details className="min-w-0">
-          <summary className={`${compact} cursor-pointer`}>{t.commentActions}</summary>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {value.own ? <>
-              <button className={compact} type="button" onClick={() => setAction("edit")}>{t.editComment}</button>
-              <button className={compact} type="button" onClick={() => setAction("delete")}>{t.deleteComment}</button>
-            </> : <button className={compact} type="button" onClick={() => setAction("report")}>{t.reportComment}</button>}
-          </div>
-        </details>}
+        {!value.parentId && <button type="button" className={feedIconButton} aria-label={t.reply} title={t.reply}
+          aria-expanded={replying && replies} aria-controls={replyId} onClick={() => {
+          const showComposer = !(replying && replies);
+          setReplying(showComposer);
+          if (showComposer) { setReplies(true); setLoadedReplies(true); }
+        }}><FeedIcon name="reply" /></button>}
+        {!action && (value.own || !reported) && <FeedActions label={t.commentActions} actions={value.own ? [
+          { icon: "edit", label: t.editComment, run: () => setAction("edit") },
+          { icon: "delete", label: t.deleteComment, run: () => setAction("delete") },
+        ] : [{ icon: "report", label: t.reportComment, run: () => setAction("report") }]} />}
       </div>
       {action === "delete" && <div className="mt-3 grid gap-2">
         <p>{t.confirmDeleteComment}</p>
         {mutation.error !== null && <ApiErrorNotice error={mutation.error} retry={refresh} />}
         <div className="flex flex-wrap gap-2">
-          <button type="button" className={institutionAction} disabled={mutation.busy} onClick={async () => {
+          <button type="button" className={feedIconButton} aria-label={t.deleteComment} title={t.deleteComment} disabled={mutation.busy} onClick={async () => {
             if (await mutation.run(() => deleteComment(value.id, value.version))) { setAction(null); refresh(); }
-          }}>{t.deleteComment}</button>
+          }}><FeedIcon name="delete" /></button>
           <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => setAction(null)}>{t.cancel}</button>
         </div>
       </div>}
@@ -242,8 +269,8 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
         cancel={() => setAction(null)} reported={() => { setAction(null); setReported(true); }} />}
       {reported && <p role="status" className="mt-2">{t.reportSent}</p>}
     </> : <p className="text-[var(--theme-body)]">{t.commentUnavailable}</p>}
-    {(value.hasReplies || addedReply || replies) && <button type="button" className={`${compact} mt-2`} aria-expanded={replies}
-      aria-controls={replyId} onClick={() => { setReplies(!replies); setLoadedReplies(true); }}>{t.replies}</button>}
+    {(value.hasReplies || addedReply || replies) && <button type="button" className={`${feedIconButton} mt-2`} aria-label={t.replies} title={t.replies}
+      aria-expanded={replies} aria-controls={replyId} onClick={() => { setReplies(!replies); setLoadedReplies(true); }}><FeedIcon name="thread" /></button>}
     {!value.parentId && <div id={replyId} className="min-w-0 border-s border-[var(--theme-border)] ps-2 sm:ps-3" hidden={!replies}>
       {loadedReplies && <Thread postId={postId} parentId={value.id}
         compose={replying && value.available} onReplySaved={() => setAddedReply(true)} onCancel={() => setReplying(false)} />}

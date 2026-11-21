@@ -98,7 +98,7 @@ export function AmbassadorDirectory({ signedIn }: { signedIn: boolean }) {
   if (signedIn) return <MemberShell>{content}</MemberShell>;
   return <div id="top" className="flex min-h-dvh flex-col">
     <Navbar />
-    <main className="w-full flex-1 px-4 py-5 sm:px-8 sm:py-8">{content}</main>
+    <main className="public-container flex-1 py-5 sm:py-8">{content}</main>
     <SiteFooter />
   </div>;
 }

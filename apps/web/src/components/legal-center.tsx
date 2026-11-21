@@ -31,7 +31,7 @@ export function LegalCenter({ policyId, history = false, release, versions = [],
   const t = copy[locale];
   const variant = release?.variants.find((item) => item.locale === locale);
   const title = history ? t.history : policyId ? names[locale][policyId] : t.center;
-  return <div className={styles.page}>
+  return <div className={`public-container ${styles.page}`}>
     <header className={styles.header}>
       <div><Link href="/legal" className={styles.eyebrow}>{t.center}</Link><h1>{title}</h1></div>
       <label className={styles.language}>{t.languages}

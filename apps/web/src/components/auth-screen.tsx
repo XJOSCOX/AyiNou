@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { completePasswordRecovery } from "@/app/reset-password/actions";
@@ -52,6 +52,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const [lastName, setLastName] = useState("");
   const [referral, setReferral] = useState(initialReferral);
   const [signupPath, setSignupPath] = useState<SignupPath>("individual");
+  const signupSlides = useRef<HTMLDivElement>(null);
   const signup = organizationOnboardingMessages[locale];
   const [visiblePassword, setVisiblePassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -177,14 +178,33 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           {mode === "register" && (
             <fieldset className="grid min-w-0 gap-2" disabled={loading} aria-describedby="signup-path-help">
               <legend className="mb-2 font-semibold">{signup.choice}</legend>
-              {(["individual", "organization"] as const).map((path) => (
-                <label key={path} className="flex cursor-pointer items-start gap-3 rounded-md border border-[var(--theme-border)] p-3 has-checked:bg-[var(--theme-control)]">
-                  <input type="radio" name="signup-path" value={path} checked={signupPath === path}
-                    onChange={() => setSignupPath(path)} className="mt-1" />
-                  <span><strong className="block">{signup[path]}</strong>
-                    <span className="block text-sm text-[var(--theme-body)]">{signup[`${path}Help`]}</span></span>
-                </label>
-              ))}
+              <div className="grid min-w-0 grid-cols-2 gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-1">
+                {(["individual", "organization"] as const).map((path, index) => (
+                  <label key={path} className="relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center rounded-md px-2 py-2 text-center text-sm font-semibold has-checked:bg-[var(--theme-surface)] has-checked:text-[var(--theme-link)] focus-within:outline-2 focus-within:outline-[var(--theme-link)]">
+                    <input type="radio" name="signup-path" value={path} checked={signupPath === path} className="absolute inset-0 size-full cursor-pointer opacity-0"
+                      onChange={() => {
+                        setSignupPath(path);
+                        const track = signupSlides.current;
+                        if (track) track.scrollTo({ left: index * track.clientWidth });
+                      }} />
+                    <span className="break-words">{signup[path]}</span>
+                  </label>
+                ))}
+              </div>
+              <div ref={signupSlides} className={styles.signupSlides} dir="ltr"
+                onScroll={(event) => {
+                  if (loading) return;
+                  const { scrollLeft, clientWidth } = event.currentTarget;
+                  if (clientWidth) setSignupPath(scrollLeft >= clientWidth / 2 ? "organization" : "individual");
+                }}>
+                {(["individual", "organization"] as const).map((path) => (
+                  <div key={path} dir="auto" className="rounded-lg bg-[var(--theme-hero)] px-4 py-3"
+                    aria-hidden={signupPath !== path}>
+                    <strong className="block">{signup[path]}</strong>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--theme-body)]">{signup[`${path}Help`]}</p>
+                  </div>
+                ))}
+              </div>
               <p id="signup-path-help" className="text-sm text-[var(--theme-body)]">{signup.explanation}</p>
             </fieldset>
           )}
