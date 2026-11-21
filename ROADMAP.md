@@ -309,3 +309,16 @@ Public, anonymous legal routes and a fail-closed empty release registry are impl
 
 The platform administrator can inspect versioned publication settings and audit history. All policies start as disabled drafts. Public release visibility requires both the server control and an approved immutable release. Legal approval, acceptance collection and privacy processing remain separate gated work. [L6.2A controls](docs/legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md)
 
+
+
+## Organization expansion initiative
+
+- [x] O1 design and database impact review. [Architecture](docs/organizations/O1_ONBOARDING_ARCHITECTURE.md) · [Owner decisions](docs/organizations/O1_OWNER_DECISION_BRIEF.md)
+- [ ] O2 personal signup paths and resumable organization intent.
+- [ ] O3 Founder Verified provenance and scoped identity compatibility.
+- [ ] O4 registration status, institutional authority and completion gates.
+- [ ] O5 safe pathway corrections, bootstrap governance and succession.
+- [ ] O6 Early Partner Program.
+- [ ] O7 integration, security validation and rollout review.
+
+Future implementation depends on documented owner decisions and separate authorization. [Phase dependencies and exit criteria](docs/organizations/O1_IMPLEMENTATION_ROADMAP.md)
