@@ -1,0 +1,24 @@
+<!-- l5: {"id":"voting_and_polling_policy","locale":"fr","source_sha256":"3647e0fa1bd3852d9d494457abcd971472023564ea258fab8a4a82ad43fba4bc","version":"L5-working-1","review":"pending"} -->
+# Politique d’Ayinou relative aux votes et sondages
+
+**DRAFT — NOT APPROVED FOR PUBLICATION**
+
+**TRANSLATION DRAFT — QUALIFIED HUMAN AND LEGAL REVIEW REQUIRED**
+
+## 1. Portée et autorité
+
+Les sondages d’Ayinou sont des consultations à titre indicatif. Les responsables de sondages communautaires, institutionnels ou relatifs à des projets peuvent utiliser les résultats des personnes admissibles pour éclairer une discussion ou consigner une recommandation. Ayinou n’organise pas d’élections gouvernementales haïtiennes ou américaines. Un sondage n’élit pas un dirigeant d’une entité juridique, n’approuve pas un projet, ne transfère pas la propriété et ne modifie aucune décision requérant une procédure indépendante. Une recommandation peut être consignée selon la procédure publiée, avec une justification écrite. Le pouvoir de prendre ensuite une mesure doit provenir de la procédure distincte applicable.
+
+## 2. Admissibilité, consentement et bulletin de vote
+
+Le public visé, la portée et les conditions d’admissibilité d’un sondage déterminent qui peut voter. Un compte individuel admissible ne peut enregistrer qu’un seul choix accepté. Un profil institutionnel ne confère aucun bulletin individuel supplémentaire; un administrateur ou une personne portant un badge n’a pas plus de poids dans le vote. Les sondages consultatifs ordinaires reposent sur l’admissibilité actuelle. Les sondages d’organisation, de projet, de candidats et de recommandation consignée suivent la procédure de confiance renforcée. Celle-ci exige une identité examinée de manière indépendante, fige la liste des comptes admissibles à la publication et vérifie de nouveau les restrictions applicables, la portée et la vérification active au moment du vote. Les personnes arrivées plus tard ne peuvent rejoindre la liste figée. Un bulletin accepté peut rester comptabilisé même si l’admissibilité change ensuite.
+
+Une personne candidate doit remplir les conditions applicables d’admissibilité et de visibilité et donner son consentement exprès. Une modification importante de la question ou de la description d’un sondage de candidats exige un nouveau consentement. Une personne candidate peut se retirer. Une perte d’admissibilité ou un retrait supprime son affichage individuel actuel et empêche de nouveaux choix en sa faveur. Les décomptes historiques peuvent rester attachés à une option anonymisée. Le remplacement d’une personne candidate pendant la rédaction doit suivre la procédure de consentement applicable.
+
+## 3. Confidentialité et interprétation des résultats
+
+Les choix de vote restent privés. Consultez le reçu personnel disponible pour lever un doute sur une soumission au lieu de multiplier les tentatives de vote. Les organisateurs ne reçoivent ni les choix des électeurs ni une liste associant les bulletins à leurs identités. La liste électorale figée est un dossier d’admissibilité protégé. La visibilité des résultats agrégés dépend des paramètres et de l’étape du sondage. Un sondage peut afficher des résultats après le vote si cette option est activée; les résultats définitifs exigent une clôture explicite après la date limite. Un quorum est un nombre minimal facultatif de bulletins. Un seuil décisionnel facultatif correspond à la part des bulletins comptés obtenue par l’option en tête. L’absence de bulletins, une égalité, un quorum ou seuil non atteint, ou l’indisponibilité de la personne candidate en tête peuvent rendre le résultat non concluant. Un graphique ou un classement ne constitue pas, à lui seul, une décision consignée.
+
+## 4. Intégrité, contestations et dossiers
+
+Il est interdit d’acheter, de vendre, de contraindre, d’échanger des votes ou de voter sous l’identité d’autrui. Ne coordonnez pas de faux comptes, ne demandez pas de captures d’écran de bulletins privés et ne déduisez pas les choix individuels en croisant les résultats avec des listes privées de participants. Pour contester un décompte ou une procédure, indiquez le sondage et le problème précis. Ne publiez pas le choix supposé d’une personne et n’utilisez pas la contestation pour la viser. [Approval required — approuver le canal doté de personnel, le traitement des preuves, l’indépendance, la portée de la contestation, les mesures correctives et les avis.] Les reçus, agrégats et décisions actuels restent soumis aux restrictions d’accès. [Approval required — approuver la durée et les modalités de conservation des bulletins, reçus, listes électorales figées et agrégats, avec des garanties empêchant la reconstitution des votes privés.] [Politique relative aux droits sur les données et à leur conservation](../../DATA_RIGHTS_AND_RETENTION_POLICY_DRAFT.md)

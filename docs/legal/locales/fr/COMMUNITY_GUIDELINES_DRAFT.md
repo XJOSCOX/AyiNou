@@ -1,0 +1,52 @@
+<!-- l5: {"id":"community_guidelines","locale":"fr","source_sha256":"6fb971f3688aedefc6c5839d6228cff6ce5b6557a8ec898b13b8a59e862c696e","version":"L5-working-1","review":"pending"} -->
+# Règles de la communauté Ayinou
+
+**DRAFT — NOT APPROVED FOR PUBLICATION**
+
+**TRANSLATION DRAFT — QUALIFIED HUMAN AND LEGAL REVIEW REQUIRED**
+
+## 1. Portée
+
+Ces règles s’appliquent aux publications, commentaires, médias, profils, activités des institutions et groupes, projets, annonces de bénévolat, sondages, candidatures et usages des signalements ou recours. Elles valent pour les espaces privés comme publics. Les responsables peuvent ajouter des règles locales compatibles pour leur communauté. Les règles de sécurité de la plateforme et le droit applicable continuent de s’appliquer. Un responsable local ne peut autoriser la divulgation de preuves privées ni des représailles contre une personne ayant signalé un problème. [Conditions d’utilisation](../../TERMS_DRAFT.md)
+
+## 2. Débat et critique
+
+Vous pouvez critiquer les idées, politiques, institutions et comportements. Donnez le contexte pertinent et distinguez une observation d’une déduction, d’une accusation non vérifiée ou d’une opinion. Les désaccords politiques, sociaux, religieux et professionnels pacifiques sont les bienvenus. La critique de responsables ou d’organisations, une satire clairement présentée et des opinions impopulaires ne justifient pas, à elles seules, une sanction. Corrigez une erreur lorsque vous en prenez connaissance. Ne transformez pas une critique en campagne ciblée contre une personne.
+
+## 3. Harcèlement, menaces et discrimination
+
+Ne menacez pas de violence, n’appelez pas à nuire, ne célébrez pas des violences pour intimider une cible et ne recrutez pas d’autres personnes pour la harceler. Des contacts répétés non désirés, insultes ciblées, menaces visant la famille, représailles et attaques collectives coordonnées peuvent constituer du harcèlement. N’utilisez pas la situation protégée ou vulnérable d’une personne pour la déshumaniser, réclamer son exclusion ou des violences, ou encourager une discrimination ciblée. Documenter des abus ou les citer pour les critiquer peut être approprié si le contexte est clair et si les détails inutiles sont retirés. Les modérateurs devraient tenir compte du contexte, de la cible, de la gravité et du risque réaliste pour la sécurité.
+
+## 4. Identité, autorité institutionnelle et manipulation
+
+Présentez honnêtement les noms, affiliations et marques. Ne vous faites pas passer pour une personne, une autorité publique, une organisation, un modérateur ou un professionnel. Une simple affiliation, un rôle obtenu par invitation, une marque d’administrateur ou un intérêt pour un partenariat ne prouvent pas que vous détenez une fonction publique ou parlez pour une organisation. Signalez la parodie ou le commentaire lorsqu’un lecteur raisonnable pourrait les confondre avec la source réelle. N’achetez ni ne coordonnez de faux comptes, réactions, parrainages, votes ou témoignages. Ne contournez pas une restriction avec un autre compte, les identifiants d’autrui ou un profil institutionnel distinct de nom seulement.
+
+Coordonner une campagne civique légitime, inviter à une discussion ou diffuser un appel public à bénévoles peut être approprié. Utiliser des comptes sous un contrôle commun pour simuler un soutien indépendant, payer une personne pour son soutien ou organiser des signalements de masse contre un critique constitue une manipulation. N’inondez pas les discussions d’offres répétées, ne diffusez pas de liens malveillants et ne déguisez pas une publicité ou une demande de paiement en soutien officiel. L’affirmation qu’un canal est approuvé ou obligatoire devrait être étayée par les instructions de l’organisation concernée.
+
+## 5. Confidentialité, lieux et consentement
+
+Ne publiez pas l’adresse, les coordonnées privées, les déplacements précis, les dossiers personnels identifiants, les identifiants de connexion ou les communications privées d’autrui sans autorisation. Évitez d’identifier les survivants de violences, les mineurs, les demandeurs d’aide ou les personnes présentes dans un lieu protégé, même par la combinaison indirecte d’une image et d’un lieu. Ne publiez pas de contenu intime sans consentement et ne rediffusez pas de photos ou enregistrements privés pour humilier quelqu’un. Recadrez, floutez ou omettez les détails sensibles permettant une identification lorsque vous documentez un événement d’intérêt public. Consentir à participer à un projet ou apparaître une fois sur une photo ne vaut pas autorisation de publicité ultérieure ou de divulgation de dossiers privés. [Politique de confidentialité](../../PRIVACY_POLICY_DRAFT.md)
+
+Soyez particulièrement prudent avec les lieux d’hébergement, les itinéraires de personnes vulnérables, les écoles, les visites médicales et les signalements de violences permettant d’identifier quelqu’un. Évitez cartes, repères, horaires ou images qui révéleraient un lieu même sans adresse exacte. Un signalement peut désigner le contenu par son lien et expliquer le problème sans recopier les informations sensibles dans une discussion publique. Les modérateurs devraient retirer les détails inutiles de toute explication visible par d’autres personnes.
+
+## 6. Exploitation et protection
+
+Ne facilitez pas les abus, la manipulation préparatoire, la contrainte, la traite, l’exploitation sexuelle ou l’exploitation de personnes cherchant de l’aide. N’échangez pas l’accès, une mission, des votes ou des services prétendus contre de l’argent, des images, des données personnelles ou des faveurs. Respectez les consignes de protection et utilisez les outils de signalement disponibles si une personne peut être en danger. Ne menez pas votre propre enquête en demandant ou diffusant davantage de contenu préjudiciable. Le service ne dispose pas d’un centre d’intervention d’urgence. [Approval required — approuver un canal de protection sûr, l’autorité d’escalade, les obligations légales de signalement et le traitement des preuves.]
+
+## 7. Projets, bénévolat et conseils honnêtes
+
+Ne présentez pas de façon trompeuse les financements, pouvoirs, qualifications, partenariats, bénéficiaires prévus ou résultats. N’utilisez pas une fiche de projet, un message privé ou une invitation pour solliciter des dons, frais, paiements d’assurance, cartes-cadeaux ou identifiants sans autorisation. Ne promettez pas un emploi, une aide, un visa, un traitement médical ou un autre résultat que vous ne pouvez légalement fournir. Les témoignages personnels et discussions de bonne foi sont permis. Évitez de présenter des conseils médicaux non qualifiés comme des soins professionnels, d’inciter à des actes dangereux ou de détourner une personne d’une aide appropriée sur la base d’une affirmation non étayée. Signalez clairement les estimations et les résultats déclarés par leurs auteurs. [Politique des projets et du bénévolat](../../PROJECT_AND_VOLUNTEER_POLICY_DRAFT.md)
+
+## 8. Sondages, signalements et plaintes de propriété intellectuelle honnêtes
+
+Ne contraignez pas quelqu’un à montrer son bulletin, n’achetez ni n’échangez des votes, ne votez pas avec plusieurs comptes, ne vous faites pas passer pour un candidat et ne présentez pas un sondage comme preuve d’une décision juridiquement contraignante. Dans un signalement, désignez le problème, donnez les faits utiles et distinguez ce que vous savez de ce que vous soupçonnez. Un signalement de bonne foi peut être erroné. Les accusations inventées, omissions délibérées visant à tromper un examinateur, signalements répétés de représailles et pressions sur des témoins peuvent être traités séparément. Utilisez la procédure approuvée de propriété intellectuelle pour les véritables revendications de droits. [Politique des votes et sondages](../../VOTING_AND_POLLING_POLICY_DRAFT.md) · [Conditions d’utilisation](../../TERMS_DRAFT.md)
+
+## 9. Décisions de modération
+
+Les mesures disponibles dépendent de la ressource et des pouvoirs de l’examinateur. Une réponse proportionnée peut comprendre une correction, un avertissement approprié, une visibilité réduite, un retrait, des restrictions d’accès ciblées ou la perte de privilèges du compte ou de l’institution. Un risque immédiat crédible pour la sécurité peut justifier une restriction d’urgence en attendant examen. Les examinateurs devraient tenir compte de la gravité, des preuves, de l’ampleur de la diffusion, des comportements antérieurs comparables et du risque de préjudice. Des violations répétées peuvent justifier des mesures plus fortes. La popularité, le nombre de signalements seul ou un désaccord avec l’opérateur ne suffisent pas. N’exposez pas les preuves restreintes ou les données d’identité dans les explications publiques. Fournissez une justification écrite applicable et une voie de contestation lorsque cela est autorisé et sûr. [Approval required — approuver les critères de gravité, les effectifs, les avis écrits, les escalades et la réponse urgente.]
+
+Lorsqu’une correction répond au préjudice, préférez corriger le contenu contesté ou réduire son public plutôt qu’imposer une restriction générale au compte. La divulgation menaçante d’un lieu protégé peut nécessiter une dissimulation immédiate et une préservation limitée des preuves. Expliquez pourquoi une mesure limitée serait insuffisante avant une restriction plus large. Une mesure temporaire devrait être réexaminée avant toute prolongation. Respectez les limites de confidentialité appropriées si la violation touche une personne, institution ou communauté privée. Une décision concernant une ressource ne confère pas automatiquement le pouvoir d’agir dans les autres.
+
+## 10. Recours et limites du réexamen
+
+Les masquages actuels admissibles de ses propres publications ou commentaires et les refus ou révocations écrits de vérification admissibles ont des voies de recours distinctes dans l’application, chacune assortie de son délai existant de 14 jours. La procédure applicable fixe la portée et l’indépendance. Le réexamen d’une vérification permet une nouvelle décision sans rétablir automatiquement la qualité ou les permissions. D’autres décisions peuvent ne pas avoir de recours dans l’application. [Approval required — approuver un autre canal, une attribution indépendante, le traitement des conflits, l’assistance linguistique et des objectifs raisonnables de réponse.] La disponibilité dépend des effectifs. Ne divulguez pas de contenu restreint en public pour contester une décision.
