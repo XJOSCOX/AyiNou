@@ -1,0 +1,803 @@
+{
+  "schema_version": 1,
+  "snapshot_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+  "documents": [
+    {
+      "id": "community_guidelines",
+      "class": "public_core",
+      "source_path": "docs/legal/COMMUNITY_GUIDELINES_DRAFT.md",
+      "source_sha256": "6fb971f3688aedefc6c5839d6228cff6ce5b6557a8ec898b13b8a59e862c696e",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "placeholder_count": 3,
+      "known_unresolved_placeholders": [
+        "[Approval required — secure safeguarding channel, escalation authority, legal reporting duties and handling of evidence.]",
+        "[Approval required — severity standards, staffing, written notices, escalation and urgent response.]",
+        "[Approval required — alternative channel and independent assignment, conflict handling, language support and reasonable response targets.]"
+      ]
+    },
+    {
+      "id": "comprehensive_policy_blueprint",
+      "class": "editorial_research",
+      "source_path": "docs/legal/COMPREHENSIVE_POLICY_BLUEPRINT.md",
+      "source_sha256": "f9d654adab512db732febd349b03dbf9b4bbcc240242a3e3214a66ba056ac845",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "cookie_and_tracking_notice",
+      "class": "public_specialized",
+      "source_path": "docs/legal/COOKIE_AND_TRACKING_NOTICE_DRAFT.md",
+      "source_sha256": "86417f8487c7024e029e5e44b5e15bfc78979540ff2afef9a834ebd1677d5f0b",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2"
+      ],
+      "placeholder_count": 2,
+      "known_unresolved_placeholders": [
+        "[Approval required — identify operator, actual deployment, covered services, preference choices and contact.]",
+        "[Approval required — final classification, duration and purpose of each technology, third-party disclosure and applicable consent rules. Decide whether to use a standalone notice after counsel's review.]"
+      ]
+    },
+    {
+      "id": "data_rights_and_retention_policy",
+      "class": "public_specialized",
+      "source_path": "docs/legal/DATA_RIGHTS_AND_RETENTION_POLICY_DRAFT.md",
+      "source_sha256": "42184702427d15ff69d02714efe141975b576f287858ba849ab3956bc1b0bb1c",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "placeholder_count": 3,
+      "known_unresolved_placeholders": [
+        "[Approval required — actual request types, intake, regional proof, clocks and escalation, format, permitted exclusions and delivery.]",
+        "[Approval required — response categories and deadlines, representative proof, lawful limitations, extension and appeal notices, and usable rights channels for each applicable region.]",
+        "[approved secure contact]"
+      ]
+    },
+    {
+      "id": "early_partner_program_policy",
+      "class": "public_specialized",
+      "source_path": "docs/legal/EARLY_PARTNER_PROGRAM_POLICY_DRAFT.md",
+      "source_sha256": "4e9b87c5c728465d773279070c81f3ccdc88585740ba1eb320b43598ad924658",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "placeholder_count": 2,
+      "known_unresolved_placeholders": [
+        "[Approval required — who may select partners, which markets, capacity, selection criteria and dispute handling.]",
+        "[Approval required — participation agreement, feedback use, secure access and a written exit procedure.]"
+      ]
+    },
+    {
+      "id": "future_capabilities_policy_annex",
+      "class": "future_proposal",
+      "source_path": "docs/legal/FUTURE_CAPABILITIES_POLICY_ANNEX.md",
+      "source_sha256": "c282b944c201ae2bc2e5ca5a945c0e936cddece5ec30aa889e09e6a0e1cb85e5",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "placeholder_count": 1,
+      "known_unresolved_placeholders": [
+        "[Approval required — owner scope, Haiti and relevant U.S. counsel, qualified healthcare review, provider licensing and contracts, safeguarding, medical confidentiality, financial controls, technical privacy assessment and operational recovery.]"
+      ]
+    },
+    {
+      "id": "board_governance_and_delegation_policy",
+      "class": "internal_governance",
+      "source_path": "docs/legal/governance/BOARD_GOVERNANCE_AND_DELEGATION_POLICY_DRAFT.md",
+      "source_sha256": "99bb8a4d9013f5b3606d8642d44e88bd8d048b44a1b0477d3b07c3a7be38b5b3",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 1,
+      "known_unresolved_placeholders": [
+        "[Approval required — certificate and bylaws, board and officers, committee scopes, financial thresholds, delegation and recovery plan, and appropriate dissolution clauses.]"
+      ]
+    },
+    {
+      "id": "conflict_of_interest_policy",
+      "class": "internal_governance",
+      "source_path": "docs/legal/governance/CONFLICT_OF_INTEREST_POLICY_DRAFT.md",
+      "source_sha256": "9d314d65a71eb597b6bf0b69daf4c911a98f1dcc5f7678f95d93269e0945b8f9",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 1,
+      "known_unresolved_placeholders": [
+        "[Approval required — covered persons, quorum, committees, disclosure intervals, compensation authority, corrective actions and counsel review.]"
+      ]
+    },
+    {
+      "id": "corporate_records_retention_policy",
+      "class": "internal_governance",
+      "source_path": "docs/legal/governance/CORPORATE_RECORDS_RETENTION_POLICY_DRAFT.md",
+      "source_sha256": "af8807abf9b2d91dc9052e37c6dd2b209d543ac8fdeaf72ad3bdf419d7dea0d8",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 1,
+      "known_unresolved_placeholders": [
+        "[Approval required — statutory and contractual schedules, permanent records, authorized inspection and backup procedures.]"
+      ]
+    },
+    {
+      "id": "whistleblower_policy",
+      "class": "internal_governance",
+      "source_path": "docs/legal/governance/WHISTLEBLOWER_POLICY_DRAFT.md",
+      "source_sha256": "dc4c15bbf75e28268984a458856961c3e050d9c2d51580c150d0435055d8dda5",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 2,
+      "known_unresolved_placeholders": [
+        "[Approval required — confidential channels, recipients, backup coverage and availability.]",
+        "[Approval required — oversight, documented review targets, reporting rights, escalation, remedies and preservation schedule.]"
+      ]
+    },
+    {
+      "id": "international_legal_review",
+      "class": "editorial_research",
+      "source_path": "docs/legal/INTERNATIONAL_LEGAL_REVIEW.md",
+      "source_sha256": "561d5c2ab107142eceac8e684bfe9bd66649972924df0227ae09d66edaa526d0",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "l4_approval_and_gap_register",
+      "class": "editorial_research",
+      "source_path": "docs/legal/L4_APPROVAL_AND_GAP_REGISTER.md",
+      "source_sha256": "fbc720e95b48eeeacdbe176ce4218ad9b5e82440504c2bfcd72a3957c280fd20",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "l4_final_report",
+      "class": "editorial_research",
+      "source_path": "docs/legal/L4_FINAL_REPORT.md",
+      "source_sha256": "d5ef21b6305a149ba9d21c17d59d88bbed7c711907b5cdd05da5d08baa4a3957",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "l4_policy_glossary",
+      "class": "editorial_research",
+      "source_path": "docs/legal/L4_POLICY_GLOSSARY.md",
+      "source_sha256": "132eac199459b43ef19ffbbafab32e612dae3088655a4e9fa247247866e8ec22",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "l4_research_and_evidence",
+      "class": "editorial_research",
+      "source_path": "docs/legal/L4_RESEARCH_AND_EVIDENCE.md",
+      "source_sha256": "7f618a0bbe34d247e67928a0d99d28d56f45216feeab8d629065f1e0053ba515",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [
+        "1",
+        "2"
+      ],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "legal_implementation_plan",
+      "class": "editorial_research",
+      "source_path": "docs/legal/LEGAL_IMPLEMENTATION_PLAN.md",
+      "source_sha256": "ca6f39dd95a5be54335f1af120ebd89de77ed33f974e44c0d8bd6157ca667ab5",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "legal_translation_plan",
+      "class": "editorial_research",
+      "source_path": "docs/legal/LEGAL_TRANSLATION_PLAN.md",
+      "source_sha256": "8829d37c51d0f26b833348293b8d596fc855d1e9e02cfd1a219ece132b2c89f4",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "nonprofit_governance_plan",
+      "class": "editorial_research",
+      "source_path": "docs/legal/NONPROFIT_GOVERNANCE_PLAN.md",
+      "source_sha256": "39df4dab3d9f154a60acdbeccc1b35ae17a05e61d217f0ee5ec1884087a390f7",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "nonprofit_structure_research",
+      "class": "editorial_research",
+      "source_path": "docs/legal/NONPROFIT_STRUCTURE_RESEARCH.md",
+      "source_sha256": "b18edcb74a057408878ab184c9ce928f32ced5b64c011ba4ec8d3c0ed683f277",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "organization_and_representative_policy",
+      "class": "public_specialized",
+      "source_path": "docs/legal/ORGANIZATION_AND_REPRESENTATIVE_POLICY_DRAFT.md",
+      "source_sha256": "598d954d9a3741e3510adddd7f736d7cf47e145030a3420646511ac5f817d8b7",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "placeholder_count": 1,
+      "known_unresolved_placeholders": [
+        "[Approval required — independent route for ownership and restriction disputes, emergency authority, timing and notice.]"
+      ]
+    },
+    {
+      "id": "owner_approved_planning_directions",
+      "class": "editorial_research",
+      "source_path": "docs/legal/OWNER_APPROVED_PLANNING_DIRECTIONS.md",
+      "source_sha256": "f0de5e28514e38efb1da12561d70e550202472f6082034e4eb04873dc70710ab",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "owner_decision_brief",
+      "class": "editorial_research",
+      "source_path": "docs/legal/OWNER_DECISION_BRIEF.md",
+      "source_sha256": "fd7dc30db31d723da62123c74446157b9b61860cacebd58fe782d6adf484e36c",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "policy_decisions",
+      "class": "editorial_research",
+      "source_path": "docs/legal/POLICY_DECISIONS.md",
+      "source_sha256": "3f8bb3d1244eaa78dda465563fbd209735d45521a9260fda493dfc57cf694489",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "privacy_policy",
+      "class": "public_core",
+      "source_path": "docs/legal/PRIVACY_POLICY_DRAFT.md",
+      "source_sha256": "9a8f40a29970e489d71c1e0f1f633d636786dce20ec9c15f07906b4446d3abd3",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "placeholder_count": 9,
+      "known_unresolved_placeholders": [
+        "[Approval required — identify the responsible legal operator, covered services and markets, privacy contact, date and authoritative policy version.]",
+        "[Approval required — map each purpose and audience to applicable authority, evaluate sensitive or children’s information, and document justified collection and retention for each market.]",
+        "[Approval required — decision authority, request authentication, disclosure thresholds, notice exceptions, transfer controls and records of disclosures.]",
+        "[Approval required — operator and vendor agreements, subprocessors, hosting regions, cross-border access, applicable international transfer mechanisms and safeguards.]",
+        "[Approval required — secure incident channel, provider incident responsibilities, notices, timelines and support for inaccessible accounts.]",
+        "[Approval required — retention categories and triggers, scope of technical cleanup, preservation authority, physical deletion, provider and backup procedures and exception notices.]",
+        "[Approval required — staffed channel, treatment of people who cannot sign in, jurisdiction-specific options, complaints and oversight authorities.]",
+        "[Approval required — safeguards, age-assurance and access alternatives, suspected-child handling, parents' requests where applicable, and disclosure and deletion procedures.]",
+        "[Approval required — accountable operator, secure privacy contact, effective date, notice method and four-language publication review.]"
+      ]
+    },
+    {
+      "id": "project_and_volunteer_policy",
+      "class": "public_specialized",
+      "source_path": "docs/legal/PROJECT_AND_VOLUNTEER_POLICY_DRAFT.md",
+      "source_sha256": "99109f04a7ed8ae55ebc4385beff7d000c8446abdfb75dee0ff65b58a5672e9e",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "placeholder_count": 3,
+      "known_unresolved_placeholders": [
+        "[Approval required — legal classification, safeguarding, background checks where applicable, insurance, accommodations, emergency response and responsibility for off-platform work.]",
+        "[Approval required — independent review, notice, safety escalation and handling of unresolved assignments and restricted evidence on archival.]",
+        "[Approval required — any future donation or sponsorship regime, jurisdiction-specific solicitation requirements, operating controls and consumer communications.]"
+      ]
+    },
+    {
+      "id": "retention_and_deletion_matrix",
+      "class": "editorial_research",
+      "source_path": "docs/legal/RETENTION_AND_DELETION_MATRIX.md",
+      "source_sha256": "f018b02dfdcc6b81551954b3f581900d7b05347d6495f67222c6167b23daadbf",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "internal",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [],
+      "translation_status": "pending",
+      "last_synchronized_revision": null,
+      "section_ids": [],
+      "placeholder_count": 0,
+      "known_unresolved_placeholders": []
+    },
+    {
+      "id": "terms",
+      "class": "public_core",
+      "source_path": "docs/legal/TERMS_DRAFT.md",
+      "source_sha256": "0934372e9f9734691d8a02f6371b1c55e7b55416fd8dcafd30180db1fca799e2",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17"
+      ],
+      "placeholder_count": 11,
+      "known_unresolved_placeholders": [
+        "[Approval required — establish the legal operator, covered services and markets, notice and assent method, effective date, and which policy versions form part of the agreement.]",
+        "[approved support contact]",
+        "[Approval required — verify geographic eligibility, age controls, suspected-minor response, accessibility alternatives, invitation issuance and revocation, and recovery for people who lose account access.]",
+        "[Approval required — license duration, sublicensing limits, lawful retention exceptions, creator remedies and treatment on termination.]",
+        "[approved intellectual-property contact and process]",
+        "[Approval required — applicability of U.S. notice-and-takedown rules and applicable local alternatives.]",
+        "[Approval required — enforcement criteria, emergency response, reason delivery and staffed escalation.]",
+        "[Approval required — staffed alternatives, independence, time targets, notice and evidence access.]",
+        "[Approval required — proportionate disclaimers and liability provisions for the actual operator, appropriate exceptions, consumer remedies and independent review.]",
+        "[Approval required — dispute contact, informal review if offered, applicable law, jurisdiction, court and regulatory routes and reasonable language/accessibility options.]",
+        "[Approval required — operator's legal name, official address, support, safety, privacy and intellectual-property contacts, effective date and version.]"
+      ]
+    },
+    {
+      "id": "verification_and_badges_policy",
+      "class": "public_specialized",
+      "source_path": "docs/legal/VERIFICATION_AND_BADGES_POLICY_DRAFT.md",
+      "source_sha256": "a8642a7c587aa8806312b1f7105b159dcf48c116b09507c4f61d32da96494636",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "placeholder_count": 1,
+      "known_unresolved_placeholders": [
+        "[Approval required — reviewer training, operational staffing, proof alternatives, secure exception handling and retention.]"
+      ]
+    },
+    {
+      "id": "voting_and_polling_policy",
+      "class": "public_specialized",
+      "source_path": "docs/legal/VOTING_AND_POLLING_POLICY_DRAFT.md",
+      "source_sha256": "3647e0fa1bd3852d9d494457abcd971472023564ea258fab8a4a82ad43fba4bc",
+      "source_commit": "55bb028ef3ac32ac34f5b420ca008f13c05f51d9",
+      "editorial_version": "L4-working-1",
+      "source_status": "draft_not_approved",
+      "source_language": "en",
+      "proposed_audience": "public",
+      "approval_blockers": [
+        "L4-31",
+        "owner_and_qualified_legal_review"
+      ],
+      "target_locales": [
+        "ht",
+        "fr",
+        "es"
+      ],
+      "translation_status": "working_draft_unreviewed",
+      "last_synchronized_revision": "L4-working-1",
+      "section_ids": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "placeholder_count": 2,
+      "known_unresolved_placeholders": [
+        "[Approval required — staffed channel, evidence handling, independence, challenge scope, remedy and notice.]",
+        "[Approval required — approved retention and disposition for ballots, receipts, eligibility snapshots and aggregates, with safeguards against reconstructing private votes.]"
+      ]
+    }
+  ]
+}
