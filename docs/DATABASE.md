@@ -784,3 +784,7 @@ Migration `20261121010000_l62a_legal_publication_controls.sql` creates `private.
 ## O2 organization signup intent
 
 Migration `20261121020000_o2_organization_intents.sql` creates private signup choices, onboarding intents and command receipts. RLS and revoked direct grants close all three tables. The read/write RPCs are service-only and bind the caller to a live Auth session. One partial unique index protects open intents and the per-subject command key prevents replay divergence. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)
+
+## O3 Founder Verified
+
+`20261121030000_o3_founder_identity.sql` adds scoped founder authorities, cases, proof receipts, grants and one durable event ledger. Service-only read and command RPCs bind case scope, live session, version and UUID command receipt. The public profile projection rechecks live consent, state and policy. Production policy is closed, with no method, authority or cases seeded. [Schema, endpoints and validation](organizations/O3_IMPLEMENTATION_REPORT.md)

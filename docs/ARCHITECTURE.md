@@ -199,3 +199,7 @@ The administrator workspace calls Fastify, which checks current platform authori
 ## O2 organization signup intent
 
 The organization choice extends the same Supabase Auth registration. A private trigger captures the hint at registration and creates the owner-scoped intent on confirmed email. Personal onboarding and member access remain independent. The O2 API checks a live session and rechecks it in SQL. Intents cannot reach institution creation or ownership commands. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)
+
+## O3 founder identity boundary
+
+Founder-specific authority and proof receipts sit behind service-only SQL and use the existing verified Supabase session and administrator checks. Verification and Administration display restricted case projections. The public profile adds a live Founder Verified flag through the existing visibility path. Independent claims and downstream authorization continue to use their existing provenance. [Implementation report](organizations/O3_IMPLEMENTATION_REPORT.md)

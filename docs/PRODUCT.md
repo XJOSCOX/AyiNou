@@ -113,3 +113,7 @@ Members can hold opinion polls, prioritize eligible projects, discuss a proposal
 ## O2 organization signup intent
 
 Members choose Individual or Organization at registration and create the same personal account. Organization setup can be resumed after personal onboarding. The saved intent describes pending identity eligibility and carries no organization ownership, verification, project or ballot authority. An intent-only member can continue as an individual after confirming the correction. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)
+
+## Founder Verified
+
+Founder Verified is a separate designation for confirmation of identity and Ayinou account control by the authorized founding administrator. Consent and optional public display are member choices. Independent Identity Verified takes visual precedence when both exist, while both provenance records remain intact. The synthetic lifecycle is implemented. Real issuance, independently assigned appeals and any future onboarding eligibility require separate approval. [O3 status](organizations/O3_IMPLEMENTATION_REPORT.md)

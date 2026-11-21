@@ -127,3 +127,7 @@ L6.2A adds an administrator status and availability workspace. Its disabled data
 ## O2 organization signup intent
 
 Use the disposable Chromium runner with its local mail catcher for O2 signup and confirmation tests. Review the migration dry-run against the linked project before applying it. Keep the future pilot eligibility rule shared across both signup choices. The O2 path is limited to intent and does not call the legacy institution write API. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)
+
+## O3 founder identity release boundary
+
+Exercise founder proof and grant only in the disposable Chromium suite. The hosted dry run must list O2 before O3 while both remain pending. Obtain explicit authorization for hosted application and verify the closed policy and empty authority/case tables after rollout. Deployment does not approve proof policy, authority provisioning, real issuance or O4 eligibility. [Release and recovery details](organizations/O3_IMPLEMENTATION_REPORT.md)
