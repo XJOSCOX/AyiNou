@@ -123,3 +123,7 @@ Committing a legal draft, passing translation tests, or building the site does n
 
 L6.2A adds an administrator status and availability workspace. Its disabled database defaults and empty immutable registries reject activation. Review migration dry runs and disposable database/browser checks before hosted application. A future release requires separate written legal, translation, owner and publication decisions; the operational switch alone cannot publish. See [L6.2A controls](legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md).
 
+
+## O2 organization signup intent
+
+Use the disposable Chromium runner with its local mail catcher for O2 signup and confirmation tests. Review the migration dry-run against the linked project before applying it. Keep the future pilot eligibility rule shared across both signup choices. The O2 path is limited to intent and does not call the legacy institution write API. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)

@@ -109,3 +109,7 @@ Project teams can document work through milestones, updates, supporting evidence
 ### Community voting and recommendations
 
 Members can hold opinion polls, prioritize eligible projects, discuss a proposal or task through a scoped decision poll, and nominate eligible Ayinou members who consent to appear. Each eligible account gets one private ballot. The poll shows the audience, eligibility and result rules before members vote. Final results explain a tie, a missed requirement or a candidate withdrawal. The accountable organizer can record a recommendation, defer a decision, or decline the recommendation. Communities and institutions continue to use their existing appointments and approval processes. Ayinou polls are for internal participation and do not establish eligibility for public office or official election results.
+
+## O2 organization signup intent
+
+Members choose Individual or Organization at registration and create the same personal account. Organization setup can be resumed after personal onboarding. The saved intent describes pending identity eligibility and carries no organization ownership, verification, project or ballot authority. An intent-only member can continue as an individual after confirming the correction. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)

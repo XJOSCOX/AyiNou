@@ -780,3 +780,7 @@ Plan and hold updates serialize per subject, with version and snapshot revalidat
 ## Legal L6.2A publication settings
 
 Migration `20261121010000_l62a_legal_publication_controls.sql` creates `private.legal_publication_settings` (one disabled global row), `private.legal_policy_settings` (nine disabled draft rows), and `private.legal_publication_audit` (initially empty). RLS is enabled and direct grants are revoked. Service-role-only RPCs `legal_availability_for_api`, `admin_legal_settings_for_api`, `admin_legal_audit_for_api` and `admin_legal_action_for_api` expose bounded projections and serialized audited actions. The action RPC uses revision comparison and unique request IDs. No approval or text record is inserted. [Full gate](legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md)
+
+## O2 organization signup intent
+
+Migration `20261121020000_o2_organization_intents.sql` creates private signup choices, onboarding intents and command receipts. RLS and revoked direct grants close all three tables. The read/write RPCs are service-only and bind the caller to a live Auth session. One partial unique index protects open intents and the per-subject command key prevents replay divergence. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)

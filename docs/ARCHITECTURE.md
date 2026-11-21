@@ -195,3 +195,7 @@ Public legal routes read only `apps/web/src/lib/legal/published-releases.json`, 
 
 The administrator workspace calls Fastify, which checks current platform authority and recent TOTP and delegates versioned changes to audited private PostgreSQL RPCs. Public legal pages additionally require the uncached API availability response and an exact matching immutable release version. The database starts disabled and contains no approvals or release content. See [publication controls](legal/L6_2A_ADMIN_PUBLICATION_CONTROLS.md).
 
+
+## O2 organization signup intent
+
+The organization choice extends the same Supabase Auth registration. A private trigger captures the hint at registration and creates the owner-scoped intent on confirmed email. Personal onboarding and member access remain independent. The O2 API checks a live session and rechecks it in SQL. Intents cannot reach institution creation or ownership commands. [Implementation report](organizations/O2_IMPLEMENTATION_REPORT.md)

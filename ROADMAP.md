@@ -314,7 +314,7 @@ The platform administrator can inspect versioned publication settings and audit 
 ## Organization expansion initiative
 
 - [x] O1 design and database impact review. [Architecture](docs/organizations/O1_ONBOARDING_ARCHITECTURE.md) · [Owner decisions](docs/organizations/O1_OWNER_DECISION_BRIEF.md)
-- [ ] O2 personal signup paths and resumable organization intent.
+- [x] O2 personal signup paths and resumable organization intent. [Implementation report](docs/organizations/O2_IMPLEMENTATION_REPORT.md)
 - [ ] O3 Founder Verified provenance and scoped identity compatibility.
 - [ ] O4 registration status, institutional authority and completion gates.
 - [ ] O5 safe pathway corrections, bootstrap governance and succession.
