@@ -34,6 +34,10 @@ jobs:
         run: npm run lint
       - name: Check shared contracts, translations, API and client behavior
         run: npm test
+      - name: Validate legal publication boundary and L5 source integrity
+        run: |
+          npm run test:legal-center
+          python scripts/validate-legal-l5.py
 
   build:
     name: Production builds and dependencies

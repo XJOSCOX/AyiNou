@@ -61,6 +61,7 @@
     "test:shared": "node --import tsx scripts/check-shared-contracts.mjs",
     "test:i18n": "node scripts/check-translations.mjs",
     "test:client-errors": "node --import tsx --test scripts/check-client-errors.mjs",
+    "test:legal-center": "node --import tsx scripts/check-legal-center.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
     "test:e2e:smoke": "node scripts/run-e2e.mjs --grep @smoke",
     "test:e2e:headed": "node scripts/run-e2e.mjs --headed",
