@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-          fetch-depth: 0 # L5 validates frozen blobs from an older commit.
+          fetch-depth: 0 # L5 source integrity and S1 review checks use historical baselines.
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: "22.18.0"
@@ -35,6 +35,8 @@ jobs:
         run: npm run lint
       - name: Check shared contracts, translations, API and client behavior
         run: npm test
+      - name: Validate engineering standards and review evidence
+        run: npm run test:standards
       - name: Validate legal publication boundary and L5 source integrity
         run: |
           npm run test:legal-center

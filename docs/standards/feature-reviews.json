@@ -1,0 +1,10 @@
+{
+  "features": [
+    {
+      "id": "s1",
+      "report": "docs/standards/S1_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": []
+    }
+  ]
+}
