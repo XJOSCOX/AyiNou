@@ -322,3 +322,17 @@ The platform administrator can inspect versioned publication settings and audit 
 - [ ] O7 integration, security validation and rollout review.
 
 Future implementation depends on documented owner decisions and separate authorization. [Phase dependencies and exit criteria](docs/organizations/O1_IMPLEMENTATION_ROADMAP.md)
+
+## S1 permanent engineering and audit governance
+
+S1 establishes repository-wide [engineering standards](docs/standards/ENGINEERING_STANDARDS.md), [audit coverage review](docs/standards/AUDIT_COVERAGE_MATRIX.md), and a [completion checklist](docs/standards/FEATURE_COMPLETION_CHECKLIST.md) for O3–O7 and all later phases. Maintain the feature review register, run the standards gate, and track deployment and unresolved policy decisions.
+
+- [ ] O3 Founder Verified identity and independent provenance.
+- [ ] O4 institution authority and registration checks, including the legacy create path.
+- [ ] O5 signup corrections, bootstrap administration and succession.
+- [ ] O6 Early Partner organizations and O7 rollout verification.
+- [ ] Unified Audit Center with permission-scoped read projections and approved summary export.
+- [ ] Organization Programs, applications and waitlists, volunteer coordination, provider referrals and separately authorized financial support integrations.
+- [ ] Expanded community reporting, radio and media, and native mobile apps.
+
+These initiatives remain planned. [S1 implementation report](docs/standards/S1_IMPLEMENTATION_REPORT.md)
