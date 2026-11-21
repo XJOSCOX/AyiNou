@@ -35,6 +35,11 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
   async function rpc<T>(name: string, input: Record<string, unknown>): Promise<T> {
     const { data, error } = await client.rpc(name, input);
     if (error) {
+      if (error.code === "O2001") throw new InstitutionError("UNAUTHORIZED", 401);
+      if (error.code === "O2002") throw new InstitutionError("IDEMPOTENCY_CONFLICT", 409);
+      if (error.code === "O2003") throw new InstitutionError("NOT_FOUND", 404);
+      if (error.code === "O2004") throw new InstitutionError("STALE_VERSION", 409);
+      if (error.code === "O2005") throw new InstitutionError("DEPENDENCY_BLOCKED", 409);
       if (error.code === "42501") throw new InstitutionError("FORBIDDEN", 403);
       if (error.code === "PVE01") throw new InstitutionError("VERIFICATION_REQUIRED", 409);
       if (error.code === "PVT05") throw new InstitutionError("VERIFICATION_ASSIGNMENT_REQUIRED", 403);

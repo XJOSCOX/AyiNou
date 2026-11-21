@@ -2,6 +2,7 @@ export * from "./core";
 export * from "./trust";
 export * from "./accounts";
 export * from "./institutions";
+export * from "./organization-onboarding";
 export * from "./ambassadors";
 export * from "./communities";
 export * from "./feed";

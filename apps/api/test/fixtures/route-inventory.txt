@@ -63,6 +63,7 @@ GET /api/v1/me/muted - -
 GET /api/v1/me/notification-preferences - -
 GET /api/v1/me/notifications - -
 GET /api/v1/me/notifications/unread-count - -
+GET /api/v1/me/organization-onboarding - -
 GET /api/v1/me/organization-roles - -
 GET /api/v1/me/platform-access - -
 GET /api/v1/me/polls - -
@@ -170,6 +171,7 @@ HEAD /api/v1/me/muted - onSend
 HEAD /api/v1/me/notification-preferences - onSend
 HEAD /api/v1/me/notifications - onSend
 HEAD /api/v1/me/notifications/unread-count - onSend
+HEAD /api/v1/me/organization-onboarding - onSend
 HEAD /api/v1/me/organization-roles - onSend
 HEAD /api/v1/me/platform-access - onSend
 HEAD /api/v1/me/polls - onSend
@@ -279,6 +281,7 @@ POST /api/v1/institutions/:id/roles 4096 -
 POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
 POST /api/v1/me/notifications/read-all 1024 -
+POST /api/v1/me/organization-onboarding/:id/change-path 1024 -
 POST /api/v1/me/post-media 4200000 onRequest
 POST /api/v1/me/privacy-exports/:id/revoke 512 -
 POST /api/v1/me/privacy-requests 512 -
@@ -313,6 +316,7 @@ POST /api/v1/verification/review/:id 4096 -
 PUT /api/v1/comments/:id/reaction 1024 -
 PUT /api/v1/institutions/:key/follow 1024 -
 PUT /api/v1/me/notification-preferences 1024 -
+PUT /api/v1/me/organization-onboarding 1024 -
 PUT /api/v1/members/:key/follow 1024 -
 PUT /api/v1/members/:username/block 1024 -
 PUT /api/v1/members/:username/mute 1024 -
