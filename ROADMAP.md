@@ -319,6 +319,7 @@ The platform administrator can inspect versioned publication settings and audit 
 - [x] [Archive regular identity applications after a Founder Verified grant](docs/organizations/FOUNDER_APPLICATION_CLOSURE_IMPLEMENTATION_REPORT.md). The migration is applied in hosted development with issuance disabled.
 - [x] [Separate Founder reviewer eligibility and require member consent for supersession](docs/organizations/FOUNDER_VERIFICATION_POLICY_UPDATE.md). The follow-up migration requires separate hosted approval.
 - [x] [Recognize the formal Founder role and reserve its powers](docs/governance/FOUNDER_AUTHORITY_AND_POWERS.md). The hierarchy has [explicit capability and approval boundaries](docs/governance/FOUNDER_CAPABILITY_MATRIX.md). Protected succession and hosted activation remain separately governed.
+- [x] [Reserve the founding identity through explicit one-time setup and separate the four badge styles](docs/governance/FOUNDER_BOOTSTRAP_AND_BADGES.md). Hosted migrations and succession remain separately authorized.
 - [x] [O4 identity-gated setup](docs/organizations/O4_IMPLEMENTATION_REPORT.md), private registration declarations and reviewed claims. Hosted rollout awaits approval.
 - [ ] O5 safe pathway corrections, bootstrap governance and succession.
 - [ ] O6 Early Partner Program.

@@ -5,13 +5,14 @@ import Link from "next/link";
 import type { FollowStatus, ProfilePreview, PublicAmbassador } from "@ayinou/shared";
 import { discoveryMessages } from "@/lib/discovery-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
+import { founderMessages } from "@/lib/founder-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { DisplayControls } from "./display-controls";
 import { AmbassadorRecognition } from "./ambassador-public";
 import { FounderVerifiedBadge } from "./founder-verified-badge";
 import { ProfileFollowPanel } from "./discovery-accounts";
 import { MemberSafetyControls } from "./member-safety";
-import { VerifiedBadge, institutionCard, institutionLink } from "./institution-ui";
+import { AdministratorMark, FounderMark, PersonalClaimChecks, institutionCard, institutionLink } from "./institution-ui";
 import { ImpersonationReportForm } from "./trust-workspace";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
@@ -40,11 +41,17 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
             <p className="break-all text-sm text-[var(--theme-body)]">@{username}</p>
           </div>
         </div>
-        {!!social.personalClaims?.length && <div className="mt-3 grid gap-2">
-          <div className="flex flex-wrap gap-2">{social.personalClaims.map((claim) => <VerifiedBadge key={claim} label={trust[claim]} />)}</div>
-          <p className="text-sm text-[var(--theme-body)]">{trust.noEndorsement}</p>
-        </div>}
-        {profile.founderVerified && !social.personalClaims?.includes("identity") && <FounderVerifiedBadge />}
+        <div className="flex flex-wrap items-center gap-2">
+          {profile.platformLeadership === "founder" && <FounderMark />}
+          {profile.platformLeadership === "administrator" && <AdministratorMark />}
+          {!!social.personalClaims?.length && <PersonalClaimChecks claims={social.personalClaims} compact={false} />}
+        </div>
+        {!!social.personalClaims?.length && <p className="mt-2 text-sm text-[var(--theme-body)]">{trust.noEndorsement}</p>}
+        {profile.founderVerified && (social.personalClaims?.includes("identity") ?
+          <details className="mt-3">
+            <summary className="cursor-pointer text-sm font-semibold">{founderMessages[locale].verificationDetails}</summary>
+            <FounderVerifiedBadge />
+          </details> : <FounderVerifiedBadge />)}
         {profile.biography && <p className="mt-4 max-w-prose whitespace-pre-line break-words" dir="auto">{profile.biography}</p>}
         {ambassador && <AmbassadorRecognition ambassador={ambassador} />}
       </section>

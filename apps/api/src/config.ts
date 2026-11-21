@@ -10,7 +10,7 @@ const environmentSchema = z.object({
   SUPABASE_URL: z.url().optional(),
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
-  AYINOU_BOOTSTRAP_ADMIN_USER_ID: z.preprocess((value) => value === "" ? undefined : value, z.uuid().optional()),
+  AYINOU_FOUNDER_BOOTSTRAP_ENABLED: z.enum(["true", "false"]).optional(),
   AYINOU_PRIVACY_INTAKE: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_PRIVACY_EXPORT: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_PRIVACY_LIFECYCLE: z.enum(["disabled", "synthetic"]).default("disabled").optional(),

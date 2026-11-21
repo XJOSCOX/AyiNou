@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { platformRoles, type PlatformAccess } from "@ayinou/shared";
@@ -11,7 +12,7 @@ const actionInput = z.discriminatedUnion("action", [
   z.strictObject({ action: z.enum(["grant", "revoke"]), value: z.enum(platformRoles), reason }),
 ]);
 
-export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null) {
+export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null, founderBootstrapEnabled = false) {
   app.decorateRequest("authUserId", null);
   app.decorateRequest("authToken", null);
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
@@ -33,6 +34,21 @@ export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifi
 
   const access = (actor: string) => repo!.rpc<PlatformAccess>("platform_access_for_api", { p_actor: actor });
   app.get("/api/v1/me/platform-access", async (request) => access(request.authUserId!));
+  app.get("/api/v1/me/founder-bootstrap", async (request) => ({
+    available: founderBootstrapEnabled && await repo!.rpc<boolean>("founder_registration_status_for_api", { p_actor: request.authUserId }),
+  }));
+  app.post("/api/v1/me/founder-bootstrap", { bodyLimit: 256 }, async (request) => {
+    if (!founderBootstrapEnabled) throw new InstitutionError("FORBIDDEN", 403);
+    const session = await auth?.verifySession?.(request.authToken!, true);
+    if (!session || session.actor !== request.authUserId) throw new InstitutionError("MFA_REQUIRED", 403);
+    const { credential } = z.strictObject({ credential: z.string().regex(/^[A-Za-z0-9_-]{43}$/) }).parse(request.body);
+    const outcome = await repo!.rpc<string>("claim_founder_registration_for_api", {
+      p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp_at: session.totpAt,
+      p_hash: createHash("sha256").update(credential, "utf8").digest("hex"),
+    });
+    if (outcome !== "claimed") throw new InstitutionError("FOUNDER_BOOTSTRAP_UNAVAILABLE", 409);
+    return { claimed: true };
+  });
 
   app.register(async (admin) => {
     admin.addHook("preHandler", async (request) => {

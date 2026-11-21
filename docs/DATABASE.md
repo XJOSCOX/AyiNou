@@ -793,6 +793,8 @@ Migration `20261121020000_o2_organization_intents.sql` creates private signup ch
 
 `20261121100000_platform_founder_role.sql` recognizes Founder from `private.platform_bootstrap` and its matching platform audit record. It reuses the platform administration checks and gates Founder issuance separately. A Founder case’s authenticated subject can explicitly confirm supersession after an eligible grant. [Founder powers and compatibility](governance/FOUNDER_AUTHORITY_AND_POWERS.md)
 
+`20261121110000_reserved_founder_bootstrap.sql` protects a single installation reservation, retires the old startup RPC, and provides private credential preparation and authenticated MFA-bound consumption. The existing bootstrap and audit remain authoritative. Public role display uses a service-only projection after profile visibility checks. [Enrollment and badges](governance/FOUNDER_BOOTSTRAP_AND_BADGES.md)
+
 ## O4 organization setup
 
 `20261121040000_o4_organization_setup.sql` extends institutions, O2 intents and the institution ledger. Organizations use a private claimed registration state and version. Completed intent receipts are retained separately from open drafts. SQL locks and current reviewed identity guard decisive writes and claim approvals, and the existing reviewer flow handles ownership transfer. [Database and API details](organizations/O4_IMPLEMENTATION_REPORT.md)

@@ -15,6 +15,13 @@
     "application_held": "Yon mezi ki an vigè anpeche yo fèmen demann nan."
   },
   "founderIssuanceOnly": "Se sèlman Fondatè a ki ka bay distenksyon sa a lè tout kondisyon verifikasyon yo satisfè.",
+  "verificationDetails": "Detay verifikasyon",
+  "bootstrapTitle": "Konfigire kont Fondatè a",
+  "bootstrapHelp": "Antre kòd prive pou yon sèl itilizasyon yo te bay pou imèl ou konfime a. Ou bezwen yon verifikasyon resan nan aplikasyon otantifikasyon an.",
+  "bootstrapCredential": "Kòd Fondatè pou yon sèl itilizasyon",
+  "bootstrapSubmit": "Konfime konfigirasyon Fondatè a",
+  "bootstrapComplete": "Konfigirasyon kont Fondatè a fini.",
+  "bootstrapUnavailable": "Nou pa t kapab konfigire kont Fondatè a. Verifye kòd la oswa kontakte moun k ap jere enstalasyon an.",
   "activeCases": "Dosye aktif",
   "caseHistory": "Istwa dosye yo",
   "lastUpdated": "Dènye mizajou",

@@ -189,14 +189,17 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       if (profile.error) throw unavailable();
       if (!profile.data) return null;
       const row = profile.data as { user_id: string; display_name: string; username: string; biography: string | null; avatar_asset: string | null; membership_category: ProfilePreview["membershipCategory"] };
-      const [avatar, designation] = await Promise.all([
+      const [avatar, designation, leadership] = await Promise.all([
         avatarUrl(row.user_id, row.avatar_asset),
         admin.rpc("founder_identity_public_for_api", { p_subject: row.user_id }),
+        admin.rpc("platform_leadership_for_api", { p_subject: row.user_id }),
       ]);
       return {
         displayName: row.display_name, username: row.username, biography: row.biography, avatarUrl: avatar,
         membershipCategory: row.membership_category,
         ...(!designation.error && designation.data === true ? { founderVerified: true as const } : {}),
+        ...(!leadership.error && (leadership.data === "founder" || leadership.data === "administrator")
+          ? { platformLeadership: leadership.data } : {}),
       };
     },
     async departments() {

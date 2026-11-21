@@ -15,6 +15,13 @@
     "application_held": "Une mesure active empêche la clôture de cette demande."
   },
   "founderIssuanceOnly": "Seule la personne fondatrice peut attribuer cette distinction après satisfaction de toutes les conditions de vérification.",
+  "verificationDetails": "Détails de la vérification",
+  "bootstrapTitle": "Configurer le compte fondateur",
+  "bootstrapHelp": "Saisissez le code privé à usage unique associé à votre adresse confirmée. Une vérification récente par application d’authentification est requise.",
+  "bootstrapCredential": "Code fondateur à usage unique",
+  "bootstrapSubmit": "Confirmer la configuration",
+  "bootstrapComplete": "Le compte fondateur est configuré.",
+  "bootstrapUnavailable": "La configuration du compte fondateur a échoué. Vérifiez le code ou contactez la personne responsable de l’installation.",
   "activeCases": "Dossiers en cours",
   "caseHistory": "Historique des dossiers",
   "lastUpdated": "Dernière mise à jour",

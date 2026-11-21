@@ -11,13 +11,14 @@ import { useMemberIdentity } from "@/lib/member-display-name";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { DisplayControls } from "./display-controls";
 import { InstitutionSwitcher } from "./institution-switcher";
-import { AdministratorMark, PersonalClaimChecks } from "./institution-ui";
+import { AdministratorMark, FounderMark, PersonalClaimChecks } from "./institution-ui";
+import { FounderVerifiedMark } from "./founder-verified-badge";
 import { SiteBrand } from "./site-brand";
 import { NotificationBell } from "./notification-bell";
 
 export function MemberNavbar() {
   const [locale] = useLocale();
-  const { displayName, avatarUrl, claims, administrator } = useMemberIdentity();
+  const { displayName, avatarUrl, claims, administrator, founder, founderVerified } = useMemberIdentity();
   const [failedAvatar, setFailedAvatar] = useState<string | null>(null);
   const settings = accountMessages[locale].settings;
   const menuLabel = displayName || settings;
@@ -58,7 +59,8 @@ export function MemberNavbar() {
             </span>
             <span className="line-clamp-2 min-w-0 break-words text-start leading-tight sm:line-clamp-none sm:truncate" title={menuLabel}>{menuLabel}</span>
             {displayName && <PersonalClaimChecks claims={claims} />}
-            {administrator && <AdministratorMark />}
+            {founder ? <FounderMark compact /> : administrator && <AdministratorMark compact />}
+            {founderVerified && !claims.includes("identity") && <FounderVerifiedMark compact />}
             <span aria-hidden="true" className="me-1 size-1.5 shrink-0 -translate-y-px rotate-45 border-e border-b border-current" />
           </summary>
           <div className="absolute end-0 z-30 mt-2 grid w-48 max-w-[calc(100vw-2rem)] gap-0.5 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg">

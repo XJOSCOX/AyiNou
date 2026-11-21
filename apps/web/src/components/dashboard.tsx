@@ -12,11 +12,12 @@ import { useLocale } from "@/lib/locale-store";
 import { useMemberIdentity } from "@/lib/member-display-name";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { AdministratorMark, FounderMark, PersonalClaimChecks } from "./institution-ui";
+import { FounderVerifiedMark } from "./founder-verified-badge";
 import { MemberShell } from "./member-shell";
 
 export function Dashboard() {
   const [locale] = useLocale();
-  const { claims, administrator, founder } = useMemberIdentity();
+  const { claims, administrator, founder, founderVerified } = useMemberIdentity();
   const t = communityMessages[locale];
   const auth = authMessages[locale];
   const account = accountMessages[locale];
@@ -70,6 +71,7 @@ export function Dashboard() {
             {auth.dashboardTitle.replace("{name}", profile.displayName ?? "")}
             {profile.displayName && <PersonalClaimChecks claims={claims} />}
             {founder ? <FounderMark /> : administrator && <AdministratorMark />}
+            {founderVerified && !claims.includes("identity") && <FounderVerifiedMark />}
           </p>}
           {profileError && <p role="alert" className="mt-6 text-sm text-[var(--theme-on-primary-error)]">{auth.loadError}</p>}
           <div className="mt-7 flex flex-wrap gap-3">

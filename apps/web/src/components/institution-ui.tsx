@@ -7,6 +7,7 @@ import { institutionMessages } from "@/lib/institution-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
+import { DesignationMark } from "./designation-mark";
 
 export const institutionCard = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
 export const institutionField = "mt-1.5 block min-h-11 w-full rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-3 py-2 text-[var(--theme-text)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]";
@@ -66,23 +67,19 @@ export function VerifiedCheck({ label }: { label?: string }) {
   );
 }
 
-export function FounderMark() {
+export function FounderMark({ compact }: { compact?: boolean }) {
   const [locale] = useLocale();
-  return <span className="inline-flex w-fit items-center rounded-md border border-[var(--theme-border)] bg-[var(--theme-selected)] px-2 py-0.5 align-middle text-xs font-semibold text-[var(--theme-text)]">
-    {adminMessages[locale].founder}
-  </span>;
+  return <DesignationMark kind="founder" label={adminMessages[locale].founder} compact={compact} />;
 }
 
-export function AdministratorMark() {
+export function AdministratorMark({ compact }: { compact?: boolean }) {
   const [locale] = useLocale();
-  const label = adminMessages[locale].administrator;
-  return <Image src="/admin-verified.png" width={18} height={18} alt={label} title={label} unoptimized
-    className="inline-block size-[18px] shrink-0 align-middle" />;
+  return <DesignationMark kind="administrator" label={adminMessages[locale].administrator} compact={compact} />;
 }
 
-export function PersonalClaimChecks({ claims }: { claims: readonly PersonalClaim[] }) {
+export function PersonalClaimChecks({ claims, compact = true }: { claims: readonly PersonalClaim[]; compact?: boolean }) {
   const [locale] = useLocale();
-  return claims.map((claim) => <VerifiedCheck key={claim} label={trustMessages[locale][claim]} />);
+  return claims.map((claim) => <DesignationMark key={claim} kind="identity" label={trustMessages[locale][claim]} compact={compact} />);
 }
 
 export function InstitutionLogo({ organization }: { organization: Pick<Institution, "name" | "logoUrl"> }) {

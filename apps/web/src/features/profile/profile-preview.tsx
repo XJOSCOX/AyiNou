@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { MemberProfile, MembershipCategory } from "@ayinou/shared";
-import { AdministratorMark, PersonalClaimChecks } from "@/components/institution-ui";
+import { AdministratorMark, FounderMark, PersonalClaimChecks } from "@/components/institution-ui";
+import { FounderVerifiedMark } from "@/components/founder-verified-badge";
 import { authMessages } from "@/lib/auth-i18n";
 import type { Locale } from "@/lib/i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
@@ -11,9 +12,9 @@ type ProfilePreviewProps = {
   saved: Pick<MemberProfile, "displayName" | "username" | "biography" | "showMembershipCategory" |
     "membershipCategory" | "discoverable" | "isVisible">;
   avatar: MemberProfile["avatarUrl"];
-} & Pick<ReturnType<typeof useMemberIdentity>, "administrator" | "claims">;
+} & Pick<ReturnType<typeof useMemberIdentity>, "administrator" | "founder" | "founderVerified" | "claims">;
 
-export function SavedProfilePreview({ locale, saved, avatar, claims, administrator }: ProfilePreviewProps) {
+export function SavedProfilePreview({ locale, saved, avatar, claims, administrator, founder, founderVerified }: ProfilePreviewProps) {
   const m = membershipMessages[locale];
   return (
     <section className="mt-7 rounded-2xl bg-[var(--theme-control)] p-5" aria-label={m.preview}>
@@ -23,7 +24,8 @@ export function SavedProfilePreview({ locale, saved, avatar, claims, administrat
         {avatar && <Image src={avatar} alt={m.photoAlt} width={56} height={56} className="rounded-full" unoptimized />}
         <div>
           <p className="font-bold">{saved.displayName}{saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} /></>}
-            {administrator && <>{" "}<AdministratorMark /></>}</p>
+            {founder ? <FounderMark /> : administrator && <AdministratorMark />}
+            {founderVerified && !claims.includes("identity") && <FounderVerifiedMark />}</p>
           {saved.username && <p className="text-sm text-[var(--theme-body)]">@{saved.username}</p>}
         </div>
       </div>
@@ -36,7 +38,7 @@ export function SavedProfilePreview({ locale, saved, avatar, claims, administrat
 }
 
 export function DraftProfilePreview({
-  locale, saved, avatar, claims, administrator, displayName, username, biography, showCategory, category, profileSections,
+  locale, saved, avatar, claims, administrator, founder, founderVerified, displayName, username, biography, showCategory, category, profileSections,
 }: ProfilePreviewProps & {
   displayName: string;
   username: string;
@@ -62,7 +64,8 @@ export function DraftProfilePreview({
           <h2 className="mt-3 text-sm font-semibold text-[var(--theme-link)]">{m.preview}</h2>
           <p className="mt-1 break-words text-2xl font-semibold leading-tight tracking-tight">
             {display || t.displayName}{display && display === saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} />
-              {administrator && <AdministratorMark />}</>}
+              {founder ? <FounderMark /> : administrator && <AdministratorMark />}
+              {founderVerified && !claims.includes("identity") && <FounderVerifiedMark />}</>}
           </p>
           {username.trim() && <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{username.trim().toLowerCase()}</p>}
           {biography.trim() && <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[var(--theme-body)]">{biography.trim()}</p>}

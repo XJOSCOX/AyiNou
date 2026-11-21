@@ -14,6 +14,7 @@ const config = readConfig({
   SUPABASE_PUBLISHABLE_KEY: publishable,
   SUPABASE_SECRET_KEY: secret,
   LOG_LEVEL: "error",
+  AYINOU_FOUNDER_BOOTSTRAP_ENABLED: "true",
   AYINOU_PRIVACY_INTAKE: "synthetic",
   AYINOU_PRIVACY_EXPORT: "synthetic",
   AYINOU_PRIVACY_LIFECYCLE: "synthetic",

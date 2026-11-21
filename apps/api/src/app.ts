@@ -58,7 +58,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerMemberRoutes(instance, auth, members, readBudget));
   app.register((instance) => registerCommunityRoutes(instance, community));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
-  app.register((instance) => registerAdminRoutes(instance, auth, institutions));
+  app.register((instance) => registerAdminRoutes(instance, auth, institutions, config.AYINOU_FOUNDER_BOOTSTRAP_ENABLED === "true"));
   app.register((instance) => registerAdministrationGovernance(instance, auth, institutions));
   app.register((instance) => registerEarlyPartners(instance, auth, institutions));
   app.register((instance) => registerOrganizationOnboarding(instance, auth, institutions, readBudget));

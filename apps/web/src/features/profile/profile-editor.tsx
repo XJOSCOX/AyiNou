@@ -32,7 +32,7 @@ export function ProfileEditor({ profile, departments, onboarding }: {
   profile: MemberProfile; departments: Department[]; onboarding: boolean;
 }) {
   const [locale, setLocale] = useLocale();
-  const { claims, administrator, setAvatarUrl } = useMemberIdentity();
+  const { claims, administrator, founder, founderVerified, setAvatarUrl } = useMemberIdentity();
   const t = authMessages[locale];
   const account = accountMessages[locale];
   const m = membershipMessages[locale];
@@ -64,7 +64,7 @@ export function ProfileEditor({ profile, departments, onboarding }: {
   const { avatar, photoError, uploading, changePhoto } = useProfileAvatar(
     profile.avatarUrl, setAvatarUrl, () => router.replace("/login"),
   );
-  const previewProps = { locale, saved, avatar, claims, administrator };
+  const previewProps = { locale, saved, avatar, claims, administrator, founder, founderVerified };
   const all = !onboarding;
   const titles = [m.membership, m.location, m.publicProfile, m.interests];
 

@@ -9,6 +9,7 @@ import { fetchAccountCodes } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { privacyMessages } from "@/lib/privacy-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { FounderBootstrap } from "./founder-bootstrap";
 import { AccountMfa } from "./account-mfa";
 import { AccountSecurity } from "./account-security";
 import { MemberShell } from "./member-shell";
@@ -81,6 +82,7 @@ export function AccountSettings() {
           <h2 className="text-xl font-semibold">{a.security}</h2>
           <AccountSecurity />
           <AccountMfa />
+          <FounderBootstrap />
         </section>
         <NotificationPreferencesPanel />
         <MemberSafetySettings />

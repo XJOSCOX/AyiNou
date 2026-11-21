@@ -559,7 +559,34 @@
     {
       "id": "founder-verification-policy",
       "report": "docs/organizations/FOUNDER_REVIEWER_AND_SUPERSESSION_REPORT.md",
-      "routes": [],
+      "routes": [
+        {
+          "route": "GET /api/v1/me/founder-bootstrap",
+          "contract": "GET /api/v1/me/founder-bootstrap - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only eligibility, scoped to the confirmed email owner."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-bootstrap.spec.ts",
+            "denialScenario": "An unrelated member cannot see the reservation."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/founder-bootstrap",
+          "contract": "POST /api/v1/me/founder-bootstrap 256 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The existing bootstrap event commits with credential consumption. Bounded eligible denials write a private event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-bootstrap.spec.ts",
+            "denialScenario": "A matching member without recent TOTP cannot claim Founder. Concurrent attempts consume exactly one credential."
+          }
+        }
+      ],
       "migrations": [
         {
           "file": "supabase/migrations/20261121090000_founder_supersession_consent.sql",
@@ -576,6 +603,14 @@
           "compatibility": "Preserves ordinary administrator assignments, O5 records, independent reviewer decisions and the existing closed gates.",
           "validation": "Disposable Founder recognition, administrator parity, ordinary-scoped issuer denial, post-grant consent, audit atomicity and account restriction tests.",
           "rolloutAndRollback": "Requires separate approval. Preserve authenticated provenance and keep both issuance and O4 parity disabled."
+        },
+        {
+          "file": "supabase/migrations/20261121110000_reserved_founder_bootstrap.sql",
+          "rlsAndGrants": "Registration and audit tables retain RLS without direct grants. Provisioning, claims and public role lookup execute only through the service role.",
+          "authorization": "Only a current session with recent MFA, matching confirmed email, the single unconsumed reservation and the private credential can commit Founder bootstrap.",
+          "compatibility": "Preserves existing first-account records and derives Founder from their trusted provenance. Retires legacy startup execution and blocks reservation reuse.",
+          "validation": "Disposable Founder bootstrap coverage verifies conflicting ownership, credential expiry, denial auditing and concurrent consumption. Profile tests verify role and badge separation.",
+          "rolloutAndRollback": "Requires separate hosted approval. Preserve the protected singleton and keep Founder Verified, succession and the existing high-impact gates disabled."
         }
       ]
     }

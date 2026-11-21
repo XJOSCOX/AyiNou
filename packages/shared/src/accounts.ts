@@ -26,6 +26,7 @@ export interface MemberProfile {
 
 export interface ProfilePreview {
   founderVerified?: true;
+  platformLeadership?: "founder" | "administrator";
   displayName: string | null;
   username: string | null;
   biography: string | null;
@@ -51,7 +52,7 @@ export const platformRoles = ["administrator", "moderator", "verification_review
 
 export type PlatformRole = (typeof platformRoles)[number];
 export type AccountStatus = "active" | "suspended" | "banned";
-export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: boolean; founder?: boolean };
+export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: boolean; founder?: boolean; founderVerified?: boolean };
 export type AdminOverview = Record<"members" | "organizations" | "recentMembershipEvents" | "pendingVerifications" | "restrictedAccounts" | "recentAdminActions", number>;
 export interface AdminAccount {
   bootstrapTrust?: boolean;

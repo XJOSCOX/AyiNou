@@ -11,7 +11,7 @@ import { useLocale } from "@/lib/locale-store";
 import { apiErrorCode } from "@/lib/api-errors";
 import { localizedApiError } from "@/lib/error-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
-import { AdministratorMark, FounderMark, institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
+import { AdministratorMark, FounderMark, institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, PersonalClaimChecks, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
@@ -119,7 +119,7 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
       : accounts.data.length ? accounts.data.map((account) => <article className={institutionCard} key={account.id}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{account.verified && <>{" "}<VerifiedCheck label={t.identityVerified} /></>}
+            <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{account.verified && <>{" "}<PersonalClaimChecks claims={["identity"]} /></>}
               {account.founder ? <>{" "}<FounderMark /></> : account.roles.includes("administrator") && <>{" "}<AdministratorMark /></>}</h2>
             {account.bootstrapTrust && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].bootstrapTrust}</p>}
             {account.username && <p className="break-all text-sm">@{account.username}</p>}

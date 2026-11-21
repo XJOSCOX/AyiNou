@@ -15,6 +15,13 @@
     "application_held": "An active hold prevents closing this application."
   },
   "founderIssuanceOnly": "Only the Founder can issue this designation after all verification requirements are met.",
+  "verificationDetails": "Verification details",
+  "bootstrapTitle": "Set up the Founder account",
+  "bootstrapHelp": "Enter the private one-time credential issued for your confirmed email. A recent authenticator check is required.",
+  "bootstrapCredential": "One-time Founder credential",
+  "bootstrapSubmit": "Confirm Founder setup",
+  "bootstrapComplete": "Founder setup is complete.",
+  "bootstrapUnavailable": "Founder setup could not be completed. Check the credential or contact the installation operator.",
   "activeCases": "Active cases",
   "caseHistory": "Case history",
   "lastUpdated": "Last updated",

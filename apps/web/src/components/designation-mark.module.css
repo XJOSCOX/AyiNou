@@ -1,0 +1,63 @@
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid currentColor;
+  border-radius: 0.45rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35;
+  vertical-align: middle;
+}
+
+.mark img {
+  flex: none;
+  object-fit: contain;
+}
+
+.compact {
+  padding: 0.08rem;
+}
+
+.founder {
+  color: #9f2433;
+  background: #fff0f1;
+}
+
+.administrator {
+  color: #176249;
+  background: #e7f7ee;
+}
+
+.identity {
+  color: #1956a5;
+  background: #eaf2ff;
+}
+
+.founderIdentity {
+  color: #795006;
+  background: #fff4d3;
+}
+
+:global([data-theme="dark"]) .founder {
+  color: #ff9ca8;
+  background: #47232b;
+}
+
+:global([data-theme="dark"]) .administrator {
+  color: #86dfb1;
+  background: #183b30;
+}
+
+:global([data-theme="dark"]) .identity {
+  color: #96c5ff;
+  background: #1b3352;
+}
+
+:global([data-theme="dark"]) .founderIdentity {
+  color: #ffd275;
+  background: #443417;
+}

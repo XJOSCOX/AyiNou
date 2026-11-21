@@ -15,6 +15,13 @@
     "application_held": "Una medida vigente impide cerrar esta solicitud."
   },
   "founderIssuanceOnly": "Solo la persona fundadora puede conceder esta distinción cuando se cumplan todos los requisitos de verificación.",
+  "verificationDetails": "Detalles de verificación",
+  "bootstrapTitle": "Configurar la cuenta fundadora",
+  "bootstrapHelp": "Introduce el código privado de un solo uso emitido para tu correo confirmado. Se requiere una comprobación reciente con la aplicación de autenticación.",
+  "bootstrapCredential": "Código de fundador de un solo uso",
+  "bootstrapSubmit": "Confirmar la configuración",
+  "bootstrapComplete": "La cuenta fundadora está configurada.",
+  "bootstrapUnavailable": "No se pudo configurar la cuenta fundadora. Comprueba el código o contacta con la persona responsable de la instalación.",
   "activeCases": "Casos activos",
   "caseHistory": "Historial de casos",
   "lastUpdated": "Última actualización",

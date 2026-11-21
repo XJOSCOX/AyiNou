@@ -16,10 +16,11 @@ type Identity = {
   claims: PersonalClaim[];
   administrator: boolean;
   founder: boolean;
+  founderVerified: boolean;
   reviewer: boolean;
 };
 const MemberIdentity = createContext<Identity | null>(null);
-const emptyAccess: { administrator: boolean; reviewer: boolean; founder?: boolean } = { administrator: false, reviewer: false };
+const emptyAccess: { administrator: boolean; reviewer: boolean; founder?: boolean; founderVerified?: boolean } = { administrator: false, reviewer: false };
 // The profile endpoint signs avatar URLs for five minutes. Refresh the display data before expiry.
 const avatarRefreshInterval = 2 * 60 * 1000;
 
@@ -109,6 +110,7 @@ export function MemberDisplayNameProvider({ memberId = null, name, children }: {
     displayName: member ? name ?? profile.displayName : null, avatarUrl: member ? profile.avatarUrl : null,
     setAvatarUrl, claims: member ? claims : [], administrator: !!member && access.administrator, reviewer: !!member && access.reviewer,
     founder: !!member && access.founder === true,
+    founderVerified: !!member && access.founderVerified === true,
   }}>{children}</MemberIdentity.Provider>;
 }
 

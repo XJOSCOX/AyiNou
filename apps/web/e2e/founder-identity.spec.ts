@@ -63,7 +63,7 @@ async function publicProfile(member: Member) {
 type Administrator = Awaited<ReturnType<typeof elevate>>;
 const founderTest = test.extend<{ administrators: { founder: Administrator; ordinaryAdmin: Administrator } }>({
   administrators: async ({ makeMember }, provide) => {
-    const [leader, ordinary] = await Promise.all([makeMember(), makeMember()]);
+    const [leader, ordinary] = await Promise.all([makeMember(), makeMember({ visible: true })]);
     try {
       const founder = await elevate(leader);
       const ordinaryAdmin = await elevate(ordinary);
@@ -229,9 +229,10 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
       '{"scope":"individual","creator_id":"${founder.id}","eligibility":"verified"}'),'${member.id}')::text;`)).toBe("true:false");
     await guest.goto("/members/" + member.handle);
     await expect(guest.getByText(founderMessages.en.badge, { exact: true })).toBeVisible();
-    const badgeIcon = guest.locator('img[src="/founder-verified.png"]');
+    const badgeIcon = guest.locator('[data-designation="founderIdentity"] img');
     await expect(badgeIcon).toBeVisible();
-    await expect.poll(() => badgeIcon.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    await expect(badgeIcon).toHaveAttribute("src", "/founder-verified.png");
+    await expect(badgeIcon).toHaveJSProperty("naturalWidth", 100);
 
     await apiCall(founder, review, 200, "POST", decision("hold", 4, "account_risk"));
     expect(await publicProfile(member)).not.toHaveProperty("founderVerified");
@@ -434,8 +435,8 @@ founderTest("founder authority and ordinary review are independent, and superses
 });
 
 
-founderTest("formal Founder provenance gives routine admin authority and reserves Founder issuance", async ({
-  makeMember, administrators: { founder, ordinaryAdmin },
+founderTest("formal Founder provenance gives routine admin authority and reserves Founder issuance @smoke", async ({
+  page, makeMember, administrators: { founder, ordinaryAdmin },
 }) => {
   const reason = "Synthetic routine authority and protected role test.";
   const accessPath = "/api/v1/me/platform-access";
@@ -466,6 +467,64 @@ founderTest("formal Founder provenance gives routine admin authority and reserve
     expect((await apiCall(ordinaryAdmin, adminPath, 200)).canIssue).toBe(false);
     await apiCall(ordinaryAdmin, actionPath(adminPath, caseId), 403, "POST", decision("grant", 3, "confirmed"));
     expect(sql(`select count(*) from private.founder_identity_events where case_id='${caseId}' and action='grant';`)).toBe("0");
+
+    assign(founder);
+    const subject = await openCase(founder, ordinaryAdmin);
+    const memberAction = actionPath(ownerPath, subject.caseId);
+    const founderAction = actionPath(adminPath, subject.caseId);
+    await apiCall(ordinaryAdmin, memberAction, 200, "POST", { ...version(1), action: "consent", disclose: true });
+    recordProof(subject.caseId);
+    await apiCall(founder, founderAction, 200, "POST", decision("grant", 3, "confirmed"));
+    expect(await apiCall(ordinaryAdmin, accessPath, 200)).toMatchObject({ founder: false, administrator: true, founderVerified: true });
+
+    await inEnglish(page.context());
+    await page.goto("/members/" + ordinaryAdmin.handle);
+    const green = page.locator('[data-designation="administrator"]');
+    const gold = page.locator('[data-designation="founderIdentity"]');
+    const blue = page.locator('[data-designation="identity"]');
+    await expect(green).toHaveCSS("color", "rgb(23, 98, 73)");
+    await expect(green.locator("img")).toHaveAttribute("src", "/admin.png");
+    await expect(green.locator("img")).toHaveJSProperty("naturalWidth", 100);
+    await expect(gold).toHaveCSS("color", "rgb(121, 80, 6)");
+    await expect(page.locator('[data-designation="founder"]')).toHaveCount(0);
+
+    const separateReviewer = await elevate(await makeMember());
+    try {
+      const application = (await apiCall(ordinaryAdmin, "/api/v1/me/verification", 201, "POST", {
+        organizationId: null, kind: "identity", evidence: ["https://example.org/synthetic-independent-review"],
+      })).id;
+      const review = "/api/v1/verification/review/" + application;
+      sql(`insert into private.verification_reviewers(user_id) values ('${founder.id}'),('${separateReviewer.id}');`);
+      for (const reviewer of [founder, separateReviewer]) {
+        await apiCall(reviewer, review + "/work", 204, "PATCH", { claim: true });
+        expect(await apiCall(reviewer, review, 200, "POST", {
+          decision: "approve", conflictFree: true, rationale: "Synthetic independent identity decision.",
+        })).toMatchObject({ status: reviewer.id === founder.id ? "pending" : "approved" });
+      }
+
+      await page.reload();
+      await expect(green).toBeVisible();
+      await expect(blue).toHaveCSS("color", "rgb(25, 86, 165)");
+      await expect(blue.locator("img")).toHaveAttribute("src", "/verified.png");
+      await expect(blue.locator("img")).toHaveJSProperty("naturalWidth", 100);
+      await expect(gold).toBeHidden();
+      await page.getByText(founderMessages.en.verificationDetails, { exact: true }).click();
+      await expect(gold).toBeVisible();
+
+      await apiCall(founder, founderAction, 200, "POST", decision("revoke", 4, "account_risk"));
+      await page.reload();
+      await expect(green).toBeVisible();
+      await expect(blue).toBeVisible();
+      await expect(gold).toHaveCount(0);
+
+      sql(`delete from public.role_assignments where user_id='${ordinaryAdmin.id}' and role='administrator';`);
+      await page.reload();
+      await expect(green).toHaveCount(0);
+      await expect(blue).toBeVisible();
+    } finally {
+      sql(`delete from public.role_assignments where user_id='${separateReviewer.id}' and role='administrator';
+        delete from private.verification_reviewers where user_id='${separateReviewer.id}';`);
+    }
   } finally {
     setSyntheticPolicy(false);
   }
