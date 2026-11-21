@@ -86,6 +86,139 @@
           "rolloutAndRollback": "No hosted write. Apply the ordered O2 and O3 sequence only after separate authorization. Preserve history and use a forward policy closure or recovery migration."
         }
       ]
+    },
+    {
+      "id": "o4",
+      "report": "docs/organizations/O4_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/organization-onboarding/setup",
+          "contract": "GET /api/v1/me/organization-onboarding/setup - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only bounded projection of the live subject’s own intent and receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "An unauthenticated caller cannot read an intent; another signed-in account receives no draft."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/organization-onboarding/matches",
+          "contract": "GET /api/v1/me/organization-onboarding/matches - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only search with the existing discovery read budget and public profile fields."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "Unauthenticated callers are denied; archived institutions are absent from matches."
+          }
+        },
+        {
+          "route": "PUT /api/v1/me/organization-onboarding/:id/details",
+          "contract": "PUT /api/v1/me/organization-onboarding/:id/details 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The O2 receipt and private versioned draft commit together."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "A different member cannot write another subject’s draft; unknown identity flags are rejected."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/organization-onboarding/:id/complete",
+          "contract": "POST /api/v1/me/organization-onboarding/:id/complete 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "O2 receipts and institutional authority events commit with creation or claim dispatch."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "Held or revoked identity, missing declarations and cross-subject commands cannot establish ownership."
+          }
+        },
+        {
+          "route": "PUT /api/v1/institutions/:id/registration",
+          "contract": "PUT /api/v1/institutions/:id/registration 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The correction event is an idempotent receipt in the existing institution ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "The close competitor in a handle race has no ownership and cannot edit registration."
+          }
+        },
+        {
+          "route": "POST /api/v1/institutions",
+          "contract": "POST /api/v1/institutions 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The legacy create path returns setup-required and cannot mutate or create any organization."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "Authenticated legacy creation is denied at Fastify and the previous SQL function."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/verification",
+          "contract": "POST /api/v1/me/verification 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Existing review submissions retain the institutional ledger. Claim submissions must use the O4 authority statement and the existing independent review."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "A direct claim submission is rejected without a versioned authority declaration."
+          }
+        },
+        {
+          "route": "POST /api/v1/verification/review/:id",
+          "contract": "POST /api/v1/verification/review/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The existing decision ledger and ownership transfer remain atomic. O4 adds repeated identity and declaration guards before each approval."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "The claim cannot transfer with one approval or while the applicant’s identity is held."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/institutions/:id",
+          "contract": "PATCH /api/v1/institutions/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The original organization update event remains the durable record. Changing into or out of a government category is refused."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-setup.spec.ts",
+            "denialScenario": "An ordinary organization owner cannot use a profile update to assign a government category."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121040000_o4_organization_setup.sql",
+          "rlsAndGrants": "Existing organization, intent, receipt and audit tables retain RLS and their revoked application grants. Added commands use explicit service-only execute grants and empty search paths.",
+          "authorization": "Live session, own intent, reviewed identity, authority version, ordinary kind, and incumbent role or independent review are enforced in SQL. Old creation and claim RPC paths fail closed.",
+          "compatibility": "Legacy registration is unknown. Existing membership and review records are preserved. O2 reads and positional RPC arguments stay compatible. The later O4 private registration DTO is additive.",
+          "validation": "Disposable browser and database suite tests O2, O3 and O4 isolation, concurrent grant attempts, protected claims, independent reviewers, and authoritative audit receipts.",
+          "rolloutAndRollback": "Hosted dry run orders O2, O3, O4 without writes. Deploy matching API and client after the database postflight. Roll forward with a closed creation policy to preserve receipts and avoid reopening legacy paths."
+        }
+      ]
     }
   ]
 }

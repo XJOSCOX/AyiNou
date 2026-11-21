@@ -8,12 +8,11 @@ import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionAction, institutionErrorBox, institutionField } from "./institution-ui";
 
-export function InstitutionForm({ initial, role = "owner", identityLocked = false, onSave, creating = false }: {
+export function InstitutionForm({ initial, role = "owner", identityLocked = false, onSave }: {
   initial?: InstitutionInput;
   role?: OrganizationRole;
   identityLocked?: boolean;
   onSave: (input: Partial<InstitutionInput>) => Promise<void>;
-  creating?: boolean;
 }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
@@ -101,7 +100,7 @@ export function InstitutionForm({ initial, role = "owner", identityLocked = fals
       </div>}
       {failed !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failed)}</p>}
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.saved}</p>}
-      <button type="submit" disabled={busy} className={institutionAction}>{busy ? auth.working : creating ? t.create : t.save}</button>
+      <button type="submit" disabled={busy} className={institutionAction}>{busy ? auth.working : t.save}</button>
     </form>
   );
 }

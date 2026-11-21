@@ -1,18 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { InstitutionInput } from "@ayinou/shared";
-import { accountMessages } from "@/lib/account-i18n";
 import { affiliationMessages } from "@/lib/affiliation-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { discoveryMessages } from "@/lib/discovery-i18n";
-import { createInstitution, loadInstitutionAccounts, resolveInvitation } from "@/lib/institution-api";
+import { loadInstitutionAccounts, resolveInvitation } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
-import { InstitutionForm } from "./institution-form";
 import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionStatus, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
@@ -23,9 +19,7 @@ export function InstitutionHub() {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
   const auth = authMessages[locale];
-  const router = useRouter();
   const accounts = useInstitutionResource(loadInstitutionAccounts);
-  const [creating, setCreating] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
 
@@ -42,21 +36,9 @@ export function InstitutionHub() {
     <MemberShell>
       <div className="grid gap-5">
         <PageHeader title={t.institutions} description={t.institutionsIntro} actions={<>
-          <Link className={institutionLink} href="/organization-onboarding">{organizationOnboardingMessages[locale].resume}</Link>
+          <Link className={institutionAction} href="/organization-onboarding">{organizationOnboardingMessages[locale].resume}</Link>
           <Link className={institutionLink} href="/discover?view=institutions">{discoveryMessages[locale].viewAll}</Link>
-          {!creating && <button type="button" className={institutionAction} onClick={() => setCreating(true)}>{t.create}</button>}
         </>} />
-        {creating && <section className={institutionCard}>
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold">{t.create}</h2>
-            <button type="button" className={institutionLink} onClick={() => setCreating(false)}>{accountMessages[locale].cancel}</button>
-          </div>
-          <p className="mb-5 text-sm text-[var(--theme-body)]">{t.newIntro}</p>
-          <InstitutionForm creating onSave={async (input) => {
-            const { id } = await createInstitution(input as InstitutionInput);
-            router.push(`/institutions/${id}`);
-          }} />
-        </section>}
         {failure !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failure)}</p>}
         {accounts.error ? <div className={institutionCard}>
           <p role="alert">{institutionError(t, accounts.error)}</p>

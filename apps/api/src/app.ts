@@ -57,7 +57,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerCommunityRoutes(instance, community));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions));
-  app.register((instance) => registerOrganizationOnboarding(instance, auth, institutions));
+  app.register((instance) => registerOrganizationOnboarding(instance, auth, institutions, readBudget));
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
   app.register((instance) => registerPublicLegalRoutes(instance, institutions));
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));

@@ -37,6 +37,11 @@ export function sql(statement: string) {
   }).trim();
 }
 
+export function finishPersonalOnboarding(member: Member) {
+  sql(`update public.member_private set onboarding_step=4,first_name='Synthetic',last_name='Member',
+    membership_category='haitian' where user_id='${member.id}';`);
+}
+
 export function totp(secret: string) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const bits = [...secret.replace(/=+$/, "").toUpperCase()]

@@ -40,6 +40,12 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
       if (error.code === "O2003") throw new InstitutionError("NOT_FOUND", 404);
       if (error.code === "O2004") throw new InstitutionError("STALE_VERSION", 409);
       if (error.code === "O2005") throw new InstitutionError("DEPENDENCY_BLOCKED", 409);
+      if (error.code === "O4001") throw new InstitutionError("ORG_SETUP_REQUIRED", 409);
+      if (error.code === "O4002") throw new InstitutionError("ORG_SETUP_IDENTITY_REQUIRED", 403);
+      if (error.code === "O4003") throw new InstitutionError("ORG_SETUP_AUTHORITY_REQUIRED", 409);
+      if (error.code === "O4004") throw new InstitutionError("ORG_SETUP_PROTECTED", 403);
+      if (error.code === "O4005") throw new InstitutionError("ORG_SETUP_HANDLE_UNAVAILABLE", 409);
+      if (error.code === "O4006") throw new InstitutionError("ORG_SETUP_PROFILE_REQUIRED", 409);
       if (error.code === "42501") throw new InstitutionError("FORBIDDEN", 403);
       if (error.code === "PVE01") throw new InstitutionError("VERIFICATION_REQUIRED", 409);
       if (error.code === "PVT05") throw new InstitutionError("VERIFICATION_ASSIGNMENT_REQUIRED", 403);

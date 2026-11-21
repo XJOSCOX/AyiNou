@@ -1,4 +1,5 @@
 import { verificationKinds } from "@ayinou/shared";
+import { redirect } from "next/navigation";
 import { VerificationScreen } from "@/components/verification-screen";
 
 export default async function VerificationPage({ searchParams }: {
@@ -8,6 +9,7 @@ export default async function VerificationPage({ searchParams }: {
   const claim = typeof query.claim === "string" && /^[a-z0-9][a-z0-9-]{2,39}$/.test(query.claim) ? query.claim : "";
   const institution = typeof query.institution === "string" ? query.institution.slice(0, 36) : "";
   const kind = verificationKinds.find((item) => item === query.kind);
-  const initialKind = claim ? "claim" : kind ?? "identity";
-  return <VerificationScreen key={`${initialKind}:${institution}:${claim}`} initialKind={initialKind} institution={institution} claim={claim} />;
+  if (claim || kind === "claim") redirect(`/organization-onboarding${claim ? `?claim=${claim}` : ""}`);
+  const initialKind = kind ?? "identity";
+  return <VerificationScreen key={`${initialKind}:${institution}`} initialKind={initialKind} institution={institution} />;
 }

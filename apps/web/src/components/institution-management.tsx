@@ -14,6 +14,7 @@ import { trustMessages } from "@/lib/trust-i18n";
 import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import { InstitutionForm } from "./institution-form";
+import { OrganizationRegistrationPanel } from "./organization-registration-panel";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, InstitutionLogo,
   InstitutionStatus, useInstitutionResource, VerifiedBadge } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -108,6 +109,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
             </> : <>
               <InstitutionForm initial={{ ...org, contactEmail: detail.contactEmail }} role={role} identityLocked={detail.identityLocked}
                 onSave={async (input) => { await saveInstitution(org.id, input); refresh(); }} />
+              {detail.registration && <OrganizationRegistrationPanel organizationId={org.id} initial={detail.registration} canCorrect={role === "owner"} />}
               <div className="mt-5 border-t border-[var(--theme-border)] pt-4">
                 <label className="inline-flex">
                   <input type="file" className="peer sr-only" accept="image/jpeg,image/png,image/webp" disabled={busy}

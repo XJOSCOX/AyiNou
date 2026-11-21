@@ -5,11 +5,10 @@ import { z } from "zod";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
 import { registerAffiliationDirectory, registerAffiliationRoutes } from "./affiliations.js";
+import { publicInstitutionUrl } from "./institution-input.js";
 
 const handle = z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9-]{2,39}$/);
 const resource = z.object({ id: z.uuid() });
-const publicUrl = z.string().trim().max(300).regex(/^https:\/\/[A-Za-z0-9][A-Za-z0-9.-]*(\/[^\s?#\\]*)?$/)
-  .refine((value) => { try { return new URL(value).protocol === "https:"; } catch { return false; } });
 const institution = z.object({
   handle,
   name: z.string().trim().min(2).max(120),
@@ -17,7 +16,7 @@ const institution = z.object({
   description: z.string().trim().max(600).nullable(),
   countryCode: z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/),
   departmentCode: z.string().regex(/^HT-[A-Z]{2}$/).nullable(),
-  website: publicUrl.nullable(),
+  website: publicInstitutionUrl.nullable(),
   contactEmail: z.email().max(254).nullable(),
 }).strict();
 const patchInstitution = institution.partial().refine((input) => Object.keys(input).length > 0);
@@ -29,7 +28,7 @@ const invite = z.object({
 const submission = z.object({
   kind: z.enum(verificationKinds),
   organizationId: z.uuid().nullable(),
-  evidence: z.array(publicUrl).min(1).max(3),
+  evidence: z.array(publicInstitutionUrl).min(1).max(3),
 }).strict().refine(({ evidence, kind }) => new Set(evidence).size === evidence.length &&
   (kind !== "notable_person" || evidence.length >= 2));
 const decision = z.object({
@@ -76,10 +75,9 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
     const base = "/api/v1/institutions";
     api.get("/api/v1/me/institution-accounts", async (request) => service.accounts(request.authUserId!));
     api.get(`${base}/:id`, async (request) => service.manage(request.authUserId!, resource.parse(request.params).id));
-    api.post(base, { bodyLimit: 4096 }, async (request, reply) => {
-      const input = institution.parse(request.body);
-      const id = await service.rpc<string>("institution_save_for_api", { p_actor: request.authUserId, p_org: null, p_input: input });
-      return reply.code(201).send({ id });
+    api.post(base, { bodyLimit: 4096 }, async (request) => {
+      institution.parse(request.body);
+      throw new InstitutionError("ORG_SETUP_REQUIRED", 409);
     });
     api.patch(`${base}/:id`, { bodyLimit: 4096 }, async (request) => {
       const { id } = resource.parse(request.params);
@@ -129,6 +127,7 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
     }));
     api.post("/api/v1/me/verification", { bodyLimit: 4096 }, async (request, reply) => {
       const input = submission.parse(request.body);
+      if (input.kind === "claim") throw new InstitutionError("ORG_SETUP_REQUIRED", 409);
       const id = await service.rpc<string>("verification_submit_for_api", {
         p_actor: request.authUserId, p_org: input.organizationId, p_kind: input.kind, p_evidence: input.evidence,
       });

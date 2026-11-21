@@ -1,6 +1,6 @@
-import type { Institution, InstitutionAccounts, InstitutionInput, InstitutionManagement, OrganizationRole, ReviewApplication, ReviewQueueMode,
+import type { InstitutionAccounts, InstitutionInput, InstitutionManagement, OrganizationRole, ReviewApplication, ReviewQueueMode,
   ReviewDecision, VerificationApplication, VerificationKind, VerifiedRepresentatives } from "@ayinou/shared";
-import { authorizedRequest, encodeProfileImage, publicRequest } from "./api";
+import { authorizedRequest, encodeProfileImage } from "./api";
 
 const base = "/api/v1/institutions";
 const verify = "/api/v1/me/verification";
@@ -14,14 +14,6 @@ export const loadInstitutionAccounts = (signal?: AbortSignal): Promise<Instituti
 
 export const loadInstitution = (id: string, signal?: AbortSignal): Promise<InstitutionManagement> =>
   authorizedRequest(`${base}/${id}`, { signal });
-
-export async function readPublicInstitution(handle: string, signal?: AbortSignal): Promise<Institution> {
-  return (await publicRequest(`${base}/by-handle/${encodeURIComponent(handle)}`, { signal })).organization;
-}
-
-export function createInstitution(input: InstitutionInput): Promise<{ id: string }> {
-  return post(base, input);
-}
 
 export function saveInstitution(id: string, input: Partial<InstitutionInput>) {
   return authorizedRequest(`${base}/${id}`, { method: "PATCH", body: JSON.stringify(input) });

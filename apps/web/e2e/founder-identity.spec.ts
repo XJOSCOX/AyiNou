@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } from "@ayinou/shared";
 import { founderMessages } from "../src/lib/founder-i18n";
 import { messages } from "../src/lib/i18n";
-import { api, apiCall, expect, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
 
 const ownerPath = "/api/v1/me/founder-identity";
 const adminPath = "/api/v1/admin/founder-identity";
@@ -148,6 +148,24 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
     await apiCall(founder, review, 409, "POST", { ...payload, expectedVersion: 4 });
     await apiCall(founder, review, 409, "POST", decision("grant", 4, "confirmed"));
     expect(await publicProfile(member)).toMatchObject({ founderVerified: true });
+    expect(sql(`select private.organization_setup_founder_candidate('${member.id}')::text || ':' ||
+      private.organization_setup_identity_eligible('${member.id}')::text;`)).toBe("true:false");
+    finishPersonalOnboarding(member);
+    const organizationPath = "/api/v1/me/organization-onboarding";
+    const intent = (await apiCall(member, organizationPath, 200, "PUT", {
+      id: null, expectedVersion: 0, requestId: randomUUID(), stage: "drafting",
+    })).intent;
+    const organizationDraft = await apiCall(member, organizationPath + "/" + intent.id + "/details", 200, "PUT", {
+      expectedVersion: intent.version, requestId: randomUUID(), draft: {
+        mode: "new", name: "Synthetic founder eligibility", handle: "fv-" + randomUUID().slice(0, 12),
+        kind: "ngo", countryCode: "HT", registrationStatus: "informal_unregistered",
+      },
+    });
+    const refused = await apiCall(member, organizationPath + "/" + intent.id + "/complete", 403, "POST", {
+      expectedVersion: organizationDraft.version, requestId: randomUUID(),
+      declaration: { authorityConfirmed: true, declarationVersion: 1 },
+    });
+    expect(refused.error.code).toBe("ORG_SETUP_IDENTITY_REQUIRED");
     const discoveryPath = "/api/v1/discover/people?q=" + member.handle;
     const discovery = await apiCall(founder, discoveryPath, 200);
     expect(discovery.accounts).toEqual([expect.objectContaining({ handle: member.handle })]);

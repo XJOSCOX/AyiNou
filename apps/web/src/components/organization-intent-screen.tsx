@@ -12,6 +12,7 @@ import { browserSupabase } from "@/lib/supabase/browser";
 import { institutionAction, institutionCard, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
+import { OrganizationSetupPanel } from "./organization-setup-panel";
 
 const path = "/api/v1/me/organization-onboarding";
 type Command = {
@@ -20,7 +21,7 @@ type Command = {
   body: OrganizationIntentUpdate | { expectedVersion: number; requestId: string };
 };
 
-export function OrganizationIntentScreen({ subject, profileComplete }: { subject: string; profileComplete: boolean }) {
+export function OrganizationIntentScreen({ subject, profileComplete, claim }: { subject: string; profileComplete: boolean; claim: string }) {
   const [locale] = useLocale();
   const t = organizationOnboardingMessages[locale];
   const [intent, setIntent] = useState<OrganizationOnboardingIntent | null | undefined>();
@@ -125,7 +126,6 @@ export function OrganizationIntentScreen({ subject, profileComplete }: { subject
             : <>
               {intent && intent.stage !== "cancelled" && <div className="mb-4">
                 <p className="font-semibold">{t[intent.stage]}</p>
-                <p className="mt-1 text-[var(--theme-body)]">{t.pending}</p>
               </div>}
               <div className="flex flex-wrap items-center gap-3">
                 {pending ? <><button type="button" className={institutionAction} onClick={() => void run(pending)}>{t.retry}</button>
@@ -145,6 +145,8 @@ export function OrganizationIntentScreen({ subject, profileComplete }: { subject
               </div>
             </>}
         </section>
+        {!sessionLost && profileComplete && intent !== undefined && <OrganizationSetupPanel subject={subject} intent={intent} claim={claim}
+          onReceipt={(receipt) => setIntent((current) => receipt.result ? null : current && { ...current, version: receipt.version, stage: "drafting" })} />}
       </div>
     </MemberShell>
   );

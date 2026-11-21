@@ -37,8 +37,14 @@ test("institution routes reject acting identities and require elevated reviewer 
       assert.equal((await app.inject({ method: "POST", url, headers, payload: { ...payload, ...field } })).statusCode, 400);
     }
     assert.equal(calls.length, 0);
-    assert.equal((await app.inject({ method: "POST", url, headers, payload })).statusCode, 201);
-    assert.deepEqual(calls.pop(), { name: "institution_save_for_api", input: { p_actor: actor, p_org: null, p_input: payload } });
+    const legacyCreate = await app.inject({ method: "POST", url, headers, payload });
+    assert.equal(legacyCreate.statusCode, 409);
+    assert.equal(legacyCreate.json().error.code, "ORG_SETUP_REQUIRED");
+    const legacyClaim = await app.inject({ method: "POST", url: "/api/v1/me/verification", headers,
+      payload: { kind: "claim", organizationId: institutionId, evidence: ["https://example.invalid/one", "https://example.org/two"] } });
+    assert.equal(legacyClaim.statusCode, 409);
+    assert.equal(legacyClaim.json().error.code, "ORG_SETUP_REQUIRED");
+    assert.equal(calls.length, 0);
     const review = await app.inject({ method: "POST", url: "/api/v1/me/verification", headers,
       payload: { kind: "government", organizationId: institutionId, evidence: ["http://example.invalid/private"] } });
     assert.equal(review.statusCode, 400);

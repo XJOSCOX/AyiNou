@@ -5,6 +5,14 @@ export const invitedRoles = ["administrator", "editor", "viewer"] as const;
 
 export type OrganizationKind = typeof organizationKinds[number];
 
+export const organizationRegistrationStatuses = ["unknown", "informal_unregistered", "pursuing_registration", "registered"] as const;
+export type OrganizationRegistrationStatus = typeof organizationRegistrationStatuses[number];
+
+export interface OrganizationRegistration {
+  status: OrganizationRegistrationStatus;
+  version: number;
+}
+
 export type OrganizationRole = "owner" | typeof invitedRoles[number];
 
 export type InstitutionInput = {
@@ -30,6 +38,7 @@ export type InstitutionManagement = {
   role: OrganizationRole;
   contactEmail: string | null;
   identityLocked: boolean;
+  registration?: OrganizationRegistration & { locked: boolean };
   representatives: { id: string; role: OrganizationRole; expiresAt: string | null; displayName: string | null;
     username: string | null; verified: boolean; isSelf: boolean }[];
   invitations: { id: string; role: OrganizationRole; expiresAt: string; username: string | null }[];

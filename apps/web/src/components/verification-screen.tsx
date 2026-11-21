@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 import { governmentKinds, verificationKinds, type InstitutionAccounts, type VerificationKind } from "@ayinou/shared";
 import { authMessages } from "@/lib/auth-i18n";
 import { apiErrorCode } from "@/lib/api-errors";
-import { loadApplications, loadInstitutionAccounts, readPublicInstitution, submitVerification } from "@/lib/institution-api";
+import { loadApplications, loadInstitutionAccounts, submitVerification } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
@@ -15,8 +15,8 @@ import { FounderIdentityPanel } from "./founder-identity";
 import { PageHeader } from "./page-header";
 import { MyVerificationAppeals } from "./trust-workspace";
 
-export function VerificationScreen({ initialKind, institution, claim }: {
-  initialKind: VerificationKind; institution: string; claim: string;
+export function VerificationScreen({ initialKind, institution }: {
+  initialKind: VerificationKind; institution: string;
 }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
@@ -43,7 +43,7 @@ export function VerificationScreen({ initialKind, institution, claim }: {
               <p role="alert" className={institutionErrorBox}>{institutionError(t, accounts.error)}</p>
               <button type="button" className={`${institutionLink} mt-3`} onClick={accounts.refresh}>{auth.retry}</button>
             </> : accounts.data ? <ApplicationForm accounts={accounts.data} initialKind={initialKind} initialOrg={institution}
-              initialClaim={claim} refresh={applications.refresh} /> : <p role="status">{auth.working}</p>}
+              refresh={applications.refresh} /> : <p role="status">{auth.working}</p>}
           </section>
           <section className={institutionCard}>
             <h2 className="text-xl font-semibold">{t.applications}</h2>
@@ -74,15 +74,14 @@ export function VerificationScreen({ initialKind, institution, claim }: {
   );
 }
 
-function ApplicationForm({ accounts, initialKind, initialOrg, initialClaim, refresh }: {
-  accounts: InstitutionAccounts; initialKind: VerificationKind; initialOrg: string; initialClaim: string; refresh: () => void;
+function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {
+  accounts: InstitutionAccounts; initialKind: VerificationKind; initialOrg: string; refresh: () => void;
 }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
   const auth = authMessages[locale];
   const [kind, setKind] = useState(initialKind);
   const [organization, setOrganization] = useState(initialOrg);
-  const [claimHandle, setClaimHandle] = useState(initialClaim);
   const [evidence, setEvidence] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<unknown>(null);
@@ -101,16 +100,10 @@ function ApplicationForm({ accounts, initialKind, initialOrg, initialClaim, refr
     setFailed(null);
     try {
       const references = evidence.split("\n").map((value) => value.trim()).filter(Boolean);
-      if ((needsOrganization || kind === "claim") && references.length < 2) throw new Error("INSTITUTION_EVIDENCE_REQUIRED");
+      if (needsOrganization && references.length < 2) throw new Error("INSTITUTION_EVIDENCE_REQUIRED");
       if (references.length < (kind === "notable_person" ? 2 : 1) || references.length > 3) throw new Error("INVALID_INPUT");
       let id: string | null = null;
-      if (kind === "claim") {
-        try { id = (await readPublicInstitution(claimHandle.trim().toLowerCase())).id; }
-        catch (cause) {
-          if (cause instanceof Error && cause.message === "NOT_FOUND") throw new Error("INVALID_INPUT");
-          throw cause;
-        }
-      } else if (needsOrganization) {
+      if (needsOrganization) {
         if (!eligible.some((org) => org.id === organization)) throw new Error("INVALID_INPUT");
         id = organization;
       }
@@ -129,13 +122,9 @@ function ApplicationForm({ accounts, initialKind, initialOrg, initialClaim, refr
           const value = verificationKinds.find((item) => item === event.target.value);
           if (value) { setKind(value); setOrganization(""); setSaved(false); }
         }}>
-          {verificationKinds.map((item) => <option key={item} value={item}>{t[item]}</option>)}
+          {verificationKinds.filter((item) => item !== "claim").map((item) => <option key={item} value={item}>{t[item]}</option>)}
         </select>
       </label>
-      {kind === "claim" && <label className="block text-sm font-semibold">{t.handle}
-        <input value={claimHandle} onChange={(event) => setClaimHandle(event.target.value)} className={institutionField}
-          required autoCapitalize="none" spellCheck={false} minLength={3} maxLength={40} disabled={busy} />
-      </label>}
       {needsOrganization && <label className="block text-sm font-semibold">{t.institutions}
         <select className={institutionField} value={eligible.some((org) => org.id === organization) ? organization : ""}
           onChange={(event) => setOrganization(event.target.value)} required disabled={busy || !eligible.length}>
