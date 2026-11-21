@@ -7,6 +7,8 @@ test("public pages align with the navigation and footer at each viewport", async
     for (const path of paths) {
       await page.goto(path);
       await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeVisible();
+      const logo = page.getByRole("banner").locator('img[src="/icon.png"]');
+      await expect(logo).toHaveJSProperty("naturalWidth", 96);
       const layout = await page.evaluate(() => {
         const content = document.querySelector("main#main, main.public-container, main .public-container");
         const navigation = document.querySelector("header .public-container");
