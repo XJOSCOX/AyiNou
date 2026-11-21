@@ -1,11 +1,11 @@
 # D1 deployment approval checklist
 
-**Decision: hold at owner approval.** This procedure describes a future authorized release. D1 uses read-only hosted inspection and disposable infrastructure.
+**Public release remains on hold.** This checklist records D1's historical pre-deployment sequence. During D2 the owner separately approved O2–O7 for the hosted development project `hcbxulyfmdmuyccgrujs`. Postflight found all six applied and no pending versions. For that exact target, do not replay the D1 apply step. Use the D2 recovery, Auth and public-release gates. [D2 final readiness](D2_FINAL_READINESS.md)
 
 | Step | Work and acceptance evidence |
 | --- | --- |
 | A. Identify release | Pin the exact reviewed Git commit, six SQL SHA-256 fingerprints, provider project `hcbxulyfmdmuyccgrujs`, Fastify and Next.js artifacts, and compatible rollback revision. Verify all CI results. Record separate signed production authorization. |
-| B. Confirm backup | Check that a usable provider backup or an independently approved recovery point exists. Record age, retention, storage protection and acceptable RPO/RTO. Approve a restricted isolated restore and independent verification if needed. |
+| B. Confirm backup | Verify a usable database recovery point plus separately protected Storage bytes and configuration. Record age, retention, key custody, access and accepted RPO/RTO. Require an authorized isolated restore and independent verification before public launch. [D2 recovery strategy](D2_RECOVERY_STRATEGY.md) |
 | C. Prepare window | Name release, database, application, recovery and audit operators. Confirm alerts, status communications, migration lock budget, retry rules and an ingress write pause. Pause signup and legacy create/claim and competing institutional mutations before O2; stop old workers or other channels capable of writing those routes. Verify the pause from permitted operator entry points. Keep it active through database postflight and old-client denial. |
 | D. Recheck hosted | Run the exact read-only commands in the [readiness evidence](D1_MIGRATION_READINESS.md#read-only-evidence). Expect L6.2A followed by exactly six pending files, unchanged preflight dependencies and matching project. Review drift and lock activity. Check Auth and backup prerequisites against recorded evidence. |
 | E. Apply reviewed SQL | Authorized operator only. Use the pinned Supabase CLI against the explicitly named target. Check the dry-run response again, then authorize execution of those six files in listed order. Stop at the first error or new migration. |

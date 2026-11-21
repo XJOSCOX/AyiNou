@@ -13,4 +13,6 @@ Cadences below are proposed operating defaults. Platform owner is the current es
 | Before public copy/release | Localization reviewers and qualified legal/product reviewers pending | Four-language changes, accurate status/claims, reviewed policies, notices and intended audiences. |
 | After incident or material failure | Incident owner and independent reviewer pending | Timeline, containment, evidence scope, corrective action, regression and assigned follow-up date. |
 
+For backups, verify each authorized checkpoint's age, decryptability, database and Storage completeness and private custody. Independently rehearse an isolated restore before release and at the approved cadence. Include post-recovery revocation, hold and audit reconciliation. Review retention and key custody monthly or after access changes, and protect active holds during cleanup. A proposal or test fixture does not establish a deployed schedule. [D2 recovery ownership and monitoring](../deployment/D2_OPERATIONAL_RESPONSIBILITIES.md)
+
 Track overdue decisions explicitly. Resolve expired access, stale documentation and flags through an identifiable owner. Review stats and diagnostic retention with privacy and operations before adopting any new telemetry.

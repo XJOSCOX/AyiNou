@@ -16,8 +16,10 @@ const project = "ayinou-e2e-" + randomUUID().slice(0, 12);
 const cli = fromRoot("node_modules", "supabase", "dist", "supabase.js");
 const playwright = fromRoot("node_modules", "@playwright", "test", "cli.js");
 const deploymentRehearsal = process.argv.includes("--deployment-rehearsal");
-const organizationRollout = deploymentRehearsal || process.argv.includes("--organization-rollout");
-const args = process.argv.slice(2).filter((argument) => argument !== "--organization-rollout" && argument !== "--deployment-rehearsal");
+const recoveryRehearsal = process.argv.includes("--recovery-rehearsal");
+const organizationRollout = recoveryRehearsal || deploymentRehearsal || process.argv.includes("--organization-rollout");
+const runnerFlags = new Set(["--organization-rollout", "--deployment-rehearsal", "--recovery-rehearsal"]);
+const args = process.argv.slice(2).filter((argument) => !runnerFlags.has(argument));
 const organizationBaseline = "20261121010000";
 // Source configuration comes from the newly started stack, never from development credentials.
 const env = Object.fromEntries(Object.entries(process.env).filter(([name]) =>
@@ -132,12 +134,15 @@ async function main() {
     if (credentials.API_URL !== supabaseUrl || !publicKey || !secretKey) {
       throw new Error("Disposable Supabase endpoint or credentials did not match");
     }
-    await run(playwright, ["test", "--config", config, ...args], {
-      env: { ...env, AYINOU_E2E_PROJECT: project, AYINOU_E2E_WEB_DIR: web, AYINOU_E2E_WEB_URL: webUrl,
-        AYINOU_E2E_API_URL: apiUrl, AYINOU_E2E_SUPABASE_URL: supabaseUrl,
-        AYINOU_E2E_SUPABASE_PUBLIC: publicKey, AYINOU_E2E_SUPABASE_SECRET: secretKey,
-        AYINOU_E2E_EXPORT_KEY: randomBytes(32).toString("hex") },
-    });
+    const testEnv = { ...env, AYINOU_E2E_PROJECT: project, AYINOU_E2E_WEB_DIR: web, AYINOU_E2E_WEB_URL: webUrl,
+      AYINOU_E2E_API_URL: apiUrl, AYINOU_E2E_SUPABASE_URL: supabaseUrl,
+      AYINOU_E2E_SUPABASE_PUBLIC: publicKey, AYINOU_E2E_SUPABASE_SECRET: secretKey,
+      AYINOU_E2E_EXPORT_KEY: randomBytes(32).toString("hex") };
+    if (recoveryRehearsal) {
+      await run(fromRoot("scripts", "rehearse-d2-recovery.mjs"), [], { env: testEnv, timeout: 240_000 });
+      return;
+    }
+    await run(playwright, ["test", "--config", config, ...args], { env: testEnv });
   } finally {
     if (startAttempted) {
       await run(cli, ["stop", "--workdir", directory, "--no-backup", "--project-id", project],

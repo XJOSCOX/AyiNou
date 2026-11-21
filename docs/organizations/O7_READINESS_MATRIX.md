@@ -5,9 +5,9 @@ PASS describes verified technical behavior within the stated scope. CONDITIONAL 
 | Capability | Decision | Evidence and remaining requirement |
 | --- | --- | --- |
 | Technical integration | PASS | Disposable O2–O7 tests, receipt and live authorization probes. |
-| Hosted database migration | BLOCKED | D1 matched the applied history and rehearsed the pending chain. Usable recovery evidence, Auth readiness and owner authorization are pending. [D1 readiness](../deployment/D1_MIGRATION_READINESS.md) |
+| Hosted development database migration | PASS | D2 applied the separately authorized O2–O7 sequence to the development project and verified 67 migration entries, preservation and closed gates. Public release remains blocked. [D2 readiness](../deployment/D2_FINAL_READINESS.md) |
 | Auth, password recovery and MFA | CONDITIONAL | Disposable email, fresh session, account binding and TOTP pass. Production email delivery and Auth password-rule parity need verification. |
-| Organization setup and scoped roles | PASS | Disposable owner creation, private declarations, representative invitation and existing claim workflow. Hosted deployment pending. |
+| Organization setup and scoped roles | PASS | Disposable owner creation, private declarations, representative invitation and existing claim workflow. Hosted development schema was installed; no live organization or claim test was written. |
 | Independent identity review staffing | CONDITIONAL | Two separate decisions required by SQL. Named eligible reviewer coverage and conflict procedures still need confirmation. |
 | Founder Verified operational proof | BLOCKED | Production issuance closed. Independent proof ceremony, custody, correction and appeal approval required. |
 | Governance recovery | BLOCKED | Current high-impact execution gate closed. Approved successor and provider-backed recovery rehearsal needed. |

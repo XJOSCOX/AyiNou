@@ -520,6 +520,12 @@
       "report": "docs/deployment/D1_FINAL_REPORT.md",
       "routes": [],
       "migrations": []
+    },
+    {
+      "id": "d2",
+      "report": "docs/deployment/D2_FINAL_READINESS.md",
+      "routes": [],
+      "migrations": []
     }
   ]
 }

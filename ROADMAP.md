@@ -355,6 +355,10 @@ O7 pairs the organization migration rollout with disposable end-to-end tests and
 
 The reviewed six-file database rollout has read-only hosted evidence and disposable compatibility tests. Production remains blocked on verified recovery, Auth readiness and separate operator approval. [D1 readiness](docs/deployment/D1_MIGRATION_READINESS.md)
 
+## D2 recovery and hosted development deployment
+
+The reviewed O2–O7 migrations are deployed to the owner-approved development database and passed hosted postflight. Synthetic recovery passed. Public release waits for verified provider or independent recovery points, protected Storage recovery, staffed operators, and Auth/email validation. [D2 readiness](docs/deployment/D2_FINAL_READINESS.md)
+
 ## Future Session Security milestone
 
 Plan opt-in remembered devices, absolute role-based session limits, session management and authorized private workflow links. Activation depends on test evidence across Supabase Auth, Next.js, Fastify and PostgreSQL. [Implementation plan](docs/security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
