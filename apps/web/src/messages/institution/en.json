@@ -56,6 +56,8 @@
   "applicationSubmitted": "Submitted",
   "applicationResolved": "Decision recorded",
   "founderClosureReason": "Closed because Founder Verified was granted. This application received no regular identity approval.",
+  "personalRequestPending": "You already have a personal verification request under review. Wait for it to close before submitting another.",
+  "personalAlreadyVerified": "You already hold this verification.",
   "noApplications": "You have no applications yet.",
   "review": "Reviewer queue",
   "reviewIntro": "Review the official sources and record a written decision. Approval requires two independent reviewers.",

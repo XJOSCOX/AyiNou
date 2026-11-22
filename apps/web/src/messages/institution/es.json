@@ -56,6 +56,8 @@
   "applicationSubmitted": "Enviada",
   "applicationResolved": "Decisión registrada",
   "founderClosureReason": "La solicitud se cerró tras concederse la distinción Founder Verified. Esta solicitud no recibió la aprobación de verificación de identidad ordinaria.",
+  "personalRequestPending": "Ya tienes una solicitud de verificación personal en revisión. Espera a que se cierre antes de enviar otra.",
+  "personalAlreadyVerified": "Ya tienes esta verificación.",
   "noApplications": "Aún no tienes solicitudes.",
   "review": "Solicitudes para revisar",
   "reviewIntro": "Revisa las fuentes oficiales y deja por escrito tu decisión. Se necesitan dos revisores independientes para aprobar una solicitud.",

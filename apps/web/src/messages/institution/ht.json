@@ -56,6 +56,8 @@
   "applicationSubmitted": "Soumèt",
   "applicationResolved": "Desizyon anrejistre",
   "founderClosureReason": "Yo fèmen demann sa a paske yo te bay distenksyon Founder Verified. Demann lan pa t resevwa apwobasyon pou verifikasyon idantite regilye.",
+  "personalRequestPending": "Ou deja gen yon demann verifikasyon pèsonèl y ap egzamine. Tann li fèmen anvan ou soumèt yon lòt.",
+  "personalAlreadyVerified": "Ou deja gen verifikasyon sa a.",
   "noApplications": "Ou poko gen okenn demann.",
   "review": "Lis demann pou revize",
   "reviewIntro": "Egzamine sous ofisyèl yo epi ekri desizyon ou. Apwobasyon mande de moun endepandan.",

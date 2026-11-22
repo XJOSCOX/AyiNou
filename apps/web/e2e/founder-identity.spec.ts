@@ -102,9 +102,9 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
   const { id: applicationId } = await apiCall(member, applicationsPath, 201, "POST", {
     organizationId: null, kind: "identity", evidence: [evidence],
   });
-  const { id: publicFigureId } = await apiCall(member, applicationsPath, 201, "POST", {
-    organizationId: null, kind: "notable_person", evidence: ["https://example.org/synthetic-figure", "https://example.net/synthetic-figure"],
-  });
+  // Rehearse older data that already had two personal applications before the new guard.
+  const publicFigureId = sql(`with legacy as (insert into private.verification_applications(applicant_id,kind)
+    values ('${member.id}','notable_person') returning id) select id from legacy;`);
   const { id: otherApplicationId } = await apiCall(other, applicationsPath, 201, "POST", {
     organizationId: null, kind: "identity", evidence: [evidence],
   });
@@ -832,6 +832,10 @@ founderTest("Founder grants gold after account confirmation with or without memb
         await run(ordinaryAdmin, issue, 403, grant, otherWorkspace);
         const granted = await run(founder, issue, 200, grant);
         expect(await run(founder, issue, 200, grant)).toEqual(granted);
+        const redundant = await apiCall(snapshot, "/api/v1/me/verification", 409, "POST", {
+          organizationId: null, kind: "identity", evidence: ["https://example.org/already-verified"],
+        });
+        expect(redundant.error.code).toBe("VERIFICATION_ALREADY_VERIFIED");
         expect((await publicProfile(target)).founderVerified).toBe(true);
         expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{founder}");
         expect(sql(`select private.project_identity_state('${target.id}') || ':' ||

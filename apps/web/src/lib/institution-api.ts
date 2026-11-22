@@ -1,5 +1,5 @@
 import type { InstitutionAccounts, InstitutionInput, InstitutionManagement, OrganizationRole, ReviewApplication, ReviewQueueMode,
-  ReviewDecision, VerificationApplication, VerificationKind, VerifiedRepresentatives } from "@ayinou/shared";
+  ReviewDecision, VerificationKind, VerificationWorkspace, VerifiedRepresentatives } from "@ayinou/shared";
 import { authorizedRequest, encodeProfileImage } from "./api";
 
 const base = "/api/v1/institutions";
@@ -36,8 +36,8 @@ export const loadVerifiedRepresentatives = (id: string, signal: AbortSignal): Pr
 export const saveRepresentativeConsent = (id: string, publish: boolean): Promise<void> =>
   authorizedRequest(`${base}/${id}/verified-representatives/me`, { method: "PATCH", body: JSON.stringify({ publish }) });
 
-export const loadApplications = async (signal?: AbortSignal): Promise<VerificationApplication[]> =>
-  (await authorizedRequest(verify, { signal })).applications;
+export const loadApplications = (signal?: AbortSignal): Promise<VerificationWorkspace> =>
+  authorizedRequest(verify, { signal });
 
 export const submitVerification = (kind: VerificationKind, organizationId: string | null, evidence: string[]) =>
   post(verify, { kind, organizationId, evidence });

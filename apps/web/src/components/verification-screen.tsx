@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { type Locale, governmentKinds, verificationKinds, type InstitutionAccounts, type VerificationApplication, type VerificationKind } from "@ayinou/shared";
+import { type Locale, governmentKinds, verificationKinds, type InstitutionAccounts, type VerificationApplication, type VerificationKind, type VerificationWorkspace } from "@ayinou/shared";
 import { authMessages } from "@/lib/auth-i18n";
 import { apiErrorCode } from "@/lib/api-errors";
 import { loadApplications, loadInstitutionAccounts, submitVerification } from "@/lib/institution-api";
@@ -45,7 +45,7 @@ export function VerificationScreen({ initialKind, institution }: {
               <p role="alert" className={institutionErrorBox}>{institutionError(t, accounts.error)}</p>
               <button type="button" className={`${institutionLink} mt-3`} onClick={accounts.refresh}>{auth.retry}</button>
             </> : accounts.data ? <ApplicationForm accounts={accounts.data} initialKind={initialKind} initialOrg={institution}
-              refresh={applications.refresh} /> : <p role="status">{auth.working}</p>}
+              workspace={applications.data} refresh={applications.refresh} /> : <p role="status">{auth.working}</p>}
           </section>
           <section className={institutionCard}>
             <h2 className="text-xl font-semibold">{t.applications}</h2>
@@ -53,11 +53,11 @@ export function VerificationScreen({ initialKind, institution }: {
               <p role="alert" className={institutionErrorBox}>{institutionError(t, applications.error)}</p>
               <button type="button" className={`${institutionLink} mt-3`} onClick={applications.refresh}>{auth.retry}</button>
             </div> : !applications.data ? <p role="status" className="mt-3">{auth.working}</p>
-              : <ApplicationHistory applications={applications.data} locale={locale} messages={t} />}
+              : <ApplicationHistory applications={applications.data.applications} locale={locale} messages={t} />}
           </section>
         </div>
         <FounderIdentityPanel onSuperseded={applications.refresh} />
-        {applications.data && <MyVerificationAppeals applications={applications.data} />}
+        {applications.data && <MyVerificationAppeals applications={applications.data.applications} />}
       </div>
     </MemberShell>
   );
@@ -97,8 +97,9 @@ function ApplicationHistory({ applications, locale, messages: t }: {
   </>;
 }
 
-function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {
-  accounts: InstitutionAccounts; initialKind: VerificationKind; initialOrg: string; refresh: () => void;
+function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh }: {
+  accounts: InstitutionAccounts; initialKind: VerificationKind; initialOrg: string;
+  workspace: VerificationWorkspace | null; refresh: () => void;
 }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
@@ -109,6 +110,12 @@ function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<unknown>(null);
   const [saved, setSaved] = useState(false);
+  const [submittedAgainst, setSubmittedAgainst] = useState<VerificationWorkspace | null>(null);
+  const isPersonal = kind === "identity" || kind === "notable_person";
+  const personalState = isPersonal ? workspace?.personalRequests[kind] : undefined;
+  const personalBlocked = isPersonal && (personalState !== "available" || workspace === submittedAgainst);
+  const personalNotice = personalState === "already_verified" ? t.personalAlreadyVerified
+    : personalState === "pending" || (workspace !== null && workspace === submittedAgainst) ? t.personalRequestPending : null;
   const needsOrganization = kind === "organization" || kind === "government" || kind === "representative";
   const eligible = accounts.organizations.filter((org) => {
     if (kind === "representative") return true;
@@ -117,7 +124,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || personalBlocked) return;
     setBusy(true);
     setSaved(false);
     setFailed(null);
@@ -131,11 +138,14 @@ function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {
         id = organization;
       }
       await submitVerification(kind, id, references);
+      if (isPersonal) setSubmittedAgainst(workspace);
       setEvidence("");
       setSaved(true);
       refresh();
-    } catch (cause) { setFailed(cause); }
-    finally { setBusy(false); }
+    } catch (cause) {
+      setFailed(cause);
+      if (["VERIFICATION_REQUEST_PENDING", "VERIFICATION_ALREADY_VERIFIED"].includes(apiErrorCode(cause))) refresh();
+    } finally { setBusy(false); }
   }
 
   return (
@@ -156,7 +166,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {
         </select>
       </label>}
       <label className="block text-sm font-semibold">{t.evidence}
-        <textarea className={institutionField} value={evidence} rows={4} maxLength={905} required disabled={busy}
+        <textarea className={institutionField} value={evidence} rows={4} maxLength={905} required disabled={busy || personalBlocked}
           onChange={(event) => setEvidence(event.target.value)} aria-describedby="verification-evidence-hint" />
       </label>
       <p id="verification-evidence-hint" className="text-sm text-[var(--theme-body)]">{t.evidenceHelp} {trustMessages[locale].evidenceStandard}</p>
@@ -166,8 +176,9 @@ function ApplicationForm({ accounts, initialKind, initialOrg, refresh }: {
       </p>}
       {failed !== null && <p role="alert" className={institutionErrorBox}>{apiErrorCode(failed) === "INSTITUTION_EVIDENCE_REQUIRED"
         ? trustMessages[locale].institutionEvidenceRequired : institutionError(t, failed)}</p>}
+      {isPersonal && personalNotice && <p role="status" className="text-sm">{personalNotice}</p>}
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.submitted}</p>}
-      <button type="submit" className={institutionAction} disabled={busy || (needsOrganization && !eligible.length)}>{busy ? auth.working : t.submit}</button>
+      <button type="submit" className={institutionAction} disabled={busy || personalBlocked || (needsOrganization && !eligible.length)}>{busy ? auth.working : t.submit}</button>
     </form>
   );
 }

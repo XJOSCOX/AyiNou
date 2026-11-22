@@ -189,6 +189,7 @@
     "OrganizationSetupView": "type:a30bfadac835ee0e939456d8bb7fa961a78e8432e6a4d7c4f60414096a741d89",
     "PersonalClaim": "type:bdbeee96d10078674adca30a9968666690fd548f585bf876ed376f7664e94df7",
     "personalClaims": "value:5d06744b14e09be6ba7f284580b31d0d9cf67f5f3ed4e04f69e8a66faf6bc73e",
+    "PersonalVerificationRequestState": "type:8df2fb982a00150df1eb93fa0f0e65dd43e022941567774b147a0ce2c3667666",
     "PlatformAccess": "type:3e8f425bff0b315a9a4238d00b463eb57b71620115d01c44edc3584b0c3e531a",
     "PlatformRole": "type:2473d46104c7b706217bd0b192fd22cde8c8f24d8bc7440bf9bf979aab8d0ffc",
     "platformRoles": "value:fb60ac1a18d4c44cc55ed616a10f6a001967bf074380ac189da46ea0f7ff037f",
@@ -293,6 +294,7 @@
     "VerificationKind": "type:c9ea5fcff649971cb2982a100656b0d569dd60faaba1e8e25d5ea7e22e5e0474",
     "verificationKinds": "value:c93d14eefb9c0e90e975d6c988eec66cb38f31955455b312bb3691855041cdf0",
     "VerificationStatus": "type:8ed940092989a0d58bfe3ab2dc780dbe6dcb43f54ad416b090abcad67746580f",
+    "VerificationWorkspace": "type:6266e37e5a245a1d0f1b892fd0cf1032f317409cb7519b5968c6861e2f71b3fb",
     "VerifiedRepresentatives": "type:5c8fb9ec1f272a9e2e4cd7a86ab0ebf9709ce3ac185b3a853f5dff34c6150e4e"
   },
   "privateTypes": {

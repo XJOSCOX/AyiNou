@@ -1103,6 +1103,21 @@
           "rolloutAndRollback": "Deploy only the separately authorized exact migration with the matching app release. Existing policy data and historical cases are preserved."
         }
       ]
+    },
+    {
+      "id": "personal-verification-request-limits",
+      "report": "docs/identity/PERSONAL_VERIFICATION_REQUEST_LIMITS_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122180000_personal_verification_request_limits.sql",
+          "rlsAndGrants": "The private eligibility helper has no application grants. The workspace read and submit functions remain service-only.",
+          "authorization": "Reuses live reviewed and Founder provenance. Personal submission requires an active member and takes the same trust lock as grants and review decisions.",
+          "compatibility": "Retains existing cases, old overlapping pending requests and evidence. The API keeps the existing applications key and organization submission behavior.",
+          "validation": "Disposable Chromium and API tests cover cross-type concurrency, historical duplicates, closed requests and both verified paths.",
+          "rolloutAndRollback": "Apply only the separately approved migration with the matching app. Preserve case histories and existing issuance policies."
+        }
+      ]
     }
   ]
 }

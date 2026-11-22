@@ -33,6 +33,12 @@ export type VerificationApplication = {
   closureReason?: "superseded_by_founder_verification" | null;
   decidedAt: string | null; rationale: string | null; canAppeal?: boolean; eligibleApprovals?: number | null;
 };
+export type PersonalVerificationRequestState = "available" | "pending" | "already_verified";
+export type VerificationWorkspace = {
+  applications: VerificationApplication[];
+  personalRequests: Record<PersonalClaim, PersonalVerificationRequestState>;
+};
+
 export type ReviewApplication = Omit<VerificationApplication, "decidedAt" | "rationale"> & {
   decidedAt?: string | null;
   founderVerified?: boolean;

@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { invitedRoles, organizationKinds, reviewDecisions, reviewQueueModes, verificationKinds, type InstitutionInput,
-  type ReviewApplication, type VerificationApplication, type VerificationStatus, type VerifiedRepresentatives } from "@ayinou/shared";
+  type ReviewApplication, type VerificationWorkspace, type VerificationStatus, type VerifiedRepresentatives } from "@ayinou/shared";
 import { z } from "zod";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
@@ -122,9 +122,8 @@ export async function registerInstitutionRoutes(app: FastifyInstance, auth: Auth
       });
       return reply.code(204).send();
     });
-    api.get("/api/v1/me/verification", async (request) => ({
-      applications: await service.rpc<VerificationApplication[]>("verification_own_for_api", { p_actor: request.authUserId }),
-    }));
+    api.get("/api/v1/me/verification", (request) =>
+      service.rpc<VerificationWorkspace>("verification_workspace_for_api", { p_actor: request.authUserId }));
     api.post("/api/v1/me/verification", { bodyLimit: 4096 }, async (request, reply) => {
       const input = submission.parse(request.body);
       if (input.kind === "claim") throw new InstitutionError("ORG_SETUP_REQUIRED", 409);
