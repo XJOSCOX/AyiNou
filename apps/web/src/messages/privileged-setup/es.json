@@ -1,0 +1,22 @@
+{
+  "founder": "Registro del fundador",
+  "administrator": "Activación del rol de administrador",
+  "unavailable": "Este proceso no está disponible.",
+  "secret": "Introduce el código privado",
+  "unlock": "Continuar",
+  "register": "Crear la cuenta del fundador",
+  "password": "Contraseña",
+  "confirmPassword": "Confirmar contraseña",
+  "email": "Abre el correo de confirmación y vuelve aquí.",
+  "emailBlocked": "Activa la confirmación por correo antes de iniciar el registro del fundador.",
+  "mfa": "Verifica un nuevo código del autenticador antes de activar y vuelve aquí.",
+  "settings": "Configuración de la cuenta",
+  "activate": "Activar",
+  "failed": "No se pudo completar la solicitud. Revisa el código, la sesión y los requisitos.",
+  "accept": "Acepto las responsabilidades de un administrador.",
+  "signIn": "Iniciar sesión",
+  "pending": "Pendiente de aprobación independiente.",
+  "issue": "Crear invitación privada",
+  "deliver": "Comparte el enlace y el código por separado con la persona destinataria. El código aparece una sola vez.",
+  "revoke": "Revocar esta invitación"
+}

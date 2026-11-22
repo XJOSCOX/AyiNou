@@ -19,3 +19,5 @@ The rows describe capability boundaries. Automatic authority still requires a li
 The [Founder release verification matrix](FOUNDER_PERMISSION_VERIFICATION.md) links the five principal roles to the disposable HTTP and SQL test, including routine project moderation, governance roster membership and protections for restricted domains.
 
 Organization Owner, Organization Manager and custom organization roles remain a separate system. Compatible cross-domain assignments grant only the scopes explicitly authorized in each domain.
+
+F1 permits the recognized Founder to initiate an O5 Administrator appointment and issue one private invitation. A distinct active Administrator approves, and the eligible target accepts with recent MFA. Generic governance execution and succession stay closed. [F1 report](F1_IMPLEMENTATION_REPORT.md).

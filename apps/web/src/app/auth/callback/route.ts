@@ -6,7 +6,8 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const next = url.searchParams.get("next");
-  const safeNext = next === "/reset-password" ? next : "/onboarding";
+  const founder = next && /^\/setup\/f\/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(next);
+  const safeNext = next === "/reset-password" || founder ? next! : "/onboarding";
   const webOrigin = process.env.WEB_ORIGIN ?? "http://localhost:4000";
   const authUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;

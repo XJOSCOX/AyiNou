@@ -679,6 +679,100 @@
           "rolloutAndRollback": "Apply after U1 only under separate hosted approval. Keep Auth settings under operator control. Restore email confirmation for public launch and use a verified forward fix if the Auth provider contract drifts."
         }
       ]
+    },
+    {
+      "id": "f1-private-privileged-workflows",
+      "report": "docs/governance/F1_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "DELETE /api/v1/admin/appointments/:id/invitation",
+          "contract": "DELETE /api/v1/admin/appointments/:id/invitation - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The private workflow ledger and existing O5 and platform audit identify the authorized material state change."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/privileged-setup.spec.ts",
+            "denialScenario": "The browser requires the Founder secret before the private form. An unrelated account and an insufficiently approved workflow cannot activate Administrator."
+          }
+        },
+        {
+          "route": "GET /api/v1/administrator-activation/:id",
+          "contract": "GET /api/v1/administrator-activation/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Availability is a bounded private read. First observation of an expired appointment is separately recorded."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/privileged-setup.spec.ts",
+            "denialScenario": "The browser requires the Founder secret before the private form. An unrelated account and an insufficiently approved workflow cannot activate Administrator."
+          }
+        },
+        {
+          "route": "GET /api/v1/setup/founder/:id",
+          "contract": "GET /api/v1/setup/founder/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Availability is a bounded private read. First observation of an expired appointment is separately recorded."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/privileged-setup.spec.ts",
+            "denialScenario": "The browser requires the Founder secret before the private form. An unrelated account and an insufficiently approved workflow cannot activate Administrator."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/appointments/:id/invitation",
+          "contract": "POST /api/v1/admin/appointments/:id/invitation - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The private workflow ledger and existing O5 and platform audit identify the authorized material state change."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/privileged-setup.spec.ts",
+            "denialScenario": "The browser requires the Founder secret before the private form. An unrelated account and an insufficiently approved workflow cannot activate Administrator."
+          }
+        },
+        {
+          "route": "POST /api/v1/administrator-activation/:id",
+          "contract": "POST /api/v1/administrator-activation/:id 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The private workflow ledger and existing O5 and platform audit identify the authorized material state change."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/privileged-setup.spec.ts",
+            "denialScenario": "The browser requires the Founder secret before the private form. An unrelated account and an insufficiently approved workflow cannot activate Administrator."
+          }
+        },
+        {
+          "route": "POST /api/v1/setup/founder/:id",
+          "contract": "POST /api/v1/setup/founder/:id 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The private workflow ledger and existing O5 and platform audit identify the authorized material state change."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/privileged-setup.spec.ts",
+            "denialScenario": "The browser requires the Founder secret before the private form. An unrelated account and an insufficiently approved workflow cannot activate Administrator."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121140000_private_privileged_workflows.sql",
+          "rlsAndGrants": "All new state has RLS and no direct application grants. Only the service role executes command wrappers.",
+          "authorization": "Founder provenance, private challenge proof, verified session, recent TOTP, exact target and independent O5 approval are rechecked in PostgreSQL.",
+          "compatibility": "Committed Founder provenance, existing badges, legacy records and the closed generic governance execution gate remain intact.",
+          "validation": "Disposable clean installation and synthetic independent appointment exercise both successful and denied paths.",
+          "rolloutAndRollback": "Apply only under separate F1 approval, after the six completed development migrations. Use forward remediation and preserve audit evidence."
+        }
+      ]
     }
   ]
 }

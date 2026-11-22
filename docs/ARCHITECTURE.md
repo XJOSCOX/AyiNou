@@ -231,3 +231,5 @@ Pause legacy institution and ownership-claim writers before applying O2. O4 inst
 ## U1 public username boundary
 
 Supabase Auth inserts an account-bound, expiring reservation during signup and confirms it during email verification. The existing profile username constraint is authoritative for ownership. Fastify exposes an uncached, rate-limited availability response and a protected staff review action. UUIDs continue to identify relationships. See [U1 architecture](identity/U1_USERNAME_ARCHITECTURE.md).
+
+F1 separates private Founder setup and Administrator activation into dedicated routes. The API hashes credentials and PostgreSQL enforces workflow ownership, prerequisites and one-time transitions. [F1 report](governance/F1_IMPLEMENTATION_REPORT.md).

@@ -1,0 +1,22 @@
+{
+  "founder": "Inscription du fondateur",
+  "administrator": "Activation du rôle d’administrateur",
+  "unavailable": "Cette procédure est indisponible.",
+  "secret": "Saisissez le code privé",
+  "unlock": "Continuer",
+  "register": "Créer le compte du fondateur",
+  "password": "Mot de passe",
+  "confirmPassword": "Confirmer le mot de passe",
+  "email": "Ouvrez le courriel de confirmation puis revenez ici.",
+  "emailBlocked": "Activez la confirmation par courriel avant de commencer l’inscription du fondateur.",
+  "mfa": "Validez un nouveau code d’authentification avant l’activation, puis revenez ici.",
+  "settings": "Paramètres du compte",
+  "activate": "Activer",
+  "failed": "La demande a échoué. Vérifiez votre code, votre session et votre admissibilité.",
+  "accept": "J’accepte les responsabilités d’un administrateur.",
+  "signIn": "Se connecter",
+  "pending": "En attente d’une approbation indépendante.",
+  "issue": "Créer une invitation privée",
+  "deliver": "Transmettez séparément le lien et le code au membre concerné. Le code ne s’affiche qu’une fois.",
+  "revoke": "Révoquer cette invitation"
+}

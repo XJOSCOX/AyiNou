@@ -7,6 +7,7 @@ import { authMessages } from "@/lib/auth-i18n";
 import { governanceLabel, governanceMessages } from "@/lib/governance-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { useMemberIdentity } from "@/lib/member-display-name";
+import { AdministratorInvitation } from "./administrator-invitation";
 import { GovernanceConfirmation, GovernanceFeedback, useGovernanceCommand } from "./governance-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 
@@ -62,7 +63,10 @@ function GovernanceWorkspace({ actor }: { actor: string }) {
 function ProposalForm({ actor, version, reload }: { actor: string; version: number; reload: () => void }) {
   const [locale] = useLocale();
   const t = governanceMessages[locale];
-  const [kind, setKind] = useState<GovernanceProposalKind>("appoint");
+  const { founder } = useMemberIdentity();
+  const availableKinds = governanceProposalKinds.filter((item) => item !== "appoint" || founder);
+  const [selected, setKind] = useState<GovernanceProposalKind>("appoint");
+  const kind = availableKinds.includes(selected) ? selected : "revoke";
   const command = useGovernanceCommand(actor);
   const targeted = kind !== "distributed" && kind !== "recovery";
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -78,7 +82,7 @@ function ProposalForm({ actor, version, reload }: { actor: string; version: numb
         const value = governanceProposalKinds.find((item) => item === event.target.value);
         if (value) setKind(value);
       }}>
-        {governanceProposalKinds.map((item) => <option key={item} value={item}>{t[item]}</option>)}
+        {availableKinds.map((item) => <option key={item} value={item}>{t[item]}</option>)}
       </select>
     </label>
     {targeted && <label className="text-sm font-semibold">{t.target}
@@ -96,6 +100,7 @@ function ProposalRow({ actor, item, reload, member = false }: {
   const [locale] = useLocale();
   const t = governanceMessages[locale];
   const command = useGovernanceCommand(actor);
+  const { founder } = useMemberIdentity();
   const action = member ? item.state === "awaiting_acceptance" ? "accept" : null
     : item.own && !["expired", "withdrawn"].includes(item.state) ? "withdraw"
       : item.state === "pending" && !item.targeted ? "approve" : null;
@@ -113,6 +118,8 @@ function ProposalRow({ actor, item, reload, member = false }: {
     {item.rationale && <p className="break-words text-sm">{item.rationale}</p>}
     <p className="text-sm">{t.expires} · <time dateTime={item.expiresAt}>{new Date(item.expiresAt).toLocaleString(locale)}</time></p>
     <GovernanceFeedback error={command.error} receipt={command.receipt} next={member ? "/settings" : "/admin"} />
+    {!member && founder && item.own && item.kind === "appoint" && !["expired", "withdrawn"].includes(item.state) &&
+      <AdministratorInvitation actor={actor} proposal={item.id} />}
     {action && <details>
       <summary className="cursor-pointer">{t[action]}</summary>
       <form className="mt-2 grid max-w-xl gap-2" onSubmit={submit}>

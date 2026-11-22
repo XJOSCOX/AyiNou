@@ -45,6 +45,7 @@ const governanceTest = test.extend<{ admins: [Awaited<ReturnType<typeof withMfa>
       const ids = admins.map((admin) => `'${admin.id}'`).join(",");
       sql(`insert into private.account_restrictions(user_id,status,reason)
         select id,'suspended','Disposable O5 fixture cleanup' from auth.users where id in (${ids});
+        delete from private.platform_bootstrap where user_id in (${ids});
         delete from public.role_assignments where user_id in (${ids});`);
     }
   },
@@ -155,6 +156,10 @@ governanceTest("O5 independent decisions and target acceptance confer no executi
   const direct = await apiCall(admin, "/api/v1/admin/accounts/" + target.id, 409, "PATCH",
     { action: "grant", value: "administrator", reason });
   expect(direct.error.code).toBe("GOVERNANCE_REQUIRED");
+  await apiCall(admin, governance + "/proposals", 403, "POST", make("appoint", target.id));
+  sql(`insert into private.platform_bootstrap(user_id) values ('${admin.id}');
+    insert into private.platform_admin_audit(subject_id,event,reason)
+      values ('${admin.id}','first_account_bootstrapped','Disposable O5 founding provenance');`);
   const created = await apiCall(admin, governance + "/proposals", 200, "POST", make("appoint", target.id));
   const path = governance + "/proposals/" + created.id + "/actions";
   const approval = { ...adminAction(created.version, "approve"), noConflict: true };

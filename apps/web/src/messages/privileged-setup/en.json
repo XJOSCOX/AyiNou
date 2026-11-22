@@ -1,0 +1,22 @@
+{
+  "founder": "Founder registration",
+  "administrator": "Administrator activation",
+  "unavailable": "This workflow is unavailable.",
+  "secret": "Enter the private code",
+  "unlock": "Continue",
+  "register": "Create the Founder account",
+  "password": "Password",
+  "confirmPassword": "Confirm password",
+  "email": "Open the confirmation email and return here.",
+  "emailBlocked": "Emailed confirmation must be enabled before starting Founder registration.",
+  "mfa": "Verify a fresh authenticator code before activation, then return here.",
+  "settings": "Account settings",
+  "activate": "Activate",
+  "failed": "The request could not be completed. Recheck your code, session and eligibility.",
+  "accept": "I accept the responsibilities of an Administrator.",
+  "signIn": "Sign in",
+  "pending": "Waiting for independent governance approval.",
+  "issue": "Issue private invitation",
+  "deliver": "Share the link and code separately with the intended member. The code appears once.",
+  "revoke": "Revoke this invitation"
+}

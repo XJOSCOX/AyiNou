@@ -370,3 +370,5 @@ Plan opt-in remembered devices, absolute role-based session limits, session mana
 ## U1 public usernames
 
 U1 adds username selection and availability to both signup choices. The hosted migration remains pending separate authorization. Long-term cooldown, retention and support operations remain policy decisions. See the [U1 implementation report](docs/identity/U1_IMPLEMENTATION_REPORT.md).
+
+F1 applies the six previously reviewed development migrations and adds private Founder enrollment and independently approved Administrator activation. The F1 schema rollout requires separate authorization. [F1 report](docs/governance/F1_IMPLEMENTATION_REPORT.md).

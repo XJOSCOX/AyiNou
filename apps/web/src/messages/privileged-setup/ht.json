@@ -1,0 +1,22 @@
+{
+  "founder": "Enskripsyon Fondatè",
+  "administrator": "Aktivasyon Administratè",
+  "unavailable": "Pwosesis sa a pa disponib.",
+  "secret": "Antre kòd prive a",
+  "unlock": "Kontinye",
+  "register": "Kreye kont Fondatè a",
+  "password": "Modpas",
+  "confirmPassword": "Konfime modpas la",
+  "email": "Louvri imèl konfimasyon an epi tounen isit la.",
+  "emailBlocked": "Aktive konfimasyon pa imèl anvan ou kòmanse enskripsyon Fondatè a.",
+  "mfa": "Verifye yon nouvo kòd nan aplikasyon otantifikasyon an epi tounen isit la.",
+  "settings": "Paramèt kont",
+  "activate": "Aktive",
+  "failed": "Nou pa t ka fini demann nan. Verifye kòd ou, sesyon ou ak kalifikasyon ou.",
+  "accept": "Mwen aksepte responsablite yon Administratè.",
+  "signIn": "Konekte",
+  "pending": "N ap tann yon apwobasyon endepandan.",
+  "issue": "Bay yon envitasyon prive",
+  "deliver": "Pataje lyen an ak kòd la apa ak manm ki dwe resevwa yo a. Kòd la parèt yon sèl fwa.",
+  "revoke": "Anile envitasyon sa a"
+}

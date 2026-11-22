@@ -1,3 +1,4 @@
+DELETE /api/v1/admin/appointments/:id/invitation - -
 DELETE /api/v1/comments/:id - -
 DELETE /api/v1/comments/:id/reaction 1024 -
 DELETE /api/v1/communities/:key/membership 1024 -
@@ -24,6 +25,7 @@ GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
 GET /api/v1/admin/privacy-requests/* 512 -
 GET /api/v1/admin/safety - -
+GET /api/v1/administrator-activation/:id - -
 GET /api/v1/ambassadors - -
 GET /api/v1/comments/:id/reaction - -
 GET /api/v1/communities - -
@@ -125,6 +127,7 @@ GET /api/v1/projects/:id/work - -
 GET /api/v1/projects/reports - -
 GET /api/v1/projects/review - -
 GET /api/v1/recommendations/settings - -
+GET /api/v1/setup/founder/:id - -
 GET /api/v1/status - -
 GET /api/v1/trust/application-assignments - -
 GET /api/v1/trust/impersonation - -
@@ -145,6 +148,7 @@ HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend
 HEAD /api/v1/admin/privacy-requests/* 512 onSend
 HEAD /api/v1/admin/safety - onSend
+HEAD /api/v1/administrator-activation/:id - onSend
 HEAD /api/v1/ambassadors - onSend
 HEAD /api/v1/comments/:id/reaction - onSend
 HEAD /api/v1/communities - onSend
@@ -245,6 +249,7 @@ HEAD /api/v1/projects/:id/work - onSend
 HEAD /api/v1/projects/reports - onSend
 HEAD /api/v1/projects/review - onSend
 HEAD /api/v1/recommendations/settings - onSend
+HEAD /api/v1/setup/founder/:id - onSend
 HEAD /api/v1/status - onSend
 HEAD /api/v1/trust/application-assignments - onSend
 HEAD /api/v1/trust/impersonation - onSend
@@ -287,6 +292,7 @@ PATCH /api/v1/trust/verification-appeals/:id/assignment 4096 -
 PATCH /api/v1/trust/verification-appeals/:id/decision 6000 -
 PATCH /api/v1/verification/review/:id/work 256 -
 POST /api/v1/admin/ambassadors 6000 -
+POST /api/v1/admin/appointments/:id/invitation - -
 POST /api/v1/admin/early-partners 2048 -
 POST /api/v1/admin/founder-identity 1024 -
 POST /api/v1/admin/founder-identity/:id/actions 1024 -
@@ -297,6 +303,7 @@ POST /api/v1/admin/legal/actions 4096 -
 POST /api/v1/admin/organization-onboarding/:id/corrections 1536 -
 POST /api/v1/admin/privacy-requests/* 512 -
 POST /api/v1/admin/usernames/review 512 -
+POST /api/v1/administrator-activation/:id 512 -
 POST /api/v1/affiliation-invitations/:id/:action 256 -
 POST /api/v1/comments/:id/reports 4096 -
 POST /api/v1/communities 13000 -
@@ -353,6 +360,7 @@ POST /api/v1/projects/:id/review 6000 -
 POST /api/v1/projects/:id/submit 512 -
 POST /api/v1/projects/:id/work 16000 -
 POST /api/v1/referrals/validate 512 -
+POST /api/v1/setup/founder/:id 512 -
 POST /api/v1/verification/review/:id 4096 -
 PUT /api/v1/comments/:id/reaction 1024 -
 PUT /api/v1/institutions/:id/registration 1024 -

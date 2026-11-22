@@ -816,3 +816,5 @@ Migration `20261121070000_o7_organization_hardening.sql` preserves existing data
 ## Phase U1 usernames
 
 Migration `20261121130000_public_usernames.sql` follows the four pending Founder migrations. Profile usernames retain the unique constraint. The new private lease, retirement, safety-hold and event tables have RLS and no direct application-role grants. See [U1 signup and availability](identity/U1_SIGNUP_AND_AVAILABILITY.md) for API contracts.
+
+The hosted Founder and U1 chain is applied through 20261121131000. The separately gated F1 migration 20261121140000 adds private, RLS-protected workflows and audit events. [F1 report](governance/F1_IMPLEMENTATION_REPORT.md).

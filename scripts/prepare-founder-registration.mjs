@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { unlink, writeFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
 
@@ -17,16 +17,18 @@ const client = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
 });
 const credential = randomBytes(32).toString("base64url");
-await writeFile(destination, credential + "\n", { mode: 0o600, flag: "wx" });
+const flow = randomUUID();
+await writeFile(destination, `/setup/f/${flow}\n${credential}\n`, { mode: 0o600, flag: "wx" });
 let prepared = false;
 try {
-  const result = await client.rpc("prepare_founder_registration_for_api", {
+  const result = await client.rpc("f1_prepare_for_api", {
+    p_flow: flow,
     p_email: email, p_username: username,
-    p_credential_hash: createHash("sha256").update(credential, "utf8").digest("hex"),
+    p_hash: createHash("sha256").update(credential, "utf8").digest("hex"),
   });
   prepared = !result.error && result.data === true;
   if (!prepared) throw new Error("Founder enrollment could not be prepared. Check migration state, existing reservation and bootstrap history.");
 } finally {
   if (!prepared) await unlink(destination);
 }
-console.log("Founder enrollment prepared. The credential is in the private file and expires after 30 minutes.");
+console.log("Founder enrollment prepared. The workflow path and separate credential are in the private file. The credential expires after 30 minutes.");
