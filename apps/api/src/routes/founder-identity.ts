@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { founderDecisions, founderIdentityBases, founderReviewActions, type FounderAppealItem, type FounderIdentityQueue, type FounderIdentityReceipt } from "@ayinou/shared";
+import { founderDecisions, founderIdentityBases, founderReviewActions, type FounderAppealItem, type FounderControlChallenge, type FounderIdentityQueue, type FounderIdentityReceipt } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
@@ -21,7 +21,8 @@ const memberAction = z.discriminatedUnion("action", [
   }).optional() }),
   revision.extend({ action: z.literal("supersede"), applicationId: z.uuid(), revision: z.number().int().min(1).max(2_147_483_647) }),
   revision.extend({ action: z.literal("visibility"), disclose: z.boolean() }),
-  revision.extend({ action: z.literal("account_control") }),
+  revision.extend({ action: z.literal("account_control_challenge") }),
+  revision.extend({ action: z.literal("account_control"), challenge: z.uuid(), confirmed: z.literal(true) }),
   revision.extend({ action: z.enum(["withdraw", "correction"]) }),
 ]);
 const standardReview = revision.extend({
@@ -49,7 +50,8 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
     }
     try {
       return await repo.rpc<T>(rpc, {
-        p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp_at: session.totpAt ?? null,
+        p_actor: session.actor, p_session: session.session, p_aal2: session.aal2,
+        ...(rpc !== "fv_member_confirmation_for_api" ? { p_totp_at: session.totpAt ?? null } : {}),
         ...(rpc === "founder_identity_read_for_api" || rpc === "founder_identity_command_for_api"
           ? { p_admin: privileged } : {}), ...input,
       });
@@ -107,6 +109,13 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
   app.post(member + "/:id/actions", { bodyLimit: 1024 }, (request) => {
     const { id } = caseId.parse(request.params);
     const input = memberAction.parse(request.body);
+    if (input.action === "account_control" || input.action === "account_control_challenge") {
+      return call<FounderIdentityReceipt | FounderControlChallenge>(request, false, "fv_member_confirmation_for_api", {
+        p_id: id, p_expected: input.expectedVersion, p_policy: input.policyVersion, p_request: input.requestId,
+        p_challenge: input.action === "account_control" ? input.challenge : null,
+        p_confirmed: input.action === "account_control" ? input.confirmed : null,
+      });
+    }
     if (input.action === "supersede") {
       return call<FounderIdentityReceipt>(request, false, "founder_supersession_after_grant_for_api", {
         p_id: id, p_expected: input.expectedVersion, p_policy: input.policyVersion, p_request: input.requestId,

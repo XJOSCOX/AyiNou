@@ -102,8 +102,9 @@
       "live_video_identity_check": "Verifikasyon idantite nan yon apèl videyo an dirèk"
     },
     "attestation": "Mwen konfime idantite moun sa a ak metòd mwen chwazi a, mwen verifye se li ki gen kont Ayinou ki konfime a, epi mwen pa gen okenn konfli enterè enpòtan.",
-    "authenticatorHelp": "Antre yon nouvo kòd ki soti nan aplikasyon otantifikasyon ki sou kont Ayinou ou a. Si ou poko genyen youn, ajoute li nan paramèt kont ou.",
-    "authenticatorFailed": "Verifikasyon an pa t mache. Tcheke kòd la ak aplikasyon otantifikasyon ou a, epi eseye ankò."
+    "sessionHelp": "Konfime nan sesyon sa a nan de minit. Rete konekte jiskaske fondatè a fini. Nou rekòmande yon aplikasyon otantifikasyon pou manm yo, men li pa obligatwa.",
+    "sessionDeclaration": "Mwen konfime se mwen ki gen kontwòl kont Ayinou sa a.",
+    "sessionFailed": "Nou pa t kapab kòmanse konfimasyon kont lan. Verifye si ou konekte epi eseye ankò."
   },
   "appeal": {
     "decline": "Refize òf la",

@@ -102,8 +102,9 @@
       "live_video_identity_check": "Verificación de identidad por videollamada en directo"
     },
     "attestation": "Confirmé la identidad de esta persona con el método seleccionado, comprobé que corresponde a la cuenta de Ayinou confirmada y no tengo ningún conflicto de intereses relevante.",
-    "authenticatorHelp": "Introduce un código nuevo de la aplicación de autenticación vinculada a tu cuenta de Ayinou. Si aún no tienes una, configúrala en los ajustes de la cuenta.",
-    "authenticatorFailed": "No se pudo completar la verificación. Comprueba el código y la aplicación vinculada a tu cuenta y vuelve a intentarlo."
+    "sessionHelp": "Confirma desde esta sesión en un plazo de dos minutos. Mantén la sesión iniciada hasta que el fundador termine. Se recomienda una aplicación de autenticación, que es opcional para los miembros.",
+    "sessionDeclaration": "Confirmo que tengo el control de esta cuenta de Ayinou.",
+    "sessionFailed": "No se pudo iniciar la confirmación de la cuenta. Comprueba que has iniciado sesión y vuelve a intentarlo."
   },
   "appeal": {
     "decline": "Rechazar la oferta",

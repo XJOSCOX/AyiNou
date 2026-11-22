@@ -32,6 +32,10 @@ See [deployment and test evidence](FOUNDER_VERIFIED_DEPLOYMENT_AND_TEST_EVIDENCE
 
 See the [operating procedure](FOUNDER_VERIFIED_OPERATING_PROCEDURE.md), [activation policy](FOUNDER_VERIFIED_ACTIVATION_POLICY.md) and [eligibility matrix](FOUNDER_VERIFIED_FINAL_ELIGIBILITY_MATRIX.md).
 
+## Recipient account confirmation
+
+The additive [recipient confirmation correction](FOUNDER_VERIFIED_MEMBER_CONFIRMATION_REPORT.md) removes the recipient authenticator enrollment prerequisite while retaining all Founder controls. The deployment and live-gate state below describe the original FV-FINAL rollout.
+
 ## Remaining blockers
 
 The reviewed hosted schema deployment is verified. Operational activation still requires a separate approval identifying the approved cohort, independent appeal staffing, duration and records lifecycle. Both live gates remain closed.

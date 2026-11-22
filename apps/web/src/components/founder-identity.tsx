@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { founderIdentityBases } from "@ayinou/shared";
 import type {
-  FounderIdentityCase, FounderIdentityQueue, FounderIdentityReceipt, FounderMemberAction, FounderReviewAction, FounderReviewCase,
+  FounderControlChallenge, FounderIdentityCase, FounderIdentityQueue, FounderIdentityReceipt, FounderMemberAction, FounderReviewAction, FounderReviewCase,
 } from "@ayinou/shared";
 import Link from "next/link";
 import { authorizedRequest } from "@/lib/api";
@@ -12,8 +12,6 @@ import { authMessages } from "@/lib/auth-i18n";
 import { founderMessages } from "@/lib/founder-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionMessages } from "@/lib/institution-i18n";
-import { browserSupabase } from "@/lib/supabase/browser";
-import { AuthenticatorCode } from "./authenticator-code";
 import { useMemberIdentity } from "@/lib/member-display-name";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -67,7 +65,7 @@ function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: stri
     } catch (cause) {
       if (controller.signal.aborted) return;
       setError(cause);
-      if (apiErrorCode(cause) === "STALE_VERSION") resource.refresh();
+      if (body.action === "account_control" || apiErrorCode(cause) === "STALE_VERSION") resource.refresh();
     } finally {
       if (!controller.signal.aborted) setBusy(false);
       inFlight.current = null;
@@ -146,7 +144,7 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
   const [attested, setAttested] = useState(false);
   const [checking, setChecking] = useState(false);
   const [proofError, setProofError] = useState(false);
-  const [showChallenge, setShowChallenge] = useState(false);
+  const [challenge, setChallenge] = useState<FounderControlChallenge | null>(null);
   const [publish, setPublish] = useState(item.disclose);
   const [supersede, setSupersede] = useState(false);
   const application = item.regularApplication;
@@ -166,20 +164,16 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
     ["proof_pending", "ready_for_review", "held"].includes(item.state) && !item.proofReady;
   const canCorrect = ["granted", "held", "revoked", "denied", "withdrawn"].includes(item.state);
 
-  async function confirmControl(code: string) {
+  async function beginAccountControl() {
     if (checking || busy) return;
     setChecking(true);
     setProofError(false);
     try {
-      const auth = browserSupabase().auth;
-      const { data: current } = await auth.getSession();
-      const { data } = await auth.mfa.listFactors();
-      const factor = data?.totp[0];
-      if (current.session?.user.id !== actor || !factor || (await auth.mfa.challengeAndVerify({ factorId: factor.id, code })).error) {
-        setProofError(true);
-        return;
-      }
-      await act({ action: "account_control" });
+      const result: FounderControlChallenge = await authorizedRequest(`/api/v1/me/founder-identity/${item.id}/actions`, {
+        method: "POST", body: JSON.stringify({ action: "account_control_challenge", expectedVersion: item.version,
+          policyVersion: item.policyVersion, requestId: crypto.randomUUID() }),
+      }, actor);
+      setChallenge(result);
     } catch {
       setProofError(true);
     } finally {
@@ -264,11 +258,23 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
         <button type="button" className={institutionLink} disabled={busy} onClick={() => setConfirm("withdraw")}>{item.state === "consent_pending" ? t.appeal.decline : t.actions.withdraw}</button>
       </div>}
       {pendingProof && (item.controlReady ? <p role="status">{t.liveProof.controlReady}</p> : <div className="grid gap-2">
-        {showChallenge ? <><p className="text-sm">{t.liveProof.authenticatorHelp}</p>
-          <AuthenticatorCode busy={checking || busy} submitCode={(code) => void confirmControl(code)} />
-          {proofError && <p role="alert">{t.liveProof.authenticatorFailed}</p>}
-          <button type="button" className={institutionLink} onClick={() => setShowChallenge(false)}>{t.cancel}</button>
-        </> : <button type="button" className={institutionLink} onClick={() => setShowChallenge(true)}>{t.actions.account_control}</button>}
+        {challenge ? <form className="grid max-w-prose gap-3" onSubmit={(event) => {
+          event.preventDefault();
+          if (busy) return;
+          setChallenge(null);
+          void act({ action: "account_control", challenge: challenge.challenge, confirmed: true });
+        }}>
+          <p className="text-sm">{t.liveProof.sessionHelp}</p>
+          <label className="flex items-start gap-2 text-sm">
+            <input className="mt-1" type="checkbox" required />{t.liveProof.sessionDeclaration}
+          </label>
+          <div className="flex flex-wrap items-center gap-3">
+            <button type="submit" className={institutionAction} disabled={busy}>{t.confirm}</button>
+            <button type="button" className={institutionLink} onClick={() => setChallenge(null)}>{t.cancel}</button>
+          </div>
+        </form> : <button type="button" className={`${institutionLink} justify-self-start`} disabled={checking || busy}
+          onClick={() => { void beginAccountControl(); }}>{t.actions.account_control}</button>}
+        {proofError && <p role="alert">{t.liveProof.sessionFailed}</p>}
       </div>)}
       {canSupersedeAfterGrant && <button type="button" className={institutionLink} disabled={busy}
         onClick={() => setConfirm("supersede")}>{t.actions.supersede}</button>}

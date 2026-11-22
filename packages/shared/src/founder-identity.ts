@@ -60,6 +60,11 @@ export interface FounderIdentityQueue<T extends FounderIdentityCase = FounderIde
   cases: T[];
 }
 
+export interface FounderControlChallenge {
+  challenge: string;
+  expiresAt: string;
+}
+
 export interface FounderIdentityReceipt {
   auditId: string;
   caseId: string;

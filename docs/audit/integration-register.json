@@ -104,10 +104,11 @@
         "private.founder_registration_audit",
         "private.f1_events",
         "private.founder_identity_controls",
+        "private.fv_member_challenges",
         "private.fv_development_policies",
         "private.fv_founder_appeals"
       ],
-      "observed": "The Founder ledgers preserve case, grant and optional application closure references. FV-FINAL adds restricted approval windows, cohort identity and independent appeal decisions. Hosted real issuance remains closed. A1A excludes these restricted records.",
+      "observed": "The Founder ledgers preserve case, grant and optional application closure references. FV-FINAL adds restricted approval windows, cohort identity and independent appeal decisions. Hosted issuance depends on the separate scoped development policy. Account confirmation consumes a session-bound challenge and records the outcome in the existing Founder case ledger. A1A excludes these restricted records.",
       "missing": [
         "separately assigned case summary and approved retention"
       ],

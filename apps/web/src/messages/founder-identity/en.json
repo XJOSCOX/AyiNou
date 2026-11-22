@@ -102,8 +102,9 @@
       "live_video_identity_check": "Live video identity check"
     },
     "attestation": "I confirmed this person’s identity with the selected method, matched it to the confirmed Ayinou account, and have no material conflict.",
-    "authenticatorHelp": "Enter a fresh code from the authenticator registered to your Ayinou account. If you have no authenticator yet, add one in Account settings.",
-    "authenticatorFailed": "The authenticator check could not be completed. Check your code and registered authenticator, then try again."
+    "sessionHelp": "Confirm from this signed-in session within two minutes. Keep this session signed in until the Founder finishes. An authenticator is recommended and optional for members.",
+    "sessionDeclaration": "I confirm that I control this Ayinou account.",
+    "sessionFailed": "Could not start account confirmation. Check that you are signed in and try again."
   },
   "appeal": {
     "decline": "Decline offer",

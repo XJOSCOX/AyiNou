@@ -1058,6 +1058,21 @@
           "rolloutAndRollback": "Separate owner approval for schema and operational activation. Disable the bounded policy with an approved stop reference and keep historical provenance."
         }
       ]
+    },
+    {
+      "id": "founder-verified-member-confirmation",
+      "report": "docs/identity/FOUNDER_VERIFIED_MEMBER_CONFIRMATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122150000_fv_member_account_confirmation.sql",
+          "rlsAndGrants": "Private challenge table with RLS and no application table access. One service-only windowed confirmation RPC.",
+          "authorization": "Checks the ordinary authenticated session, exact member, case revision, challenge hash, consent, development cohort and expiration. Founder MFA, private workspace and grant authority remain enforced.",
+          "compatibility": "Existing authenticator-backed receipts keep the original session conditions. No policy rows, grants or applications are modified. The new endpoint actions use the existing route shape.",
+          "validation": "Disposable Chromium and API checks cover no-authenticator issuance, optional enrolled MFA, replays and cross-session or cross-case attempts.",
+          "rolloutAndRollback": "Approve this exact version separately after disposable checks and CI. Keep prior scope and use audited stop or forward correction if postflight fails."
+        }
+      ]
     }
   ]
 }

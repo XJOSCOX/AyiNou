@@ -625,7 +625,7 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
     }
   });
 
-founderTest("Founder verifies account control and grants gold from the original private session @smoke",
+founderTest("Founder grants gold after account confirmation with or without member MFA @smoke",
   async ({ page, makeMember, administrators: { founder, ordinaryAdmin } }) => {
     test.setTimeout(100_000);
     const members = [await makeMember({ visible: true }), await makeMember({ visible: true })];
@@ -675,17 +675,19 @@ founderTest("Founder verifies account control and grants gold from the original 
     // The closed gates permit a consent request but prohibit receipt creation and actual issuance.
     try {
       for (const [i, target] of members.entries()) {
-        const application = i ? (await apiCall(target, "/api/v1/me/verification", 201, "POST", {
+        const application = !i ? (await apiCall(target, "/api/v1/me/verification", 201, "POST", {
           organizationId: null, kind: "identity", evidence: ["https://example.org/restricted-founder-fixture"],
         })).id as string : null;
-        const opened = await run(founder, adminPath, 200, { username: target.handle, requestId: randomUUID(), reason: "member_request" });
-        const mine = actionPath(ownerPath, opened.caseId), issue = actionPath(adminPath, opened.caseId);
-        const consent = await apiCall(target, mine, 200, "POST", {
-          ...version(opened.version), action: "consent", disclose: true,
+        const open = () => run(founder, adminPath, 200, { username: target.handle, requestId: randomUUID(), reason: "member_request" });
+        const accept = (path: string, expected: number) => apiCall(target, path, 200, "POST", {
+          ...version(expected), action: "consent", disclose: true,
           ...(application && { supersession: { applicationId: application, revision: 1 } }),
         });
+        let opened = await open();
+        let mine = actionPath(ownerPath, opened.caseId);
+        let consent = await accept(mine, opened.version);
         if (!i) {
-          await apiCall(target, mine, 409, "POST", { ...version(consent.version), action: "account_control" });
+          await apiCall(target, mine, 409, "POST", { ...version(consent.version), action: "account_control_challenge" });
           proofPolicy(true);
           const outside = await makeMember({ visible: true });
           const outsideOpened = await run(founder, adminPath, 200, {
@@ -695,22 +697,61 @@ founderTest("Founder verifies account control and grants gold from the original 
           const outsideConsent = await apiCall(outside, outsidePath, 200, "POST", {
             ...version(outsideOpened.version), action: "consent", disclose: true,
           });
-          const outsideAssured = await elevate(outside);
-          sql(`delete from public.role_assignments where user_id='${outside.id}' and role='administrator';`);
-          await apiCall(outsideAssured, outsidePath, 409, "POST", {
-            ...version(outsideConsent.version), action: "account_control",
+          await apiCall(outside, outsidePath, 409, "POST", {
+            ...version(outsideConsent.version), action: "account_control_challenge",
           });
           expect(sql(`select count(*) from private.founder_identity_controls where case_id='${outsideOpened.caseId}';`)).toBe("0");
+          const earlier = await apiCall(target, mine, 200, "POST", {
+            ...version(consent.version), action: "account_control_challenge",
+          });
+          await apiCall(target, mine, 200, "POST", { ...version(consent.version), action: "withdraw" });
+          opened = await open();
+          mine = actionPath(ownerPath, opened.caseId);
+          consent = await accept(mine, opened.version);
+          await apiCall(target, mine, 409, "POST", {
+            ...version(consent.version), action: "account_control", challenge: earlier.challenge, confirmed: true,
+          });
         }
-        await apiCall(target, mine, 403, "POST", { ...version(consent.version), action: "account_control" });
-        const snapshot = await elevate(target);
-        sql(`delete from public.role_assignments where user_id='${target.id}' and role='administrator';`);
+        const issue = actionPath(adminPath, opened.caseId);
+        await apiCall(target, mine, 400, "POST", { ...version(consent.version), action: "account_control" });
+        const snapshot = i ? await elevate(target) : target;
+        if (i) sql(`delete from public.role_assignments where user_id='${target.id}' and role='administrator';`);
+        await run(founder, issue, 409, { ...version(consent.version), action: "attest",
+          basis: "in_person_identity_check", noConflict: true });
+        const begin = () => apiCall(snapshot, mine, 200, "POST", {
+          ...version(consent.version), action: "account_control_challenge",
+        });
+        const complete = (challenge: string) => ({ ...version(consent.version), action: "account_control", challenge, confirmed: true });
+        const issued = await begin();
+        let receipt: FounderIdentityReceipt;
         if (!i) {
+          expect(sql(`select count(*) from auth.mfa_factors where user_id='${target.id}';`)).toBe("0");
+          const alternateClient = createClient("http://127.0.0.1:55321", process.env.AYINOU_E2E_SUPABASE_PUBLIC!, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          const { data } = await alternateClient.auth.signInWithPassword({ email: target.email, password: target.password });
+          expect(data.session).not.toBeNull();
+          const otherSession = { ...target, token: data.session!.access_token };
+          await apiCall(otherSession, mine, 409, "POST", complete(issued.challenge));
+          await apiCall(ordinaryAdmin, mine, 404, "POST", complete(issued.challenge));
+          await apiCall(snapshot, actionPath(ownerPath, randomUUID()), 404, "POST", complete(issued.challenge));
+          await apiCall(snapshot, mine, 400, "POST", { ...complete(issued.challenge), confirmed: false });
+          await apiCall(snapshot, mine, 409, "POST", { ...complete(issued.challenge), expectedVersion: consent.version - 1 });
+          const initial = auditSession(snapshot);
+          sql(`update private.s2a_session_policy set revoked_at=clock_timestamp() where session_id='${initial}';`);
+          await apiCall(snapshot, mine, 401, "POST", complete(issued.challenge));
+          sql(`update private.s2a_session_policy set revoked_at=null where session_id='${initial}';
+            update auth.sessions set not_after=clock_timestamp()-interval '1 second' where id='${initial}';`);
+          await apiCall(snapshot, mine, 401, "POST", complete(issued.challenge));
+          sql(`update auth.sessions set not_after=null where id='${initial}';
+            update private.fv_member_challenges set issued_at=clock_timestamp()-interval '2 minutes',
+              expires_at=clock_timestamp()-interval '1 minute' where case_id='${opened.caseId}';`);
+          await apiCall(snapshot, mine, 409, "POST", complete(issued.challenge));
           finishPersonalOnboarding(target);
           await page.setViewportSize({ width: 320, height: 860 });
           await inEnglish(page.context());
           await login(page, target);
-          await solveMfa(page, snapshot.secret);
+          await expect(page).toHaveURL(/\/dashboard/);
           for (const locale of ["ht", "fr", "es", "en"] as const) {
             await page.context().addCookies([{ name: "ayinou-locale", value: locale, url: web }]);
             await page.goto("/verification");
@@ -719,15 +760,25 @@ founderTest("Founder verifies account control and grants gold from the original 
             await expect(controlButton).toBeVisible();
             await controlButton.focus();
             await page.keyboard.press("Enter");
-            await expect(page.getByText(labels.liveProof.authenticatorHelp)).toBeVisible();
+            await expect(page.getByText(labels.liveProof.sessionHelp)).toBeVisible();
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
           }
+          await page.getByRole("checkbox", { name: founderMessages.en.liveProof.sessionDeclaration }).check();
+          const confirmed = page.waitForResponse(response => response.url().endsWith(mine) && response.request().method() === "POST");
+          const dialog = page.locator("form").filter({ has: page.getByRole("checkbox", { name: founderMessages.en.liveProof.sessionDeclaration }) });
+          await dialog.getByRole("button", { name: founderMessages.en.confirm, exact: true }).click();
+          const response = await confirmed;
+          expect(response.status()).toBe(200);
+          receipt = await response.json();
+        } else {
+          const control = complete(issued.challenge);
+          const result = await Promise.all([control, { ...control, requestId: randomUUID() }].map(body => fetch(api + mine, {
+            method: "POST", headers: { Authorization: "Bearer " + snapshot.token, "Content-Type": "application/json" }, body: JSON.stringify(body),
+          })));
+          expect(result.map(response => response.status).sort()).toEqual([200, 409]);
+          receipt = await result.find(response => response.ok)!.json();
+          await apiCall(snapshot, mine, 409, "POST", { ...control, expectedVersion: receipt.version });
         }
-        await run(founder, issue, 409, { ...version(consent.version), action: "attest",
-          basis: "in_person_identity_check", noConflict: true });
-        const control = { ...version(consent.version), action: "account_control" };
-        const receipt = await apiCall(snapshot, mine, 200, "POST", control);
-        expect(await apiCall(snapshot, mine, 200, "POST", control)).toEqual(receipt);
         await run(ordinaryAdmin, issue, 403, { ...version(receipt.version), action: "attest",
           basis: "in_person_identity_check", noConflict: true }, otherWorkspace);
         const attestation = { ...version(receipt.version), action: "attest",
@@ -739,11 +790,12 @@ founderTest("Founder verifies account control and grants gold from the original 
         await apiCall(founder, issue, 403, "POST", grant);
         await run(founder, issue, 404, grant, otherWorkspace);
         if (!i) {
-          const subjectSession = auditSession(snapshot);
+          const subjectSession = sql(`select subject_session from private.founder_identity_controls where case_id='${opened.caseId}' and case_version=${receipt.version};`);
           sql(`update private.s2a_session_policy set revoked_at=now() where session_id='${subjectSession}';`);
           try { await run(founder, issue, 409, grant); }
           finally { sql(`update private.s2a_session_policy set revoked_at=null where session_id='${subjectSession}';`); }
         }
+        await run(ordinaryAdmin, issue, 403, grant, otherWorkspace);
         const granted = await run(founder, issue, 200, grant);
         expect(await run(founder, issue, 200, grant)).toEqual(granted);
         expect((await publicProfile(target)).founderVerified).toBe(true);
@@ -790,9 +842,9 @@ founderTest("Founder verifies account control and grants gold from the original 
           expect(await run(ordinaryAdmin, reviewPath, 200, undefined, reviewRef)).toEqual([]);
           await run(founder, reviewPath, 404, undefined, workspace);
           expect(sql(`select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace
-            where n.nspname='private' and c.relname in ('fv_development_policies','fv_development_members','fv_founder_appeals')
+            where n.nspname='private' and c.relname in ('fv_development_policies','fv_development_members','fv_founder_appeals','fv_member_challenges')
               and c.relrowsecurity and not has_table_privilege('authenticated',c.oid,'SELECT')
-              and not has_table_privilege('service_role',c.oid,'INSERT');`)).toBe("3");
+              and not has_table_privilege('service_role',c.oid,'INSERT');`)).toBe("4");
           expect(() => sql(`select private.fv_assign_appeal('${appeal}','${founder.id}',gen_random_uuid());`)).toThrow();
           sql(`select private.fv_assign_appeal('${appeal}','${ordinaryAdmin.id}',gen_random_uuid());`);
           const assigned = await run(ordinaryAdmin, reviewPath, 200, undefined, reviewRef);

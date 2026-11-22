@@ -102,8 +102,9 @@
       "live_video_identity_check": "Vérification de l’identité en visioconférence"
     },
     "attestation": "J’ai confirmé l’identité de cette personne par la méthode choisie, vérifié qu’elle correspond au compte Ayinou confirmé et je n’ai aucun conflit d’intérêts important.",
-    "authenticatorHelp": "Saisissez un nouveau code de l’application d’authentification associée à votre compte Ayinou. Si nécessaire, configurez-en une dans les paramètres du compte.",
-    "authenticatorFailed": "La vérification a échoué. Vérifiez le code et l’application associée à votre compte, puis réessayez."
+    "sessionHelp": "Confirmez depuis cette session dans les deux minutes. Restez connecté jusqu’à la fin de la vérification par le fondateur. Une application d’authentification est recommandée et facultative pour les membres.",
+    "sessionDeclaration": "Je confirme que je contrôle ce compte Ayinou.",
+    "sessionFailed": "Impossible de démarrer la confirmation du compte. Vérifiez que vous êtes connecté et réessayez."
   },
   "appeal": {
     "decline": "Refuser l’offre",

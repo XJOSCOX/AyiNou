@@ -102,6 +102,7 @@
     "FollowTarget": "type:7deb76e9e616e7f5dd59d1978b98aa86dfa555c4ff9fd9586e5248c02cd9e9bf",
     "FounderAppealItem": "type:94c5f1ba004003db84afcc419e2e757153b3aba85d5017c5e128a9bcbdb1f5e7",
     "founderCaseStates": "value:370559e6e750ae70f5eb92b689377023eb013384ab63878189c8ae0108f9957a",
+    "FounderControlChallenge": "type:df468fbef1de4d248c5246c50646be6ba722448e94fd34551a932387d369d84d",
     "founderDecisions": "value:0946f85014551973c0f4ea0ce24d06e3a7c70c17367cb2f79b3e7b70517d95e8",
     "founderIdentityBases": "value:2568c812c843ec5b5843a8a48ea0d7c077e3f217bf3989835c9de17303a40263",
     "FounderIdentityCase": "type:9225f9f714c329a8ca133de576962d59e080839fa429eaab6140f9e61f5c1272",
