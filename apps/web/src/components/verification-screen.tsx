@@ -47,7 +47,7 @@ export function VerificationScreen({ initialKind, institution }: {
             </> : accounts.data ? <ApplicationForm accounts={accounts.data} initialKind={initialKind} initialOrg={institution}
               workspace={applications.data} refresh={applications.refresh} /> : <p role="status">{auth.working}</p>}
           </section>
-          <section className={institutionCard}>
+          <section id="my-verification-applications" tabIndex={-1} className={`${institutionCard} scroll-mt-24`}>
             <h2 className="text-xl font-semibold">{t.applications}</h2>
             {applications.error ? <div className="mt-3">
               <p role="alert" className={institutionErrorBox}>{institutionError(t, applications.error)}</p>
@@ -114,8 +114,12 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
   const isPersonal = kind === "identity" || kind === "notable_person";
   const personalState = isPersonal ? workspace?.personalRequests[kind] : undefined;
   const personalBlocked = isPersonal && (personalState !== "available" || workspace === submittedAgainst);
-  const personalNotice = personalState === "already_verified" ? t.personalAlreadyVerified
-    : personalState === "pending" || (workspace !== null && workspace === submittedAgainst) ? t.personalRequestPending : null;
+  const verified = personalState === "already_verified";
+  const pending = personalState === "pending" || (isPersonal && workspace !== null && workspace === submittedAgainst);
+  const personalNotice = verified || pending;
+  const failureCode = apiErrorCode(failed);
+  const hasNoticeForFailure = (verified && failureCode === "VERIFICATION_ALREADY_VERIFIED") ||
+    (pending && failureCode === "VERIFICATION_REQUEST_PENDING");
   const needsOrganization = kind === "organization" || kind === "government" || kind === "representative";
   const eligible = accounts.organizations.filter((org) => {
     if (kind === "representative") return true;
@@ -153,7 +157,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
       <label className="block text-sm font-semibold">{t.applicationType}
         <select className={institutionField} value={kind} disabled={busy} onChange={(event) => {
           const value = verificationKinds.find((item) => item === event.target.value);
-          if (value) { setKind(value); setOrganization(""); setSaved(false); }
+          if (value) { setKind(value); setOrganization(""); setSaved(false); setFailed(null); }
         }}>
           {verificationKinds.filter((item) => item !== "claim").map((item) => <option key={item} value={item}>{t[item]}</option>)}
         </select>
@@ -165,20 +169,37 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
           {eligible.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}
         </select>
       </label>}
-      <label className="block text-sm font-semibold">{t.evidence}
-        <textarea className={institutionField} value={evidence} rows={4} maxLength={905} required disabled={busy || personalBlocked}
-          onChange={(event) => setEvidence(event.target.value)} aria-describedby="verification-evidence-hint" />
-      </label>
-      <p id="verification-evidence-hint" className="text-sm text-[var(--theme-body)]">{t.evidenceHelp} {trustMessages[locale].evidenceStandard}</p>
-      {kind === "notable_person" && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].notabilityReferences}</p>}
-      {kind !== "identity" && kind !== "notable_person" && <p className="text-sm text-[var(--theme-body)]">
-        {trustMessages[locale].institutionEvidenceRequired} {trustMessages[locale].institutionEvidenceHelp}
-      </p>}
-      {failed !== null && <p role="alert" className={institutionErrorBox}>{apiErrorCode(failed) === "INSTITUTION_EVIDENCE_REQUIRED"
+      {personalNotice ? <div className="flex items-start gap-3 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-3.5 sm:gap-4 sm:p-4">
+        <span aria-hidden="true" className={`grid size-10 shrink-0 place-items-center rounded-full ${verified
+          ? "bg-[var(--theme-verified-bg)] text-[var(--theme-verified-text)]"
+          : "bg-[var(--theme-selected)] text-[var(--theme-link)]"}`}>
+          <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            {verified ? <path d="m8 12 2.5 2.5L16 9" /> : <path d="M12 7v5l3 2" />}
+          </svg>
+        </span>
+        <div className="min-w-0 space-y-2">
+          <div role="status" className="space-y-1">
+            <p className="font-semibold">{verified ? t.personalAlreadyVerifiedTitle : t.personalRequestPendingTitle}</p>
+            <p className="text-sm leading-relaxed text-[var(--theme-body)]">{verified ? t.personalAlreadyVerified : t.personalRequestPending}</p>
+          </div>
+          <a className={institutionLink} href="#my-verification-applications">{t.viewMyApplications}</a>
+        </div>
+      </div> : <>
+        <label className="block text-sm font-semibold">{t.evidence}
+          <textarea className={institutionField} value={evidence} rows={4} maxLength={905} required disabled={busy || personalBlocked}
+            onChange={(event) => setEvidence(event.target.value)} aria-describedby="verification-evidence-hint" />
+        </label>
+        <p id="verification-evidence-hint" className="text-sm text-[var(--theme-body)]">{t.evidenceHelp} {trustMessages[locale].evidenceStandard}</p>
+        {kind === "notable_person" && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].notabilityReferences}</p>}
+        {kind !== "identity" && kind !== "notable_person" && <p className="text-sm text-[var(--theme-body)]">
+          {trustMessages[locale].institutionEvidenceRequired} {trustMessages[locale].institutionEvidenceHelp}
+        </p>}
+        <button type="submit" className={institutionAction} disabled={busy || personalBlocked || (needsOrganization && !eligible.length)}>{busy ? auth.working : t.submit}</button>
+      </>}
+      {failed !== null && !hasNoticeForFailure && <p role="alert" className={institutionErrorBox}>{failureCode === "INSTITUTION_EVIDENCE_REQUIRED"
         ? trustMessages[locale].institutionEvidenceRequired : institutionError(t, failed)}</p>}
-      {isPersonal && personalNotice && <p role="status" className="text-sm">{personalNotice}</p>}
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.submitted}</p>}
-      <button type="submit" className={institutionAction} disabled={busy || personalBlocked || (needsOrganization && !eligible.length)}>{busy ? auth.working : t.submit}</button>
     </form>
   );
 }

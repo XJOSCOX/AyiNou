@@ -25,14 +25,24 @@ test("personal verification allows one pending request and blocks already-verifi
     await inEnglish(context);
     await login(page, member);
     await expect(page).toHaveURL(/\/dashboard/);
+    await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/verification");
     const labels = institutionMessages.en;
     const type = page.getByLabel(labels.applicationType);
     const submit = page.getByRole("button", { name: labels.submit, exact: true });
-    await expect(page.getByText(labels.personalRequestPending)).toBeVisible();
-    await expect(submit).toBeDisabled();
+    const pending = page.getByRole("status").filter({ hasText: labels.personalRequestPendingTitle });
+    await expect(pending).toContainText(labels.personalRequestPending);
+    await expect(submit).toHaveCount(0);
+    await expect(page.getByLabel(labels.evidence)).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+    const applicationsLink = page.getByRole("link", { name: labels.viewMyApplications });
+    await applicationsLink.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/#my-verification-applications$/);
+    await expect(page.locator("#my-verification-applications")).toBeFocused();
     await type.selectOption("notable_person");
-    await expect(submit).toBeDisabled();
+    await expect(pending).toBeVisible();
+    await expect(submit).toHaveCount(0);
 
     // Rehearse a completed historical decision without requiring another reviewer UI flow.
     sql(`update private.verification_applications set status='rejected',decided_at=clock_timestamp() where id='${id}';`);
@@ -45,8 +55,9 @@ test("personal verification allows one pending request and blocks already-verifi
     const redundant = await apiCall(member, path, 409, "POST", identity);
     expect(redundant.error.code).toBe("VERIFICATION_ALREADY_VERIFIED");
     await page.reload();
-    await expect(page.getByText(labels.personalAlreadyVerified)).toBeVisible();
-    await expect(submit).toBeDisabled();
+    await expect(page.getByRole("status").filter({ hasText: labels.personalAlreadyVerifiedTitle }))
+      .toContainText(labels.personalAlreadyVerified);
+    await expect(submit).toHaveCount(0);
     await type.selectOption("notable_person");
     await expect(submit).toBeEnabled();
     await apiCall(member, path, 201, "POST", publicFigure);
