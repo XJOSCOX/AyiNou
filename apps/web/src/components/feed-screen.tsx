@@ -21,7 +21,7 @@ import { ContentReportForm } from "./content-report-form";
 import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
 import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { PostTopicLabels, RecommendationActions, RecommendationSettingsPanel } from "./feed-recommendations";
-import { VerifiedCheck, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
+import { PersonalClaimChecks, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { PostComposer } from "./post-composer";
@@ -178,7 +178,7 @@ export function PostCard({ post, changed, recommendation }: { post: FeedPost; ch
         <div className="min-w-0">
           <p className="break-words font-semibold">
             {post.author?.username ? <Link className="hover:underline" href={`/members/${post.author.username}`}>{name}</Link> : name}
-            {post.author?.verified && <>{" "}<VerifiedCheck label={t.verified} /></>}
+            {!!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
           </p>
           {post.author?.username && <p className="break-all text-xs text-[var(--theme-body)]">@{post.author.username}</p>}
         </div>

@@ -16,4 +16,6 @@ The rows describe capability boundaries. Automatic authority still requires a li
 | Legal publication and real privacy actions | Separate approved workflow. Current gates remain closed | Same | No | No | No | No | Read public materials or manage own requests |
 | Operate approved programs or assist members | Separate supported program or assistance scope | Same | Safety scope only | Review scope only | Planned purpose-specific assistance | Planned purpose-specific program assignment | Own participation |
 
+The [Founder release verification matrix](FOUNDER_PERMISSION_VERIFICATION.md) links the five principal roles to the disposable HTTP and SQL test, including routine project moderation, governance roster membership and protections for restricted domains.
+
 Organization Owner, Organization Manager and custom organization roles remain a separate system. Compatible cross-domain assignments grant only the scopes explicitly authorized in each domain.

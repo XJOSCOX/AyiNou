@@ -9,7 +9,7 @@
   },
   "symbols": {
     "AccountStatus": "type:5af2f22f3f54680b0f22e3f7381031cc362aa3830ef4a946872505d5c9e0ce18",
-    "AdminAccount": "type:6fa638de8a6d113bea7f92b7ab51178030f4ed97607907f3911bc7d64fe5daae",
+    "AdminAccount": "type:3854315271ad7456abc0a2645539892b77d851178da8d69304666168f16d6d9e",
     "AdminAccountAction": "type:c8781d2d398c3170136f97fa0543f81aa17f54fb165444483508113805ba2ba8",
     "AdminAuditEvent": "type:201a5c5452b465762fc136a9eb93a58ae94e335c66ef03667e30916308dfa42b",
     "AdminOverview": "type:60d96b7d506175495c515c660846278b8c9aeef6b1b177c1244530f4656a4ae0",

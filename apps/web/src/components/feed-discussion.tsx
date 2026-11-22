@@ -8,7 +8,7 @@ import {
 import { ApiErrorNotice } from "./api-error-notice";
 import { ContentReportForm } from "./content-report-form";
 import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
-import { VerifiedCheck, institutionAction, institutionField, institutionLink } from "./institution-ui";
+import { PersonalClaimChecks, institutionAction, institutionField, institutionLink } from "./institution-ui";
 import { apiErrorCode } from "@/lib/api-errors";
 import { createComment, deleteComment, editComment, loadComments, loadReaction, reportComment, setReaction } from "@/lib/feed-api";
 import { feedMessages } from "@/lib/feed-i18n";
@@ -229,7 +229,7 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="min-w-0 break-words font-semibold">
           {value.author?.displayName ?? (value.own ? t.you : t.unknownAuthor)}
-          {value.author?.verified && <>{" "}<VerifiedCheck label={t.verified} /></>}
+          {!!value.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={value.author.personalClaims} /></>}
         </p>
         <p className="flex flex-wrap gap-x-2 text-xs text-[var(--theme-body)]">
           <time dateTime={value.createdAt}>{format.format(new Date(value.createdAt))}</time>

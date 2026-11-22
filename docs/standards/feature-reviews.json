@@ -613,6 +613,21 @@
           "rolloutAndRollback": "Requires separate hosted approval. Preserve the protected singleton and keep Founder Verified, succession and the existing high-impact gates disabled."
         }
       ]
+    },
+    {
+      "id": "founder-release-audit",
+      "report": "docs/governance/FOUNDER_FINAL_RELEASE_AUDIT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121120000_founder_release_authorization.sql",
+          "rlsAndGrants": "No new tables. The private roster helper has no application-role grants. Replaced functions retain their ownership and ACLs.",
+          "authorization": "Trusted bootstrap provenance participates in routine project moderation, governance rosters and lifecycle continuity. Scoped evidence, role assignment, recent MFA and publication rules remain effective.",
+          "compatibility": "Existing role assignments are preserved and deduplicated in the roster. The existing account verification boolean remains alongside optional typed claims. Grants and historical rows are preserved.",
+          "validation": "Disposable five-role matrix checks routine parity, role ordering independence, assigned evidence, lifecycle blockers and direct database grants. The Founder suite checks consent, proof and audit reconciliation.",
+          "rolloutAndRollback": "Run after migrations 09, 10 and 11 under separately approved deployment. Keep issuance closed and apply any recovery through a forward correction."
+        }
+      ]
     }
   ]
 }

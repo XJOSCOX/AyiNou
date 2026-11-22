@@ -119,7 +119,7 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
       : accounts.data.length ? accounts.data.map((account) => <article className={institutionCard} key={account.id}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{account.verified && <>{" "}<PersonalClaimChecks claims={["identity"]} /></>}
+            <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{!!account.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={account.personalClaims} /></>}
               {account.founder ? <>{" "}<FounderMark /></> : account.roles.includes("administrator") && <>{" "}<AdministratorMark /></>}</h2>
             {account.bootstrapTrust && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].bootstrapTrust}</p>}
             {account.username && <p className="break-all text-sm">@{account.username}</p>}

@@ -1,4 +1,5 @@
 import type { Locale } from "./core.js";
+import type { PersonalClaim } from "./trust.js";
 
 export type MembershipCategory = "haitian" | "international_supporter";
 export const interestCodes = ["education", "peace", "healthcare", "agriculture", "technology", "entrepreneurship", "employment", "environment", "infrastructure", "culture"] as const;
@@ -56,6 +57,7 @@ export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: 
 export type AdminOverview = Record<"members" | "organizations" | "recentMembershipEvents" | "pendingVerifications" | "restrictedAccounts" | "recentAdminActions", number>;
 export interface AdminAccount {
   bootstrapTrust?: boolean;
+  personalClaims?: PersonalClaim[];
   founder?: boolean;
   id: string;
   username: string | null;
