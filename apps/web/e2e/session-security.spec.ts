@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ActiveSessionList, PrivateFlow } from "@ayinou/shared";
-import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, localClient, login, enroll, sql,
+import { apiCall, expect, finishPersonalOnboarding, inEnglish, localClient, login, enroll, sql,
   solveMfa, test, totp, web, type Member } from "./fixtures";
 import { sessionSecurityMessages } from "../src/lib/session-security-i18n";
 
