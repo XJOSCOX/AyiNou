@@ -397,4 +397,4 @@ The direct proof workflow adds the recognized Founder’s session-bound authorit
 
 ## FV-FINAL — Founder Verified development release
 
-FV-FINAL adds an exact approved development cohort and policy window, independent appeal review and live gold eligibility for eligible new nongovernment organizations. Reviewed source changes and schema deployment are separate from operational activation. See the [implementation report](docs/identity/FOUNDER_VERIFIED_FINAL_IMPLEMENTATION_REPORT.md) and [operations policy](docs/identity/FOUNDER_VERIFIED_ACTIVATION_POLICY.md).
+FV-FINAL adds an exact approved development cohort and policy window, independent appeal review and live gold eligibility for eligible new nongovernment organizations. The hosted development schema is deployed and verified. Operational activation remains closed and requires a separate approval. See the [implementation report](docs/identity/FOUNDER_VERIFIED_FINAL_IMPLEMENTATION_REPORT.md) and [operations policy](docs/identity/FOUNDER_VERIFIED_ACTIVATION_POLICY.md).

@@ -34,4 +34,4 @@ See the [operating procedure](FOUNDER_VERIFIED_OPERATING_PROCEDURE.md), [activat
 
 ## Remaining blockers
 
-Exact hosted migration approval and separate operational activation approval are required. The latter must identify the approved cohort, appeal staffing, duration and records lifecycle. Both live gates stay closed through schema deployment.
+The reviewed hosted schema deployment is verified. Operational activation still requires a separate approval identifying the approved cohort, independent appeal staffing, duration and records lifecycle. Both live gates remain closed.
