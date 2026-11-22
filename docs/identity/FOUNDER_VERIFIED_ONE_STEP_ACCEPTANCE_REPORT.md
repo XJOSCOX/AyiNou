@@ -32,6 +32,11 @@ Six focused disposable Chromium scenarios passed, including one-click acceptance
 
 See the [operating procedure](FOUNDER_VERIFIED_OPERATING_PROCEDURE.md). The existing standing issuance policy remains active or stopped as previously authorized.
 
+## Hosted deployment
+
+All 97 local Chromium regressions and both immediate-signup scenarios passed. All three [release CI jobs](https://github.com/XJOSCOX/AyiNou/actions/runs/45069225103) passed on `1a805c2aada77abf007074d6d8ee00ae79700cdc`. The owner authorized the exact `20261122170000_fv_one_step_member_acceptance.sql` file for `hcbxulyfmdmuyccgrujs`. The verified SHA-256 was `10a89d3ff4529f48272b4dace155013b6aba8e1439aedce373b9939ec1bd590c`.
+
+Postflight showed 86 applied migrations, zero pending and zero hosted-only. The standing approval, both gates, policy rows, original cohort, cases, audit counts and both gold grants matched the baseline. Hosted PostgREST denied an invalid session and direct anonymous execution. The matching local API denied the signed-out action with a private HTTP 401. A separate cloud app deployment was outside this rollout.
 ## Remaining blockers
 
-Hosted deployment requires authorization for the exact additive migration after the full validation and CI checks.
+Hosted development is verified. The positive one-step gold path was exercised with disposable accounts. No existing hosted case was modified during validation.
