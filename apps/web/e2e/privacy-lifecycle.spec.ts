@@ -150,6 +150,7 @@ test("deletion plans surface ownership and shared data blockers without exposing
   sql(`update feed_data.communities set owner_id='${other.id}' where id='${group.community.id}';`);
   expect((await (await request(owner, path + "preview")).json()).state).toBe("stale");
   expect((await (await request(owner, path + "preview")).json()).warnings).not.toContain("group_owner");
+  sql(`delete from public.role_assignments where user_id='${owner.id}' and role='administrator';`);
 });
 
 test("synthetic holds, execution and quarantine recover without writing product records", async ({ makeMember }) => {

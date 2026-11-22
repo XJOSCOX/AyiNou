@@ -14,7 +14,7 @@ import { institutionAction, institutionCard, institutionField, institutionLink, 
 const path = "/api/v1/admin/governance";
 const invites = "/api/v1/me/governance-invitations";
 const eventLabels: Record<string, string> = {
-  propose: "proposeEvent", approve: "approveEvent", accept: "acceptEvent", withdraw: "withdrawEvent",
+  propose: "proposeEvent", approve: "approveEvent", accept: "acceptEvent", withdraw: "withdrawEvent", activate: "activateEvent",
 };
 
 export function PlatformGovernance() {
@@ -101,9 +101,11 @@ function ProposalRow({ actor, item, reload, member = false }: {
   const t = governanceMessages[locale];
   const command = useGovernanceCommand(actor);
   const { founder } = useMemberIdentity();
-  const action = member ? item.state === "awaiting_acceptance" ? "accept" : null
-    : item.own && !["expired", "withdrawn"].includes(item.state) ? "withdraw"
-      : item.state === "pending" && !item.targeted ? "approve" : null;
+  const founderDirect = item.authorizationMode === "founder_direct";
+  const closed = ["expired", "withdrawn", "activated", "unavailable"].includes(item.state);
+  const action = member ? !founderDirect && item.state === "awaiting_acceptance" ? "accept" : null
+    : item.own && !closed ? "withdraw"
+      : !founderDirect && item.state === "pending" && !item.targeted ? "approve" : null;
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!action) return;
@@ -113,13 +115,14 @@ function ProposalRow({ actor, item, reload, member = false }: {
         ...(action === "approve" && { noConflict: true }) }, reload);
   }
   return <li className="grid gap-2 border-t border-[var(--theme-border)] pt-2">
-    <p className="font-semibold">{t[item.kind]} · {t[item.state]}</p>
+    <p className="font-semibold">{t[item.kind]} · {founderDirect && item.state === "awaiting_acceptance" ? t.awaitingMemberAcceptance : t[item.state]}</p>
+    {founderDirect && <p className="text-sm">{t.founderAuthorized}</p>}
     {item.target && <p className="break-all text-sm">{t.target} · {item.target}</p>}
     {item.rationale && <p className="break-words text-sm">{item.rationale}</p>}
     <p className="text-sm">{t.expires} · <time dateTime={item.expiresAt}>{new Date(item.expiresAt).toLocaleString(locale)}</time></p>
     <GovernanceFeedback error={command.error} receipt={command.receipt} next={member ? "/settings" : "/admin"} />
-    {!member && founder && item.own && item.kind === "appoint" && !["expired", "withdrawn"].includes(item.state) &&
-      <AdministratorInvitation actor={actor} proposal={item.id} />}
+    {!member && founder && item.own && item.kind === "appoint" && !closed &&
+      <AdministratorInvitation actor={actor} proposal={item.id} issued={item.invitationIssued} onRevoked={reload} />}
     {action && <details>
       <summary className="cursor-pointer">{t[action]}</summary>
       <form className="mt-2 grid max-w-xl gap-2" onSubmit={submit}>

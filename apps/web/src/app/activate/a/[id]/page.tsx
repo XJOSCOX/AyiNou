@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AuthShell } from "@/components/auth-shell";
 import { defaultLocale, isLocale, localeCookie } from "@/lib/i18n";
 import { privilegedSetupMessages } from "@/lib/privileged-setup-i18n";
+import { governanceMessages } from "@/lib/governance-i18n";
 import { workflowId, workflowRequest } from "@/lib/privileged-setup-server";
 
 export const dynamic = "force-dynamic";
@@ -17,23 +18,32 @@ export default async function AdministratorActivation({ params, searchParams }: 
   params: Promise<{ id: string }>; searchParams: Promise<{ result?: string }>;
 }) {
   const { id } = await params;
-  const locale = (await cookies()).get(localeCookie)?.value ?? "";
-  const t = privilegedSetupMessages[isLocale(locale) ? locale : defaultLocale];
+  const preference = (await cookies()).get(localeCookie)?.value ?? "";
+  const locale = isLocale(preference) ? preference : defaultLocale;
+  const t = privilegedSetupMessages[locale];
+  const g = governanceMessages[locale];
   const endpoint = "/api/v1/administrator-activation/" + id;
-  const invitation = workflowId.test(id) && await workflowRequest<{ ready: boolean }>(endpoint, undefined, true);
+  const invitation = workflowId.test(id) && await workflowRequest<{
+    ready: boolean;
+    authorizationMode?: "founder_direct";
+    state?: "awaiting_acceptance" | "activated" | "expired" | "withdrawn" | "unavailable";
+  }>(endpoint, undefined, true);
   const failed = (await searchParams).result === "try";
 
   async function activate(data: FormData) {
     "use server";
-    const outcome = await workflowRequest(endpoint, { code: data.get("code"), accept: data.get("accept") === "on" }, true);
+    const outcome = await workflowRequest<{ authorizationMode?: "founder_direct" }>(endpoint,
+      { code: data.get("code"), accept: data.get("accept") === "on" }, true);
     if (!outcome) redirect("/activate/a/" + id + "?result=try");
-    redirect("/admin");
+    redirect(outcome.authorizationMode === "founder_direct" ? "/activate/a/" + id : "/admin");
   }
 
   return <AuthShell>
     <h1 className="text-3xl font-semibold">{invitation ? t.administrator : t.unavailable}</h1>
     {!invitation && <Link className={institutionLink} href="/login">{t.signIn}</Link>}
-    {invitation && !invitation.ready && <p className="mt-4" role="status">{t.pending}</p>}
+    {invitation && invitation.authorizationMode === "founder_direct" && <p className="mt-4">{g.founderAuthorized}</p>}
+    {invitation && !invitation.ready && <p className="mt-4" role="status">{invitation.state ? g[invitation.state] : t.pending}</p>}
+    {invitation && invitation.state === "activated" && <Link href="/admin" className={institutionLink}>{g.governance}</Link>}
     {invitation && invitation.ready && <form action={activate} className="mt-5 grid gap-4">
       <Link href={"/mfa?next=" + encodeURIComponent("/activate/a/" + id)} className={institutionLink}>{t.mfa}</Link>
       <Link href="/settings" className={institutionLink}>{t.settings}</Link>

@@ -41,7 +41,9 @@ export interface GovernanceProposal {
   kind: GovernanceProposalKind;
   version: number;
   governanceVersion: number;
-  state: "pending" | "awaiting_acceptance" | "execution_closed" | "withdrawn" | "expired";
+  state: "pending" | "awaiting_acceptance" | "execution_closed" | "withdrawn" | "expired" | "activated" | "unavailable";
+  authorizationMode?: "founder_direct";
+  invitationIssued?: boolean;
   expiresAt: string;
   accepted: boolean;
   own?: boolean;

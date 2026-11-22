@@ -2,7 +2,7 @@
 
 This plan sequences future work against the blueprint. Every phase starts with a fresh code/SQL inventory and owner-approved scope. A later phase can leave a gated capability closed. The review and publication of this blueprint do not start any phase or authorize hosted changes.
 
-**Sequence.** F1 development release review, including proposed F1.1 → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. Scoped support and program delegation remain separately approved follow-on work within the later integration sequence.
+**Sequence.** F1 development release review, including F1.1 → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. Scoped support and program delegation remain separately approved follow-on work within the later integration sequence.
 
 ## Evidence required for every implementation phase
 
@@ -23,12 +23,12 @@ This plan sequences future work against the blueprint. Every phase starts with a
 
 ## Phase 1.1 — F1.1 Founder-direct Administrator appointments
 
-**OWNER APPROVED — NOT YET IMPLEMENTED**. This is a focused follow-up inside the F1 development release review, before S2. It adds no hosted deployment permission. [Transaction design](ADMINISTRATOR_ACTIVATION.md#smallest-compatible-f11-change)
+**Implemented in source and validated against disposable Supabase.** This is a focused follow-up inside the F1 development release review, before S2. It adds no hosted deployment permission. [Transaction design](ADMINISTRATOR_ACTIVATION.md#f11-authorization-activation-and-compatibility)
 
 | Area | Scope and evidence |
 | --- | --- |
 | Exact code scope | Add a direct authorization mode only for newly confirmed Founder `appoint` proposals. Account for O5 proposal creation/receipt and state projection and F1 readiness, issuance and redemption. Keep ordinary `approve`, general `execute`, succession and recovery unchanged. |
-| Database impact | Plan one additive migration after F1 to constrain the mode and adjust only the relevant O5 and F1 functions and projections. Preserve RLS, service-only RPC grants, the shared lock, uniqueness, original O5 receipts and completed history. Test upgrade without retroactively authorizing legacy proposals. |
+| Database impact | Use the additive F1.1 migration after F1 to constrain the mode and adjust only the relevant O5 and F1 functions and projections. Preserve RLS, service-only RPC grants, the shared lock, uniqueness, original O5 receipts and completed history. Test upgrade without retroactively authorizing legacy proposals. |
 | API, UI and minimum security | Reuse the governance proposal and private invitation/activation routes. Update only direct appointment states and controls. Require live trusted Founder authority, recent MFA and recorded reason, then correct target, credential, current eligibility, fresh MFA and explicit acceptance. No automatic promotion from the invitation itself. |
 | Audit | Link the original decision receipt and reason to issuance, acceptance and activation. Preserve separate actors and a truthful authorization source. Show green only after committed role assignment. Retain expiry, revoke and denial evidence without logging the verifier or raw code. |
 | Localization, CI and development exit | Validate Haitian Creole, French, English and Spanish for readiness, acceptance and unavailable states. Run S1, API contract, full Chromium, production builds, legal boundary and main CI checks. Exit when all cases below pass with restrictions and preexisting behavior intact. Hosted application requires explicit approval. |
@@ -102,7 +102,7 @@ This plan sequences future work against the blueprint. Every phase starts with a
 ## First-install and existing-host test strategy
 
 1. Use `npm run test:e2e -- privileged-setup.spec.ts founder-bootstrap.spec.ts administration-governance.spec.ts` against a fresh disposable database with Mailpit. Start with no Founder and prove ordinary signup cannot claim a protected handle or power. Exercise wrong and exhausted setup secrets, expiry, actual emailed confirmation, no proof under auto-confirm, wrong-actor and second-browser attempts, password/email recovery, MFA and concurrent claim. Verify exactly one committed bootstrap and red projection.
-2. Establish the current F1 baseline in disposable infrastructure. Legacy F1 needs an eligible independent approver, and a lone Founder stays pending. For proposed F1.1, prove a marked direct appointment can activate with a sole Founder only after eligible target acceptance, current MFA and one-time redemption. Run the F1.1 cases above and preserve legacy and unrelated governance behavior.
+2. Establish the current F1 baseline in disposable infrastructure. Legacy F1 needs an eligible independent approver, and a lone Founder stays pending. For F1.1, prove a marked direct appointment can activate with a sole Founder only after eligible target acceptance, current MFA and one-time redemption. Run the F1.1 cases above and preserve legacy and unrelated governance behavior.
 3. Rehearse existing-data upgrade with the earlier migrations and then F1 in disposable infrastructure. Ensure the existing Founder can continue and no competing bootstrap can form. Compare expected RLS, grants and migration fingerprints. Test recoverability using synthetic database + Storage, not merely a schema dump.
 4. On the existing hosted development project, use a read-only project/reference check, dry run, preservation inventory and catalog/role postflight only when separately requested. Preserve all records, credentials, project settings and history. F1 deployment approval can name just that migration; it does not confer permission to reset or change runtime gates.
 

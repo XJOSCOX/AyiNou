@@ -52,6 +52,10 @@ The O5 regression suite uses disposable Supabase with synthetic members, adminis
 
 Operational rollout requires the pending O2, O3, O4 and O5 migrations in that order, followed by matched API and web releases. The read-only hosted dry run for project `hcbxulyfmdmuyccgrujs` listed O2, O3, O4 and O5 in that order. All four were pending at verification. Production application needs separate authorization. A rollback should roll forward with privileged execution closed, preserve the ledger and routing guards, and avoid restoring the legacy administrator mutation as a substitute.
 
+## F1.1 compatibility
+
+New Founder-direct Administrator appointments carry a separate authorization mode. The original proposal receipt records Founder authorization, and only private activation can commit the target’s acceptance and grant. Legacy appointments retain their approval and acceptance rules. Other O5 proposal types and generic execution remain unchanged. [F1.1 implementation](../governance/F1_1_IMPLEMENTATION_REPORT.md)
+
 ## Remaining blockers
 
 High-impact execution and operational recovery require an approved delegation and succession procedure, named custodians, provider-backed recovery, separate proof, independent authorization, time-limited access, rehearsal and retrospective review. No operational execution receipt can be generated while these controls are closed. O6 will need its own policy, permissions, and partner dependency integration. O5 contains no Early Partner records, Founder Verified issuance, policy publication or real privacy operations.

@@ -21,7 +21,7 @@ Derive the Founder from trusted bootstrap provenance even if the account has no 
 
 Revoke or constrain ordinary sessions before allowing promoted Administrator access. No existing 30-day deadline can carry into a privileged session. Role revocation removes Administrator authority immediately, including on other devices. Preserve 15-minute TOTP freshness on applicable privileged commands and action-specific step-up.
 
-Current F1 Administrator activation requires a separate O5 approver. The owner superseded that requirement for new Founder-authorized appointments. Proposed F1.1 will preserve the named member’s own account, explicit acceptance, fresh MFA and one-time credential. S2 must preserve whichever appointment modes are supported at its baseline, including legacy approvals where applicable. [Administrator activation](../blueprints/ADMINISTRATOR_ACTIVATION.md)
+Current F1 Administrator activation requires a separate O5 approver. The owner superseded that requirement for new Founder-authorized appointments. F1.1 preserves the named member’s own account, explicit acceptance, fresh MFA and one-time credential. S2 must preserve whichever appointment modes are supported at its baseline, including legacy approvals where applicable. [Administrator activation](../blueprints/ADMINISTRATOR_ACTIVATION.md)
 
 ## Private workflow references
 
@@ -46,7 +46,7 @@ Apply the [audit event policy](../standards/AUDIT_EVENT_POLICY.md) to login, rem
 | Multiple devices and cross-account isolation | Keep each device session scoped to its own account and deadline. Exercise concurrent sessions, logout, targeted revocation and stale or switched account state. |
 | Current MFA | Require current assurance and a TOTP proof within 15 minutes on applicable privileged commands, independently of remaining session lifetime. |
 | Server, API and database | Verify Next.js, Fastify and applicable PostgreSQL/RPC/Storage boundaries agree just before and at each expiry, after revocation and after role changes. |
-| Existing F1 workflows | Regress proof and one-time Founder setup, supported appointment modes, named member redemption, reuse and the Administrator session transition. When F1.1 is available, prove a first direct appointment works with a sole Founder and existing independent approval safeguards still apply to legacy proposals and unrelated governance. |
+| Existing F1 workflows | Regress proof and one-time Founder setup, supported appointment modes, named member redemption, reuse and the Administrator session transition. Prove a first direct appointment works with a sole Founder and existing independent approval safeguards still apply to legacy proposals and unrelated governance. |
 | Private workflows | Cross-account copied link and account switching fail safely. Original-session-only flows reject another session. Ordinary drafts resume across authorized devices. Expired, revoked or completed flows cannot be replayed. |
 | Production readiness | Verify effective provider settings and a compatible database/application rollout in disposable infrastructure. Document recovery and staff observability. Obtain separate authorization before enabling production policy. |
 

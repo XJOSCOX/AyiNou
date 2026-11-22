@@ -160,7 +160,11 @@ governanceTest("O5 independent decisions and target acceptance confer no executi
   sql(`insert into private.platform_bootstrap(user_id) values ('${admin.id}');
     insert into private.platform_admin_audit(subject_id,event,reason)
       values ('${admin.id}','first_account_bootstrapped','Disposable O5 founding provenance');`);
-  const created = await apiCall(admin, governance + "/proposals", 200, "POST", make("appoint", target.id));
+  const legacyId = sql(`insert into private.platform_governance_proposals(proposer_id,target_id,kind,governance_version)
+    values ('${admin.id}','${target.id}','appoint',${state.version}) returning id;`).split(/\r?\n/)[0];
+  const created = (await apiCall(admin, governance, 200)).proposals.find((item: { id: string }) => item.id === legacyId);
+  expect(created).toMatchObject({ state: "pending", accepted: false });
+  expect(created.authorizationMode).toBeUndefined();
   const path = governance + "/proposals/" + created.id + "/actions";
   const approval = { ...adminAction(created.version, "approve"), noConflict: true };
   await apiCall(admin, path, 403, "POST", approval);

@@ -773,6 +773,21 @@
           "rolloutAndRollback": "Apply only under separate F1 approval, after the six completed development migrations. Use forward remediation and preserve audit evidence."
         }
       ]
+    },
+    {
+      "id": "f11-founder-direct-administrator-appointments",
+      "report": "docs/governance/F1_1_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121141000_founder_direct_administrator_appointments.sql",
+          "rlsAndGrants": "Reuses private O5 and F1 relations with RLS and no direct grants. Preserves service-only wrappers and restricts the private helper.",
+          "authorization": "A verified active Founder confirms a versioned appointment. Target redemption rechecks actor, scoped authority, recent MFA, credential and lifecycle. Legacy independent approval stays required.",
+          "compatibility": "Preserves existing routes, default independent records, governance decisions, scoped grants and identity gates.",
+          "validation": "Disposable full-chain tests cover first Administrator, legacy approval, concurrency, invalid credentials, suspension, and linked audits.",
+          "rolloutAndRollback": "Follows F1 after explicit hosted approval. Use reviewed forward remediation while preserving historical decisions."
+        }
+      ]
     }
   ]
 }

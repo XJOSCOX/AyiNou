@@ -1,4 +1,9 @@
 {
+  "founderAuthorized": "Autorizado por el fundador",
+  "awaitingMemberAcceptance": "Pendiente de aceptación del miembro",
+  "activated": "Activado",
+  "unavailable": "Revocado o no disponible",
+  "activateEvent": "Nombramiento de administrador activado",
   "partner_obligations": "Compromisos de socio inicial",
   "expires": "Vence",
   "corrections": "Correcciones de incorporación",

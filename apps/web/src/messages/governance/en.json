@@ -1,4 +1,9 @@
 {
+  "founderAuthorized": "Authorized by Founder",
+  "awaitingMemberAcceptance": "Awaiting member acceptance",
+  "activated": "Activated",
+  "unavailable": "Revoked or unavailable",
+  "activateEvent": "Administrator appointment activated",
   "partner_obligations": "Early Partner obligations",
   "expires": "Expires",
   "corrections": "Onboarding corrections",
