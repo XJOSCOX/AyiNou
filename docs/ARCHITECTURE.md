@@ -227,3 +227,7 @@ Authentication screens use a shared responsive shell and theme variables. The re
 ## D1 rollout boundary
 
 Pause legacy institution and ownership-claim writers before applying O2. O4 installs the database-level refusal for the old API. Complete database postflight before releasing the pinned API and web artifacts or resuming writes. [D1 rollout and containment](deployment/D1_DEPLOYMENT_APPROVAL_CHECKLIST.md)
+
+## U1 public username boundary
+
+Supabase Auth inserts an account-bound, expiring reservation during signup and confirms it during email verification. The existing profile username constraint is authoritative for ownership. Fastify exposes an uncached, rate-limited availability response and a protected staff review action. UUIDs continue to identify relationships. See [U1 architecture](identity/U1_USERNAME_ARCHITECTURE.md).

@@ -17,19 +17,14 @@ import Link from "next/link";
 import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-
-const reserved = ["admin", "support", "ayinou", "system", "root", "moderator", "administrator"];
+import { UsernameField, useUsernameAvailability } from "@/components/username-field";
+import { usernameMessages } from "@/lib/username-i18n";
+import { normalizePublicUsername, publicUsernamePattern } from "@ayinou/shared";
 
 const validName = (value: string) => value.trim().length >= 1 && value.trim().length <= 80 && !/\p{Cc}/u.test(value.trim());
 
-function usernameSuggestion(displayName: string) {
-  const base = displayName.normalize("NFKD").toLowerCase().replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 18);
-  return `${base || "member"}_${Math.floor(1000 + Math.random() * 9000)}`;
-}
-
-export function ProfileEditor({ profile, departments, onboarding }: {
-  profile: MemberProfile; departments: Department[]; onboarding: boolean;
+export function ProfileEditor({ profile, departments, onboarding, useSignupDefaults = false }: {
+  profile: MemberProfile; departments: Department[]; onboarding: boolean; useSignupDefaults?: boolean;
 }) {
   const [locale, setLocale] = useLocale();
   const { claims, administrator, founder, founderVerified, setAvatarUrl } = useMemberIdentity();
@@ -38,7 +33,9 @@ export function ProfileEditor({ profile, departments, onboarding }: {
   const m = membershipMessages[locale];
   const errors = {
     invalidPrivateNames: m.invalidPrivateNames, categoryRequired: m.categoryRequired, countryCodeHint: t.countryCodeHint,
-    usernameHint: m.usernameHint, invalidName: t.invalidName, usernameTaken: m.usernameTaken, saveError: t.saveError,
+    usernameHint: usernameMessages[locale].invalid, invalidName: t.invalidName, usernameTaken: m.usernameTaken, saveError: t.saveError,
+    usernameConfirm: usernameMessages[locale].confirm, usernameBlocked: usernameMessages[locale].blocked,
+    usernameLimit: usernameMessages[locale].limit,
   };
   const router = useRouter();
   const [saved, setSaved] = useState(profile);
@@ -47,13 +44,16 @@ export function ProfileEditor({ profile, departments, onboarding }: {
   const [lastName, setLastName] = useState(profile.lastName ?? "");
   const [displayName, setDisplayName] = useState(profile.displayName ?? "");
   const [preferredLocaleChoice, setPreferredLocale] = useState<Locale | null>(null);
-  const preferredLocale = preferredLocaleChoice ?? (onboarding && step === 0 ? locale : saved.preferredLocale);
+  const preferredLocale = preferredLocaleChoice ?? (onboarding && step === 0 && !useSignupDefaults ? locale : saved.preferredLocale);
   const [category, setCategory] = useState<MembershipCategory | "">(profile.membershipCategory ?? "");
   const [country, setCountry] = useState(profile.residenceCountryCode ?? "");
   const [countryOption, setCountryOption] = useState(country && !countryOptions.includes(country) ? "other" : country);
   const [department, setDepartment] = useState(profile.residenceDepartmentCode ?? "");
   const [connection, setConnection] = useState(profile.diasporaDepartmentCode ?? "");
   const [username, setUsername] = useState(profile.username ?? "");
+  const changingUsername = normalizePublicUsername(username) !== saved.username;
+  const usernameCheck = useUsernameAvailability(username, changingUsername && (!onboarding || step === 2));
+  const [confirmedUsername, setConfirmedUsername] = useState<string | null>(null);
   const [biography, setBiography] = useState(profile.biography ?? "");
   const [interests, setInterests] = useState<InterestCode[]>(profile.interests ?? []);
   const [discoverable, setDiscoverable] = useState(profile.discoverable ?? false);
@@ -89,10 +89,12 @@ export function ProfileEditor({ profile, departments, onboarding }: {
       });
     }
     if (all || step === 2) {
-      const normalized = username.trim().toLowerCase();
-      if (!/^[a-z0-9][a-z0-9_]{2,23}$/.test(normalized) || reserved.includes(normalized)) { setError("usernameHint"); return; }
-      if (displayName.trim().length < 2 || displayName.trim().length > 80) { setError("invalidName"); return; }
-      Object.assign(changes, { username: normalized, displayName: displayName.trim(), biography: biography.trim() || null, discoverable, showMembershipCategory: showCategory });
+      if (changingUsername && !publicUsernamePattern.test(usernameCheck.candidate)) { setError("usernameHint"); return; }
+      if (changingUsername && saved.username && confirmedUsername !== usernameCheck.candidate) { setError("usernameConfirm"); return; }
+      const publicName = useSignupDefaults ? usernameCheck.candidate : displayName.trim();
+      if (publicName.length < 2 || publicName.length > 80) { setError("invalidName"); return; }
+      Object.assign(changes, { displayName: publicName, biography: biography.trim() || null, discoverable, showMembershipCategory: showCategory });
+      if (changingUsername) changes.username = usernameCheck.candidate;
     }
     if (all || step === 3) changes.interests = skip ? [] : interests;
     if (onboarding) changes.onboardingStep = step + 1;
@@ -100,6 +102,11 @@ export function ProfileEditor({ profile, departments, onboarding }: {
     try {
       const result = await updateMyProfile(changes);
       setSaved(result);
+      if (changes.username) {
+        setUsername(result.username ?? "");
+        setDisplayName(result.displayName ?? "");
+        setConfirmedUsername(null);
+      }
       if (onboarding && step === 0) {
         void browserSupabase().auth.updateUser({ data: { first_name: null, last_name: null } }).catch(() => {});
       }
@@ -112,7 +119,10 @@ export function ProfileEditor({ profile, departments, onboarding }: {
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "";
       if (code === "UNAUTHORIZED") router.replace("/login");
-      else setError(code === "USERNAME_TAKEN" ? "usernameTaken" : "saveError");
+      else if (code === "USERNAME_TAKEN") setError("usernameTaken");
+      else if (code === "USERNAME_NOT_PERMITTED") setError("usernameBlocked");
+      else if (code === "USERNAME_CHANGE_LIMIT") setError("usernameLimit");
+      else setError("saveError");
     } finally { setBusy(false); }
   }
 
@@ -179,11 +189,15 @@ export function ProfileEditor({ profile, departments, onboarding }: {
     <fieldset className="space-y-4">
       <legend className={all ? "sr-only" : "text-lg font-bold"}>{m.publicProfile}</legend>
       <div className={all ? "grid gap-4 sm:grid-cols-2" : "space-y-4"}>
-        <label className="block">{t.displayName}<input className={input} autoComplete="nickname" maxLength={80} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></label>
-        <label className="block">{m.username}<input className={input} autoComplete="username" autoCapitalize="none" spellCheck={false} aria-describedby="username-hint" maxLength={24} value={username} onChange={(e) => setUsername(e.target.value)} required /></label>
+        {!useSignupDefaults && <label className="block">{t.displayName}<input className={input} autoComplete="nickname" maxLength={80} value={displayName} onChange={(e) => setDisplayName(e.target.value)} required /></label>}
+        <UsernameField value={username} onChange={(value) => { setUsername(value); setConfirmedUsername(null); }}
+          check={usernameCheck} className={input} existing={!!saved.username} />
       </div>
-      <p id="username-hint" className="text-xs text-[var(--theme-body)]">{m.usernameHint}</p>
-      <button type="button" className="text-sm font-semibold text-[var(--theme-link)] underline" onClick={() => setUsername(usernameSuggestion(displayName))}>{m.suggestion}</button>
+      {saved.username && changingUsername && <label className="flex items-start gap-2 text-sm">
+        <input type="checkbox" className="mt-1" checked={confirmedUsername === usernameCheck.candidate}
+          onChange={(event) => setConfirmedUsername(event.target.checked ? usernameCheck.candidate : null)} />
+        {usernameMessages[locale].confirm}
+      </label>}
       <label className="block">{m.biography}<textarea className={input} rows={3} value={biography} onChange={(e) => setBiography(e.target.value)} maxLength={320} /></label>
       <div>
         <p>{m.photo}</p>

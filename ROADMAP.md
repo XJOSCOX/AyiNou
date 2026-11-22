@@ -366,3 +366,7 @@ The reviewed O2–O7 migrations are deployed to the owner-approved development d
 ## Future Session Security milestone
 
 Plan opt-in remembered devices, absolute role-based session limits, session management and authorized private workflow links. Activation depends on test evidence across Supabase Auth, Next.js, Fastify and PostgreSQL. [Implementation plan](docs/security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
+
+## U1 public usernames
+
+U1 adds username selection and availability to both signup choices. The hosted migration remains pending separate authorization. Long-term cooldown, retention and support operations remain policy decisions. See the [U1 implementation report](docs/identity/U1_IMPLEMENTATION_REPORT.md).

@@ -149,3 +149,7 @@ Check hosted migration history and the O2 through O6 dry run before any approved
 ## O7 organization rollout rehearsal
 
 Run `npm run test:e2e -- --organization-rollout organization-integration.spec.ts auth-recovery.spec.ts` to install the L6.2A baseline, apply O2–O7 incrementally on disposable Supabase and test the new app. A hosted dry run verifies ordering. Production deployment requires separate authorization. [O7 deployment runbook](organizations/O7_DEPLOYMENT_RUNBOOK.md)
+
+## U1 signup release checkpoint
+
+Confirm the approved migration sequence, Auth email confirmation settings and recovery checkpoint before U1 deployment. Deploy the database migration before the web signup UI. Verify both registration choices, old profile links, referral and organization intent, and existing Founder authority. See the [U1 implementation report](identity/U1_IMPLEMENTATION_REPORT.md).

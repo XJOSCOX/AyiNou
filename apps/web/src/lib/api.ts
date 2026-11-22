@@ -1,4 +1,4 @@
-import type { CommunityStats, Department, MemberProfile, ProfileChanges, ReferralSummary, StatusResponse } from "@ayinou/shared";
+import type { CommunityStats, Department, MemberProfile, ProfileChanges, ReferralSummary, StatusResponse, UsernameAvailability } from "@ayinou/shared";
 import { browserSupabase } from "./supabase/browser";
 import { ApiRequestError, requestJson, requestResponse } from "./api-errors";
 
@@ -46,6 +46,15 @@ export function publicRequest(path: string, init?: RequestInit) {
   headers.set("Accept", "application/json");
   if (init?.body) headers.set("Content-Type", "application/json");
   return requestJson(`${apiBaseUrl}${path}`, { ...init, headers });
+}
+
+export async function getUsernameAvailability(username: string, signal?: AbortSignal): Promise<UsernameAvailability> {
+  const deadline = AbortSignal.timeout(5_000);
+  const payload = await publicRequest(`/api/v1/usernames/availability?${new URLSearchParams({ username })}`, {
+    signal: signal ? AbortSignal.any([signal, deadline]) : deadline,
+  });
+  if (["available", "taken", "invalid", "reserved", "blocked", "unavailable"].includes(payload?.status)) return payload.status;
+  throw new ApiRequestError("API_ERROR", 502);
 }
 
 const pendingProfiles = new Map<string, Promise<MemberProfile>>();

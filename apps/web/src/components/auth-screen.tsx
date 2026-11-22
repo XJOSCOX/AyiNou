@@ -4,19 +4,20 @@ import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { completePasswordRecovery } from "@/app/reset-password/actions";
-import { referralCodePattern, type SignupPath } from "@ayinou/shared";
+import { publicUsernamePattern, referralCodePattern, type SignupPath } from "@ayinou/shared";
 import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { AuthShell } from "./auth-shell";
 import { accountMessages } from "@/lib/account-i18n";
-import { validateReferralCode } from "@/lib/api";
+import { getUsernameAvailability, validateReferralCode } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { membershipMessages } from "@/lib/membership-i18n";
-import { isLocale, languageNames, locales } from "@/lib/i18n";
 import { validNewPassword } from "@/lib/password-policy";
 import { passwordSecurityMessages } from "@/lib/password-security-i18n";
 import { PasswordRequirements } from "./password-requirements";
+import { UsernameField, useUsernameAvailability } from "./username-field";
+import { usernameMessages } from "@/lib/username-i18n";
 import styles from "./auth-screen.module.css";
 
 export type AuthMode = "register" | "login" | "verify" | "forgot" | "reset";
@@ -29,14 +30,15 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   mode: AuthMode; invalidLink?: boolean; initialReferral?: string; claimHandle?: string; joinHandle?: string;
   recoverySession?: string; passwordReset?: boolean;
 }) {
-  const [locale, setLocale] = useLocale();
+  const [locale] = useLocale();
   const t = authMessages[locale];
   const m = membershipMessages[locale];
   const account = accountMessages[locale];
   const passwordCopy = passwordSecurityMessages[locale];
   const creatingPassword = mode === "register" || mode === "reset";
   const errors = {
-    invalidEmail: t.invalidEmail, invalidPassword: passwordCopy.invalid, invalidName: t.invalidName,
+    usernameConflict: usernameMessages[locale].conflict, usernameNetwork: usernameMessages[locale].network,
+    invalidEmail: t.invalidEmail, invalidPassword: passwordCopy.invalid,
     mismatch: passwordCopy.mismatch, samePassword: passwordCopy.samePassword, signOutPending: passwordCopy.signOutPending,
     invalidCredentials: t.invalidCredentials, invalidReferral: account.invalidReferral,
     invalidPrivateNames: m.invalidPrivateNames, confirmationUnavailable: t.confirmationUnavailable,
@@ -47,7 +49,8 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordChanged, setPasswordChanged] = useState(false);
-  const [displayName, setDisplayName] = useState("");
+  const [username, setUsername] = useState("");
+  const usernameCheck = useUsernameAvailability(username, mode === "register");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [referral, setReferral] = useState(initialReferral);
@@ -85,13 +88,22 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
       !name.trim() || name.trim().length > 80 || /\p{Cc}/u.test(name.trim()))) {
       setError("invalidPrivateNames"); return;
     }
-    if (mode === "register" && (displayName.trim().length < 2 || displayName.trim().length > 80)) {
-      setError("invalidName"); return;
+    if (mode === "register" && !publicUsernamePattern.test(usernameCheck.candidate)) {
+      usernameCheck.report("invalid");
+      setError("usernameConflict");
+      return;
     }
     setLoading(true);
     try {
       const supabase = browserSupabase();
       if (mode === "register") {
+        const status = usernameCheck.status === "available" ? "available"
+          : await getUsernameAvailability(usernameCheck.candidate).catch(() => "network" as const);
+        usernameCheck.report(status);
+        if (status !== "available") {
+          setError(status === "network" ? "usernameNetwork" : "usernameConflict");
+          return;
+        }
         const code = referral.trim().toUpperCase();
         if (code && (!referralCodePattern.test(code) || !await validateReferralCode(code))) {
           setError("invalidReferral");
@@ -102,8 +114,8 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
             data: {
-              display_name: displayName.trim(), preferred_locale: locale, first_name: firstName.trim(), last_name: lastName.trim(),
-              signup_path: signupPath,
+              preferred_locale: locale, first_name: firstName.trim(), last_name: lastName.trim(),
+              signup_path: signupPath, public_username: usernameCheck.candidate,
               ...(code ? { referral_code: code } : {}),
             },
           },
@@ -113,7 +125,18 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           return;
         }
         if (authError?.code === "weak_password") { setError("invalidPassword"); return; }
-        if (authError) throw authError;
+        if (authError) {
+          // Auth reports a generic insertion failure when another signup wins the lease.
+          if (authError.code === "unexpected_failure" || (authError.status ?? 0) >= 500) {
+            const latest = await getUsernameAvailability(usernameCheck.candidate).catch(() => "network" as const);
+            if (latest !== "available" && latest !== "network") {
+              usernameCheck.report(latest);
+              setError("usernameConflict");
+              return;
+            }
+          }
+          throw authError;
+        }
         router.push("/verify-email");
       } else if (mode === "login") {
         const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
@@ -221,23 +244,18 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
                 </label>
               </div>
               <p id="private-names" className="text-xs text-[var(--theme-body)]">{m.privateNames}</p>
-              <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
-                <label className="relative block" htmlFor="display-name">
-                  <input id="display-name" value={displayName} onChange={(e) => setDisplayName(e.target.value)} className={floatingFieldClass} placeholder=" " autoComplete="nickname" required minLength={2} maxLength={80} />
-                  <span className={styles.fieldLabel}>{t.displayName}</span>
-                </label>
-                <label className="relative block">
-                  <select className={floatingFieldClass} value={locale} onChange={(event) => {
-                    if (isLocale(event.target.value)) setLocale(event.target.value);
-                  }}>
-                    {locales.map((option) => <option key={option} value={option} lang={option}>{languageNames[option]}</option>)}
-                  </select>
-                  <span className={styles.fieldLabel}>{t.preferredLanguage}</span>
+              <div className="grid items-start gap-4 sm:grid-cols-2">
+                <UsernameField value={username} onChange={setUsername} check={usernameCheck} showPreview
+                  className={fieldClass + " min-h-11 py-2"} />
+                <label htmlFor="email" className="block min-w-0 space-y-1.5 font-medium">
+                  <span className="block">{t.email}</span>
+                  <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                    className={fieldClass + " min-h-11 py-2 font-normal"} autoComplete="email" required />
                 </label>
               </div>
             </>
           )}
-          {mode !== "reset" && (
+          {mode !== "reset" && mode !== "register" && (
             <div className="relative">
               <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)}
                 className={floatingFieldClass} placeholder=" " autoComplete="email" required />

@@ -1,0 +1,21 @@
+{
+  "choose": "Choose a username",
+  "guidance": "Start with a letter. Use 3–24 letters from a to z, numbers, or underscores.",
+  "checking": "Checking availability…",
+  "available": "Username available",
+  "taken": "Username taken",
+  "invalid": "Enter a valid username.",
+  "reserved": "This username is reserved for platform use.",
+  "blocked": "This username is not permitted.",
+  "unavailable": "This username is unavailable. Choose another.",
+  "network": "Availability could not be checked.",
+  "retry": "Check again",
+  "suggestion": "Try @{username}",
+  "preview": "Public profile preview",
+  "rename": "Change username",
+  "confirm": "I confirm that I want to change my public username.",
+  "review": "If you believe this name was blocked by mistake, request a safety review.",
+  "contact": "Request a safety review",
+  "limit": "You’ve reached today’s username change limit. Try again later.",
+  "conflict": "Choose an available username to continue."
+}

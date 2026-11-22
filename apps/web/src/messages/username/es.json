@@ -1,0 +1,21 @@
+{
+  "choose": "Elige un nombre de usuario",
+  "guidance": "Empieza con una letra. Usa de 3 a 24 caracteres: letras de la a a la z, números o guiones bajos.",
+  "checking": "Comprobando disponibilidad…",
+  "available": "Nombre de usuario disponible",
+  "taken": "Nombre de usuario en uso",
+  "invalid": "Introduce un nombre de usuario válido.",
+  "reserved": "Este nombre está reservado para la plataforma.",
+  "blocked": "Este nombre de usuario no está permitido.",
+  "unavailable": "Este nombre no está disponible. Elige otro.",
+  "network": "No se pudo comprobar la disponibilidad.",
+  "retry": "Volver a comprobar",
+  "suggestion": "Probar @{username}",
+  "preview": "Vista previa del perfil público",
+  "rename": "Cambiar el nombre de usuario",
+  "confirm": "Confirmo que quiero cambiar mi nombre de usuario público.",
+  "review": "Si crees que el nombre se bloqueó por error, solicita una revisión de seguridad.",
+  "contact": "Solicitar una revisión de seguridad",
+  "limit": "Has alcanzado el límite de cambios de hoy. Vuelve a intentarlo más tarde.",
+  "conflict": "Elige un nombre de usuario disponible para continuar."
+}

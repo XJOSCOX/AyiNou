@@ -54,7 +54,7 @@ test("O7 organization signup continues through independent review, receipt recon
     await page.locator('input[name="signup-path"][value="organization"]').check();
     await page.getByLabel(member.firstName, { exact: true }).fill("Ana");
     await page.getByLabel(member.lastName, { exact: true }).fill("Fixture");
-    await page.locator("#display-name").fill("O7 Fixture");
+    await page.locator('input[name="username"]').fill(handle.replaceAll("-", "_"));
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("#confirm-password").fill(password);
@@ -78,7 +78,7 @@ test("O7 organization signup continues through independent review, receipt recon
     await page.getByRole("button", { name: member.continue, exact: true }).click();
     await page.getByRole("button", { name: member.skip, exact: true }).click();
     // The personal handle uses underscores while the organization handle uses hyphens.
-    await page.getByLabel(/username/i).fill(handle.replaceAll("-", "_"));
+    await expect(page.locator('input[name="username"]')).toHaveValue(handle.replaceAll("-", "_"));
     await page.getByRole("button", { name: member.continue, exact: true }).click();
     await page.getByRole("button", { name: member.skip, exact: true }).click();
     await page.getByRole("link", { name: onboarding.resume, exact: true }).click();

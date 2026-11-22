@@ -1,0 +1,21 @@
+{
+  "choose": "Chwazi yon non itilizatè",
+  "guidance": "Kòmanse ak yon lèt. Sèvi ak 3–24 karaktè: lèt a rive z, chif oswa tirè anba.",
+  "checking": "N ap verifye si non an disponib…",
+  "available": "Non itilizatè a disponib",
+  "taken": "Non itilizatè a deja pran",
+  "invalid": "Antre yon non itilizatè ki valab.",
+  "reserved": "Non sa a rezève pou platfòm nan.",
+  "blocked": "Non itilizatè sa a pa otorize.",
+  "unavailable": "Non sa a pa disponib. Chwazi yon lòt.",
+  "network": "Nou pa t ka verifye si non an disponib.",
+  "retry": "Verifye ankò",
+  "suggestion": "Eseye @{username}",
+  "preview": "Men jan pwofil piblik la ap parèt",
+  "rename": "Chanje non itilizatè",
+  "confirm": "Mwen konfime mwen vle chanje non itilizatè piblik mwen an.",
+  "review": "Si w panse se yon erè ki fè yo bloke non an, mande yon revizyon sekirite.",
+  "contact": "Mande yon revizyon sekirite",
+  "limit": "Ou rive nan limit chanjman non pou jodi a. Eseye pita.",
+  "conflict": "Chwazi yon non itilizatè ki disponib pou kontinye."
+}

@@ -135,3 +135,7 @@ Early Partners is a future limited organization pilot. The test workflow covers 
 ## O7 signup and account recovery
 
 Sign-in, signup, verification and recovery use the same adaptable layout and theme. Signup and reset show localized password requirements and ask members to confirm their password. Accounts with an enrolled authenticator must confirm it before a recovery password change. [O7 readiness](organizations/O7_READINESS_MATRIX.md)
+
+## Public usernames and display names
+
+Both registration choices collect a unique public username. It starts as the member’s public display name. The signup language control also sets the account’s preferred language. Members can change their display name and language from their profile. Display names may duplicate and support ordinary Unicode. See the [username moderation policy](identity/U1_USERNAME_MODERATION_POLICY.md).

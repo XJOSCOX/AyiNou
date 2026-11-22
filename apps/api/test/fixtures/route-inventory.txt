@@ -129,6 +129,7 @@ GET /api/v1/status - -
 GET /api/v1/trust/application-assignments - -
 GET /api/v1/trust/impersonation - -
 GET /api/v1/trust/verification-appeals - -
+GET /api/v1/usernames/availability - -
 GET /api/v1/verification/review - -
 GET /health - -
 HEAD /api/v1/admin/accounts - onSend
@@ -248,6 +249,7 @@ HEAD /api/v1/status - onSend
 HEAD /api/v1/trust/application-assignments - onSend
 HEAD /api/v1/trust/impersonation - onSend
 HEAD /api/v1/trust/verification-appeals - onSend
+HEAD /api/v1/usernames/availability - onSend
 HEAD /api/v1/verification/review - onSend
 HEAD /health - onSend
 OPTIONS * - -
@@ -294,6 +296,7 @@ POST /api/v1/admin/governance/proposals/:id/actions 1536 -
 POST /api/v1/admin/legal/actions 4096 -
 POST /api/v1/admin/organization-onboarding/:id/corrections 1536 -
 POST /api/v1/admin/privacy-requests/* 512 -
+POST /api/v1/admin/usernames/review 512 -
 POST /api/v1/affiliation-invitations/:id/:action 256 -
 POST /api/v1/comments/:id/reports 4096 -
 POST /api/v1/communities 13000 -

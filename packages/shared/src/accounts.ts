@@ -1,6 +1,14 @@
 import type { Locale } from "./core.js";
 import type { PersonalClaim } from "./trust.js";
 
+export const publicUsernamePattern = /^[a-z][a-z0-9_]{2,23}$/;
+
+export function normalizePublicUsername(value: string): string {
+  return value.replace(/^[ \t\r\n]+|[ \t\r\n]+$/g, "").replace(/[A-Z]/g, (letter) => letter.toLowerCase());
+}
+
+export type UsernameAvailability = "available" | "taken" | "invalid" | "reserved" | "blocked" | "unavailable";
+
 export type MembershipCategory = "haitian" | "international_supporter";
 export const interestCodes = ["education", "peace", "healthcare", "agriculture", "technology", "entrepreneurship", "employment", "environment", "infrastructure", "culture"] as const;
 export type InterestCode = typeof interestCodes[number];

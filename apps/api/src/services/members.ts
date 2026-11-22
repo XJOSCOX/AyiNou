@@ -1,13 +1,18 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
-import type { Department, MemberProfile, PersonalClaim, ProfileChanges, ProfilePreview, UpdateMemberProfile } from "@ayinou/shared";
+import type { Department, MemberProfile, PersonalClaim, ProfileChanges, ProfilePreview, UpdateMemberProfile, UsernameAvailability } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { accountRepository, type AccountRepository } from "./accounts.js";
 import { safeProfileImage } from "./profile-image.js";
 
 export interface MemberRepository {
   accounts?: AccountRepository;
+  usernameAvailability?(username: string): Promise<UsernameAvailability>;
+  reviewUsername?(input: {
+    actor: string; session: string; totpAt: number; requestId: string; action: string;
+    username: string; replacement?: string; reason: string;
+  }): Promise<{ receiptId: string; event: string }>;
   hasPersonalVerification?(userId: string): Promise<boolean>;
   personalVerification?(userId: string): Promise<PersonalClaim[]>;
   get(userId: string, token: string): Promise<MemberProfile>;
@@ -150,6 +155,9 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       await initialize(userId);
       const { error } = await asMember(token).rpc("save_member_profile_v2", { p_changes: input });
       if (error?.code === "23505") throw new MemberError("USERNAME_TAKEN", 409);
+      if (error?.code === "U1001") throw new MemberError("USERNAME_NOT_PERMITTED", 400);
+      if (error?.code === "U1002") throw new MemberError("USERNAME_CHANGE_LIMIT", 429);
+      if (error?.code === "42501") throw new MemberError("FORBIDDEN", 403);
       if (error && ["23514", "23503"].includes(error.code)) throw new MemberError("INVALID_PROFILE", 400);
       if (error) throw unavailable();
       await recordActivity(userId);
@@ -182,6 +190,24 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       const signed = await avatarUrl(userId, asset);
       if (!signed) throw unavailable();
       return signed;
+    },
+    async usernameAvailability(username) {
+      const { data, error } = await admin.rpc("username_availability_for_api", { p_username: username });
+      if (error || !["available", "taken", "invalid", "reserved", "blocked", "unavailable"].includes(data)) {
+        throw new MemberError("SERVICE_UNAVAILABLE", 503);
+      }
+      return data as UsernameAvailability;
+    },
+    async reviewUsername(input) {
+      const { data, error } = await admin.rpc("review_username_for_api", {
+        p_actor: input.actor, p_session: input.session, p_totp: input.totpAt, p_request: input.requestId,
+        p_action: input.action, p_username: input.username, p_new_username: input.replacement ?? null, p_reason: input.reason,
+      });
+      if (error?.code === "42501") throw new MemberError("FORBIDDEN", 403);
+      if (error && ["U1003", "23505"].includes(error.code)) throw new MemberError("USERNAME_REVIEW_CONFLICT", 409);
+      if (error && ["23514", "U1001"].includes(error.code)) throw new MemberError("USERNAME_NOT_PERMITTED", 400);
+      if (error || typeof data?.receiptId !== "string" || typeof data?.event !== "string") throw unavailable();
+      return data;
     },
     async publicProfile(username, token) {
       const client = token ? asMember(token) : admin;

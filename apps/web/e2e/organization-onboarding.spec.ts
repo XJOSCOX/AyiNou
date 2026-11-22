@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { api, apiCall, expect, inEnglish, login, logout, sql, test } from "./fixtures";
 import { authMessages } from "../src/lib/auth-i18n";
 import { membershipMessages } from "../src/lib/membership-i18n";
+import { usernameMessages } from "../src/lib/username-i18n";
 import en from "../src/messages/organization-onboarding/en.json";
 import ht from "../src/messages/organization-onboarding/ht.json";
 import fr from "../src/messages/organization-onboarding/fr.json";
@@ -22,21 +23,32 @@ for (const kind of ["individual", "organization"] as const) {
     for (const [locale, message] of Object.entries({ ht, fr, es, en })) {
       await page.getByRole("combobox").last().selectOption(locale);
       await expect(page.getByText(message.choice, { exact: true })).toBeVisible();
+      await expect(page.getByLabel(usernameMessages[locale as keyof typeof usernameMessages].choose)).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(kind === "organization" ? 320 : 1440);
     }
     const email = `o2-${randomUUID()}@example.com`;
     const password = "Disposable-signup!9";
+    const preferred = kind === "individual" ? "fr" : "en";
+    const username = "o2_" + randomUUID().slice(0, 8);
     const m = membershipMessages.en;
-    const t = authMessages.en;
     await page.locator(`input[name="signup-path"][value="${kind}"]`).check();
     await page.getByLabel(m.firstName, { exact: true }).fill("Ada");
     await page.getByLabel(m.lastName, { exact: true }).fill("Fixture");
-    await page.locator("#display-name").fill("O2 Fixture");
+    const usernameField = page.getByLabel(usernameMessages.en.choose);
+    const emailField = page.locator("#email");
+    await expect(page.locator("#display-name")).toHaveCount(0);
+    await expect(page.getByRole("combobox")).toHaveCount(1);
+    await usernameField.fill(username.toUpperCase());
+    const usernameBox = (await usernameField.boundingBox())!;
+    const emailBox = (await emailField.boundingBox())!;
+    if (kind === "individual") expect(Math.abs(usernameBox.y - emailBox.y)).toBeLessThan(2);
+    else expect(emailBox.y).toBeGreaterThan(usernameBox.y);
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(password);
     await page.locator("#confirm-password").fill(password);
     await page.locator('input[autocomplete="off"]').last().fill(referralCode);
-    await page.getByRole("main").getByRole("button", { name: t.register, exact: true }).click();
+    await page.getByRole("combobox").selectOption(preferred);
+    await page.getByRole("main").getByRole("button", { name: authMessages[preferred].register, exact: true }).click();
     await expect(page).toHaveURL(/\/verify-email/);
 
     let messageId: string | undefined;
@@ -52,19 +64,26 @@ for (const kind of ["individual", "organization"] as const) {
     expect(link).not.toBeNull();
     const verification = new URL(link![0]);
     expect(verification.origin).toBe("http://127.0.0.1:55321");
+    await inEnglish(context);
     await page.goto(verification.href);
     await expect(page).toHaveURL(/\/onboarding/);
     await page.getByRole("radio", { name: m.haitian, exact: true }).check();
     await page.getByRole("button", { name: m.continue, exact: true }).click();
+    if (preferred !== "en") {
+      await expect(page.locator('[aria-current="step"]')).toHaveText(membershipMessages[preferred].location);
+      await page.getByRole("banner").getByRole("combobox").selectOption("en");
+    }
     await page.reload();
     await expect(page.locator('[aria-current="step"]')).toHaveText(m.location);
     await page.getByRole("button", { name: m.skip, exact: true }).click();
-    await page.getByLabel(/username/i).fill("o2_" + randomUUID().slice(0, 8));
+    await expect(page.getByLabel(usernameMessages.en.rename)).toHaveValue(username);
     await page.getByRole("button", { name: m.continue, exact: true }).click();
     await page.getByRole("button", { name: m.skip, exact: true }).click();
     await page.getByRole("link", { name: en.resume, exact: true }).click();
     const member = sql(`select id from auth.users where email='${email}' and email_confirmed_at is not null;`);
     expect(member).toMatch(/^[a-z0-9-]{36}$/);
+    expect(sql(`select username||':'||display_name||':'||preferred_locale from public.profiles where user_id='${member}';`))
+      .toBe(username + ":" + username + ":" + preferred);
     expect(sql(`select count(*) from private.referrals where referred_user_id='${member}' and confirmed_at is not null;`)).toBe("1");
     expect(sql(`select count(*) from private.organizations where created_by='${member}';`)).toBe("0");
     expect(sql(`select count(*) from private.verification_applications where applicant_id='${member}';`)).toBe("0");

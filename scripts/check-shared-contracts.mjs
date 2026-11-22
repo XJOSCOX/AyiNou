@@ -55,6 +55,10 @@ for (const { name, symbol } of publicSymbols) {
 const runtime = entries(Object.entries(namespace).map(([name, value]) => {
   if (value instanceof RegExp) return [name, { pattern: value.source, flags: value.flags }];
   if (typeof value === "function") {
+    if (name === "normalizePublicUsername") {
+      const examples = ["  Marie_Pierre  ", "mаrie", "Karen", "A\tB", "1legacy"];
+      return [name, Object.fromEntries(examples.map((example) => [example, value(example)]))];
+    }
     assert.equal(name, "departmentCommunityContent");
     return [name, Object.fromEntries(namespace.locales.map((locale) =>
       [locale, value(locale, "Centre $&")]

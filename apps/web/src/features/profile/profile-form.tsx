@@ -14,7 +14,7 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
   const [locale] = useLocale();
   const t = authMessages[locale];
   const router = useRouter();
-  const [loaded, setLoaded] = useState<{ profile: MemberProfile; departments: Department[] } | null>(null);
+  const [loaded, setLoaded] = useState<{ profile: MemberProfile; departments: Department[]; useSignupDefaults: boolean } | null>(null);
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
 
@@ -26,7 +26,7 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
       const name = (key: string) => typeof metadata[key] === "string" ? metadata[key].slice(0, 80) : "";
       const registrationLocale = typeof metadata.preferred_locale === "string" && isLocale(metadata.preferred_locale) ? metadata.preferred_locale : null;
       setLoaded({
-        departments,
+        departments, useSignupDefaults: onboarding && typeof metadata.public_username === "string",
         profile: {
           ...profile,
           firstName: profile.firstName ?? name("first_name"),
@@ -41,7 +41,7 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
       else setFailed(true);
     });
     return () => { cancelled = true; };
-  }, [retry, router]);
+  }, [onboarding, retry, router]);
 
   useEffect(() => {
     if (!loaded || onboarding) return;

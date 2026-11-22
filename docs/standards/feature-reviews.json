@@ -628,6 +628,49 @@
           "rolloutAndRollback": "Run after migrations 09, 10 and 11 under separately approved deployment. Keep issuance closed and apply any recovery through a forward correction."
         }
       ]
+    },
+    {
+      "id": "u1-public-usernames",
+      "report": "docs/identity/U1_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/usernames/availability",
+          "contract": "GET /api/v1/usernames/availability - -",
+          "access": "public",
+          "publicReason": "Prospective members must check a candidate before they have an account. The bounded status and dedicated read budget protect private subjects and reservations.",
+          "audit": {
+            "kind": "exception",
+            "detail": "Advisory read returns a single bounded public status. Dedicated read buckets limit probing and routine diagnostics omit the query."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/usernames.spec.ts",
+            "denialScenario": "Unconfirmed reservations and hidden or former profiles expose only unavailable. Direct Auth and nonservice RPC bypass attempts fail."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/usernames/review",
+          "contract": "POST /api/v1/admin/usernames/review 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Safety holds, releases, corrections and appeal outcomes commit with a categorical reason and idempotent audit receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/usernames.spec.ts",
+            "denialScenario": "A member with MFA cannot act as a reviewer. An enrolled administrator with an AAL1 token is also denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121130000_public_usernames.sql",
+          "rlsAndGrants": "Private leases, retirements, safety holds and events have RLS and no direct application-role grants. Service-only availability and review functions expose bounded projections.",
+          "authorization": "Authenticated member profile writes enforce live subject authorization. Auth-bound expiring signup leases and one uniqueness constraint prevent duplicate assignments. The review transaction rechecks the active administrator and recent authenticator session.",
+          "compatibility": "Keeps legacy names and UUID associations, recognizes existing Founder reservation, initializes the username as the public display name, and redirects former names only through current visibility and block predicates.",
+          "validation": "Disposable coverage exercises conflicting GoTrue signup, expired reservations, role safety, legacy names, private data boundaries, real Auth confirmation, referral and organization intent, and audit receipts.",
+          "rolloutAndRollback": "Separate hosted approval is required for the four pending Founder migrations and U1. Confirm backups and Auth email confirmations. Preserve existing names, leases and audit through forward remediation."
+        }
+      ]
     }
   ]
 }

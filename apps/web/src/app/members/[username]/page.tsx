@@ -1,5 +1,5 @@
 import type { FollowStatus, ProfilePreview, PublicAmbassador } from "@ayinou/shared";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { MemberPublic } from "@/components/member-public";
 import { ApiRequestError, requestJson } from "@/lib/api-errors";
 import { serverSupabase } from "@/lib/supabase/server";
@@ -21,8 +21,9 @@ export default async function PublicMemberPage({ params }: { params: Promise<{ u
   const token = signedIn ? (await client.auth.getSession()).data.session?.access_token : undefined;
   if (signedIn && !token) notFound();
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
-  const [{ profile }, social, { ambassador }] = await Promise.all([
-    publicMemberData<{ profile: ProfilePreview }>(`${api}/api/v1/profiles/${username}`, headers),
+  const { profile } = await publicMemberData<{ profile: ProfilePreview }>(`${api}/api/v1/profiles/${username}`, headers);
+  if (profile.username && profile.username !== username) redirect(`/members/${profile.username}`);
+  const [social, { ambassador }] = await Promise.all([
     publicMemberData<FollowStatus>(`${api}/api/v1/members/${username}/follow`, headers),
     (requestJson(`${api}/api/v1/members/${username}/ambassador`, { headers, signal: AbortSignal.timeout(2500) }) as
       Promise<{ ambassador: Pick<PublicAmbassador, "category" | "statement"> | null }>).catch(() => ({ ambassador: null })),

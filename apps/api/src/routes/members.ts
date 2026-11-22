@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { interestCodes, locales, referralCodePattern, type ApiErrorResponse, type UpdateMemberProfile } from "@ayinou/shared";
+import { interestCodes, locales, normalizePublicUsername, publicUsernamePattern, referralCodePattern, type ApiErrorResponse, type UpdateMemberProfile } from "@ayinou/shared";
 import type { AuthVerifier } from "../services/auth.js";
 import { MemberError, type MemberRepository } from "../services/members.js";
 import type { ReadBudget } from "../services/read-budget.js";
@@ -20,8 +20,8 @@ const updateProfileSchema = z.object(legacyFields).strict().refine((value) =>
   (value.residenceDepartmentCode === null || value.residenceCountryCode === "HT") &&
   (value.diasporaDepartmentCode === null || value.residenceCountryCode !== "HT"),
 );
-const username = z.string().trim().toLowerCase().regex(/^[a-z0-9][a-z0-9_]{2,23}$/)
-  .refine((value) => !["admin", "support", "ayinou", "system", "root", "moderator", "administrator"].includes(value));
+// Legacy handles may begin with a number. PostgreSQL applies the new format only on assignment.
+const username = z.string().max(64).transform(normalizePublicUsername).pipe(z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/));
 const privateName = z.string().trim().min(1).max(80).refine((value) => !/\p{Cc}/u.test(value));
 const profileChanges = z.object({
   ...legacyFields,
@@ -36,6 +36,14 @@ const profileChanges = z.object({
   interests: z.array(z.enum(interestCodes)).max(interestCodes.length)
     .transform((values) => [...new Set(values)]),
 }).partial().strict().refine((value) => Object.keys(value).length > 0);
+const usernameReview = z.strictObject({
+  requestId: z.uuid(),
+  action: z.enum(["hold", "release", "correct", "appeal_reviewed"]),
+  username,
+  replacement: username.refine((value) => publicUsernamePattern.test(value)).optional(),
+  reason: z.enum(["impersonation", "abuse", "false_positive", "safety"]),
+}).refine(({ action, replacement }) => (action === "correct") === (replacement !== undefined));
+
 const avatarInput = z.object({ image: z.base64().max(2_796_204) }).strict();
 const referralInput = z.object({ code: z.string().max(64).trim().toUpperCase() }).strict();
 
@@ -76,6 +84,21 @@ export async function registerMemberRoutes(
     return { valid: await accounts.validateReferral(input.data.code) };
   });
 
+  app.get("/api/v1/usernames/availability", async (request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    await read("username", null, request.ip);
+    const parsed = z.strictObject({ username: z.string().max(64) }).safeParse(request.query);
+    const candidate = parsed.success ? normalizePublicUsername(parsed.data.username) : "";
+    if (!publicUsernamePattern.test(candidate)) return { status: "invalid" };
+    if (!members?.usernameAvailability) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Username check unavailable"));
+    try {
+      return { status: await members.usernameAvailability(candidate) };
+    } catch (cause) {
+      if (cause instanceof MemberError) return reply.code(cause.statusCode).send(error(cause.code, "Username check unavailable"));
+      throw cause;
+    }
+  });
+
   app.get("/api/v1/departments", async (_request, reply) => {
     if (!members) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Database unavailable"));
     return { departments: await members.departments() };
@@ -109,6 +132,23 @@ export async function registerMemberRoutes(
       if (!userId) return reply.code(401).send(error("UNAUTHORIZED", "Invalid or expired session"));
       request.authUserId = userId;
       request.authToken = match[1];
+    });
+
+    protectedApp.post("/api/v1/admin/usernames/review", { bodyLimit: 512 }, async (request, reply) => {
+      if (!members?.reviewUsername || !request.authToken) {
+        return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Username review unavailable"));
+      }
+      const proof = await auth?.verifySession?.(request.authToken, true);
+      if (!proof || proof.actor !== request.authUserId || proof.totpAt === undefined) {
+        return reply.code(403).send(error("MFA_REQUIRED", "Recent authenticator verification required"));
+      }
+      const details = usernameReview.parse(request.body);
+      try {
+        return await members.reviewUsername({ ...details, actor: proof.actor, session: proof.session, totpAt: proof.totpAt });
+      } catch (cause) {
+        if (cause instanceof MemberError) return reply.code(cause.statusCode).send(error(cause.code, "Username review could not be completed"));
+        throw cause;
+      }
     });
 
     protectedApp.get("/api/v1/me/member-code", async (request, reply) => {

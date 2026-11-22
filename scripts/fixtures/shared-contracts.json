@@ -146,6 +146,7 @@
     "ModerationAppeal": "type:50dd87949779bc5f68bd52a29776f2732d0cd640cf3bb0a3590296db60ced06d",
     "ModerationScope": "type:3ab63e4516193cd957a85d1fa4857072b9accbadf6645194aaf492580b736985",
     "MyAffiliations": "type:e9d1a45bb46bfe782eb839867579b3bdccb797ba664a28e17395f98ecd71c801",
+    "normalizePublicUsername": "value:d70dc898ce23c7f6ddfca81993530ce528d90978a448d1b953dc2f56d4c6cf51",
     "NotificationPage": "type:c5f0a7c9792b4f9a5c960ca07de7025fe40127c8a6278197514bdab5e617ae5c",
     "notificationPreferenceKeys": "value:d83761769909fe78d92c1747d6fcc55b02f9fe31673e6433a15716964c0026db",
     "NotificationPreferences": "type:66ca9d9036b99c9fc012d347f4a5b6d917ca0a4746f9b395f0cafe464ad5f788",
@@ -243,6 +244,7 @@
     "ProjectWorkTask": "type:b119704eea46cf8c768c851b43770a712168e09d8839cb50fc9e2706bb098f14",
     "protectedOrganizationPermissions": "value:2349d4473522a78d2a140c67e8425c702605dee823f736467000500222c0258c",
     "PublicAmbassador": "type:56de0e00d7a9f5dbbb90cc863965891f93039cb6f0a17d5b2c2ebe20c041029e",
+    "publicUsernamePattern": "value:80b23c69141311e9524a5334901e18c866fe50c026e4b1d5d40863e2e346e6c8",
     "ReactionKind": "type:a38170e353259f45e5c52a41b1557d9c3a78ea5e94dc49830efdd71ed95e7749",
     "reactionKinds": "value:710fc09db62455ee107a2ab3fbcc8c359ee55a7f4ff359ec0503ba043c0bae41",
     "ReactionSummary": "type:97a660fdaee6ef8844bece8da5fab295e5b0a6ccdc2b9c17c1abc4770a2e7eec",
@@ -265,6 +267,7 @@
     "SignupPath": "type:c249b0e99290040736a8305eb062808769e3a3fd4b97384fae6c9aff4bbbecb5",
     "StatusResponse": "type:bc13ad0e66a811fe283af87bbcf151d79cfa16d49663ff46b98018565d0459ff",
     "UpdateMemberProfile": "type:c096b49445347f2052c4afc8e8b07d8317425e21c9f6cf09319f5f2af29daa90",
+    "UsernameAvailability": "type:208d313cc04cee671d0ec3c6c0f738370991d6b15846712572656bb9bc966d4f",
     "VerificationAppeal": "type:14003233a9a40b18831272ef5d9454c973964b04bc833e058913310cc9dbcdac",
     "VerificationAppealOutcome": "type:ba966aa46699d60e578921568e3f135976b456ef133fce6e123c260a30c447d7",
     "verificationAppealOutcomes": "value:93225510c6e73111a41f578bcb2e227850c71c268fe8212947d6fe8d34a1c15b",
@@ -522,6 +525,13 @@
       "remove",
       "dismiss"
     ],
+    "normalizePublicUsername": {
+      "  Marie_Pierre  ": "marie_pierre",
+      "mаrie": "mаrie",
+      "Karen": "Karen",
+      "A\tB": "a\tb",
+      "1legacy": "1legacy"
+    },
     "notificationPreferenceKeys": [
       "reactions",
       "comments",
@@ -686,6 +696,10 @@
       "contacts",
       "membershipPolicy"
     ],
+    "publicUsernamePattern": {
+      "pattern": "^[a-z][a-z0-9_]{2,23}$",
+      "flags": ""
+    },
     "reactionKinds": [
       "like",
       "love",
