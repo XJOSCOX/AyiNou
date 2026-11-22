@@ -47,6 +47,19 @@ async function recent(member: Member) {
   return { ...member, token: proof.data.access_token, mfaSecret: factor.data.totp.secret };
 }
 
+async function authenticateAgain(member: Member & { mfaSecret: string }): Promise<Member> {
+  const client = createClient(supabase, process.env.AYINOU_E2E_SUPABASE_PUBLIC!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+  const signed = await client.auth.signInWithPassword({ email: member.email, password: member.password });
+  if (signed.error) throw signed.error;
+  const listed = await client.auth.mfa.listFactors();
+  if (listed.error) throw listed.error;
+  const proof = await client.auth.mfa.challengeAndVerify({ factorId: listed.data.totp[0].id, code: totp(member.mfaSecret) });
+  if (proof.error) throw proof.error;
+  return { ...member, token: proof.data.access_token };
+}
+
 test("F1.1 clean installation appoints the first Administrator through the Founder and the named member @smoke",
   async ({ page, context, makeMember }) => {
     test.setTimeout(100_000);
@@ -161,11 +174,19 @@ test("F1.1 clean installation appoints the first Administrator through the Found
         method: "POST", headers: { Authorization: "Bearer " + candidate.token, "Content-Type": "application/json" },
         body: JSON.stringify(accept),
       })));
-      expect(outcomes.map((response) => response.status).sort()).toEqual([200, 404]);
-      expect((await apiCall(candidate, "/api/v1/me/platform-access", 200))).toMatchObject({ administrator: true, founder: false });
+      const statuses = outcomes.map((response) => response.status).sort();
+      expect([[200, 401], [200, 404]]).toContainEqual(statuses);
+      await apiCall(candidate, "/api/v1/me/platform-access", 401);
       await apiCall(candidate, invitation, 404, "POST", accept);
-      expect(await apiCall(candidate, invitation, 200)).toMatchObject({ ready: false, state: "activated" });
+      const administrator = await authenticateAgain(candidate);
+      await apiCall(administrator, invitation, 404, "POST", accept);
+      expect((await apiCall(administrator, "/api/v1/me/platform-access", 200))).toMatchObject({ administrator: true, founder: false });
+      expect(await apiCall(administrator, invitation, 200)).toMatchObject({ ready: false, state: "activated" });
       await page.reload();
+      await expect(page).toHaveURL(/\/login\?session=ended/);
+      await login(page, candidate);
+      await solveMfa(page, candidate.mfaSecret);
+      await page.goto(privatePage);
       await expect(page.getByText(governanceMessages.en.activated, { exact: true })).toBeVisible();
       await page.goto("/admin");
       await expect(page.locator("header [data-designation=administrator]").first()).toBeVisible();
@@ -180,8 +201,10 @@ test("F1.1 clean installation appoints the first Administrator through the Found
           and grant_event.actor_id=invitation.target_id and grant_event.outcome->>'invitationId'=invitation.id::text
           and decision_receipt.actor_id=invitation.founder_id and audit.reason=decision_receipt.reason
           and proposal.approver_id is null and proposal.approved_at is null and invitation.code_hash is null;`)).toBe("1");
-      await apiCall(candidate, "/api/v1/admin/overview", 200);
-      await apiCall(candidate, governance + "/proposals", 403, "POST",
+      await apiCall(administrator, "/api/v1/admin/overview", 200);
+      expect(sql(`select count(*) > 0 from private.s2a_session_events where user_id='${candidate.id}' and event='privileged_mfa';`)).toBe("t");
+      expect(sql(`select count(*) from private.s2a_session_events where user_id='${candidate.id}' and event='promotion';`)).toBe("1");
+      await apiCall(administrator, governance + "/proposals", 403, "POST",
         { ...revise(version), kind: "appoint", target: secondTarget.id, reason });
 
       const another = await propose(secondTarget.id);
@@ -250,9 +273,13 @@ test("F1.1 keeps legacy approval and fails closed on authority or eligibility ch
       extract(epoch from now())::bigint-901,'${issued.flowId}','activate',null);`)).toThrow();
     await apiCall(candidate, activation, 200, "POST", { code: issued.code, accept: true });
     await apiCall(admin, "/api/v1/admin/overview", 200);
-    await apiCall(candidate, "/api/v1/admin/overview", 200);
-    await apiCall(candidate, "/api/v1/admin/founder-identity", 403);
-    await apiCall(candidate, "/api/v1/admin/privacy-requests/queue", 403);
+    await apiCall(candidate, "/api/v1/admin/overview", 401);
+    const promoted = await authenticateAgain(candidate);
+    await apiCall(promoted, "/api/v1/admin/overview", 200);
+    await apiCall(promoted, "/api/v1/admin/founder-identity", 403);
+    await apiCall(promoted, "/api/v1/admin/privacy-requests/queue", 403);
+    sql(`delete from public.role_assignments where user_id='${candidate.id}' and role='administrator';`);
+    await apiCall(promoted, "/api/v1/admin/overview", 403);
 
     const legacy = randomUUID();
     sql(`insert into private.platform_governance_proposals(id,proposer_id,target_id,kind,governance_version)

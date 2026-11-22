@@ -9,7 +9,7 @@
 3. Ayinou issues a short-lived, account-bound, one-time credential. Retain the existing F1 policy of a random 32-byte code, hashed verifier, expiry at the earlier of 24 hours or the proposal deadline, five failed credential attempts, and one-time disclosure to the issuing Founder. Deliver the opaque link and credential separately through a private channel.
 4. The target signs in to their own account, enters the code, completes fresh MFA and explicitly accepts. Until then there is no Administrator assignment or green badge.
 5. PostgreSQL rechecks all authorization and lifecycle conditions and atomically records acceptance, activates the Administrator role, consumes the credential and writes the audit records.
-6. The active assignment supplies the green Administrator badge. The appointment cannot grant red Founder authority, blue independent verification or gold Founder Verified.
+6. S2A discards prior sessions at activation. The member signs in with a fresh session and completes MFA before using Administrator actions. The active assignment supplies the green Administrator badge. The appointment cannot grant red Founder authority, blue independent verification or gold Founder Verified.
 
 ## F1 baseline and resolved conflict
 

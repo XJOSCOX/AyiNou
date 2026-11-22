@@ -1,4 +1,7 @@
 {
+  "rememberDevice": "Recordar este dispositivo",
+  "sessionEnded": "Tu sesión terminó. Vuelve a iniciar sesión para continuar.",
+  "roleSessionChanged": "El acceso de administrador está listo. Vuelve a iniciar sesión y verifica con tu aplicación de autenticación.",
   "brandEyebrow": "Un pueblo. Un futuro.",
   "brandTitle": "Juntos por Haití.",
   "backHome": "Volver al inicio",

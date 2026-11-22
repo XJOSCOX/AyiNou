@@ -60,8 +60,13 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
         p_user: claims.sub, p_session: claims.session_id, p_aal2: claims.aal === "aal2", p_privileged: requireMfa,
       });
       if (session.status === 0 || session.status >= 500 || session.error?.code === "57014") throw unavailable();
-      return !session.error && session.data === true
-        ? { actor: claims.sub, session: z.uuid().parse(claims.session_id), aal2: claims.aal === "aal2", totpAt } : null;
+      if (session.error) return null;
+      if (session.data !== true) {
+        // A signed but expired session remains denied even if its audit write is unavailable.
+        await security.rpc("s2a_observe_expiry_for_api", { p_user: claims.sub, p_session: claims.session_id });
+        return null;
+      }
+      return { actor: claims.sub, session: z.uuid().parse(claims.session_id), aal2: claims.aal === "aal2", totpAt };
     } catch (cause) {
       if (cause instanceof ApiError) throw cause;
       if (isAuthRetryableFetchError(cause)) throw unavailable();

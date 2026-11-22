@@ -1,4 +1,7 @@
 {
+  "rememberDevice": "Remember this device",
+  "sessionEnded": "Your session has ended. Sign in again to continue.",
+  "roleSessionChanged": "Administrator access is ready. Sign in again and verify with your authenticator.",
   "brandEyebrow": "One people. One future.",
   "brandTitle": "Together for Haiti.",
   "backHome": "Back to home",

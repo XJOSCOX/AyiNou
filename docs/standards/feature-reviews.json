@@ -788,6 +788,21 @@
           "rolloutAndRollback": "Follows F1 after explicit hosted approval. Use reviewed forward remediation while preserving historical decisions."
         }
       ]
+    },
+    {
+      "id": "s2a-absolute-session-policy",
+      "report": "docs/security/S2A_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121142000_s2a_session_policy.sql",
+          "rlsAndGrants": "Private RLS tables deny direct application access. Two own-session RPCs are restricted to authenticated and the API audit wrapper is service-only.",
+          "authorization": "The existing live-session gates use trusted Auth start, exact actor and session, live authority, cutoff and the provider deadline. Privileged commands retain current fresh MFA.",
+          "compatibility": "Legacy sessions use the original trusted start and unchecked policy. F1 and F1.1 preserve the named target and consume credentials before forcing reauthentication.",
+          "validation": "Disposable controlled clocks and Playwright cover deadlines, refresh, independent browser sessions, direct authorization, MFA and the clean Founder appointment.",
+          "rolloutAndRollback": "Verify the exact hosted scope and rehearse in disposable Supabase first. Apply the migration before the matching application. Use forward remediation and retain audit evidence."
+        }
+      ]
     }
   ]
 }

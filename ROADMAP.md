@@ -363,9 +363,9 @@ The reviewed six-file database rollout has read-only hosted evidence and disposa
 
 The reviewed O2–O7 migrations are deployed to the owner-approved development database and passed hosted postflight. Synthetic recovery passed. Public release waits for verified provider or independent recovery points, protected Storage recovery, staffed operators, and Auth/email validation. [D2 readiness](docs/deployment/D2_FINAL_READINESS.md)
 
-## Future Session Security milestone
+## S2A absolute session lifetimes
 
-**OWNER APPROVED — NOT YET IMPLEMENTED**. S2 will enforce six hours for the recognized Founder and Administrators regardless of preference, 30 days for ordinary remembered sessions and 12 hours for ordinary unremembered sessions. Remember This Device defaults to unchecked with nonpersistent browser authentication. Enforce the original session deadline across Next.js, Fastify and PostgreSQL as applicable, constrain prior sessions on promotion, remove administrative authority immediately on revocation and retain applicable 15-minute TOTP freshness. [Implementation plan](docs/security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
+S2A implements six hours for the recognized Founder and Administrators, 30 days for remembered ordinary sessions, and 12 hours for unchecked ordinary sessions. The default browser session is nonpersistent. Promotion requires a new sign-in and MFA. Existing role revocation and 15-minute privileged TOTP rules apply. S2B session inventory and private workflow routing remain planned. [Implementation and development rollout](docs/security/S2A_DEPLOYMENT_AND_TEST_RESULTS.md)
 
 ## U1 public usernames
 

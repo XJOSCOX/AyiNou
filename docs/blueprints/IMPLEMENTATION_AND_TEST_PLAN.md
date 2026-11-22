@@ -49,7 +49,7 @@ This plan sequences future work against the blueprint. Every phase starts with a
 
 ## Phase 2 — S2 absolute session lifetimes and promotion handling
 
-**OWNER APPROVED — NOT YET IMPLEMENTED**. The approved policy is recorded in the [Session Security plan](../security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md#absolute-session-policy).
+**Implemented in S2A.** See the [hosted deployment status](../security/S2A_DEPLOYMENT_AND_TEST_RESULTS.md). The approved policy is recorded in the [Session Security plan](../security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md#absolute-session-policy).
 
 | Area | Scope and evidence |
 | --- | --- |

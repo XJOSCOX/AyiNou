@@ -1,6 +1,6 @@
 # Session Security implementation plan
 
-**OWNER APPROVED — NOT YET IMPLEMENTED**. This plan records the future S2 policy. Existing authentication, hosted Auth settings and feature gates retain their current behavior. Start with F1 development release review, then S2 absolute lifetimes and promotion handling, then S2 session inventory and private user-bound links, then identity and audit integration.
+F1/F1.1 was followed by S2A absolute lifetimes and promotion handling. See the [S2A implementation](S2A_IMPLEMENTATION_REPORT.md) and [deployment evidence](S2A_DEPLOYMENT_AND_TEST_RESULTS.md). S2B session inventory and private user-bound links remain planned, followed by identity and audit integration. Hosted Auth settings and restricted feature gates have their own operational approvals.
 
 ## Inspect provider and application boundaries
 
@@ -21,7 +21,7 @@ Derive the Founder from trusted bootstrap provenance even if the account has no 
 
 Revoke or constrain ordinary sessions before allowing promoted Administrator access. No existing 30-day deadline can carry into a privileged session. Role revocation removes Administrator authority immediately, including on other devices. Preserve 15-minute TOTP freshness on applicable privileged commands and action-specific step-up.
 
-Current F1 Administrator activation requires a separate O5 approver. The owner superseded that requirement for new Founder-authorized appointments. F1.1 preserves the named member’s own account, explicit acceptance, fresh MFA and one-time credential. S2 must preserve whichever appointment modes are supported at its baseline, including legacy approvals where applicable. [Administrator activation](../blueprints/ADMINISTRATOR_ACTIVATION.md)
+F1.1 lets the Founder authorize a new appointment directly and preserves independent approval for legacy appointments. Both require the named member’s own account, explicit acceptance, fresh MFA and a one-time credential. S2A invalidates earlier sessions after either activation path. [Administrator activation](../blueprints/ADMINISTRATOR_ACTIVATION.md)
 
 ## Private workflow references
 
@@ -52,4 +52,4 @@ Apply the [audit event policy](../standards/AUDIT_EVENT_POLICY.md) to login, rem
 
 Use controlled test clocks and disposable Supabase Auth sessions and fixtures for the cases above. Do not run expiry, promotion or revocation probes on hosted development as part of S2 tests.
 
-Open work includes provider capabilities, legacy-session migration, recovery, staffing for workflows that retain independent approvals, and which workflows first adopt private routing. The approved session deadlines remain fixed. [Blueprint decisions](../blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md)
+Open work includes provider capabilities for inventory, recovery, staffing for workflows that retain independent approvals, and which workflows first adopt private routing. S2A uses unchecked deadlines for legacy sessions with a trusted start. The approved session deadlines remain fixed. [Blueprint decisions](../blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md)

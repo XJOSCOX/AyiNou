@@ -32,10 +32,10 @@ export default async function AdministratorActivation({ params, searchParams }: 
 
   async function activate(data: FormData) {
     "use server";
-    const outcome = await workflowRequest<{ authorizationMode?: "founder_direct" }>(endpoint,
+    const outcome = await workflowRequest(endpoint,
       { code: data.get("code"), accept: data.get("accept") === "on" }, true);
     if (!outcome) redirect("/activate/a/" + id + "?result=try");
-    redirect(outcome.authorizationMode === "founder_direct" ? "/activate/a/" + id : "/admin");
+    redirect("/login?session=promotion");
   }
 
   return <AuthShell>

@@ -6,7 +6,7 @@ import { accountMessages } from "../src/lib/account-i18n";
 
 const supabase = "http://127.0.0.1:55321";
 export const api = "http://127.0.0.1:5300";
-const web = "http://127.0.0.1:5400";
+export const web = "http://127.0.0.1:5400";
 const auth = { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false };
 export type Member = { id: string; email: string; password: string; handle: string; token: string };
 

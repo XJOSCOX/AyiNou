@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { recoverySessionId } from "@/lib/recovery-claims";
+import { rememberedSessionCookie, sessionCookieOptions } from "@/lib/supabase/session-cookies";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
     cookies: {
       getAll() { return request.cookies.getAll(); },
       setAll(cookiesToSet, cacheHeaders) {
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, sessionCookieOptions(options)));
         Object.entries(cacheHeaders).forEach(([name, value]) => response.headers.set(name, value));
       },
     },
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
     response.headers.set("Location", new URL(failed, webOrigin).href);
     return response;
   }
+  response.cookies.set(rememberedSessionCookie, "", { path: "/", maxAge: 0 });
   if (safeNext === "/reset-password") {
     const claims = await supabase.auth.getClaims(data.session.access_token);
     const destination = recoverySessionId(claims.data?.claims) ? "/reset-password" : "/forgot-password?error=verification";

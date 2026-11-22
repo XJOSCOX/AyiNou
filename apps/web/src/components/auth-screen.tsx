@@ -11,7 +11,7 @@ import { accountMessages } from "@/lib/account-i18n";
 import { getUsernameAvailability, validateReferralCode } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { browserSupabase } from "@/lib/supabase/browser";
+import { browserSupabase, setRememberedSession } from "@/lib/supabase/browser";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { validNewPassword } from "@/lib/password-policy";
 import { passwordSecurityMessages } from "@/lib/password-security-i18n";
@@ -26,9 +26,9 @@ const fieldClass = "block w-full rounded-md border border-[var(--theme-border)] 
 const floatingFieldClass = `${fieldClass} ${styles.floatingInput} pb-2 pt-6`;
 const primaryActionClass = "w-full rounded-md bg-[var(--theme-primary)] px-6 py-3.5 font-semibold text-[var(--theme-on-primary)] hover:bg-[var(--theme-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]";
 
-export function AuthScreen({ mode, invalidLink = false, initialReferral = "", claimHandle, joinHandle, recoverySession, passwordReset }: {
+export function AuthScreen({ mode, invalidLink = false, initialReferral = "", claimHandle, joinHandle, recoverySession, passwordReset, sessionNotice }: {
   mode: AuthMode; invalidLink?: boolean; initialReferral?: string; claimHandle?: string; joinHandle?: string;
-  recoverySession?: string; passwordReset?: boolean;
+  recoverySession?: string; passwordReset?: boolean; sessionNotice?: "promotion" | "ended";
 }) {
   const [locale] = useLocale();
   const t = authMessages[locale];
@@ -46,6 +46,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   };
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [remember, setRemember] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordChanged, setPasswordChanged] = useState(false);
@@ -109,6 +110,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           setError("invalidReferral");
           return;
         }
+        setRememberedSession(null);
         const { data, error: authError } = await supabase.auth.signUp({
           email: email.trim(), password,
           options: {
@@ -144,6 +146,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           router.push("/verify-email");
         }
       } else if (mode === "login") {
+        setRememberedSession(null);
         const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authError) {
           if (authError.status === 400 && ["invalid_credentials", "email_not_confirmed"].includes(authError.code ?? "")) {
@@ -151,6 +154,13 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           }
           throw authError;
         }
+        const preference = await supabase.rpc("s2a_set_session_preference", { p_remember: remember });
+        if (preference.error && (remember || preference.error.code !== "PGRST202")) {
+          await supabase.auth.signOut({ scope: "local" });
+          setError("serviceError");
+          return;
+        }
+        if (preference.data?.remembered) setRememberedSession(preference.data.expiresAt);
         if (claimHandle || joinHandle) {
           const assurance = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
           const next = claimHandle ? `/verification?claim=${claimHandle}` : `/organization/${joinHandle}`;
@@ -306,6 +316,13 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
               <span className={styles.fieldLabel}>{account.optionalReferral}</span>
             </label>
           )}
+          {mode === "login" && <label className="flex min-h-11 items-center gap-3 text-sm">
+            <input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} />
+            {t.rememberDevice}
+          </label>}
+          {sessionNotice && <p role="status" className="rounded-md bg-[var(--theme-control)] p-3 text-sm">
+            {sessionNotice === "promotion" ? t.roleSessionChanged : t.sessionEnded}
+          </p>}
           {(error || showLinkError) && <p role="alert" className="rounded-md bg-[var(--theme-error-bg)] p-3 text-sm text-[var(--theme-error-text)]">{error ? errors[error] : t.sessionNeeded}</p>}
           {success && <p role="status" className="rounded-md bg-[var(--theme-control)] p-3 text-sm text-[var(--theme-link)]">{t[success]}</p>}
           {mode === "login" && <p className="text-right text-sm"><Link href="/forgot-password" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.forgotLink}</Link></p>}

@@ -1,4 +1,7 @@
 {
+  "rememberDevice": "Se souvenir de cet appareil",
+  "sessionEnded": "Votre session a pris fin. Reconnectez-vous pour continuer.",
+  "roleSessionChanged": "L’accès administrateur est prêt. Reconnectez-vous et confirmez avec votre application d’authentification.",
   "brandEyebrow": "Un seul peuple. Un seul avenir.",
   "brandTitle": "Ensemble pour Haïti.",
   "backHome": "Retour à l'accueil",
