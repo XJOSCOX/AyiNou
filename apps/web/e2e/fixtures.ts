@@ -23,7 +23,7 @@ function checked<T extends { data: unknown; error: { code?: string } | null }>(r
   return result.data;
 }
 
-function localClient(key: string) {
+export function localClient(key: string) {
   localProject();
   const value = process.env[key];
   if (!value) throw new Error("Missing disposable Supabase credential");

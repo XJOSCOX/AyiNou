@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { useEffect, useRef, useState } from "react";
 import type { OrganizationIntentReceipt, OrganizationIntentUpdate, OrganizationOnboardingIntent } from "@ayinou/shared";
@@ -9,6 +10,8 @@ import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
 import { useLocale } from "@/lib/locale-store";
 import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { browserSupabase } from "@/lib/supabase/browser";
+import { openPrivateFlow, privateFlowPath } from "@/lib/session-security";
+import { sessionSecurityMessages } from "@/lib/session-security-i18n";
 import { institutionAction, institutionCard, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
@@ -25,6 +28,10 @@ type Command = {
 export function OrganizationIntentScreen({ subject, profileComplete, claim }: { subject: string; profileComplete: boolean; claim: string }) {
   const [locale] = useLocale();
   const t = organizationOnboardingMessages[locale];
+  const security = sessionSecurityMessages[locale];
+  const router = useRouter();
+  const [linkBusy, setLinkBusy] = useState(false);
+  const [linkError, setLinkError] = useState(false);
   const [intent, setIntent] = useState<OrganizationOnboardingIntent | null | undefined>();
   const [revision, setRevision] = useState(0);
   const [error, setError] = useState("");
@@ -102,6 +109,17 @@ export function OrganizationIntentScreen({ subject, profileComplete, claim }: { 
     } });
   }
 
+  async function openResumeLink() {
+    if (linkBusy) return;
+    setLinkBusy(true);
+    setLinkError(false);
+    try {
+      const flow = await openPrivateFlow("organization_draft", subject);
+      if (!active.current?.signal.aborted) router.push(privateFlowPath(flow));
+    } catch { setLinkError(true); }
+    finally { setLinkBusy(false); }
+  }
+
   function cancel() {
     if (!intent) return;
     void run({ url: path + "/" + intent.id + "/change-path", method: "POST", body: {
@@ -141,7 +159,10 @@ export function OrganizationIntentScreen({ subject, profileComplete, claim }: { 
                     : <button type="button" className={institutionAction} disabled={busy} onClick={() => save(intent?.stage === "drafting" ? "awaiting_identity" : "drafting")}>
                       {intent?.stage === "drafting" ? t.save : t.start}
                     </button>}
-                  {intent && <button type="button" className={institutionLink} disabled={busy} onClick={() => setConfirm(true)}>{t.cancelPath}</button>}
+                  {intent && <>
+                    <button type="button" className={institutionLink} disabled={busy || linkBusy} onClick={() => void openResumeLink()}>{security.createLink}</button>
+                    <button type="button" className={institutionLink} disabled={busy} onClick={() => setConfirm(true)}>{t.cancelPath}</button>
+                  </>}
                 </>}
               </div>
             </>}
@@ -149,6 +170,7 @@ export function OrganizationIntentScreen({ subject, profileComplete, claim }: { 
         {!sessionLost && profileComplete && intent !== undefined && <OrganizationSetupPanel subject={subject} intent={intent} claim={claim} intentBusy={busy}
           onReceipt={(receipt) => setIntent((current) => receipt.result ? null : current && { ...current, version: receipt.version, stage: "drafting" })} />}
         {!sessionLost && intent !== undefined && <MemberOnboardingCorrections subject={subject} intent={intent} refreshSetup={reload} />}
+        {linkError && !sessionLost && <p role="alert">{security.unavailable}</p>}
       </div>
     </MemberShell>
   );

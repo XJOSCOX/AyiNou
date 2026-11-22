@@ -25,6 +25,18 @@ Email/password signup and email confirmation are enabled. Site URL: `http://loca
 
 Supabase's default hosted email sender is limited to organization team addresses and low volume. Configure custom SMTP or use a controlled team mailbox for reliable confirmation and recovery tests. Keep confirmation enabled. Mailpit captures only optional local Docker mail, never hosted email. See [Auth testing](https://supabase.com/docs/guides/auth/testing-auth-flows) and [SMTP](https://supabase.com/docs/guides/auth/auth-smtp) guidance.
 
+## S2B sessions and private workflows
+
+Migration `20261121143000_s2b_sessions_private_workflows.sql` follows S2A. It adds `revoked_at` to the S2A policy and two private RLS tables for workflows and audited receipts. Service-only RPCs read and revoke active sessions and authorize steps by owner, live session, scope and version. The security ledger records opaque references and trusted assurance time for material leadership events. [Authorization and grants](security/S2B_AUTHORIZATION_AND_AUDIT.md)
+
+| Fastify endpoint | Scope |
+| --- | --- |
+| `GET /api/v1/me/sessions` | Current account's session inventory. |
+| `POST /api/v1/me/sessions/revoke` | Revokes the selected management reference or, for ordinary members, other sessions. Leadership requires recent TOTP for a selected session. |
+| `POST /api/v1/me/private-workflows` | Opens or returns the current eligible draft link or leadership confirmation. |
+| `GET /api/v1/me/private-workflows/:id/:step` | Reads only the authorized open step. |
+| `POST /api/v1/me/private-workflows/:id/:step` | Cancels a link or confirms leadership sign-out with the expected version and request reference. |
+
 ## Tables and access
 
 | Table | Purpose | Client access |

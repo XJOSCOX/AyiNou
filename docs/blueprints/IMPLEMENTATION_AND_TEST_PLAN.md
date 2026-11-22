@@ -59,7 +59,9 @@ This plan sequences future work against the blueprint. Every phase starts with a
 | Disposable and cross-module tests | Use controlled clocks and disposable Supabase. Run separate expiry cases for Founder at six hours, Administrator at six hours, remembered ordinary member at 30 days and unremembered ordinary member at 12 hours. Independently exercise refresh rotation, promotion, role revocation, multiple devices, current MFA, cross-account session isolation and enforcement in Next.js, Fastify and PostgreSQL as applicable. Regress both F1 workflows, reset/MFA, U1 onboarding, project/poll writes, organization context and relevant protected Storage. |
 | Four languages, CI and development exit | Exercise remember/expiry/org return states in all locales and run final CI. Exit when all enforcement points agree and refreshed or pre-promotion credentials cannot extend a deadline or bypass the role transition. |
 
-## Phase 3 — S2 session inventory and private user-bound links
+## Phase 3 — S2B session inventory and private user-bound links
+
+The implementation integrates account-bound organization drafts and original-session-bound leadership confirmation. Ayinou enforces selected-session and all-other revocation across its live policy. See the [S2B validation and hosted rollout status](../security/S2B_IMPLEMENTATION_REPORT.md).
 
 | Area | Scope and evidence |
 | --- | --- |

@@ -365,7 +365,11 @@ The reviewed O2–O7 migrations are deployed to the owner-approved development d
 
 ## S2A absolute session lifetimes
 
-**S2A COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121142000` and verified 77 applied migrations with zero pending. The policy gives the recognized Founder and Administrators six hours, ordinary remembered sessions 30 days, and ordinary unchecked sessions 12 hours. The default browser session is nonpersistent. Promotion requires a new sign-in and MFA. Existing role revocation and 15-minute privileged TOTP rules apply. S2B session inventory and private workflow routing remain planned. [Implementation and development rollout](docs/security/S2A_DEPLOYMENT_AND_TEST_RESULTS.md)
+**S2A COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121142000` and verified 77 applied migrations with zero pending. The policy gives the recognized Founder and Administrators six hours, ordinary remembered sessions 30 days, and ordinary unchecked sessions 12 hours. The default browser session is nonpersistent. Promotion requires a new sign-in and MFA. Existing role revocation and 15-minute privileged TOTP rules apply. [Implementation and development rollout](docs/security/S2A_DEPLOYMENT_AND_TEST_RESULTS.md)
+
+## S2B session management and private workflow links
+
+S2B adds owner-scoped session inventory and revocation, plus account-bound organization draft links and original-session leadership confirmation. The existing F1 paths stay available. Follow the [implementation and hosted rollout status](docs/security/S2B_IMPLEMENTATION_REPORT.md).
 
 ## U1 public usernames
 

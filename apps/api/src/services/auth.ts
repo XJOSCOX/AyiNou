@@ -46,16 +46,14 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
         !z.uuid().safeParse(claims.sub).success
       ) return null;
       let totpAt: number | undefined;
-      if (requireMfa) {
-        const now = Date.now() / 1000;
-        for (const entry of Array.isArray(claims.amr) ? claims.amr : []) {
-          if (typeof entry === "object" && entry !== null && (entry.method === "totp" || entry.method === "mfa/totp") &&
-            typeof entry.timestamp === "number" && entry.timestamp <= now + 30 && entry.timestamp >= now - 900) {
-            totpAt = Math.max(totpAt ?? 0, Math.floor(entry.timestamp));
-          }
+      const now = Date.now() / 1000;
+      for (const entry of Array.isArray(claims.amr) ? claims.amr : []) {
+        if (typeof entry === "object" && entry !== null && (entry.method === "totp" || entry.method === "mfa/totp") &&
+          typeof entry.timestamp === "number" && entry.timestamp <= now + 30 && entry.timestamp >= now - 900) {
+          totpAt = Math.max(totpAt ?? 0, Math.floor(entry.timestamp));
         }
-        if (totpAt === undefined) return null;
       }
+      if (requireMfa && totpAt === undefined) return null;
       const session = await security.rpc("account_session_for_api", {
         p_user: claims.sub, p_session: claims.session_id, p_aal2: claims.aal === "aal2", p_privileged: requireMfa,
       });

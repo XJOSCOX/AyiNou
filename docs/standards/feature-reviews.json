@@ -803,6 +803,87 @@
           "rolloutAndRollback": "Verify the exact hosted scope and rehearse in disposable Supabase first. Apply the migration before the matching application. Use forward remediation and retain audit evidence."
         }
       ]
+    },
+    {
+      "id": "s2b-session-security",
+      "report": "docs/security/S2B_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/private-workflows/:id/:step",
+          "contract": "GET /api/v1/me/private-workflows/:id/:step - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine private reads emit bounded route diagnostics only."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/session-security.spec.ts",
+            "denialScenario": "A copied complete URL returns a no-store 404 on both the browser and API, including another session for a privileged owner."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/sessions",
+          "contract": "GET /api/v1/me/sessions - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A member's scoped inventory read makes no material change."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/session-security.spec.ts",
+            "denialScenario": "Only the current member sees their active sessions. Revoked devices cannot list sessions after refresh."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/private-workflows",
+          "contract": "POST /api/v1/me/private-workflows 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "A new workflow and its creation event commit in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/session-security.spec.ts",
+            "denialScenario": "Only a live eligible owner can open the draft or start a fresh-MFA leadership confirmation."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/private-workflows/:id/:step",
+          "contract": "POST /api/v1/me/private-workflows/:id/:step 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Completion or cancellation and the corresponding receipt are transactional."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/session-security.spec.ts",
+            "denialScenario": "Other accounts and mismatched original sessions cannot apply commands. Concurrent replay produces one outcome."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/sessions/revoke",
+          "contract": "POST /api/v1/me/sessions/revoke 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Revocation and the actor-scoped command receipt commit atomically."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/session-security.spec.ts",
+            "denialScenario": "An unrelated account and the initiating session cannot be revoked through a copied management reference."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121143000_s2b_sessions_private_workflows.sql",
+          "rlsAndGrants": "New private RLS tables grant no application role direct access. Service-only wrappers enforce scope in SQL.",
+          "authorization": "The actor must hold a live S2A session. Resource, workflow state, owner, binding and recent TOTP are checked for each relevant action.",
+          "compatibility": "Existing S2A deadlines, legacy routing and both F1 mechanisms continue to use their established checks.",
+          "validation": "Disposable PostgREST, Fastify and Chromium checks cover copied URLs, session refresh, exact binding, races, audit and role changes.",
+          "rolloutAndRollback": "Apply only to the approved dev project after exact migration approval. Use reviewed forward remediation and preserve audit and Auth state."
+        }
+      ]
     }
   ]
 }

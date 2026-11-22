@@ -12,6 +12,7 @@ import { useLocale } from "@/lib/locale-store";
 import { FounderBootstrap } from "./founder-bootstrap";
 import { AccountMfa } from "./account-mfa";
 import { AccountSecurity } from "./account-security";
+import { ActiveSessions } from "./active-sessions";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { NotificationPreferencesPanel } from "./notifications";
@@ -21,7 +22,7 @@ import { GovernanceInvitations } from "./platform-governance";
 const card = "min-w-0 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-6";
 const secondaryAction = "rounded-md border border-[var(--theme-button-border)] bg-[var(--theme-button)] px-3 py-2 text-sm font-semibold text-[var(--theme-text)] hover:bg-[var(--theme-button-hover)]";
 
-export function AccountSettings() {
+export function AccountSettings({ subject }: { subject: string }) {
   const [locale] = useLocale();
   const a = accountMessages[locale];
   const t = authMessages[locale];
@@ -82,6 +83,7 @@ export function AccountSettings() {
           <h2 className="text-xl font-semibold">{a.security}</h2>
           <AccountSecurity />
           <AccountMfa />
+          <ActiveSessions subject={subject} />
           <FounderBootstrap />
         </section>
         <NotificationPreferencesPanel />

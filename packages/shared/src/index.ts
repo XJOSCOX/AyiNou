@@ -1,6 +1,7 @@
 export * from "./core";
 export * from "./trust";
 export * from "./accounts";
+export * from "./session-security";
 export * from "./institutions";
 export * from "./organization-onboarding";
 export * from "./founder-identity";

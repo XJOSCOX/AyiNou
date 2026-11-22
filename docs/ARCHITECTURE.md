@@ -26,6 +26,10 @@ Fastify's verifier calls Supabase `getClaims` to validate the token signature th
 
 `GET` and `PATCH /api/v1/me/profile` require verified bearer tokens. PATCH accepts only display name, language, and broad optional location fields. The public profile remains hidden until a future trusted visibility workflow. The API keeps private location out of anonymous responses. PostgreSQL role assignments and verification records drive access independently of user-editable metadata.
 
+## Sessions and private workflows
+
+S2A supplies the absolute policy for each Auth session. S2B adds application-side revocation to the same live check. Next.js resolves `/s/{flowId}/{step}` through a verified Fastify request and returns no-store, no-referrer responses. The database distinguishes owner-bound organization resume from original-session leadership confirmation. Domain commands retain their existing authorization. [S2B router](security/S2B_PRIVATE_WORKFLOW_ROUTER.md)
+
 ## Current layout
 
 Phase 2B keeps Auth credential handling in Supabase. `PATCH /api/v1/me/profile/details` accepts owner-scoped partial updates and saves related fields atomically through `save_member_profile_v2`. `POST /api/v1/me/profile/avatar` validates and reencodes images before the server writes to private Storage. `GET /api/v1/profiles/:username` returns a limited public projection when trusted visibility and owner discoverability both permit it. `GET /api/v1/me/profile` returns saved onboarding progress and owner details. Stage completion, the public projection, and storage handling are available through Fastify for future native clients.

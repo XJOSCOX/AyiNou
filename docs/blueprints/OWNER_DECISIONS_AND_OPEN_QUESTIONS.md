@@ -20,8 +20,8 @@
 
 | Decision needed | Type | Proposed disposition |
 | --- | --- | --- |
-| Legacy-session and provider capabilities for S2B | Owner decision and operational evidence | S2A uses trusted session start and defaults legacy sessions to unchecked. Document provider evidence for last activity, inventory, targeted revocation and recovery before adding those controls. Assess any separate policy for sensitive domain operators independently of the confirmed limits. |
-| First workflows to adopt the shared `/s` router and when to bind to the initiating session | Owner decision | Start with one account-bound draft in parallel to the legacy route, then one privileged workflow after session proof. Preserve approved F1 paths during transition. |
+| Provider-native remote revocation and last activity | Operational evidence | S2B enforces Ayinou revocation and uses trusted original session time. Add provider-native targeted revocation or last-activity metadata only when supported and verifiable. |
+| Additional workflows for the shared `/s` router | Owner decision | S2B integrates organization drafts and original-session leadership sign-out confirmation. Require separate review before extending the scope or changing existing F1 paths. |
 | Succession, compromised-account recovery and independent approver staffing for workflows that still require it | Owner decision and operational approval | Name independent roles, emergency containment and recorded thresholds for those workflows. Founder-direct Administrator appointments have no second-Administrator requirement under the revised policy. |
 | Invitation delivery, lost delivery/reissue and obsolete O5 acceptance | Owner decision and operational approval | Start with separate private delivery and audited revocation. Prefer unified target acceptance and versioned reissue rather than code retrieval. |
 | Founder proof procedure, privacy-safe evidence retention, appeal and independent review staffing | Owner decision and operational approval | Approve evidence source, retention/holds, restricted access, neutral appeals and staffed operators before enabling real issuance. Keep O4 parity separate. |

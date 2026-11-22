@@ -1,6 +1,6 @@
 # Session Security implementation plan
 
-F1/F1.1 was followed by S2A absolute lifetimes and promotion handling. See the [S2A implementation](S2A_IMPLEMENTATION_REPORT.md) and [deployment evidence](S2A_DEPLOYMENT_AND_TEST_RESULTS.md). S2B session inventory and private user-bound links remain planned, followed by identity and audit integration. Hosted Auth settings and restricted feature gates have their own operational approvals.
+F1/F1.1 was followed by S2A absolute lifetimes and promotion handling. See the [S2A implementation](S2A_IMPLEMENTATION_REPORT.md) and [deployment evidence](S2A_DEPLOYMENT_AND_TEST_RESULTS.md). S2B implements session inventory and private user-bound links for the two reviewed flows. See the [S2B implementation and rollout evidence](S2B_IMPLEMENTATION_REPORT.md). Identity and audit integration remain later work. Hosted Auth settings and restricted feature gates have their own operational approvals.
 
 ## Inspect provider and application boundaries
 
