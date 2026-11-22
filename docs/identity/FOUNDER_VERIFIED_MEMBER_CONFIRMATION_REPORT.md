@@ -28,12 +28,18 @@ The challenge becomes invalid on expiry, case revision changes, loss of session 
 
 ## Validation and CI
 
-Six disposable Chromium scenarios passed, including gold issuance and opted-in application closure for an account with no authenticator, optional enrolled MFA, copied and replayed challenges, expired or revoked sessions, independent review and controlled O4 eligibility. Typecheck, lint, client and API checks, four-language validation and both production builds passed. All three GitHub jobs and the exact hosted dry run are required before schema approval.
+Six focused disposable Chromium scenarios and all 97 full Chromium regressions passed, plus two immediate-signup tests. The new flow issued gold and closed the exact opted-in application for a member with no authenticator. Tests also covered optional enrolled MFA, copied and replayed challenges, expired or revoked sessions, independent review and controlled O4 eligibility. Typecheck, lint, client and API checks, four-language validation and both production builds passed. All three [release CI jobs](https://github.com/XJOSCOX/AyiNou/actions/runs/45063406618) passed at commit `f58ccba1d6f84350223c259e5b34eea681a986ec`.
 
 ## Documentation and operations
 
 Use the [operating procedure](FOUNDER_VERIFIED_OPERATING_PROCEDURE.md) and [activation policy](FOUNDER_VERIFIED_ACTIVATION_POLICY.md). Preserve the existing approval, gates and exact cohort during deployment. Coordinate the matching API and web with the database change.
 
+## Hosted development postflight
+
+The separately approved file `20261122150000_fv_member_account_confirmation.sql` was applied to hosted development project `hcbxulyfmdmuyccgrujs`. SHA-256 `2d79a4673dae51de21b53c72e736c6dccb23e6aad79ce4288614c7d3531b61e9` matched the tested Git release. The postflight showed 84 applied migrations, zero pending and zero hosted-only. There were no seed or role changes.
+
+The existing policy approval, expiry, gates, one-member cohort, case and audit counts, gold grant and pending regular application matched the immediate preflight. The hosted challenge table has RLS and no direct application grants. The new RPC is service-only and rejected an invalid session. Anonymous execution was denied. No new challenge, grant or test account was created on hosted development. The matching local web and API responded successfully. The positive no-authenticator grant was exercised in disposable Supabase. No separate cloud application was deployed.
+
 ## Remaining blockers
 
-Hosted migration deployment requires exact separate owner authorization. The current development cohort is not expanded by this release.
+Hosted schema deployment is verified. A positive hosted workflow for a different member would require a separately approved cohort change.
