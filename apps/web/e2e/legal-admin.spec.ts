@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { api, expect, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, expect, inEnglish, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
 
 const supabase = "http://127.0.0.1:55321";
 
@@ -52,7 +52,7 @@ test("legal controls stay draft-safe, restricted and audit-free without approved
   await login(page, admin);
   await expect(page).toHaveURL(/\/mfa/);
   await solveMfa(page, secret);
-  await page.goto("/admin");
+  await openAdministration(page);
   await page.getByRole("button", { name: "Legal & Policies" }).click();
   await expect(page.getByText("Early Partner")).toBeVisible();
   await expect(page.getByText("No approved release").first()).toBeVisible();

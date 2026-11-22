@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
 import { earlyPartnerMessages } from "../src/lib/early-partner-i18n";
 import { messages } from "../src/lib/i18n";
 
@@ -254,7 +254,7 @@ pilotTest("O6 serializes acceptance and suspension and rechecks expiry and organ
   await inEnglish(context);
   await login(page, first);
   await solveMfa(page, first.secret);
-  await page.goto("/admin");
+  await openAdministration(page);
   const t = earlyPartnerMessages.en;
   await page.getByRole("button", { name: t.title, exact: true }).click();
   const view = page.getByRole("region", { name: t.title });

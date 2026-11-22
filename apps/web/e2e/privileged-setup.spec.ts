@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm, rmdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
-import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
 import { privilegedSetupMessages } from "../src/lib/privileged-setup-i18n";
 import { governanceMessages } from "../src/lib/governance-i18n";
 
@@ -188,7 +188,7 @@ test("F1.1 clean installation appoints the first Administrator through the Found
       await solveMfa(page, candidate.mfaSecret);
       await page.goto(privatePage);
       await expect(page.getByText(governanceMessages.en.activated, { exact: true })).toBeVisible();
-      await page.goto("/admin");
+      await openAdministration(page);
       await expect(page.locator("header [data-designation=administrator]").first()).toBeVisible();
       expect(sql(`select count(*) from private.f1_events where workflow='${issued.flowId}' and event in ('accepted','activated');`)).toBe("2");
       expect(sql(`select count(*) from private.platform_governance_events grant_event

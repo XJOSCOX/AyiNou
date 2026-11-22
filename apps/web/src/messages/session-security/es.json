@@ -1,4 +1,6 @@
 {
+  "openAdmin": "Abrir la administración",
+  "adminLinkHelp": "Abre un enlace privado para esta sesión. El enlace caduca después de cinco minutos y requiere una verificación reciente con tu aplicación de autenticación.",
   "sessionScope": "Cerrar una sesión elimina su acceso a Ayinou.",
   "active": "Sesiones activas",
   "current": "Sesión actual",

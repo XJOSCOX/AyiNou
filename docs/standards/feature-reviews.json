@@ -882,6 +882,14 @@
           "compatibility": "Existing S2A deadlines, legacy routing and both F1 mechanisms continue to use their established checks.",
           "validation": "Disposable PostgREST, Fastify and Chromium checks cover copied URLs, session refresh, exact binding, races, audit and role changes.",
           "rolloutAndRollback": "Apply only to the approved dev project after exact migration approval. Use reviewed forward remediation and preserve audit and Auth state."
+        },
+        {
+          "file": "supabase/migrations/20261121144000_admin_workspace_session_link.sql",
+          "rlsAndGrants": "Reuses the private S2B RLS table. The wrapper remains service-only and direct grants are removed from the delegated implementation.",
+          "authorization": "Platform leadership, original account and session, live S2A policy and current recent TOTP are checked before rendering any administration data.",
+          "compatibility": "Preserves existing RPC signatures, the onboarding and sign-out workflow behavior, and independent authorization for administrative API actions.",
+          "validation": "Disposable browser coverage checks regular-route 404, signed-out and cross-account denial, a second session for the same Administrator, expiration and role revocation.",
+          "rolloutAndRollback": "Apply the single reviewed hosted development migration only after exact owner approval. Use reviewed forward remediation."
         }
       ]
     }

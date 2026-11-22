@@ -73,6 +73,12 @@ export async function login(page: Page, member: Pick<Member, "email" | "password
   await page.getByRole("button", { name: "Sign in", exact: true }).click();
 }
 
+export async function openAdministration(page: Page) {
+  await page.goto("/admin");
+  await page.getByRole("button", { name: "Open administration", exact: true }).click();
+  await expect(page).toHaveURL(/\/s\/[0-9a-f-]{36}\/admin$/);
+}
+
 export async function logout(page: Page) {
   await page.getByRole("banner").locator("summary").first().click();
   await page.getByRole("button", { name: "Sign out", exact: true }).click();

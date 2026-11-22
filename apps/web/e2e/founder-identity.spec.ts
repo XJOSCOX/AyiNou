@@ -4,7 +4,7 @@ import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } 
 import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
 import { messages } from "../src/lib/i18n";
-import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
 
 const ownerPath = "/api/v1/me/founder-identity";
 const adminPath = "/api/v1/admin/founder-identity";
@@ -295,7 +295,7 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
       const staff = await staffContext.newPage();
       await login(staff, founder);
       await solveMfa(staff, founder.secret);
-      await staff.goto("/admin");
+      await openAdministration(staff);
       await staff.getByRole("button", { name: founderMessages.en.adminTitle }).click();
       const workspace = staff.getByRole("region", { name: founderMessages.en.adminTitle });
       await workspace.getByText(founderMessages.en.caseHistory, { exact: true }).click();
@@ -547,7 +547,7 @@ founderTest("an assigned founder reviewer opens consent without a member applica
   await inEnglish(page.context());
   await login(page, founder);
   await solveMfa(page, founder.secret);
-  await page.goto("/admin");
+  await openAdministration(page);
   const t = founderMessages.en;
   const tab = page.getByRole("button", { name: t.adminTitle, exact: true });
   const panel = page.getByRole("region", { name: t.adminTitle, exact: true });
@@ -603,7 +603,7 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
         await login(adminPage, founder);
         await solveMfa(adminPage, founder.secret);
         await openVerification(adminPage, 503);
-        await adminPage.goto("/admin");
+        await openAdministration(adminPage);
         await adminPage.getByRole("button", { name: founderMessages.en.adminTitle, exact: true }).click();
         const tab = adminPage.getByRole("region", { name: founderMessages.en.adminTitle, exact: true });
         await expect(tab.getByRole("status")).toHaveText(founderMessages.en.notDeployed);

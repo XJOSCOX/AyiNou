@@ -1,4 +1,6 @@
 {
+  "openAdmin": "Ouvrir l’administration",
+  "adminLinkHelp": "Ouvrez un lien privé pour cette session. Le lien expire après cinq minutes et exige une vérification récente avec votre application d’authentification.",
   "sessionScope": "Déconnecter une session lui retire l’accès à Ayinou.",
   "active": "Sessions actives",
   "current": "Session actuelle",

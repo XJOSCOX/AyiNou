@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
-import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
 import { governanceMessages } from "../src/lib/governance-i18n";
 
 const corrections = "/api/v1/me/onboarding-corrections";
@@ -208,7 +208,7 @@ governanceTest("O5 governance controls remain accessible on narrow screens in fo
   await page.setViewportSize({ width: 320, height: 800 });
   await login(page, admin);
   await solveMfa(page, admin.secret);
-  await page.goto("/admin");
+  await openAdministration(page);
   const select = page.getByRole("banner").getByRole("combobox").last();
   for (const locale of ["en", "ht", "fr", "es"] as const) {
     await select.selectOption(locale);
