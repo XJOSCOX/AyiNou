@@ -393,7 +393,7 @@ A1A adds scoped activity queries, nine existing ledger adapters and a permanent 
 
 ## Founder authority consolidation
 
-The recognized Founder inherits routine platform administration and can decide eligible regular blue applications through the private administration workspace. Ordinary reviewers retain two approvals. Hosted rollout of the new direct blue decision remains separately authorized. [Implementation report](docs/governance/FOUNDER_AUTHORITY_CONSOLIDATION.md)
+The recognized Founder inherits routine platform administration and can decide eligible regular blue applications through the private administration workspace. Ordinary reviewers retain two approvals. The approved migration is deployed to hosted development with 89 applied migrations and zero pending. [Implementation report](docs/governance/FOUNDER_AUTHORITY_CONSOLIDATION.md)
 
 ## Founder Verified integration
 
