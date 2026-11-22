@@ -5,7 +5,7 @@ This index is the decision map for Ayinou accounts, platform authority, identity
 1. [Account and authentication](ACCOUNT_AND_AUTHENTICATION.md) — personal and organization signup, handles and onboarding.
 2. [Founder registration](FOUNDER_REGISTRATION.md) — protected reservation, one-time bootstrap and continuity.
 3. [Platform roles and permissions](PLATFORM_ROLES_AND_PERMISSIONS.md) — capability matrix and domain separation.
-4. [Administrator activation](ADMINISTRATOR_ACTIVATION.md) — O5 proposal, independent approval and target-bound redemption.
+4. [Administrator activation](ADMINISTRATOR_ACTIVATION.md) — existing F1 approval dependency, approved Founder-direct authority and target-bound redemption.
 5. [Identity verification and badges](IDENTITY_VERIFICATION_AND_BADGES.md) — review, provenance, badge display and consented supersession.
 6. [Session and private workflow security](SESSION_AND_PRIVATE_WORKFLOW_SECURITY.md) — current controls and future policy.
 7. [Audit and security requirements](AUDIT_AND_SECURITY_REQUIREMENTS.md) — evidence, privacy, gaps and release conditions.

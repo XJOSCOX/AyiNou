@@ -2,7 +2,7 @@
 
 This plan sequences future work against the blueprint. Every phase starts with a fresh code/SQL inventory and owner-approved scope. A later phase can leave a gated capability closed. The review and publication of this blueprint do not start any phase or authorize hosted changes.
 
-**Sequence.** F1 development release review → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. Scoped support and program delegation remain separately approved follow-on work within the later integration sequence.
+**Sequence.** F1 development release review, including proposed F1.1 → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. Scoped support and program delegation remain separately approved follow-on work within the later integration sequence.
 
 ## Evidence required for every implementation phase
 
@@ -17,9 +17,35 @@ This plan sequences future work against the blueprint. Every phase starts with a
 | --- | --- |
 | Exact scope and existing modules | Audit the established `privileged-setup.ts` routes, `/setup/f`, `/activate/a`, Auth callback and MFA return target rules, `scripts/prepare-founder-registration.mjs`, Platform Governance and U1 username paths. Any proposed follow-up is limited to compatibility, issuance/recovery UX or clearer acceptance/audit projection. |
 | Database impact | Rehearse `20261121140000_private_privileged_workflows.sql` on empty and upgraded disposable databases. Compare private tables/RLS/grants, service definer search paths, active Founder provenance, O5 and F1 event trails. A hosted migration requires separate named approval. No code or SQL change is presumed for pure release reconciliation. |
-| API/UI and security | Keep dedicated setup and activation endpoints. Confirm secret-first, no cache/referrer leakage, exact target, fresh MFA, distinct approval and a single atomic role change. If improving delivery and old O5 acceptance, preserve historic receipts and fail closed. |
+| API/UI and security | Keep dedicated setup and activation endpoints. Verify baseline F1 behavior, including secret-first setup, privacy, exact target, fresh MFA, its current independent approval and atomic role change. Use the baseline to isolate the proposed F1.1 change. |
 | Disposable and cross-module tests | Run `privileged-setup`, `founder-bootstrap`, `founder-release-audit`, `administration-governance`, `usernames`, `immediate-signup` and `auth-recovery`. Cover prepared-but-unused, already-initialized upgrade, suspected credential leakage, actual callback proof and unchanged poll/project, privacy and legal gates. |
 | Four languages, CI and development exit | Test both flows and cancellation in all four locales and the shared CI gate. Exit when the clean-install, upgrade and privilege cases reproduce, role/badge projections agree, and rollout and recovery notes name the exact pending scope. Hosted application is tracked as a separate outcome. |
+
+## Phase 1.1 — F1.1 Founder-direct Administrator appointments
+
+**OWNER APPROVED — NOT YET IMPLEMENTED**. This is a focused follow-up inside the F1 development release review, before S2. It adds no hosted deployment permission. [Transaction design](ADMINISTRATOR_ACTIVATION.md#smallest-compatible-f11-change)
+
+| Area | Scope and evidence |
+| --- | --- |
+| Exact code scope | Add a direct authorization mode only for newly confirmed Founder `appoint` proposals. Account for O5 proposal creation/receipt and state projection and F1 readiness, issuance and redemption. Keep ordinary `approve`, general `execute`, succession and recovery unchanged. |
+| Database impact | Plan one additive migration after F1 to constrain the mode and adjust only the relevant O5 and F1 functions and projections. Preserve RLS, service-only RPC grants, the shared lock, uniqueness, original O5 receipts and completed history. Test upgrade without retroactively authorizing legacy proposals. |
+| API, UI and minimum security | Reuse the governance proposal and private invitation/activation routes. Update only direct appointment states and controls. Require live trusted Founder authority, recent MFA and recorded reason, then correct target, credential, current eligibility, fresh MFA and explicit acceptance. No automatic promotion from the invitation itself. |
+| Audit | Link the original decision receipt and reason to issuance, acceptance and activation. Preserve separate actors and a truthful authorization source. Show green only after committed role assignment. Retain expiry, revoke and denial evidence without logging the verifier or raw code. |
+| Localization, CI and development exit | Validate Haitian Creole, French, English and Spanish for readiness, acceptance and unavailable states. Run S1, API contract, full Chromium, production builds, legal boundary and main CI checks. Exit when all cases below pass with restrictions and preexisting behavior intact. Hosted application requires explicit approval. |
+
+### F1.1 disposable acceptance cases
+
+| Case | Required outcome |
+| --- | --- |
+| Direct appointment and first Administrator | A recent-MFA recognized Founder confirms with a reason. An eligible target receives an invitation and activates with the correct proof and consent. Run separately with zero other platform leaders and with existing administrators. No synthetic second approver is needed for F1.1. |
+| Credential and locator misuse | Invalid codes fail with bounded attempts. A copied URL alone, a copied code from another account, wrong target, expired/revoked invitation and replay after use all fail. |
+| Consent and assurance | No activation without explicit acceptance or current TOTP on the target's live session. Deny Founder initiation without current MFA or a valid reason. Invalid or suspended account and revoked session cannot perform protected steps. |
+| Concurrent appointment and redemption | Simultaneous proposals and issuance do not create duplicate active invitations. A conflicting retry fails. Two concurrent valid redemptions commit exactly one role and one acceptance/activation sequence. |
+| Founder suspension | With disposable restricted-account fixtures, prove a suspended Founder cannot authorize or issue. Suspension after issue blocks outstanding redemption. Existing protected restriction/recovery commands stay closed as before. |
+| Existing Administrator privileges | An existing Administrator retains routine powers, cannot initiate a Founder-reserved appointment or self-promote, and gains no power to approve a marked direct appointment. Legacy pending approvals and unrelated O5 approvals remain independently governed. |
+| Independent verification and privacy | A separately assigned Founder has one ordinary identity vote. A second distinct eligible, unconflicted reviewer is still necessary. Verify no blue or gold grant, no new proof/evidence, ballot, legal or privacy authority, and unchanged O3 gates. |
+| Audit and upgrade consistency | Record a single attributable Founder receipt and written reason, invitation and verified target consent. Role, verifier consumption and success audit commit or roll back together. Existing approval receipts retain their source and pending legacy proposals gain no direct authorization. |
+| Prevention of Founder self-promotion | Attempts from a normal member, Administrator, wrong account or alternate service route cannot create Founder authority. Founder cannot appoint themself or create a second Founder. Bootstrap singleton and role projection remain consistent. |
 
 ## Phase 2 — S2 absolute session lifetimes and promotion handling
 
@@ -76,7 +102,7 @@ This plan sequences future work against the blueprint. Every phase starts with a
 ## First-install and existing-host test strategy
 
 1. Use `npm run test:e2e -- privileged-setup.spec.ts founder-bootstrap.spec.ts administration-governance.spec.ts` against a fresh disposable database with Mailpit. Start with no Founder and prove ordinary signup cannot claim a protected handle or power. Exercise wrong and exhausted setup secrets, expiry, actual emailed confirmation, no proof under auto-confirm, wrong-actor and second-browser attempts, password/email recovery, MFA and concurrent claim. Verify exactly one committed bootstrap and red projection.
-2. Test the supported appointment path with a deliberately seeded independent eligible approver **only in disposable infrastructure**. Separately prove that a lone Founder stays pending. Test no premature green badge, wrong account, revoked session, stale MFA/approval, wrong code, revocation/expiry, concurrent consumption and no role/verification side effects. Record outcome counts and cleanup.
+2. Establish the current F1 baseline in disposable infrastructure. Legacy F1 needs an eligible independent approver, and a lone Founder stays pending. For proposed F1.1, prove a marked direct appointment can activate with a sole Founder only after eligible target acceptance, current MFA and one-time redemption. Run the F1.1 cases above and preserve legacy and unrelated governance behavior.
 3. Rehearse existing-data upgrade with the earlier migrations and then F1 in disposable infrastructure. Ensure the existing Founder can continue and no competing bootstrap can form. Compare expected RLS, grants and migration fingerprints. Test recoverability using synthetic database + Storage, not merely a schema dump.
 4. On the existing hosted development project, use a read-only project/reference check, dry run, preservation inventory and catalog/role postflight only when separately requested. Preserve all records, credentials, project settings and history. F1 deployment approval can name just that migration; it does not confer permission to reset or change runtime gates.
 
