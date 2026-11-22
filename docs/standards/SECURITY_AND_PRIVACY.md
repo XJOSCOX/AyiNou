@@ -11,9 +11,9 @@ Use reviewed releases and runtime gates for legal and privacy operations. Legal 
 
 ## Session and private workflow policy
 
-The Session Security milestone will add an opt-in, unchecked-by-default “Remember this device” control. Remembered ordinary-member sessions may persist for at most 30 days from the original trusted sign-in. Nonremembered sessions use nonpersistent browser credentials and a finite, server-enforced maximum. Sign-out and revocation remain available in both modes. Browser close is not reliable server-side evidence.
+Remember This Device is opt-in and defaults to unchecked. Ordinary remembered sessions may persist for at most 30 days from the trusted Auth session start. The unchecked policy uses nonpersistent browser credentials and a 12-hour server maximum. Sign-out and revocation remain available in both modes. Browser close alone supplies no reliable server-side evidence.
 
-Active Platform Administrator and Super Administrator assignments require a six-hour absolute limit from the original server-trusted sign-in, including when remembering a device. Refresh cannot extend the deadline. Recheck current authority, constrain or revoke pre-promotion sessions before allowing privileged access, and remove privileges immediately on revocation. Prompt for login and applicable MFA after expiry. Preserve the existing 15-minute TOTP freshness check and action-specific step-up.
+The trusted Founder and active Platform Administrators have a six-hour absolute maximum regardless of browser preference. Refresh cannot extend it. Administrator activation invalidates earlier sessions for the target account. Current authority checks remove privileges immediately on revocation. Prompt for sign-in and applicable MFA after expiry. Preserve the existing 15-minute TOTP freshness check and action-specific step-up.
 
 Private workflow links use `/s/{flowId}/{step}` with random opaque references. Bind the workflow to a user or authorized participant and, when sensitivity requires it, the initiating session. Check identity, live authorization, expiry, revocation, completion and MFA on each read and write. Ordinary account-owned drafts may resume on another device. Keep credentials, tokens, raw session IDs and OTPs out of URLs. Return nondisclosing errors for unauthorized access.
 

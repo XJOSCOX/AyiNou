@@ -9,7 +9,7 @@ const hash = (credential: string) => createHash("sha256").update(credential).dig
 test("reserved Founder bootstrap requires confirmed email, fresh MFA and one atomic credential consumption @smoke", async ({ page, makeMember }) => {
   test.setTimeout(100_000);
   const [owner, ordinary] = await Promise.all([makeMember(), makeMember()]);
-  const reserved = "founder_" + randomUUID().slice(0, 8);
+  const reserved = "founder_e2e_" + randomUUID().slice(0, 8);
   const first = randomBytes(32).toString("base64url");
   const credential = randomBytes(32).toString("base64url");
   const prepare = (email: string, username: string, token: string) =>
