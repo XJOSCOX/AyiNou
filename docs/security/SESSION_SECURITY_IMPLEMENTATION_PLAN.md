@@ -1,6 +1,6 @@
 # Session Security implementation plan
 
-This milestone records approved requirements for future implementation. Existing authentication behavior and routes keep their present session policy during O7.
+**OWNER APPROVED — NOT YET IMPLEMENTED**. This plan records the future S2 policy. Existing authentication, hosted Auth settings and feature gates retain their current behavior. Start with F1 development release review, then S2 absolute lifetimes and promotion handling, then S2 session inventory and private user-bound links, then identity and audit integration.
 
 ## Inspect provider and application boundaries
 
@@ -10,9 +10,18 @@ This milestone records approved requirements for future implementation. Existing
 
 ## Absolute session policy
 
-Add a localized “Remember this device” login checkbox, initially unchecked. An opted-in ordinary member can persist authentication for at most 30 days from original login. Use nonpersistent browser credentials for unchecked sessions and decide their finite server-side maximum with the owner before implementation. Browser restoration and close semantics vary. The server always checks its own deadline.
+| Effective authority and preference | Absolute maximum | Browser authentication |
+| --- | --- | --- |
+| Recognized Founder, either preference | Six hours | The preference cannot extend the limit. |
+| Active Administrator, either preference | Six hours | The preference cannot extend the limit. |
+| Ordinary member, Remember This Device checked | 30 days | Persistent within the server deadline. |
+| Ordinary member, Remember This Device unchecked (default) | 12 hours | Nonpersistent, with best-effort browser-close behavior. |
 
-For any active Platform Administrator or Super Administrator assignment, enforce six hours from original login regardless of cookie preference. Revocation or constraint of pre-promotion sessions must precede privileged access. Role revocation removes authority immediately. Refresh, concurrent device use, current browser context and client role labels do not change deadlines or privileges. Expiry requires reauthentication and applicable MFA. Keep 15-minute privileged TOTP freshness and step-up checks for sensitive actions.
+Derive the Founder from trusted bootstrap provenance even if the account has no Administrator row. Enforce the original authenticated session start and deadline in Next.js, Fastify and PostgreSQL as applicable, including protected data paths. Refresh-token rotation cannot move the deadline. Browser close, cookie restoration and concurrent devices do not replace server checks. Expiry requires reauthentication and applicable MFA.
+
+Revoke or constrain ordinary sessions before allowing promoted Administrator access. No existing 30-day deadline can carry into a privileged session. Role revocation removes Administrator authority immediately, including on other devices. Preserve 15-minute TOTP freshness on applicable privileged commands and action-specific step-up.
+
+Administrator appointments continue to require Founder initiation, independent O5 approval by a different eligible and unconflicted Administrator, and explicit acceptance by the named member using their own account, fresh MFA and a one-time credential. An appointment with no eligible independent approver remains pending. The session phase must preserve these F1 safeguards.
 
 ## Private workflow references
 
@@ -28,10 +37,19 @@ Apply the [audit event policy](../standards/AUDIT_EVENT_POLICY.md) to login, rem
 
 | Coverage | Automated acceptance evidence |
 | --- | --- |
-| Ordinary accounts | Opt-in persists through reopening within the 30-day maximum. Unchecked stays nonpersistent with the documented server limit. Both expire at their own absolute deadline. |
-| Privileged accounts | Six-hour expiry for both cookie preferences. Refresh leaves the original deadline unchanged. Promotion constrains older sessions and role removal ends privilege immediately. Step-up and 15-minute TOTP freshness still apply. |
-| Session lifecycle | Two concurrent devices, refresh rotation, logout and targeted and other-session revocation. Confirm Next.js, API and database agree when the session is expired or revoked. |
+| Founder expiry | Independently enforce six hours with either preference. Use trusted Founder provenance without an Administrator row and prove the effective-privilege check. |
+| Administrator expiry | Independently enforce six hours with either preference. Verify normal role assignment separately from Founder provenance. |
+| Ordinary remembered expiry | Reopen within the 30-day maximum and deny at the deadline. |
+| Ordinary unremembered expiry | Default unchecked, use nonpersistent browser authentication and deny at 12 hours even if the browser restores credentials. |
+| Refresh-token rotation | Rotate tokens before expiry and under concurrent refresh. Verify the original start and deadline stay fixed for each policy. |
+| Promotion and role revocation | Constrain or revoke remembered sessions before privilege starts. Immediately deny administrative operations after revocation across devices. |
+| Multiple devices and cross-account isolation | Keep each device session scoped to its own account and deadline. Exercise concurrent sessions, logout, targeted revocation and stale or switched account state. |
+| Current MFA | Require current assurance and a TOTP proof within 15 minutes on applicable privileged commands, independently of remaining session lifetime. |
+| Server, API and database | Verify Next.js, Fastify and applicable PostgreSQL/RPC/Storage boundaries agree just before and at each expiry, after revocation and after role changes. |
+| Existing F1 workflows | Regress real proof and one-time Founder setup. Test O5 independent approval, named member redemption, no eligible approver, reuse, and the transition into the Administrator session policy. |
 | Private workflows | Cross-account copied link and account switching fail safely. Original-session-only flows reject another session. Ordinary drafts resume across authorized devices. Expired, revoked or completed flows cannot be replayed. |
 | Production readiness | Verify effective provider settings and a compatible database/application rollout in disposable infrastructure. Document recovery and staff observability. Obtain separate authorization before enabling production policy. |
 
-Open decisions include the ordinary nonremembered server lifetime, provider capabilities, legacy-session migration and the first workflows chosen for routing.
+Use controlled test clocks and disposable Supabase Auth sessions and fixtures for the cases above. Do not run expiry, promotion or revocation probes on hosted development as part of S2 tests.
+
+Open work includes provider capabilities, legacy-session migration, recovery, independent approver staffing and which workflows first adopt private routing. These gaps do not reopen the approved deadlines or approval requirements. [Blueprint decisions](../blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md)

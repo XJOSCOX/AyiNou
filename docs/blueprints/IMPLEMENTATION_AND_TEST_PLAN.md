@@ -2,6 +2,8 @@
 
 This plan sequences future work against the blueprint. Every phase starts with a fresh code/SQL inventory and owner-approved scope. A later phase can leave a gated capability closed. The review and publication of this blueprint do not start any phase or authorize hosted changes.
 
+**Sequence.** F1 development release review → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. Scoped support and program delegation remain separately approved follow-on work within the later integration sequence.
+
 ## Evidence required for every implementation phase
 
 - Run from `main`, preserve unrelated files, and record the exact source and migration baselines. Use additive migrations and explicit grants. Include API contract inventory, SQL/RLS review, audit coverage, client recovery and an S1 report. Update the review register for actual contract changes.
@@ -21,15 +23,17 @@ This plan sequences future work against the blueprint. Every phase starts with a
 
 ## Phase 2 — S2 absolute session lifetimes and promotion handling
 
+**OWNER APPROVED — NOT YET IMPLEMENTED**. The approved policy is recorded in the [Session Security plan](../security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md#absolute-session-policy).
+
 | Area | Scope and evidence |
 | --- | --- |
 | Exact scope and existing modules | Measure supported Auth session fields in disposable and approved read-only environments. Modify only login/SSR session creation and refresh, `apps/web/src/proxy.ts`, `apps/api/src/services/auth.ts` and the corresponding SQL session boundary and direct protected consumers. Include F1 administrator promotion and current role revocation. |
 | Database impact | Compare verified provider settings with required per-role deadlines. If needed, design an additive private state keyed to verified provider session ID with server-owned start, preference, effective deadline and constraint state. Define legacy-session rollout, monotonic deadlines and bounded cleanup. Never trust client time or JWT refresh time as initial sign-in. |
-| API/UI and security | Localized unchecked “Remember this device,” consistent expiry and reauthentication feedback. Enforce 30 days for opted-in ordinary sessions and six hours for eligible leadership under approved interpretation. Implement owner-selected nonremembered limit. Restrict prior sessions atomically or fail closed at their first privileged use. Do not introduce a new login system. |
-| Disposable and cross-module tests | Use controlled clocks and multiple real Auth sessions for refresh rotation, devices, browser restart, fast/slow refresh, privilege grants/removal and expired/revoked sessions across Next.js/Fastify/SQL and protected Storage. Regress reset/MFA, U1 onboarding, F1, project/poll writes and organization context. |
+| API/UI and security | Default Remember This Device to unchecked. Enforce 30 days for ordinary remembered sessions, 12 hours with nonpersistent browser authentication when unchecked, and six hours each for the recognized Founder and Administrators regardless of preference. Derive Founder authority from trusted bootstrap provenance. Measure from original authenticated session start and preserve the deadline through refresh. Revoke or constrain prior sessions before privileged access on promotion. Remove authority immediately on role revocation and preserve applicable 15-minute TOTP assurance. |
+| Disposable and cross-module tests | Use controlled clocks and disposable Supabase. Run separate expiry cases for Founder at six hours, Administrator at six hours, remembered ordinary member at 30 days and unremembered ordinary member at 12 hours. Independently exercise refresh rotation, promotion, role revocation, multiple devices, current MFA, cross-account session isolation and enforcement in Next.js, Fastify and PostgreSQL as applicable. Regress both F1 workflows, reset/MFA, U1 onboarding, project/poll writes, organization context and relevant protected Storage. |
 | Four languages, CI and development exit | Exercise remember/expiry/org return states in all locales and run final CI. Exit when all enforcement points agree and refreshed or pre-promotion credentials cannot extend a deadline or bypass the role transition. |
 
-## Phase 3 — Session inventory and scoped private workflow links
+## Phase 3 — S2 session inventory and private user-bound links
 
 | Area | Scope and evidence |
 | --- | --- |

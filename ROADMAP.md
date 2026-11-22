@@ -365,7 +365,7 @@ The reviewed O2–O7 migrations are deployed to the owner-approved development d
 
 ## Future Session Security milestone
 
-Plan opt-in remembered devices, absolute role-based session limits, session management and authorized private workflow links. Activation depends on test evidence across Supabase Auth, Next.js, Fastify and PostgreSQL. [Implementation plan](docs/security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
+**OWNER APPROVED — NOT YET IMPLEMENTED**. S2 will enforce six hours for the recognized Founder and Administrators regardless of preference, 30 days for ordinary remembered sessions and 12 hours for ordinary unremembered sessions. Remember This Device defaults to unchecked with nonpersistent browser authentication. Enforce the original session deadline across Next.js, Fastify and PostgreSQL as applicable, constrain prior sessions on promotion, remove administrative authority immediately on revocation and retain applicable 15-minute TOTP freshness. [Implementation plan](docs/security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
 
 ## U1 public usernames
 
@@ -375,4 +375,6 @@ U1 adds username selection and availability to both signup choices. Its migratio
 
 F1 applied six reviewed migrations, bringing hosted development to 74. Private Founder enrollment and independently approved Administrator activation passed disposable validation. Migration `20261121140000_private_privileged_workflows.sql` remains pending separate hosted approval. [F1 report](docs/governance/F1_IMPLEMENTATION_REPORT.md)
 
-The [Master Blueprint](docs/blueprints/README.md) records the approved account and role policy, current implementation and feature gates. Its [implementation plan](docs/blueprints/IMPLEMENTATION_AND_TEST_PLAN.md) and [owner decision register](docs/blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md) define future work. The blueprint does not start S2, the Unified Audit Center or a hosted rollout.
+The owner confirmed Founder initiation, independent O5 approval by a different eligible and unconflicted Administrator, and acceptance by the named member with their authenticated account, fresh MFA and a one-time credential. Appointments remain pending without an eligible approver. [Administrator activation](docs/blueprints/ADMINISTRATOR_ACTIVATION.md)
+
+Sequence: F1 development release review → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. [Master Blueprint](docs/blueprints/README.md) · [Owner decisions](docs/blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md)
