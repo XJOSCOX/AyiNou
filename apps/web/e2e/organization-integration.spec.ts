@@ -247,9 +247,10 @@ test("O7 private catalog, restricted routes and competing intent commands agree"
       and (not p.prosecdef or not coalesce('search_path=""'=any(p.proconfig),false)
         or has_function_privilege('anon',p.oid,'execute') or has_function_privilege('authenticated',p.oid,'execute')
         or not has_function_privilege('service_role',p.oid,'execute'))),
-    'founder',private.founder_identity_policy_open(),'parity',private.organization_setup_founder_parity_enabled(),
+    'founder',private.founder_identity_policy_open(),'liveProof',private.founder_identity_live_proof_enabled(),
+    'parity',private.organization_setup_founder_parity_enabled(),
     'pilot',private.early_partner_synthetic_gate(null));`));
-  expect(inventory).toEqual({ tables: 19, exposed: 0, rpc: 16, unsafeRpc: 0, founder: false, parity: false, pilot: false });
+  expect(inventory).toEqual({ tables: 20, exposed: 0, rpc: 17, unsafeRpc: 0, founder: false, liveProof: false, parity: false, pilot: false });
 
   const current = await start(actor);
   const save = { ...next(current.version), id: current.id, stage: "awaiting_identity" };
