@@ -17,8 +17,8 @@ export interface SessionRevocation {
 
 export interface PrivateFlow {
   id: string;
-  kind: "organization_draft" | "revoke_other_sessions" | "admin_workspace";
-  step: "resume" | "confirm" | "admin";
+  kind: "organization_draft" | "revoke_other_sessions" | "admin_workspace" | "verification_workspace";
+  step: "resume" | "confirm" | "admin" | "review";
   version: number;
   expiresAt: string;
 }

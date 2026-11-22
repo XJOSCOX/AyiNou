@@ -1,5 +1,5 @@
-import { apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, login, openAdministration,
-  solveMfa, sql, test } from "./fixtures";
+import { apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, localClient, login, openAdministration,
+  solveMfa, sql, test, totp, web } from "./fixtures";
 import { adminMessages } from "../src/lib/admin-i18n";
 import { messages } from "../src/lib/i18n";
 import { sessionSecurityMessages } from "../src/lib/session-security-i18n";
@@ -12,6 +12,21 @@ test("Platform Administration uses an original-session link and hides its direct
     const secret = await enroll(leader);
     sql(`insert into public.role_assignments(user_id,role) values('${leader.id}','administrator');`);
     try {
+      const client = localClient("AYINOU_E2E_SUPABASE_PUBLIC");
+      const signIn = await client.auth.signInWithPassword({ email: leader.email, password: leader.password });
+      expect(signIn.error).toBeNull();
+      const factor = (await client.auth.mfa.listFactors()).data?.totp[0];
+      expect(factor).toBeDefined();
+      const elevated = await client.auth.mfa.challengeAndVerify({ factorId: factor!.id, code: totp(secret) });
+      expect(elevated.error).toBeNull();
+      const actor = { ...leader, token: elevated.data!.access_token };
+      const concurrent = await Promise.all([0, 1].map(() =>
+        apiCall(actor, "/api/v1/me/private-workflows", 200, "POST", { kind: "admin_workspace" })));
+      expect(concurrent[0]).toEqual(concurrent[1]);
+
+      const anonymous = await request.get("/admin");
+      expect(anonymous.status()).toBe(404);
+      expect(await anonymous.text()).not.toContain(sessionSecurityMessages.en.openAdmin);
       await inEnglish(page.context());
       await login(page, leader);
       await solveMfa(page, secret);
@@ -56,10 +71,59 @@ test("Platform Administration uses an original-session link and hides its direct
       expect((await page.reload())?.status()).toBe(404);
       await openAdministration(page);
       expect(page.url()).not.toBe(original.href);
+      const cancellable = page.url();
+      await page.getByRole("button", { name: sessionSecurityMessages.en.closeWorkspace }).click();
+      await expect(page.getByText(sessionSecurityMessages.en.expiredLink)).toBeVisible();
+      expect((await page.goto(cancellable))?.status()).toBe(404);
+      await openAdministration(page);
       sql(`delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);
       expect((await page.reload())?.status()).toBe(404);
       expect((await page.goto("/admin"))?.status()).toBe(404);
+      sql(`insert into public.role_assignments(user_id,role) values('${leader.id}','administrator');`);
+      await openAdministration(page);
+      const revoked = new URL(page.url()).pathname.split("/")[2];
+      sql(`update private.s2a_session_policy set revoked_at=clock_timestamp() where session_id=
+        (select bound_session from private.s2b_workflows where id='${revoked}');`);
+      expect((await page.reload())?.status()).toBe(404);
     } finally {
       sql(`delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);
     }
   });
+
+test("Assigned verification review gets its own workspace and ordinary admin authority is insufficient @smoke", async ({ makeMember, page }) => {
+  const [reviewer, leader] = await Promise.all([makeMember(), makeMember()]);
+  finishPersonalOnboarding(reviewer);
+  finishPersonalOnboarding(leader);
+  const reviewMfa = await enroll(reviewer);
+  const leaderMfa = await enroll(leader);
+  sql(`insert into private.verification_reviewers(user_id) values('${reviewer.id}');
+    insert into public.role_assignments(user_id,role) values('${leader.id}','administrator');`);
+  try {
+    await inEnglish(page.context());
+    await login(page, reviewer);
+    await solveMfa(page, reviewMfa);
+    expect((await page.goto("/admin"))?.status()).toBe(404);
+    for (const [index, locale] of (["ht", "fr", "es", "en"] as const).entries()) {
+      const width = index % 2 ? 1440 : 320;
+      await page.setViewportSize({ width, height: 900 });
+      await page.context().addCookies([{ name: "ayinou-locale", value: locale, url: web }]);
+      await page.goto("/verification/review");
+      const control = page.getByRole("button", { name: sessionSecurityMessages[locale].openReview, exact: true });
+      await control.focus();
+      await expect(control).toBeFocused();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+    }
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/s\/[a-f0-9-]{36}\/review$/);
+    const address = page.url();
+    sql(`delete from private.verification_reviewers where user_id='${reviewer.id}';`);
+    expect((await page.reload())?.status()).toBe(404);
+    await login(page, leader);
+    await solveMfa(page, leaderMfa);
+    expect((await page.goto("/verification/review"))?.status()).toBe(404);
+    expect((await page.goto(address))?.status()).toBe(404);
+  } finally {
+    sql(`delete from private.verification_reviewers where user_id='${reviewer.id}';
+      delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);
+  }
+});

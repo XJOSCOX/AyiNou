@@ -1,4 +1,6 @@
 {
+  "openReview": "Louvri revizyon verifikasyon an",
+  "closeWorkspace": "Fèmen espas travay prive a",
   "openAdmin": "Louvri administrasyon an",
   "adminLinkHelp": "Louvri yon lyen prive pou sesyon sa a. Lyen an ekspire apre senk minit epi li mande yon verifikasyon resan nan aplikasyon otantifikatè ou a.",
   "sessionScope": "Lè w dekonekte yon sesyon, li pèdi aksè ak Ayinou.",

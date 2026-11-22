@@ -10,6 +10,8 @@
 | Show current and other sessions, authoritative times and targeted/all-other revocation. | **Implemented in S2B.** Settings lists only the current account's active sessions and preserves regular Auth logout. Targeted and all-other revocation are enforced by Ayinou. Provider-native targeted revocation and authoritative last activity remain unsupported in this integration. [Sessions](../security/S2B_ACTIVE_SESSION_MANAGEMENT.md) |
 | Use opaque private workflow references and check every operation. | **Implemented for two S2B workflows.** Organization drafts are account-bound. Leadership sign-out confirmation is bound to the exact initiating session and recent verified MFA. F1/F1.1 continue using their dedicated paths. [Private router](../security/S2B_PRIVATE_WORKFLOW_ROUTER.md) |
 
+S2C makes Platform Administration and the independently assigned verification queue original-session workspaces requiring recent TOTP. Themes, ordinary settings, F1 bootstrap and F1.1 activation continue through their existing paths. [Workspace authorization](../security/S2C_WORKSPACE_AUTHORIZATION.md)
+
 ## Reference and binding rules
 
 | Workflow | Current binding or proposed policy |

@@ -10,6 +10,7 @@ import { authMessages } from "@/lib/auth-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { useMemberIdentity } from "@/lib/member-display-name";
+import { openPrivateFlow, privateFlowPath } from "@/lib/session-security";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { DisplayControls } from "./display-controls";
 import { InstitutionSwitcher } from "./institution-switcher";
@@ -20,7 +21,7 @@ import { NotificationBell } from "./notification-bell";
 
 export function MemberNavbar() {
   const [locale] = useLocale();
-  const { displayName, avatarUrl, claims, administrator, founder, founderVerified, reviewer } = useMemberIdentity();
+  const { memberId, displayName, avatarUrl, claims, administrator, founder, founderVerified, reviewer } = useMemberIdentity();
   const accountMenu = useRef<HTMLDetailsElement>(null);
   const [failedAvatar, setFailedAvatar] = useState<string | null>(null);
   const settings = accountMessages[locale].settings;
@@ -77,8 +78,14 @@ export function MemberNavbar() {
           </summary>
           <div className="absolute end-0 z-30 mt-2 grid w-56 max-w-[calc(100vw-2rem)] gap-0.5 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg">
             {accountLinks.map(({ href, label }) => (
-              <Link key={href} href={href} prefetch={false} onNavigate={() => {
+              <Link key={href} href={href} prefetch={false} onNavigate={(event) => {
                 if (accountMenu.current) accountMenu.current.open = false;
+                if (memberId && (href === "/admin" || href === "/verification/review")) {
+                  event.preventDefault();
+                  const kind = href === "/admin" ? "admin_workspace" : "verification_workspace";
+                  void openPrivateFlow(kind, memberId).then(flow => router.push(privateFlowPath(flow)),
+                    () => router.push(href));
+                }
               }} className="rounded px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
                 {label}
               </Link>

@@ -1,4 +1,6 @@
 {
+  "openReview": "Open verification review",
+  "closeWorkspace": "Close private workspace",
   "openAdmin": "Open administration",
   "adminLinkHelp": "Open a private link for this session. The link expires after five minutes and requires recent authenticator verification.",
   "sessionScope": "Signing out a session removes its access to Ayinou.",

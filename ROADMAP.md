@@ -371,6 +371,10 @@ The reviewed O2–O7 migrations are deployed to the owner-approved development d
 
 **S2B COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121143000` and verified 78 applied migrations with zero pending. S2B adds owner-scoped session inventory and revocation, account-bound organization draft links, and original-session leadership confirmation. The existing F1 paths stay available. [Implementation and hosted rollout](docs/security/S2B_IMPLEMENTATION_REPORT.md).
 
+## S2C private staff workspaces
+
+Platform Administration and independent verification review use short-lived links tied to the initiating account and session. Routine member and public routes retain their stable URLs. [S2C implementation and rollout](docs/security/S2C_IMPLEMENTATION_REPORT.md)
+
 ## U1 public usernames
 
 U1 adds username selection and availability to both signup choices. Its migrations were applied to hosted development during F1. Long-term cooldown, retention and support operations remain policy decisions. See the [U1 implementation report](docs/identity/U1_IMPLEMENTATION_REPORT.md).

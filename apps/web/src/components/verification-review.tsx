@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent, type ReactNode } from "react";
 import { reviewDecisions, reviewQueueModes, type ReviewApplication, type ReviewQueueMode } from "@ayinou/shared";
 import { adminMessages } from "@/lib/admin-i18n";
 import { loadPlatformAccess } from "@/lib/admin-api";
@@ -17,7 +17,7 @@ import { PageHeader } from "./page-header";
 import { AdminFeedback } from "./admin-workspace";
 import { VerificationAppealReview } from "./trust-workspace";
 
-export function VerificationReview() {
+export function VerificationReview({ workspaceAction }: { workspaceAction: ReactNode }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
   const auth = authMessages[locale];
@@ -32,7 +32,7 @@ export function VerificationReview() {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <PageHeader title={t.review} description={t.reviewIntro} />
+        <PageHeader title={t.review} description={t.reviewIntro} actions={workspaceAction} />
         {!error && <div className="flex flex-wrap gap-2" role="group" aria-label={t.applications}>
           {reviewQueueModes.map((status) => <button key={status} type="button" aria-pressed={mode === status}
             className="rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]"

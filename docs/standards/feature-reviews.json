@@ -892,6 +892,21 @@
           "rolloutAndRollback": "Apply the single reviewed hosted development migration only after exact owner approval. Use reviewed forward remediation."
         }
       ]
+    },
+    {
+      "id": "s2c-private-staff-workspaces",
+      "report": "docs/security/S2C_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121144100_s2c_scoped_workspaces.sql",
+          "rlsAndGrants": "Reuses private S2B RLS and keeps the router RPC service-only.",
+          "authorization": "Exact owner/session, current platform or reviewer scope, recent MFA and live S2A policy authorize each workspace read or cancellation.",
+          "compatibility": "Preserves F1/F1.1 and existing independent review and evidence boundaries, while reusing S2B draft and sign-out dispatch.",
+          "validation": "Disposable Chromium and SQL cover signed-out, cross-account, same-account cross-session, concurrent creation, cancellation, expiry and role loss.",
+          "rolloutAndRollback": "Apply after the approved administration link migration and exact full-set dry run. Use forward remediation and preserve audit evidence."
+        }
+      ]
     }
   ]
 }

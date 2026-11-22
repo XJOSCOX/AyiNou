@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent, type ReactNode } from "react";
 import { platformRoles, type AccountStatus, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
 import { adminMessages } from "@/lib/admin-i18n";
@@ -32,7 +32,7 @@ const statuses: AccountStatus[] = ["active", "suspended", "banned"];
 type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
 const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder", "corrections", "governance", "partners"];
 
-export function AdminWorkspace() {
+export function AdminWorkspace({ workspaceAction }: { workspaceAction: ReactNode }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
   const [tab, setTab] = useState<AdminTab>("overview");
@@ -42,7 +42,7 @@ export function AdminWorkspace() {
 
   return <MemberShell>
     <div className="grid gap-4">
-      <PageHeader title={t.administration} actions={access.data?.founder && <FounderMark />} />
+      <PageHeader title={t.administration} actions={<>{access.data?.founder && <FounderMark />}{workspaceAction}</>} />
       {overview.error ? <AdminFeedback error={overview.error} totp={access.data?.totp} retry={refresh} />
         : !overview.data ? <p role="status">{authMessages[locale].working}</p> : <>
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">

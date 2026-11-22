@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "X-Robots-Tag", value: "noindex, nofollow" },
     ];
-    return ["/admin", "/s/:path*"].map(source => ({ source, headers }));
+    return ["/admin", "/verification/review", "/s/:path*"].map(source => ({ source, headers }));
   },
 };
 
