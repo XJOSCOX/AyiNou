@@ -316,14 +316,14 @@ The platform administrator can inspect versioned publication settings and audit 
 - [x] O1 design and database impact review. [Architecture](docs/organizations/O1_ONBOARDING_ARCHITECTURE.md) · [Owner decisions](docs/organizations/O1_OWNER_DECISION_BRIEF.md)
 - [x] O2 personal signup paths and resumable organization intent. [Implementation report](docs/organizations/O2_IMPLEMENTATION_REPORT.md)
 - [x] O3 Founder Verified provenance and synthetic lifecycle. Real issuance awaits separate approval.
-- [x] [Archive regular identity applications after a Founder Verified grant](docs/organizations/FOUNDER_APPLICATION_CLOSURE_IMPLEMENTATION_REPORT.md). The migration is applied in hosted development with issuance disabled.
-- [x] [Separate Founder reviewer eligibility and require member consent for supersession](docs/organizations/FOUNDER_VERIFICATION_POLICY_UPDATE.md). The follow-up migration requires separate hosted approval.
+- [x] [Preserve regular identity application history after explicit supersession consent](docs/organizations/FOUNDER_VERIFICATION_POLICY_UPDATE.md). The newer consent policy supersedes the historical closure behavior. Founder Verified issuance remains disabled.
+- [x] Separate Founder issuance and independent review assignments. The follow-up consent migration was applied in hosted development during F1.
 - [x] [Recognize the formal Founder role and reserve its powers](docs/governance/FOUNDER_AUTHORITY_AND_POWERS.md). The hierarchy has [explicit capability and approval boundaries](docs/governance/FOUNDER_CAPABILITY_MATRIX.md). Protected succession and hosted activation remain separately governed.
-- [x] [Reserve the founding identity through explicit one-time setup and separate the four badge styles](docs/governance/FOUNDER_BOOTSTRAP_AND_BADGES.md). Hosted migrations and succession remain separately authorized.
-- [x] [O4 identity-gated setup](docs/organizations/O4_IMPLEMENTATION_REPORT.md), private registration declarations and reviewed claims. Hosted rollout awaits approval.
-- [ ] O5 safe pathway corrections, bootstrap governance and succession.
-- [ ] O6 Early Partner Program.
-- [ ] O7 integration, security validation and rollout review.
+- [x] [Reserve the founding identity and separate the four badge styles](docs/governance/FOUNDER_BOOTSTRAP_AND_BADGES.md). Hosted development has the reservation migration. F1 private setup has a separate pending migration, and succession remains closed.
+- [x] [O4 identity-gated setup](docs/organizations/O4_IMPLEMENTATION_REPORT.md), private registration declarations and reviewed claims. The development schema was applied during D2.
+- [x] [O5 scoped corrections and governance proposals](docs/organizations/O5_IMPLEMENTATION_REPORT.md). Protected execution and succession remain closed.
+- [x] [O6 Early Partner synthetic foundation](docs/organizations/O6_IMPLEMENTATION_REPORT.md). Real enrollment remains closed.
+- [x] [O7 integration and development rollout verification](docs/deployment/D2_FINAL_READINESS.md). Public launch readiness is separate.
 
 Future implementation depends on documented owner decisions and separate authorization. [Phase dependencies and exit criteria](docs/organizations/O1_IMPLEMENTATION_ROADMAP.md)
 
@@ -333,8 +333,8 @@ S1 establishes repository-wide [engineering standards](docs/standards/ENGINEERIN
 
 - [x] [O3 Founder Verified infrastructure](docs/organizations/O3_IMPLEMENTATION_REPORT.md). Production authority and proof activation are separately gated.
 - [x] O4 institution authority and registration checks with legacy creation and claim entry points closed.
-- [ ] O5 signup corrections, bootstrap administration and succession.
-- [ ] O6 Early Partner organizations and O7 rollout verification.
+- [x] O5 signup corrections and governance decision history. Protected succession remains closed.
+- [x] O6 synthetic Early Partners and O7 development rollout verification. Real enrollment remains closed.
 - [ ] Unified Audit Center with permission-scoped read projections and approved summary export.
 - [ ] Organization Programs, applications and waitlists, volunteer coordination, provider referrals and separately authorized financial support integrations.
 - [ ] Expanded community reporting, radio and media, and native mobile apps.
@@ -344,7 +344,7 @@ These initiatives remain planned. [S1 implementation report](docs/standards/S1_I
 
 ## O5 administrative corrections and governance
 
-O5 adds auditable administrative corrections and governance proposals. Hosted migration rollout and approval of operational recovery remain separate milestones. See [O5 implementation](docs/organizations/O5_IMPLEMENTATION_REPORT.md).
+O5 adds auditable administrative corrections and governance proposals. D2 applied its schema in hosted development. Operational recovery still requires separate approval. See [O5 implementation](docs/organizations/O5_IMPLEMENTATION_REPORT.md).
 
 
 ## O6 Early Partners
@@ -353,7 +353,7 @@ O6 implements synthetic-first Early Partner participation. Real enrollment, an e
 
 ## O7 integration and release readiness
 
-O7 pairs the organization migration rollout with disposable end-to-end tests and shared authentication screens. Hosted rollout and operational feature decisions remain separate. [O7 readiness](docs/organizations/O7_READINESS_MATRIX.md)
+O7 pairs the organization migrations with disposable end-to-end tests and shared authentication screens. D2 completed the approved hosted development rollout. Operational feature decisions remain separate. [O7 readiness](docs/organizations/O7_READINESS_MATRIX.md)
 
 ## D1 controlled deployment preparation
 
@@ -369,6 +369,10 @@ Plan opt-in remembered devices, absolute role-based session limits, session mana
 
 ## U1 public usernames
 
-U1 adds username selection and availability to both signup choices. The hosted migration remains pending separate authorization. Long-term cooldown, retention and support operations remain policy decisions. See the [U1 implementation report](docs/identity/U1_IMPLEMENTATION_REPORT.md).
+U1 adds username selection and availability to both signup choices. Its migrations were applied to hosted development during F1. Long-term cooldown, retention and support operations remain policy decisions. See the [U1 implementation report](docs/identity/U1_IMPLEMENTATION_REPORT.md).
 
-F1 applies the six previously reviewed development migrations and adds private Founder enrollment and independently approved Administrator activation. The F1 schema rollout requires separate authorization. [F1 report](docs/governance/F1_IMPLEMENTATION_REPORT.md).
+## F1 and the Account, Roles & Security Master Blueprint
+
+F1 applied six reviewed migrations, bringing hosted development to 74. Private Founder enrollment and independently approved Administrator activation passed disposable validation. Migration `20261121140000_private_privileged_workflows.sql` remains pending separate hosted approval. [F1 report](docs/governance/F1_IMPLEMENTATION_REPORT.md)
+
+The [Master Blueprint](docs/blueprints/README.md) records the approved account and role policy, current implementation and feature gates. Its [implementation plan](docs/blueprints/IMPLEMENTATION_AND_TEST_PLAN.md) and [owner decision register](docs/blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md) define future work. The blueprint does not start S2, the Unified Audit Center or a hosted rollout.
