@@ -10,7 +10,7 @@ Private entry for Platform Administration and independent Verification Review. T
 
 ## Permissions and audit
 
-Owner, exact live session, recent verified MFA and current domain authority are checked before private content renders. Explicit closure records a versioned receipt with assurance time in the existing restricted ledger. Domain authorization for evidence, Foundation roles, independent approvals and governance remains separate. [Workspace rules](S2C_WORKSPACE_AUTHORIZATION.md)
+Owner, exact live session, recent verified MFA and current domain authority are checked before private content renders. Explicit closure records a versioned receipt with assurance time in the existing restricted ledger. Domain authorization for evidence, Founder roles, independent approvals and governance remains separate. [Workspace rules](S2C_WORKSPACE_AUTHORIZATION.md)
 
 ## Privacy and lifecycle
 
@@ -26,12 +26,18 @@ The owner transaction lock serializes open and close. Valid references are reuse
 
 ## Validation and CI
 
-Disposable Playwright covers Founder and Administrator entry, review assignment, copied links, concurrent creation, cancellation and role loss. S2A, S2B and F1 authorization regressions run on the existing disposable stack.
+The local disposable suite passed 92 Chromium tests and two additional development signup tests with email confirmation disabled. It covered trusted Founder and Administrator entry, independent reviewer assignment, other-account and other-session denial, concurrent creation, expiry, cancellation, session revocation, role loss, and protected workspace labels and controls in all four languages. The existing F1/F1.1 appointment, S2A session policy, S2B revocation and regular identity review regressions passed.
+
+Typecheck, lint, application tests, shared contracts, translation parity, S1 standards, Legal Center validation, dependency audit and both production builds passed. GitHub passed quality, production builds and Chromium smoke on the release commit [f090896](https://github.com/XJOSCOX/AyiNou/commit/f090896f677606a43c71c97e8493dd2d52bdf81e). [Release workflow](https://github.com/XJOSCOX/AyiNou/actions/runs/45040554023)
 
 ## Documentation and operations
 
-Hosted development project `hcbxulyfmdmuyccgrujs` had 78 applied migrations before S2C. The final ordered development rollout requires the exact approved migration set and a passing release CI. Use the [deployment procedure](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md).
+The phase started on `206e796c6fcd5217fe2203ad1450ac71867799e4`. A fresh preflight compared both migration files to the tested Git objects and found exactly two pending versions on Ayinou development project `hcbxulyfmdmuyccgrujs`. After the owner-approved ordered rollout, hosted migration history contained **80 applied, zero pending and zero remote-only**. No seeds or roles were pushed. No database reset or new hosted test account was needed.
+
+Read-only SQL verified RLS, lack of direct application-role access to the private tables, service-only RPC access, account and original-session binding, restricted internal functions, Founder provenance, regular-member denial, MFA and revocation predicates, and S2A deadlines. Account and profile fingerprints and the role, verification, audit and Storage counts matched preflight. Hosted PostgREST rejected private workspace requests from the public role and returned no data for invalid private and existing workflow references. The existing local Next.js and Fastify services returned 404s for anonymous requests, and private pages returned no-store and no-referrer headers. A live Founder workspace had the expected initiating provider session, creation audit receipt and five-minute limit. An anonymous request to that issued address returned 404, and the read-only service RPC returned no content for a different identity and session. The full authenticated and copied-link matrix ran in disposable Supabase.
+
+Founder Verified issuance, Early Partners, legal publication, real privacy processing and high-impact governance remain closed. The development database rollout is complete and verified. The application changes are on `main` and were exercised locally against the hosted development stack. No separate cloud web or API deployment was performed.
 
 ## Remaining blockers
 
-Hosted activation depends on approval and postflight of the exact S2C migration set. Domain-specific moderated queues remain separately scoped and the protected privacy, recovery, legal publication and restricted program gates remain closed.
+There are zero pending S2C migrations. A cloud application release remains a separate deployment. Domain-specific moderation queues retain their existing authorization contracts. [Deployment procedure](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md)

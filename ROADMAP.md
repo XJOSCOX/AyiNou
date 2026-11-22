@@ -373,7 +373,7 @@ The reviewed O2–O7 migrations are deployed to the owner-approved development d
 
 ## S2C private staff workspaces
 
-Platform Administration and independent verification review use short-lived links tied to the initiating account and session. Routine member and public routes retain their stable URLs. [S2C implementation and rollout](docs/security/S2C_IMPLEMENTATION_REPORT.md)
+Platform Administration and independent verification review use short-lived links tied to the initiating account and session. Routine member and public routes retain their stable URLs. The hosted development database is verified at 80 applied migrations with zero pending. The matching application is on main and verified locally. [S2C implementation and rollout](docs/security/S2C_IMPLEMENTATION_REPORT.md)
 
 ## U1 public usernames
 
