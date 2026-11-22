@@ -95,6 +95,8 @@
     "correction": "Mande yon moun endepandan egzamine desizyon sa a?"
   },
   "liveProof": {
+    "outsidePolicy": "Manm sa a pa nan limit politik aktyèl pou bay badj Fondatè Verifye a.",
+    "waitForMember": "N ap tann manm nan konfime li gen kontwòl kont lan nan Verifikasyon.",
     "controlReady": "Kontwòl kont lan konfime",
     "basis": "Metòd pou konfime idantite a",
     "methods": {

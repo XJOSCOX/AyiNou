@@ -95,6 +95,8 @@
     "correction": "¿Solicitar una revisión independiente de esta decisión?"
   },
   "liveProof": {
+    "outsidePolicy": "Esta persona está fuera del alcance de la política vigente de emisión de la insignia Verificado por el fundador.",
+    "waitForMember": "Esperando que la persona confirme el control de su cuenta en Verificación.",
     "controlReady": "Control de la cuenta confirmado",
     "basis": "Método de confirmación de identidad",
     "methods": {

@@ -1073,6 +1073,21 @@
           "rolloutAndRollback": "Approve this exact version separately after disposable checks and CI. Keep prior scope and use audited stop or forward correction if postflight fails."
         }
       ]
+    },
+    {
+      "id": "founder-verified-standing-issuance",
+      "report": "docs/identity/FOUNDER_VERIFIED_OPERATIONAL_ISSUANCE_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122160000_fv_operational_issuance_policy.sql",
+          "rlsAndGrants": "Keeps policy and cohort data private. The moved confirmation function is private with no execution for app roles, behind the same service-only RPC.",
+          "authorization": "Standing scope still requires active trusted Founder authority, normal account confirmation, policy and case binding, recent Founder MFA, and S2C workspace. Standing emergency stop blocks fallback to cohort policies.",
+          "compatibility": "No policy, member, application, or grant writes in migration. Existing development approval history and legitimately granted gold can carry forward to an approved standing policy.",
+          "validation": "Disposable Chromium path validates cutover, the regular active session without MFA, non-cohort issuance and emergency stop while the old cohort is still valid.",
+          "rolloutAndRollback": "Verify the sole exact migration and obtain hosted authorization for schema and one standing approval record. A recorded stop disables proof, issuance and gold projection without rewriting audit history."
+        }
+      ]
     }
   ]
 }

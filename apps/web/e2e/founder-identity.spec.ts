@@ -628,7 +628,7 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
 founderTest("Founder grants gold after account confirmation with or without member MFA @smoke",
   async ({ page, makeMember, administrators: { founder, ordinaryAdmin } }) => {
     test.setTimeout(100_000);
-    const members = [await makeMember({ visible: true }), await makeMember({ visible: true })];
+    const members = [await makeMember({ visible: true }), await makeMember({ visible: true }), await makeMember({ visible: true })];
     const auditSession = (member: Member) => {
       const id: string = JSON.parse(Buffer.from(member.token.split(".")[1], "base64url").toString()).session_id;
       expect(id).toMatch(/^[a-f0-9-]{36}$/);
@@ -649,12 +649,13 @@ founderTest("Founder grants gold after account confirmation with or without memb
       return data;
     }
     const policy = randomUUID();
+    const standingPolicy = randomUUID();
     let claimTarget = "";
     const reviewPath = "/api/v1/verification/founder-appeals";
     function proofPolicy(open: boolean) {
       if (!open) {
         sql(`update private.fv_development_policies set stopped_at=clock_timestamp(),stop_approval_ref=gen_random_uuid()
-          where id='${policy}';
+          where id in ('${policy}','${standingPolicy}') and stopped_at is null;
           delete from private.verification_reviewers where user_id='${ordinaryAdmin.id}';`);
         return;
       }
@@ -663,7 +664,7 @@ founderTest("Founder grants gold after account confirmation with or without memb
         values('${policy}',gen_random_uuid(),'${founder.id}',1,array['in_person_identity_check','live_video_identity_check'],
           true,true,clock_timestamp(),clock_timestamp()+interval '1 hour');
         insert into private.fv_development_members(policy_id,user_id)
-          values('${policy}','${members[0].id}'),('${policy}','${members[1].id}');
+          values('${policy}','${members[0].id}');
         insert into private.verification_reviewers(user_id) values('${ordinaryAdmin.id}');`);
     }
     expect((await run(founder, adminPath, 200)).liveProofEnabled).toBe(false);
@@ -714,8 +715,9 @@ founderTest("Founder grants gold after account confirmation with or without memb
         }
         const issue = actionPath(adminPath, opened.caseId);
         await apiCall(target, mine, 400, "POST", { ...version(consent.version), action: "account_control" });
-        const snapshot = i ? await elevate(target) : target;
-        if (i) sql(`delete from public.role_assignments where user_id='${target.id}' and role='administrator';`);
+        const snapshot = i === 1 ? await elevate(target) : target;
+        if (i === 1) sql(`delete from public.role_assignments where user_id='${target.id}' and role='administrator';`);
+        if (i) expect(sql(`select count(*) from private.fv_development_members where user_id='${target.id}';`)).toBe("0");
         await run(founder, issue, 409, { ...version(consent.version), action: "attest",
           basis: "in_person_identity_check", noConflict: true });
         const begin = () => apiCall(snapshot, mine, 200, "POST", {
@@ -829,6 +831,14 @@ founderTest("Founder grants gold after account confirmation with or without memb
           declaration: { authorityConfirmed: true, declarationVersion: 1 },
         });
         if (!i) {
+          sql(`begin; select pg_advisory_xact_lock(20261120,300);
+            insert into private.fv_development_policies(id,approval_ref,approved_by,case_policy,methods,
+              proof_enabled,issuance_enabled,starts_at,expires_at,scope)
+            values('${standingPolicy}',gen_random_uuid(),'${founder.id}',1,array['in_person_identity_check','live_video_identity_check'],
+              true,true,clock_timestamp(),null,'eligible_members'); commit;`);
+          expect((await publicProfile(target)).founderVerified).toBe(true);
+          expect(sql(`select count(*) from private.fv_development_members where policy_id='${standingPolicy}';`)).toBe("0");
+          expect(sql(`select private.fv_policy_for_member('${founder.id}',1) is null;`)).toBe("t");
           expect(completion).toMatchObject({ result: { kind: "created" } });
           claimTarget = sql(`select handle from private.organizations where id='${completion.result.organizationId}';`);
           expect(claimTarget).toMatch(/^fv-/);
@@ -860,6 +870,17 @@ founderTest("Founder grants gold after account confirmation with or without memb
           continue;
         }
         expect(completion.error.code).toBe("ORG_SETUP_IDENTITY_REQUIRED");
+        if (i === 2) {
+          expect(sql(`select count(*) from auth.mfa_factors where user_id='${target.id}';`)).toBe("0");
+          expect(sql(`select count(*) from private.founder_identity_grants g join private.founder_identity_proofs p on p.id=g.proof_id
+            where g.subject_id='${target.id}' and p.deployment_policy_id='${standingPolicy}';`)).toBe("1");
+          sql(`begin; select pg_advisory_xact_lock(20261120,300);
+            update private.fv_development_policies set stopped_at=clock_timestamp(),stop_approval_ref=gen_random_uuid()
+            where id='${standingPolicy}'; commit;`);
+          expect((await run(founder, adminPath, 200)).liveProofEnabled).toBe(false);
+          expect((await publicProfile(target)).founderVerified).toBeUndefined();
+          expect(sql(`select count(*) from private.founder_identity_grants where subject_id='${target.id}';`)).toBe("1");
+        }
         const held = await run(founder, issue, 200, decision("hold", granted.version, "account_risk"));
         expect((await publicProfile(target)).founderVerified).toBeUndefined();
         expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{}");

@@ -160,8 +160,9 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
     ...fields, expectedVersion: item.version, policyVersion: item.policyVersion,
   });
   const canWithdraw = ["consent_pending", "proof_pending", "ready_for_review", "granted", "held"].includes(item.state);
-  const pendingProof = liveProof && item.liveEligible !== false && item.consented && !item.conflicted &&
+  const needsProof = item.consented && !item.conflicted &&
     ["proof_pending", "ready_for_review", "held"].includes(item.state) && !item.proofReady;
+  const pendingProof = liveProof && item.liveEligible !== false && needsProof;
   const canCorrect = ["granted", "held", "revoked", "denied", "withdrawn"].includes(item.state);
 
   async function beginAccountControl() {
@@ -195,15 +196,17 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
     {item.appealStatus ? <p role="status" className="max-w-prose text-sm">{item.appealStatus === "pending" ? t.correctionPending : t.appeal.outcomes[item.appealStatus]}
       {item.appealRef && <> <code className="break-all">{item.appealRef}</code></>}</p>
       : item.correctionPending && <p className="max-w-prose text-sm">{t.correctionPending}</p>}
+    {liveProof && needsProof && item.liveEligible === false && <p role="status">{t.liveProof.outsidePolicy}</p>}
     {admin ? <>
       {application && <p className="text-sm">{t.regularApplication} · {institutionMessages[locale][application.status]}</p>}
-      {item.supersessionConsented !== undefined && <p className="text-sm">
+      {application?.status === "pending" && item.supersessionConsented !== undefined && <p className="text-sm">
         {item.supersessionConsented ? t.supersessionAgreed : t.supersessionNotAgreed}
       </p>}
       {item.supersessionOutcome && <p className="text-sm">
         {canSupersede && application?.status === "pending" ? t.supersessionReady : t.supersessionResults[item.supersessionOutcome]}
       </p>}
       <p className="text-sm">{item.consented ? t.consentRecorded : t.consentMissing} · {item.proofReady ? t.proofReady : t.proofMissing}</p>
+      {pendingProof && !item.controlReady && <p role="status">{t.liveProof.waitForMember}</p>}
       {pendingProof && item.controlReady && <form className="grid max-w-md gap-3" onSubmit={(event) => {
         event.preventDefault();
         if (attested) void act({ action: "attest", basis, noConflict: true });

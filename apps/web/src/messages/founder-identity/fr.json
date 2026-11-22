@@ -95,6 +95,8 @@
     "correction": "Demander un examen indépendant de cette décision ?"
   },
   "liveProof": {
+    "outsidePolicy": "Ce membre est hors du périmètre actuel d’attribution du badge Vérifié par le fondateur.",
+    "waitForMember": "En attente de la confirmation du contrôle du compte par le membre dans Vérification.",
     "controlReady": "Contrôle du compte confirmé",
     "basis": "Méthode de confirmation de l’identité",
     "methods": {

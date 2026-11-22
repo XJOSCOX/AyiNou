@@ -95,6 +95,8 @@
     "correction": "Request independent review of this decision?"
   },
   "liveProof": {
+    "outsidePolicy": "This member is outside the current Founder Verified issuance policy.",
+    "waitForMember": "Waiting for the member to confirm account control in Verification.",
     "controlReady": "Account control confirmed",
     "basis": "Identity confirmation method",
     "methods": {
