@@ -3,6 +3,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { cp, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:net";
 import { basename, dirname, join } from "node:path";
+import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
@@ -48,12 +49,28 @@ function run(file, argv, options = {}) {
   });
 }
 
-function available(port) {
+function probePort(port) {
   return new Promise((resolve, reject) => {
     const probe = createServer();
-    probe.on("error", () => reject(new Error(`E2E port ${port} is unavailable`)));
+    probe.once("error", reject);
     probe.listen(port, "127.0.0.1", () => probe.close(resolve));
   });
+}
+
+async function available(port) {
+  const deadline = Date.now() + 15_000;
+  for (;;) {
+    try {
+      await probePort(port);
+      return;
+    } catch (cause) {
+      // Docker can briefly retain a published port after removing its container.
+      if (cause.code !== "EADDRINUSE" || Date.now() >= deadline) {
+        throw new Error(`E2E port ${port} is unavailable`, { cause });
+      }
+      await delay(250);
+    }
+  }
 }
 
 async function prepare(directory) {
