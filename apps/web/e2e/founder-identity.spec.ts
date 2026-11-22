@@ -146,10 +146,9 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await panel.getByLabel(founderMessages.en.publicChoice).check();
-  await panel.getByRole("button", { name: founderMessages.en.actions.consent }).click();
   await expect(panel.getByLabel(founderMessages.en.supersessionChoice)).not.toBeChecked();
   await panel.getByLabel(founderMessages.en.supersessionChoice).check();
-  await panel.getByRole("button", { name: founderMessages.en.confirm }).click();
+  await panel.getByRole("button", { name: founderMessages.en.actions.consent }).click();
   await expect(panel.getByText(founderMessages.en.states.proof_pending)).toBeVisible();
   expect(() => recordProof(caseId)).toThrow();
   await apiCall(founder, review, 409, "POST", decision("grant", 2, "confirmed"));
@@ -626,7 +625,7 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
   });
 
 founderTest("Founder grants gold after account confirmation with or without member MFA @smoke",
-  async ({ page, makeMember, administrators: { founder, ordinaryAdmin } }) => {
+  async ({ page, browser, makeMember, administrators: { founder, ordinaryAdmin } }) => {
     test.setTimeout(100_000);
     const members = [await makeMember({ visible: true }), await makeMember({ visible: true }), await makeMember({ visible: true })];
     const auditSession = (member: Member) => {
@@ -676,7 +675,7 @@ founderTest("Founder grants gold after account confirmation with or without memb
     // The closed gates permit a consent request but prohibit receipt creation and actual issuance.
     try {
       for (const [i, target] of members.entries()) {
-        const application = !i ? (await apiCall(target, "/api/v1/me/verification", 201, "POST", {
+        const application = i !== 1 ? (await apiCall(target, "/api/v1/me/verification", 201, "POST", {
           organizationId: null, kind: "identity", evidence: ["https://example.org/restricted-founder-fixture"],
         })).id as string : null;
         const open = () => run(founder, adminPath, 200, { username: target.handle, requestId: randomUUID(), reason: "member_request" });
@@ -686,7 +685,7 @@ founderTest("Founder grants gold after account confirmation with or without memb
         });
         let opened = await open();
         let mine = actionPath(ownerPath, opened.caseId);
-        let consent = await accept(mine, opened.version);
+        let consent = i === 2 ? opened : await accept(mine, opened.version);
         if (!i) {
           await apiCall(target, mine, 409, "POST", { ...version(consent.version), action: "account_control_challenge" });
           proofPolicy(true);
@@ -760,18 +759,51 @@ founderTest("Founder grants gold after account confirmation with or without memb
             const labels = founderMessages[locale];
             const controlButton = page.getByRole("button", { name: labels.actions.account_control, exact: true });
             await expect(controlButton).toBeVisible();
-            await controlButton.focus();
-            await page.keyboard.press("Enter");
             await expect(page.getByText(labels.liveProof.sessionHelp)).toBeVisible();
             expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
           }
-          await page.getByRole("checkbox", { name: founderMessages.en.liveProof.sessionDeclaration }).check();
-          const confirmed = page.waitForResponse(response => response.url().endsWith(mine) && response.request().method() === "POST");
-          const dialog = page.locator("form").filter({ has: page.getByRole("checkbox", { name: founderMessages.en.liveProof.sessionDeclaration }) });
-          await dialog.getByRole("button", { name: founderMessages.en.confirm, exact: true }).click();
+          const confirmed = page.waitForResponse(response => response.url().endsWith(mine)
+            && response.request().method() === "POST" && response.request().postDataJSON().action === "account_control");
+          await page.getByRole("button", { name: founderMessages.en.actions.account_control, exact: true }).focus();
+          await page.keyboard.press("Enter");
           const response = await confirmed;
           expect(response.status()).toBe(200);
           receipt = await response.json();
+        } else if (i === 2) {
+          const combined = { ...version(opened.version), action: "accept_and_confirm", confirmed: true, disclose: true, challenge: issued.challenge };
+          await apiCall(ordinaryAdmin, mine, 404, "POST", combined);
+          await apiCall(target, mine, 400, "POST", { ...combined, confirmed: false });
+          await apiCall(target, mine, 409, "POST", { ...combined, supersession: { applicationId: application, revision: 99 } });
+          expect(sql(`select state from private.founder_identity_cases where id='${opened.caseId}';`)).toBe("consent_pending");
+          expect(sql(`select count(*) from private.founder_identity_events where case_id='${opened.caseId}' and action in ('consent','account_control');`)).toBe("0");
+          const context = await browser.newContext();
+          try {
+            finishPersonalOnboarding(target);
+            await inEnglish(context);
+            const member = await context.newPage();
+            await login(member, target);
+            await expect(member).toHaveURL(/\/dashboard/);
+            await member.goto("/verification");
+            const panel = member.getByRole("region", { name: founderMessages.en.title, exact: true });
+            const choice = panel.getByLabel(founderMessages.en.supersessionChoice);
+            await expect(choice).not.toBeChecked();
+            await choice.check();
+            await panel.getByLabel(founderMessages.en.publicChoice).check();
+            const response = member.waitForResponse(r => r.url().endsWith(mine) && r.request().method() === "POST"
+              && r.request().postDataJSON().action === "accept_and_confirm");
+            await panel.getByRole("button", { name: founderMessages.en.liveProof.acceptAndConfirm }).click();
+            const result = await response;
+            expect(result.status()).toBe(200);
+            receipt = await result.json();
+            await expect(panel.getByText(founderMessages.en.liveProof.controlReady)).toBeVisible();
+          } finally {
+            // The browser session stays registered with Auth until the Founder completes the grant.
+            await context.close();
+          }
+          expect(sql(`select count(*) from private.founder_identity_events proof join private.founder_identity_events consent
+            on consent.id=(proof.command->>'consentAuditId')::uuid and consent.action='consent' and consent.case_id=proof.case_id
+            where proof.case_id='${opened.caseId}' and proof.action='account_control';`)).toBe("1");
+          await apiCall(target, mine, 409, "POST", combined);
         } else {
           const control = complete(issued.challenge);
           const result = await Promise.all([control, { ...control, requestId: randomUUID() }].map(body => fetch(api + mine, {

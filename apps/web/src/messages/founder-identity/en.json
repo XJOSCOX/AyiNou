@@ -104,9 +104,8 @@
       "live_video_identity_check": "Live video identity check"
     },
     "attestation": "I confirmed this person’s identity with the selected method, matched it to the confirmed Ayinou account, and have no material conflict.",
-    "sessionHelp": "Confirm from this signed-in session within two minutes. Keep this session signed in until the Founder finishes. An authenticator is recommended and optional for members.",
-    "sessionDeclaration": "I confirm that I control this Ayinou account.",
-    "sessionFailed": "Could not start account confirmation. Check that you are signed in and try again."
+    "acceptAndConfirm": "Accept and confirm account control",
+    "sessionHelp": "Confirm that you control this Ayinou account. Keep this session signed in while the Founder completes verification."
   },
   "appeal": {
     "decline": "Decline offer",

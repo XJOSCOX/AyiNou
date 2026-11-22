@@ -1088,6 +1088,21 @@
           "rolloutAndRollback": "Verify the sole exact migration and obtain hosted authorization for schema and one standing approval record. A recorded stop disables proof, issuance and gold projection without rewriting audit history."
         }
       ]
+    },
+    {
+      "id": "founder-verified-one-step-acceptance",
+      "report": "docs/identity/FOUNDER_VERIFIED_ONE_STEP_ACCEPTANCE_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122170000_fv_one_step_member_acceptance.sql",
+          "rlsAndGrants": "Private challenge table protections are unchanged. Both public RPCs are service-only and share a private implementation.",
+          "authorization": "Rechecks signed member and current session, case and policy. Combined acceptance consumes the bound challenge before recording native consent and confirmation.",
+          "compatibility": "Retains the original consent and confirmation routes, audit ledgers, active policy, and Founder grant behavior.",
+          "validation": "Disposable Founder scenario validates one-click browser confirmation, stale application rollback, wrong account and forged confirmation.",
+          "rolloutAndRollback": "Deploy only the separately authorized exact migration with the matching app release. Existing policy data and historical cases are preserved."
+        }
+      ]
     }
   ]
 }

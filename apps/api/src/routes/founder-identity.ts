@@ -15,10 +15,13 @@ const revision = z.strictObject({
 });
 const username = z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/);
 const open = z.strictObject({ username, requestId: z.uuid(), reason: z.literal("member_request") });
+const applicationChoice = z.strictObject({
+  applicationId: z.uuid(), revision: z.number().int().min(1).max(2_147_483_647),
+}).optional();
 const memberAction = z.discriminatedUnion("action", [
-  revision.extend({ action: z.literal("consent"), disclose: z.boolean(), supersession: z.strictObject({
-    applicationId: z.uuid(), revision: z.number().int().min(1).max(2_147_483_647),
-  }).optional() }),
+  revision.extend({ action: z.literal("consent"), disclose: z.boolean(), supersession: applicationChoice }),
+  revision.extend({ action: z.literal("accept_and_confirm"), disclose: z.boolean(), supersession: applicationChoice,
+    challenge: z.uuid(), confirmed: z.literal(true) }),
   revision.extend({ action: z.literal("supersede"), applicationId: z.uuid(), revision: z.number().int().min(1).max(2_147_483_647) }),
   revision.extend({ action: z.literal("visibility"), disclose: z.boolean() }),
   revision.extend({ action: z.literal("account_control_challenge") }),
@@ -51,7 +54,8 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
     try {
       return await repo.rpc<T>(rpc, {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2,
-        ...(rpc !== "fv_member_confirmation_for_api" ? { p_totp_at: session.totpAt ?? null } : {}),
+        ...(!["fv_member_confirmation_for_api", "fv_member_accept_and_confirm_for_api"].includes(rpc)
+          ? { p_totp_at: session.totpAt ?? null } : {}),
         ...(rpc === "founder_identity_read_for_api" || rpc === "founder_identity_command_for_api"
           ? { p_admin: privileged } : {}), ...input,
       });
@@ -109,6 +113,13 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
   app.post(member + "/:id/actions", { bodyLimit: 1024 }, (request) => {
     const { id } = caseId.parse(request.params);
     const input = memberAction.parse(request.body);
+    if (input.action === "accept_and_confirm") {
+      return call<FounderIdentityReceipt>(request, false, "fv_member_accept_and_confirm_for_api", {
+        p_id: id, p_expected: input.expectedVersion, p_policy: input.policyVersion, p_request: input.requestId,
+        p_challenge: input.challenge, p_confirmed: input.confirmed, p_disclose: input.disclose,
+        p_application: input.supersession?.applicationId ?? null, p_revision: input.supersession?.revision ?? null,
+      });
+    }
     if (input.action === "account_control" || input.action === "account_control_challenge") {
       return call<FounderIdentityReceipt | FounderControlChallenge>(request, false, "fv_member_confirmation_for_api", {
         p_id: id, p_expected: input.expectedVersion, p_policy: input.policyVersion, p_request: input.requestId,

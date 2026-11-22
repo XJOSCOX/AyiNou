@@ -51,11 +51,21 @@ function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: stri
     setError(null);
     setReceipt(null);
     setBusy(true);
+    const confirmsControl = body.action === "account_control" || body.action === "accept_and_confirm";
+    const request = (payload: Record<string, unknown>) => authorizedRequest(base + path, {
+      method: "POST", signal: controller.signal,
+      headers: workspaceId ? { "X-Ayinou-Workspace": workspaceId } : undefined, body: JSON.stringify(payload),
+    }, actor);
     try {
-      const result: FounderIdentityReceipt = await authorizedRequest(base + path, {
-        method: "POST", signal: controller.signal,
-        headers: workspaceId ? { "X-Ayinou-Workspace": workspaceId } : undefined, body: JSON.stringify({ ...body, requestId: retryKey.current.key }),
-      }, actor);
+      const requestId = retryKey.current.key;
+      let confirmation = {};
+      if (confirmsControl) {
+        const issued: FounderControlChallenge = await request({ action: "account_control_challenge",
+          requestId: crypto.randomUUID(), expectedVersion: body.expectedVersion, policyVersion: body.policyVersion });
+        if (controller.signal.aborted) return;
+        confirmation = { challenge: issued.challenge, confirmed: true };
+      }
+      const result: FounderIdentityReceipt = await request({ ...body, ...confirmation, requestId });
       if (controller.signal.aborted) return;
       retryKey.current = null;
       setReceipt(result);
@@ -65,7 +75,7 @@ function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: stri
     } catch (cause) {
       if (controller.signal.aborted) return;
       setError(cause);
-      if (body.action === "account_control" || apiErrorCode(cause) === "STALE_VERSION") resource.refresh();
+      if (confirmsControl || apiErrorCode(cause) === "STALE_VERSION") resource.refresh();
     } finally {
       if (!controller.signal.aborted) setBusy(false);
       inFlight.current = null;
@@ -82,7 +92,7 @@ function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: stri
   const caseHistory = resource.data?.cases.filter((item) => !activeStates.has(item.state)) ?? [];
   const renderCase = (item: FounderReviewCase) => <FounderCase key={item.id + ":" + item.version} item={item}
     admin={admin} busy={busy} enabled={resource.data?.issuanceEnabled === true && (!admin || resource.data.canIssue !== false)}
-    actor={actor} liveProof={resource.data?.liveProofEnabled === true && (!admin || resource.data.canIssue !== false)} send={send} />;
+    liveProof={resource.data?.liveProofEnabled === true && (!admin || resource.data.canIssue !== false)} send={send} />;
   return <section className={`${institutionCard} grid gap-4`} aria-label={title}>
     <h2 className="text-xl font-semibold">{title}</h2>
     {reviewAccessRequired ? <p role="status" className="max-w-prose text-sm">{t.reviewAccessRequired}</p>
@@ -135,25 +145,26 @@ function reviewActions(item: FounderReviewCase, enabled: boolean): Review[] {
   ];
 }
 
-function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
-  item: FounderReviewCase; admin: boolean; enabled: boolean; busy: boolean; actor: string; liveProof: boolean; send: Send;
+function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
+  item: FounderReviewCase; admin: boolean; enabled: boolean; busy: boolean; liveProof: boolean; send: Send;
 }) {
   const [locale] = useLocale();
   const t = founderMessages[locale];
   const [basis, setBasis] = useState<typeof founderIdentityBases[number]>(founderIdentityBases[0]);
   const [attested, setAttested] = useState(false);
-  const [checking, setChecking] = useState(false);
-  const [proofError, setProofError] = useState(false);
-  const [challenge, setChallenge] = useState<FounderControlChallenge | null>(null);
   const [publish, setPublish] = useState(item.disclose);
-  const [supersede, setSupersede] = useState(false);
+  const [supersession, setSupersession] = useState<{ applicationId: string; revision: number } | null>(null);
   const application = item.regularApplication;
-  const canChooseSupersession = item.state === "consent_pending" && application?.status === "pending";
+  const accepting = item.state === "consent_pending";
+  const combineAcceptance = accepting && liveProof && item.liveEligible !== false;
+  const canChooseSupersession = accepting && application?.status === "pending";
+  const selectedSupersession = canChooseSupersession && supersession?.applicationId === application.id &&
+    supersession.revision === application.revision ? supersession : null;
   const canSupersede = item.supersessionOutcome === "superseded_by_founder_verification";
   const canSupersedeAfterGrant = enabled && item.state === "granted" && application?.status === "pending" && !canSupersede;
   const [review, setReview] = useState<Review | null>(null);
   const [conflictFree, setConflictFree] = useState(false);
-  const [confirm, setConfirm] = useState<Exclude<FounderMemberAction, "visibility"> | null>(null);
+  const [confirm, setConfirm] = useState<Exclude<FounderMemberAction, "visibility" | "consent"> | null>(null);
   const controls = reviewActions(item, enabled && item.liveEligible !== false && item.appealStatus !== "pending");
   const grant = review?.action === "grant" || review?.action === "release";
   const act = (fields: object) => send(`/${item.id}/actions`, {
@@ -164,23 +175,6 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
     ["proof_pending", "ready_for_review", "held"].includes(item.state) && !item.proofReady;
   const pendingProof = liveProof && item.liveEligible !== false && needsProof;
   const canCorrect = ["granted", "held", "revoked", "denied", "withdrawn"].includes(item.state);
-
-  async function beginAccountControl() {
-    if (checking || busy) return;
-    setChecking(true);
-    setProofError(false);
-    try {
-      const result: FounderControlChallenge = await authorizedRequest(`/api/v1/me/founder-identity/${item.id}/actions`, {
-        method: "POST", body: JSON.stringify({ action: "account_control_challenge", expectedVersion: item.version,
-          policyVersion: item.policyVersion, requestId: crypto.randomUUID() }),
-      }, actor);
-      setChallenge(result);
-    } catch {
-      setProofError(true);
-    } finally {
-      setChecking(false);
-    }
-  }
 
   function submitReview(event: FormEvent) {
     event.preventDefault();
@@ -196,7 +190,7 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
     {item.appealStatus ? <p role="status" className="max-w-prose text-sm">{item.appealStatus === "pending" ? t.correctionPending : t.appeal.outcomes[item.appealStatus]}
       {item.appealRef && <> <code className="break-all">{item.appealRef}</code></>}</p>
       : item.correctionPending && <p className="max-w-prose text-sm">{t.correctionPending}</p>}
-    {liveProof && needsProof && item.liveEligible === false && <p role="status">{t.liveProof.outsidePolicy}</p>}
+    {liveProof && (accepting || needsProof) && item.liveEligible === false && <p role="status">{t.liveProof.outsidePolicy}</p>}
     {admin ? <>
       {application && <p className="text-sm">{t.regularApplication} · {institutionMessages[locale][application.status]}</p>}
       {application?.status === "pending" && item.supersessionConsented !== undefined && <p className="text-sm">
@@ -249,35 +243,34 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
         </ul>
       </details>
     </> : <>
-      {item.state === "consent_pending" && <p className="max-w-prose text-sm">{t.consentExplanation.replace("{version}", String(item.policyVersion))}</p>}
+      {accepting && <>
+        <p className="max-w-prose text-sm">{t.consentExplanation.replace("{version}", String(item.policyVersion))}</p>
+        {combineAcceptance && <p className="max-w-prose text-sm">{t.liveProof.sessionHelp}</p>}
+        {canChooseSupersession && <div className="grid max-w-prose gap-2 text-sm">
+          <p>{t.supersessionExplanation}</p>
+          <label className="flex items-start gap-2">
+            <input className="mt-1" type="checkbox" disabled={busy} checked={selectedSupersession !== null}
+              onChange={(event) => setSupersession(event.target.checked ? { applicationId: application.id, revision: application.revision } : null)} />
+            {t.supersessionChoice}
+          </label>
+        </div>}
+      </>}
       {canWithdraw && <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={publish} onChange={(event) => setPublish(event.target.checked)} />{t.publicChoice}
+          <input type="checkbox" disabled={busy} checked={publish} onChange={(event) => setPublish(event.target.checked)} />{t.publicChoice}
         </label>
-        {item.state === "consent_pending" ? <button type="button" className={institutionAction} disabled={busy}
-          onClick={() => setConfirm("consent")}>{t.actions.consent}</button>
+        {accepting ? <button type="button" className={institutionAction} disabled={busy}
+          onClick={() => { void act({ action: combineAcceptance ? "accept_and_confirm" : "consent", disclose: publish,
+            ...(selectedSupersession ? { supersession: selectedSupersession } : {}),
+          }); }}>{combineAcceptance ? t.liveProof.acceptAndConfirm : t.actions.consent}</button>
           : <button type="button" className={institutionAction} disabled={busy || publish === item.disclose}
             onClick={() => { void act({ action: "visibility", disclose: publish }); }}>{t.actions.visibility}</button>}
         <button type="button" className={institutionLink} disabled={busy} onClick={() => setConfirm("withdraw")}>{item.state === "consent_pending" ? t.appeal.decline : t.actions.withdraw}</button>
       </div>}
       {pendingProof && (item.controlReady ? <p role="status">{t.liveProof.controlReady}</p> : <div className="grid gap-2">
-        {challenge ? <form className="grid max-w-prose gap-3" onSubmit={(event) => {
-          event.preventDefault();
-          if (busy) return;
-          setChallenge(null);
-          void act({ action: "account_control", challenge: challenge.challenge, confirmed: true });
-        }}>
-          <p className="text-sm">{t.liveProof.sessionHelp}</p>
-          <label className="flex items-start gap-2 text-sm">
-            <input className="mt-1" type="checkbox" required />{t.liveProof.sessionDeclaration}
-          </label>
-          <div className="flex flex-wrap items-center gap-3">
-            <button type="submit" className={institutionAction} disabled={busy}>{t.confirm}</button>
-            <button type="button" className={institutionLink} onClick={() => setChallenge(null)}>{t.cancel}</button>
-          </div>
-        </form> : <button type="button" className={`${institutionLink} justify-self-start`} disabled={checking || busy}
-          onClick={() => { void beginAccountControl(); }}>{t.actions.account_control}</button>}
-        {proofError && <p role="alert">{t.liveProof.sessionFailed}</p>}
+        <p className="max-w-prose text-sm">{t.liveProof.sessionHelp}</p>
+        <button type="button" className={`${institutionAction} justify-self-start`} disabled={busy}
+          onClick={() => { void act({ action: "account_control" }); }}>{t.actions.account_control}</button>
       </div>)}
       {canSupersedeAfterGrant && <button type="button" className={institutionLink} disabled={busy}
         onClick={() => setConfirm("supersede")}>{t.actions.supersede}</button>}
@@ -285,18 +278,8 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
         onClick={() => setConfirm("correction")}>{t.appeal.request}</button>}
       {confirm && <div className="flex flex-wrap items-center gap-3">
         <p className="w-full text-sm">{t.prompts[confirm]}</p>
-        {confirm === "consent" && canChooseSupersession && <div className="grid w-full gap-2 text-sm">
-          <p className="max-w-prose">{t.supersessionExplanation}</p>
-          <label className="flex items-start gap-2">
-            <input type="checkbox" className="mt-1" checked={supersede} onChange={(event) => setSupersede(event.target.checked)} />
-            {t.supersessionChoice}
-          </label>
-        </div>}
         <button type="button" className={institutionAction} disabled={busy}
-          onClick={() => { void act({ action: confirm, ...(confirm === "consent" ? {
-            disclose: publish,
-            ...(canChooseSupersession && supersede ? { supersession: { applicationId: application.id, revision: application.revision } } : {}),
-          } : {}), ...(confirm === "supersede" && canSupersedeAfterGrant ? {
+          onClick={() => { void act({ action: confirm, ...(confirm === "supersede" && canSupersedeAfterGrant ? {
             applicationId: application.id, revision: application.revision,
           } : {}) }); }}>{t.confirm}</button>
         <button type="button" className={institutionLink} onClick={() => setConfirm(null)}>{t.cancel}</button>
