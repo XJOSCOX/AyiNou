@@ -153,13 +153,9 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
   const [basis, setBasis] = useState<typeof founderIdentityBases[number]>(founderIdentityBases[0]);
   const [attested, setAttested] = useState(false);
   const [publish, setPublish] = useState(item.disclose);
-  const [supersession, setSupersession] = useState<{ applicationId: string; revision: number } | null>(null);
   const application = item.regularApplication;
   const accepting = item.state === "consent_pending";
   const combineAcceptance = accepting && liveProof && item.liveEligible !== false;
-  const canChooseSupersession = accepting && application?.status === "pending";
-  const selectedSupersession = canChooseSupersession && supersession?.applicationId === application.id &&
-    supersession.revision === application.revision ? supersession : null;
   const canSupersede = item.supersessionOutcome === "superseded_by_founder_verification";
   const canSupersedeAfterGrant = enabled && item.state === "granted" && application?.status === "pending" && !canSupersede;
   const [review, setReview] = useState<Review | null>(null);
@@ -193,9 +189,7 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
     {liveProof && (accepting || needsProof) && item.liveEligible === false && <p role="status">{t.liveProof.outsidePolicy}</p>}
     {admin ? <>
       {application && <p className="text-sm">{t.regularApplication} · {institutionMessages[locale][application.status]}</p>}
-      {application?.status === "pending" && item.supersessionConsented !== undefined && <p className="text-sm">
-        {item.supersessionConsented ? t.supersessionAgreed : t.supersessionNotAgreed}
-      </p>}
+      {application?.status === "pending" && activeStates.has(item.state) && <p className="text-sm">{t.supersessionExplanation}</p>}
       {item.supersessionOutcome && <p className="text-sm">
         {canSupersede && application?.status === "pending" ? t.supersessionReady : t.supersessionResults[item.supersessionOutcome]}
       </p>}
@@ -246,14 +240,7 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
       {accepting && <>
         <p className="max-w-prose text-sm">{t.consentExplanation.replace("{version}", String(item.policyVersion))}</p>
         {combineAcceptance && <p className="max-w-prose text-sm">{t.liveProof.sessionHelp}</p>}
-        {canChooseSupersession && <div className="grid max-w-prose gap-2 text-sm">
-          <p>{t.supersessionExplanation}</p>
-          <label className="flex items-start gap-2">
-            <input className="mt-1" type="checkbox" disabled={busy} checked={selectedSupersession !== null}
-              onChange={(event) => setSupersession(event.target.checked ? { applicationId: application.id, revision: application.revision } : null)} />
-            {t.supersessionChoice}
-          </label>
-        </div>}
+        <p className="max-w-prose text-sm">{t.supersessionExplanation}</p>
       </>}
       {canWithdraw && <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <label className="flex items-center gap-2 text-sm">
@@ -261,7 +248,6 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
         </label>
         {accepting ? <button type="button" className={institutionAction} disabled={busy}
           onClick={() => { void act({ action: combineAcceptance ? "accept_and_confirm" : "consent", disclose: publish,
-            ...(selectedSupersession ? { supersession: selectedSupersession } : {}),
           }); }}>{combineAcceptance ? t.liveProof.acceptAndConfirm : t.actions.consent}</button>
           : <button type="button" className={institutionAction} disabled={busy || publish === item.disclose}
             onClick={() => { void act({ action: "visibility", disclose: publish }); }}>{t.actions.visibility}</button>}

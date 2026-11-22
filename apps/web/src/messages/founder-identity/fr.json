@@ -1,16 +1,13 @@
 {
   "verificationPaths": "Founder Verified confirme l’identité et le contrôle du compte par l’administrateur fondateur. La vérification d’identité indépendante exige l’approbation de deux examinateurs indépendants habilités.",
-  "supersessionExplanation": "La distinction Founder Verified ouvre des droits différents de ceux de la vérification d’identité indépendante. Vous pouvez clore votre demande d’identité en conservant son historique, ou poursuivre l’examen indépendant.",
-  "supersessionChoice": "Clore cette demande en cours si la distinction Founder Verified m’est attribuée.",
+  "supersessionExplanation": "Si vous recevez la distinction Founder Verified, toute demande Identity Verified en cours sera automatiquement clôturée. Son historique restera accessible.",
   "regularApplication": "Demande de vérification d’identité ordinaire",
-  "supersessionAgreed": "Le membre a accepté la clôture de cette demande.",
-  "supersessionNotAgreed": "Le membre n’a pas accepté la clôture de cette demande.",
   "supersessionReady": "La demande actuelle peut être clôturée lors de l’attribution de la distinction Founder Verified.",
-  "supersededMemberNotice": "Votre demande précédente de vérification d’identité a été clôturée parce que vous avez accepté la distinction Founder Verified. Elle n’a pas été approuvée par des examinateurs indépendants.",
+  "supersededMemberNotice": "Votre demande de vérification d’identité en cours a été clôturée lorsque vous avez reçu la distinction Founder Verified. Elle reste disponible dans votre historique.",
   "supersessionResults": {
     "no_consent": "La demande est restée ouverte ou aucune demande admissible n’était présente.",
-    "superseded_by_founder_verification": "Demande remplacée par Founder Verified avec le consentement du membre.",
-    "application_completed": "Une décision a déjà été rendue sur la demande.",
+    "superseded_by_founder_verification": "Demande clôturée à la suite de l’attribution de la distinction Founder Verified.",
+    "application_completed": "Aucune demande de vérification d’identité en cours ne nécessitait de clôture.",
     "stale_application": "La demande ou son examen a changé après le consentement.",
     "application_held": "Une mesure active empêche la clôture de cette demande."
   },

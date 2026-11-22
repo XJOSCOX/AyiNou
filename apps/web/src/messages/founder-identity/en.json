@@ -1,16 +1,13 @@
 {
   "verificationPaths": "Founder Verified confirms identity and account control through the founding administrator. Identity Verified requires approval from two eligible independent reviewers.",
-  "supersessionExplanation": "If granted, Founder Verified has different privileges from independently reviewed identity. You can close your pending identity application and keep its history, or leave it open for independent review.",
-  "supersessionChoice": "Close this pending application if Founder Verified is granted.",
+  "supersessionExplanation": "If you receive Founder Verified, any pending Identity Verified application will close automatically. Its history will remain available.",
   "regularApplication": "Regular identity application",
-  "supersessionAgreed": "Member agreed to close this application.",
-  "supersessionNotAgreed": "Member has not agreed to close this application.",
   "supersessionReady": "The current application can be closed when the Founder designation is granted.",
-  "supersededMemberNotice": "Your previous identity verification application was closed because you accepted Founder Verified. It was not independently approved.",
+  "supersededMemberNotice": "Your pending identity verification application was closed when you received Founder Verified. You can still see it in your history.",
   "supersessionResults": {
     "no_consent": "The application was kept open or no eligible application was present.",
-    "superseded_by_founder_verification": "Superseded by Founder Verified with the member’s consent.",
-    "application_completed": "The application already received a decision.",
+    "superseded_by_founder_verification": "Closed because Founder Verified was granted.",
+    "application_completed": "No pending identity application needed to be closed.",
     "stale_application": "The application or its review changed after consent.",
     "application_held": "An active hold prevents closing this application."
   },

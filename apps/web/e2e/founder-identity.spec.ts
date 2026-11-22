@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } from "@ayinou/shared";
 import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
@@ -146,8 +147,7 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   await panel.getByLabel(founderMessages.en.publicChoice).check();
-  await expect(panel.getByLabel(founderMessages.en.supersessionChoice)).not.toBeChecked();
-  await panel.getByLabel(founderMessages.en.supersessionChoice).check();
+  await expect(panel.getByText(founderMessages.en.supersessionExplanation)).toBeVisible();
   await panel.getByRole("button", { name: founderMessages.en.actions.consent }).click();
   await expect(panel.getByText(founderMessages.en.states.proof_pending)).toBeVisible();
   expect(() => recordProof(caseId)).toThrow();
@@ -318,7 +318,7 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
 });
 
 
-founderTest("founder authority and ordinary review are independent, and supersession respects current consent", async ({
+founderTest("founder issuance closes pending ordinary requests without rewriting independent decisions", async ({
   makeMember, administrators: { founder, ordinaryAdmin },
 }) => {
   test.setTimeout(100_000);
@@ -398,7 +398,7 @@ founderTest("founder authority and ordinary review are independent, and superses
         expect(second.status).toBe(status === "closed" ? 409 : 200);
       } else {
         await apiCall(founder, grantUrl, 200, "POST", payload);
-        const outcome = scenario === "approved" ? "approved" : scenario === "rejected" ? "rejected" : scenario === "prior_vote" ? "closed" : "pending";
+        const outcome = scenario === "approved" ? "approved" : scenario === "rejected" ? "rejected" : "closed";
         expect(await read(member, application)).toMatchObject({ status: outcome });
       }
       expect(await publicProfile(member)).toMatchObject({ founderVerified: true });
@@ -412,18 +412,10 @@ founderTest("founder authority and ordinary review are independent, and superses
       expect(audit).toContain("grant_initiated:founder_confirmed");
       expect(audit).toContain("grant_committed:founder_confirmed");
       expect(audit).toContain("application_resolved:" + (
-        scenario === "declined" ? "no_consent" : scenario === "stale" ? "stale_application" :
-          finalStatus === "closed" ? "superseded_by_founder_verification" : "application_completed"
+        finalStatus === "closed" ? "superseded_by_founder_verification" : "application_completed"
       ));
       expect(audit.includes("member_consented:member_opted_in")).toBe(scenario !== "declined");
       if (scenario === "declined") {
-        const archived = (await apiCall(member, ownerPath, 200)).cases[0];
-        const late = { ...version(archived.version), action: "supersede", applicationId: application,
-          revision: archived.regularApplication.revision };
-        await apiCall(ordinaryAdmin, mine, 404, "POST", late);
-        const receipt = await apiCall(member, mine, 200, "POST", late);
-        expect(await apiCall(member, mine, 200, "POST", late)).toEqual(receipt);
-        await apiCall(member, mine, 409, "POST", { ...late, revision: late.revision + 1 });
         expect(await read(member, application)).toMatchObject({
           status: "closed", closureReason: "superseded_by_founder_verification",
         });
@@ -785,9 +777,7 @@ founderTest("Founder grants gold after account confirmation with or without memb
             await expect(member).toHaveURL(/\/dashboard/);
             await member.goto("/verification");
             const panel = member.getByRole("region", { name: founderMessages.en.title, exact: true });
-            const choice = panel.getByLabel(founderMessages.en.supersessionChoice);
-            await expect(choice).not.toBeChecked();
-            await choice.check();
+            await expect(panel.getByText(founderMessages.en.supersessionExplanation)).toBeVisible();
             await panel.getByLabel(founderMessages.en.publicChoice).check();
             const response = member.waitForResponse(r => r.url().endsWith(mine) && r.request().method() === "POST"
               && r.request().postDataJSON().action === "accept_and_confirm");
@@ -838,6 +828,23 @@ founderTest("Founder grants gold after account confirmation with or without memb
         expect(redundant.error.code).toBe("VERIFICATION_ALREADY_VERIFIED");
         expect((await publicProfile(target)).founderVerified).toBe(true);
         expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{founder}");
+        if (i === 2) {
+          // Recreate a pre-policy grant whose separate ordinary application stayed pending.
+          sql(`update private.verification_applications set status='pending',decided_at=null,closed_by_founder_event_id=null
+            where id='${application}';
+            update private.founder_supersession_events set reason='no_consent' where founder_event_id='${granted.auditId}'
+              and event='application_resolved';`);
+          const migration = readFileSync("supabase/migrations/20261122181000_fv_automatic_application_closure.sql", "utf8");
+          sql(migration);
+          sql(migration);
+          expect(sql(`select string_agg(event||':'||reason,',' order by event) from private.founder_supersession_events
+            where founder_event_id='${granted.auditId}' and event in ('application_resolved','application_reconciled');`))
+            .toBe("application_reconciled:superseded_by_founder_verification,application_resolved:no_consent");
+          const history = await apiCall(snapshot, "/api/v1/me/verification", 200);
+          expect(history.applications).toContainEqual(expect.objectContaining({
+            id: application, status: "closed", closureReason: "superseded_by_founder_verification",
+          }));
+        }
         expect(sql(`select private.project_identity_state('${target.id}') || ':' ||
           private.organization_setup_identity_eligible('${target.id}')::text || ':' ||
           has_table_privilege('authenticated','private.founder_identity_controls','SELECT,INSERT')::text;`)).toBe("required:false:false");

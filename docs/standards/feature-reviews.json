@@ -1105,6 +1105,21 @@
       ]
     },
     {
+      "id": "founder-verified-automatic-application-closure",
+      "report": "docs/identity/FOUNDER_VERIFIED_APPLICATION_RESOLUTION.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122181000_fv_automatic_application_closure.sql",
+          "rlsAndGrants": "Retains the private ledgers and service-only API. The private closure helper has no application grants.",
+          "authorization": "The existing authorized Founder grant triggers closure. Historical reconciliation requires live trusted gold and an eligible pending regular identity application.",
+          "compatibility": "Retains prior grant and application history, existing independent decisions, holds, and old command shapes.",
+          "validation": "Disposable grant, race, replay, queue and reconciliation regression coverage.",
+          "rolloutAndRollback": "Deploy the exact approved migration with the matching release. Preserve historical closure records."
+        }
+      ]
+    },
+    {
       "id": "personal-verification-request-limits",
       "report": "docs/identity/PERSONAL_VERIFICATION_REQUEST_LIMITS_REPORT.md",
       "routes": [],

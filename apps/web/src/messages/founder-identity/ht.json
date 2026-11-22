@@ -1,16 +1,13 @@
 {
   "verificationPaths": "Founder Verified konfime idantite ak kontwòl kont lan atravè administratè fondatè a. Verifikasyon idantite endepandan mande apwobasyon de moun ki kalifye pou fè revizyon endepandan.",
-  "supersessionExplanation": "Si yo ba ou Founder Verified, ou gen privilèj ki diferan de verifikasyon idantite endepandan. Ou ka fèmen demann idantite ou a epi konsève istwa li, oswa kite l ouvè pou revizyon endepandan.",
-  "supersessionChoice": "Fèmen demann sa a ki annatant si yo ban mwen Founder Verified.",
+  "supersessionExplanation": "Si ou resevwa Founder Verified, nenpòt demann Identity Verified ki annatant ap fèmen otomatikman. Istwa demann nan ap rete disponib.",
   "regularApplication": "Demann verifikasyon idantite regilye",
-  "supersessionAgreed": "Manm nan dakò pou yo fèmen demann sa a.",
-  "supersessionNotAgreed": "Manm nan poko dakò pou yo fèmen demann sa a.",
   "supersessionReady": "Yo ka fèmen demann sa a lè yo bay Founder Verified.",
-  "supersededMemberNotice": "Yo te fèmen ansyen demann verifikasyon idantite ou a paske ou te aksepte Founder Verified. Demann nan pa t resevwa apwobasyon endepandan.",
+  "supersededMemberNotice": "Demann verifikasyon idantite ou ki te annatant la te fèmen lè ou te resevwa Founder Verified. Ou ka toujou wè li nan istwa ou.",
   "supersessionResults": {
     "no_consent": "Yo kite demann nan ouvè oswa pa t gen yon demann ki kalifye.",
-    "superseded_by_founder_verification": "Founder Verified ranplase demann nan avèk konsantman manm nan.",
-    "application_completed": "Yo te deja pran yon desizyon sou demann nan.",
+    "superseded_by_founder_verification": "Yo fèmen demann nan paske manm nan resevwa Founder Verified.",
+    "application_completed": "Pa t gen okenn demann verifikasyon idantite annatant pou fèmen.",
     "stale_application": "Demann nan oswa revizyon li chanje apre konsantman an.",
     "application_held": "Yon mezi ki an vigè anpeche yo fèmen demann nan."
   },
