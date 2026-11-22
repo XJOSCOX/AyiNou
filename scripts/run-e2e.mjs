@@ -15,10 +15,11 @@ const ports = new Map([[54320, 55320], [54321, 55321], [54322, 55322], [54323, 5
 const project = "ayinou-e2e-" + randomUUID().slice(0, 12);
 const cli = fromRoot("node_modules", "supabase", "dist", "supabase.js");
 const playwright = fromRoot("node_modules", "@playwright", "test", "cli.js");
+const immediateSignup = process.argv.includes("--without-signup-confirmation");
 const deploymentRehearsal = process.argv.includes("--deployment-rehearsal");
 const recoveryRehearsal = process.argv.includes("--recovery-rehearsal");
 const organizationRollout = recoveryRehearsal || deploymentRehearsal || process.argv.includes("--organization-rollout");
-const runnerFlags = new Set(["--organization-rollout", "--deployment-rehearsal", "--recovery-rehearsal"]);
+const runnerFlags = new Set(["--organization-rollout", "--deployment-rehearsal", "--recovery-rehearsal", "--without-signup-confirmation"]);
 const args = process.argv.slice(2).filter((argument) => !runnerFlags.has(argument));
 const organizationBaseline = "20261121010000";
 // Source configuration comes from the newly started stack, never from development credentials.
@@ -59,13 +60,18 @@ async function prepare(directory) {
   const supabase = join(directory, "supabase");
   const web = join(directory, "web");
   await Promise.all([mkdir(supabase), mkdir(web)]);
-  const config = (await readFile(fromRoot("supabase", "config.toml"), "utf8"))
+  let config = (await readFile(fromRoot("supabase", "config.toml"), "utf8"))
     .replace(/^project_id\s*=.*$/m, `project_id = "${project}"`)
     .replaceAll("http://127.0.0.1:4000", webUrl)
     .replace(/^(port|shadow_port|inspector_port)\s*=\s*(\d+)$/gm,
       (line, key, value) => ports.has(Number(value)) ? `${key} = ${ports.get(Number(value))}` : line)
     .replace(/(\[auth.mfa.totp\]\s*\r?\n)enroll_enabled = false\s*\r?\nverify_enabled = false/,
       "$1enroll_enabled = true\nverify_enabled = true");
+  if (immediateSignup) {
+    const emailConfirmation = /^(\[auth\.email\](?:(?!^\[)[\s\S])*?^enable_confirmations[ \t]*=[ \t]*)true\b/m;
+    if (!emailConfirmation.test(config)) throw new Error("Could not configure disposable email auto-confirmation");
+    config = config.replace(emailConfirmation, "$1false");
+  }
   if (!config.includes(`project_id = "${project}"`) || !config.includes("port = 55321")) {
     throw new Error("Could not isolate Supabase configuration");
   }
@@ -137,7 +143,8 @@ async function main() {
     const testEnv = { ...env, AYINOU_E2E_PROJECT: project, AYINOU_E2E_WEB_DIR: web, AYINOU_E2E_WEB_URL: webUrl,
       AYINOU_E2E_API_URL: apiUrl, AYINOU_E2E_SUPABASE_URL: supabaseUrl,
       AYINOU_E2E_SUPABASE_PUBLIC: publicKey, AYINOU_E2E_SUPABASE_SECRET: secretKey,
-      AYINOU_E2E_EXPORT_KEY: randomBytes(32).toString("hex") };
+      AYINOU_E2E_EXPORT_KEY: randomBytes(32).toString("hex"),
+      AYINOU_E2E_IMMEDIATE_SIGNUP: immediateSignup ? "true" : "false" };
     if (recoveryRehearsal) {
       await run(fromRoot("scripts", "rehearse-d2-recovery.mjs"), [], { env: testEnv, timeout: 240_000 });
       return;

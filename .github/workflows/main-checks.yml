@@ -97,3 +97,5 @@ jobs:
           path: browser-summary.json
           if-no-files-found: ignore
           retention-days: 3
+      - name: Verify development signup with email confirmation disabled
+        run: npm run test:e2e -- --without-signup-confirmation immediate-signup.spec.ts

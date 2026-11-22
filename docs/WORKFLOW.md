@@ -152,4 +152,4 @@ Run `npm run test:e2e -- --organization-rollout organization-integration.spec.ts
 
 ## U1 signup release checkpoint
 
-Confirm the approved migration sequence, Auth email confirmation settings and recovery checkpoint before U1 deployment. Deploy the database migration before the web signup UI. Verify both registration choices, old profile links, referral and organization intent, and existing Founder authority. See the [U1 implementation report](identity/U1_IMPLEMENTATION_REPORT.md).
+Confirm the approved migration sequence, Auth email confirmation settings and recovery checkpoint before U1 deployment. Deploy the database migration before the web signup UI. Verify both registration choices, old profile links, referral and organization intent, and existing Founder authority. The development setting may return an immediate session. Exercise both settings in separate disposable stacks and restore emailed confirmation before a public rollout. See the [U1 implementation report](identity/U1_IMPLEMENTATION_REPORT.md).

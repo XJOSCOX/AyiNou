@@ -9,7 +9,7 @@ The immutable Supabase Auth UUID identifies a member. `public.profiles.username`
 - `private.username_safety_holds` stores manual holds on unassigned, unleased handles. The public projection does not reveal a hold or its rationale.
 - `private.username_events` records reservation, expiration when collected, assignment, change, retirement and staff outcomes. Staff commands bind an authenticated actor, request UUID, normalized command hash, categorical reason and receipt. No raw identity documents, email, password, session or evidence appear in these records.
 
-Profile changes and signup share the existing Founder reservation transaction lock. The unique profile constraint and the lease primary key remain final conflict controls. Auth insertion, referral attribution, organization intent and any username lease commit or roll back together. Email confirmation can promote only the lease bound to the same Auth UUID. Later Auth metadata changes cannot create or transfer a claim.
+Profile changes and signup share the existing Founder reservation transaction lock. The unique profile constraint and the lease primary key remain final conflict controls. Auth insertion, referral attribution, organization intent and any username lease commit or roll back together. Auth can promote only the lease bound to the same UUID, whether confirmation follows an emailed link or occurs in the signup transaction. A deferred database check requires a reservation receipt for public signup even when the lease has already been consumed. Trusted Auth administration and invitations keep their separate entry points. Later Auth metadata changes cannot create or transfer a claim.
 
 ## Compatibility and maintenance
 

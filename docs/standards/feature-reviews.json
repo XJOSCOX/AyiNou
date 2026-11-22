@@ -668,7 +668,15 @@
           "authorization": "Authenticated member profile writes enforce live subject authorization. Auth-bound expiring signup leases and one uniqueness constraint prevent duplicate assignments. The review transaction rechecks the active administrator and recent authenticator session.",
           "compatibility": "Keeps legacy names and UUID associations, recognizes existing Founder reservation, initializes the username as the public display name, and redirects former names only through current visibility and block predicates.",
           "validation": "Disposable coverage exercises conflicting GoTrue signup, expired reservations, role safety, legacy names, private data boundaries, real Auth confirmation, referral and organization intent, and audit receipts.",
-          "rolloutAndRollback": "Separate hosted approval is required for the four pending Founder migrations and U1. Confirm backups and Auth email confirmations. Preserve existing names, leases and audit through forward remediation."
+          "rolloutAndRollback": "Separate hosted approval is required for the four pending Founder migrations and U1. Confirm backups and the current Auth signup mode. Preserve existing names, leases and audit through forward remediation."
+        },
+        {
+          "file": "supabase/migrations/20261121131000_username_immediate_signup.sql",
+          "rlsAndGrants": "No new application table grants. Internal receipt and email proof helpers are private. Replaced Founder functions retain their service-only privileges.",
+          "authorization": "The Auth transaction requires the member's reservation receipt even when email confirmation is automatic. Trusted administrative provisioning is tied to a server-authored audit receipt. The unclaimed Founder handle and credential flow require separate email proof.",
+          "compatibility": "Existing accounts and committed Founder provenance remain valid. Emailed signup and immediate signup converge on the same ownership rules. Staff provisioning and Auth invitations keep distinct entry points.",
+          "validation": "Dedicated disposable automatic-confirmation browser tests exercise direct onboarding, persistence, rejection of a missing username and the unclaimed Founder reservation. Standard smoke exercises emailed confirmation and trusted Founder bootstrap.",
+          "rolloutAndRollback": "Apply after U1 only under separate hosted approval. Keep Auth settings under operator control. Restore email confirmation for public launch and use a verified forward fix if the Auth provider contract drifts."
         }
       ]
     }

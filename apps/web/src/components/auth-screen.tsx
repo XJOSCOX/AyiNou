@@ -109,7 +109,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           setError("invalidReferral");
           return;
         }
-        const { error: authError } = await supabase.auth.signUp({
+        const { data, error: authError } = await supabase.auth.signUp({
           email: email.trim(), password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
@@ -137,7 +137,12 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           }
           throw authError;
         }
-        router.push("/verify-email");
+        if (data.session) {
+          router.replace("/onboarding");
+          router.refresh();
+        } else {
+          router.push("/verify-email");
+        }
       } else if (mode === "login") {
         const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (authError) {
