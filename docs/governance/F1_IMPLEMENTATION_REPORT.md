@@ -1,5 +1,7 @@
 # F1 implementation and rollout report
 
+The pending deployment described in this historical report was subsequently completed for F1 and F1.1 on the hosted development database. [Final deployment evidence](../deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md)
+
 ## Scope
 
 The reviewed starting baseline was `dff33fadab3964bca06ed87d3f7660aa76e53624`. F1 covers the separately approved development rollout and source changes for a fresh-install Founder setup plus independently approved Administrator appointments.

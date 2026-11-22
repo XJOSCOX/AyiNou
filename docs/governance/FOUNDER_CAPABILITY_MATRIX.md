@@ -20,4 +20,4 @@ The [Founder release verification matrix](FOUNDER_PERMISSION_VERIFICATION.md) li
 
 Organization Owner, Organization Manager and custom organization roles remain a separate system. Compatible cross-domain assignments grant only the scopes explicitly authorized in each domain.
 
-F1.1 records the active recognized Founder’s direct authorization for a new Administrator appointment. The exact eligible target accepts with recent TOTP and a one-time credential. Legacy appointments keep their independent O5 approval, and generic execution and succession stay closed. F1 and F1.1 await separate hosted deployment approval. [F1.1 report](F1_1_IMPLEMENTATION_REPORT.md)
+F1.1 records the active recognized Founder’s direct authorization for a new Administrator appointment. The exact eligible target accepts with recent TOTP and a one-time credential. Legacy appointments keep their independent O5 approval, and generic execution and succession stay closed. F1 and F1.1 are deployed on the hosted development database. [F1.1 report](F1_1_IMPLEMENTATION_REPORT.md)

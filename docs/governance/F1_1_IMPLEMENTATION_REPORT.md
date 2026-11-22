@@ -1,5 +1,7 @@
 # F1.1 Founder-direct Administrator appointments
 
+The pending rollout described in this implementation report was subsequently completed on the hosted development database. [Final deployment evidence](../deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md)
+
 ## Scope
 
 Starting main revision `14e1f275d8a44bd93afc97c879bd6977a732c0d8`. F1.1 applies the owner-approved rule to the F1 and O5 appointment workflow. Independent reviews, Founder Verified, succession, recovery and S2 keep their existing boundaries.

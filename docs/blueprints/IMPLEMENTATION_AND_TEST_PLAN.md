@@ -1,8 +1,8 @@
 # Implementation and test plan
 
-This plan sequences future work against the blueprint. Every phase starts with a fresh code/SQL inventory and owner-approved scope. A later phase can leave a gated capability closed. The review and publication of this blueprint do not start any phase or authorize hosted changes.
+This plan sequences future work against the blueprint. Every phase starts with a fresh code/SQL inventory and owner-approved scope. Follow **Implement → Test → Fix → Deploy to hosted development → Verify → Close phase**. Keep schema and application changes in the same module, apply only the exact separately approved development migrations, and finish postflight and fixes before advancing. [Hosted development procedure](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md) A later phase can leave a gated capability closed. The review and publication of this blueprint do not start any phase or authorize hosted changes.
 
-**Sequence.** F1 development release review, including F1.1 → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. Scoped support and program delegation remain separately approved follow-on work within the later integration sequence.
+**Sequence.** F1 and F1.1 development release is closed. The approved sequence continues with S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. Scoped support and program delegation remain separately approved follow-on work within the later integration sequence.
 
 ## Evidence required for every implementation phase
 
@@ -23,7 +23,7 @@ This plan sequences future work against the blueprint. Every phase starts with a
 
 ## Phase 1.1 — F1.1 Founder-direct Administrator appointments
 
-**Implemented in source and validated against disposable Supabase.** This is a focused follow-up inside the F1 development release review, before S2. It adds no hosted deployment permission. [Transaction design](ADMINISTRATOR_ACTIVATION.md#f11-authorization-activation-and-compatibility)
+**COMPLETE AND DEPLOYED** on the hosted development database. Read-only postflight and disposable application validation are recorded in the [deployment evidence](../deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md). [Transaction design](ADMINISTRATOR_ACTIVATION.md#f11-authorization-activation-and-compatibility)
 
 | Area | Scope and evidence |
 | --- | --- |
@@ -104,7 +104,7 @@ This plan sequences future work against the blueprint. Every phase starts with a
 1. Use `npm run test:e2e -- privileged-setup.spec.ts founder-bootstrap.spec.ts administration-governance.spec.ts` against a fresh disposable database with Mailpit. Start with no Founder and prove ordinary signup cannot claim a protected handle or power. Exercise wrong and exhausted setup secrets, expiry, actual emailed confirmation, no proof under auto-confirm, wrong-actor and second-browser attempts, password/email recovery, MFA and concurrent claim. Verify exactly one committed bootstrap and red projection.
 2. Establish the current F1 baseline in disposable infrastructure. Legacy F1 needs an eligible independent approver, and a lone Founder stays pending. For F1.1, prove a marked direct appointment can activate with a sole Founder only after eligible target acceptance, current MFA and one-time redemption. Run the F1.1 cases above and preserve legacy and unrelated governance behavior.
 3. Rehearse existing-data upgrade with the earlier migrations and then F1 in disposable infrastructure. Ensure the existing Founder can continue and no competing bootstrap can form. Compare expected RLS, grants and migration fingerprints. Test recoverability using synthetic database + Storage, not merely a schema dump.
-4. On the existing hosted development project, use a read-only project/reference check, dry run, preservation inventory and catalog/role postflight only when separately requested. Preserve all records, credentials, project settings and history. F1 deployment approval can name just that migration; it does not confer permission to reset or change runtime gates.
+4. On the existing hosted development project, verify the tested revision, exact target and authorized migration scope, record a read-only preservation inventory, apply the approved migrations and complete the catalog, grants and role postflight. Preserve all records, credentials, settings and history. An approval for named migrations grants no permission to reset or change runtime gates.
 
 ## Optional future hosted reset
 
@@ -114,4 +114,4 @@ First inventory what is eligible for deletion and what must be retained. Verify 
 
 ## Public-launch readiness
 
-Development complete means scoped behavior works and the exact commit has disposable evidence. A public launch additionally needs verified provider backup and restore, secured Storage copies, named operators and support, approved recovery objectives, SMTP and Auth redirect verification, production incident and access controls, lawful retention and evidence handling, approved legal releases and separately approved feature gates. See [D2 readiness](../deployment/D2_FINAL_READINESS.md) and the [S1 completion checklist](../standards/FEATURE_COMPLETION_CHECKLIST.md).
+Use **COMPLETE AND DEPLOYED** after the tested code, required hosted development migrations and postflight are verified. Record the actual application deployment status separately. A public launch additionally needs verified provider backup and restore, secured Storage copies, named operators and support, approved recovery objectives, SMTP and Auth redirect verification, production incident and access controls, lawful retention and evidence handling, approved legal releases and separately approved feature gates. See [D2 readiness](../deployment/D2_FINAL_READINESS.md) and the [S1 completion checklist](../standards/FEATURE_COMPLETION_CHECKLIST.md).

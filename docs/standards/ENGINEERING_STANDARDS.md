@@ -19,6 +19,12 @@ Support `ht` by default plus `fr`, `en` and `es`, including errors, labels, prom
 
 Measure costly paths before optimizing. Bound payloads, query counts, database scans and expensive retries. Check realistic cardinalities, failures and slow connections. Align indexes with access scope and stable pagination. Set explicit budgets for expensive paths and use telemetry that avoids exposing private payloads.
 
+## Development release and deployment
+
+Use **Implement → Test → Fix → Deploy to hosted development → Verify → Close phase**. Keep implementation and required migrations in one module. Run the disposable database chain, full applicable regressions and CI for the tested release. Verify the exact hosted development project, source SHA, migration history, dry run and preservation checks. Apply only separately authorized versions. Complete read-only postflight and resolve deployment issues before moving to the next module. Keep an unapproved or blocked migration in the current phase’s open work. Do not accumulate pending migrations across completed phases.
+
+Mark a development module **COMPLETE AND DEPLOYED** only after the code, required hosted database changes and postflight evidence are verified. Record local, CI and hosted evidence separately, including any scope checked only in disposable infrastructure. State whether the matching application was actually deployed or merely tested against the upgraded database. Development completion grants no public-launch authority. [Hosted development workflow](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md)
+
 ## Release safety
 
 Use feature switches only where they serve a rollout decision. Give production-relevant switches a safe default, a named owner, authorization at the server and a retirement plan. A flag cannot override authorization or legal approval. Plan application/schema compatibility, smoke checks, stop conditions and reversible mitigations. Use forward corrective SQL or approved recovery if a migration cannot safely be reversed. Preserve evidence and restrict access when full rollback is unsafe.

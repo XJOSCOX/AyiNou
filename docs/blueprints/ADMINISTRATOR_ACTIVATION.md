@@ -1,6 +1,6 @@
 # Administrator activation
 
-**Owner approved and implemented in F1.1 source. Hosted deployment is pending.** The uniquely recognized Founder has direct final authority over Founder-reserved platform administrative actions. An Administrator appointment authorized by the Founder requires no second Administrator. This revision supersedes the earlier second-Administrator decision for this appointment alone. Other governance, succession, compromised-account recovery and independent review retain their own protections.
+**Owner approved and verified on the F1.1 hosted development database.** The uniquely recognized Founder has direct final authority over Founder-reserved platform administrative actions. An Administrator appointment authorized by the Founder requires no second Administrator. This revision supersedes the earlier second-Administrator decision for this appointment alone. Other governance, succession, compromised-account recovery and independent review retain their own protections.
 
 ## Approved workflow
 
@@ -13,7 +13,7 @@
 
 ## F1 baseline and resolved conflict
 
-F1 already provides scoped invitation issuance and redemption in source and disposable tests. Hosted F1 migration `20261121140000_private_privileged_workflows.sql` remains pending separate deployment approval. Pre-F1 O5 allows eligible administrators to create proposals and keeps generic execution closed.
+F1 introduced scoped invitation issuance and redemption. Hosted development applied `20261121140000_private_privileged_workflows.sql` followed by F1.1. Pre-F1 O5 allows eligible administrators to create proposals and keeps generic execution closed.
 
 - The F1 wrapper for `o5_proposal_command_for_api` limits new `appoint` proposals to the recognized Founder. It delegates to O5, which verifies the session, recent MFA, written reason, exact target, eligibility, governance version and idempotency under the shared transaction lock.
 - O5's `approve` command writes `approved_at` and `approver_id` after an independent Administrator decision. `o5_proposal_state` treats absence of `approved_at` as pending. O5's proposal-only `accept` also depends on approval and creates no role.
@@ -27,4 +27,4 @@ F1 already provides scoped invitation issuance and redemption in source and disp
 4. **Project direct appointment status accurately.** Reuse `/admin`, `/activate/a/{id}` and current route families. Add a scoped mode discriminator only where projections need it. For direct appointments, remove the independent approval and generic proposal-only acceptance controls. Show awaiting target acceptance, unavailable/expired and activation based on persisted state and the actual role grant. Preserve legacy proposal displays, unrelated governance actions and four-language parity. Keep the explicit acceptance assertion at the service boundary and bind it to the atomically recorded SQL redemption.
 5. **Preserve boundaries.** Keep ordinary and Founder identity proof, ballot and evidence access, legal publication, privacy operations, protected leadership status changes, succession and compromised-account recovery outside this change. Ordinary review still needs two eligible unconflicted reviewers. A separately assigned Founder can cast one vote. Keep the six-hour S2 policy, its promotion-time controls and existing 15-minute TOTP freshness distinct. F1.1 adds no S2 enforcement.
 
-F1.1 is validated in disposable infrastructure. Hosted development still needs F1 `20261121140000`, then F1.1 `20261121141000`. Applying either requires a separate deployment decision. [F1.1 phase and tests](IMPLEMENTATION_AND_TEST_PLAN.md#phase-11--f11-founder-direct-administrator-appointments) · [F1 SQL](../../supabase/migrations/20261121140000_private_privileged_workflows.sql) · [O5 SQL](../../supabase/migrations/20261121050000_o5_administration_governance.sql) · [Current F1 tests](../../apps/web/e2e/privileged-setup.spec.ts)
+F1.1 is validated in disposable infrastructure and deployed on the hosted development database. The matching local application passed read-only compatibility checks. [Hosted deployment evidence](../deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md) · [F1.1 phase and tests](IMPLEMENTATION_AND_TEST_PLAN.md#phase-11--f11-founder-direct-administrator-appointments) · [F1 SQL](../../supabase/migrations/20261121140000_private_privileged_workflows.sql) · [O5 SQL](../../supabase/migrations/20261121050000_o5_administration_governance.sql) · [Current F1 tests](../../apps/web/e2e/privileged-setup.spec.ts)

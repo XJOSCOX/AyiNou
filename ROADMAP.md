@@ -373,8 +373,8 @@ U1 adds username selection and availability to both signup choices. Its migratio
 
 ## F1 and the Account, Roles & Security Master Blueprint
 
-F1 applied six reviewed migrations, bringing hosted development to 74. Private Founder enrollment and independently approved Administrator activation passed disposable validation. Migration `20261121140000_private_privileged_workflows.sql` remains pending separate hosted approval. [F1 report](docs/governance/F1_IMPLEMENTATION_REPORT.md)
+**F1 and F1.1 COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121140000` and `20261121141000` in order. Hosted development has 76 applied migrations and zero pending. Verified matching local Fastify/Next.js compatibility without deploying a hosted application. [Deployment evidence](docs/deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md)
 
-**F1.1 implemented in source and disposable tests.** Only the active recognized Founder can directly authorize a new Administrator appointment. The named member accepts with fresh MFA and the one-time code. Legacy proposals retain independent approval. Migration `20261121141000_founder_direct_administrator_appointments.sql` remains pending after F1. [F1.1 report](docs/governance/F1_1_IMPLEMENTATION_REPORT.md)
+Only the active recognized Founder can directly authorize a new Administrator appointment. The named member accepts with fresh MFA and the one-time code. Legacy proposals retain independent approval. [F1.1 implementation](docs/governance/F1_1_IMPLEMENTATION_REPORT.md)
 
-Sequence: F1 development release review, including F1.1 → S2 absolute session lifetimes and promotion handling → S2 session inventory and private user-bound links → identity and audit integration. [Master Blueprint](docs/blueprints/README.md) · [Owner decisions](docs/blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md)
+The F1/F1.1 development rollout is closed. S2 absolute session lifetimes and promotion handling remains next and has not started. Session inventory, private user-bound links, and identity and audit integration follow the approved sequence. [Master Blueprint](docs/blueprints/README.md) · [Owner decisions](docs/blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md)

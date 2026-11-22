@@ -11,8 +11,10 @@ Create `*_IMPLEMENTATION_REPORT.md` or explicitly register another report path. 
 | Localization and accessibility | All four locales, keyboard/focus/labels, responsive mobile and desktop behavior and relevant assistive technology. |
 | Reliability and recovery | User recovery, retries, idempotency, concurrency and rollback/reconciliation. |
 | Validation and CI | Unit, integration, RLS allow/deny and browser results, CI run and actual status. Explain tests that do not apply or are blocked. |
-| Documentation and operations | Updated docs, accountable roles, deployment state, hosted migration and approval, postflight monitoring and recovery. |
+| Documentation and operations | Updated docs, accountable roles, exact hosted development project and migration authorization, before/after history and preservation evidence, postflight, actual application deployment state and recovery. |
 | Remaining blockers | Pending decisions, verification limits and follow-up. |
+
+Close the module only after the [hosted development workflow](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md) has been satisfied. Keep outstanding approvals or deployment fixes in the current phase.
 
 Add a record to [feature-reviews.json](feature-reviews.json). Register each Fastify route addition or contract change with the verb and path, the exact route inventory line as its contract, its access class, audit declaration (durable event or a reason for no durable event), and authorization evidence. An explicitly public operation may use a reasoned authorization exception. For restricted routes, list a checked-in test file and the denial scenario a reviewer should find. Existing route changes with no method/path/body-limit/hook change still require human review but cannot be discovered by this check.
 
