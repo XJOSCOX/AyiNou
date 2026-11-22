@@ -393,4 +393,4 @@ A1A adds scoped activity queries, nine existing ledger adapters and a permanent 
 
 ## Founder Verified integration
 
-The direct proof workflow adds the recognized Founder’s session-bound authority, member authenticator confirmation, a structured identity attestation and scoped gold badge display. Version-specific optional ordinary-application closure remains transactional. Hosted issuance is closed pending owner-approved operations. [Integration report](docs/identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md)
+The direct proof workflow adds the recognized Founder’s session-bound authority, member authenticator confirmation, a structured identity attestation and scoped gold badge display. Version-specific optional ordinary-application closure remains transactional. The hosted development schema is staged at 82 applied migrations with zero pending. Both live gates remain closed pending owner-approved operations. [Integration report](docs/identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md)
