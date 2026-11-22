@@ -389,4 +389,4 @@ The F1/F1.1 development rollout is closed. S2 absolute session lifetimes and pro
 
 ## A1A unified audit infrastructure
 
-A1A adds scoped activity queries, nine existing ledger adapters and a permanent audit integration register. The hosted checkpoint awaits exact migration approval. A1B will add the graphical Audit Center. [A1A report](docs/audit/A1A_IMPLEMENTATION_REPORT.md)
+A1A adds scoped activity queries, nine existing ledger adapters and a permanent audit integration register. The hosted development database is verified at 81 migrations with zero pending. A1B will add the graphical Audit Center. [A1A report](docs/audit/A1A_IMPLEMENTATION_REPORT.md)
