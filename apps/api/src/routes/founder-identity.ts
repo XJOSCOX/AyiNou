@@ -8,6 +8,14 @@ import { InstitutionError, type InstitutionRepository } from "../services/instit
 const member = "/api/v1/me/founder-identity";
 const admin = "/api/v1/admin/founder-identity";
 const appeals = "/api/v1/verification/founder-appeals";
+const blue = "/api/v1/admin/founder-blue-verification/:id";
+const blueDecision = z.strictObject({
+  decision: z.enum(["approve", "reject"]),
+  expectedVersion: z.number().int().min(1).max(2_147_483_647),
+  requestId: z.uuid(),
+  reason: z.string().trim().min(10).max(1000),
+  noConflict: z.literal(true),
+});
 const revision = z.strictObject({
   expectedVersion: z.number().int().min(1).max(2_147_483_647),
   policyVersion: z.literal(1),
@@ -101,6 +109,21 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
     return data;
   }
 
+  async function blueApplication(request: FastifyRequest, input?: z.infer<typeof blueDecision>) {
+    const workspace = z.uuid().safeParse(request.headers["x-ayinou-workspace"]);
+    if (!workspace.success) throw new ApiError(404, "NOT_FOUND", "Resource unavailable");
+    const result = await call(request, true, "founder_blue_verification_for_api", {
+      p_workspace: workspace.data, p_id: caseId.parse(request.params).id,
+      p_expected: input?.expectedVersion ?? null, p_request: input?.requestId ?? null,
+      p_reason: input?.reason ?? null, p_no_conflict: input?.noConflict ?? null,
+      p_decision: input?.decision ?? null,
+    });
+    if (result === null) throw new ApiError(404, "NOT_FOUND", "Resource unavailable");
+    return result;
+  }
+
+  app.get(blue, (request) => blueApplication(request));
+  app.post(blue, { bodyLimit: 8192 }, (request) => blueApplication(request, blueDecision.parse(request.body)));
   app.get(appeals, (request) => independentAppeal<FounderAppealItem[]>(request, null));
   app.post(appeals + "/:id", { bodyLimit: 512 }, (request) => independentAppeal<FounderIdentityReceipt>(request,
     caseId.parse(request.params).id, appealDecision.parse(request.body)));

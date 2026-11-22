@@ -6,7 +6,8 @@ import { useLocale } from "@/lib/locale-store";
 import { loadAppealQueue, loadVerificationAssignments, loadImpersonationQueue, assignVerificationApplication, assignVerificationAppeal, decideImpersonation } from "@/lib/trust-api";
 import { trustMessages } from "@/lib/trust-i18n";
 import { type ImpersonationReview, type ImpersonationRestriction, personalClaims } from "@ayinou/shared";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { authorizedRequest } from "@/lib/api";
 
 const assignmentAppeals = (signal: AbortSignal) => loadAppealQueue("assign", signal);
 
@@ -37,7 +38,7 @@ function AssignmentForm({ save, canRelease = false }: { save(handle: string, rea
   </form>;
 }
 
-export function TrustAdministration() {
+export function TrustAdministration({ founderWorkspace }: { founderWorkspace?: string }) {
   const [locale] = useLocale();
   const t = trustMessages[locale];
   const labels = institutionMessages[locale];
@@ -52,6 +53,8 @@ export function TrustAdministration() {
       {applications.data?.applications.map((application) => <details className="break-words border-t border-[var(--theme-border)] pt-2" key={application.id}>
         <summary className="cursor-pointer font-semibold">{labels[application.kind]} {application.applicantUsername && `· @${application.applicantUsername}`}</summary>
         {application.eligibleReviewers < 2 && <p className="my-2 text-sm">{t.reviewersNeeded}</p>}
+        {founderWorkspace && application.kind === "identity" && application.status === "pending" &&
+          <FounderBlueApproval applicationId={application.id} workspace={founderWorkspace} refresh={applications.refresh} />}
         {application.assigned.length > 0 && <p className="my-2 text-sm">{t.assignedReviewers} · {application.assigned
           .filter(({ eligible }) => eligible).map(({ handle }) => handle).join(", ") || "—"}</p>}
         <AssignmentForm canRelease save={async (handle, reason, assign) => {
@@ -77,6 +80,67 @@ export function TrustAdministration() {
       {reports.data?.reports.map((item) => <ImpersonationReviewCard key={item.id} item={item} refresh={reports.refresh} />)}
     </section>
   </div>;
+}
+
+function FounderBlueApproval({ applicationId, workspace, refresh }: {
+  applicationId: string; workspace: string; refresh(): void;
+}) {
+  const [locale] = useLocale();
+  const t = trustMessages[locale];
+  const [open, setOpen] = useState(false);
+  return <div className="my-3 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-3">
+    <button type="button" className={institutionAction} aria-expanded={open} onClick={() => setOpen(!open)}>{t.founderBlueReview}</button>
+    {open && <FounderBlueDecision applicationId={applicationId} workspace={workspace} refresh={refresh} />}
+  </div>;
+}
+
+function FounderBlueDecision({ applicationId, workspace, refresh }: {
+  applicationId: string; workspace: string; refresh(): void;
+}) {
+  const [locale] = useLocale();
+  const t = trustMessages[locale];
+  const labels = institutionMessages[locale];
+  const mutation = useFeedMutation();
+  const retry = useRef<{ fingerprint: string; id: string } | null>(null);
+  const path = `/api/v1/admin/founder-blue-verification/${applicationId}`;
+  const load = useCallback((signal: AbortSignal): Promise<{ revision: number; evidence: string[] }> =>
+    authorizedRequest(path, { signal, headers: { "X-Ayinou-Workspace": workspace } }), [path, workspace]);
+  const evidence = useInstitutionResource(load);
+  if (evidence.error !== null) return <TrustError error={evidence.error} retry={evidence.refresh} returnTo="/admin" />;
+  if (!evidence.data) return <p role="status" className="mt-3 text-sm">{t.founderBlueLoading}</p>;
+  const { revision, evidence: references } = evidence.data;
+  return <form className="mt-3 grid gap-3" onSubmit={(event) => {
+    event.preventDefault();
+    const form = fields(event);
+    if (!form.has("conflictFree")) return;
+    const reason = field(form, "reason");
+    const button = (event.nativeEvent as SubmitEvent).submitter;
+    const decision = button instanceof HTMLButtonElement && button.value === "reject" ? "reject" : "approve";
+    const fingerprint = JSON.stringify([revision, reason, decision]);
+    if (retry.current?.fingerprint !== fingerprint) retry.current = { fingerprint, id: crypto.randomUUID() };
+    const requestId = retry.current.id;
+    void mutation.run(async () => {
+      await authorizedRequest(path, {
+        method: "POST", headers: { "X-Ayinou-Workspace": workspace },
+        body: JSON.stringify({ expectedVersion: revision, requestId, reason, noConflict: true, decision }),
+      });
+      refresh();
+    });
+  }}>
+    <p className="text-sm text-[var(--theme-body)]">{t.founderBlueHelp}</p>
+    <PublicReferences references={references} />
+    <label className="text-sm font-semibold">{t.reason}
+      <textarea name="reason" className={institutionField} rows={3} required minLength={10} maxLength={1000} />
+    </label>
+    <label className="flex items-start gap-2 text-sm">
+      <input className="mt-1" type="checkbox" name="conflictFree" required />{labels.conflictFree}
+    </label>
+    {mutation.error !== null && <TrustError error={mutation.error} retry={evidence.refresh} returnTo="/admin" />}
+    <div className="flex flex-wrap gap-3">
+      <button value="approve" className={institutionAction} disabled={mutation.busy || references.length === 0}>{t.founderBlueApprove}</button>
+      <button value="reject" className={`${institutionField} mt-0 w-auto`} disabled={mutation.busy || references.length === 0}>{labels.reject}</button>
+    </div>
+  </form>;
 }
 
 function ImpersonationReviewCard({ item, refresh }: { item: ImpersonationReview; refresh(): void }) {

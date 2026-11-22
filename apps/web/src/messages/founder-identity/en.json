@@ -1,5 +1,5 @@
 {
-  "verificationPaths": "Founder Verified confirms identity and account control through the founding administrator. Identity Verified requires approval from two eligible independent reviewers.",
+  "verificationPaths": "Founder Verified confirms identity and account control through the founding administrator. For regular Identity Verified, the Founder can approve directly, or two eligible independent reviewers can approve.",
   "supersessionExplanation": "If you receive Founder Verified, any pending Identity Verified application will close automatically. Its history will remain available.",
   "regularApplication": "Regular identity application",
   "supersessionReady": "The current application can be closed when the Founder designation is granted.",

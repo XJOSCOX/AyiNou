@@ -10,9 +10,10 @@ The matrix assumes active enrolled test accounts with recent MFA and only the ro
 | Eligible feed and project moderation | Allow | Allow | Allow | Deny | Deny |
 | Ordinary verification queue | Separate assignment | Separate assignment | Separate assignment | Allow | Deny |
 | Ordinary case evidence | Eligible assigned work | Eligible assigned work | Eligible assigned work | Eligible assigned work | Own authorized records only |
-| Ordinary verification vote | One eligible vote after assignment | Same | Same if assigned | One eligible vote after assignment | Deny |
+| Founder-direct personal identity decision | Allow eligible case in private administration workspace | Deny | Deny | Deny | Own application |
+| Ordinary verification vote | One eligible vote after separate assignment | Same | Same if assigned | One eligible vote after assignment | Deny |
 | Open Founder consent or contain a case | Separate active Founder Identity scope | Separate active Founder Identity scope | Deny | Deny without scoped administrative access | Own consent only |
-| Grant or release Founder Verified | Formal Founder, active scope and proof. Issuance closed | Deny | Deny | Deny | Deny |
+| Grant or release Founder Verified | Formal Founder, active scope and proof under the standing development policy | Deny | Deny | Deny | Deny |
 | Restricted privacy queue | Disabled | Disabled | Disabled | Disabled | Disabled |
 | Early Partners administration | Separate operator assignment | Separate operator assignment | Deny | Deny | Deny |
 | Raw private ballots | Deny | Deny | Deny | Deny | Deny |

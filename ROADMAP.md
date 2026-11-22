@@ -391,6 +391,10 @@ The F1/F1.1 development rollout is closed. S2 absolute session lifetimes and pro
 
 A1A adds scoped activity queries, nine existing ledger adapters and a permanent audit integration register. The hosted development database is verified at 81 migrations with zero pending. A1B will add the graphical Audit Center. [A1A report](docs/audit/A1A_IMPLEMENTATION_REPORT.md)
 
+## Founder authority consolidation
+
+The recognized Founder inherits routine platform administration and can decide eligible regular blue applications through the private administration workspace. Ordinary reviewers retain two approvals. Hosted rollout of the new direct blue decision remains separately authorized. [Implementation report](docs/governance/FOUNDER_AUTHORITY_CONSOLIDATION.md)
+
 ## Founder Verified integration
 
 The direct proof workflow adds the recognized Founder’s session-bound authority, member authenticator confirmation, a structured identity attestation and scoped gold badge display. Version-specific optional ordinary-application closure remains transactional. The hosted development schema is staged at 82 applied migrations with zero pending. Both live gates remain closed pending owner-approved operations. [Integration report](docs/identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md)

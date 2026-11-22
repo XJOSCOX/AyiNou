@@ -1,5 +1,5 @@
 {
-  "verificationPaths": "Founder Verified confirme l’identité et le contrôle du compte par l’administrateur fondateur. La vérification d’identité indépendante exige l’approbation de deux examinateurs indépendants habilités.",
+  "verificationPaths": "Founder Verified confirme l’identité et le contrôle du compte par l’administrateur fondateur. Pour la vérification d’identité ordinaire, le Fondateur peut approuver directement la demande, ou deux examinateurs indépendants habilités peuvent l’approuver.",
   "supersessionExplanation": "Si vous recevez la distinction Founder Verified, toute demande Identity Verified en cours sera automatiquement clôturée. Son historique restera accessible.",
   "regularApplication": "Demande de vérification d’identité ordinaire",
   "supersessionReady": "La demande actuelle peut être clôturée lors de l’attribution de la distinction Founder Verified.",

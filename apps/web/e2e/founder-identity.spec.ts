@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } from "@ayinou/shared";
 import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
+import { trustMessages } from "../src/lib/trust-i18n";
 import { messages } from "../src/lib/i18n";
 import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 
@@ -531,6 +532,93 @@ founderTest("formal Founder provenance gives routine admin authority and reserve
     .toBe("true:false");
   await apiCall(founder, "/api/v1/admin/overview", 401);
   sql(`delete from private.account_restrictions where user_id='${founder.id}';`);
+});
+
+founderTest("Founder-direct blue approval is confined to eligible identity applications and the Founder workspace @smoke", async ({
+  page, makeMember, administrators: { founder, ordinaryAdmin },
+}) => {
+  const [member, browserMember, figure, rejected, held] = await Promise.all([
+    makeMember({ visible: true }), makeMember(), makeMember(), makeMember(), makeMember(),
+  ]);
+  const applications = "/api/v1/me/verification";
+  const evidence = "https://example.org/identity-proof";
+  const submit = async (actor: Member, kind = "identity"): Promise<string> =>
+    (await apiCall(actor, applications, 201, "POST", {
+      organizationId: null, kind, evidence: kind === "identity" ? [evidence] : [evidence, "https://example.net/public-profile"],
+    })).id;
+  const [id, browserId, figureId, selfId, rejectedId, heldId] = await Promise.all([
+    submit(member), submit(browserMember), submit(figure, "notable_person"), submit(founder), submit(rejected), submit(held),
+  ]);
+  const createWorkspace = async (actor: Member) => (await apiCall(actor, "/api/v1/me/private-workflows", 200, "POST",
+    { kind: "admin_workspace" })).id as string;
+  const [workspace, other] = await Promise.all([createWorkspace(founder), createWorkspace(ordinaryAdmin)]);
+  const url = (application: string) => `/api/v1/admin/founder-blue-verification/${application}`;
+  const send = (actor: Member, application: string, ref: string, body?: object) => fetch(api + url(application), {
+    method: body ? "POST" : "GET",
+    headers: { Authorization: "Bearer " + actor.token, "X-Ayinou-Workspace": ref, ...(body && { "Content-Type": "application/json" }) },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  expect((await send(ordinaryAdmin, id, other)).status).toBe(404);
+  expect((await send(founder, id, other)).status).toBe(404);
+  expect((await send(founder, figureId, workspace)).status).toBe(404);
+  expect((await send(founder, selfId, workspace)).status).toBe(404);
+  expect(sql(`select private.institution_reviewer('${founder.id}');`)).toBe("f");
+
+  const reviewed = await send(founder, id, workspace);
+  expect(reviewed.status).toBe(200);
+  expect(reviewed.headers.get("cache-control")).toBe("private, no-store");
+  expect(await reviewed.json()).toEqual({ id, revision: 1, evidence: [evidence] });
+  const approval = { expectedVersion: 1, requestId: randomUUID(), reason: "Reviewed public evidence for this member.", noConflict: true, decision: "approve" };
+  const rejection = { ...approval, requestId: randomUUID(), decision: "reject" };
+  expect((await send(founder, rejectedId, workspace, rejection)).status).toBe(200);
+  expect(sql(`select a.status || ':' || e.event from private.verification_applications a
+    join private.institution_audit e on e.subject_id=a.id and e.event='founder_identity_rejected'
+    where a.id='${rejectedId}';`)).toBe("rejected:founder_identity_rejected");
+  expect(sql(`select count(*) from public.verification_records where user_id='${rejected.id}';`)).toBe("0");
+  sql(`insert into public.verification_records(user_id,verification_type,status,reviewed_by,verified_at,publication_held_at)
+    values ('${held.id}','identity','verified','${ordinaryAdmin.id}',now(),now());`);
+  expect((await send(founder, heldId, workspace, { ...approval, requestId: randomUUID() })).status).toBe(409);
+  expect((await send(ordinaryAdmin, id, other, approval)).status).toBe(404);
+  expect((await send(founder, id, workspace, { ...approval, noConflict: false })).status).toBe(400);
+  expect((await send(founder, id, workspace, { ...approval, expectedVersion: 2 })).status).toBe(409);
+  const [first, replay] = await Promise.all([send(founder, id, workspace, approval), send(founder, id, workspace, approval)]);
+  expect(first.status).toBe(200);
+  expect(replay.status).toBe(200);
+  const receipt = await first.json();
+  expect(receipt).toMatchObject({ id, status: "approved" });
+  expect(await replay.json()).toEqual(receipt);
+  expect((await send(founder, id, workspace, { ...approval, reason: "Different replayed decision reason." })).status).toBe(409);
+  expect(sql(`select
+    (select count(*) from private.verification_reviews where application_id='${id}')::text || ':' ||
+    (select count(*) from private.institution_audit where subject_id='${id}' and event='founder_identity_approved')::text || ':' ||
+    private.personal_identity_provenance('${member.id}')::text;`)).toBe("1:1:{founder_direct_blue}");
+  expect(sql(`select private.project_identity_state('${member.id}') || ':' ||
+    private.organization_setup_identity_eligible('${member.id}')::text || ':' ||
+    private.ambassador_public_eligible('${member.id}')::text;`)).toBe("required:false:false");
+  expect(await apiCall(member, "/api/v1/me/verification-badge", 200))
+    .toMatchObject({ verified: true, personalClaims: ["identity"] });
+  expect(await publicProfile(member)).not.toHaveProperty("founderVerified");
+  expect(sql(`select event_type || ':' || authority from private.a1a_audit_source where resource_ref='${id}';`))
+    .toBe("founder_direct_regular_approval:founder");
+
+  finishPersonalOnboarding(founder);
+  await inEnglish(page.context());
+  await login(page, founder);
+  await solveMfa(page, founder.secret);
+  await openAdministration(page);
+  const trust = trustMessages.en;
+  await page.getByRole("button", { name: trust.trustWorkspace, exact: true }).click();
+  const item = page.locator("details").filter({ has: page.locator("summary", { hasText: `@${browserMember.handle}` }) });
+  await item.locator("summary").click();
+  await item.getByRole("button", { name: trust.founderBlueReview }).click();
+  await expect(item.getByRole("link", { name: evidence })).toBeVisible();
+  const decisionForm = item.locator("form").filter({ has: page.getByRole("button", { name: trust.founderBlueApprove }) });
+  await decisionForm.getByLabel(trust.reason).fill("Reviewed the member evidence with no conflict.");
+  await decisionForm.getByLabel(institutionMessages.en.conflictFree).check();
+  const result = page.waitForResponse(response => response.url().endsWith(url(browserId)) && response.request().method() === "POST");
+  await decisionForm.getByRole("button", { name: trust.founderBlueApprove }).click();
+  expect((await result).status()).toBe(200);
+  await expect(item.getByRole("button", { name: trust.founderBlueReview })).toHaveCount(0);
 });
 
 founderTest("the recognized Founder opens consent without a manual assignment or member application", async ({

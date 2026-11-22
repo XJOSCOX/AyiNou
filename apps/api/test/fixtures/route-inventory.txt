@@ -18,6 +18,7 @@ GET /api/v1/admin/audit - -
 GET /api/v1/admin/audit/events - -
 GET /api/v1/admin/audit/events/:reference - -
 GET /api/v1/admin/early-partners - -
+GET /api/v1/admin/founder-blue-verification/:id - -
 GET /api/v1/admin/founder-identity - -
 GET /api/v1/admin/governance - -
 GET /api/v1/admin/legal - -
@@ -150,6 +151,7 @@ HEAD /api/v1/admin/audit - onSend
 HEAD /api/v1/admin/audit/events - onSend
 HEAD /api/v1/admin/audit/events/:reference - onSend
 HEAD /api/v1/admin/early-partners - onSend
+HEAD /api/v1/admin/founder-blue-verification/:id - onSend
 HEAD /api/v1/admin/founder-identity - onSend
 HEAD /api/v1/admin/governance - onSend
 HEAD /api/v1/admin/legal - onSend
@@ -312,6 +314,7 @@ PATCH /api/v1/verification/review/:id/work 256 -
 POST /api/v1/admin/ambassadors 6000 -
 POST /api/v1/admin/appointments/:id/invitation - -
 POST /api/v1/admin/early-partners 2048 -
+POST /api/v1/admin/founder-blue-verification/:id 8192 -
 POST /api/v1/admin/founder-identity 1024 -
 POST /api/v1/admin/founder-identity/:id/actions 1024 -
 POST /api/v1/admin/governance/claim-holds/:id 1536 -

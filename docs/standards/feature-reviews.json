@@ -1,6 +1,48 @@
 {
   "features": [
     {
+      "id": "founder-authority-consolidation",
+      "report": "docs/governance/FOUNDER_AUTHORITY_CONSOLIDATION.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/founder-blue-verification/:id",
+          "contract": "GET /api/v1/admin/founder-blue-verification/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only per-case evidence references under the active Founder and original-session private workspace."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "An ordinary Administrator, copied workspace, wrong application type and self-review are denied."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/founder-blue-verification/:id",
+          "contract": "POST /api/v1/admin/founder-blue-verification/:id 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "A direct Founder approval or rejection commits with its audit receipt in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "An ordinary Administrator, held case, stale revision and forged conflict declaration cannot decide the application."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122182000_founder_direct_blue_verification.sql",
+          "rlsAndGrants": "The new RPC is service-only. Existing ledgers and audit view remain inaccessible to browser roles.",
+          "authorization": "Rechecks the recognized active Founder, recent MFA, original-session admin workspace, exact case and conflict and safety predicates.",
+          "compatibility": "One blue badge, distinct provenance. Existing ordinary decisions, gold closure, and independent eligibility for high-trust features remain intact.",
+          "validation": "Disposable approval, rejection, denial, concurrent replay, existing two-reviewer approval and gold workflow tests.",
+          "rolloutAndRollback": "Apply only the separately authorized exact additive migration after the release checks. Preserve earlier schema versions and all decision history."
+        }
+      ]
+    },
+    {
       "id": "s1",
       "report": "docs/standards/S1_IMPLEMENTATION_REPORT.md",
       "routes": [],

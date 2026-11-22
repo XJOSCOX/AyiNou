@@ -59,7 +59,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
           </dl><SafetyOverviewPanel /></>}
           {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
           {tab === "audit" && <AuditFeed />}
-          {tab === "trust" && <TrustAdministration />}
+          {tab === "trust" && <TrustAdministration founderWorkspace={access.data?.founder ? workspaceId : undefined} />}
           {tab === "ambassadors" && <AmbassadorAdministration />}
           {tab === "legal" && <LegalAdminPanel />}
           {tab === "founder" && <FounderIdentityPanel admin workspaceId={workspaceId} />}
