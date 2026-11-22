@@ -30,8 +30,9 @@ async function elevate(member: Member) {
 
 function setSyntheticPolicy(open: boolean) {
   // sql() rejects non-disposable projects and writes only through the owned Docker container.
+  const body = open ? "select true" : "select coalesce((private.fv_active_policy()).issuance_enabled,false)";
   sql(`create or replace function private.founder_identity_policy_open() returns boolean
-    language sql immutable set search_path='' as $$ select ${open ? "true" : "false"} $$;`);
+    language sql stable set search_path='' as $$ ${body} $$;`);
 }
 
 const assign = (member: Member) => sql(`insert into private.founder_identity_authorities(actor_id,scope,approval_ref,expires_at)
@@ -647,10 +648,23 @@ founderTest("Founder verifies account control and grants gold from the original 
       expect(response.headers.get("cache-control")).toBe("private, no-store");
       return data;
     }
+    const policy = randomUUID();
+    let claimTarget = "";
+    const reviewPath = "/api/v1/verification/founder-appeals";
     function proofPolicy(open: boolean) {
-      setSyntheticPolicy(open);
-      sql(`create or replace function private.founder_identity_live_proof_enabled() returns boolean
-        language sql immutable set search_path='' as $$ select ${open} $$;`);
+      if (!open) {
+        sql(`update private.fv_development_policies set stopped_at=clock_timestamp(),stop_approval_ref=gen_random_uuid()
+          where id='${policy}';
+          delete from private.verification_reviewers where user_id='${ordinaryAdmin.id}';`);
+        return;
+      }
+      sql(`insert into private.fv_development_policies(id,approval_ref,approved_by,case_policy,methods,
+        proof_enabled,issuance_enabled,starts_at,expires_at)
+        values('${policy}',gen_random_uuid(),'${founder.id}',1,array['in_person_identity_check','live_video_identity_check'],
+          true,true,clock_timestamp(),clock_timestamp()+interval '1 hour');
+        insert into private.fv_development_members(policy_id,user_id)
+          values('${policy}','${members[0].id}'),('${policy}','${members[1].id}');
+        insert into private.verification_reviewers(user_id) values('${ordinaryAdmin.id}');`);
     }
     expect((await run(founder, adminPath, 200)).liveProofEnabled).toBe(false);
     await run(ordinaryAdmin, adminPath, 404);
@@ -673,6 +687,20 @@ founderTest("Founder verifies account control and grants gold from the original 
         if (!i) {
           await apiCall(target, mine, 409, "POST", { ...version(consent.version), action: "account_control" });
           proofPolicy(true);
+          const outside = await makeMember({ visible: true });
+          const outsideOpened = await run(founder, adminPath, 200, {
+            username: outside.handle, requestId: randomUUID(), reason: "member_request",
+          });
+          const outsidePath = actionPath(ownerPath, outsideOpened.caseId);
+          const outsideConsent = await apiCall(outside, outsidePath, 200, "POST", {
+            ...version(outsideOpened.version), action: "consent", disclose: true,
+          });
+          const outsideAssured = await elevate(outside);
+          sql(`delete from public.role_assignments where user_id='${outside.id}' and role='administrator';`);
+          await apiCall(outsideAssured, outsidePath, 409, "POST", {
+            ...version(outsideConsent.version), action: "account_control",
+          });
+          expect(sql(`select count(*) from private.founder_identity_controls where case_id='${outsideOpened.caseId}';`)).toBe("0");
         }
         await apiCall(target, mine, 403, "POST", { ...version(consent.version), action: "account_control" });
         const snapshot = await elevate(target);
@@ -702,7 +730,9 @@ founderTest("Founder verifies account control and grants gold from the original 
         expect(await apiCall(snapshot, mine, 200, "POST", control)).toEqual(receipt);
         await run(ordinaryAdmin, issue, 403, { ...version(receipt.version), action: "attest",
           basis: "in_person_identity_check", noConflict: true }, otherWorkspace);
-        const attestation = { ...version(receipt.version), action: "attest", basis: "in_person_identity_check", noConflict: true };
+        const attestation = { ...version(receipt.version), action: "attest",
+          basis: i ? "live_video_identity_check" : "in_person_identity_check", noConflict: true };
+        await run(founder, issue, 400, { ...attestation, basis: "forged_method" });
         const reviewed = await run(founder, issue, 200, attestation);
         expect(await run(founder, issue, 200, attestation)).toEqual(reviewed);
         const grant = decision("grant", reviewed.version, "confirmed");
@@ -729,6 +759,55 @@ founderTest("Founder verifies account control and grants gold from the original 
             .toContainEqual(expect.objectContaining({ id: application, status: "closed", closureReason: "superseded_by_founder_verification" }));
           expect(sql(`select count(*) from private.verification_reviews where application_id='${application}';`)).toBe("0");
         }
+        finishPersonalOnboarding(target);
+        const organization = "/api/v1/me/organization-onboarding";
+        const intent = (await apiCall(snapshot, organization, 200, "PUT", {
+          id: null, expectedVersion: 0, requestId: randomUUID(), stage: "drafting",
+        })).intent;
+        const setupPath = organization + "/" + intent.id;
+        const draft = i ? { mode: "existing", targetHandle: claimTarget }
+          : { mode: "new", name: "Disposable gold owner", handle: "fv-" + randomUUID().slice(0, 12),
+              kind: "ngo", countryCode: "HT", registrationStatus: "informal_unregistered" };
+        const saved = await apiCall(snapshot, setupPath + "/details", 200, "PUT", {
+          expectedVersion: intent.version, requestId: randomUUID(), draft,
+        });
+        expect((await apiCall(snapshot, organization + "/setup", 200)).eligible).toBe(!i);
+        const completion = await apiCall(snapshot, setupPath + "/complete", i ? 403 : 200, "POST", {
+          expectedVersion: saved.version, requestId: randomUUID(),
+          declaration: { authorityConfirmed: true, declarationVersion: 1 },
+        });
+        if (!i) {
+          expect(completion).toMatchObject({ result: { kind: "created" } });
+          claimTarget = sql(`select handle from private.organizations where id='${completion.result.organizationId}';`);
+          expect(claimTarget).toMatch(/^fv-/);
+          const correction = await apiCall(snapshot, mine, 200, "POST", { ...version(granted.version), action: "correction" });
+          const appeals = (await apiCall(snapshot, ownerPath, 200)).cases[0];
+          expect(appeals).toMatchObject({ state: "held", appealStatus: "pending" });
+          const appeal = appeals.appealRef as string;
+          const reviewRef = (await apiCall(ordinaryAdmin, "/api/v1/me/private-workflows", 200, "POST", {
+            kind: "verification_workspace",
+          })).id as string;
+          expect(await run(ordinaryAdmin, reviewPath, 200, undefined, reviewRef)).toEqual([]);
+          await run(founder, reviewPath, 404, undefined, workspace);
+          expect(sql(`select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace
+            where n.nspname='private' and c.relname in ('fv_development_policies','fv_development_members','fv_founder_appeals')
+              and c.relrowsecurity and not has_table_privilege('authenticated',c.oid,'SELECT')
+              and not has_table_privilege('service_role',c.oid,'INSERT');`)).toBe("3");
+          expect(() => sql(`select private.fv_assign_appeal('${appeal}','${founder.id}',gen_random_uuid());`)).toThrow();
+          sql(`select private.fv_assign_appeal('${appeal}','${ordinaryAdmin.id}',gen_random_uuid());`);
+          const assigned = await run(ordinaryAdmin, reviewPath, 200, undefined, reviewRef);
+          expect(assigned).toEqual([expect.objectContaining({ id: appeal, status: "held" })]);
+          expect(JSON.stringify(assigned)).not.toMatch(/subject_session|founder_identity_proofs/);
+          await run(founder, issue, 409, decision("release", correction.version, "confirmed"));
+          const disposition = { action: "revoke", requestId: randomUUID(), noConflict: true };
+          await run(ordinaryAdmin, reviewPath + "/" + appeal, 404, disposition, otherWorkspace);
+          const completed = await run(ordinaryAdmin, reviewPath + "/" + appeal, 200, disposition, reviewRef);
+          expect(await run(ordinaryAdmin, reviewPath + "/" + appeal, 200, disposition, reviewRef)).toEqual(completed);
+          expect((await apiCall(snapshot, ownerPath, 200)).cases[0]).toMatchObject({ state: "revoked", appealStatus: "revoked" });
+          expect((await publicProfile(target)).founderVerified).toBeUndefined();
+          continue;
+        }
+        expect(completion.error.code).toBe("ORG_SETUP_IDENTITY_REQUIRED");
         const held = await run(founder, issue, 200, decision("hold", granted.version, "account_risk"));
         expect((await publicProfile(target)).founderVerified).toBeUndefined();
         expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{}");

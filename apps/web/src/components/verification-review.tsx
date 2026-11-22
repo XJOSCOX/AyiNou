@@ -15,9 +15,10 @@ import { institutionAction, institutionCard, institutionErrorBox, institutionFie
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { AdminFeedback } from "./admin-workspace";
+import { FounderAppealReview } from "./founder-appeal-review";
 import { VerificationAppealReview } from "./trust-workspace";
 
-export function VerificationReview({ workspaceAction }: { workspaceAction: ReactNode }) {
+export function VerificationReview({ workspaceAction, workspaceId }: { workspaceAction: ReactNode; workspaceId: string }) {
   const [locale] = useLocale();
   const t = institutionMessages[locale];
   const auth = authMessages[locale];
@@ -43,6 +44,7 @@ export function VerificationReview({ workspaceAction }: { workspaceAction: React
           : current.length ? current.map((item) => <ReviewCard key={item.id} item={item} refresh={queue.refresh} />)
           : <p className={institutionCard}>{t.emptyQueue}</p>}
         {access.data?.reviewer && <VerificationAppealReview />}
+        {access.data?.reviewer && !access.data?.founder && <FounderAppealReview workspaceId={workspaceId} />}
       </div>
     </MemberShell>
   );

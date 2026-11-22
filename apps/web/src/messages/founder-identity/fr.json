@@ -76,7 +76,9 @@
     "deny": "Refuser la demande",
     "conflict": "Déclarer un conflit",
     "account_control": "Confirmer le contrôle du compte",
-    "attest": "Enregistrer la confirmation d’identité"
+    "attest": "Enregistrer la confirmation d’identité",
+    "appeal_upheld": "Décision confirmée en recours",
+    "appeal_revoked": "Recours clos par révocation"
   },
   "reasons": {
     "confirmed": "L’identité et le contrôle du compte ont été confirmés selon la procédure approuvée.",
@@ -102,5 +104,16 @@
     "attestation": "J’ai confirmé l’identité de cette personne par la méthode choisie, vérifié qu’elle correspond au compte Ayinou confirmé et je n’ai aucun conflit d’intérêts important.",
     "authenticatorHelp": "Saisissez un nouveau code de l’application d’authentification associée à votre compte Ayinou. Si nécessaire, configurez-en une dans les paramètres du compte.",
     "authenticatorFailed": "La vérification a échoué. Vérifiez le code et l’application associée à votre compte, puis réessayez."
+  },
+  "appeal": {
+    "decline": "Refuser l’offre",
+    "request": "Demander un examen indépendant",
+    "queue": "Recours Founder attribués",
+    "uphold": "Confirmer la décision existante",
+    "outcomes": {
+      "pending": "Un examen indépendant est en attente. Le badge or concerné reste masqué tant que le recours est ouvert.",
+      "upheld": "La personne chargée de l’examen indépendant a confirmé la décision. Le badge or reste masqué si le dossier est suspendu.",
+      "revoked": "L’examen indépendant a révoqué ce badge or."
+    }
   }
 }

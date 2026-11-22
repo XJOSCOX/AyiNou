@@ -76,7 +76,9 @@
     "deny": "Deny request",
     "conflict": "Declare conflict",
     "account_control": "Confirm account control",
-    "attest": "Record identity confirmation"
+    "attest": "Record identity confirmation",
+    "appeal_upheld": "Appeal upheld",
+    "appeal_revoked": "Appeal resolved by revocation"
   },
   "reasons": {
     "confirmed": "Identity and control were confirmed through the approved process.",
@@ -102,5 +104,16 @@
     "attestation": "I confirmed this person’s identity with the selected method, matched it to the confirmed Ayinou account, and have no material conflict.",
     "authenticatorHelp": "Enter a fresh code from the authenticator registered to your Ayinou account. If you have no authenticator yet, add one in Account settings.",
     "authenticatorFailed": "The authenticator check could not be completed. Check your code and registered authenticator, then try again."
+  },
+  "appeal": {
+    "decline": "Decline offer",
+    "request": "Request independent review",
+    "queue": "Assigned Founder appeals",
+    "uphold": "Uphold the existing decision",
+    "outcomes": {
+      "pending": "An independent review is pending. An affected gold badge stays hidden while the appeal is open.",
+      "upheld": "The independent reviewer upheld the existing decision. Gold stays hidden if the case is still held.",
+      "revoked": "Independent review revoked this gold designation."
+    }
   }
 }

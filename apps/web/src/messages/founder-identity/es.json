@@ -76,7 +76,9 @@
     "deny": "Denegar solicitud",
     "conflict": "Declarar conflicto",
     "account_control": "Confirmar el control de la cuenta",
-    "attest": "Registrar la confirmación de identidad"
+    "attest": "Registrar la confirmación de identidad",
+    "appeal_upheld": "Decisión confirmada en apelación",
+    "appeal_revoked": "Apelación resuelta mediante revocación"
   },
   "reasons": {
     "confirmed": "La identidad y el control de la cuenta se confirmaron mediante el proceso aprobado.",
@@ -102,5 +104,16 @@
     "attestation": "Confirmé la identidad de esta persona con el método seleccionado, comprobé que corresponde a la cuenta de Ayinou confirmada y no tengo ningún conflicto de intereses relevante.",
     "authenticatorHelp": "Introduce un código nuevo de la aplicación de autenticación vinculada a tu cuenta de Ayinou. Si aún no tienes una, configúrala en los ajustes de la cuenta.",
     "authenticatorFailed": "No se pudo completar la verificación. Comprueba el código y la aplicación vinculada a tu cuenta y vuelve a intentarlo."
+  },
+  "appeal": {
+    "decline": "Rechazar la oferta",
+    "request": "Solicitar revisión independiente",
+    "queue": "Apelaciones de Fundador asignadas",
+    "uphold": "Confirmar la decisión existente",
+    "outcomes": {
+      "pending": "Hay una revisión independiente pendiente. La insignia dorada afectada seguirá oculta mientras la apelación esté abierta.",
+      "upheld": "La revisión independiente confirmó la decisión. La insignia seguirá oculta si el caso continúa suspendido.",
+      "revoked": "La revisión independiente revocó esta insignia dorada."
+    }
   }
 }

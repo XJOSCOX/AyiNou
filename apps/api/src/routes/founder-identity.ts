@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { founderDecisions, founderIdentityBases, founderReviewActions, type FounderIdentityQueue, type FounderIdentityReceipt } from "@ayinou/shared";
+import { founderDecisions, founderIdentityBases, founderReviewActions, type FounderAppealItem, type FounderIdentityQueue, type FounderIdentityReceipt } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
@@ -7,6 +7,7 @@ import { InstitutionError, type InstitutionRepository } from "../services/instit
 
 const member = "/api/v1/me/founder-identity";
 const admin = "/api/v1/admin/founder-identity";
+const appeals = "/api/v1/verification/founder-appeals";
 const revision = z.strictObject({
   expectedVersion: z.number().int().min(1).max(2_147_483_647),
   policyVersion: z.literal(1),
@@ -32,6 +33,7 @@ const review = z.union([standardReview, revision.extend({
   action: z.literal("attest"), basis: z.enum(founderIdentityBases), noConflict: z.literal(true),
 })]);
 const caseId = z.strictObject({ id: z.uuid() });
+const appealDecision = z.strictObject({ action: z.enum(["uphold", "revoke"]), requestId: z.uuid(), noConflict: z.literal(true) });
 
 export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null) {
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
@@ -81,6 +83,21 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
       });
   }
 
+  async function independentAppeal<T>(request: FastifyRequest, id: string | null,
+    input?: z.infer<typeof appealDecision>) {
+    const workspace = z.uuid().safeParse(request.headers["x-ayinou-workspace"]);
+    if (!workspace.success) throw new ApiError(404, "NOT_FOUND", "Resource unavailable");
+    const data = await call<T | null>(request, true, "fv_founder_appeals_for_api", {
+      p_workspace: workspace.data, p_id: id, p_action: input?.action ?? null,
+      p_request: input?.requestId ?? null, p_no_conflict: input?.noConflict ?? null,
+    });
+    if (data === null) throw new ApiError(404, "NOT_FOUND", "Resource unavailable");
+    return data;
+  }
+
+  app.get(appeals, (request) => independentAppeal<FounderAppealItem[]>(request, null));
+  app.post(appeals + "/:id", { bodyLimit: 512 }, (request) => independentAppeal<FounderIdentityReceipt>(request,
+    caseId.parse(request.params).id, appealDecision.parse(request.body)));
   app.get(member, (request) => call<FounderIdentityQueue>(request, false, "founder_identity_read_for_api"));
   app.get(admin, (request) => staff<FounderIdentityQueue>(request, "read"));
   app.post(admin, { bodyLimit: 1024 }, (request) => {

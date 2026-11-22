@@ -1016,6 +1016,48 @@
           "rolloutAndRollback": "Additive development deployment requires separate owner approval. Keep both operational gates closed until the identity and operations policy is approved."
         }
       ]
+    },
+    {
+      "id": "founder-verified-final",
+      "report": "docs/identity/FOUNDER_VERIFIED_FINAL_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/verification/founder-appeals",
+          "contract": "GET /api/v1/verification/founder-appeals - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Bounded assigned-case read with no mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "Only a current independent reviewer in their S2C workspace can see the assigned appeal."
+          }
+        },
+        {
+          "route": "POST /api/v1/verification/founder-appeals/:id",
+          "contract": "POST /api/v1/verification/founder-appeals/:id 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The private Founder event receipt commits atomically with the assigned review decision."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "The Founder and issuer cannot receive assignment to their own case."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121147000_fv_final_development_policy.sql",
+          "rlsAndGrants": "RLS and no direct application access on approval, cohort and appeal data. Scoped reviewer entry is service-only.",
+          "authorization": "Trusted Founder, current S2 workspace and scoped consent and TOTP. Appeals require independent case assignment.",
+          "compatibility": "Reuses existing case and grant transactions, limits gold parity to eligible new non-government O4 setup and leaves other gates closed.",
+          "validation": "Disposable Founder and O4 scenarios, including exact replay, conflict, expiry and independent paths.",
+          "rolloutAndRollback": "Separate owner approval for schema and operational activation. Disable the bounded policy with an approved stop reference and keep historical provenance."
+        }
+      ]
     }
   ]
 }

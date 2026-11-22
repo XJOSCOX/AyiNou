@@ -103,13 +103,15 @@
         "private.founder_supersession_events",
         "private.founder_registration_audit",
         "private.f1_events",
-        "private.founder_identity_controls"
+        "private.founder_identity_controls",
+        "private.fv_development_policies",
+        "private.fv_founder_appeals"
       ],
-      "observed": "O3 and the supersession command retain approved case lineage. F1 registration has its separate provenance and provisioning. A1A excludes the restricted case ledgers and credential history. Issuance remains closed. Versioned member account-control and Founder attestation extend the restricted native history while both live gates stay closed.",
+      "observed": "The Founder ledgers preserve case, grant and optional application closure references. FV-FINAL adds restricted approval windows, cohort identity and independent appeal decisions. Hosted real issuance remains closed. A1A excludes these restricted records.",
       "missing": [
         "separately assigned case summary and approved retention"
       ],
-      "viewers": "Restricted case participants or existing enrollment authority",
+      "viewers": "Subject case summary, recognized Founder using S2C, or assigned and unconflicted independent reviewer in their separate S2C workspace.",
       "excluded": "Private proof and credentials",
       "tests": [
         "apps/web/e2e/founder-identity.spec.ts",

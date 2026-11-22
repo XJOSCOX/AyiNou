@@ -62,3 +62,7 @@ Operational identity/account-control ceremony, approved founder delegation and s
 ## Operational proof integration
 
 The subsequent Founder Verified integration introduces a live member authenticator receipt and separately records a structured Founder attestation. It preserves consent, eligibility, live workspace checks and native audit. Both gates still default to closed and require separate operational authorization. [Completion report](../identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md)
+
+## FV-FINAL integration
+
+The candidate reuses O3 case, attestation, grant and supersession transactions. It requires two separate live development gates and an explicitly approved member cohort. A correction creates an eligible independent appeal and suppresses gold. See the [operating procedure](../identity/FOUNDER_VERIFIED_OPERATING_PROCEDURE.md) for the release boundary and member process.

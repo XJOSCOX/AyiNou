@@ -394,3 +394,7 @@ A1A adds scoped activity queries, nine existing ledger adapters and a permanent 
 ## Founder Verified integration
 
 The direct proof workflow adds the recognized Founder’s session-bound authority, member authenticator confirmation, a structured identity attestation and scoped gold badge display. Version-specific optional ordinary-application closure remains transactional. The hosted development schema is staged at 82 applied migrations with zero pending. Both live gates remain closed pending owner-approved operations. [Integration report](docs/identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md)
+
+## FV-FINAL — Founder Verified development release
+
+FV-FINAL adds an exact approved development cohort and policy window, independent appeal review and live gold eligibility for eligible new nongovernment organizations. Reviewed source changes and schema deployment are separate from operational activation. See the [implementation report](docs/identity/FOUNDER_VERIFIED_FINAL_IMPLEMENTATION_REPORT.md) and [operations policy](docs/identity/FOUNDER_VERIFIED_ACTIVATION_POLICY.md).

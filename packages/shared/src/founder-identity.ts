@@ -19,11 +19,25 @@ export interface FounderIdentityCase {
   disclose: boolean;
   correctionPending: boolean;
   controlReady?: boolean;
+  liveEligible?: boolean;
+  appealRef?: string | null;
+  appealStatus?: "pending" | "upheld" | "revoked" | null;
+  memberHistory?: { action: FounderCaseEvent; occurredAt: string }[];
   decision: Decision | null;
   updatedAt: string;
   regularApplication?: { id: string; revision: number; status: VerificationStatus } | null;
   supersessionConsented?: boolean;
   supersessionOutcome?: "no_consent" | "superseded_by_founder_verification" | "application_completed" | "stale_application" | "application_held" | null;
+}
+
+type FounderCaseEvent = FounderMemberAction | FounderReviewAction | "open" | "proof_recorded" | "account_control" | "attest"
+  | "appeal_upheld" | "appeal_revoked";
+
+export interface FounderAppealItem {
+  id: string;
+  username: string | null;
+  status: FounderIdentityCase["state"];
+  createdAt: string;
 }
 
 export interface FounderReviewCase extends FounderIdentityCase {
@@ -32,7 +46,7 @@ export interface FounderReviewCase extends FounderIdentityCase {
   proofReady: boolean;
   history: {
     id: string;
-    action: FounderMemberAction | FounderReviewAction | "open" | "proof_recorded" | "account_control" | "attest";
+    action: FounderCaseEvent;
     reason: Decision | null;
     occurredAt: string;
     version: number;

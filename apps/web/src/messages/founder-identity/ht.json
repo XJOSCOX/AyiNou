@@ -76,7 +76,9 @@
     "deny": "Refize demann nan",
     "conflict": "Deklare yon konfli",
     "account_control": "Konfime ou gen kontwòl kont lan",
-    "attest": "Anrejistre konfimasyon idantite a"
+    "attest": "Anrejistre konfimasyon idantite a",
+    "appeal_upheld": "Desizyon an rete apre kontestasyon",
+    "appeal_revoked": "Kontestasyon an fini ak revokasyon"
   },
   "reasons": {
     "confirmed": "Yo konfime idantite ak kontwòl sou kont lan dapre pwosedi apwouve a.",
@@ -102,5 +104,16 @@
     "attestation": "Mwen konfime idantite moun sa a ak metòd mwen chwazi a, mwen verifye se li ki gen kont Ayinou ki konfime a, epi mwen pa gen okenn konfli enterè enpòtan.",
     "authenticatorHelp": "Antre yon nouvo kòd ki soti nan aplikasyon otantifikasyon ki sou kont Ayinou ou a. Si ou poko genyen youn, ajoute li nan paramèt kont ou.",
     "authenticatorFailed": "Verifikasyon an pa t mache. Tcheke kòd la ak aplikasyon otantifikasyon ou a, epi eseye ankò."
+  },
+  "appeal": {
+    "decline": "Refize òf la",
+    "request": "Mande yon revizyon endepandan",
+    "queue": "Kontestasyon Fondatè ki asiyen",
+    "uphold": "Kenbe desizyon ki deja la",
+    "outcomes": {
+      "pending": "Gen yon revizyon endepandan k ap tann. Badj lò ki konsène a rete kache pandan kontestasyon an ouvè.",
+      "upheld": "Moun ki fè revizyon endepandan an kenbe desizyon an. Badj lò a rete kache si dosye a toujou sou poz.",
+      "revoked": "Revizyon endepandan an revoke badj lò sa a."
+    }
   }
 }

@@ -141,6 +141,7 @@ GET /api/v1/trust/impersonation - -
 GET /api/v1/trust/verification-appeals - -
 GET /api/v1/usernames/availability - -
 GET /api/v1/verification/cases/:id/activity - -
+GET /api/v1/verification/founder-appeals - -
 GET /api/v1/verification/review - -
 GET /health - -
 HEAD /api/v1/admin/accounts - onSend
@@ -271,6 +272,7 @@ HEAD /api/v1/trust/impersonation - onSend
 HEAD /api/v1/trust/verification-appeals - onSend
 HEAD /api/v1/usernames/availability - onSend
 HEAD /api/v1/verification/cases/:id/activity - onSend
+HEAD /api/v1/verification/founder-appeals - onSend
 HEAD /api/v1/verification/review - onSend
 HEAD /health - onSend
 OPTIONS * - -
@@ -380,6 +382,7 @@ POST /api/v1/projects/:id/submit 512 -
 POST /api/v1/projects/:id/work 16000 -
 POST /api/v1/referrals/validate 512 -
 POST /api/v1/setup/founder/:id 512 -
+POST /api/v1/verification/founder-appeals/:id 512 -
 POST /api/v1/verification/review/:id 4096 -
 PUT /api/v1/comments/:id/reaction 1024 -
 PUT /api/v1/institutions/:id/registration 1024 -

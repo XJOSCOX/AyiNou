@@ -156,13 +156,13 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
   const [review, setReview] = useState<Review | null>(null);
   const [conflictFree, setConflictFree] = useState(false);
   const [confirm, setConfirm] = useState<Exclude<FounderMemberAction, "visibility"> | null>(null);
-  const controls = reviewActions(item, enabled);
+  const controls = reviewActions(item, enabled && item.liveEligible !== false && item.appealStatus !== "pending");
   const grant = review?.action === "grant" || review?.action === "release";
   const act = (fields: object) => send(`/${item.id}/actions`, {
     ...fields, expectedVersion: item.version, policyVersion: item.policyVersion,
   });
   const canWithdraw = ["consent_pending", "proof_pending", "ready_for_review", "granted", "held"].includes(item.state);
-  const pendingProof = liveProof && item.consented && !item.conflicted &&
+  const pendingProof = liveProof && item.liveEligible !== false && item.consented && !item.conflicted &&
     ["proof_pending", "ready_for_review", "held"].includes(item.state) && !item.proofReady;
   const canCorrect = ["granted", "held", "revoked", "denied", "withdrawn"].includes(item.state);
 
@@ -198,7 +198,9 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
     {!activeStates.has(item.state) && <p className="text-sm text-[var(--theme-body)]">
       {t.lastUpdated} · <time dateTime={item.updatedAt}>{new Date(item.updatedAt).toLocaleString(locale)}</time>
     </p>}
-    {item.correctionPending && <p className="max-w-prose text-sm">{t.correctionPending}</p>}
+    {item.appealStatus ? <p role="status" className="max-w-prose text-sm">{item.appealStatus === "pending" ? t.correctionPending : t.appeal.outcomes[item.appealStatus]}
+      {item.appealRef && <> <code className="break-all">{item.appealRef}</code></>}</p>
+      : item.correctionPending && <p className="max-w-prose text-sm">{t.correctionPending}</p>}
     {admin ? <>
       {application && <p className="text-sm">{t.regularApplication} · {institutionMessages[locale][application.status]}</p>}
       {item.supersessionConsented !== undefined && <p className="text-sm">
@@ -259,7 +261,7 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
           onClick={() => setConfirm("consent")}>{t.actions.consent}</button>
           : <button type="button" className={institutionAction} disabled={busy || publish === item.disclose}
             onClick={() => { void act({ action: "visibility", disclose: publish }); }}>{t.actions.visibility}</button>}
-        <button type="button" className={institutionLink} disabled={busy} onClick={() => setConfirm("withdraw")}>{t.actions.withdraw}</button>
+        <button type="button" className={institutionLink} disabled={busy} onClick={() => setConfirm("withdraw")}>{item.state === "consent_pending" ? t.appeal.decline : t.actions.withdraw}</button>
       </div>}
       {pendingProof && (item.controlReady ? <p role="status">{t.liveProof.controlReady}</p> : <div className="grid gap-2">
         {showChallenge ? <><p className="text-sm">{t.liveProof.authenticatorHelp}</p>
@@ -271,7 +273,7 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
       {canSupersedeAfterGrant && <button type="button" className={institutionLink} disabled={busy}
         onClick={() => setConfirm("supersede")}>{t.actions.supersede}</button>}
       {canCorrect && !item.correctionPending && <button type="button" className={`${institutionLink} justify-self-start`} disabled={busy}
-        onClick={() => setConfirm("correction")}>{t.actions.correction}</button>}
+        onClick={() => setConfirm("correction")}>{t.appeal.request}</button>}
       {confirm && <div className="flex flex-wrap items-center gap-3">
         <p className="w-full text-sm">{t.prompts[confirm]}</p>
         {confirm === "consent" && canChooseSupersession && <div className="grid w-full gap-2 text-sm">
@@ -290,6 +292,12 @@ function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
           } : {}) }); }}>{t.confirm}</button>
         <button type="button" className={institutionLink} onClick={() => setConfirm(null)}>{t.cancel}</button>
       </div>}
+      {!!item.memberHistory?.length && <details>
+        <summary className="cursor-pointer font-semibold">{t.history}</summary>
+        <ul className="mt-2 grid gap-2 text-sm">{item.memberHistory.map((event, index) =>
+          <li key={event.occurredAt + event.action + index}>{t.actions[event.action]} · <time dateTime={event.occurredAt}>
+            {new Date(event.occurredAt).toLocaleString(locale)}</time></li>)}</ul>
+      </details>}
     </>}
   </article>;
 }
