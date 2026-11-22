@@ -34,4 +34,4 @@ Deploy the matching API and web with the additive migration after the exact host
 
 ## Remaining blockers
 
-Hosted rollout requires separate approval for the exact migration after validation.
+The owner approved rollout. Migration `20261122180000` was applied to hosted development project `hcbxulyfmdmuyccgrujs` with the Founder automatic closure migration. Postflight recorded 88 migrations with zero pending and verified both the pending and already-verified eligibility states. All 98 local Chromium tests and all three GitHub Actions jobs passed for the application release. [Release CI](https://github.com/XJOSCOX/AyiNou/actions/runs/45072250874)

@@ -26,7 +26,7 @@ Ayinou checks the current application after acquiring the trust lock. A concurre
 
 ## Validation and CI
 
-Disposable scenarios cover one-step acceptance, an existing grant with a pending application, repeated reconciliation, grant replay and races with independent review. They check history, queue removal and verified status.
+Disposable scenarios cover one-step acceptance, an existing grant with a pending application, repeated reconciliation, grant replay and races with independent review. All 98 local Chromium tests and all three GitHub Actions jobs passed for release `3c7cc73a4327dacb40e74bce50a8c45cf64244ea`. [Release CI](https://github.com/XJOSCOX/AyiNou/actions/runs/45072250874)
 
 ## Documentation and operations
 
@@ -34,4 +34,4 @@ Reconcile eligible legacy applications with the same migration that enables auto
 
 ## Remaining blockers
 
-Hosted rollout requires exact migration authorization after validation.
+The approved migration was applied to hosted development project `hcbxulyfmdmuyccgrujs` with the personal request limits migration. Postflight recorded 88 migrations with zero pending. One eligible pending application closed and retained its history with a reconciliation event linked to the original gold grant. Existing grant and application counts, issuance policy, RLS and restricted grants were verified. The application code was pushed to `main`. No cloud application deployment was performed.
