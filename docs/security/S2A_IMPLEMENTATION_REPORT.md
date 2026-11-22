@@ -34,4 +34,4 @@ See the [enforcement rules](S2A_SESSION_POLICY_ENFORCEMENT.md) and the [developm
 
 ## Remaining blockers
 
-S2B owns session inventory, per-device revocation controls and the common private workflow router. Hosted rollout and postflight status are tracked independently in the deployment report. Public launch and restricted workflows retain their existing authorization gates.
+The hosted S2A rollout and matching local application verification passed. S2B owns session inventory, per-device revocation controls and the common private workflow router. Public launch and restricted workflows retain their existing authorization gates.

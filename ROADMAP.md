@@ -365,7 +365,7 @@ The reviewed O2–O7 migrations are deployed to the owner-approved development d
 
 ## S2A absolute session lifetimes
 
-S2A implements six hours for the recognized Founder and Administrators, 30 days for remembered ordinary sessions, and 12 hours for unchecked ordinary sessions. The default browser session is nonpersistent. Promotion requires a new sign-in and MFA. Existing role revocation and 15-minute privileged TOTP rules apply. S2B session inventory and private workflow routing remain planned. [Implementation and development rollout](docs/security/S2A_DEPLOYMENT_AND_TEST_RESULTS.md)
+**S2A COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121142000` and verified 77 applied migrations with zero pending. The policy gives the recognized Founder and Administrators six hours, ordinary remembered sessions 30 days, and ordinary unchecked sessions 12 hours. The default browser session is nonpersistent. Promotion requires a new sign-in and MFA. Existing role revocation and 15-minute privileged TOTP rules apply. S2B session inventory and private workflow routing remain planned. [Implementation and development rollout](docs/security/S2A_DEPLOYMENT_AND_TEST_RESULTS.md)
 
 ## U1 public usernames
 
@@ -373,7 +373,7 @@ U1 adds username selection and availability to both signup choices. Its migratio
 
 ## F1 and the Account, Roles & Security Master Blueprint
 
-**F1 and F1.1 COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121140000` and `20261121141000` in order. Hosted development has 76 applied migrations and zero pending. Verified matching local Fastify/Next.js compatibility without deploying a hosted application. [Deployment evidence](docs/deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md)
+**F1 and F1.1 COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121140000` and `20261121141000` in order. F1 postflight recorded 76 applied migrations and zero pending. Verified matching local Fastify/Next.js compatibility without deploying a hosted application. [Deployment evidence](docs/deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md)
 
 Only the active recognized Founder can directly authorize a new Administrator appointment. The named member accepts with fresh MFA and the one-time code. Legacy proposals retain independent approval. [F1.1 implementation](docs/governance/F1_1_IMPLEMENTATION_REPORT.md)
 
