@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FounderVerifiedMark } from "./founder-verified-badge";
 import type { Institution } from "@ayinou/shared";
 import { useCallback } from "react";
 import { loadVerifiedRepresentatives, saveRepresentativeConsent } from "@/lib/institution-api";
@@ -80,6 +81,7 @@ function VerifiedRepresentativePanel({ organizationId }: { organizationId: strin
     {!!data?.representatives.length && <ul className="mt-3 grid gap-2">
       {data.representatives.map((person) => <li key={person.username} className="flex flex-wrap items-center gap-2">
         <Link className={`${institutionLink} break-all`} href={`/members/${encodeURIComponent(person.username)}`}>{person.displayName}</Link>
+        {person.founderVerified && <FounderVerifiedMark compact />}
         <VerifiedBadge label={t.representative} />
       </li>)}
     </ul>}

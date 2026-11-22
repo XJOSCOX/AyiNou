@@ -77,5 +77,5 @@ export function SessionWorkspace({ subject, flow }: { subject: string; flow: Pri
     <button type="button" disabled={busy} onClick={() => void close()} className={institutionLink}>{t.closeWorkspace}</button>
     {failed && <p role="alert">{t.failed}</p>}
   </div>;
-  return admin ? <AdminWorkspace workspaceAction={action} /> : <VerificationReview workspaceAction={action} />;
+  return admin ? <AdminWorkspace workspaceId={flow.id} workspaceAction={action} /> : <VerificationReview workspaceAction={action} />;
 }

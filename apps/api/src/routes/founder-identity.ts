@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { founderDecisions, founderReviewActions, type FounderIdentityQueue, type FounderIdentityReceipt } from "@ayinou/shared";
+import { founderDecisions, founderIdentityBases, founderReviewActions, type FounderIdentityQueue, type FounderIdentityReceipt } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
@@ -20,13 +20,17 @@ const memberAction = z.discriminatedUnion("action", [
   }).optional() }),
   revision.extend({ action: z.literal("supersede"), applicationId: z.uuid(), revision: z.number().int().min(1).max(2_147_483_647) }),
   revision.extend({ action: z.literal("visibility"), disclose: z.boolean() }),
+  revision.extend({ action: z.literal("account_control") }),
   revision.extend({ action: z.enum(["withdraw", "correction"]) }),
 ]);
-const review = revision.extend({
+const standardReview = revision.extend({
   action: z.enum(founderReviewActions),
   reason: z.enum(founderDecisions),
   noConflict: z.literal(true).optional(),
 }).refine(({ action, noConflict }) => (action === "grant" || action === "release") === (noConflict === true));
+const review = z.union([standardReview, revision.extend({
+  action: z.literal("attest"), basis: z.enum(founderIdentityBases), noConflict: z.literal(true),
+})]);
 const caseId = z.strictObject({ id: z.uuid() });
 
 export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null) {
@@ -44,7 +48,8 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
     try {
       return await repo.rpc<T>(rpc, {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp_at: session.totpAt ?? null,
-        ...(rpc.startsWith("founder_supersession_") ? {} : { p_admin: privileged }), ...input,
+        ...(rpc === "founder_identity_read_for_api" || rpc === "founder_identity_command_for_api"
+          ? { p_admin: privileged } : {}), ...input,
       });
     } catch (cause) {
       if (cause instanceof InstitutionError) throw new ApiError(cause.statusCode, cause.code, "Founder identity request could not be completed");
@@ -52,14 +57,35 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
     }
   }
 
+  async function staff<T>(request: FastifyRequest, action: string, input: {
+    id?: string; username?: string; expected?: number; policy?: number; requestId?: string;
+    reason?: string; noConflict?: true; basis?: string;
+  } = {}) {
+    const header = request.headers["x-ayinou-workspace"];
+    if (header !== undefined || action === "attest") {
+      const workspace = z.uuid().safeParse(header);
+      if (!workspace.success) throw new ApiError(404, "NOT_FOUND", "Resource unavailable");
+      const result = await call<T | null>(request, true, "founder_identity_workspace_for_api", {
+        p_workspace: workspace.data, p_id: input.id ?? null, p_username: input.username ?? null, p_action: action,
+        p_expected: input.expected ?? null, p_policy: input.policy ?? null, p_request: input.requestId ?? null,
+        p_reason: input.reason ?? null, p_no_conflict: input.noConflict ?? null, p_basis: input.basis ?? null,
+      });
+      if (result === null) throw new ApiError(404, "NOT_FOUND", "Resource unavailable");
+      return result;
+    }
+    return action === "read" ? call<T>(request, true, "founder_identity_read_for_api")
+      : call<T>(request, true, "founder_identity_command_for_api", {
+        p_id: input.id ?? null, p_username: input.username ?? null, p_action: action, p_expected: input.expected,
+        p_policy: input.policy, p_request: input.requestId, p_reason: input.reason, p_disclose: null,
+        p_no_conflict: input.noConflict ?? null,
+      });
+  }
+
   app.get(member, (request) => call<FounderIdentityQueue>(request, false, "founder_identity_read_for_api"));
-  app.get(admin, (request) => call<FounderIdentityQueue>(request, true, "founder_identity_read_for_api"));
+  app.get(admin, (request) => staff<FounderIdentityQueue>(request, "read"));
   app.post(admin, { bodyLimit: 1024 }, (request) => {
     const input = open.parse(request.body);
-    return call<FounderIdentityReceipt>(request, true, "founder_identity_command_for_api", {
-      p_id: null, p_username: input.username, p_action: "open", p_expected: 0, p_policy: 1,
-      p_request: input.requestId, p_reason: input.reason, p_disclose: null, p_no_conflict: null,
-    });
+    return staff<FounderIdentityReceipt>(request, "open", { ...input, expected: 0, policy: 1 });
   });
   app.post(member + "/:id/actions", { bodyLimit: 1024 }, (request) => {
     const { id } = caseId.parse(request.params);
@@ -84,9 +110,9 @@ export function registerFounderIdentity(app: FastifyInstance, auth: AuthVerifier
   app.post(admin + "/:id/actions", { bodyLimit: 1024 }, (request) => {
     const { id } = caseId.parse(request.params);
     const input = review.parse(request.body);
-    return call<FounderIdentityReceipt>(request, true, "founder_identity_command_for_api", {
-      p_id: id, p_username: null, p_action: input.action, p_expected: input.expectedVersion, p_policy: input.policyVersion,
-      p_request: input.requestId, p_reason: input.reason, p_disclose: null, p_no_conflict: input.noConflict ?? null,
+    return staff<FounderIdentityReceipt>(request, input.action, {
+      id, expected: input.expectedVersion, policy: input.policyVersion, requestId: input.requestId, noConflict: input.noConflict,
+      ...(input.action === "attest" ? { basis: input.basis } : { reason: input.reason }),
     });
   });
 }

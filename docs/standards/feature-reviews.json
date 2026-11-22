@@ -1001,6 +1001,21 @@
           "rolloutAndRollback": "Apply the exact migration after release checks and independent owner approval. Use additive forward remediation and keep the existing ledgers intact."
         }
       ]
+    },
+    {
+      "id": "founder-verified-live-proof",
+      "report": "docs/identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121146000_founder_verified_live_workflow.sql",
+          "rlsAndGrants": "Controls have private RLS and no direct application grants. Trusted service RPCs restrict workspace, session and role; internal proof helpers remain private.",
+          "authorization": "Current captured session and recent member TOTP authorize confirmation; recognized Founder, explicit conflict clearance and original S2C workspace authorize attestation and live issuance.",
+          "compatibility": "Retains O3 synthetic fixtures, ordinary blue review, versioned supersession, and existing project, poll and leadership conditions.",
+          "validation": "Disposable cases exercise proof, workspace binding, guarded issuance, atomic audit and unchanged independent outcomes.",
+          "rolloutAndRollback": "Additive development deployment requires separate owner approval. Keep both operational gates closed until the identity and operations policy is approved."
+        }
+      ]
     }
   ]
 }

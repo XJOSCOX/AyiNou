@@ -24,7 +24,7 @@ export type Institution = Omit<InstitutionInput, "contactEmail"> & {
   status: "active" | "archived" | "restricted"; verificationStatus: "unverified" | "verified" | "revoked";
 };
 export type VerifiedRepresentatives = {
-  representatives: Array<{ username: string; displayName: string }>;
+  representatives: Array<{ username: string; displayName: string; founderVerified?: true }>;
   ownConsent: boolean | null;
 };
 

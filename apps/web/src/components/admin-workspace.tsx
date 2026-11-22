@@ -32,7 +32,7 @@ const statuses: AccountStatus[] = ["active", "suspended", "banned"];
 type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
 const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder", "corrections", "governance", "partners"];
 
-export function AdminWorkspace({ workspaceAction }: { workspaceAction: ReactNode }) {
+export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceAction: ReactNode; workspaceId: string }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
   const [tab, setTab] = useState<AdminTab>("overview");
@@ -62,7 +62,7 @@ export function AdminWorkspace({ workspaceAction }: { workspaceAction: ReactNode
           {tab === "trust" && <TrustAdministration />}
           {tab === "ambassadors" && <AmbassadorAdministration />}
           {tab === "legal" && <LegalAdminPanel />}
-          {tab === "founder" && <FounderIdentityPanel admin />}
+          {tab === "founder" && <FounderIdentityPanel admin workspaceId={workspaceId} />}
           {tab === "corrections" && <AdminOnboardingCorrections />}
           {tab === "governance" && <PlatformGovernance />}
           {tab === "partners" && <AdminEarlyPartners />}

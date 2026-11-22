@@ -3,6 +3,7 @@ import type { VerificationStatus } from "./trust.ts";
 export const founderCaseStates = ["consent_pending", "proof_pending", "ready_for_review", "granted", "held", "revoked", "denied", "withdrawn"] as const;
 export const founderDecisions = ["confirmed", "insufficient_proof", "conflict", "account_risk", "member_request", "corrected"] as const;
 export const founderMemberActions = ["consent", "visibility", "withdraw", "correction", "supersede"] as const;
+export const founderIdentityBases = ["in_person_identity_check", "live_video_identity_check"] as const;
 export const founderReviewActions = ["grant", "hold", "release", "revoke", "deny", "conflict"] as const;
 
 type Decision = typeof founderDecisions[number];
@@ -17,6 +18,7 @@ export interface FounderIdentityCase {
   consented: boolean;
   disclose: boolean;
   correctionPending: boolean;
+  controlReady?: boolean;
   decision: Decision | null;
   updatedAt: string;
   regularApplication?: { id: string; revision: number; status: VerificationStatus } | null;
@@ -30,7 +32,7 @@ export interface FounderReviewCase extends FounderIdentityCase {
   proofReady: boolean;
   history: {
     id: string;
-    action: FounderMemberAction | FounderReviewAction | "open" | "proof_recorded";
+    action: FounderMemberAction | FounderReviewAction | "open" | "proof_recorded" | "account_control" | "attest";
     reason: Decision | null;
     occurredAt: string;
     version: number;
@@ -39,6 +41,7 @@ export interface FounderReviewCase extends FounderIdentityCase {
 
 export interface FounderIdentityQueue<T extends FounderIdentityCase = FounderIdentityCase> {
   issuanceEnabled: boolean;
+  liveProofEnabled?: boolean;
   canIssue?: boolean;
   cases: T[];
 }

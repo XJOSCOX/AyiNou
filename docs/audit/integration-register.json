@@ -102,9 +102,10 @@
         "private.founder_identity_events",
         "private.founder_supersession_events",
         "private.founder_registration_audit",
-        "private.f1_events"
+        "private.f1_events",
+        "private.founder_identity_controls"
       ],
-      "observed": "O3 and the supersession command retain approved case lineage. F1 registration has its separate provenance and provisioning. A1A excludes the restricted case ledgers and credential history. Issuance remains closed.",
+      "observed": "O3 and the supersession command retain approved case lineage. F1 registration has its separate provenance and provisioning. A1A excludes the restricted case ledgers and credential history. Issuance remains closed. Versioned member account-control and Founder attestation extend the restricted native history while both live gates stay closed.",
       "missing": [
         "separately assigned case summary and approved retention"
       ],

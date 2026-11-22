@@ -74,7 +74,9 @@
     "release": "Lever la suspension",
     "revoke": "Révoquer la mention",
     "deny": "Refuser la demande",
-    "conflict": "Déclarer un conflit"
+    "conflict": "Déclarer un conflit",
+    "account_control": "Confirmer le contrôle du compte",
+    "attest": "Enregistrer la confirmation d’identité"
   },
   "reasons": {
     "confirmed": "L’identité et le contrôle du compte ont été confirmés selon la procédure approuvée.",
@@ -89,5 +91,16 @@
     "consent": "Confirmer votre choix de procéder à cette vérification par le fondateur.",
     "withdraw": "Retirer votre consentement et supprimer toute mention de vérification par le fondateur de votre profil public ?",
     "correction": "Demander un examen indépendant de cette décision ?"
+  },
+  "liveProof": {
+    "controlReady": "Contrôle du compte confirmé",
+    "basis": "Méthode de confirmation de l’identité",
+    "methods": {
+      "in_person_identity_check": "Vérification de l’identité en personne",
+      "live_video_identity_check": "Vérification de l’identité en visioconférence"
+    },
+    "attestation": "J’ai confirmé l’identité de cette personne par la méthode choisie, vérifié qu’elle correspond au compte Ayinou confirmé et je n’ai aucun conflit d’intérêts important.",
+    "authenticatorHelp": "Saisissez un nouveau code de l’application d’authentification associée à votre compte Ayinou. Si nécessaire, configurez-en une dans les paramètres du compte.",
+    "authenticatorFailed": "La vérification a échoué. Vérifiez le code et l’application associée à votre compte, puis réessayez."
   }
 }

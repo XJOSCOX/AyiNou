@@ -8,6 +8,7 @@ import {
 import { ApiErrorNotice } from "./api-error-notice";
 import { ContentReportForm } from "./content-report-form";
 import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
+import { FounderVerifiedMark } from "./founder-verified-badge";
 import { PersonalClaimChecks, institutionAction, institutionField, institutionLink } from "./institution-ui";
 import { apiErrorCode } from "@/lib/api-errors";
 import { createComment, deleteComment, editComment, loadComments, loadReaction, reportComment, setReaction } from "@/lib/feed-api";
@@ -230,6 +231,7 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
         <p className="min-w-0 break-words font-semibold">
           {value.author?.displayName ?? (value.own ? t.you : t.unknownAuthor)}
           {!!value.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={value.author.personalClaims} /></>}
+          {value.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
         </p>
         <p className="flex flex-wrap gap-x-2 text-xs text-[var(--theme-body)]">
           <time dateTime={value.createdAt}>{format.format(new Date(value.createdAt))}</time>

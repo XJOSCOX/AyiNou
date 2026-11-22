@@ -8,6 +8,7 @@ import { useLocale } from "@/lib/locale-store";
 import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { loadLinkedComment, loadPostDetail } from "@/lib/notification-api";
 import { ApiErrorNotice } from "./api-error-notice";
+import { FounderVerifiedMark } from "./founder-verified-badge";
 import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { institutionCard, institutionLink, useInstitutionResource, PersonalClaimChecks } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -29,6 +30,7 @@ export function PostDetail({ id, comment }: { id: string; comment?: string }) {
     {post && <article className={institutionCard}>
       <h1 className="break-words text-xl font-semibold">{post.author?.displayName ?? (post.own ? f.you : f.unknownAuthor)}
         {!!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
+        {post.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
       </h1>
       <time className="text-sm text-[var(--theme-body)]" dateTime={post.publishedAt ?? post.createdAt}>
         {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(post.publishedAt ?? post.createdAt))}

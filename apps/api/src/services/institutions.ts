@@ -35,7 +35,7 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
   async function rpc<T>(name: string, input: Record<string, unknown>): Promise<T> {
     const { data, error } = await client.rpc(name, input);
     if (error) {
-      if (error.code === "PGRST202" && name === "founder_identity_read_for_api") {
+      if (error.code === "PGRST202" && ["founder_identity_read_for_api", "founder_identity_workspace_for_api"].includes(name)) {
         throw new InstitutionError("FOUNDER_IDENTITY_NOT_DEPLOYED", 503);
       }
       if (error.code === "O2001") throw new InstitutionError("UNAUTHORIZED", 401);

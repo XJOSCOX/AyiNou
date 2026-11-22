@@ -58,3 +58,7 @@ Founder scope and ordinary reviewer scope remain distinct. Member consent to sup
 ## Remaining blockers
 
 Operational identity/account-control ceremony, approved founder delegation and succession, conflict escalation, proof and audit retention/export/deletion, independent appeal assignment and safe contact delivery still require approval and validation. No environment setting can turn this implementation on. O4 would need its own narrow create/claim eligibility checks, with policy, live account, consent, grant and hold rechecked in the command transaction. No organization setup, project eligibility, voting rights or platform permissions were changed.
+
+## Operational proof integration
+
+The subsequent Founder Verified integration introduces a live member authenticator receipt and separately records a structured Founder attestation. It preserves consent, eligibility, live workspace checks and native audit. Both gates still default to closed and require separate operational authorization. [Completion report](../identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md)

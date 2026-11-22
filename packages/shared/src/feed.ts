@@ -27,6 +27,7 @@ export type PostInput = {
   body: string; language: Locale; visibility: PostVisibility; topics?: InterestCode[]; attachments?: AttachmentInput[];
 };
 export interface FeedAuthor {
+  founderVerified?: true;
   personalClaims?: PersonalClaim[];
   displayName: string;
   username: string | null;

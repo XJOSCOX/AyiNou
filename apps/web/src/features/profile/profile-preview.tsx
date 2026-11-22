@@ -25,7 +25,7 @@ export function SavedProfilePreview({ locale, saved, avatar, claims, administrat
         <div>
           <p className="font-bold">{saved.displayName}{saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} /></>}
             {founder ? <FounderMark /> : administrator && <AdministratorMark />}
-            {founderVerified && !claims.includes("identity") && <FounderVerifiedMark />}</p>
+            {founderVerified && <FounderVerifiedMark />}</p>
           {saved.username && <p className="text-sm text-[var(--theme-body)]">@{saved.username}</p>}
         </div>
       </div>
@@ -65,7 +65,7 @@ export function DraftProfilePreview({
           <p className="mt-1 break-words text-2xl font-semibold leading-tight tracking-tight">
             {display || t.displayName}{display && display === saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} />
               {founder ? <FounderMark /> : administrator && <AdministratorMark />}
-              {founderVerified && !claims.includes("identity") && <FounderVerifiedMark />}</>}
+              {founderVerified && <FounderVerifiedMark />}</>}
           </p>
           {username.trim() && <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{username.trim().toLowerCase()}</p>}
           {biography.trim() && <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[var(--theme-body)]">{biography.trim()}</p>}

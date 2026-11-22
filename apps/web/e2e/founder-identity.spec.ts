@@ -4,7 +4,7 @@ import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } 
 import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
 import { messages } from "../src/lib/i18n";
-import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 
 const ownerPath = "/api/v1/me/founder-identity";
 const adminPath = "/api/v1/admin/founder-identity";
@@ -219,7 +219,7 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
     const discoveryPath = "/api/v1/discover/people?q=" + member.handle;
     const discovery = await apiCall(founder, discoveryPath, 200);
     expect(discovery.accounts).toEqual([expect.objectContaining({ handle: member.handle })]);
-    expect(discovery.accounts[0]).not.toHaveProperty("founderVerified");
+    expect(discovery.accounts[0]).toHaveProperty("founderVerified", true);
     expect((await apiCall(founder, discoveryPath + "&verified=true", 200)).accounts).toEqual([]);
     expect(sql(`select private.project_identity_state('${member.id}') || ':' ||
       cardinality(private.reviewed_personal_claims('${member.id}'))::text;`)).toBe("required:0");
@@ -236,7 +236,9 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
 
     await apiCall(founder, review, 200, "POST", decision("hold", 4, "account_risk"));
     expect(await publicProfile(member)).not.toHaveProperty("founderVerified");
-    expect((await apiCall(founder, discoveryPath, 200)).accounts).toEqual(discovery.accounts);
+    const heldDiscovery = (await apiCall(founder, discoveryPath, 200)).accounts;
+    expect(heldDiscovery).toEqual([expect.objectContaining({ handle: member.handle })]);
+    expect(heldDiscovery[0]).not.toHaveProperty("founderVerified");
     await guest.reload();
     await expect(guest.getByText(founderMessages.en.badge, { exact: true })).toHaveCount(0);
     await expect(badgeIcon).toHaveCount(0);
@@ -539,7 +541,7 @@ founderTest("formal Founder provenance gives routine admin authority and reserve
   sql(`delete from private.account_restrictions where user_id='${founder.id}';`);
 });
 
-founderTest("an assigned founder reviewer opens consent without a member application", async ({
+founderTest("the recognized Founder opens consent without a manual assignment or member application", async ({
   page, makeMember, administrators: { founder },
 }) => {
   const member = await makeMember();
@@ -552,12 +554,8 @@ founderTest("an assigned founder reviewer opens consent without a member applica
   const tab = page.getByRole("button", { name: t.adminTitle, exact: true });
   const panel = page.getByRole("region", { name: t.adminTitle, exact: true });
   await tab.click();
-  await expect(panel.getByRole("status")).toHaveText(t.reviewAccessRequired);
-  await expect(panel.getByLabel(t.username)).toHaveCount(0);
-
-  assign(founder);
-  await page.reload();
-  await tab.click();
+  expect(sql(`select count(*) from private.founder_identity_authorities where actor_id='${founder.id}';`)).toBe("0");
+  await expect(panel.getByLabel(t.username)).toBeVisible();
   await expect(panel.getByText(t.openHelp)).toBeVisible();
   await expect(panel.getByText(t.disabled)).toBeVisible();
   expect(sql(`select count(*) from private.verification_applications where applicant_id='${member.id}';`)).toBe("0");
@@ -588,7 +586,9 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
 
     await openVerification(page, 200);
     const rpc = "public.founder_identity_read_for_api(uuid,uuid,boolean,bigint,boolean)";
+    const workspaceRpc = "public.founder_identity_workspace_for_api(uuid,uuid,boolean,bigint,uuid,uuid,text,text,integer,integer,uuid,text,boolean,text)";
     sql(`alter function ${rpc} rename to founder_identity_read_disposable;
+      alter function ${workspaceRpc} rename to founder_identity_workspace_disposable;
       notify pgrst, 'reload schema';`);
     try {
       await expect.poll(async () => {
@@ -614,10 +614,131 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
     } finally {
       sql(`alter function ${rpc.replace("founder_identity_read_for_api", "founder_identity_read_disposable")}
         rename to founder_identity_read_for_api;
+        alter function ${workspaceRpc.replace("founder_identity_workspace_for_api", "founder_identity_workspace_disposable")}
+          rename to founder_identity_workspace_for_api;
         notify pgrst, 'reload schema';`);
       await expect.poll(async () => {
         const response = await fetch(api + ownerPath, { headers: { Authorization: "Bearer " + member.token } });
         return response.status;
       }).toBe(200);
     }
+  });
+
+founderTest("Founder verifies account control and grants gold from the original private session @smoke",
+  async ({ page, makeMember, administrators: { founder, ordinaryAdmin } }) => {
+    test.setTimeout(100_000);
+    const members = [await makeMember({ visible: true }), await makeMember({ visible: true })];
+    const auditSession = (member: Member) => {
+      const id: string = JSON.parse(Buffer.from(member.token.split(".")[1], "base64url").toString()).session_id;
+      expect(id).toMatch(/^[a-f0-9-]{36}$/);
+      return id;
+    };
+    const adminWorkspace = async (actor: Member) => (await apiCall(actor, "/api/v1/me/private-workflows", 200, "POST", {
+      kind: "admin_workspace",
+    })).id as string;
+    const [workspace, otherWorkspace] = await Promise.all([adminWorkspace(founder), adminWorkspace(ordinaryAdmin)]);
+    async function run(actor: Member, path: string, status: number, body?: object, ref = workspace) {
+      const response = await fetch(api + path, {
+        method: body ? "POST" : "GET", headers: { Authorization: "Bearer " + actor.token, "X-Ayinou-Workspace": ref,
+          ...(body && { "Content-Type": "application/json" }) }, body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await response.json();
+      expect(response.status, JSON.stringify(data)).toBe(status);
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+      return data;
+    }
+    function proofPolicy(open: boolean) {
+      setSyntheticPolicy(open);
+      sql(`create or replace function private.founder_identity_live_proof_enabled() returns boolean
+        language sql immutable set search_path='' as $$ select ${open} $$;`);
+    }
+    expect((await run(founder, adminPath, 200)).liveProofEnabled).toBe(false);
+    await run(ordinaryAdmin, adminPath, 404);
+    await run(ordinaryAdmin, adminPath, 403, undefined, otherWorkspace);
+    await run(founder, adminPath, 403, { username: founder.handle, requestId: randomUUID(), reason: "member_request" });
+    expect(sql(`select count(*) from private.founder_identity_authorities where actor_id='${founder.id}';`)).toBe("0");
+
+    // The closed gates permit a consent request but prohibit receipt creation and actual issuance.
+    try {
+      for (const [i, target] of members.entries()) {
+        const application = i ? (await apiCall(target, "/api/v1/me/verification", 201, "POST", {
+          organizationId: null, kind: "identity", evidence: ["https://example.org/restricted-founder-fixture"],
+        })).id as string : null;
+        const opened = await run(founder, adminPath, 200, { username: target.handle, requestId: randomUUID(), reason: "member_request" });
+        const mine = actionPath(ownerPath, opened.caseId), issue = actionPath(adminPath, opened.caseId);
+        const consent = await apiCall(target, mine, 200, "POST", {
+          ...version(opened.version), action: "consent", disclose: true,
+          ...(application && { supersession: { applicationId: application, revision: 1 } }),
+        });
+        if (!i) {
+          await apiCall(target, mine, 409, "POST", { ...version(consent.version), action: "account_control" });
+          proofPolicy(true);
+        }
+        await apiCall(target, mine, 403, "POST", { ...version(consent.version), action: "account_control" });
+        const snapshot = await elevate(target);
+        sql(`delete from public.role_assignments where user_id='${target.id}' and role='administrator';`);
+        if (!i) {
+          finishPersonalOnboarding(target);
+          await page.setViewportSize({ width: 320, height: 860 });
+          await inEnglish(page.context());
+          await login(page, target);
+          await solveMfa(page, snapshot.secret);
+          for (const locale of ["ht", "fr", "es", "en"] as const) {
+            await page.context().addCookies([{ name: "ayinou-locale", value: locale, url: web }]);
+            await page.goto("/verification");
+            const labels = founderMessages[locale];
+            const controlButton = page.getByRole("button", { name: labels.actions.account_control, exact: true });
+            await expect(controlButton).toBeVisible();
+            await controlButton.focus();
+            await page.keyboard.press("Enter");
+            await expect(page.getByText(labels.liveProof.authenticatorHelp)).toBeVisible();
+            expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+          }
+        }
+        await run(founder, issue, 409, { ...version(consent.version), action: "attest",
+          basis: "in_person_identity_check", noConflict: true });
+        const control = { ...version(consent.version), action: "account_control" };
+        const receipt = await apiCall(snapshot, mine, 200, "POST", control);
+        expect(await apiCall(snapshot, mine, 200, "POST", control)).toEqual(receipt);
+        await run(ordinaryAdmin, issue, 403, { ...version(receipt.version), action: "attest",
+          basis: "in_person_identity_check", noConflict: true }, otherWorkspace);
+        const attestation = { ...version(receipt.version), action: "attest", basis: "in_person_identity_check", noConflict: true };
+        const reviewed = await run(founder, issue, 200, attestation);
+        expect(await run(founder, issue, 200, attestation)).toEqual(reviewed);
+        const grant = decision("grant", reviewed.version, "confirmed");
+        await apiCall(founder, issue, 403, "POST", grant);
+        await run(founder, issue, 404, grant, otherWorkspace);
+        if (!i) {
+          const subjectSession = auditSession(snapshot);
+          sql(`update private.s2a_session_policy set revoked_at=now() where session_id='${subjectSession}';`);
+          try { await run(founder, issue, 409, grant); }
+          finally { sql(`update private.s2a_session_policy set revoked_at=null where session_id='${subjectSession}';`); }
+        }
+        const granted = await run(founder, issue, 200, grant);
+        expect(await run(founder, issue, 200, grant)).toEqual(granted);
+        expect((await publicProfile(target)).founderVerified).toBe(true);
+        expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{founder}");
+        expect(sql(`select private.project_identity_state('${target.id}') || ':' ||
+          private.organization_setup_identity_eligible('${target.id}')::text || ':' ||
+          has_table_privilege('authenticated','private.founder_identity_controls','SELECT,INSERT')::text;`)).toBe("required:false:false");
+        expect(sql(`select count(*) from public.verification_records where user_id='${target.id}';`)).toBe("0");
+        expect(sql(`select count(*) from private.founder_identity_events where case_id='${opened.caseId}'
+          and action in ('account_control','attest','grant');`)).toBe("3");
+        if (application) {
+          expect((await apiCall(snapshot, "/api/v1/me/verification", 200)).applications)
+            .toContainEqual(expect.objectContaining({ id: application, status: "closed", closureReason: "superseded_by_founder_verification" }));
+          expect(sql(`select count(*) from private.verification_reviews where application_id='${application}';`)).toBe("0");
+        }
+        const held = await run(founder, issue, 200, decision("hold", granted.version, "account_risk"));
+        expect((await publicProfile(target)).founderVerified).toBeUndefined();
+        expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{}");
+        await run(founder, issue, 200, decision("revoke", held.version, "account_risk"));
+      }
+      const session = auditSession(founder);
+      sql(`update auth.sessions set created_at=clock_timestamp()-interval '6 hours 1 minute' where id='${session}';`);
+      await run(founder, adminPath, 401);
+      sql(`update auth.sessions set created_at=clock_timestamp() where id='${session}';
+        update private.s2a_session_policy set revoked_at=clock_timestamp() where session_id='${session}';`);
+      await run(founder, adminPath, 401);
+    } finally { proofPolicy(false); }
   });

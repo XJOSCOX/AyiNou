@@ -28,3 +28,7 @@ A Founder grant can supersede a pending regular identity application only with t
 - **Representatives:** preserve Phase 5B reviewed membership evidence, expiration, revoked status and consent, as well as Phase 5D `institution_role` and `organization_has_permission` scope. A change in FV status should disable future gated commands and open review of exceptional risks while an existing affiliation, contract or team is resolved through its own workflow.
 
 The owner’s compatibility proposal is limited to ordinary organization setup. Eligibility, governance and partner enrollment remain separate as described in the [owner decision brief](O1_OWNER_DECISION_BRIEF.md).
+
+## Scoped personal identity provenance
+
+The new private helper recognizes active approved live Founder proof separately from independent review. O4 parity remains disabled. Evaluate it first for ordinary non-government creation with a narrower predicate. Existing claims, corrections and institutional authority keep their current review requirements. [Identity eligibility matrix](../identity/FOUNDER_VERIFIED_IDENTITY_ELIGIBILITY.md)

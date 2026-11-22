@@ -71,7 +71,7 @@ export type DiscoveryKind = "people" | "institutions";
 export type DiscoveryFilter = { kind: DiscoveryKind; q?: string; verified?: boolean; category?: OrganizationKind; country?: string; department?: string };
 type DiscoveryCardBase = { id: string; handle: string; name: string; verified: boolean; following: boolean };
 export type DiscoveryCard = DiscoveryCardBase & (
-  { kind: "member"; self: boolean; personalClaims?: PersonalClaim[] }
+  { kind: "member"; self: boolean; personalClaims?: PersonalClaim[]; founderVerified?: true }
   | { kind: "institution"; targetId: string; verificationStatus: "verified" | "unverified"; category: OrganizationKind;
       countryCode: string; departmentCode: string | null; description: string | null }
 );

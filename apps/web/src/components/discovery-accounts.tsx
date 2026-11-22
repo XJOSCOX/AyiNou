@@ -12,6 +12,7 @@ import { reconcileFollow } from "@/lib/follow-state";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
+import { FounderVerifiedMark } from "./founder-verified-badge";
 import { InstitutionStatus, PersonalClaimChecks, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 
 export const discoveryTab = "min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)] disabled:opacity-60";
@@ -67,6 +68,7 @@ function DiscoveryAccount({ account, compact, onChange }: { account: DiscoveryCa
       <div className="min-w-0">
         <Link className={`${institutionLink} break-words`} href={href}>{account.name}</Link>
         {account.kind === "member" && !!account.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={account.personalClaims} /></>}
+        {account.kind === "member" && account.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
         <p className="break-all text-xs text-[var(--theme-body)]">@{account.handle}</p>
       </div>
       {account.kind === "institution" && <InstitutionStatus status={account.verificationStatus} kind={account.category} />}

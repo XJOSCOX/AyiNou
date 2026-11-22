@@ -18,3 +18,7 @@
 A role mark can appear alongside an identity mark, including green with gold when eligible and disclosed. When blue and gold both apply, blue takes display precedence and eligible verification details can show gold provenance. Holds and revocations remove the affected identity mark without independently changing an unrelated role. Respect profile visibility, block policy, subject disclosure and the selected surface’s projection. Use text labels with the supplied icons. A complete cross-surface conformity inventory is still **not implemented** as a single policy/test suite.
 
 **Evidence.** [Owner-approved Founder verification policy](../organizations/FOUNDER_VERIFICATION_POLICY_UPDATE.md) · [Supersession report](../organizations/FOUNDER_REVIEWER_AND_SUPERSESSION_REPORT.md) · [O3 report](../organizations/O3_IMPLEMENTATION_REPORT.md) · [Consent migration](../../supabase/migrations/20261121090000_founder_supersession_consent.sql) · [Badge component](../../apps/web/src/components/designation-mark.tsx)
+
+## Founder Verified integration update
+
+The reviewed candidate adds member account-control receipts, structured Founder attestation and trusted bootstrap authorization from the original S2C workspace. Issuance and live proof remain closed. The scoped workflow preserves the separate independent path and current higher-trust identity requirements. [Integration report](../identity/FOUNDER_VERIFIED_COMPLETION_REPORT.md)

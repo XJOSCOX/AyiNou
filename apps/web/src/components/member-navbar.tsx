@@ -73,7 +73,7 @@ export function MemberNavbar() {
             <span className="line-clamp-2 min-w-0 break-words text-start leading-tight sm:line-clamp-none sm:truncate" title={menuLabel}>{menuLabel}</span>
             {displayName && <PersonalClaimChecks claims={claims} />}
             {founder ? <FounderMark compact /> : administrator && <AdministratorMark compact />}
-            {founderVerified && !claims.includes("identity") && <FounderVerifiedMark compact />}
+            {founderVerified && <FounderVerifiedMark compact />}
             <span aria-hidden="true" className="me-1 size-1.5 shrink-0 -translate-y-px rotate-45 border-e border-b border-current" />
           </summary>
           <div className="absolute end-0 z-30 mt-2 grid w-56 max-w-[calc(100vw-2rem)] gap-0.5 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-lg">

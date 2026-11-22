@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { founderIdentityBases } from "@ayinou/shared";
 import type {
   FounderIdentityCase, FounderIdentityQueue, FounderIdentityReceipt, FounderMemberAction, FounderReviewAction, FounderReviewCase,
 } from "@ayinou/shared";
@@ -11,6 +12,8 @@ import { authMessages } from "@/lib/auth-i18n";
 import { founderMessages } from "@/lib/founder-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionMessages } from "@/lib/institution-i18n";
+import { browserSupabase } from "@/lib/supabase/browser";
+import { AuthenticatorCode } from "./authenticator-code";
 import { useMemberIdentity } from "@/lib/member-display-name";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -21,17 +24,17 @@ const activeStates: ReadonlySet<FounderIdentityCase["state"]> = new Set([
   "consent_pending", "proof_pending", "ready_for_review", "held",
 ]);
 
-export function FounderIdentityPanel({ admin = false, onSuperseded }: { admin?: boolean; onSuperseded?: () => void }) {
+export function FounderIdentityPanel({ admin = false, onSuperseded, workspaceId }: { admin?: boolean; onSuperseded?: () => void; workspaceId?: string }) {
   const { memberId } = useMemberIdentity();
-  return memberId ? <FounderCases key={memberId} actor={memberId} admin={admin} onSuperseded={onSuperseded} /> : null;
+  return memberId ? <FounderCases key={memberId} actor={memberId} admin={admin} onSuperseded={onSuperseded} workspaceId={workspaceId} /> : null;
 }
 
-function FounderCases({ actor, admin, onSuperseded }: { actor: string; admin: boolean; onSuperseded?: () => void }) {
+function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: string; admin: boolean; onSuperseded?: () => void; workspaceId?: string }) {
   const [locale] = useLocale();
   const t = founderMessages[locale];
   const base = admin ? "/api/v1/admin/founder-identity" : "/api/v1/me/founder-identity";
   const load = useCallback((signal: AbortSignal): Promise<FounderIdentityQueue<FounderReviewCase>> =>
-    authorizedRequest(base, { signal }, actor), [actor, base]);
+    authorizedRequest(base, { signal, headers: workspaceId ? { "X-Ayinou-Workspace": workspaceId } : undefined }, actor), [actor, base, workspaceId]);
   const resource = useInstitutionResource(load);
   const inFlight = useRef<AbortController | null>(null);
   const retryKey = useRef<{ fingerprint: string; key: string } | null>(null);
@@ -52,7 +55,8 @@ function FounderCases({ actor, admin, onSuperseded }: { actor: string; admin: bo
     setBusy(true);
     try {
       const result: FounderIdentityReceipt = await authorizedRequest(base + path, {
-        method: "POST", signal: controller.signal, body: JSON.stringify({ ...body, requestId: retryKey.current.key }),
+        method: "POST", signal: controller.signal,
+        headers: workspaceId ? { "X-Ayinou-Workspace": workspaceId } : undefined, body: JSON.stringify({ ...body, requestId: retryKey.current.key }),
       }, actor);
       if (controller.signal.aborted) return;
       retryKey.current = null;
@@ -80,7 +84,7 @@ function FounderCases({ actor, admin, onSuperseded }: { actor: string; admin: bo
   const caseHistory = resource.data?.cases.filter((item) => !activeStates.has(item.state)) ?? [];
   const renderCase = (item: FounderReviewCase) => <FounderCase key={item.id + ":" + item.version} item={item}
     admin={admin} busy={busy} enabled={resource.data?.issuanceEnabled === true && (!admin || resource.data.canIssue !== false)}
-    send={send} />;
+    actor={actor} liveProof={resource.data?.liveProofEnabled === true && (!admin || resource.data.canIssue !== false)} send={send} />;
   return <section className={`${institutionCard} grid gap-4`} aria-label={title}>
     <h2 className="text-xl font-semibold">{title}</h2>
     {reviewAccessRequired ? <p role="status" className="max-w-prose text-sm">{t.reviewAccessRequired}</p>
@@ -133,11 +137,16 @@ function reviewActions(item: FounderReviewCase, enabled: boolean): Review[] {
   ];
 }
 
-function FounderCase({ item, admin, enabled, busy, send }: {
-  item: FounderReviewCase; admin: boolean; enabled: boolean; busy: boolean; send: Send;
+function FounderCase({ item, admin, enabled, busy, actor, liveProof, send }: {
+  item: FounderReviewCase; admin: boolean; enabled: boolean; busy: boolean; actor: string; liveProof: boolean; send: Send;
 }) {
   const [locale] = useLocale();
   const t = founderMessages[locale];
+  const [basis, setBasis] = useState<typeof founderIdentityBases[number]>(founderIdentityBases[0]);
+  const [attested, setAttested] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [proofError, setProofError] = useState(false);
+  const [showChallenge, setShowChallenge] = useState(false);
   const [publish, setPublish] = useState(item.disclose);
   const [supersede, setSupersede] = useState(false);
   const application = item.regularApplication;
@@ -153,7 +162,30 @@ function FounderCase({ item, admin, enabled, busy, send }: {
     ...fields, expectedVersion: item.version, policyVersion: item.policyVersion,
   });
   const canWithdraw = ["consent_pending", "proof_pending", "ready_for_review", "granted", "held"].includes(item.state);
+  const pendingProof = liveProof && item.consented && !item.conflicted &&
+    ["proof_pending", "ready_for_review", "held"].includes(item.state) && !item.proofReady;
   const canCorrect = ["granted", "held", "revoked", "denied", "withdrawn"].includes(item.state);
+
+  async function confirmControl(code: string) {
+    if (checking || busy) return;
+    setChecking(true);
+    setProofError(false);
+    try {
+      const auth = browserSupabase().auth;
+      const { data: current } = await auth.getSession();
+      const { data } = await auth.mfa.listFactors();
+      const factor = data?.totp[0];
+      if (current.session?.user.id !== actor || !factor || (await auth.mfa.challengeAndVerify({ factorId: factor.id, code })).error) {
+        setProofError(true);
+        return;
+      }
+      await act({ action: "account_control" });
+    } catch {
+      setProofError(true);
+    } finally {
+      setChecking(false);
+    }
+  }
 
   function submitReview(event: FormEvent) {
     event.preventDefault();
@@ -176,6 +208,21 @@ function FounderCase({ item, admin, enabled, busy, send }: {
         {canSupersede && application?.status === "pending" ? t.supersessionReady : t.supersessionResults[item.supersessionOutcome]}
       </p>}
       <p className="text-sm">{item.consented ? t.consentRecorded : t.consentMissing} · {item.proofReady ? t.proofReady : t.proofMissing}</p>
+      {pendingProof && item.controlReady && <form className="grid max-w-md gap-3" onSubmit={(event) => {
+        event.preventDefault();
+        if (attested) void act({ action: "attest", basis, noConflict: true });
+      }}>
+        <p role="status">{t.liveProof.controlReady}</p>
+        <label className="text-sm font-semibold">{t.liveProof.basis}
+          <select className={institutionField} value={basis} onChange={(event) => {
+            const next = founderIdentityBases.find((value) => value === event.target.value);
+            if (next) setBasis(next);
+          }}>{founderIdentityBases.map((value) => <option key={value} value={value}>{t.liveProof.methods[value]}</option>)}</select>
+        </label>
+        <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={attested} required
+          onChange={(event) => setAttested(event.target.checked)} />{t.liveProof.attestation}</label>
+        <button className={institutionAction} disabled={busy || !attested}>{t.actions.attest}</button>
+      </form>}
       {controls.length > 0 && <form onSubmit={submitReview} className="grid max-w-md gap-3">
         <label className="text-sm font-semibold">{t.reviewAction}
           <select className={institutionField} value={review?.action ?? ""} onChange={(event) => {
@@ -214,6 +261,13 @@ function FounderCase({ item, admin, enabled, busy, send }: {
             onClick={() => { void act({ action: "visibility", disclose: publish }); }}>{t.actions.visibility}</button>}
         <button type="button" className={institutionLink} disabled={busy} onClick={() => setConfirm("withdraw")}>{t.actions.withdraw}</button>
       </div>}
+      {pendingProof && (item.controlReady ? <p role="status">{t.liveProof.controlReady}</p> : <div className="grid gap-2">
+        {showChallenge ? <><p className="text-sm">{t.liveProof.authenticatorHelp}</p>
+          <AuthenticatorCode busy={checking || busy} submitCode={(code) => void confirmControl(code)} />
+          {proofError && <p role="alert">{t.liveProof.authenticatorFailed}</p>}
+          <button type="button" className={institutionLink} onClick={() => setShowChallenge(false)}>{t.cancel}</button>
+        </> : <button type="button" className={institutionLink} onClick={() => setShowChallenge(true)}>{t.actions.account_control}</button>}
+      </div>)}
       {canSupersedeAfterGrant && <button type="button" className={institutionLink} disabled={busy}
         onClick={() => setConfirm("supersede")}>{t.actions.supersede}</button>}
       {canCorrect && !item.correctionPending && <button type="button" className={`${institutionLink} justify-self-start`} disabled={busy}

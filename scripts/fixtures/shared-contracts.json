@@ -73,7 +73,7 @@
     "DepartmentCommunity": "type:1d85fe96df7c6736d6b60fb08f92d63bde7f69cfc87a9fa30d6c3bed85c96c28",
     "departmentCommunityContent": "value:67bd3fedac063db9ef8e7701eeca5d6ea8ca7a7718beb00bc368554be2b77a01",
     "DepartmentCommunityContent": "type:45afacd2a51d5ba02bd0597191e9f8e6ed70e45213cab735556dfa2886d3ee07",
-    "DiscoveryCard": "type:215ed4200f827c7f1bcd57ca176f657a674b8635cd7a9297e1b653e930310087",
+    "DiscoveryCard": "type:f4398812da4e72a523212c3688a5a95bef9c805dbb734c9780d381d621bfac20",
     "DiscoveryFilter": "type:b61b5c04c6f993c70370601dd1625c615546f23e9de50b0c88fbb2ed777b416a",
     "DiscoveryKind": "type:a55a16bc73f059fcf2ca42b35ab8bf86f3d123d3c904c73303596a83ed1e2756",
     "DiscoveryPage": "type:6647559d6b0a8bebd767d2c93499488ea3edb0244898b3f4bbfa9658cb9303a0",
@@ -90,7 +90,7 @@
     "ExportCategory": "type:fd50ca33cc1a2f01629e0d33072f6ddeb582977d474c10da93f711eea5463f22",
     "ExportState": "type:a3d4bb1d75024ef77ce73df9a90a31da158d99598aecb74798e1f8c9810316c9",
     "ExportStatus": "type:d8372a141bfeff030745c4cba3a99ba50911a00eeb535e5e0fcfaf8e03c9a904",
-    "FeedAuthor": "type:b434f444a8cb1d17dbaf1eb208a06018563fff594e219babfb7aefaada08b45f",
+    "FeedAuthor": "type:87ac258d26e3b8ffbf9724c1516eaa87610c442aff07dd6a7e77c0682f583b9a",
     "FeedComment": "type:895eb8c342bb526ab3e206c1c2a3fb94c08b44e9e47e559fa883eeab26a784b2",
     "FeedPage": "type:e1184753223739dd8ab32bfe9a05d0c84c03ced5bb6575561949818fb30b6117",
     "FeedPost": "type:947302215d2851333685e87f5a7e753df5770e2de9ee66cd7ea09820ec01534b",
@@ -102,14 +102,15 @@
     "FollowTarget": "type:7deb76e9e616e7f5dd59d1978b98aa86dfa555c4ff9fd9586e5248c02cd9e9bf",
     "founderCaseStates": "value:370559e6e750ae70f5eb92b689377023eb013384ab63878189c8ae0108f9957a",
     "founderDecisions": "value:0946f85014551973c0f4ea0ce24d06e3a7c70c17367cb2f79b3e7b70517d95e8",
-    "FounderIdentityCase": "type:c35c7a033b9290ef6802586029a05a28cd2b05e823511f85e39d5a5bede7826e",
-    "FounderIdentityQueue": "type:464320d647f681a739bb6b2184057ea84dccb4ebbe466b0561a6fe1eae1a5c5d",
+    "founderIdentityBases": "value:2568c812c843ec5b5843a8a48ea0d7c077e3f217bf3989835c9de17303a40263",
+    "FounderIdentityCase": "type:df53a0bba606f44dd4c0b3a8196db4fb8ea45a9493541b6619e5477d71430d80",
+    "FounderIdentityQueue": "type:48d5dfd763c95e923e599b7825bb4215435eab0f089334eaf3437df1a5a86ba0",
     "FounderIdentityReceipt": "type:df7927bc65c6789e9bca38d877e2232076379536fcae67b492f17982d0cb160b",
     "FounderMemberAction": "type:dcf3f513aa06249e12c4a24a01abe30fa43d7c77ca3ee26cfc081fb227fe173b",
     "founderMemberActions": "value:20d74d277fe61c0019fa3afcb04a385c353573193f6adee559c8774c6022ce8b",
     "FounderReviewAction": "type:d19c9036da8c98ff1337b7cc540369c2706c7873492f6b31229df5eff06b725d",
     "founderReviewActions": "value:912ce6c4ff2ddac6b980362e28bfbf838f9565a4ec89d2922a07ceb0120c19a4",
-    "FounderReviewCase": "type:99f0211faa13da008f32c2d08950ca8ec22bbcb992cfc7e73f1904b059fb1f01",
+    "FounderReviewCase": "type:a1572fd17f494183f991f80de7712cc1dbda6d0b253db831c4bd0b535b23afc7",
     "futureOrganizationPermissions": "value:18ab1c44d090af09f19489adc03ea5b63977a6570a7091cbce1e0d58971b5092",
     "GovernanceProposal": "type:ccd2eafdedce6cb91c269f27479028be31a35b38ccae63e3a9d17c1c9a7db4a0",
     "GovernanceProposalKind": "type:56c4438d2800827faad89124af0d9efa8c19202f56e3f0225981618c7cea48d3",
@@ -290,7 +291,7 @@
     "VerificationKind": "type:c9ea5fcff649971cb2982a100656b0d569dd60faaba1e8e25d5ea7e22e5e0474",
     "verificationKinds": "value:c93d14eefb9c0e90e975d6c988eec66cb38f31955455b312bb3691855041cdf0",
     "VerificationStatus": "type:8ed940092989a0d58bfe3ab2dc780dbe6dcb43f54ad416b090abcad67746580f",
-    "VerifiedRepresentatives": "type:35d2e1ecf5c46c90907dd17200558c65dd040423daef25a5259b6f239297ec9b"
+    "VerifiedRepresentatives": "type:5c8fb9ec1f272a9e2e4cd7a86ab0ebf9709ce3ac185b3a853f5dff34c6150e4e"
   },
   "privateTypes": {
     "AffiliationInvitation": "860e596fca514ead3247be5fc03556d3c67d80f64e03ca927e20795b63bf1a4e",
@@ -455,6 +456,10 @@
       "account_risk",
       "member_request",
       "corrected"
+    ],
+    "founderIdentityBases": [
+      "in_person_identity_check",
+      "live_video_identity_check"
     ],
     "founderMemberActions": [
       "consent",

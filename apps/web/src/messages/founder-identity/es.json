@@ -74,7 +74,9 @@
     "release": "Levantar suspensión",
     "revoke": "Revocar distinción",
     "deny": "Denegar solicitud",
-    "conflict": "Declarar conflicto"
+    "conflict": "Declarar conflicto",
+    "account_control": "Confirmar el control de la cuenta",
+    "attest": "Registrar la confirmación de identidad"
   },
   "reasons": {
     "confirmed": "La identidad y el control de la cuenta se confirmaron mediante el proceso aprobado.",
@@ -89,5 +91,16 @@
     "consent": "Confirme que desea continuar con la revisión del fundador.",
     "withdraw": "¿Retirar su consentimiento y eliminar de su perfil público la distinción del fundador?",
     "correction": "¿Solicitar una revisión independiente de esta decisión?"
+  },
+  "liveProof": {
+    "controlReady": "Control de la cuenta confirmado",
+    "basis": "Método de confirmación de identidad",
+    "methods": {
+      "in_person_identity_check": "Verificación de identidad en persona",
+      "live_video_identity_check": "Verificación de identidad por videollamada en directo"
+    },
+    "attestation": "Confirmé la identidad de esta persona con el método seleccionado, comprobé que corresponde a la cuenta de Ayinou confirmada y no tengo ningún conflicto de intereses relevante.",
+    "authenticatorHelp": "Introduce un código nuevo de la aplicación de autenticación vinculada a tu cuenta de Ayinou. Si aún no tienes una, configúrala en los ajustes de la cuenta.",
+    "authenticatorFailed": "No se pudo completar la verificación. Comprueba el código y la aplicación vinculada a tu cuenta y vuelve a intentarlo."
   }
 }

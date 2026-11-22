@@ -28,3 +28,7 @@ Baseline `a13379db52b962d9cd0dfd8192d0844d8b34633c`. Coverage describes effectiv
 | future programs | pending policy | No durable ledger | Current development has no authorized processing. Future module reports must document event source, actor, transaction and data handling before implementation. |
 
 A native row, domain decision, command receipt and operational diagnostic have different evidentiary meanings. The projection declares its source and source version where available. Existing row deletion, detachment and hold semantics still govern availability. Historical actions with no recorded event cannot be reconstructed from a current version.
+
+## Founder Verified evidence boundary
+
+The subsequent Founder Verified workflow extends the restricted native ledger with account-control and attestation events plus a private control receipt. The case projection can show scoped action summaries. No general A1A route gains access. [Founder Verified audit](../identity/FOUNDER_VERIFIED_COMPLETION_AUDIT.md)
