@@ -154,3 +154,7 @@ Run `npm run test:e2e -- --organization-rollout organization-integration.spec.ts
 ## U1 signup release checkpoint
 
 Confirm the approved migration sequence, Auth email confirmation settings and recovery checkpoint before U1 deployment. Deploy the database migration before the web signup UI. Verify both registration choices, old profile links, referral and organization intent, and existing Founder authority. The development setting may return an immediate session. Exercise both settings in separate disposable stacks and restore emailed confirmation before a public rollout. See the [U1 implementation report](identity/U1_IMPLEMENTATION_REPORT.md).
+
+## Audit integrations
+
+For a new protected state-changing action, record the source ledger, transaction boundary, authorized readers, redactions, retention and holds, reconciliation tests and integration status in the feature report and audit register. Validate the declaration locally, check actual grants and behavior in disposable Supabase, and verify the exact hosted migration with approval before applying it. [Audit integration register](audit/A1A_MISSING_COVERAGE_REGISTER.md)

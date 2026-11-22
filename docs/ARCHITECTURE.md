@@ -239,3 +239,7 @@ Supabase Auth inserts an account-bound, expiring reservation during signup and c
 F1 separates private Founder setup and Administrator activation into dedicated routes. The API hashes credentials and PostgreSQL enforces workflow ownership, prerequisites and one-time transitions. [F1 report](governance/F1_IMPLEMENTATION_REPORT.md).
 
 F1.1 reuses the same Fastify and Next.js routes. PostgreSQL records an explicit Founder-direct mode only on new Administrator appointments and applies its authority check at readiness and redemption. The target-bound transaction records acceptance and activates the role together. Legacy proposals and other governance operations retain their existing rules. [F1.1 report](governance/F1_1_IMPLEMENTATION_REPORT.md)
+
+## Unified audit reads
+
+Fastify derives the viewer from the live session, binds privileged audit reads to S2C where applicable and sends bounded selectors to a service-only projection in PostgreSQL. Native event stores own their payload and retention. User-facing consumers integrate through the versioned summary contract. [A1A architecture and API](audit/A1A_READ_API_DESIGN.md)

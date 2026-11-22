@@ -11,6 +11,7 @@ import { registerInstitutionRoutes } from "./routes/institutions.js";
 import { createInstitutionRepository, type InstitutionRepository } from "./services/institutions.js";
 import { registerPrivilegedSetup } from "./routes/privileged-setup.js";
 import { registerSessionSecurity } from "./routes/session-security.js";
+import { registerAuditRoutes } from "./routes/audit.js";
 import { registerAdminRoutes } from "./routes/admin.js";
 import { registerAdministrationGovernance } from "./routes/administration-governance.js";
 import { registerEarlyPartners } from "./routes/early-partners.js";
@@ -66,6 +67,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerEarlyPartners(instance, auth, institutions));
   app.register((instance) => registerOrganizationOnboarding(instance, auth, institutions, readBudget));
   app.register((instance) => registerSessionSecurity(instance, auth, institutions));
+  app.register((instance) => registerAuditRoutes(instance, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
   app.register((instance) => registerPublicLegalRoutes(instance, institutions));
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));

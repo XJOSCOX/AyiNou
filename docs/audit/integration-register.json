@@ -1,0 +1,465 @@
+{
+  "version": 1,
+  "modules": [
+    {
+      "module": "platform",
+      "status": "covered",
+      "requiredEvents": "Restriction changes, ordinary platform role grants and revocations, trusted bootstrap",
+      "sources": [
+        "private.platform_admin_audit"
+      ],
+      "observed": "The legacy platform audit reason and subject relations are restricted. Bootstrap is Founder-only in A1A. The public role history uses active S2C platform workspace access.",
+      "missing": [
+        "rejected unauthorized actions as durable events"
+      ],
+      "viewers": "Platform Administrator with live S2C link, Founder for bootstrap",
+      "excluded": "Reasons and unrelated account details",
+      "tests": [
+        "apps/web/e2e/founder-release-audit.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Platform security policy"
+    },
+    {
+      "module": "governance",
+      "status": "partially covered",
+      "requiredEvents": "Founder-direct and legacy proposals, activation, assignment, correction and emergency claim holds",
+      "sources": [
+        "private.platform_governance_events",
+        "private.platform_governance_proposals",
+        "private.f1_events"
+      ],
+      "observed": "O5 and F1 locked transactions own the records. Founder gets proposal receipt summaries in A1A. Corrections, claim holds, domain authority and private credential lifecycle remain source-scoped.",
+      "missing": [
+        "A1A adapters for O5 correction and authority events",
+        "separate F1 lifecycle projection"
+      ],
+      "viewers": "Founder with live S2C link for A1A proposals",
+      "excluded": "Credentials, reasons and payload hashes",
+      "tests": [
+        "apps/web/e2e/administration-governance.spec.ts",
+        "apps/web/e2e/privileged-setup.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Scoped governance reconciliation"
+    },
+    {
+      "module": "session",
+      "status": "partially covered",
+      "requiredEvents": "Session policy issue, remember, observed expiry, promotion and revocation, workflow creation, closure and completion",
+      "sources": [
+        "auth.sessions",
+        "private.s2a_session_events",
+        "private.s2b_security_events",
+        "private.s2b_workflows"
+      ],
+      "observed": "S2A policy trigger and S2B commands write native events. A1A self history excludes provider IDs, workflow locators, assurance timestamps and receipt contents.",
+      "missing": [
+        "provider login and failure coverage",
+        "durable historical access after session deletion",
+        "provider last activity"
+      ],
+      "viewers": "Current account subject",
+      "excluded": "Session and workflow references, MFA timestamps",
+      "tests": [
+        "apps/web/e2e/session-policy.spec.ts",
+        "apps/web/e2e/session-security.spec.ts",
+        "apps/web/e2e/admin-session-link.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Session operations and retention policy"
+    },
+    {
+      "module": "identity",
+      "status": "partially covered",
+      "requiredEvents": "Application state, assignments, independent decisions, impersonation and appeal resolution, reviewed claim state",
+      "sources": [
+        "private.verification_applications",
+        "private.verification_reviews",
+        "private.verification_assignment_audit",
+        "private.verification_appeals",
+        "public.verification_records"
+      ],
+      "observed": "Existing submission and review commands enforce actor, assignment and conflicts. A1A reads only ordinary assigned case decisions. Subject/evidence and appeal workflows use existing access.",
+      "missing": [
+        "application intake and assignment projections",
+        "complete badge and appeal transition inventory for readers"
+      ],
+      "viewers": "Assigned unconflicted reviewer for exact case",
+      "excluded": "Rationale, all evidence and other identities",
+      "tests": [
+        "apps/web/e2e/trust-access.spec.ts",
+        "apps/web/e2e/founder-release-audit.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Verification activity integration"
+    },
+    {
+      "module": "founder_identity",
+      "status": "gated/not operational",
+      "requiredEvents": "Consent, visibility, withdrawal, proof, grant, hold, revocation and supersession; separate Founder registration",
+      "sources": [
+        "private.founder_identity_events",
+        "private.founder_supersession_events",
+        "private.founder_registration_audit",
+        "private.f1_events"
+      ],
+      "observed": "O3 and the supersession command retain approved case lineage. F1 registration has its separate provenance and provisioning. A1A excludes the restricted case ledgers and credential history. Issuance remains closed.",
+      "missing": [
+        "separately assigned case summary and approved retention"
+      ],
+      "viewers": "Restricted case participants or existing enrollment authority",
+      "excluded": "Private proof and credentials",
+      "tests": [
+        "apps/web/e2e/founder-identity.spec.ts",
+        "apps/web/e2e/privileged-setup.spec.ts"
+      ],
+      "remediation": "Founder identity operations review"
+    },
+    {
+      "module": "username",
+      "status": "partially covered",
+      "requiredEvents": "Handle assignment, change, retirement, reservation, review, hold, release and appeal decision",
+      "sources": [
+        "private.username_events"
+      ],
+      "observed": "U1 writes the restricted ledger in Auth triggers and change/review commands. Members see their own assignment and change with allowed handle transitions. Staff-specific reason and lease events remain private.",
+      "missing": [
+        "approved staff projection",
+        "owner retention and handle-tombstone schedule"
+      ],
+      "viewers": "Current account subject for eligible U1 events",
+      "excluded": "Safety reasons, lease and fingerprints",
+      "tests": [
+        "apps/web/e2e/usernames.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "U1 retention and support policy"
+    },
+    {
+      "module": "profile",
+      "status": "intentionally current-state only",
+      "requiredEvents": "Current profile, locale, discoverability and avatar reference",
+      "sources": [
+        "public.profiles",
+        "public.member_private",
+        "public.user_settings"
+      ],
+      "observed": "Current owner-only settings and public profile projections. Avatar bytes reside in Storage. Revision history is unavailable.",
+      "missing": [
+        "material profile corrections and avatar reconciliation"
+      ],
+      "viewers": "Existing subject or public projection",
+      "excluded": "Private profile fields and media references",
+      "tests": [
+        "apps/web/e2e/onboarding.spec.ts",
+        "apps/web/e2e/display.spec.ts"
+      ],
+      "remediation": "Profile lifecycle policy"
+    },
+    {
+      "module": "feed_posts_comments",
+      "status": "intentionally current-state only",
+      "requiredEvents": "Routine edits and removal state, original post request receipt",
+      "sources": [
+        "feed_data.posts",
+        "feed_data.comments",
+        "feed_data.post_submissions"
+      ],
+      "observed": "Current visibility and versioned feed commands. Ordinary edit history was never recorded and cannot be recovered from current rows.",
+      "missing": [
+        "durable high-impact author removal while evidence is open"
+      ],
+      "viewers": "Existing author and permitted viewer",
+      "excluded": "Post and comment bodies",
+      "tests": [
+        "apps/web/e2e/forms.spec.ts",
+        "apps/web/e2e/feed-media.spec.ts"
+      ],
+      "remediation": "Feed lifecycle audit"
+    },
+    {
+      "module": "feed_moderation",
+      "status": "partially covered",
+      "requiredEvents": "Reports, hide, restore, remove, dismiss and appeal disposition",
+      "sources": [
+        "feed_data.post_moderation_actions",
+        "feed_data.comment_moderation_actions",
+        "feed_data.content_reports",
+        "feed_data.comment_reports",
+        "feed_data.moderation_appeals"
+      ],
+      "observed": "Feed and scoped moderation commands write actions atomically. A1A uses general feed actions only. Community-linked history, issue reports and appeals remain domain-bound.",
+      "missing": [
+        "moderation report or appeal summary",
+        "community moderators’ resource-scoped adapter"
+      ],
+      "viewers": "Live platform leadership or designated general feed moderator",
+      "excluded": "Body, reports, raw reasons and room metadata",
+      "tests": [
+        "apps/web/e2e/privacy.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Moderation activity integration"
+    },
+    {
+      "module": "account_safety",
+      "status": "intentionally current-state only",
+      "requiredEvents": "Platform restrictions and ordinary block or mute preferences",
+      "sources": [
+        "private.account_restrictions",
+        "feed_data.member_blocks",
+        "feed_data.member_mutes"
+      ],
+      "observed": "Administrative restrictions have a platform event. Member block and mute use current feed safety state and existing controls. A1A avoids publishing interaction or blocked account history.",
+      "missing": [
+        "policy for material safety transitions"
+      ],
+      "viewers": "Subject for safety settings, platform admin for restrictions",
+      "excluded": "Relationships and rationale",
+      "tests": [
+        "apps/web/e2e/privacy.spec.ts",
+        "apps/web/e2e/auth.spec.ts"
+      ],
+      "remediation": "Account safety event policy"
+    },
+    {
+      "module": "organization_onboarding",
+      "status": "partially covered",
+      "requiredEvents": "Intent selection, consent, setup, cancellation, claim, registration and protected corrections",
+      "sources": [
+        "private.organization_onboarding_intents",
+        "private.organization_onboarding_receipts",
+        "private.institution_audit",
+        "private.platform_governance_events"
+      ],
+      "observed": "O2 commands store versioned owner receipts. O4 commits successful setup, ownership and declarations with institutional events. O5 separately records privileged corrections. None of these receipts are exposed in A1A.",
+      "missing": [
+        "safe owner-only receipt projection",
+        "normalized registration and corrections activity"
+      ],
+      "viewers": "Current owner and independently assigned staff",
+      "excluded": "Drafts and raw receipts",
+      "tests": [
+        "apps/web/e2e/organization-onboarding.spec.ts",
+        "apps/web/e2e/organization-setup.spec.ts",
+        "apps/web/e2e/administration-governance.spec.ts"
+      ],
+      "remediation": "Organization onboarding activity integration"
+    },
+    {
+      "module": "organization_people",
+      "status": "partially covered",
+      "requiredEvents": "Ownership, representatives, staff, invitations, affiliations and restrictions",
+      "sources": [
+        "private.institution_audit",
+        "private.organization_affiliation_events"
+      ],
+      "observed": "O4, Phase 2D and affiliation workflow retain policy-specific provenance. Owner or scoped assignment checks differ across commands. No A1A adapter for these ledgers.",
+      "missing": [
+        "normalized representative and affiliation read receipts",
+        "restriction event coverage review"
+      ],
+      "viewers": "Existing organization-specific authority",
+      "excluded": "Contacts and invitation recipients",
+      "tests": [
+        "apps/web/e2e/organization-setup.spec.ts",
+        "apps/web/e2e/organization-integration.spec.ts"
+      ],
+      "remediation": "Organization activity integration"
+    },
+    {
+      "module": "organization_roles",
+      "status": "covered",
+      "requiredEvents": "Custom role configuration, assignments, revocation and relationship retirement",
+      "sources": [
+        "private.organization_role_audit"
+      ],
+      "observed": "Current foundation owner or organization administrator can view one tenant; native Phase 5D writes the ledger within role transactions. A1A omits the JSON states and identities of other members.",
+      "missing": [],
+      "viewers": "Current organization owner or foundation administrator",
+      "excluded": "Raw before and after documents and other member identities",
+      "tests": [
+        "apps/web/e2e/organization-integration.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Organization retention review"
+    },
+    {
+      "module": "communities",
+      "status": "partially covered",
+      "requiredEvents": "Group creation and ownership, staff role changes, admissions, removals and moderation",
+      "sources": [
+        "feed_data.community_staff_audit",
+        "feed_data.group_audit",
+        "feed_data.community_memberships"
+      ],
+      "observed": "Group and department commands own these records. Active resource-specific group or department assignments remain the access boundary. A1A excludes both adapters and community-linked feed actions.",
+      "missing": [
+        "complete removal and staff decision history",
+        "scoped read adapter"
+      ],
+      "viewers": "Current assigned room staff",
+      "excluded": "Private room metadata and roster",
+      "tests": [
+        "apps/web/e2e/group-workflow.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Community governance audit"
+    },
+    {
+      "module": "projects",
+      "status": "partially covered",
+      "requiredEvents": "Proposals, independent reviews, decisions, roles, volunteering, tasks, milestones, evidence and outcomes",
+      "sources": [
+        "private.project_events",
+        "private.project_operations_events",
+        "private.project_milestones",
+        "private.project_progress_entries",
+        "private.project_metric_observations"
+      ],
+      "observed": "Project proposal, operations and progress commands preserve their own state and events. Account, project and institutional grant rules determine access. No cross-project adapter in A1A.",
+      "missing": [
+        "audit full progress and final-report redaction and role matrix"
+      ],
+      "viewers": "Existing current project, organization or independent reviewer",
+      "excluded": "Progress evidence and private contact",
+      "tests": [
+        "apps/web/e2e/project-work.spec.ts",
+        "apps/web/e2e/project-progress.spec.ts"
+      ],
+      "remediation": "Project activity integration"
+    },
+    {
+      "module": "polls",
+      "status": "partially covered",
+      "requiredEvents": "Creation, eligible configuration, nomination decisions, suspension, finalization and disposition",
+      "sources": [
+        "private.poll_events",
+        "private.poll_decisions",
+        "private.poll_ballots"
+      ],
+      "observed": "Versioned poll commands own the event trail. Ballots remain an independent restricted store with sole permitted voter access. A1A has no ballot join or poll adapter.",
+      "missing": [
+        "authorized decision-only projection",
+        "eligibility and publication audit policy"
+      ],
+      "viewers": "Existing secured poll role",
+      "excluded": "Individual ballots and electorate identity",
+      "tests": [
+        "apps/web/e2e/polls.spec.ts",
+        "apps/web/e2e/unified-audit.spec.ts"
+      ],
+      "remediation": "Poll governance review"
+    },
+    {
+      "module": "early_partners",
+      "status": "gated/not operational",
+      "requiredEvents": "Nomination, offer, consent, access, feedback, suspension and termination",
+      "sources": [
+        "private.early_partner_events"
+      ],
+      "observed": "O6 transactions use fixture-approved participation and separate operator assignments. Actual enrollment remains disabled. No A1A adapter.",
+      "missing": [
+        "operational approval and explicit visibility policy"
+      ],
+      "viewers": "Separately scoped synthetic operator or subject",
+      "excluded": "Private feedback and cohort records",
+      "tests": [
+        "apps/web/e2e/early-partners.spec.ts"
+      ],
+      "remediation": "Early Partner operations review"
+    },
+    {
+      "module": "legal",
+      "status": "gated/not operational",
+      "requiredEvents": "Availability, version approval and emergency suspension",
+      "sources": [
+        "private.legal_publication_settings",
+        "private.legal_policy_settings",
+        "private.legal_publication_audit"
+      ],
+      "observed": "L6.2A applies its own proof registry and authorization. Broader audit access has no legal publication authority. Publication and acceptance stay off.",
+      "missing": [
+        "staff-safe release projection after approver policy"
+      ],
+      "viewers": "Existing authorized legal role",
+      "excluded": "Approval package and unpublished content",
+      "tests": [
+        "apps/web/e2e/legal-admin.spec.ts",
+        "apps/web/e2e/legal-center.spec.ts"
+      ],
+      "remediation": "Legal publication control review"
+    },
+    {
+      "module": "privacy",
+      "status": "gated/not operational",
+      "requiredEvents": "Rights intake, scoped review, export generation, evidence holds, lifecycle and synthetic recovery",
+      "sources": [
+        "private.privacy_case_events",
+        "private.privacy_exports",
+        "private.lifecycle_events"
+      ],
+      "observed": "Dedicated synthetic-only intake, export and lifecycle workflows retain their own evidence and receipt rules. Real processing remains disabled. No A1A adapter.",
+      "missing": [
+        "approved evidence and metadata retention, designated operators, rights processing authorization"
+      ],
+      "viewers": "Existing synthetic subject and scoped privacy operator",
+      "excluded": "Export bytes, rights cases, raw reasons and evidence",
+      "tests": [
+        "apps/web/e2e/privacy-intake.spec.ts",
+        "apps/web/e2e/privacy-export.spec.ts",
+        "apps/web/e2e/privacy-lifecycle.spec.ts"
+      ],
+      "remediation": "Privacy operational authorization"
+    },
+    {
+      "module": "ambassadors",
+      "status": "partially covered",
+      "requiredEvents": "Invitation, consent, status and visibility decisions",
+      "sources": [
+        "private.ambassador_audit"
+      ],
+      "observed": "Program-specific and backend-scoped outcome ledger. A1A omits this source pending a scoped public-consent and staff audit review.",
+      "missing": [
+        "independent nomination and consent read reconciliation"
+      ],
+      "viewers": "Current approved program authorities and subject",
+      "excluded": "Private evidence and invite details",
+      "tests": [
+        "apps/web/e2e/founder-release-audit.spec.ts"
+      ],
+      "remediation": "Ambassadors activity integration"
+    },
+    {
+      "module": "diagnostics",
+      "status": "not covered",
+      "requiredEvents": "Cross-module durable security denials and export-proof operational receipts",
+      "sources": [],
+      "observed": "Fastify logs route/status and request correlation. These diagnostics do not constitute actor-linked event evidence.",
+      "missing": [
+        "purpose-bound durable denial telemetry"
+      ],
+      "viewers": "Operational access under separate policy",
+      "excluded": "Query payloads, tokens and personal data",
+      "tests": [
+        "apps/web/e2e/failures.spec.ts"
+      ],
+      "remediation": "Security telemetry policy"
+    },
+    {
+      "module": "future_programs",
+      "status": "pending policy",
+      "requiredEvents": "Enrollment, benefit decisions, protected referrals and external financial effects",
+      "sources": [],
+      "observed": "Current development has no authorized processing. Future module reports must document event source, actor, transaction and data handling before implementation.",
+      "missing": [
+        "owner-approved scope, policies and retention"
+      ],
+      "viewers": "Pending policy",
+      "excluded": "Beneficiary, medical and financial information",
+      "tests": [],
+      "remediation": "Future owner-authorized phases"
+    }
+  ]
+}

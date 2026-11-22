@@ -40,6 +40,15 @@
     "AppealPage": "type:49b4f6a7c1d2b8569d02636922a9d2977dcbeea22edcafa21c011c3f85a11c56",
     "AppealReview": "type:84a5fae8d033720890f20542f9d474c1fc8140e2ae794c205210aeb73e109034",
     "AttachmentInput": "type:151593b53e82f1cb1c1e81dfe251fbdfe92228573d342ea1da2d8086f70af0c6",
+    "AuditAuthority": "type:bac858bbe00a6c81878a1fd396e5841c45884b07589ad7beb63019912aa4bc2a",
+    "auditCategories": "value:e24c8d2e646c98a0b180fdc4513d37ed663dc4a97678aaed0ce8d04c1db7465f",
+    "AuditCategory": "type:48f17bdb8e788ec19fd6a4e3b483bb1d70aef38d9bb8b36766ce0be7edc9b83a",
+    "AuditEvent": "type:abcdaeb4e21f1ebb49863367eab27a667072fc1ab30d7a921489eebb769a76c4",
+    "AuditOutcome": "type:84999313bd6027dc8267b0799a91a15efd79f8a62d5354a1f4396991151ef775",
+    "auditOutcomes": "value:95c3f47f2583ba6787c618790e9adb5ebc4b0b89fc5de96172cd9d3eecb205cd",
+    "AuditPage": "type:9572704c425af95cb976bf2122dba806f32dd830dc3234c78b651c6abb983ed1",
+    "AuditResourceType": "type:1161665a6319e5e651641c2230a35fa9c4eb300a90eadfb7d69c29634cfb63e9",
+    "auditResourceTypes": "value:d0d0b980cdaa1c8434eea12096a6657b5554656b3b17268db8ba5800f44a95ae",
     "commentBodyLimit": "value:f6565e364b20aa02da97d6a0ea229746f6bd6c8c2513f03ba4022d5f42ec27f6",
     "CommentInput": "type:432f924b75fdae0ef516c3df52e5fc1237dabd31e9619bddf64b0208af7cf4b9",
     "CommentPage": "type:ff2fdaff461d7730ec6aedaa75eeb1934283cf801206ba6da942bbaa23730eea",
@@ -325,6 +334,34 @@
       "upheld",
       "overturned",
       "closed"
+    ],
+    "auditCategories": [
+      "platform",
+      "governance",
+      "security",
+      "identity",
+      "organization",
+      "verification",
+      "moderation"
+    ],
+    "auditOutcomes": [
+      "recorded",
+      "approved",
+      "rejected",
+      "revoked",
+      "expired",
+      "cancelled"
+    ],
+    "auditResourceTypes": [
+      "account",
+      "proposal",
+      "session_policy",
+      "private_workflow",
+      "username",
+      "organization_role",
+      "verification_case",
+      "post",
+      "comment"
     ],
     "commentBodyLimit": 1000,
     "communityKinds": [

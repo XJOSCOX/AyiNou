@@ -29,3 +29,7 @@ Never log credentials, tokens, raw ballot choices, health records, private evide
 ## Session and private workflow events
 
 The Session Security milestone must cover provider-supported login successes and material security failures, new remembered sessions, revocations, privileged expiry, role changes affecting session eligibility, sensitive workflow creation and completion, and high-risk MFA step-up. Record suspicious cross-account access with minimized security telemetry. Use scoped server-generated audit references and preserve durable mutation evidence where the application owns the transaction. Keep credentials, session tokens, raw MFA codes, and other authentication secrets out of audit payloads and logs. [Session Security implementation plan](../security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
+
+## Unified audit integration
+
+Update the audit register for protected state-changing operations. A feature report identifies events, their authoritative storage, atomicity, viewers, redaction, deletion and hold behavior, integrity tests and any adapter or deferral. Keep private evidence in the owning domain. CI checks declaration shape and referenced tests; authorization and evidence quality require review and runtime tests. [A1A integration register](../audit/A1A_MISSING_COVERAGE_REGISTER.md)

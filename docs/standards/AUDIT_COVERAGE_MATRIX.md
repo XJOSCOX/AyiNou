@@ -1,6 +1,6 @@
 # Current audit coverage
 
-Source snapshot `e57d16740a56f2426ee83cc3300d724a7366dc53`. Coverage describes committed code and effective migration definitions, not an assertion that a scheduled job runs or every environment has applied the schema. O2 is pending on hosted Supabase. L3 writes are synthetic-only. Legal settings exist with publication still gated.
+Source snapshot `e57d16740a56f2426ee83cc3300d724a7366dc53`. Coverage describes committed code and effective migration definitions, not an assertion that a scheduled job runs or every environment has applied the schema. O2 was pending at that source snapshot and has since been applied to hosted development. L3 writes are synthetic-only. Legal settings exist with publication still gated.
 
 **Legend.** Atomic means the effective observed SQL command writes the named event or state in its transaction. **State** means current rows or case decisions are the evidence, without a distinct durable action trail. **D** means Fastify's sanitized method/route/status diagnostics for API failures where applicable. These are not an actor-linked audit. Auth/provider-only and browser actions have different boundaries. **U** means no approved retention schedule was established by this source review. Existing foreign-key delete behavior still applies. The **Next** column identifies proposals for later authorized phases, not committed feature dates.
 
@@ -69,3 +69,7 @@ O6 records program and operator provenance, nomination, offer, refusal, consent 
 ## O7 organization integration
 
 O7 reconciles onboarding receipts with durable organization audit events and reviews the authorization, redaction and lifecycle boundaries shared by O2 through O6. [O7 audit reconciliation](../organizations/O7_AUDIT_RECONCILIATION.md)
+
+## A1A source review
+
+See the [verified audit source inventory](../audit/A1A_SOURCE_INVENTORY.md) and [integration register](../audit/A1A_MISSING_COVERAGE_REGISTER.md) for the current ledger coverage, gaps, authorization and exclusions. A1A indexes and reads native sources and does not backfill events.

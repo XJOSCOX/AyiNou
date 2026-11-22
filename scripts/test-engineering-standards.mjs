@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { changedRoutes, reportSections, verifyDeclarations } from "./check-engineering-standards.mjs";
+import { changedRoutes, reportSections, verifyAuditIntegration, verifyDeclarations } from "./check-engineering-standards.mjs";
 
 const report = "docs/example_IMPLEMENTATION_REPORT.md";
 const route = "POST /api/v1/example";
@@ -55,4 +55,16 @@ test("unregistered routes, migrations and reports have actionable errors", () =>
   const sample = input();
   sample.registry.features = [];
   assert.equal(verifyDeclarations(sample).length, 3);
+});
+
+test("audit integration declarations validate statuses, evidence links and module identity", () => {
+  const entry = {
+    module: "example", status: "covered", requiredEvents: "Record material changes.", observed: "Native transaction.",
+    sources: ["private.example_events"], viewers: "Scoped staff.", excluded: "Evidence payloads.",
+    missing: [], tests: ["apps/api/test/example.test.ts"], remediation: "Review retention policy.",
+  };
+  const exists = (file) => file === "apps/api/test/example.test.ts";
+  assert.deepEqual(verifyAuditIntegration({ version: 1, modules: [entry] }, exists), []);
+  const invalid = { ...entry, status: "deployed", tests: ["../outside"] };
+  assert.equal(verifyAuditIntegration({ version: 1, modules: [invalid, invalid] }, exists).length, 3);
 });

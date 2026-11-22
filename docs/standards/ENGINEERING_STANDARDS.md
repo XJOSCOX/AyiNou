@@ -34,3 +34,7 @@ Run the [completion checklist](FEATURE_COMPLETION_CHECKLIST.md). Keep the existi
 ## Session and private workflow engineering
 
 Inspect actual Supabase Auth settings, refresh behavior, the Next.js cookie/session adapters, Fastify authorization and PostgreSQL session-backed writes before changing authentication. Establish a trusted original sign-in clock and check current role and session policy at each enforcement point. Test concurrent refresh, privilege changes, logout, session revocation and cross-account workflow access. Keep session and workflow activation behind a separately reviewed rollout. [Session Security implementation plan](../security/SESSION_SECURITY_IMPLEMENTATION_PLAN.md)
+
+## Audit integration declarations
+
+For protected state-changing features, include an audit integration register entry and explain event identity, transactionality, scope, redaction, lifecycle and reconciliation. The CI declaration check establishes that entries and referenced tests exist. Assess the effective security policy and native event effects through disposable testing and human review. [Audit register](../audit/A1A_MISSING_COVERAGE_REGISTER.md)

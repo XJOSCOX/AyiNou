@@ -907,6 +907,100 @@
           "rolloutAndRollback": "Apply after the approved administration link migration and exact full-set dry run. Use forward remediation and preserve audit evidence."
         }
       ]
+    },
+    {
+      "id": "a1a-unified-audit-reads",
+      "report": "docs/audit/A1A_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/audit/events",
+          "contract": "GET /api/v1/admin/audit/events - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The read does not mutate the source ledger. Existing sanitized operational diagnostics and bounded rate counters apply."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/unified-audit.spec.ts",
+            "denialScenario": "An ordinary member or administrator in another session receives a generic 404 and a revoked role cannot resume its cursor."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/audit/events/:reference",
+          "contract": "GET /api/v1/admin/audit/events/:reference - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The read does not mutate the source ledger. Existing sanitized operational diagnostics and bounded rate counters apply."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/unified-audit.spec.ts",
+            "denialScenario": "Ordinary administrators cannot read Founder governance references, and unknown references return the same denial."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/activity",
+          "contract": "GET /api/v1/me/activity - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The read does not mutate the source ledger. Existing sanitized operational diagnostics and bounded rate counters apply."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/unified-audit.spec.ts",
+            "denialScenario": "A cursor stolen by another account and actor filters outside the platform scope are rejected."
+          }
+        },
+        {
+          "route": "GET /api/v1/institutions/:id/activity",
+          "contract": "GET /api/v1/institutions/:id/activity - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The read does not mutate the source ledger. Existing sanitized operational diagnostics and bounded rate counters apply."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/unified-audit.spec.ts",
+            "denialScenario": "An owner cannot inspect a foreign organization and loses access after their membership ends."
+          }
+        },
+        {
+          "route": "GET /api/v1/verification/cases/:id/activity",
+          "contract": "GET /api/v1/verification/cases/:id/activity - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The read does not mutate the source ledger. Existing sanitized operational diagnostics and bounded rate counters apply."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/unified-audit.spec.ts",
+            "denialScenario": "An unassigned reviewer and case applicant cannot inspect the review history."
+          }
+        },
+        {
+          "route": "GET /api/v1/moderation/:kind/:id/activity",
+          "contract": "GET /api/v1/moderation/:kind/:id/activity - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The read does not mutate the source ledger. Existing sanitized operational diagnostics and bounded rate counters apply."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/unified-audit.spec.ts",
+            "denialScenario": "Members and removed moderators cannot read decisions, and private department actions are absent."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261121145000_a1a_unified_audit_reads.sql",
+          "rlsAndGrants": "Restricted private projection over existing RLS ledgers, service-only entry RPC and existing bounded read counter.",
+          "authorization": "Rechecks live account, S2A/S2B session, S2C workspace for staff, recent MFA and current exact source assignment or organization scope.",
+          "compatibility": "Uses historical ledgers without changing their rows, writers, grants or operational gates.",
+          "validation": "Disposable synthetic scope, redaction, keyset, concurrency and source reconciliation tests. Explicitly verify hosted preflight and grants.",
+          "rolloutAndRollback": "Apply the exact migration after release checks and independent owner approval. Use additive forward remediation and keep the existing ledgers intact."
+        }
+      ]
     }
   ]
 }

@@ -832,3 +832,7 @@ Migration `20261121130000_public_usernames.sql` follows the four pending Founder
 Hosted development applied F1 `20261121140000` after the Founder and U1 chain. It adds private, RLS-protected workflows and audit events. [F1 report](governance/F1_IMPLEMENTATION_REPORT.md).
 
 F1.1 migration `20261121141000` adds `authorization_mode` to the private O5 proposal table. Existing rows retain `independent`. Only newly confirmed Founder Administrator appointments use `founder_direct`, which excludes independent approver fields. The O5 proposal receipt records the initiating authority and links to the activation event. Existing RLS, grants and invitation expiry remain in place. Hosted development applied F1.1 after F1. The final count is 76 with zero pending migrations. [Hosted deployment evidence](deployment/F1_F1_1_DEVELOPMENT_DEPLOYMENT.md) [F1.1 report](governance/F1_1_IMPLEMENTATION_REPORT.md)
+
+## A1A unified audit reads
+
+`20261121145000_a1a_unified_audit_reads.sql` adds a restricted source projection, bounded indexes, service-only read RPC and a shared read-budget category. Existing ledgers and RLS remain their authorities. Inspect the hosted postflight and use disposable fixtures for stateful tests. [Source inventory](audit/A1A_SOURCE_INVENTORY.md)

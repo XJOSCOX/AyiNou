@@ -124,6 +124,39 @@ const tree = (path) => readdirSync(join(root, path), { recursive: true, withFile
     return relative(root, join(parent, entry.name)).replaceAll("\\", "/");
   });
 
+const auditStatuses = new Set(["covered", "partially covered", "not covered", "intentionally current-state only",
+  "gated/not operational", "pending policy"]);
+
+export function verifyAuditIntegration(registry, exists) {
+  if (registry?.version !== 1 || !Array.isArray(registry.modules) || registry.modules.length === 0) {
+    return ["Audit integration register must declare version 1 and module entries."];
+  }
+  const errors = [];
+  const seen = new Set();
+  for (const entry of registry.modules) {
+    const name = entry?.module;
+    if (typeof name !== "string" || !/^[a-z][a-z0-9_]*$/.test(name) || seen.has(name)) {
+      errors.push("Missing, invalid or duplicate audit module " + String(name));
+      continue;
+    }
+    seen.add(name);
+    for (const field of ["requiredEvents", "observed", "viewers", "excluded", "remediation"]) {
+      if (!explanation(entry[field])) errors.push(name + ": audit integration needs " + field);
+    }
+    if (!auditStatuses.has(entry.status)) errors.push(name + ": invalid audit coverage status");
+    if (!Array.isArray(entry.sources) || entry.sources.some((source) => typeof source !== "string" ||
+      !/^[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*$/.test(source))
+      || (entry.status === "covered" && entry.sources.length === 0)) errors.push(name + ": declare native sources");
+    if (!Array.isArray(entry.missing) || entry.missing.some((gap) => !explanation(gap))) {
+      errors.push(name + ": declare missing event coverage");
+    }
+    if (!Array.isArray(entry.tests) || entry.tests.some((file) => !relativePath(file) || !exists(file))) {
+      errors.push(name + ": link existing audit test evidence");
+    }
+  }
+  return errors;
+}
+
 function main() {
   const registry = JSON.parse(read(standardRoot + "/feature-reviews.json"));
   const known = new Set(lines(git("ls-tree", "-r", "--name-only", baseline, "--", "docs", migrationRoot)));
@@ -134,6 +167,7 @@ function main() {
     ...lines(git("diff", "--name-only", baseline, "--", migrationRoot)).filter((path) => path.endsWith(".sql")),
   ]);
   const errors = verifyDeclarations({ registry, reports, routes, migrations, read, exists });
+  errors.push(...verifyAuditIntegration(JSON.parse(read("docs/audit/integration-register.json")), exists));
   for (const file of ["AGENTS.md", ...tree(standardRoot).filter((path) => path.endsWith(".md"))]) {
     for (const [, target] of read(file).matchAll(/\]\(([^)\s]+)\)/g)) {
       if (/^(https?:|mailto:|#)/.test(target)) continue;

@@ -1,6 +1,6 @@
 # Unified Audit Center design
 
-Planned for a later authorized phase. Keep authoritative events in the current domain stores. Each source adapter exposes an allowlisted projection and identifies provenance by source, source ID and native version. Normalize event type, timestamp and scope in projections, without synthesizing missing reasons, outcomes or user IDs. Begin with platform administration, O2 receipts after approval, organization roles and publication controls. Keep voting identity/evidence and privacy evidence outside general adapters.
+A1A implements scoped native-source reads. The graphical Audit Center remains a later phase. [A1A API and source inventory](../audit/A1A_READ_API_DESIGN.md) Keep authoritative events in the current domain stores. Each source adapter exposes an allowlisted projection and identifies provenance by source, source ID and native version. Normalize event type, timestamp and scope in projections, without synthesizing missing reasons, outcomes or user IDs. Begin with platform administration, O2 receipts after approval, organization roles and publication controls. Keep voting identity/evidence and privacy evidence outside general adapters.
 
 ## Access and query
 

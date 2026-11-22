@@ -386,3 +386,7 @@ U1 adds username selection and availability to both signup choices. Its migratio
 Only the active recognized Founder can directly authorize a new Administrator appointment. The named member accepts with fresh MFA and the one-time code. Legacy proposals retain independent approval. [F1.1 implementation](docs/governance/F1_1_IMPLEMENTATION_REPORT.md)
 
 The F1/F1.1 development rollout is closed. S2 absolute session lifetimes and promotion handling remains next and has not started. Session inventory, private user-bound links, and identity and audit integration follow the approved sequence. [Master Blueprint](docs/blueprints/README.md) · [Owner decisions](docs/blueprints/OWNER_DECISIONS_AND_OPEN_QUESTIONS.md)
+
+## A1A unified audit infrastructure
+
+A1A adds scoped activity queries, nine existing ledger adapters and a permanent audit integration register. The hosted checkpoint awaits exact migration approval. A1B will add the graphical Audit Center. [A1A report](docs/audit/A1A_IMPLEMENTATION_REPORT.md)

@@ -15,6 +15,8 @@ DELETE /api/v1/recommendations/feedback - -
 GET /api/v1/admin/accounts - -
 GET /api/v1/admin/ambassadors - -
 GET /api/v1/admin/audit - -
+GET /api/v1/admin/audit/events - -
+GET /api/v1/admin/audit/events/:reference - -
 GET /api/v1/admin/early-partners - -
 GET /api/v1/admin/founder-identity - -
 GET /api/v1/admin/governance - -
@@ -46,6 +48,7 @@ GET /api/v1/discover/people - -
 GET /api/v1/discover/suggestions - -
 GET /api/v1/feed - -
 GET /api/v1/institutions/:id - -
+GET /api/v1/institutions/:id/activity - -
 GET /api/v1/institutions/:id/affiliations/manage - -
 GET /api/v1/institutions/:id/early-partner - -
 GET /api/v1/institutions/:id/roles - -
@@ -55,6 +58,7 @@ GET /api/v1/institutions/:key/followers - -
 GET /api/v1/institutions/by-handle/:handle - -
 GET /api/v1/institutions/by-handle/:handle/affiliations - -
 GET /api/v1/legal/availability - -
+GET /api/v1/me/activity - -
 GET /api/v1/me/affiliations - -
 GET /api/v1/me/ambassadors - -
 GET /api/v1/me/blocked - -
@@ -107,6 +111,7 @@ GET /api/v1/members/:key/followers - -
 GET /api/v1/members/:key/following - -
 GET /api/v1/members/:username/ambassador - -
 GET /api/v1/members/:username/mute - -
+GET /api/v1/moderation/:kind/:id/activity - -
 GET /api/v1/moderation/appeals - -
 GET /api/v1/moderation/feed - -
 GET /api/v1/polls - -
@@ -135,11 +140,14 @@ GET /api/v1/trust/application-assignments - -
 GET /api/v1/trust/impersonation - -
 GET /api/v1/trust/verification-appeals - -
 GET /api/v1/usernames/availability - -
+GET /api/v1/verification/cases/:id/activity - -
 GET /api/v1/verification/review - -
 GET /health - -
 HEAD /api/v1/admin/accounts - onSend
 HEAD /api/v1/admin/ambassadors - onSend
 HEAD /api/v1/admin/audit - onSend
+HEAD /api/v1/admin/audit/events - onSend
+HEAD /api/v1/admin/audit/events/:reference - onSend
 HEAD /api/v1/admin/early-partners - onSend
 HEAD /api/v1/admin/founder-identity - onSend
 HEAD /api/v1/admin/governance - onSend
@@ -171,6 +179,7 @@ HEAD /api/v1/discover/people - onSend
 HEAD /api/v1/discover/suggestions - onSend
 HEAD /api/v1/feed - onSend
 HEAD /api/v1/institutions/:id - onSend
+HEAD /api/v1/institutions/:id/activity - onSend
 HEAD /api/v1/institutions/:id/affiliations/manage - onSend
 HEAD /api/v1/institutions/:id/early-partner - onSend
 HEAD /api/v1/institutions/:id/roles - onSend
@@ -180,6 +189,7 @@ HEAD /api/v1/institutions/:key/followers - onSend
 HEAD /api/v1/institutions/by-handle/:handle - onSend
 HEAD /api/v1/institutions/by-handle/:handle/affiliations - onSend
 HEAD /api/v1/legal/availability - onSend
+HEAD /api/v1/me/activity - onSend
 HEAD /api/v1/me/affiliations - onSend
 HEAD /api/v1/me/ambassadors - onSend
 HEAD /api/v1/me/blocked - onSend
@@ -231,6 +241,7 @@ HEAD /api/v1/members/:key/followers - onSend
 HEAD /api/v1/members/:key/following - onSend
 HEAD /api/v1/members/:username/ambassador - onSend
 HEAD /api/v1/members/:username/mute - onSend
+HEAD /api/v1/moderation/:kind/:id/activity - onSend
 HEAD /api/v1/moderation/appeals - onSend
 HEAD /api/v1/moderation/feed - onSend
 HEAD /api/v1/polls - onSend
@@ -259,6 +270,7 @@ HEAD /api/v1/trust/application-assignments - onSend
 HEAD /api/v1/trust/impersonation - onSend
 HEAD /api/v1/trust/verification-appeals - onSend
 HEAD /api/v1/usernames/availability - onSend
+HEAD /api/v1/verification/cases/:id/activity - onSend
 HEAD /api/v1/verification/review - onSend
 HEAD /health - onSend
 OPTIONS * - -
