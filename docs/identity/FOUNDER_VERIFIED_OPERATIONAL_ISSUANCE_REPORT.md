@@ -26,12 +26,18 @@ Confirmation uses the same transaction lock as policy cutover and grant to preve
 
 ## Validation and CI
 
-Six focused disposable Chromium regressions passed. They covered transition from the test policy, historical grant visibility, successful issuance without a cohort row or recipient authenticator, independent approval boundaries, and emergency stop while the old test window was still open. Hosted rollout requires tested main, all three CI jobs, an exact migration dry run and the authorized policy operation.
+Six focused disposable Chromium regressions passed. They covered transition from the test policy, historical grant visibility, successful issuance without a cohort row or recipient authenticator, independent approval boundaries, and emergency stop while the old test window was still open. All 97 local Chromium regressions, both immediate-signup scenarios, 51 API tests, client tests, typecheck, lint, four-language parity, engineering standards and both builds passed. All three [release CI jobs](https://github.com/XJOSCOX/AyiNou/actions/runs/45066275092) passed at `c61dc4dd517b8ecd6aa77e1e053265b946f13bab`.
 
 ## Documentation and operations
 
 See the [issuance policy](FOUNDER_VERIFIED_ACTIVATION_POLICY.md) and [Founder operating procedure](FOUNDER_VERIFIED_OPERATING_PROCEDURE.md).
 
+## Hosted development rollout
+
+Applied only `20261122160000_fv_operational_issuance_policy.sql` to `hcbxulyfmdmuyccgrujs` after exact owner approval. SHA-256 `e764e0c5f188ac9bfa34d3d03a37730a1a758fc267019afd0f07dc3713a80286` matched the working release. Hosted history shows 85 applied migrations, zero pending and zero hosted-only.
+
+The separately approved activation recorded `a8f2009f-c9bb-48e6-8c84-f821efb0ace4` for the recognized Founder. Both gates select the standing eligible-member scope, which has no expiry or per-member allowlist. The prior test approval and its original expiry remain in the registry. Case, audit and grant counts matched the baseline, and the previously issued gold remained eligible for disclosure. The pending `joscofaie0417` case retains its consent and can now confirm account control. No gold was issued during rollout. Hosted catalog checks showed the client cannot execute either confirmation entry and the implementation function is private. The matching local web and API returned HTTP 200.
+
 ## Remaining blockers
 
-Applying the migration is subject to exact hosted authorization. Activation of the standing policy on the designated hosted development project is a separate operator transaction authorized for that scope. No public launch or unrelated feature activation is implied.
+Hosted schema and policy activation are verified. The member and Founder can complete their pending case through the application. This rollout authorizes hosted development scope. Public launch remains separate.
