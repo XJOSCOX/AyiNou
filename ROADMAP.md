@@ -369,7 +369,7 @@ The reviewed O2–O7 migrations are deployed to the owner-approved development d
 
 ## S2B session management and private workflow links
 
-S2B adds owner-scoped session inventory and revocation, plus account-bound organization draft links and original-session leadership confirmation. The existing F1 paths stay available. Follow the [implementation and hosted rollout status](docs/security/S2B_IMPLEMENTATION_REPORT.md).
+**S2B COMPLETE AND DEPLOYED — hosted development database.** Applied `20261121143000` and verified 78 applied migrations with zero pending. S2B adds owner-scoped session inventory and revocation, account-bound organization draft links, and original-session leadership confirmation. The existing F1 paths stay available. [Implementation and hosted rollout](docs/security/S2B_IMPLEMENTATION_REPORT.md).
 
 ## U1 public usernames
 
