@@ -69,6 +69,7 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
   const [error, setError] = useState<keyof typeof errors | "">("");
   const [success, setSuccess] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [publishError, setPublishError] = useState("");
   const { avatar, photoError, uploading, changePhoto } = useProfileAvatar(
     profile.avatarUrl, setAvatarUrl, () => router.replace("/login"),
   );
@@ -85,6 +86,24 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
     ? (!managed || !policy?.requireCountry && !(policy?.requireDepartment && country === "HT"))
     : step === 3 && (!managed || !policy?.requireInterests);
   const titles = [m.membership, m.location, m.publicProfile, m.interests];
+
+  async function publishProfile() {
+    if (busy || uploading || !canPublish) return;
+    setBusy(true);
+    setPublishError("");
+    try {
+      const result = await updateMyProfile({ publishProfile: true });
+      setSaved(result);
+      setDiscoverable(result.discoverable ?? false);
+      router.refresh();
+    } catch (cause) {
+      const code = cause instanceof Error ? cause.message : "";
+      if (code === "UNAUTHORIZED") router.replace("/login");
+      else setPublishError(code === "PROFILE_POLICY_DISABLED" ? copy.policyDisabled : m.profilePublishError);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function submit(event?: FormEvent<HTMLFormElement>, skip = false, later = false) {
     event?.preventDefault();
@@ -194,7 +213,7 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
     <fieldset className={all ? "space-y-3" : "space-y-2 rounded-xl border border-[var(--theme-border)] p-3"}>
       <legend className={all ? "sr-only" : "px-1 font-semibold"}>{m.privacy}</legend>
       <label className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={discoverable}
-        disabled={!canPublish && !discoverable} onChange={(e) => setDiscoverable(e.target.checked)} />{m.discoverable}</label>
+        disabled={!canPublish && !discoverable} onChange={(e) => setDiscoverable(e.target.checked)} />{all ? m.profileDiscoverable : m.discoverable}</label>
       <label className="flex items-start gap-2"><input className="mt-1" type="checkbox" checked={showCategory}
         disabled={!editable && !showCategory} onChange={(e) => setShowCategory(e.target.checked)} />{m.showCategory}</label>
       {(all || managed) && ([
@@ -297,7 +316,9 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
       </ol>}
       <div className={all ? "mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)]" : ""}>
         {all && canShowPreview && <div className="self-start xl:col-start-2 xl:row-start-1 xl:sticky xl:top-5"><DraftProfilePreview {...previewProps} displayName={displayName} username={username} biography={policy?.profileBiographies === false ? "" : biography}
-            showCategory={showCategory} category={category} profileSections={profileSections} /></div>}
+            showCategory={showCategory} category={category} profileSections={profileSections}
+            publish={canPublish && saved.username && saved.displayName ? () => { void publishProfile(); } : undefined}
+            publishDisabled={busy || uploading} publishError={publishError} /></div>}
         <form className={all ? "min-w-0 space-y-4 xl:col-start-1 xl:row-start-1" : "mt-6 space-y-7"} onSubmit={submit}
           onChange={() => { if (success) setSuccess(false); }} aria-busy={busy || uploading} noValidate>
           {all ? profileSections.map(([id, label]) => (

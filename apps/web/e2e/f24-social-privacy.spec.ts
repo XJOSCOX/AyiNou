@@ -133,3 +133,39 @@ test("F2.4 checks the original audience for quotes, search and recommendation sn
   expect(updatedQuote.post.social.quote).toEqual({ unavailable: true });
   await apiCall(peer, posts + "/" + original.id, 404);
 });
+
+test("a saved hidden profile publishes once and appears in People search", async ({ makeMember, page }) => {
+  test.setTimeout(90_000);
+  const [owner, viewer] = await Promise.all([makeMember({ visible: true }), makeMember({ visible: true })]);
+  finishPersonalOnboarding(owner);
+  finishPersonalOnboarding(viewer);
+  const profilePath = "/api/v1/me/profile/details";
+  sql(`update public.profiles set is_visible=false where user_id='${owner.id}';
+    update public.user_settings set discoverable=true where user_id='${owner.id}';`);
+  const search = "/api/v1/discover/people?q=" + owner.handle;
+  expect((await apiCall(viewer, search, 200)).accounts).toEqual([]);
+  expect((await fetch(api + profile(owner))).status).toBe(404);
+  expect((await fetch(api + profilePath, {
+    method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ publishProfile: true }),
+  })).status).toBe(401);
+  await apiCall(owner, profilePath, 400, "PATCH", { publishProfile: true, userId: viewer.id });
+
+  await inEnglish(page.context());
+  await login(page, owner);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/profile");
+  const publish = page.getByRole("button", { name: "Publish profile", exact: true });
+  await expect(publish).toBeVisible();
+  await publish.click();
+  await expect(page.getByText("Your saved profile is published.", { exact: true })).toBeVisible();
+  expect((await apiCall(viewer, search, 200)).accounts).toContainEqual(expect.objectContaining({
+    handle: owner.handle, following: false, canFollow: true,
+  }));
+  expect((await apiCall(viewer, member(owner) + "/follow", 200, "PUT")).following).toBe(true);
+  expect((await fetch(api + profile(owner))).status).toBe(200);
+
+  await apiCall(owner, profilePath, 200, "PATCH", { discoverable: false });
+  expect((await apiCall(viewer, search, 200)).accounts).toEqual([]);
+  await apiCall(owner, profilePath, 200, "PATCH", { publishProfile: true });
+  expect((await apiCall(owner, profilePath, 200, "PATCH", { publishProfile: true })).profile.isVisible).toBe(true);
+});

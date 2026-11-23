@@ -162,7 +162,10 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
     },
     async saveDetails(userId, token, input) {
       await initialize(userId);
-      const { error } = await asMember(token).rpc("save_member_profile_v2", { p_changes: input });
+      const member = asMember(token);
+      const { error } = input.publishProfile
+        ? await member.rpc("publish_member_profile_for_client")
+        : await member.rpc("save_member_profile_v2", { p_changes: input });
       if (error?.code === "23505") throw new MemberError("USERNAME_TAKEN", 409);
       if (error?.code === "U1001") throw new MemberError("USERNAME_NOT_PERMITTED", 400);
       if (error?.code === "U1002") throw new MemberError("USERNAME_CHANGE_LIMIT", 429);

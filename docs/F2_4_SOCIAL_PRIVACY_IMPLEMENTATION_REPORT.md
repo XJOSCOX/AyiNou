@@ -50,3 +50,9 @@ The postflight dry run reported zero pending migrations. Both new tables had RLS
 ## Remaining blockers
 
 Hosted database migration and the connected local application are verified. Public application hosting is outside this release. Previously issued signed avatar URLs retain their existing expiration window, and trending ranks hashtags from eligible public posts.
+
+## Profile publication follow-up
+
+The profile preview offers **Publish profile** for a member’s saved name and username. Publication sets the existing visibility and discoverability flags in one operation. Social privacy and per-field disclosure still determine what other members can see. The command leaves account data unchanged until the member uses it. Existing profile saves and onboarding continue to use the original flow.
+
+Migration `20261123125400_explicit_profile_publication` adds the session-bound command and requires separate hosted approval.

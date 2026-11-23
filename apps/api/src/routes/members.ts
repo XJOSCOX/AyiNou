@@ -37,7 +37,9 @@ const profileChanges = z.object({
   skipOptional: z.boolean(),
   interests: z.array(z.enum(interestCodes)).max(interestCodes.length)
     .transform((values) => [...new Set(values)]),
-}).partial().strict().refine((value) => Object.keys(value).length > 0);
+}).partial().strict().refine((value) => Object.keys(value).length > 0).or(
+  z.strictObject({ publishProfile: z.literal(true) }),
+);
 const usernameReview = z.strictObject({
   requestId: z.uuid(),
   action: z.enum(["hold", "release", "correct", "appeal_reviewed"]),

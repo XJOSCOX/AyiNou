@@ -138,6 +138,14 @@
           "compatibility": "Published post audiences are preserved, and the existing export schema accepts the new post visibility.",
           "validation": "Test privacy transitions, live visibility after removal, and legacy privacy exports in disposable infrastructure.",
           "rolloutAndRollback": "Check the exact approved hosted migration set and run a read-only postflight. Use a forward recovery migration to preserve member and audit records."
+        },
+        {
+          "file": "supabase/migrations/20261123125400_explicit_profile_publication.sql",
+          "rlsAndGrants": "The publication RPC grants execution only to authenticated callers; it writes only the caller’s profile and keeps existing table grants and RLS.",
+          "authorization": "Publication checks active member and session eligibility as well as current profile editing and public-profile policy. Its target is derived solely from the session.",
+          "compatibility": "An explicit command publishes saved data even when discovery was already enabled. Existing profile saves, onboarding, social privacy and per-field selections keep their behavior.",
+          "validation": "Disposable Chromium checks a legacy hidden profile, guest rejection, actor binding, discovery and following by a second member, and repeat publication.",
+          "rolloutAndRollback": "Verify the approved single migration against hosted history. Withdraw the new RPC grant in a forward migration if needed; preserve member visibility choices."
         }
       ]
     },

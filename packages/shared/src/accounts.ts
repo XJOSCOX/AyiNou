@@ -81,7 +81,7 @@ export interface ProfilePreview {
   interests?: InterestCode[] | null;
 }
 
-export type ProfileChanges = Partial<Omit<MemberProfile, "userId" | "isVisible" | "avatarUrl" | "experience">> & { skipOptional?: boolean };
+export type ProfileChanges = Partial<Omit<MemberProfile, "userId" | "isVisible" | "avatarUrl" | "experience">> & { skipOptional?: boolean; publishProfile?: true };
 
 export interface UpdateMemberProfile {
   displayName: string;

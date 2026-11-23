@@ -5,6 +5,7 @@ import { FounderVerifiedMark } from "@/components/founder-verified-badge";
 import { authMessages } from "@/lib/auth-i18n";
 import type { Locale } from "@/lib/i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
+import { action, errorBox } from "./profile-styles";
 import type { useMemberIdentity } from "@/lib/member-display-name";
 
 type ProfilePreviewProps = {
@@ -38,7 +39,7 @@ export function SavedProfilePreview({ locale, saved, avatar, claims, administrat
 }
 
 export function DraftProfilePreview({
-  locale, saved, avatar, claims, administrator, founder, founderVerified, displayName, username, biography, showCategory, category, profileSections,
+  locale, saved, avatar, claims, administrator, founder, founderVerified, displayName, username, biography, showCategory, category, profileSections, publish, publishDisabled, publishError,
 }: ProfilePreviewProps & {
   displayName: string;
   username: string;
@@ -46,6 +47,9 @@ export function DraftProfilePreview({
   showCategory: boolean;
   category: MembershipCategory | "";
   profileSections: readonly (readonly [string, string])[];
+  publish?: () => void;
+  publishDisabled: boolean;
+  publishError: string;
 }) {
   const m = membershipMessages[locale];
   const t = authMessages[locale];
@@ -70,7 +74,12 @@ export function DraftProfilePreview({
           {username.trim() && <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{username.trim().toLowerCase()}</p>}
           {biography.trim() && <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[var(--theme-body)]">{biography.trim()}</p>}
           {showCategory && category && <p className="mt-3 text-sm text-[var(--theme-link)]">{category === "haitian" ? m.haitianCount : m.supporterCount}</p>}
-          <p className="mt-4 border-t border-[var(--theme-border)] pt-3 text-sm text-[var(--theme-body)]">{visible ? m.profilePublished : m.profileHidden}</p>
+          <p role="status" className="mt-4 border-t border-[var(--theme-border)] pt-3 text-sm text-[var(--theme-body)]">{visible ? m.profilePublished : m.profileHidden}</p>
+          {!visible && publish && <div className="mt-3 space-y-3">
+            <p className="text-sm text-[var(--theme-body)]">{m.profilePublishHint}</p>
+            <button type="button" className={action} disabled={publishDisabled} onClick={publish}>{m.profilePublish}</button>
+            {publishError && <p role="alert" className={errorBox}>{publishError}</p>}
+          </div>}
         </div>
       </section>
       <nav aria-label={t.profileTitle} className="mt-4 flex flex-wrap gap-2 xl:flex-col">
