@@ -17,6 +17,7 @@ GET /api/v1/admin/ambassadors - -
 GET /api/v1/admin/audit - -
 GET /api/v1/admin/audit/events - -
 GET /api/v1/admin/audit/events/:reference - -
+GET /api/v1/admin/audit/policies - -
 GET /api/v1/admin/early-partners - -
 GET /api/v1/admin/founder-blue-verification/:id - -
 GET /api/v1/admin/founder-identity - -
@@ -154,6 +155,7 @@ HEAD /api/v1/admin/ambassadors - onSend
 HEAD /api/v1/admin/audit - onSend
 HEAD /api/v1/admin/audit/events - onSend
 HEAD /api/v1/admin/audit/events/:reference - onSend
+HEAD /api/v1/admin/audit/policies - onSend
 HEAD /api/v1/admin/early-partners - onSend
 HEAD /api/v1/admin/founder-blue-verification/:id - onSend
 HEAD /api/v1/admin/founder-identity - onSend

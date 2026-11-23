@@ -1,4 +1,14 @@
 {
+  "policyAudit": {
+    "title": "Chanjman nan paramèt yo",
+    "changedBy": "Moun ki fè chanjman an",
+    "reason": "Rezon",
+    "empty": "Pa gen chanjman nan paramèt yo ki anrejistre.",
+    "newer": "Chanjman ki pi resan",
+    "older": "Chanjman ki pi ansyen",
+    "rewards": "Rekonpans parennaj",
+    "latest": "Dènye chanjman yo"
+  },
   "registrationPolicy": {
     "title": "Enskripsyon",
     "help": "Jere kreyasyon kont ak parennaj. Paramèt sa yo aplike lè yon nouvo kont ap kreye.",

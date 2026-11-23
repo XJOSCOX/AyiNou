@@ -1,4 +1,14 @@
 {
+  "policyAudit": {
+    "title": "Cambios de configuración",
+    "changedBy": "Modificado por",
+    "reason": "Motivo",
+    "empty": "No se han registrado cambios de configuración.",
+    "newer": "Cambios más recientes",
+    "older": "Cambios anteriores",
+    "rewards": "Recompensas por referencias",
+    "latest": "Últimos cambios"
+  },
   "registrationPolicy": {
     "title": "Registro",
     "help": "Administra la creación de cuentas y las referencias. Estos ajustes se aplican al crear una cuenta nueva.",

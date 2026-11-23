@@ -1,4 +1,14 @@
 {
+  "policyAudit": {
+    "title": "Policy changes",
+    "changedBy": "Changed by",
+    "reason": "Reason",
+    "empty": "No policy changes have been recorded.",
+    "newer": "Newer changes",
+    "older": "Older changes",
+    "rewards": "Referral rewards",
+    "latest": "Latest changes"
+  },
   "registrationPolicy": {
     "title": "Registration",
     "help": "Manage account creation and referrals. These settings take effect when a new account is created.",

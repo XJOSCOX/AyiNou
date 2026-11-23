@@ -193,6 +193,8 @@
     "PlatformAccess": "type:3e8f425bff0b315a9a4238d00b463eb57b71620115d01c44edc3584b0c3e531a",
     "PlatformRole": "type:2473d46104c7b706217bd0b192fd22cde8c8f24d8bc7440bf9bf979aab8d0ffc",
     "platformRoles": "value:fb60ac1a18d4c44cc55ed616a10f6a001967bf074380ac189da46ea0f7ff037f",
+    "PolicyAuditEvent": "type:cea2f8eea2766dc22f0f82039f2d5fda68eb125554622d78839a087b721c01cf",
+    "PolicyAuditPage": "type:3f1ebc555b928dcaea2f249357e47752b1615440afc96c1d35f045b1ec55c6fd",
     "PollCard": "type:625686661c256fee89db9c9b793aa57b593fa279dad9befa6e09da7cf60b3327",
     "PollConfigOptions": "type:09349449573ad315fe7ad6c59a485f5fb124939aafb6a3e225858886c17da7a9",
     "PollConfiguration": "type:35b41647c2757b4dc9f747aa249181d9c66c8401429c75a5ecd495629f7de8f6",

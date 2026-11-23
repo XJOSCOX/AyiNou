@@ -28,6 +28,7 @@ import { earlyPartnerMessages } from "@/lib/early-partner-i18n";
 import { AdminEarlyPartners } from "./early-partner-workspace";
 import { HomepageSettings } from "./homepage-settings";
 import { RegistrationSettings } from "./registration-settings";
+import { PolicyAuditHistory } from "./policy-audit-history";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
@@ -98,7 +99,10 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
                 </div>)}
               </dl><SafetyOverviewPanel /></>}
               {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
-              {tab === "audit" && <AuditFeed />}
+              {tab === "audit" && <>
+                {access.data?.founder && <PolicyAuditHistory key={workspaceId} workspaceId={workspaceId} />}
+                <AuditFeed />
+              </>}
               {tab === "trust" && <TrustAdministration founderWorkspace={access.data?.founder ? workspaceId : undefined} />}
               {tab === "ambassadors" && <AmbassadorAdministration />}
               {tab === "legal" && <LegalAdminPanel />}

@@ -1,6 +1,35 @@
 {
   "features": [
     {
+      "id": "platform-policy-audit-history",
+      "report": "docs/rules/PLATFORM_POLICY_AUDIT_HISTORY.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/audit/policies",
+          "contract": "GET /api/v1/admin/audit/policies - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The endpoint reads committed policy audit records through the original Founder workspace and applies the existing audit read budget."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/registration-policy.spec.ts",
+            "denialScenario": "Ordinary members cannot read reasons; copied workspace identifiers or another workspace’s cursor are refused."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122185000_platform_policy_audit_history.sql",
+          "rlsAndGrants": "The indexed ledgers retain existing RLS and table grants; the new projection RPC grants execute only to the service role.",
+          "authorization": "The SQL projection checks active Founder provenance, recent MFA, and the original private workspace on every page.",
+          "compatibility": "Existing ledger rows, mutation behavior, and account audit history remain available through their existing boundaries.",
+          "validation": "Disposable test checks both policy sources, timestamps, actor, written reason, denied reads and paging with tied timestamps.",
+          "rolloutAndRollback": "Apply only the verified additive migration after preflight. Remove the view access path through a separate forward migration if rollback is required."
+        }
+      ]
+    },
+    {
       "id": "r2-2-registration-referrals",
       "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
       "routes": [

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
-import { auditCategories, auditOutcomes, auditResourceTypes, type AuditEvent, type AuditPage } from "@ayinou/shared";
+import { auditCategories, auditOutcomes, auditResourceTypes, type AuditEvent, type AuditPage, type PolicyAuditEvent, type PolicyAuditPage } from "@ayinou/shared";
 import { ApiError } from "../services/api-error.js";
 import { auditTimestamp, createAuditCursor } from "../services/audit-cursor.js";
 import type { AuthVerifier } from "../services/auth.js";
@@ -81,6 +81,40 @@ export function registerAuditRoutes(app: FastifyInstance, auth: AuthVerifier | n
       throw new ApiError(503, "SERVICE_UNAVAILABLE", "Audit service unavailable");
     }
   }
+
+  app.get("/api/v1/admin/audit/policies", async (request): Promise<PolicyAuditPage> => {
+    const query = z.strictObject({ cursor: filters.shape.cursor }).parse(request.query);
+    const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
+    const workspace = uuid.safeParse(request.headers["x-ayinou-workspace"]);
+    if (!token || !workspace.success) {
+      await limitReads("audit", null, request.ip);
+      throw unavailable();
+    }
+    if (!auth?.verifySession || !repo) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Audit service unavailable");
+    const session = await auth.verifySession(token, true);
+    if (!session) {
+      await limitReads("audit", null, request.ip);
+      if (await auth.verifySession(token)) throw new ApiError(403, "MFA_REQUIRED", "Recent authenticator verification required");
+      throw unavailable();
+    }
+    await limitReads("audit", session.actor, request.ip);
+    const binding = [session.actor, session.session, "platform_policies", workspace.data];
+    const cursor = query.cursor ? cursors.open(query.cursor, binding) : null;
+    const result = await repo.rpc<{ high: string; events: PolicyAuditEvent[] } | null>("platform_policy_audit_for_api", {
+      p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp: session.totpAt ?? null,
+      p_workspace: workspace.data, p_high: cursor?.high ?? null, p_before_at: cursor?.at ?? null,
+      p_before_source: cursor?.source ?? null, p_before_revision: cursor ? Number(cursor.id) : null,
+    });
+    if (!result) throw unavailable();
+
+    const events = result.events.slice(0, 20);
+    const last = events.at(-1);
+    const nextCursor = last && result.events.length > events.length ? cursors.seal({
+      high: result.high, at: last.occurredAt, source: last.source, id: String(last.revision),
+      expires: cursor?.expires ?? Date.now() + 5 * 60_000,
+    }, binding) : null;
+    return { events, nextCursor };
+  });
 
   app.get("/api/v1/admin/audit/events", (request) => read(request, "platform", filters.parse(request.query), null, null, null));
   app.get("/api/v1/admin/audit/events/:reference", async (request) => {

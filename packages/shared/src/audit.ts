@@ -36,3 +36,22 @@ export interface AuditPage {
   events: AuditEvent[];
   nextCursor: string | null;
 }
+
+export interface PolicyAuditEvent {
+  source: "homepage" | "registration";
+  revision: number;
+  actorId: string;
+  actorUsername: string | null;
+  occurredAt: string;
+  reason: string;
+  changes: {
+    key: "homepageStatistics" | "enabled" | "mode" | "individualEnabled" | "organizationEnabled" | "referralsEnabled" | "rewardsEnabled";
+    before: boolean | "public" | "invitation_only" | "closed";
+    after: boolean | "public" | "invitation_only" | "closed";
+  }[];
+}
+
+export interface PolicyAuditPage {
+  events: PolicyAuditEvent[];
+  nextCursor: string | null;
+}

@@ -2,6 +2,22 @@
   "version": 1,
   "modules": [
     {
+      "module": "homepage_policy",
+      "status": "covered",
+      "requiredEvents": "Founder changes to public Community Statistics visibility.",
+      "sources": [
+        "private.platform_boolean_policy_events"
+      ],
+      "observed": "The original ledger records the values, actor and reason in the same transaction as the update. The Founder’s audit page reads those records through the original workspace.",
+      "missing": [],
+      "viewers": "Active Founder, recent MFA and original private workspace only.",
+      "excluded": "Stats totals, session IDs, request UUIDs and unrelated member details.",
+      "tests": [
+        "apps/web/e2e/registration-policy.spec.ts"
+      ],
+      "remediation": "Retain the existing ledger lifecycle and secure Founder projection."
+    },
+    {
       "module": "registration_policy",
       "status": "partially covered",
       "requiredEvents": "Founder registration and referral policy revisions, registration invitation issue and consumption, and eligible referral attribution.",
@@ -12,9 +28,9 @@
       ],
       "observed": "Policy changes and invitation state commit in PostgreSQL. Referral attribution retains the existing subject-unique history.",
       "missing": [
-        "Unified Audit Center read adapter for registration policy revisions and invitation lifecycle"
+        "Unified Audit Center read adapter for registration invitation lifecycle"
       ],
-      "viewers": "Service-custodied administrative audit evidence; members see only their aggregate count and own stable code.",
+      "viewers": "The active Founder can view registration revisions with recent MFA and the original workspace. Members see only their aggregate count and own stable code.",
       "excluded": "Raw credentials, private recipient emails, provider proof, and referred-account identity.",
       "tests": [
         "apps/web/e2e/registration-policy.spec.ts",

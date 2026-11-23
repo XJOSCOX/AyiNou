@@ -1,4 +1,14 @@
 {
+  "policyAudit": {
+    "title": "Modifications des paramètres",
+    "changedBy": "Modifié par",
+    "reason": "Motif",
+    "empty": "Aucune modification des paramètres n’a été enregistrée.",
+    "newer": "Modifications plus récentes",
+    "older": "Modifications plus anciennes",
+    "rewards": "Récompenses de parrainage",
+    "latest": "Dernières modifications"
+  },
   "registrationPolicy": {
     "title": "Inscriptions",
     "help": "Gérez la création de comptes et les parrainages. Ces réglages s’appliquent à la création de chaque nouveau compte.",

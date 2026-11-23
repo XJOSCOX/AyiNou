@@ -161,6 +161,63 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
     await page.getByLabel(ui.reason, { exact: true }).fill(reason);
     await page.getByRole("button", { name: ui.save }).click();
     await expect(page.getByText(ui.revision + " " + (baseline + 5), { exact: false })).toBeVisible();
+
+    const historyPath = "/api/v1/admin/audit/policies";
+    const historyHeaders = { Authorization: "Bearer " + elevated.token, "X-Ayinou-Workspace": workspace };
+    const homepagePath = "/api/v1/admin/homepage/community-statistics";
+    const homepage = await (await fetch(api + homepagePath, { headers: historyHeaders })).json();
+    const setHomepage = (enabled: boolean, revision: number, note: string) => fetch(api + homepagePath, {
+      method: "PATCH", headers: { ...historyHeaders, "Content-Type": "application/json" },
+      body: JSON.stringify({ enabled, expectedRevision: revision, requestId: randomUUID(), reason: note }),
+    });
+    const homepageReason = "Temporarily hide public community statistics.";
+    expect((await setHomepage(!homepage.enabled, homepage.revision, homepageReason)).status).toBe(200);
+    expect((await setHomepage(homepage.enabled, homepage.revision + 1, "Restore the public community statistics setting.")).status).toBe(200);
+    const historyResponse = await fetch(api + historyPath, { headers: historyHeaders });
+    expect(historyResponse.status).toBe(200);
+    expect(historyResponse.headers.get("cache-control")).toContain("no-store");
+    const policyEvents = (await historyResponse.json()).events;
+    expect(policyEvents).toEqual(expect.arrayContaining([
+      expect.objectContaining({ source: "homepage", actorUsername: founder.handle, reason: homepageReason, changes: [
+        { key: "homepageStatistics", before: homepage.enabled, after: !homepage.enabled },
+      ] }),
+      expect.objectContaining({ source: "registration", actorId: founder.id, reason, changes: expect.arrayContaining([
+        { key: "mode", before: "public", after: "closed" },
+      ]) }),
+    ]));
+    expect(JSON.stringify(policyEvents)).not.toContain(invited.email);
+    expect(JSON.stringify(policyEvents)).not.toContain(code);
+    expect((await fetch(api + historyPath, {
+      headers: { Authorization: "Bearer " + member.token, "X-Ayinou-Workspace": workspace },
+    })).ok).toBe(false);
+    expect((await fetch(api + historyPath, { headers: { ...historyHeaders, "X-Ayinou-Workspace": randomUUID() } })).status).toBe(404);
+
+    await page.getByRole("button", { name: adminMessages.en.audit, exact: true }).click();
+    const historySection = page.getByRole("region", { name: adminMessages.en.policyAudit.title });
+    const entry = historySection.getByRole("listitem").filter({ hasText: homepageReason });
+    await expect(entry.getByText("@" + founder.handle, { exact: false })).toBeVisible();
+    await expect(entry.locator("time")).toHaveAttribute("datetime", /T/);
+    await expect(historySection.getByText(reason, { exact: true }).first()).toBeVisible();
+
+    sql(`insert into private.platform_boolean_policy_events(policy_key,revision,actor_id,previous_enabled,enabled,reason,request_id,occurred_at)
+      select 'homepage.community_statistics.enabled',i,'${founder.id}',true,false,
+        'Disposable earlier policy event',gen_random_uuid(),now()-interval '1 day' from generate_series(10000,10024) i;`);
+    try {
+      const readPage = (cursor?: string, active = workspace) => fetch(api + historyPath + (cursor ? "?" + new URLSearchParams({ cursor }) : ""),
+        { headers: { ...historyHeaders, "X-Ayinou-Workspace": active } });
+      const firstPage = await (await readPage()).json();
+      expect(firstPage.events).toHaveLength(20);
+      expect(firstPage.nextCursor).toBeTruthy();
+      const secondPage = await (await readPage(firstPage.nextCursor)).json();
+      const keys = [...firstPage.events, ...secondPage.events].map((e) => e.source + ":" + e.revision);
+      expect(new Set(keys).size).toBe(keys.length);
+      expect(secondPage.events.length).toBeGreaterThan(0);
+      expect(secondPage.nextCursor).toBeNull();
+      expect((await readPage(firstPage.nextCursor, randomUUID())).status).toBe(400);
+    } finally {
+      sql(`delete from private.platform_boolean_policy_events where actor_id='${founder.id}' and revision between 10000 and 10024;`);
+    }
+
     expect(sql(`select count(*) from private.registration_policy_events where revision>${baseline} and actor_id='${founder.id}';`)).toBe("5");
     expect(sql(`select (has_table_privilege('authenticated','private.registration_invitations','select')
       or has_table_privilege('authenticated','private.registration_policy_events','select')
