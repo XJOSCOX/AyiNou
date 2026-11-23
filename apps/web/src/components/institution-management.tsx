@@ -6,7 +6,7 @@ import { governmentKinds, invitedRoles, type InstitutionManagement } from "@ayin
 import { accountMessages } from "@/lib/account-i18n";
 import { affiliationMessages } from "@/lib/affiliation-i18n";
 import { authMessages } from "@/lib/auth-i18n";
-import { inviteRepresentative, loadInstitution, resolveInvitation, revokeRepresentative, saveInstitution, uploadInstitutionLogo } from "@/lib/institution-api";
+import { inviteRepresentative, loadApplications, loadInstitution, resolveInvitation, revokeRepresentative, saveInstitution, uploadInstitutionLogo } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -53,6 +53,16 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
   const country = new Intl.DisplayNames(locale, { type: "region" }).of(org.countryCode) ?? org.countryCode;
   const inviteRoles = invitedRoles.filter((item) => role === "owner" || item !== "administrator");
   const applyAs = governmentKinds.includes(org.kind) ? "government" : "organization";
+  const applications = useInstitutionResource(loadApplications);
+  const requestStates = applications.data?.institutionRequests?.[org.id];
+  const institutionState = requestStates?.institution ?? (detail.identityLocked && org.verificationStatus !== "verified" ? "pending" : "available");
+  const representativeState = requestStates?.representative ?? (detail.representatives.some((rep) => rep.isSelf && rep.verified) ? "already_verified" : "available");
+  const requests = [
+    ...(role === "owner" && org.verificationStatus !== "verified"
+      ? [{ kind: applyAs, label: t.request, state: institutionState }]
+      : []),
+    { kind: "representative", label: t.representative, state: representativeState },
+  ];
   const [editing, setEditing] = useState(false);
   const [inviting, setInviting] = useState(false);
   const inviteButton = useRef<HTMLButtonElement>(null);
@@ -262,10 +272,17 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
               <h2 className="text-xl font-semibold">{t.verification}</h2>
               <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {role === "owner" && org.verificationStatus !== "verified" && <Link className={workspaceButton} href={`/verification?institution=${org.id}&kind=${applyAs}`}>{t.request}</Link>}
-              <Link className={workspaceButton} href={`/verification?institution=${org.id}&kind=representative`}>{t.representative}</Link>
-            </div>
+            {applications.error ? <div className="mt-4">
+              <p role="alert" className={institutionErrorBox}>{institutionError(t, applications.error)}</p>
+              <button type="button" className={`${institutionLink} mt-2`} onClick={applications.refresh}>{auth.retry}</button>
+            </div> : !applications.data ? <p className="mt-4 text-sm" role="status">{auth.working}</p>
+              : <div className="mt-4 flex flex-wrap items-center gap-2">
+                {requests.map(({ kind, label, state }) => state === "available"
+                  ? <Link key={kind} className={workspaceButton} href={`/verification?institution=${org.id}&kind=${kind}`}>{label}</Link>
+                  : <p key={kind} className="rounded-md bg-[var(--theme-control)] px-3 py-2 text-sm">
+                    {kind === "representative" ? t.representative : t.organization} · {state === "pending" ? t.pending : t.approved}
+                  </p>)}
+              </div>}
           </section>
           {manageTeam && <div className="min-w-0"><OrganizationEarlyPartners organizationId={org.id} /></div>}
           {manageTeam && <section className={institutionCard}>

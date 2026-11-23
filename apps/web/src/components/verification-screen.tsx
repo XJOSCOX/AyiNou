@@ -127,14 +127,18 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
   const hasNoticeForFailure = (verified && failureCode === "VERIFICATION_ALREADY_VERIFIED") ||
     (pending && failureCode === "VERIFICATION_REQUEST_PENDING");
   const needsOrganization = kind === "organization" || kind === "government" || kind === "representative";
+  const institutionRequests = needsOrganization ? workspace?.institutionRequests?.[organization] : undefined;
+  const institutionState = kind === "representative" ? institutionRequests?.representative : institutionRequests?.institution;
+  const institutionPending = institutionState === "pending" || (needsOrganization && saved);
+  const institutionNotice = institutionPending || institutionState === "already_verified";
   const eligible = accounts.organizations.filter((org) => {
     if (kind === "representative") return true;
-    return org.role === "owner" && org.verificationStatus !== "verified" && (kind === "government") === governmentKinds.includes(org.kind);
+    return org.role === "owner" && (org.verificationStatus !== "verified" || (org.id === organization && institutionState === "already_verified")) && (kind === "government") === governmentKinds.includes(org.kind);
   });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || personalBlocked || intakePaused) return;
+    if (busy || personalBlocked || institutionNotice || intakePaused || (needsOrganization && !workspace)) return;
     setBusy(true);
     setSaved(false);
     setFailed(null);
@@ -154,7 +158,8 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
       refresh();
     } catch (cause) {
       setFailed(cause);
-      if (["VERIFICATION_REQUEST_PENDING", "VERIFICATION_ALREADY_VERIFIED"].includes(apiErrorCode(cause))) refresh();
+      if (["VERIFICATION_REQUEST_PENDING", "VERIFICATION_ALREADY_VERIFIED"].includes(apiErrorCode(cause)) ||
+        (needsOrganization && apiErrorCode(cause) === "CONFLICT")) refresh();
     } finally { setBusy(false); }
   }
 
@@ -171,7 +176,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
       {intakePaused && <p role="status" className={institutionErrorBox}>{verificationCopy[locale].copy.paused}</p>}
       {!intakePaused && needsOrganization && <label className="block text-sm font-semibold">{t.institutions}
         <select className={institutionField} value={eligible.some((org) => org.id === organization) ? organization : ""}
-          onChange={(event) => setOrganization(event.target.value)} required disabled={busy || !eligible.length}>
+          onChange={(event) => { setOrganization(event.target.value); setSaved(false); setFailed(null); }} required disabled={busy || !eligible.length}>
           <option value="">{eligible.length ? "—" : t.none}</option>
           {eligible.map((org) => <option key={org.id} value={org.id}>{org.name}</option>)}
         </select>
@@ -192,7 +197,10 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
           </div>
           <a className={institutionLink} href="#my-verification-applications">{t.viewMyApplications}</a>
         </div>
-      </div> : !intakePaused && <>
+      </div> : !intakePaused && institutionNotice ? <div role="status" className="rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-4">
+        <p className="font-semibold">{t[kind]} · {institutionPending ? t.pending : t.approved}</p>
+        <a className={institutionLink} href="#my-verification-applications">{t.viewMyApplications}</a>
+      </div> : !intakePaused && (!needsOrganization || workspace) && <>
         <label className="block text-sm font-semibold">{t.evidence}
           <textarea className={institutionField} value={evidence} rows={4} maxLength={905} required disabled={busy || personalBlocked}
             onChange={(event) => setEvidence(event.target.value)} aria-describedby="verification-evidence-hint" />
