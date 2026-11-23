@@ -4,6 +4,7 @@ import Link from "next/link";
 import { messages } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
 import { authMessages } from "@/lib/auth-i18n";
+import { canRegister, useRegistrationPolicy } from "@/lib/registration";
 import { Navbar } from "./navbar";
 import { UpdatesSidebar } from "./updates-sidebar";
 import { SiteFooter } from "./site-footer";
@@ -14,6 +15,7 @@ import styles from "./home-page.module.css";
 
 export function HomePage() {
   const [locale] = useLocale();
+  const { policy } = useRegistrationPolicy();
   const t = messages[locale];
   const auth = authMessages[locale];
   const m = membershipMessages[locale];
@@ -28,10 +30,10 @@ export function HomePage() {
             <h1 className="max-w-[15ch] text-balance text-[clamp(2.35rem,4.4vw,4.75rem)] font-semibold leading-[1.02] tracking-[-0.048em]">{t.heroTitle}</h1>
             <p className="mt-5 max-w-md text-pretty text-base leading-relaxed text-[var(--theme-body)] lg:text-lg">{t.heroBody}</p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link href="/register" className="inline-flex items-center gap-2 rounded-md bg-[var(--theme-primary)] px-5 py-3 text-sm font-semibold text-[var(--theme-on-primary)] transition-colors hover:bg-[var(--theme-primary-hover)]">
+              {canRegister(policy) && <Link href="/register" className="inline-flex items-center gap-2 rounded-md bg-[var(--theme-primary)] px-5 py-3 text-sm font-semibold text-[var(--theme-on-primary)] transition-colors hover:bg-[var(--theme-primary-hover)]">
                 {auth.register}
                 <span aria-hidden="true">→</span>
-              </Link>
+              </Link>}
               <a href="#building" className="rounded-md border border-[var(--theme-border)] px-4 py-3 text-sm font-semibold text-[var(--theme-link)] transition-colors hover:bg-[var(--theme-control)]">{t.building}</a>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { publicRequest } from "./api";
 
 export type RegistrationPolicy = {
@@ -22,4 +23,24 @@ export async function loadRegistrationPolicy(signal?: AbortSignal): Promise<Regi
     throw new Error("Invalid registration policy");
   }
   return value;
+}
+
+export function useRegistrationPolicy(enabled = true) {
+  const [policy, setPolicy] = useState<RegistrationPolicy | null>(null);
+  const [policyLoaded, setPolicyLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const controller = new AbortController();
+    loadRegistrationPolicy(controller.signal).then((value) => {
+      if (!controller.signal.aborted) setPolicy(value);
+    }).catch(() => {
+      if (!controller.signal.aborted) setPolicy(null);
+    }).finally(() => {
+      if (!controller.signal.aborted) setPolicyLoaded(true);
+    });
+    return () => controller.abort();
+  }, [enabled]);
+
+  return { policy, policyLoaded, setPolicy };
 }

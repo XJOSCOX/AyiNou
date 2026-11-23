@@ -62,6 +62,11 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
 
     await inEnglish(guest);
     const visit = await guest.newPage();
+    const signupLink = visit.getByRole("link", { name: authMessages.en.register, exact: true });
+    for (const path of ["/", "/login"]) {
+      await visit.goto(path);
+      await expect(signupLink).toBeVisible();
+    }
     await visit.goto("/register?ref=" + referralCode);
     await expect(visit.getByLabel(accountMessages.en.optionalReferral)).toHaveValue(referralCode);
     const signupCopy = organizationOnboardingMessages.en;
@@ -92,9 +97,19 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
     await visit.reload();
     await expect(visit.getByText(authMessages.en.registrationUnavailable)).toBeVisible();
 
+    for (const path of ["/", "/login"]) {
+      const policyResponse = visit.waitForResponse((response) => response.url().endsWith(policyPath));
+      await visit.goto(path);
+      expect((await policyResponse).ok()).toBeTruthy();
+      await expect(signupLink).toHaveCount(0);
+      const signIn = path === "/"
+        ? visit.getByRole("banner").getByRole("link", { name: authMessages.en.login, exact: true })
+        : visit.getByRole("button", { name: authMessages.en.login, exact: true });
+      await expect(signIn).toBeVisible();
+    }
     const restricted = update(baseline + 2, { mode: "invitation_only", individualEnabled: false });
     expect((await send(elevated.token, "PATCH", restricted)).status).toBe(200);
-    await visit.reload();
+    await visit.goto("/register?ref=" + referralCode);
     await expect(visit.getByLabel(authMessages.en.registrationInvitation)).toBeVisible();
     await expect(pathOptions).toHaveCount(0);
     await expect(visit.getByText(signupCopy.organizationHelp, { exact: true })).toBeVisible();
@@ -122,6 +137,10 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
     await expect(pathOptions).toHaveCount(0);
     await expect(visit.getByText(signupCopy.individualHelp, { exact: true })).toHaveCount(0);
     await expect(visit.getByText(signupCopy.explanation, { exact: true })).toHaveCount(0);
+    for (const path of ["/", "/login"]) {
+      await visit.goto(path);
+      await expect(signupLink).toBeVisible();
+    }
     const independent = candidate();
     expect((await signup(independent, { referral_code: referralCode })).error).toBeNull();
     expect(sql(`select count(*) from private.referrals r join auth.users u on u.id=r.referred_user_id where u.email='${independent.email}';`)).toBe("0");

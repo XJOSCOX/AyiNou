@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { completePasswordRecovery } from "@/app/reset-password/actions";
@@ -10,7 +10,7 @@ import { AuthShell } from "./auth-shell";
 import { accountMessages } from "@/lib/account-i18n";
 import { getUsernameAvailability, validateReferralCode } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
-import { canRegister, loadRegistrationPolicy, type RegistrationPolicy } from "@/lib/registration";
+import { canRegister, loadRegistrationPolicy, useRegistrationPolicy } from "@/lib/registration";
 import { useLocale } from "@/lib/locale-store";
 import { browserSupabase, setRememberedSession } from "@/lib/supabase/browser";
 import { membershipMessages } from "@/lib/membership-i18n";
@@ -62,24 +62,13 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const [lastName, setLastName] = useState("");
   const [referral, setReferral] = useState(initialReferral);
   const [signupPath, setSignupPath] = useState<SignupPath>("individual");
-  const [policy, setPolicy] = useState<RegistrationPolicy | null>(null);
-  const [policyLoaded, setPolicyLoaded] = useState(false);
+  const { policy, policyLoaded, setPolicy } = useRegistrationPolicy(mode === "register" || mode === "login");
   const [invitation, setInvitation] = useState("");
   const signupPaths: SignupPath[] = [];
   if (policy?.individualEnabled) signupPaths.push("individual");
   if (policy?.organizationEnabled) signupPaths.push("organization");
   const selectedPath = signupPaths.includes(signupPath) ? signupPath : signupPaths[0];
 
-  useEffect(() => {
-    if (mode !== "register") return;
-    const controller = new AbortController();
-    loadRegistrationPolicy(controller.signal).then((value) => {
-      if (!controller.signal.aborted) setPolicy(value);
-    }).catch(() => {}).finally(() => {
-      if (!controller.signal.aborted) setPolicyLoaded(true);
-    });
-    return () => controller.abort();
-  }, [mode]);
   const signupSlides = useRef<HTMLDivElement>(null);
   const signup = organizationOnboardingMessages[locale];
   const [visiblePassword, setVisiblePassword] = useState(false);
@@ -385,7 +374,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           <button type="submit" disabled={loading || passwordChanged || preparingReset} className={`${primaryActionClass} disabled:opacity-60`}>
             {loading ? t.working : { register: t.register, login: t.login, forgot: t.sendReset, reset: t.savePassword, verify: "" }[mode]}
           </button>
-          {mode === "login" && <p className="border-t border-[var(--theme-border)] pt-5 text-center text-sm text-[var(--theme-body)]">{t.needAccount} <Link href="/register" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.register}</Link></p>}
+          {mode === "login" && canRegister(policy) && <p className="border-t border-[var(--theme-border)] pt-5 text-center text-sm text-[var(--theme-body)]">{t.needAccount} <Link href="/register" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.register}</Link></p>}
           {mode === "register" && <p className="border-t border-[var(--theme-border)] pt-5 text-center text-sm text-[var(--theme-body)]">{t.haveAccount} <Link href="/login" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.login}</Link></p>}
           {(mode === "forgot" || mode === "reset") && <p className="text-center text-sm"><Link href="/login" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.backLogin}</Link></p>}
         </form>
