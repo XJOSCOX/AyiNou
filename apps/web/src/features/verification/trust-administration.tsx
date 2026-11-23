@@ -5,7 +5,7 @@ import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { loadAppealQueue, loadVerificationAssignments, loadImpersonationQueue, assignVerificationApplication, assignVerificationAppeal, decideImpersonation } from "@/lib/trust-api";
 import { trustMessages } from "@/lib/trust-i18n";
-import { type ImpersonationReview, type ImpersonationRestriction, personalClaims } from "@ayinou/shared";
+import { type ImpersonationReview, type ImpersonationRestriction, type VerificationKind, personalClaims } from "@ayinou/shared";
 import { useCallback, useRef, useState } from "react";
 import { authorizedRequest } from "@/lib/api";
 
@@ -53,8 +53,8 @@ export function TrustAdministration({ founderWorkspace }: { founderWorkspace?: s
       {applications.data?.applications.map((application) => <details className="break-words border-t border-[var(--theme-border)] pt-2" key={application.id}>
         <summary className="cursor-pointer font-semibold">{labels[application.kind]}{application.organizationName && ` · ${application.organizationName}`} {application.applicantUsername && `· @${application.applicantUsername}`}</summary>
         {application.eligibleReviewers < 2 && <p className="my-2 text-sm">{t.reviewersNeeded}</p>}
-        {founderWorkspace && (application.kind === "identity" || application.kind === "organization") && application.status === "pending" &&
-          <FounderBlueApproval organization={application.kind === "organization"} applicationId={application.id} workspace={founderWorkspace} refresh={applications.refresh} />}
+        {founderWorkspace && (application.canFounderReview ?? (application.kind === "identity" || application.kind === "organization")) && application.status === "pending" &&
+          <FounderBlueApproval kind={application.kind} applicationId={application.id} workspace={founderWorkspace} refresh={applications.refresh} />}
         {application.assigned.length > 0 && <p className="my-2 text-sm">{t.assignedReviewers} · {application.assigned
           .filter(({ eligible }) => eligible).map(({ handle }) => handle).join(", ") || "—"}</p>}
         <AssignmentForm canRelease={application.canRelease !== false} save={async (handle, reason, assign) => {
@@ -82,20 +82,20 @@ export function TrustAdministration({ founderWorkspace }: { founderWorkspace?: s
   </div>;
 }
 
-function FounderBlueApproval({ applicationId, workspace, refresh, organization }: {
-  applicationId: string; workspace: string; refresh(): void; organization: boolean;
+function FounderBlueApproval({ applicationId, workspace, refresh, kind }: {
+  applicationId: string; workspace: string; refresh(): void; kind: VerificationKind;
 }) {
   const [locale] = useLocale();
   const t = trustMessages[locale];
   const [open, setOpen] = useState(false);
   return <div className="my-3 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-3">
     <button type="button" className={institutionAction} aria-expanded={open} onClick={() => setOpen(!open)}>{t.founderBlueReview}</button>
-    {open && <FounderBlueDecision organization={organization} applicationId={applicationId} workspace={workspace} refresh={refresh} />}
+    {open && <FounderBlueDecision kind={kind} applicationId={applicationId} workspace={workspace} refresh={refresh} />}
   </div>;
 }
 
-function FounderBlueDecision({ applicationId, workspace, refresh, organization }: {
-  applicationId: string; workspace: string; refresh(): void; organization: boolean;
+function FounderBlueDecision({ applicationId, workspace, refresh, kind }: {
+  applicationId: string; workspace: string; refresh(): void; kind: VerificationKind;
 }) {
   const [locale] = useLocale();
   const t = trustMessages[locale];
@@ -109,6 +109,12 @@ function FounderBlueDecision({ applicationId, workspace, refresh, organization }
   if (evidence.error !== null) return <TrustError error={evidence.error} retry={evidence.refresh} returnTo="/admin" />;
   if (!evidence.data) return <p role="status" className="mt-3 text-sm">{t.founderBlueLoading}</p>;
   const { revision, evidence: references } = evidence.data;
+  const confirmation = kind === "representative" ? t.founderRepresentativeConfirm
+    : kind === "organization" ? t.founderOrgConfirm : labels.conflictFree;
+  const help = kind === "representative" ? t.founderRepresentativeHelp
+    : kind === "organization" ? t.founderOrgHelp : t.founderBlueHelp;
+  const approve = kind === "representative" ? t.founderRepresentativeApprove
+    : kind === "organization" ? t.founderOrgApprove : t.founderBlueApprove;
   return <form className="mt-3 grid gap-3" onSubmit={(event) => {
     event.preventDefault();
     const form = fields(event);
@@ -127,17 +133,17 @@ function FounderBlueDecision({ applicationId, workspace, refresh, organization }
       refresh();
     });
   }}>
-    <p className="text-sm text-[var(--theme-body)]">{organization ? t.founderOrgHelp : t.founderBlueHelp}</p>
+    <p className="text-sm text-[var(--theme-body)]">{help}</p>
     <PublicReferences references={references} />
     <label className="text-sm font-semibold">{t.reason}
       <textarea name="reason" className={institutionField} rows={3} required minLength={10} maxLength={1000} />
     </label>
     <label className="flex items-start gap-2 text-sm">
-      <input className="mt-1" type="checkbox" name="conflictFree" required />{organization ? t.founderOrgConfirm : labels.conflictFree}
+      <input className="mt-1" type="checkbox" name="conflictFree" required />{confirmation}
     </label>
     {mutation.error !== null && <TrustError error={mutation.error} retry={evidence.refresh} returnTo="/admin" />}
     <div className="flex flex-wrap gap-3">
-      <button value="approve" className={institutionAction} disabled={mutation.busy || references.length === 0}>{organization ? t.founderOrgApprove : t.founderBlueApprove}</button>
+      <button value="approve" className={institutionAction} disabled={mutation.busy || references.length === 0}>{approve}</button>
       <button value="reject" className={`${institutionField} mt-0 w-auto`} disabled={mutation.busy || references.length === 0}>{labels.reject}</button>
     </div>
   </form>;

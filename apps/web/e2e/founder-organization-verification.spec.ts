@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, localClient, login, openAdministration, solveMfa, sql, test, totp } from "./fixtures";
 
-test("Founder can delegate and decide their own ordinary organization request", async ({ page, makeMember }) => {
+test("Founder can decide their own organization and representative requests and route protected cases", async ({ page, makeMember }) => {
   const [founder, admin, delegate] = await Promise.all([makeMember(), makeMember(), makeMember()]);
   finishPersonalOnboarding(founder);
   async function elevate(member: typeof founder) {
@@ -34,18 +34,23 @@ test("Founder can delegate and decide their own ordinary organization request", 
       apiCall(actor, "/api/v1/me/verification", 201, "POST", { organizationId, kind, evidence });
     const { id } = await apply(org, "organization");
     const government = await apply(ministry, "government");
+    const governmentRepresentative = await apply(ministry, "representative");
+    const representative = await apply(org, "representative");
     const assignments = "/api/v1/trust/application-assignments";
     const queue = (await apiCall(actor, assignments, 200)).applications;
     expect(queue).toContainEqual(
       expect.objectContaining({ id, organizationName: "Founder Review Business", canRelease: false }),
     );
-    expect(queue).not.toContainEqual(expect.objectContaining({ id: government.id }));
+    expect(queue).toContainEqual(expect.objectContaining({ id: representative.id, canFounderReview: true, canRelease: false }));
+    for (const protectedCase of [government, governmentRepresentative]) {
+      expect(queue).toContainEqual(expect.objectContaining({ id: protectedCase.id, canFounderReview: false, canRelease: false }));
+    }
     const assign = (application: string, handle: string, status: number) =>
       apiCall(actor, "/api/v1/trust/applications/" + application + "/assignment", status, "PATCH",
         { reviewer: handle, reason: "Request an independent organization review.", assign: true });
     await assign(id, founder.handle, 404);
     await assign(id, reviewer.handle, 204);
-    await assign(government.id, reviewer.handle, 404);
+    await assign(government.id, reviewer.handle, 204);
     const workspace = (await apiCall(actor, "/api/v1/me/private-workflows", 200, "POST", { kind: "admin_workspace" })).id;
     const otherWorkspace = (await apiCall(other, "/api/v1/me/private-workflows", 200, "POST", { kind: "admin_workspace" })).id;
     const send = (token: string, application: string, ref: string, body?: object) =>
@@ -55,6 +60,8 @@ test("Founder can delegate and decide their own ordinary organization request", 
         body: body ? JSON.stringify(body) : undefined,
       });
     expect((await send(actor.token, government.id, workspace)).status).toBe(404);
+    expect((await send(actor.token, governmentRepresentative.id, workspace)).status).toBe(404);
+    expect((await send(other.token, representative.id, otherWorkspace)).status).toBe(404);
     expect((await send(other.token, id, otherWorkspace)).status).toBe(404);
     expect((await send(actor.token, id, otherWorkspace)).status).toBe(404);
     const response = await send(actor.token, id, workspace);
@@ -72,6 +79,29 @@ test("Founder can delegate and decide their own ordinary organization request", 
     expect(sql(`select count(*) from private.verification_reviews where application_id='${id}';`)).toBe("0");
     expect(sql(`select count(*) from private.institution_audit where subject_id='${id}' and event='founder_organization_approved';`)).toBe("1");
 
+    const repEvidence = await send(actor.token, representative.id, workspace);
+    expect(repEvidence.status).toBe(200);
+    expect((await repEvidence.json()).evidence.sort()).toEqual([...evidence].sort());
+    expect((await send(actor.token, representative.id, workspace, body)).status).toBe(409);
+
+    const appealId = randomUUID();
+    const originalDecision = randomUUID();
+    sql(`update private.verification_applications set status='rejected',decided_at=now() where id='${governmentRepresentative.id}';
+      insert into private.verification_reviews(id,application_id,reviewer_id,decision,rationale)
+      values ('${originalDecision}','${governmentRepresentative.id}','${other.id}','reject','Synthetic prior decision.');
+      insert into private.verification_appeals(id,application_id,decision_id,appellant_id,explanation,reference_urls)
+      values ('${appealId}','${governmentRepresentative.id}','${originalDecision}','${actor.id}','Private test appeal context.',array[]::text[]);`);
+    const appealPath = "/api/v1/trust/verification-appeals";
+    expect((await apiCall(actor, appealPath + "?view=assign", 200)).appeals).toContainEqual(
+      expect.objectContaining({ id: appealId, assigned: false }),
+    );
+    const routeAppeal = { reviewer: reviewer.handle, reason: "Route this case to a separate eligible reviewer." };
+    await apiCall(actor, `${appealPath}/${appealId}/assignment`, 204, "PATCH", routeAppeal);
+    expect((await apiCall(actor, appealPath + "?view=assign", 200)).appeals.find((item: { id: string }) => item.id === appealId))
+      .not.toHaveProperty("explanation");
+    await apiCall(actor, `${appealPath}/${appealId}/assignment`, 204, "PATCH", routeAppeal);
+    expect(sql(`select count(*) from private.verification_appeal_assignments where appeal_id='${appealId}';`)).toBe("1");
+
     const handle2 = handle + "-second";
     const org2 = randomUUID();
     sql(`insert into private.organizations(id,handle,name,kind,country_code,created_by)
@@ -83,6 +113,24 @@ test("Founder can delegate and decide their own ordinary organization request", 
     await solveMfa(page, actor.secret);
     await openAdministration(page);
     await page.getByRole("button", { name: "Trust and verification" }).click();
+    const repItem = page.locator("details").filter({
+      has: page.locator("summary", { hasText: "Authorized representative · Founder Review Business" }),
+    });
+    await repItem.locator("summary").click();
+    await repItem.getByRole("button", { name: "Review as Founder" }).click();
+    const approveRep = repItem.getByRole("button", { name: "Approve representative verification" });
+    const repForm = repItem.locator("form").filter({ has: page.getByRole("button", { name: "Approve representative verification" }) });
+    await repForm.getByRole("textbox", { name: "Written reason" }).fill("Reviewed public authorization for this specific representative grant.");
+    await repForm.getByRole("checkbox").check();
+    await approveRep.click();
+    await expect(repItem).toHaveCount(0);
+    expect(sql(`select a.status || ':' || (m.verified_at is not null)::text || ':' || m.public_verified_rep::text
+      from private.verification_applications a join private.organization_memberships m on m.id=a.membership_id
+      where a.id='${representative.id}';`)).toBe("approved:true:false");
+    expect(sql(`select count(*) from private.verification_reviews where application_id='${representative.id}';`)).toBe("0");
+    expect(sql(`select count(*) from private.a1a_audit_source where resource_ref='${representative.id}'
+      and authority='founder' and outcome='approved';`)).toBe("1");
+
     const item = page.locator("details").filter({ has: page.locator("summary", { hasText: "Founder Review Second" }) });
     await item.locator("summary").click();
     await item.getByRole("button", { name: "Review as Founder" }).click();

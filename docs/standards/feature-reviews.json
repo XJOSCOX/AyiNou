@@ -12,6 +12,14 @@
           "compatibility": "Additive audit events and queue metadata preserve existing applications, votes, and endpoints.",
           "validation": "Disposable browser and API checks test the owned-organization queue, assignment, direct decision, and original safeguards.",
           "rolloutAndRollback": "Exact scoped hosted migration with a read-only postflight. Remove the added authority with a forward migration and retain all audit history."
+        },
+        {
+          "file": "supabase/migrations/20261123123000_founder_representative_review.sql",
+          "rlsAndGrants": "Existing private case, membership, evidence and audit tables retain RLS and grants. Existing RPC grants remain in place and the eligibility helper is private.",
+          "authorization": "Direct representative decisions require trusted Founder provenance, current original-session administration, recent MFA and an exact active ordinary organization grant. Assignment oversight preserves independent reviewer eligibility.",
+          "compatibility": "Adds Founder representative audit events and queue capability metadata without editing historical records. Existing independent review and evidence grants remain.",
+          "validation": "Disposable browser and API coverage exercises own representative decisions, audit provenance, assignment and protected case denials.",
+          "rolloutAndRollback": "Deploy only the reviewed migration to the authorized project. Remove added authority with a forward migration while preserving decision history."
         }
       ]
     },

@@ -11,6 +11,8 @@ The matrix assumes active enrolled test accounts with recent MFA and only the ro
 | Ordinary verification queue | Separate assignment | Separate assignment | Separate assignment | Allow | Deny |
 | Ordinary case evidence | Eligible assigned work | Eligible assigned work | Eligible assigned work | Eligible assigned work | Own authorized records only |
 | Founder-direct personal identity decision | Allow eligible case in private administration workspace | Deny | Deny | Deny | Own application |
+| Direct ordinary organization or representative decision | Allow in the original private administration session, including the Founder’s own eligible representative grant | Deny | Deny | Independent review only | Own application |
+| Verification and appeal assignment oversight | View pending summaries and route protected cases to independent reviewers, including conflicted cases | Existing unconflicted assignment scope | Deny | Assigned cases only | Own records only |
 | Ordinary verification vote | One eligible vote after separate assignment | Same | Same if assigned | One eligible vote after assignment | Deny |
 | Open Founder consent or contain a case | Separate active Founder Identity scope | Separate active Founder Identity scope | Deny | Deny without scoped administrative access | Own consent only |
 | Grant or release Founder Verified | Formal Founder, active scope and proof under the standing development policy | Deny | Deny | Deny | Deny |
@@ -37,3 +39,13 @@ The matrix assumes active enrolled test accounts with recent MFA and only the ro
 | `/api/v1/verification/review`, assignment, decision and revocation | Current recent-MFA session and separate reviewer eligibility. Personal-case evidence and decisions require eligible work assignment. Conflicts and approval independence are rechecked under the transaction lock. |
 
 Core administrative actions resolve the live role in PostgreSQL. Feed moderation checks platform/admin/moderator scope, project review applies active-user, verified-authenticator and conflict predicates, and project decisions add the existing recent-session checks. Organization, community, privacy, program, verification and legal workflow roles use their own authority. The older SQL checks for an institutional or community `administrator` describe domain roles. Legacy global administrator promotion and status writes are protected by the active O5 wrapper.
+
+## Founder representative review
+
+Routine platform approval surfaces already inherit the recognized Founder through the platform-administrator predicate. This covers account administration, platform safety and impersonation, ambassador administration, eligible onboarding corrections, and platform project moderation within their current session and resource rules.
+
+The Trust and verification assignment queue includes pending cases even when the Founder is conflicted. A conflicted Founder can route an application to an eligible reviewer without releasing assignments. A conflicted Founder can route a verification appeal that has no eligible assignee. Appeal evidence and disposition are restricted to eligible assigned reviewers.
+
+For ordinary organizations the existing Founder verification command also permits direct representative decisions, including the Founder’s own current grant. The command requires the original administration workspace, recent authenticator verification, Founder provenance, a current application revision, public evidence from independent sources and a written reason. Approval updates the exact active membership, and the audit receipt records Founder authority without creating an independent reviewer vote. Existing opt-in controls continue to govern public representative display. The migration changes no evidence storage, retention, export, deletion or legal-hold rules.
+
+Government verification and government representation, ownership claims, and independent verification and appeal decisions retain their protected review paths. Founder identity proof and consent, protected governance and recovery, legal publication, privacy operations, private ballots, and program-specific operator authority retain their existing authorization. The change grants no organization or project ownership, reviewer roster assignment or access to restricted evidence.
