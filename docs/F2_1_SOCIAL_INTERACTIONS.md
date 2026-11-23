@@ -34,4 +34,13 @@ The roadmap and audit matrix describe F2.1. Hosted deployment uses the linked de
 
 ## Remaining blockers
 
-Hosted verification and final regression results are recorded below when complete.
+F2.1 is complete in development. The matching API and web ran locally against the upgraded hosted development database. There was no hosted application deployment or hosted test-account creation. Community content remains in its original audience, and existing raw mentions only resolve after a content edit.
+
+## Release verification
+
+- Starting SHA `799b5c1194de3864cc276081d52166ad14e49eef`. Tested implementation SHA `930ea340c3a2ad55549366740be002b821e82f0e`.
+- Local checks passed for typecheck, lint, both production builds, four-language parity, shared contracts, engineering standards, and Legal Center. All 53 API, seven client, and two web environment tests passed. The full Chromium suite passed 108 tests, and the final focused rerun passed three tests with opt-out and account deletion coverage.
+- Hosted development project `hcbxulyfmdmuyccgrujs` applied only `20261123090000_f21_social_interactions.sql`. The checked working file SHA-256 was `d9a6f186a65e0627c93d2ca9a77428d110753ad10da997bbeb9dfab5df783c79`. Migration history moved from 94 to 95, with zero pending in the postflight dry run.
+- Postflight found RLS and restricted table grants on all five added tables and authenticated-only execution on all six private-scope public RPCs. Aggregate counts matched before and after for accounts, posts, comments, reactions, follows, and notifications.
+- The restarted local Fastify health check and public feed returned HTTP 200. Both sampled posts carried the social projection. Anonymous saved-post access returned HTTP 401. The local web homepage returned HTTP 200. Authenticated social workflows were exercised in disposable Supabase.
+- GitHub was used for source delivery. Development validation ran locally.

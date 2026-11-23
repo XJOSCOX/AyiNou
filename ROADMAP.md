@@ -138,7 +138,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Add privacy-filtered follower lists, counts, and a chronological following feed.
 - [x] Keep institutional following independent from membership, representation, and verification.
 
-## F2.1 — Social interactions and following
+## F2.1 — Social interactions and following (COMPLETE AND DEPLOYED TO HOSTED DEVELOPMENT DATABASE)
 
 - [x] Extend the existing graph with mutual follows, organization posts, and per-account repost preferences.
 - [x] Add reposts, quote posts, private saves, canonical mentions, Unicode hashtags, and interaction notification preferences.
