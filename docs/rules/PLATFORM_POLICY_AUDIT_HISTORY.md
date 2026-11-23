@@ -26,7 +26,7 @@ Newest-first keyset pages use the timestamp, source and revision to order ties. 
 
 ## Validation and CI
 
-Disposable tests reconcile changes written by both policy routes with their audit entries and verify the rendered timestamp, actor and reason. Tests also cover access denials, pagination across ties and credential redaction. Local checks gate the hosted deployment.
+Disposable tests reconcile changes written by both policy routes with their audit entries and verify the rendered timestamp, actor and reason. Tests also cover access denials, pagination across ties and credential redaction. Local typecheck, lint, 53 API tests, shared and localization checks, engineering standards, both production builds and three targeted Chromium tests passed.
 
 ## Documentation and operations
 
@@ -34,4 +34,4 @@ Open Platform → Audit history in the Founder’s original private administrati
 
 ## Remaining blockers
 
-The additive read projection requires hosted deployment and verification against existing policy histories. No hosted audit records need to be copied or changed.
+The read-only migration was applied to hosted development project `hcbxulyfmdmuyccgrujs` after the single-file dry run. The database has 92 applied migrations and zero pending. Postflight verified both indexes, service-only RPC execution, and preservation of the 2 homepage and 8 registration records. The local API was restarted and denied anonymous requests while its homepage and registration reads stayed available. There are no remaining hosted development blockers.
