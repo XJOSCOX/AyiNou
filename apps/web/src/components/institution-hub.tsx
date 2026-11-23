@@ -4,12 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { affiliationMessages } from "@/lib/affiliation-i18n";
 import { authMessages } from "@/lib/auth-i18n";
-import { discoveryMessages } from "@/lib/discovery-i18n";
 import { loadInstitutionAccounts, resolveInvitation } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
-import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionStatus, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionLogo, InstitutionStatus, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { MyAffiliationsPanel } from "./my-affiliations-panel";
@@ -35,32 +34,37 @@ export function InstitutionHub() {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <PageHeader title={t.institutions} description={t.institutionsIntro} actions={<>
+        <PageHeader title={t.institutions} description={t.institutionHubIntro} actions={<>
           <Link className={institutionAction} href="/organization-onboarding">{organizationOnboardingMessages[locale].resume}</Link>
-          <Link className={institutionLink} href="/discover?view=institutions">{discoveryMessages[locale].viewAll}</Link>
+          <Link className={institutionLink} href="/discover?view=institutions">{t.browseInstitutions}</Link>
         </>} />
         {failure !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failure)}</p>}
         {accounts.error ? <div className={institutionCard}>
           <p role="alert">{institutionError(t, accounts.error)}</p>
           <button type="button" onClick={accounts.refresh} className={`${institutionLink} mt-2`}>{auth.retry}</button>
         </div> : !accounts.data ? <p role="status">{auth.working}</p> : (
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(17rem,2fr)]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,20rem)] lg:items-start">
             <section className={institutionCard}>
               <h2 className="text-xl font-semibold">{affiliationMessages[locale].manage}</h2>
               {accounts.data.organizations.length === 0 ? <p className="mt-3 text-[var(--theme-body)]">{t.none}</p> : (
-                <ul className="mt-3 divide-y divide-[var(--theme-border)]">
-                  {accounts.data.organizations.map((org) => <li key={org.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                    <div className="min-w-0">
-                      <Link className="break-words font-semibold text-[var(--theme-link)] hover:underline" href={`/institutions/${org.id}`}>{org.name}</Link>
-                      <p className="mt-0.5 text-sm text-[var(--theme-body)]">{t[org.role]} · @{org.handle}</p>
+                <ul className="mt-4 grid gap-3">
+                  {accounts.data.organizations.map((org) => <li key={org.id} className="grid min-w-0 gap-3 rounded-lg border border-[var(--theme-border)] p-4 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+                    <div className="flex min-w-0 flex-wrap items-center gap-3">
+                      <InstitutionLogo organization={org} />
+                      <div className="min-w-0">
+                        <Link className={`${institutionLink} break-words`} href={`/organization/${org.handle}`}>{org.name}</Link>
+                        <p className="mt-0.5 break-words text-sm text-[var(--theme-body)]">@{org.handle} · {t[org.role]}</p>
+                      </div>
+                      <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
                     </div>
-                    <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
+                    <Link className="inline-flex min-h-11 items-center justify-self-start rounded-md border border-[var(--theme-border)] px-3 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2"
+                      href={`/institutions/${org.id}`}>{t.manageOrganization}</Link>
                   </li>)}
                 </ul>
               )}
             </section>
             <section className={institutionCard}>
-              <h2 className="text-xl font-semibold">{t.invitations}</h2>
+              <h2 className="text-xl font-semibold">{t.representativeInvitations}</h2>
               {accounts.data.invitations.length === 0 ? <p className="mt-3 text-[var(--theme-body)]">{t.noInvitations}</p> : (
                 <ul className="mt-3 divide-y divide-[var(--theme-border)]">
                   {accounts.data.invitations.map((invite) => <li key={invite.id} className="space-y-2 py-3">

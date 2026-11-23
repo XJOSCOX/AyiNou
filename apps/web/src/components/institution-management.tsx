@@ -46,6 +46,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
   const manageTeam = role === "owner" || role === "administrator";
   const inviteRoles = invitedRoles.filter((item) => role === "owner" || item !== "administrator");
   const applyAs = governmentKinds.includes(org.kind) ? "government" : "organization";
+  const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState<unknown>(null);
   const [notice, setNotice] = useState<"invited" | "saved" | null>(null);
@@ -91,6 +92,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <Link href="/institutions" className={institutionLink}>{t.institutions}</Link>
           <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
           <Link href={`/organization/${org.handle}`} className={institutionLink}>{t.publicProfile}</Link>
           <Link href={`/institutions/${org.id}/roles`} className={institutionLink}>{organizationRoleMessages[locale].title}</Link>
@@ -103,13 +105,21 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
       <div className="grid gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)]">
         <div className="grid content-start gap-4">
           <section className={institutionCard}>
-            <h2 className="mb-4 text-xl font-semibold">{t.institutionProfile}</h2>
-            {role === "viewer" ? <>
-              <p className="text-sm text-[var(--theme-body)]">{org.countryCode}{org.departmentCode && ` · ${org.departmentCode}`}</p>
-              {org.description && <p className="mt-2 whitespace-pre-line break-words">{org.description}</p>}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-xl font-semibold">{t.institutionProfile}</h2>
+              {role !== "viewer" && <button type="button" className={institutionLink} disabled={busy}
+                aria-expanded={editing} aria-controls="institution-profile-content" onClick={() => setEditing(!editing)}>
+                {editing ? accountMessages[locale].cancel : t.editOrganizationProfile}
+              </button>}
+            </div>
+            <div id="institution-profile-content">
+            {!editing || role === "viewer" ? <>
+              <p className="text-sm text-[var(--theme-body)]">{org.departmentName ? `${org.departmentName} · ` : ""}{new Intl.DisplayNames(locale, { type: "region" }).of(org.countryCode)}</p>
+              {org.description && <p dir="auto" className="mt-2 whitespace-pre-line break-words">{org.description}</p>}
+              {org.website && <a className={`${institutionLink} mt-3 inline-block`} href={org.website} target="_blank" rel="noreferrer">{trustMessages[locale].listedWebsite}</a>}
             </> : <>
               <InstitutionForm initial={{ ...org, contactEmail: detail.contactEmail }} role={role} identityLocked={detail.identityLocked}
-                onSave={async (input) => { await saveInstitution(org.id, input); refresh(); }} />
+                onSave={async (input) => { await saveInstitution(org.id, input); setEditing(false); setNotice("saved"); refresh(); }} />
               {detail.registration && <OrganizationRegistrationPanel organizationId={org.id} initial={detail.registration} canCorrect={role === "owner"} />}
               <div className="mt-5 border-t border-[var(--theme-border)] pt-4">
                 <label className="inline-flex">
@@ -125,6 +135,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
                 <small id="institution-logo-hint" className="mt-1 block text-[var(--theme-body)]">{membershipMessages[locale].photoHint}</small>
               </div>
             </>}
+            </div>
           </section>
           <section className={institutionCard}>
             <h2 className="text-xl font-semibold">{t.verification}</h2>
