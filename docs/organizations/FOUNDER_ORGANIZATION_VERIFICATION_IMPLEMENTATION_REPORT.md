@@ -35,3 +35,9 @@ The existing Founder administration path is Members â†’ Trust and verification â
 ## Remaining blockers
 
 A pending request still requires an explicit decision. Independent project eligibility continues to require independent organization verification.
+
+## Release verification
+
+Implementation commit `7d08a3eed324d98065d26a97b23a4fd041287e19` passed typecheck, lint, translation parity, engineering standards, shared and API tests, and both production builds. Twelve existing Chromium regressions passed in the combined run. The focused Founder organization test passed after its queue assertion was scoped to the test applications.
+
+Hosted development applied `20261123102000_founder_organization_verification.sql` with SHA-256 `6f9ead5c4a8ae18f6d02caf5c5c4bf2558d676b846a9d0a63b9ef5e38599c11e`. Postflight found 98 applied and zero pending. The catalog confirmed the Founder decision RPC is service-only and the policy is enabled. Existing requests remained pending. The web change is available to the local development app.
