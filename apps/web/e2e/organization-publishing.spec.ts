@@ -37,6 +37,9 @@ test("F2.3 scopes announcements, pin capacity and organization post history", as
   await inEnglish(page.context());
   await page.goto("/organization/" + handle);
   await expect(page.getByRole("region", { name: "Organization posts" }).getByText(command.body)).toBeVisible();
+  await expect(page.locator("aside nav")).toBeVisible();
+  await expect(page.getByRole("banner")).toBeVisible();
+  await expect(page.getByRole("contentinfo")).toBeVisible();
   sql(`delete from private.organization_memberships where organization_id='${organization}' and user_id='${owner.id}';`);
   await apiCall(owner, `/api/v1/posts/${first.id}?version=2`, 403, "DELETE");
   await pin(owner, later.id, 404);

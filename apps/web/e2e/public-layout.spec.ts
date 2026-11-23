@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures";
 
 test("public pages align with the navigation and footer at each viewport", async ({ page }) => {
-  const paths = ["/", "/about", "/community-directory", "/projects", "/ambassadors", "/legal"];
+  const paths = ["/", "/about", "/legal"];
   for (const width of [320, 768, 2560]) {
     await page.setViewportSize({ width, height: 900 });
     for (const path of paths) {
@@ -34,6 +34,20 @@ test("public pages align with the navigation and footer at each viewport", async
       expect(layout.navigation, path).toEqual(chrome);
       expect(layout.footer, path).toEqual(chrome);
       expect(layout.overflow, path).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
+test("public app pages use the shared navigation without horizontal overflow", async ({ page }) => {
+  for (const width of [320, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const path of ["/community-directory", "/projects", "/ambassadors"]) {
+      await page.goto(path);
+      await expect(page.locator("aside nav")).toBeVisible();
+      await expect(page.getByRole("banner")).toBeVisible();
+      await expect(page.getByRole("contentinfo")).toBeVisible();
+      await expect(page.locator("main#member-main h1")).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     }
   }
 });

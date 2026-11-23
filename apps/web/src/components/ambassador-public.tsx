@@ -12,9 +12,7 @@ import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
-import { Navbar } from "./navbar";
 import { PageHeader } from "./page-header";
-import { SiteFooter } from "./site-footer";
 
 export function AmbassadorRecognition({ ambassador, compact = false }: {
   ambassador: Pick<PublicAmbassador, "category" | "statement">; compact?: boolean;
@@ -95,10 +93,5 @@ export function AmbassadorDirectory({ signedIn }: { signedIn: boolean }) {
       </section>
     </div>;
 
-  if (signedIn) return <MemberShell>{content}</MemberShell>;
-  return <div id="top" className="flex min-h-dvh flex-col">
-    <Navbar />
-    <main className="public-container flex-1 py-5 sm:py-8">{content}</main>
-    <SiteFooter />
-  </div>;
+  return <MemberShell signedIn={signedIn}>{content}</MemberShell>;
 }

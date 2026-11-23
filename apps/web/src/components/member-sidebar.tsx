@@ -24,7 +24,7 @@ const sidebarIcons = {
   "/institutions": "M3 9l9-5 9 5H3Zm1 11h16M7 10v7m5-7v7m5-7v7",
 };
 
-export function MemberSidebar({ id, expanded, toggle }: { id: string; expanded: boolean; toggle: () => void }) {
+export function MemberSidebar({ id, expanded, toggle, signedIn }: { id: string; expanded: boolean; toggle: () => void; signedIn: boolean }) {
   const [locale] = useLocale();
   const pathname = usePathname();
   const t = authMessages[locale];
@@ -39,7 +39,14 @@ export function MemberSidebar({ id, expanded, toggle }: { id: string; expanded: 
     { href: "/ambassadors", label: ambassadorMessages[locale].title },
     { href: "/institutions", label: institution.institutions },
   ];
-  const current = links.findLast(({ href }) => pathname === href || pathname.startsWith(`${href}/`))?.href;
+  const navigation = signedIn ? links : links.filter(({ href }) => ["/communities", "/projects", "/ambassadors"].includes(href));
+  const routeFor = (href: string) => !signedIn && href === "/communities" ? "/community-directory" : href;
+  const current = navigation.findLast(({ href }) => {
+    const route = routeFor(href);
+    return pathname === route || pathname.startsWith(route + "/")
+      || (href === "/institutions" && pathname.startsWith("/organization/"))
+      || (href === "/communities" && pathname.startsWith("/community-directory"));
+  })?.href;
 
   return (
     <aside className="min-w-0 border-b border-[var(--theme-border)] bg-[var(--theme-surface)] lg:border-e lg:border-b-0">
@@ -58,8 +65,8 @@ export function MemberSidebar({ id, expanded, toggle }: { id: string; expanded: 
         className={`grid gap-1 pb-3 text-sm font-semibold lg:grid-cols-1 ${expanded
           ? "grid-cols-[repeat(auto-fit,minmax(5.5rem,1fr))] px-4 sm:px-6 lg:px-3 xl:px-4"
           : "grid-cols-[repeat(auto-fit,minmax(2.75rem,1fr))] justify-items-center px-2 lg:px-1"}`}>
-        {links.map(({ href, label }) => (
-          <Link key={href} href={href} aria-current={current === href ? "page" : undefined}
+        {navigation.map(({ href, label }) => (
+          <Link key={href} href={routeFor(href)} aria-current={current === href ? "page" : undefined}
             title={expanded ? undefined : label} prefetch={expanded ? undefined : false}
             className={`flex min-h-11 min-w-0 items-center justify-center rounded-md leading-tight text-[var(--theme-body)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)] aria-[current=page]:bg-[var(--theme-selected)] aria-[current=page]:text-[var(--theme-link)] ${expanded
               ? "flex-col gap-1 px-2 py-2 text-center lg:flex-row lg:justify-start lg:gap-3 lg:px-3 lg:text-start"

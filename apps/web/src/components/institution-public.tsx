@@ -12,58 +12,60 @@ import { trustMessages } from "@/lib/trust-i18n";
 import { InstitutionLogo, InstitutionStatus, VerifiedBadge, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { ApiErrorNotice } from "./api-error-notice";
 import { ImpersonationReportForm } from "./trust-workspace";
-import { DisplayControls } from "./display-controls";
-import { SiteBrand } from "./site-brand";
-import { SiteFooter } from "./site-footer";
 import { PublicAffiliationPanel } from "./public-affiliation-panel";
 import { OrganizationTimeline } from "./organization-timeline";
+import { MemberShell } from "./member-shell";
 import { ProfileFollowPanel } from "./discovery-accounts";
 
 export function InstitutionPublic({ organization: org, signedIn }: { organization: Institution; signedIn: boolean }) {
-  const layout = signedIn ? "w-full px-4 sm:px-8" : "public-container";
   const [locale] = useLocale();
   const t = institutionMessages[locale];
   const country = new Intl.DisplayNames([locale], { type: "region", fallback: "code" }).of(org.countryCode);
   const claim = signedIn ? `/verification?claim=${org.handle}` : `/login?claim=${org.handle}`;
 
   return (
-    <div id="top" className="flex min-h-dvh flex-col">
-      <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
-        <div className={`flex flex-wrap items-center justify-between gap-3 py-3 ${layout}`}>
-          <SiteBrand />
-          <DisplayControls />
-        </div>
-      </header>
-      <main className={`grid flex-1 content-start gap-4 py-5 sm:py-8 ${layout}`}>
-        <header className={`${institutionCard} flex flex-wrap items-center justify-between gap-4`}>
-          <div className="flex min-w-0 items-center gap-4">
-            <InstitutionLogo organization={org} />
-            <div className="min-w-0">
-              <p className="text-sm text-[var(--theme-body)]">{t[org.kind]}</p>
-              <h1 className="break-words text-3xl font-semibold leading-tight tracking-tight">{org.name}</h1>
-              <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{org.handle}</p>
+    <MemberShell signedIn={signedIn}>
+      <div className="min-w-0 space-y-5 sm:space-y-6">
+        <header className="overflow-hidden rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+          <div aria-hidden="true" className="h-16 border-b border-[var(--theme-border)] bg-linear-to-r from-[var(--theme-selected)] via-[var(--theme-control)] to-[var(--theme-surface)] sm:h-24" />
+          <div className="px-5 pb-5 sm:px-7 sm:pb-6">
+            <div className="relative -mt-7 flex flex-wrap items-end gap-x-4 gap-y-3">
+              <div className="rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1">
+                <InstitutionLogo organization={org} />
+              </div>
+              <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
+            </div>
+            <h1 className="mt-3 break-words text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">{org.name}</h1>
+            <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--theme-body)]">
+              <span className="break-all">@{org.handle}</span>
+              <span>{t[org.kind]}</span>
+              <span>{[org.departmentName, country].filter(Boolean).join(" · ")}</span>
+            </p>
+            <div className="mt-4">
+              <ProfileFollowPanel target={{ kind: "institution", key: org.id }} signedIn={signedIn} inline />
             </div>
           </div>
-          <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
         </header>
-        <section className={institutionCard} aria-label={t.institutionProfile}>
-          <p className="font-semibold">{[org.departmentName, country].filter(Boolean).join(" · ")}</p>
-          {org.verificationStatus === "verified" && <p className="mt-2 text-sm text-[var(--theme-body)]">{trustMessages[locale].noEndorsement}</p>}
-          {org.description && <p className="mt-3 max-w-4xl whitespace-pre-line break-words leading-7 text-[var(--theme-body)]">{org.description}</p>}
-          {org.website && <a href={org.website} target="_blank" rel="noreferrer" className={`${institutionLink} mt-4 inline-block`}>{trustMessages[locale].listedWebsite} <span aria-hidden="true">↗</span></a>}
-        </section>
-        <PublicAffiliationPanel organization={org} signedIn={signedIn} />
-        {signedIn && <VerifiedRepresentativePanel organizationId={org.id} />}
-        <ProfileFollowPanel target={{ kind: "institution", key: org.id }} signedIn={signedIn} />
-        <OrganizationTimeline handle={org.handle} signedIn={signedIn} />
-        {signedIn && <ImpersonationReportForm institutionHandle={org.handle} />}
-        {org.verificationStatus !== "verified" && <div>
-          <Link href={claim} className={institutionAction}>{t.claimProfile}</Link>
-          {!signedIn && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.claimInstructions}</p>}
-        </div>}
-      </main>
-      <SiteFooter member={signedIn} />
-    </div>
+        <div className="grid min-w-0 items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:gap-6">
+          <OrganizationTimeline handle={org.handle} signedIn={signedIn} />
+          <aside className="grid min-w-0 gap-4">
+            <section className={institutionCard} aria-label={t.institutionProfile}>
+              <h2 className="text-lg font-semibold">{t.institutionProfile}</h2>
+              {org.description && <p dir="auto" className="mt-2 whitespace-pre-line break-words leading-6 text-[var(--theme-body)]">{org.description}</p>}
+              {org.website && <a href={org.website} target="_blank" rel="noreferrer" className={`${institutionLink} mt-3 inline-block text-sm`}>{trustMessages[locale].listedWebsite} <span aria-hidden="true">↗</span></a>}
+              {org.verificationStatus === "verified" && <p className="mt-3 border-t border-[var(--theme-border)] pt-3 text-xs leading-5 text-[var(--theme-body)]">{trustMessages[locale].noEndorsement}</p>}
+            </section>
+            <PublicAffiliationPanel organization={org} signedIn={signedIn} />
+            {signedIn && <VerifiedRepresentativePanel organizationId={org.id} />}
+            {org.verificationStatus !== "verified" && <div className={institutionCard}>
+              <Link href={claim} className={institutionLink}>{t.claimProfile}</Link>
+              {!signedIn && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.claimInstructions}</p>}
+            </div>}
+            {signedIn && <ImpersonationReportForm institutionHandle={org.handle} />}
+          </aside>
+        </div>
+      </div>
+    </MemberShell>
   );
 }
 

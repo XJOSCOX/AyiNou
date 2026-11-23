@@ -6,6 +6,7 @@ import { useLocale } from "@/lib/locale-store";
 import { MemberIdentityBoundary } from "@/lib/member-display-name";
 import { MemberNavbar } from "./member-navbar";
 import { MemberSidebar } from "./member-sidebar";
+import { Navbar } from "./navbar";
 import { SiteFooter } from "./site-footer";
 
 const desktopSidebar = "(min-width: 64rem)";
@@ -31,7 +32,7 @@ function subscribeSidebar(onChange: () => void) {
   };
 }
 
-export function MemberShell({ children }: { children: ReactNode }) {
+export function MemberShell({ children, signedIn = true }: { children: ReactNode; signedIn?: boolean }) {
   const [locale] = useLocale();
   const sidebarId = useId();
   const expanded = useSyncExternalStore(subscribeSidebar, readSidebar, () => false);
@@ -41,20 +42,21 @@ export function MemberShell({ children }: { children: ReactNode }) {
     window.dispatchEvent(new Event(sidebarChange));
   }
 
-  return (
-    <MemberIdentityBoundary><div id="top" className="flex min-h-dvh flex-col text-[var(--theme-text)]">
+  const shell = (
+    <div id="top" className="flex min-h-dvh flex-col text-[var(--theme-text)]">
       <a href="#member-main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-[var(--theme-surface)] focus:p-4">
         {messages[locale].skip}
       </a>
-      <MemberNavbar />
+      {signedIn ? <MemberNavbar /> : <Navbar />}
       <div className={`grid flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr] lg:grid-rows-1 ${expanded
         ? "lg:grid-cols-[clamp(12rem,16vw,16rem)_minmax(0,1fr)]" : "lg:grid-cols-[3.5rem_minmax(0,1fr)]"}`}>
-        <MemberSidebar id={sidebarId} expanded={expanded} toggle={toggleSidebar} />
+        <MemberSidebar signedIn={signedIn} id={sidebarId} expanded={expanded} toggle={toggleSidebar} />
         <main id="member-main" tabIndex={-1} className="min-w-0 px-4 py-5 sm:px-6 sm:py-7 xl:px-10 xl:py-9">
           {children}
         </main>
       </div>
       <SiteFooter member />
-    </div></MemberIdentityBoundary>
+    </div>
   );
+  return signedIn ? <MemberIdentityBoundary>{shell}</MemberIdentityBoundary> : shell;
 }

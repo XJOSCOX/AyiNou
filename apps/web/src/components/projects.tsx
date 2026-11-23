@@ -15,22 +15,15 @@ import { projectWorkMessages } from "@/lib/project-work-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
-import { Navbar } from "./navbar";
 import { PageHeader } from "./page-header";
 import { ProjectForm, ProjectIdentityNotice } from "./project-form";
 import { PublicProjectProgress } from "./project-progress";
 import { ReviewActionForm } from "./project-review";
-import { SiteFooter } from "./site-footer";
 
 const fields = ["description", "problem", "solution", "objectives", "beneficiaries", "outcomes"] as const;
 
 function ProjectShell({ signedIn, children }: { signedIn: boolean; children: ReactNode }) {
-  if (signedIn) return <MemberShell>{children}</MemberShell>;
-  return <div id="top" className="flex min-h-dvh flex-col">
-    <Navbar />
-    <main className="public-container flex-1 py-5 sm:py-8">{children}</main>
-    <SiteFooter />
-  </div>;
+  return <MemberShell signedIn={signedIn}>{children}</MemberShell>;
 }
 
 function ProjectTile({ item, restricted = false }: { item: ProjectCard; restricted?: boolean }) {

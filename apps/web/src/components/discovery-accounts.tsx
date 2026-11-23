@@ -88,7 +88,7 @@ function DiscoveryAccount({ account, compact, onChange }: { account: DiscoveryCa
   </li>;
 }
 
-export function ProfileFollowPanel({ target, signedIn, initial }: { target: FollowTarget; signedIn: boolean; initial?: FollowStatus }) {
+export function ProfileFollowPanel({ target, signedIn, initial, inline = false }: { target: FollowTarget; signedIn: boolean; initial?: FollowStatus; inline?: boolean }) {
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
   const [list, setList] = useState<FollowList | null>(null);
@@ -102,7 +102,7 @@ export function ProfileFollowPanel({ target, signedIn, initial }: { target: Foll
 
   function choose(value: FollowList) { setList((current) => current === value ? null : value); }
 
-  return <section className={institutionCard} aria-label={t.accounts}>
+  return <section className={inline ? "text-sm" : institutionCard} aria-label={t.accounts}>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!state && !resource.error && <p role="status">{feedMessages[locale].working}</p>}
     {state && <div className="flex flex-wrap items-start gap-2">

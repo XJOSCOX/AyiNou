@@ -3,9 +3,8 @@ import { PublicDiscussion } from "./public-discussion";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { GroupMetadata } from "@/components/community-card";
 import { institutionField, useInstitutionResource, institutionLink, institutionCard } from "@/components/institution-ui";
-import { Navbar } from "@/components/navbar";
+import { MemberShell } from "@/components/member-shell";
 import { PageHeader } from "@/components/page-header";
-import { SiteFooter } from "@/components/site-footer";
 import { communityDirectoryMessages } from "@/lib/communities-i18n";
 import { loadDepartmentCommunity } from "@/lib/department-community-api";
 import { groupMessages } from "@/lib/groups-i18n";
@@ -14,20 +13,18 @@ import { type GroupKind, groupKinds } from "@ayinou/shared";
 import Link from "next/link";
 import { useState, useCallback } from "react";
 
-function PublicShell({ children }: { children: React.ReactNode }) {
-  return <div id="top" className="flex min-h-dvh flex-col">
-    <Navbar />
-    <main className="public-container grid flex-1 grid-cols-[minmax(0,1fr)] content-start gap-4 py-6 sm:py-8">{children}</main>
-    <SiteFooter />
-  </div>;
+function PublicShell({ children, signedIn }: { children: React.ReactNode; signedIn: boolean }) {
+  return <MemberShell signedIn={signedIn}>
+    <div className="grid min-w-0 content-start gap-4">{children}</div>
+  </MemberShell>;
 }
 
-export function PublicGroups() {
+export function PublicGroups({ signedIn }: { signedIn: boolean }) {
   const [locale] = useLocale();
   const t = groupMessages[locale];
   const [kind, setKind] = useState<GroupKind | "">("");
   const [search, setSearch] = useState("");
-  return <PublicShell>
+  return <PublicShell signedIn={signedIn}>
     <PageHeader title={t.directory} />
     <div className="grid gap-3 sm:grid-cols-2">
       <label className="text-sm font-semibold">{t.searchGroups}
@@ -43,13 +40,13 @@ export function PublicGroups() {
   </PublicShell>;
 }
 
-export function PublicGroupRoom({ slug }: { slug: string }) {
+export function PublicGroupRoom({ slug, signedIn }: { slug: string; signedIn: boolean }) {
   const [locale] = useLocale();
   const t = groupMessages[locale];
   const load = useCallback((signal: AbortSignal) => loadDepartmentCommunity(slug, signal, true), [slug]);
   const resource = useInstitutionResource(load);
   const group = resource.data?.community;
-  return <PublicShell>
+  return <PublicShell signedIn={signedIn}>
     <Link href="/community-directory" className={institutionLink}>← {t.directory}</Link>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!group && resource.error === null && <p role="status">{communityDirectoryMessages[locale].loading}</p>}

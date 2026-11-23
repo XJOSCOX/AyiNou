@@ -31,6 +31,8 @@
   "projectLink": "Lien vers un projet publié (facultatif)",
   "invalidProject": "Saisissez un lien de projet AyiNou valide.",
   "organizationPosts": "Publications de l’organisation",
+  "noOrganizationPosts": "Cette organisation n’a encore publié aucun message.",
+  "noOrganizationAnnouncements": "Cette organisation n’a encore publié aucune annonce.",
   "filterPosts": "Filtrer les publications",
   "allPosts": "Toutes les publications",
   "announcements": "Annonces",

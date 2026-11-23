@@ -9,39 +9,30 @@ import { discoveryMessages } from "@/lib/discovery-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { founderMessages } from "@/lib/founder-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { DisplayControls } from "./display-controls";
 import { AmbassadorRecognition } from "./ambassador-public";
 import { FounderVerifiedBadge } from "./founder-verified-badge";
 import { ProfileFollowPanel } from "./discovery-accounts";
 import { MemberSafetyControls } from "./member-safety";
 import { AdministratorMark, FounderMark, PersonalClaimChecks, institutionCard, institutionLink } from "./institution-ui";
 import { ImpersonationReportForm } from "./trust-workspace";
+import { MemberShell } from "./member-shell";
 import { RecognitionMark } from "./recognition-mark";
 import { useVerificationPresentation } from "./verification-presentation";
 import { verificationCopy } from "@/lib/verification-policy-i18n";
-import { SiteBrand } from "./site-brand";
-import { SiteFooter } from "./site-footer";
 
 export function MemberPublic({ profile, username, social, ambassador, recognition, signedIn }: {
   profile: ProfilePreview; username: string; social: FollowStatus; signedIn: boolean;
   recognition: RecognitionBadge[];
   ambassador: Pick<PublicAmbassador, "category" | "statement"> | null;
 }) {
-  const layout = signedIn ? "w-full px-4 sm:px-8" : "public-container";
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
   const trust = trustMessages[locale];
   const presentation = useVerificationPresentation();
   const membership = membershipMessages[locale];
   const country = profile.countryCode && new Intl.DisplayNames([locale === "ht" ? "ht-HT" : locale], { type: "region" }).of(profile.countryCode);
-  return <div id="top" className="flex min-h-dvh flex-col">
-    <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
-      <div className={`flex flex-wrap items-center justify-between gap-3 py-3 ${layout}`}>
-        <SiteBrand />
-        <DisplayControls />
-      </div>
-    </header>
-    <main className={`grid flex-1 content-start gap-4 py-5 sm:py-8 ${layout}`}>
+  return <MemberShell signedIn={signedIn}>
+    <div className="grid min-w-0 gap-4">
       {signedIn && <Link className={institutionLink} href="/discover">{t.discover}</Link>}
       <section className={institutionCard}>
         <div className="flex flex-wrap items-center gap-4">
@@ -80,7 +71,6 @@ export function MemberPublic({ profile, username, social, ambassador, recognitio
       <ProfileFollowPanel target={{ kind: "member", key: username }} initial={social} signedIn={signedIn} />
       {signedIn && social.canFollow && <MemberSafetyControls username={username} />}
       {signedIn && social.canFollow && <ImpersonationReportForm username={username} />}
-    </main>
-    <SiteFooter member={signedIn} />
-  </div>;
+    </div>
+  </MemberShell>;
 }

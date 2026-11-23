@@ -21,7 +21,7 @@ export function PublicAffiliationPanel({ organization, signedIn }: {
   const directory = useInstitutionResource(load);
 
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid min-w-0 gap-4">
       <section className={institutionCard}>
         <h2 className="text-xl font-semibold">{t.membership}</h2>
         {directory.error ? <div className="mt-3 space-y-2">

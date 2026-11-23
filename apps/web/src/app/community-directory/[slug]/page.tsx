@@ -1,6 +1,11 @@
 import { PublicGroupRoom } from "@/components/groups";
 
+import { serverSupabase } from "@/lib/supabase/server";
+
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  return <PublicGroupRoom key={slug} slug={slug} />;
+  const client = await serverSupabase();
+  const { data } = await client.auth.getClaims();
+  const signedIn = Boolean(data?.claims.sub && data.claims.is_anonymous !== true);
+  return <PublicGroupRoom key={slug} slug={slug} signedIn={signedIn} />;
 }
