@@ -144,6 +144,51 @@ test("Workspace MFA renewal stays in administration and opens a private link aft
     }
   });
 
+test("Administration returns to Accounts after MFA renewal and private link expiry @smoke", async ({ makeMember, page }) => {
+  const leader = await makeMember();
+  finishPersonalOnboarding(leader);
+  const secret = await enroll(leader);
+  sql(`insert into public.role_assignments(user_id,role) values('${leader.id}','administrator');`);
+  try {
+    await inEnglish(page.context());
+    await login(page, leader);
+    await solveMfa(page, secret);
+    await openAdministration(page);
+
+    const accountsEndpoint = "**/api/v1/admin/accounts?*";
+    await page.route(accountsEndpoint, (route) => route.fulfill({
+      status: 403, json: { error: { code: "MFA_REQUIRED" } },
+      headers: { "access-control-allow-origin": web },
+    }));
+    const accounts = page.getByRole("button", { name: adminMessages.en.accounts, exact: true });
+    await accounts.click();
+    const renew = page.getByRole("link", { name: adminMessages.en.verifyNow });
+    await expect(renew).toHaveAttribute("href", "/admin?verify=1&section=accounts");
+    await page.unroute(accountsEndpoint);
+    await renew.click();
+    await expect(page).toHaveURL(/\/admin\?verify=1&section=accounts$/);
+    const prompt = page.getByRole("region", { name: sessionSecurityMessages.en.workspaceMfaTitle });
+    await prompt.getByLabel(accountMessages.en.mfaChallengeCode).fill(totp(secret));
+    await prompt.getByRole("button", { name: accountMessages.en.mfaSubmit }).click();
+    await expect(page).toHaveURL(/\/s\/[a-f0-9-]{36}\/admin\?section=accounts$/);
+    await expect(accounts).toHaveAttribute("aria-pressed", "true");
+
+    const id = new URL(page.url()).pathname.split("/")[2];
+    sql(`update private.s2b_workflows set created_at=now()-interval '10 minutes',
+      expires_at=now()-interval '1 minute' where id='${id}';`);
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+    await expect(page.getByText(sessionSecurityMessages.en.expiredLink)).toBeVisible();
+    const back = page.getByRole("link", { name: sessionSecurityMessages.en.back, exact: true });
+    await expect(back).toHaveAttribute("href", "/admin?section=accounts");
+    await back.click();
+    await page.getByRole("button", { name: sessionSecurityMessages.en.openAdmin }).click();
+    await expect(page).not.toHaveURL(new RegExp(id));
+    await expect(accounts).toHaveAttribute("aria-pressed", "true");
+  } finally {
+    sql(`delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);
+  }
+});
+
 test("Assigned verification review gets its own workspace and ordinary admin authority is insufficient @smoke", async ({ makeMember, page }) => {
   const [reviewer, leader] = await Promise.all([makeMember(), makeMember()]);
   finishPersonalOnboarding(reviewer);

@@ -9,6 +9,7 @@ import { authMessages } from "@/lib/auth-i18n";
 import { apiErrorCode } from "@/lib/api-errors";
 import { useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
+import { useAdminRenewalPath } from "./admin-section-context";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -19,10 +20,11 @@ const handlePattern = "[a-z0-9][a-z0-9_]{2,23}";
 
 function AmbassadorFeedback({ error, reload, admin = false }: { error: unknown; reload?: () => void; admin?: boolean }) {
   const [locale] = useLocale();
+  const renewalPath = useAdminRenewalPath();
   if (error === null) return null;
   return <div className="grid gap-2">
     <ApiErrorNotice error={error} retry={reload} signIn />
-    {admin && apiErrorCode(error) === "MFA_REQUIRED" && <Link href="/mfa?next=/admin" className={institutionLink}>
+    {admin && apiErrorCode(error) === "MFA_REQUIRED" && <Link href={renewalPath} className={institutionLink}>
       {ambassadorMessages[locale].verifySession}
     </Link>}
   </div>;

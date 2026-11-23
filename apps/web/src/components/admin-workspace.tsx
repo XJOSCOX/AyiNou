@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { platformRoles, type AccountStatus, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
+import { adminSections, type AdminTab } from "@/lib/admin-navigation";
 import { adminMessages } from "@/lib/admin-i18n";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { authMessages } from "@/lib/auth-i18n";
@@ -30,21 +31,15 @@ import { HomepageSettings } from "./homepage-settings";
 import { RegistrationSettings } from "./registration-settings";
 import { MemberExperienceSettings } from "./member-experience-settings";
 import { PolicyAuditHistory } from "./policy-audit-history";
+import { AdminSectionContext, useAdminRenewalPath } from "./admin-section-context";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
-type AdminTab = "memberExperience" | "registration" | "homepage" | "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
-const adminSections = [
-  { label: "navigationPlatform", pages: ["overview", "governance", "legal", "audit"] },
-  { label: "navigationSettings", pages: ["homepage", "registration", "memberExperience"] },
-  { label: "navigationMembers", pages: ["accounts", "trust", "founder", "corrections"] },
-  { label: "navigationPrograms", pages: ["ambassadors", "partners"] },
-] as const satisfies { label: keyof typeof adminMessages.en; pages: readonly AdminTab[] }[];
-
-export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceAction: ReactNode; workspaceId: string }) {
+export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectionChange }: {
+  workspaceAction: ReactNode; workspaceId: string; section: AdminTab; onSectionChange: (section: AdminTab) => void;
+}) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
-  const [tab, setTab] = useState<AdminTab>("overview");
   const [navigationOpen, setNavigationOpen] = useState(false);
   const content = useRef<HTMLElement>(null);
   const labels: Record<AdminTab, string> = {
@@ -55,10 +50,12 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
     partners: earlyPartnerMessages[locale].title,
   };
   const access = useInstitutionResource(loadPlatformAccess);
+  const visibleSections = adminSections.filter(({ label }) => label !== "navigationSettings" || access.data?.founder);
+  const tab = visibleSections.some(({ pages }) => pages.some((page) => page === section)) ? section : "overview";
   const overview = useInstitutionResource(loadAdminOverview);
   const refresh = () => { access.refresh(); overview.refresh(); };
 
-  return <MemberShell>
+  return <AdminSectionContext.Provider value={tab}><MemberShell>
     <div className="grid gap-4">
       <PageHeader title={t.administration} actions={<>{access.data?.founder && <FounderMark />}{workspaceAction}</>} />
       {overview.error ? <AdminFeedback error={overview.error} totp={access.data?.totp} retry={refresh} />
@@ -73,13 +70,13 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
               </button>
               <nav id="admin-section-navigation" aria-label={t.administration}
                 className={navigationOpen ? "mt-2 space-y-3 lg:mt-0" : "hidden space-y-3 lg:block"}>
-                {adminSections.filter(({ label }) => label !== "navigationSettings" || access.data?.founder).map(({ label, pages }) => <section key={label} aria-labelledby={label}
+                {visibleSections.map(({ label, pages }) => <section key={label} aria-labelledby={label}
                   className="border-b border-[var(--theme-border)] pb-2 last:border-0 last:pb-0">
                   <h2 id={label} className="px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)]">{t[label]}</h2>
                   <ul className="space-y-0.5">
                     {pages.map((page) => <li key={page}>
                       <button type="button" aria-pressed={tab === page} onClick={() => {
-                        setTab(page);
+                        onSectionChange(page);
                         if (navigationOpen) {
                           content.current?.focus();
                           setNavigationOpen(false);
@@ -119,7 +116,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
           </div>
         </>}
     </div>
-  </MemberShell>;
+  </MemberShell></AdminSectionContext.Provider>;
 }
 
 export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
@@ -128,13 +125,14 @@ export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
   const [locale] = useLocale();
   const t = adminMessages[locale];
   const code = apiErrorCode(error);
+  const adminRenewalPath = useAdminRenewalPath();
   const message = code === "MFA_REQUIRED" ? (totp === false ? t.enrollRequired : t.mfaRequired)
     : code === "VERIFICATION_REQUIRED" ? t.adminVerificationRequired
     : code === "FORBIDDEN" ? t.forbidden : code === "CONFLICT" ? t.conflict : code === "UNAUTHORIZED" ? t.unavailableSession : localizedApiError(locale, error);
   return <div className={institutionErrorBox}>
     <p role="alert">{message}</p>
     {code === "MFA_REQUIRED" && <Link className={institutionLink}
-      href={totp === false ? "/settings" : `${next}?verify=1`}>{totp === false ? t.accountSecurity : t.verifyNow}</Link>}
+      href={totp === false ? "/settings" : next === "/admin" ? adminRenewalPath : `${next}?verify=1`}>{totp === false ? t.accountSecurity : t.verifyNow}</Link>}
     {code === "UNAUTHORIZED" && <Link className={institutionLink} href="/login">{authMessages[locale].loginTitle}</Link>}
     {retry && !["FORBIDDEN", "MFA_REQUIRED", "UNAUTHORIZED"].includes(code) &&
       <button type="button" className={institutionLink} onClick={retry}>{authMessages[locale].retry}</button>}

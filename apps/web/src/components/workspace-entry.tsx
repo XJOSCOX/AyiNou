@@ -3,21 +3,23 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PrivateFlow } from "@ayinou/shared";
+import { adminEntryPath, type AdminTab } from "@/lib/admin-navigation";
 import { adminMessages } from "@/lib/admin-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
 import { useLocale } from "@/lib/locale-store";
 import { openPrivateFlow, privateFlowPath } from "@/lib/session-security";
 import { sessionSecurityMessages } from "@/lib/session-security-i18n";
+import { AdminSectionContext } from "./admin-section-context";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionAction, institutionCard } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { MfaChallenge } from "./mfa-challenge";
 import { PageHeader } from "./page-header";
 
-export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, verify }: {
+export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, verify, section }: {
   subject: string; sessionId: string; kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace">;
-  totp: boolean; factorIds: string[]; verify: boolean;
+  totp: boolean; factorIds: string[]; verify: boolean; section: AdminTab;
 }) {
   const [locale] = useLocale();
   const router = useRouter();
@@ -27,7 +29,7 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
   const restoreFocus = useRef(false);
   const t = sessionSecurityMessages[locale];
   const admin = kind === "admin_workspace";
-  const entry = admin ? "/admin" : "/verification/review";
+  const entry = admin ? adminEntryPath(section) : "/verification/review";
 
   async function open(afterVerification = false) {
     if (busy) return;
@@ -35,8 +37,9 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
     setError(null);
     try {
       const flow = await openPrivateFlow(kind, subject, sessionId);
-      if (afterVerification) router.replace(privateFlowPath(flow));
-      else router.push(privateFlowPath(flow));
+      const path = privateFlowPath(flow) + (admin && section !== "overview" ? "?section=" + section : "");
+      if (afterVerification) router.replace(path);
+      else router.push(path);
     } catch (cause) {
       const code = apiErrorCode(cause);
       if (!afterVerification && totp && code === "MFA_REQUIRED") {
@@ -70,7 +73,9 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
           workspace={{ onVerified: () => open(true), onCancel: cancelVerification, onSessionEnded: endVerificationSession }} />
       </div> : <section className={`${institutionCard} space-y-3`} aria-busy={busy}>
         <p>{t.adminLinkHelp}</p>
-        {error !== null && <AdminFeedback error={error} totp={totp} next={entry} />}
+        {error !== null && <AdminSectionContext.Provider value={section}>
+          <AdminFeedback error={error} totp={totp} next={admin ? "/admin" : "/verification/review"} />
+        </AdminSectionContext.Provider>}
         <button type="button" className={institutionAction} disabled={busy} onClick={() => void open()}
           ref={(button) => {
             if (button && restoreFocus.current) {

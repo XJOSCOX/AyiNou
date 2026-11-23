@@ -13,6 +13,7 @@ import { founderMessages } from "@/lib/founder-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useMemberIdentity } from "@/lib/member-display-name";
+import { useAdminRenewalPath } from "./admin-section-context";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 
@@ -82,6 +83,7 @@ function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: stri
     }
   };
 
+  const renewalPath = useAdminRenewalPath();
   const fault = error ?? resource.error;
   const notDeployed = apiErrorCode(fault) === "FOUNDER_IDENTITY_NOT_DEPLOYED";
   const reviewAccessRequired = admin && !resource.data && apiErrorCode(resource.error) === "FORBIDDEN";
@@ -98,7 +100,7 @@ function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: stri
     {reviewAccessRequired ? <p role="status" className="max-w-prose text-sm">{t.reviewAccessRequired}</p>
       : notDeployed ? <p role="status">{t.notDeployed}</p>
       : fault != null && <ApiErrorNotice error={fault} retry={resource.refresh} signIn />}
-    {admin && apiErrorCode(fault) === "MFA_REQUIRED" && <Link className={institutionLink} href="/mfa?next=/admin">{t.verifySession}</Link>}
+    {admin && apiErrorCode(fault) === "MFA_REQUIRED" && <Link className={institutionLink} href={renewalPath}>{t.verifySession}</Link>}
     {!resource.data && !fault && <p role="status">{authMessages[locale].working}</p>}
     {resource.data && <>
       {!resource.data.issuanceEnabled && <p role="status" className="max-w-prose text-sm">{t.disabled}</p>}

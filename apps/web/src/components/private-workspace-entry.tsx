@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 import type { PlatformAccess, PrivateFlow } from "@ayinou/shared";
+import type { AdminTab } from "@/lib/admin-navigation";
 import { workflowRequest } from "@/lib/privileged-setup-server";
 import { serverSupabase } from "@/lib/supabase/server";
 import { WorkspaceEntry } from "./workspace-entry";
 
-export async function PrivateWorkspaceEntry({ kind, verify }: {
+export async function PrivateWorkspaceEntry({ kind, verify, section = "overview" }: {
   kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace">;
   verify: boolean;
+  section?: AdminTab;
 }) {
   const supabase = await serverSupabase();
   const { data } = await supabase.auth.getClaims();
@@ -21,6 +23,6 @@ export async function PrivateWorkspaceEntry({ kind, verify }: {
     ? (user.data.user.factors ?? []).filter((factor) => factor.factor_type === "totp" && factor.status === "verified")
       .map((factor) => factor.id)
     : [];
-  return <WorkspaceEntry key={sessionId + kind + verify} subject={subject} sessionId={sessionId} kind={kind}
-    totp={access.totp} factorIds={factorIds} verify={verify} />;
+  return <WorkspaceEntry key={sessionId + kind + verify + section} subject={subject} sessionId={sessionId} kind={kind}
+    totp={access.totp} factorIds={factorIds} verify={verify} section={section} />;
 }

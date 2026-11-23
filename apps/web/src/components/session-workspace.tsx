@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import type { PrivateFlow } from "@ayinou/shared";
+import { adminEntryPath, type AdminTab } from "@/lib/admin-navigation";
 import { authorizedRequest } from "@/lib/api";
 import { useLocale } from "@/lib/locale-store";
 import { sessionSecurityMessages } from "@/lib/session-security-i18n";
@@ -14,15 +15,16 @@ import { VerificationReview } from "./verification-review";
 import { institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
-export function SessionWorkspace({ subject, flow }: { subject: string; flow: PrivateFlow }) {
+export function SessionWorkspace({ subject, flow, initialSection }: { subject: string; flow: PrivateFlow; initialSection: AdminTab }) {
   const [locale] = useLocale();
+  const [section, setSection] = useState(initialSection);
   const [closed, setClosed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
   const requestId = useRef<string | null>(null);
   const t = sessionSecurityMessages[locale];
   const admin = flow.kind === "admin_workspace";
-  const entry = admin ? "/admin" : "/verification/review";
+  const entry = admin ? adminEntryPath(section) : "/verification/review";
   const endpoint = workflowsEndpoint + "/" + flow.id + "/" + flow.step;
 
   useEffect(() => {
@@ -77,5 +79,5 @@ export function SessionWorkspace({ subject, flow }: { subject: string; flow: Pri
     <button type="button" disabled={busy} onClick={() => void close()} className={institutionLink}>{t.closeWorkspace}</button>
     {failed && <p role="alert">{t.failed}</p>}
   </div>;
-  return admin ? <AdminWorkspace workspaceId={flow.id} workspaceAction={action} /> : <VerificationReview workspaceAction={action} workspaceId={flow.id} />;
+  return admin ? <AdminWorkspace workspaceId={flow.id} workspaceAction={action} section={section} onSectionChange={setSection} /> : <VerificationReview workspaceAction={action} workspaceId={flow.id} />;
 }
