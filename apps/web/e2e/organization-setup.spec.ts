@@ -210,3 +210,45 @@ test("O4 draft resumes across sessions and four locales with keyboard and respon
   await page.getByRole("link", { name: organizationSetupMessages.en.manage }).click();
   await expect(page.getByRole("combobox", { name: organizationSetupMessages.en.registration, exact: true })).toHaveValue("pursuing_registration");
 });
+
+test("Recognized Founder can finish a new business draft without granting identity or claim authority", async ({ makeMember }) => {
+  const [founder, member] = await Promise.all([makeMember(), makeMember()]);
+  setUpProfile(founder);
+  setUpProfile(member);
+  sql(`insert into private.platform_bootstrap(user_id) values ('${founder.id}');
+    insert into private.platform_admin_audit(subject_id,event,reason)
+      values ('${founder.id}','first_account_bootstrapped','Disposable founding provenance');`);
+  try {
+    const orgHandle = handle();
+    const draft = { mode: "new", handle: orgHandle, name: "Founder business", kind: "business",
+      countryCode: "HT", registrationStatus: "registered" };
+    const intent = await start(founder);
+    const edit = setupPath(intent.id, "details");
+    await apiCall(founder, edit, 403, "PUT", { ...command(intent.version), draft: { ...draft, kind: "ministry" } });
+    const saved = await apiCall(founder, edit, 200, "PUT", { ...command(intent.version), draft });
+    expect(await apiCall(founder, base + "/setup", 200)).toMatchObject({ draft, eligible: true });
+    const created = await complete(founder, { ...intent, version: saved.version }, 200);
+    expect(created.result).toMatchObject({ kind: "created", handle: orgHandle });
+    expect(sql(`select count(*) from public.verification_records where user_id='${founder.id}';`)).toBe("0");
+    expect(sql(`select count(*) from private.institution_audit where organization_id='${created.result.organizationId}'
+      and actor_id='${founder.id}' and event='setup_completed';`)).toBe("1");
+    expect((await (await fetch(api + "/api/v1/institutions/by-handle/" + orgHandle)).json()).organization)
+      .toMatchObject({ verificationStatus: "unverified" });
+
+    const memberIntent = await start(member);
+    const memberSaved = await apiCall(member, setupPath(memberIntent.id, "details"), 200, "PUT", {
+      ...command(memberIntent.version), draft: { ...draft, handle: handle() },
+    });
+    expect((await complete(member, { ...memberIntent, version: memberSaved.version }, 403)).error.code)
+      .toBe("ORG_SETUP_IDENTITY_REQUIRED");
+
+    const claimIntent = await start(founder);
+    const claimSaved = await apiCall(founder, setupPath(claimIntent.id, "details"), 200, "PUT", {
+      ...command(claimIntent.version), draft: { mode: "existing", targetHandle: orgHandle },
+    });
+    expect((await complete(founder, { ...claimIntent, version: claimSaved.version }, 403, claimRefs)).error.code)
+      .toBe("ORG_SETUP_IDENTITY_REQUIRED");
+  } finally {
+    sql(`delete from private.platform_bootstrap where user_id='${founder.id}';`);
+  }
+});

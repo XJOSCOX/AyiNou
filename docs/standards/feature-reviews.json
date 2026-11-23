@@ -1,6 +1,21 @@
 {
   "features": [
     {
+      "id": "founder-new-organization-setup",
+      "report": "docs/organizations/FOUNDER_ORGANIZATION_SETUP_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123101000_founder_new_organization_setup.sql",
+          "rlsAndGrants": "The existing private eligibility predicate retains revoked client grants and has no new table or RLS changes.",
+          "authorization": "Trusted bootstrap and current account eligibility apply only to new ordinary organizations. The existing session checks, claims, and government controls still apply.",
+          "compatibility": "Existing drafts, roles, verification, and receipts retain their schema and history.",
+          "validation": "Disposable organization setup tests cover Founder completion and denied member, claim, and protected government operations.",
+          "rolloutAndRollback": "Dry-run the exact development migration, verify grants and history, and correct eligibility with a forward migration if needed."
+        }
+      ]
+    },
+    {
       "id": "f2-3-organization-publishing",
       "report": "docs/F2_3_ORGANIZATION_PUBLISHING_IMPLEMENTATION_REPORT.md",
       "routes": [
