@@ -1,4 +1,5 @@
 import type { FeedPage, FollowTarget, Locale } from "@ayinou/shared";
+import { publicRequest } from "./api";
 import { authorizedSocialRequest } from "./feed-api";
 
 export type SocialNoticePreferences = { mentions: boolean; reposts: boolean; quotes: boolean };
@@ -26,8 +27,16 @@ export function followReposts(target: FollowTarget, enabled?: boolean, signal?: 
     enabled === undefined ? { signal } : { method: "PUT", body: JSON.stringify({ enabled }) });
 }
 
-export function publishSocialPost(input: ({ sourceId: string } | { organization: string }) & { body: string; language: Locale }, id: string): Promise<{ id: string }> {
+export function publishSocialPost(input: ({ sourceId: string; organization?: undefined } | { organization: string; sourceId?: string; announcement?: boolean; projectId?: string }) & { body: string; language: Locale }, id: string): Promise<{ id: string }> {
   return authorizedSocialRequest("/api/v1/posts/social", {
     method: "POST", body: JSON.stringify(input), headers: { "Idempotency-Key": id },
   });
 }
+
+export function loadOrganizationPosts(handle: string, filter: string, signedIn: boolean, cursor: string | null, signal: AbortSignal): Promise<FeedPage> {
+  const query = new URLSearchParams({ filter, ...(cursor ? { cursor } : {}) });
+  return (signedIn ? authorizedSocialRequest : publicRequest)(`/api/v1/institutions/by-handle/${encodeURIComponent(handle)}/posts?${query}`, { signal });
+}
+
+export const setOrganizationPin = (id: string, version: number, pinned: boolean): Promise<void> =>
+  authorizedSocialRequest("/api/v1/posts/" + id + "/organization-pin", { method: "PUT", body: JSON.stringify({ version, pinned }) });

@@ -21,6 +21,7 @@ export function feedDatabaseError(code: string): ApiError {
   switch (code) {
     case "42501": return new ApiError(403, "FORBIDDEN", "This action is not permitted");
     case "PFR04": return new ApiError(404, "NOT_FOUND", "Content unavailable");
+    case "PF323": return new ApiError(409, "CONFLICT", "At most three organization posts may be pinned");
     case "PFR09": return new ApiError(409, "CONFLICT", "The content or request has changed");
     case "23505": return new ApiError(409, "DUPLICATE_REPORT", "A report already exists");
     case "PFR29": return new ApiError(429, "RATE_LIMITED", "Wait before trying again");
@@ -145,7 +146,7 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
       if (details) post.social = details;
       const topics = tags?.[post.id];
       const attachments = media?.[post.id] ?? [];
-      if (!author) return { ...post, reactions, topics, attachments, author: null };
+      if (!author || details?.organization) return { ...post, reactions, topics, attachments, author: null };
       const { avatarPath, ...publicAuthor } = author;
       return { ...post, reactions, topics, attachments, author: { ...publicAuthor, avatarUrl: avatarPath ? signed.get(avatarPath) ?? null : null } };
     });
@@ -156,7 +157,9 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
     signAvatars,
     async read(token, params) {
       const { p_scope, p_id, p_community, p_tag, ...page } = params;
-      const posts = p_scope === "community"
+      const posts = p_scope === "organization"
+        ? await rpc<PostRow[]>(token, "read_organization_posts_for_client", page)
+        : p_scope === "community"
         ? await rpc<PostRow[]>(token, "read_department_posts_for_client", { ...page, p_key: p_community })
         : p_scope === "saved" || p_scope === "hashtag"
           ? await rpc<PostRow[]>(token, "read_social_feed_for_client", { ...page, p_scope, p_tag: p_tag ?? null })

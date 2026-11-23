@@ -149,6 +149,12 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Improve image gallery navigation, conversation context, post attribution, feed loading, and composer drafts.
 - [F2.2 implementation report](docs/F2_2_FEED_EXPERIENCE_IMPLEMENTATION_REPORT.md)
 
+## F2.3 — Organization publishing and social integration
+
+- [x] Add organization announcements, profile Posts, scoped pins, organization quotes and public project links.
+- [ ] Finish organization engagement, announcement notifications and release verification.
+- [F2.3 implementation report](docs/F2_3_ORGANIZATION_PUBLISHING_IMPLEMENTATION_REPORT.md)
+
 ## Phase 3D — For You recommendations
 
 - [x] Add an optional rules-based feed with explicit topics, explanations, and member controls.

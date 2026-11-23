@@ -12,6 +12,26 @@ const organization = z.union([handle, z.uuid()]);
 const preferenceInput = z.strictObject({ mentions: z.boolean(), reposts: z.boolean(), quotes: z.boolean() });
 
 export function registerSocialRoutes(app: FastifyInstance, { viewer, repo, read }: FeedRouteContext) {
+  app.get("/api/v1/institutions/by-handle/:handle/posts", async (request) => {
+    const { actor, token } = await viewer(request);
+    await read("feed", actor, request.ip);
+    const params = z.object({ handle }).parse(request.params);
+    const query = z.strictObject({ cursor: pageCursor, filter: z.enum(["all", "announcements"]).default("all") }).parse(request.query);
+    const fields = { p_scope: "organization", p_handle: params.handle, p_filter: query.filter, p_limit: 20 };
+    const [rows, pinned] = await Promise.all([
+      repo().read(token, { ...fields, p_pins: false, ...before(query.cursor) }),
+      query.cursor ? [] : repo().read(token, { ...fields, p_pins: true, ...before() }),
+    ]);
+    const { page, nextCursor } = paginate(rows, 20);
+    return { posts: [...pinned, ...page], nextCursor };
+  });
+  app.put("/api/v1/posts/:id/organization-pin", { bodyLimit: 1024 }, async (request, reply) => {
+    const { token } = await viewer(request, true);
+    const { id } = identifiers.parse(request.params);
+    const input = z.strictObject({ version: z.number().int().positive(), pinned: z.boolean() }).parse(request.body);
+    await repo().rpc(token, "set_organization_post_pin_for_client", { p_id: id, p_version: input.version, p_pinned: input.pinned });
+    return reply.code(204).send();
+  });
   app.get("/api/v1/feed/social", async (request) => {
     const { actor, token } = await viewer(request, true);
     await read("feed", actor, request.ip);
@@ -39,9 +59,16 @@ export function registerSocialRoutes(app: FastifyInstance, { viewer, repo, read 
     const key = z.uuid().parse(request.headers["idempotency-key"]);
     const input = z.strictObject({
       body: z.string(), language: z.enum(locales), sourceId: z.uuid().optional(), organization: handle.optional(),
-    }).refine(({ sourceId, organization }) => Boolean(sourceId) !== Boolean(organization)).parse(request.body);
+      announcement: z.boolean().optional(), projectId: z.uuid().optional(),
+    }).refine(({ sourceId, organization, announcement, projectId }) =>
+      Boolean(organization) || Boolean(sourceId && announcement === undefined && !projectId)).parse(request.body);
     content(input.body, postBodyLimit);
-    const id = await repo().rpc<string>(token, "create_social_post_for_client", {
+    const id = input.organization
+      ? await repo().rpc<string>(token, "publish_organization_post_for_client", {
+        p_organization: input.organization, p_body: input.body, p_language: input.language, p_submission: key,
+        p_announcement: input.announcement ?? false, p_project: input.projectId ?? null, p_source: input.sourceId ?? null,
+      })
+      : await repo().rpc<string>(token, "create_social_post_for_client", {
       p_source: input.sourceId ?? null, p_organization: input.organization ?? null,
       p_body: input.body, p_language: input.language, p_submission: key,
     });

@@ -26,5 +26,16 @@
   "mentionSuggestions": "Suggestions de mentions",
   "publishOrganization": "Publier au nom d’une organisation",
   "organization": "Organisation",
-  "publishDone": "Publication publiée."
+  "publishDone": "Publication publiée.",
+  "announcement": "Annonce officielle",
+  "projectLink": "Lien vers un projet publié (facultatif)",
+  "invalidProject": "Saisissez un lien de projet AyiNou valide.",
+  "organizationPosts": "Publications de l’organisation",
+  "filterPosts": "Filtrer les publications",
+  "allPosts": "Toutes les publications",
+  "announcements": "Annonces",
+  "pin": "Épingler au profil",
+  "unpin": "Désépingler du profil",
+  "pinned": "Épinglé",
+  "verifiedOrganization": "Organisation vérifiée"
 }

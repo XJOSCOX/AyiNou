@@ -16,6 +16,7 @@ import { DisplayControls } from "./display-controls";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
 import { PublicAffiliationPanel } from "./public-affiliation-panel";
+import { OrganizationTimeline } from "./organization-timeline";
 import { ProfileFollowPanel } from "./discovery-accounts";
 
 export function InstitutionPublic({ organization: org, signedIn }: { organization: Institution; signedIn: boolean }) {
@@ -54,6 +55,7 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
         <PublicAffiliationPanel organization={org} signedIn={signedIn} />
         {signedIn && <VerifiedRepresentativePanel organizationId={org.id} />}
         <ProfileFollowPanel target={{ kind: "institution", key: org.id }} signedIn={signedIn} />
+        <OrganizationTimeline handle={org.handle} signedIn={signedIn} />
         {signedIn && <ImpersonationReportForm institutionHandle={org.handle} />}
         {org.verificationStatus !== "verified" && <div>
           <Link href={claim} className={institutionAction}>{t.claimProfile}</Link>

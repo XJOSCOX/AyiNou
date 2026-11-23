@@ -75,22 +75,28 @@ export function SocialPostControls({ post, bookmark, onChange }: { post: FeedPos
     {quote && <SocialComposer source={{ sourceId: post.id }} onCancel={() => setQuote(false)} onPublished={() => {
       setQuote(false); onChange?.();
     }} />}
+    {quote && <OrganizationPublisher sourceId={post.id} onPublished={() => { setQuote(false); onChange?.(); }} />}
   </div>;
 }
 
 export function SocialComposer({ source, onPublished, onCancel }: {
-  source: { sourceId: string } | { organization: string }; onPublished: () => void; onCancel?: () => void;
+  source: { sourceId: string; organization?: undefined } | { organization: string; sourceId?: string }; onPublished: () => void; onCancel?: () => void;
 }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const [body, setBody] = useState("");
   const mutation = useFeedMutation();
   const receipt = useRef({ payload: "", id: "" });
-  const allowed = Boolean(body.trim()) && Array.from(body).length <= postBodyLimit && !mutation.busy;
+  const labels = socialMessages[locale];
+  const [announcement, setAnnouncement] = useState(false);
+  const [project, setProject] = useState("");
+  const projectId = project.trim().match(/(?:^|\/projects\/)([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})\/?$/i)?.[1];
+  const invalidProject = Boolean(project.trim() && !projectId);
+  const allowed = Boolean(body.trim()) && Array.from(body).length <= postBodyLimit && !mutation.busy && !invalidProject;
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!allowed) return;
-    const input = { ...source, body, language: locale };
+    const input = { ...source, body, language: locale, ...(source.organization ? { announcement, projectId } : {}) };
     const key = JSON.stringify(input);
     if (receipt.current.payload !== key) receipt.current = { payload: key, id: crypto.randomUUID() };
     if (await mutation.run(() => publishSocialPost(input, receipt.current.id))) { setBody(""); onPublished(); }
@@ -101,6 +107,17 @@ export function SocialComposer({ source, onPublished, onCancel }: {
         onChange={(event) => setBody(event.target.value)} />
     </label>
     <MentionSuggestions value={body} onChange={setBody} />
+    {source.organization && <>
+      <label className="flex min-h-11 items-center gap-2">
+        <input type="checkbox" checked={announcement} onChange={(event) => setAnnouncement(event.target.checked)} />
+        {labels.announcement}
+      </label>
+      <label className="text-sm font-semibold">{labels.projectLink}
+        <input className={institutionField} value={project} maxLength={400} aria-invalid={invalidProject}
+          onChange={(event) => setProject(event.target.value)} />
+      </label>
+      {invalidProject && <p role="status" className="text-sm">{labels.invalidProject}</p>}
+    </>}
     <div className="flex flex-wrap gap-3">
       <button className={institutionAction} disabled={!allowed}>{t.publish}</button>
       {onCancel && <button type="button" className={institutionLink} onClick={onCancel}>{t.cancel}</button>}
@@ -109,13 +126,13 @@ export function SocialComposer({ source, onPublished, onCancel }: {
   </form>;
 }
 
-export function OrganizationPublisher({ onPublished }: { onPublished: () => void }) {
+export function OrganizationPublisher({ onPublished, handle, sourceId }: { onPublished: () => void; handle?: string; sourceId?: string }) {
   const [locale] = useLocale();
   const t = socialMessages[locale];
   const [expanded, setExpanded] = useState(false);
   const [selected, setSelected] = useState("");
   const accounts = useInstitutionResource(loadInstitutionAccounts);
-  const eligible = accounts.data?.organizations.filter(({ role }) => ["owner", "administrator", "editor"].includes(role));
+  const eligible = accounts.data?.organizations.filter((account) => (!handle || handle === account.handle) && ["owner", "administrator", "editor"].includes(account.role));
   if (!eligible?.length) return null;
   const current = eligible.find(({ handle }) => handle === selected) ?? eligible[0];
   return <div className="mt-3 grid gap-2">
@@ -128,7 +145,7 @@ export function OrganizationPublisher({ onPublished }: { onPublished: () => void
           {eligible.map(({ handle, name }) => <option key={handle} value={handle}>{name}</option>)}
         </select>
       </label>
-      <SocialComposer key={current.handle} source={{ organization: current.handle }} onPublished={() => { setExpanded(false); onPublished(); }}
+      <SocialComposer key={current.handle} source={{ organization: current.handle, sourceId }} onPublished={() => { setExpanded(false); onPublished(); }}
         onCancel={() => setExpanded(false)} />
     </>}
   </div>;

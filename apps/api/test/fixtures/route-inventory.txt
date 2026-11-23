@@ -68,6 +68,7 @@ GET /api/v1/institutions/:key/follow - -
 GET /api/v1/institutions/:key/followers - -
 GET /api/v1/institutions/by-handle/:handle - -
 GET /api/v1/institutions/by-handle/:handle/affiliations - -
+GET /api/v1/institutions/by-handle/:handle/posts - -
 GET /api/v1/legal/availability - -
 GET /api/v1/me/activity - -
 GET /api/v1/me/affiliations - -
@@ -214,6 +215,7 @@ HEAD /api/v1/institutions/:key/follow - onSend
 HEAD /api/v1/institutions/:key/followers - onSend
 HEAD /api/v1/institutions/by-handle/:handle - onSend
 HEAD /api/v1/institutions/by-handle/:handle/affiliations - onSend
+HEAD /api/v1/institutions/by-handle/:handle/posts - onSend
 HEAD /api/v1/legal/availability - onSend
 HEAD /api/v1/me/activity - onSend
 HEAD /api/v1/me/affiliations - onSend
@@ -431,6 +433,7 @@ PUT /api/v1/me/social-notification-preferences 1024 -
 PUT /api/v1/members/:key/follow 1024 -
 PUT /api/v1/members/:username/block 1024 -
 PUT /api/v1/members/:username/mute 1024 -
+PUT /api/v1/posts/:id/organization-pin 1024 -
 PUT /api/v1/posts/:id/reaction 1024 -
 PUT /api/v1/posts/:id/social 1024 -
 PUT /api/v1/projects/:id/image 4200000 -

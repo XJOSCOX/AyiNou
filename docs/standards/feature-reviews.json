@@ -1,6 +1,45 @@
 {
   "features": [
     {
+      "id": "f2-3-organization-publishing",
+      "report": "docs/F2_3_ORGANIZATION_PUBLISHING_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/institutions/by-handle/:handle/posts",
+          "contract": "GET /api/v1/institutions/by-handle/:handle/posts - -",
+          "access": "public",
+          "audit": {
+            "kind": "exception",
+            "detail": "Rate-limited timeline reads do not create durable events."
+          },
+          "publicReason": "Public projection includes only visible organization posts and omits private representative information."
+        },
+        {
+          "route": "PUT /api/v1/posts/:id/organization-pin",
+          "contract": "PUT /api/v1/posts/:id/organization-pin 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The organization post ledger records pinning and unpinning atomically."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/organization-publishing.spec.ts",
+            "denialScenario": "An outsider and a representative whose membership was removed cannot pin a post."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123100000_f23_organization_publishing.sql",
+          "rlsAndGrants": "Organization post audit ledger has RLS and no direct member grants. Pin and publish RPCs are authenticated only.",
+          "authorization": "Recheck active member status, organization visibility and scoped publishing roles. Read projections recheck post and project eligibility.",
+          "compatibility": "Existing posts, timestamps, identities, follow relationships and moderation records are preserved.",
+          "validation": "Disposable browser suite exercises live roles, pin capacity, privacy and F2.1 and F2.2 regressions.",
+          "rolloutAndRollback": "Verify the hosted dry run before applying. Withdraw the new RPC grants by forward migration if needed and preserve audit history."
+        }
+      ]
+    },
+    {
       "id": "f2-2-feed-experience",
       "report": "docs/F2_2_FEED_EXPERIENCE_IMPLEMENTATION_REPORT.md",
       "routes": [],

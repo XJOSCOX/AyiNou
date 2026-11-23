@@ -26,5 +26,16 @@
   "mentionSuggestions": "Mention suggestions",
   "publishOrganization": "Publish as an organization",
   "organization": "Organization",
-  "publishDone": "Post published."
+  "publishDone": "Post published.",
+  "announcement": "Official announcement",
+  "projectLink": "Published project link (optional)",
+  "invalidProject": "Enter a valid AyiNou project link.",
+  "organizationPosts": "Organization posts",
+  "filterPosts": "Filter posts",
+  "allPosts": "All posts",
+  "announcements": "Announcements",
+  "pin": "Pin to profile",
+  "unpin": "Unpin from profile",
+  "pinned": "Pinned",
+  "verifiedOrganization": "Verified organization"
 }

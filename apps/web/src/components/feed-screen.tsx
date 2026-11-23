@@ -27,6 +27,7 @@ import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { OrganizationPublisher, QuotePreview, SocialPostControls, usePostBookmark } from "./social-post";
 import { SocialText } from "./social-text";
+import { setOrganizationPin } from "@/lib/social-api";
 import { socialMessages } from "@/lib/social-i18n";
 import { PostComposer } from "./post-composer";
 import { PostMediaGallery } from "./post-media";
@@ -172,8 +173,8 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
   </section>;
 }
 
-export function PostCard({ post, changed, recommendation, onBookmarkChange, returnScope }: {
-  post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode; onBookmarkChange?: () => void; returnScope?: FeedScope;
+export function PostCard({ post, changed, recommendation, onBookmarkChange, returnScope, guest = false, organizationTimeline = false }: {
+  post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode; onBookmarkChange?: () => void; returnScope?: FeedScope; guest?: boolean; organizationTimeline?: boolean;
 }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
@@ -216,7 +217,7 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
           {!post.social?.organization && post.author?.username && <p className="break-all text-xs text-[var(--theme-body)]">@{post.author.username}</p>}
         </div>
       </div>
-      {!mode && (editable || (!post.own && !reported) || saveAction.length > 0) && <FeedActions label={t.postActions} actions={editable ? [
+      {!guest && !mode && (editable || (!post.own && !reported) || saveAction.length > 0) && <FeedActions label={t.postActions} actions={editable ? [
         { icon: "edit", label: t.edit, run: () => setMode("edit") },
         { icon: "delete", label: t.delete, run: () => setMode("delete") },
         ...saveAction,
@@ -228,6 +229,9 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
         <time dateTime={timestamp}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(timestamp))}</time>
       </Link>
       <span lang={post.language}>{languageNames[post.language]}</span>
+      {post.social?.announcement && <span className="font-semibold">{social.announcement}</span>}
+      {post.social?.organization?.verified && <span>{social.verifiedOrganization}</span>}
+      {organizationTimeline && post.social?.pinned && <span className="font-semibold">{social.pinned}</span>}
       {post.editedAt && <span>{t.edited}</span>}
       {(post.own || post.visibility === "members_only") && <span>{t[post.visibility]}</span>}
       {post.status === "hidden" && <span>{t.hidden}</span>}
@@ -236,7 +240,7 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
       onSaved={(message) => { setMode(null); changed(message); }} /> :
       <p lang={post.language} dir="auto" className="mt-4 max-w-[75ch] whitespace-pre-wrap break-words text-sm leading-6 sm:text-base"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></p>}
     {mode !== "edit" && !!post.topics?.length && <PostTopicLabels topics={post.topics} />}
-    {mode !== "edit" && post.attachments && <PostMediaGallery post={post.id} attachments={post.attachments} />}
+    {mode !== "edit" && post.attachments && <PostMediaGallery post={post.id} attachments={post.attachments} guest={guest} />}
     {mode === "delete" && <div className="mt-4 grid gap-3">
       <p>{t.confirmDelete}</p>
       {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
@@ -250,9 +254,23 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
     {mode === "report" && <ContentReportForm submitReport={(category, note) => reportPost(post.id, category, note)}
       cancel={() => setMode(null)} reported={() => { setMode(null); setReported(true); }} />}
     {reported && <p role="status" className="mt-3 text-sm text-[var(--theme-link)]">{t.reportSent}</p>}
+    {post.social?.project && <aside className="mt-3 grid gap-1 rounded-md border border-[var(--theme-border)] p-3 text-sm">
+      <Link className={institutionLink} href={"/projects/" + post.social.project.id}>{post.social.project.title}</Link>
+      <p className="break-words">{post.social.project.summary}</p>
+      {post.social.project.opportunities?.map((item) => <Link key={item.id} className={institutionLink}
+        href={"/projects/" + post.social?.project?.id + "/work"}>{item.title}</Link>)}
+    </aside>}
+    {organizationTimeline && post.social?.canPin && <div className="mt-3 grid gap-2">
+      <button type="button" className={institutionLink + " min-h-11 justify-self-start"} disabled={mutation.busy}
+        onClick={() => { void mutation.run(async () => {
+          await setOrganizationPin(post.id, post.version, !post.social?.pinned);
+          changed("published");
+        }); }}>{post.social.pinned ? social.unpin : social.pin}</button>
+      {mutation.error !== null && mode !== "delete" && <ApiErrorNotice error={mutation.error} />}
+    </div>}
     {recommendation}
-    {mode !== "edit" && <><QuotePreview post={post} /><SocialPostControls post={post} bookmark={bookmark} onChange={() => changed("published")} /></>}
-    {post.reactions && <PostDiscussion postId={post.id}>
+    {mode !== "edit" && <><QuotePreview post={post} />{!guest && <SocialPostControls post={post} bookmark={bookmark} onChange={() => changed("published")} />}</>}
+    {!guest && post.reactions && <PostDiscussion postId={post.id}>
       <ReactionPicker target="posts" id={post.id} summary={post.reactions} />
     </PostDiscussion>}
   </article>;

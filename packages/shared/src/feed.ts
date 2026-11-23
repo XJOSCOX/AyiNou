@@ -42,7 +42,11 @@ export interface SocialPostInfo {
   repostCount: number;
   quote: { unavailable: true } | { id: string; body: string; language: Locale; author: Omit<FeedAuthor, "avatarUrl"> | null;
     organization: { handle: string; name: string } | null } | null;
-  organization: { handle: string; name: string } | null;
+  organization: { handle: string; name: string; verified?: boolean } | null;
+  announcement?: boolean;
+  pinned?: boolean;
+  canPin?: boolean;
+  project?: { id: string; title: string; summary: string; opportunities?: { id: string; title: string }[] } | null;
   hashtags: string[];
   mentions: Record<string, string>;
 }

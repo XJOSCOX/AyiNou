@@ -26,5 +26,16 @@
   "mentionSuggestions": "Sijesyon mansyon",
   "publishOrganization": "Pibliye nan non yon òganizasyon",
   "organization": "Òganizasyon",
-  "publishDone": "Piblikasyon an pibliye."
+  "publishDone": "Piblikasyon an pibliye.",
+  "announcement": "Anons ofisyèl",
+  "projectLink": "Lyen pwojè ki pibliye (si ou vle)",
+  "invalidProject": "Antre yon lyen pwojè AyiNou ki valab.",
+  "organizationPosts": "Piblikasyon òganizasyon an",
+  "filterPosts": "Filtre piblikasyon yo",
+  "allPosts": "Tout piblikasyon",
+  "announcements": "Anons",
+  "pin": "Epingle sou pwofil la",
+  "unpin": "Retire epeng lan",
+  "pinned": "Epingle",
+  "verifiedOrganization": "Òganizasyon verifye"
 }
