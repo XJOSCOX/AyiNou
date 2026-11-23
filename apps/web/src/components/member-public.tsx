@@ -11,6 +11,8 @@ import { founderMessages } from "@/lib/founder-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AmbassadorRecognition } from "./ambassador-public";
 import { FounderVerifiedBadge } from "./founder-verified-badge";
+import { f24Messages } from "@/lib/f24-i18n";
+import { MemberActivity } from "./social-activity";
 import { ProfileFollowPanel } from "./discovery-accounts";
 import { MemberSafetyControls } from "./member-safety";
 import { AdministratorMark, FounderMark, PersonalClaimChecks, institutionCard, institutionLink } from "./institution-ui";
@@ -55,6 +57,7 @@ export function MemberPublic({ profile, username, social, ambassador, recognitio
             <summary className="cursor-pointer text-sm font-semibold">{founderMessages[locale].verificationDetails}</summary>
             <FounderVerifiedBadge />
           </details> : <FounderVerifiedBadge />)}
+        {profile.detailsVisible === false && <p className="mt-3 text-sm">{f24Messages[locale].privateProfile}</p>}
         {profile.biography && <p className="mt-4 max-w-prose whitespace-pre-line break-words" dir="auto">{profile.biography}</p>}
         {(country || profile.departmentName || !!profile.interests?.length) && <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
           {country && <div><dt className="font-semibold">{authMessages[locale].country}</dt><dd>{country}</dd></div>}
@@ -69,8 +72,9 @@ export function MemberPublic({ profile, username, social, ambassador, recognitio
         {ambassador && <AmbassadorRecognition ambassador={ambassador} />}
       </section>
       <ProfileFollowPanel target={{ kind: "member", key: username }} initial={social} signedIn={signedIn} />
-      {signedIn && social.canFollow && <MemberSafetyControls username={username} />}
-      {signedIn && social.canFollow && <ImpersonationReportForm username={username} />}
+      {profile.activityVisible && <MemberActivity username={username} signedIn={signedIn} />}
+      {signedIn && !social.self && <MemberSafetyControls username={username} />}
+      {signedIn && !social.self && <ImpersonationReportForm username={username} />}
     </div>
   </MemberShell>;
 }

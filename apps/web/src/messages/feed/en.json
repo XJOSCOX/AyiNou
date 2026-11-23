@@ -49,6 +49,7 @@
   "language": "Post language",
   "visibility": "Who can see this post?",
   "public": "Public",
+  "followers": "Followers",
   "members_only": "Members only",
   "private": "Private draft",
   "publish": "Publish",

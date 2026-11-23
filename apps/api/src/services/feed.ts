@@ -157,7 +157,9 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
     signAvatars,
     async read(token, params) {
       const { p_scope, p_id, p_community, p_tag, ...page } = params;
-      const posts = p_scope === "organization"
+      const posts = p_scope === "social_search"
+        ? await rpc<PostRow[]>(token, "read_f24_posts_for_client", { ...page, p_tag: p_tag ?? null })
+        : p_scope === "organization"
         ? await rpc<PostRow[]>(token, "read_organization_posts_for_client", page)
         : p_scope === "community"
         ? await rpc<PostRow[]>(token, "read_department_posts_for_client", { ...page, p_key: p_community })

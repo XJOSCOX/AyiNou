@@ -9,6 +9,7 @@ import { projectProgressMessages } from "@/lib/project-progress-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import Link from "next/link";
 import { loadSocialPreferences, saveSocialPreferences, type SocialNoticePreferences } from "@/lib/social-api";
+import { f24Messages } from "@/lib/f24-i18n";
 import { socialMessages } from "@/lib/social-i18n";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
@@ -25,7 +26,8 @@ import { PageHeader } from "./page-header";
 function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent }: MemberNotification) {
   if (!available) return null;
   if (kind === "poll_event") return pollEvent ? pollEvent.action === "nomination_requested" ? "/polls/nominations" : "/polls/" + pollEvent.pollId : null;
-  if (kind === "new_follower") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
+  if (kind === "follow_requested") return "/settings#follow-requests";
+  if (kind === "new_follower" || kind === "follow_approved") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
   if (kind === "appeal_decided") return appealId ? `/settings/appeals#appeal-${appealId}` : null;
   if (kind === "verification_decided" || kind === "verification_appeal_decided") return "/verification";
   if (kind === "representative_access_changed") return "/institutions";
@@ -80,6 +82,8 @@ export function NotificationCenter() {
         : item.kind === "poll_event" ? item.pollEvent ? pollMessages[locale].notices[item.pollEvent.action] : t.unavailable
         : item.kind === "project_submitted" || item.kind === "project_assigned" || item.kind === "project_changes" ||
           item.kind === "project_approved" || item.kind === "project_rejected" ? projectMessages[locale].notices[item.kind]
+        : item.kind === "follow_requested" || item.kind === "follow_approved"
+          ? `${item.actor?.displayName ?? t.someone} ${f24Messages[locale][item.kind === "follow_requested" ? "followRequestedNotice" : "followApprovedNotice"]}`
         : item.kind === "post_mention" || item.kind === "post_repost" || item.kind === "post_quote"
           ? socialMessages[locale][item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone)
           : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);

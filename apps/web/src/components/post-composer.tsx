@@ -9,6 +9,7 @@ import { feedMessages } from "@/lib/feed-i18n";
 import { useFeedMutation } from "@/lib/feed-state";
 import { isLocale, languageNames, locales } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
+import { f24Messages } from "@/lib/f24-i18n";
 import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { useMemberIdentity } from "@/lib/member-display-name";
 import { attachmentInput, postImageMaxBytes, stagePostImage, type SelectedPostImage } from "@/lib/post-media-api";
@@ -25,6 +26,7 @@ const paths = {
   images: "M7 3h10a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3Zm-3 13 4.5-4.5L12 15l3-3 5 5m-5-9h.01",
   topics: "M3.5 5.5H12l8.4 8.4-6.5 6.5L5.5 12V5.5H3.5Zm5 3h.01",
   public: "M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z",
+  followers: "M4 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2m-2-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Zm2 6a4 4 0 0 1 4 4v3",
   members_only: "M12 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM3 20v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2m2-15a3 3 0 0 1 0 6m4 9v-2a5 5 0 0 0-4-5",
   private: "M7 10h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Zm1 0V7a4 4 0 0 1 8 0v3m-4 5v2",
 };
@@ -207,6 +209,7 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel 
         </button>
       </div>
     </div>
+    {visibility === "followers" && <p className="text-xs text-[var(--theme-body)]">{f24Messages[locale].followersAudienceHint}</p>}
     <div id={topicPanel} hidden={!showTopics} className="rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] p-3">
       <p className="mb-2 text-sm text-[var(--theme-body)]">{r.topicsHelp}</p>
       <TopicOptions chosen={topics} limit={3} busy={mutation.busy} onChange={setTopics} />

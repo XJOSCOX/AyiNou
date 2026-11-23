@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { locales, postBodyLimit } from "@ayinou/shared";
+import { interestCodes, locales, postBodyLimit, type ProfileReply } from "@ayinou/shared";
 import { z } from "zod";
 import { content, identifiers } from "./validation.js";
 import { before, pageCursor, paginate } from "./pagination.js";
@@ -12,6 +12,48 @@ const organization = z.union([handle, z.uuid()]);
 const preferenceInput = z.strictObject({ mentions: z.boolean(), reposts: z.boolean(), quotes: z.boolean() });
 
 export function registerSocialRoutes(app: FastifyInstance, { viewer, repo, read }: FeedRouteContext) {
+  const postSearch = z.strictObject({
+    cursor: pageCursor, q: z.string().trim().min(2).max(100).refine((value) => !/[\p{Cc}@]/u.test(value)).optional(),
+    tag: tag.optional(), language: z.enum(locales).optional(), topic: z.enum(interestCodes).optional(),
+    since: z.iso.datetime({ offset: true }).optional(), filter: z.enum(["posts", "media", "replies"]).default("posts"),
+  });
+  app.get("/api/v1/members/:username/timeline", async (request) => {
+    const { actor, token } = await viewer(request);
+    await read("feed", actor, request.ip);
+    const { username } = z.object({ username: z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/) }).parse(request.params);
+    const query = postSearch.parse(request.query);
+    if (query.filter === "replies") {
+      const rows = await repo().rpc<ProfileReply[]>(token, "read_member_replies_f24_for_client", {
+        p_username: username, p_limit: 20, ...before(query.cursor),
+      });
+      const { page, nextCursor } = paginate(rows, 20);
+      return { replies: page, nextCursor };
+    }
+    return readSearch(token, username, query);
+  });
+  app.get("/api/v1/discover/posts", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    await read("discovery", actor, request.ip);
+    const query = postSearch.refine((v) => v.filter !== "replies" && !!(v.q || v.tag || v.language || v.topic || v.since))
+      .parse(request.query);
+    return readSearch(token, null, query);
+  });
+  app.get("/api/v1/discover/trending", async (request) => {
+    const { actor, token } = await viewer(request, true);
+    await read("discovery", actor, request.ip);
+    return { tags: await repo().rpc<string[]>(token, "trending_hashtags_f24_for_client") };
+  });
+
+  async function readSearch(token: string | null, username: string | null, query: z.infer<typeof postSearch>) {
+    const rows = await repo().read(token, {
+      p_scope: "social_search", p_username: username, p_filter: query.filter, p_query: query.q ?? null,
+      p_tag: query.tag ?? null, p_language: query.language ?? null, p_topic: query.topic ?? null,
+      p_since: query.since ?? null, p_limit: 20, ...before(query.cursor),
+    });
+    const { page, nextCursor } = paginate(rows, 20);
+    return { posts: page, nextCursor };
+  }
+
   app.get("/api/v1/institutions/by-handle/:handle/posts", async (request) => {
     const { actor, token } = await viewer(request);
     await read("feed", actor, request.ip);

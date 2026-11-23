@@ -20,6 +20,8 @@ export function searchDiscovery(filter: DiscoveryFilter, cursor: string | null, 
   if (filter.category) query.set("category", filter.category);
   if (filter.country) query.set("country", filter.country);
   if (filter.department) query.set("department", filter.department);
+  if (filter.interest) query.set("interest", filter.interest);
+  if (filter.language) query.set("language", filter.language);
   if (cursor) query.set("cursor", cursor);
   return authorizedSocialRequest(`/api/v1/discover/${filter.kind}?${query}`, { signal });
 }

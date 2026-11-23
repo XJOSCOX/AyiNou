@@ -1,6 +1,147 @@
 {
   "features": [
     {
+      "id": "f2-4-social-privacy",
+      "report": "docs/F2_4_SOCIAL_PRIVACY_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/discover/posts",
+          "contract": "GET /api/v1/discover/posts - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "authorization": {
+            "file": "apps/api/test/feed.test.ts",
+            "denialScenario": "Anonymous searches are denied. Signed-in nonfollowers receive no restricted posts."
+          }
+        },
+        {
+          "route": "GET /api/v1/discover/trending",
+          "contract": "GET /api/v1/discover/trending - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "authorization": {
+            "file": "apps/api/test/feed.test.ts",
+            "denialScenario": "Anonymous readers are denied. Restricted posts are excluded from the aggregate."
+          }
+        },
+        {
+          "route": "GET /api/v1/members/:username/timeline",
+          "contract": "GET /api/v1/members/:username/timeline - -",
+          "access": "public",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "publicReason": "Guest access is limited to disclosed activity on public profiles and individually eligible posts."
+        },
+        {
+          "route": "GET /api/v1/me/social-privacy",
+          "contract": "GET /api/v1/me/social-privacy 2048 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "authorization": {
+            "file": "apps/api/test/feed.test.ts",
+            "denialScenario": "Anonymous callers cannot read member privacy settings."
+          }
+        },
+        {
+          "route": "PUT /api/v1/me/social-privacy",
+          "contract": "PUT /api/v1/me/social-privacy 2048 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "authorization": {
+            "file": "apps/api/test/feed.test.ts",
+            "denialScenario": "Anonymous callers cannot change member privacy settings."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/follow-requests",
+          "contract": "GET /api/v1/me/follow-requests - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "authorization": {
+            "file": "apps/api/test/feed.test.ts",
+            "denialScenario": "Anonymous callers cannot read the private request queue."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/follow-requests/:id",
+          "contract": "PATCH /api/v1/me/follow-requests/:id 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/f24-social-privacy.spec.ts",
+            "denialScenario": "A member who is neither party cannot approve someone else's request."
+          }
+        },
+        {
+          "route": "DELETE /api/v1/me/followers/:key",
+          "contract": "DELETE /api/v1/me/followers/:key - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Routine scoped reads and member-managed social state do not create separate durable audit events."
+          },
+          "authorization": {
+            "file": "apps/api/test/feed.test.ts",
+            "denialScenario": "Anonymous callers cannot remove a follower; the member identity is bound to the session."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123125000_f24_profile_privacy.sql",
+          "rlsAndGrants": "Private tables have RLS and no direct client grants. Profile projections redact fields before they leave PostgreSQL.",
+          "authorization": "Requests, mutations, hiding and removal use the caller's identity and block state.",
+          "compatibility": "Historical follows remain unapproved. Existing disclosure and verification settings remain.",
+          "validation": "Disposable API/browser checks for defaults, historical follows, competing requests, unauthorized and blocked operations.",
+          "rolloutAndRollback": "Check the exact approved hosted migration set and run a read-only postflight. Use a forward recovery migration to preserve member and audit records."
+        },
+        {
+          "file": "supabase/migrations/20261123125100_f24_discovery_timelines.sql",
+          "rlsAndGrants": "RPCs expose only filtered member rows and audience-safe posts and aggregates.",
+          "authorization": "Profile activity and queries require live scope, optional disclosure, and applicable caller eligibility.",
+          "compatibility": "Existing member and organization search and cards retain their API contracts; indexes only add bounded queries.",
+          "validation": "Run direct profile, discovery, post search, and trending tests on disposable Supabase.",
+          "rolloutAndRollback": "Check the exact approved hosted migration set and run a read-only postflight. Use a forward recovery migration to preserve member and audit records."
+        },
+        {
+          "file": "supabase/migrations/20261123125200_f24_followers_audience.sql",
+          "rlsAndGrants": "Posts RLS and shared discussion checks enforce follower scope. Helpers deny direct access except a caller-bound predicate.",
+          "authorization": "Only the author or a valid follower can read Followers posts. Shares require public source posts.",
+          "compatibility": "Personal audience is additive; organization and community posts keep their existing audiences.",
+          "validation": "Test direct posts, restricted bookmarks and shares, mention preferences, chronological Following and For You.",
+          "rolloutAndRollback": "Check the exact approved hosted migration set and run a read-only postflight. Use a forward recovery migration to preserve member and audit records."
+        },
+        {
+          "file": "supabase/migrations/20261123125300_f24_audience_integrity.sql",
+          "rlsAndGrants": "Approval flags are enforced by RLS and inherited media and engagement checks. Relationship helpers remain private and activity projections are audience-scoped.",
+          "authorization": "Profile privacy reductions preserve approval requirements on previously protected posts.",
+          "compatibility": "Published post audiences are preserved, and the existing export schema accepts the new post visibility.",
+          "validation": "Test privacy transitions, live visibility after removal, and legacy privacy exports in disposable infrastructure.",
+          "rolloutAndRollback": "Check the exact approved hosted migration set and run a read-only postflight. Use a forward recovery migration to preserve member and audit records."
+        }
+      ]
+    },
+    {
       "id": "founder-organization-verification",
       "report": "docs/organizations/FOUNDER_ORGANIZATION_VERIFICATION_IMPLEMENTATION_REPORT.md",
       "routes": [],
@@ -20,6 +161,14 @@
           "compatibility": "Adds Founder representative audit events and queue capability metadata without editing historical records. Existing independent review and evidence grants remain.",
           "validation": "Disposable browser and API coverage exercises own representative decisions, audit provenance, assignment and protected case denials.",
           "rolloutAndRollback": "Deploy only the reviewed migration to the authorized project. Remove added authority with a forward migration while preserving decision history."
+        },
+        {
+          "file": "supabase/migrations/20261123121000_institution_verification_request_states.sql",
+          "rlsAndGrants": "The existing service-only verification workspace RPC retains its grant.",
+          "authorization": "The state projection is scoped to the caller's active organization memberships and individual request history.",
+          "compatibility": "Institution and representative states are additive and do not update verification decisions.",
+          "validation": "The SQL projection was reviewed against independent request types and active membership filters.",
+          "rolloutAndRollback": "Check the exact approved hosted migration set and run a read-only postflight. Use a forward recovery migration to preserve member and audit records."
         }
       ]
     },
@@ -74,6 +223,14 @@
           "compatibility": "Existing posts, timestamps, identities, follow relationships and moderation records are preserved.",
           "validation": "Disposable browser suite exercises live roles, pin capacity, privacy and F2.1 and F2.2 regressions.",
           "rolloutAndRollback": "Verify the hosted dry run before applying. Withdraw the new RPC grants by forward migration if needed and preserve audit history."
+        },
+        {
+          "file": "supabase/migrations/20261123124000_institution_list_logos.sql",
+          "rlsAndGrants": "The existing service-only account-list RPC retains its grant.",
+          "authorization": "The list still requires an eligible actor and active organization membership before returning a logo asset reference.",
+          "compatibility": "Logo metadata is additive and organization records and memberships are preserved.",
+          "validation": "The migration was checked against the local and hosted schema history and existing membership predicates.",
+          "rolloutAndRollback": "Check the exact approved hosted migration set and run a read-only postflight. Use a forward recovery migration to preserve member and audit records."
         }
       ]
     },

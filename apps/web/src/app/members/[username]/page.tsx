@@ -25,9 +25,9 @@ export default async function PublicMemberPage({ params }: { params: Promise<{ u
   if (profile.username && profile.username !== username) redirect(`/members/${profile.username}`);
   const [social, { ambassador }, { data: recognition }] = await Promise.all([
     publicMemberData<FollowStatus>(`${api}/api/v1/members/${username}/follow`, headers),
-    (requestJson(`${api}/api/v1/members/${username}/ambassador`, { headers, signal: AbortSignal.timeout(2500) }) as
+    profile.detailsVisible === false ? { ambassador: null } : (requestJson(`${api}/api/v1/members/${username}/ambassador`, { headers, signal: AbortSignal.timeout(2500) }) as
       Promise<{ ambassador: Pick<PublicAmbassador, "category" | "statement"> | null }>).catch(() => ({ ambassador: null })),
-    client.rpc("public_recognition_badges", { p_username: username }).abortSignal(AbortSignal.timeout(2500)),
+    profile.detailsVisible === false ? { data: null } : client.rpc("public_recognition_badges", { p_username: username }).abortSignal(AbortSignal.timeout(2500)),
   ]);
   return <MemberPublic profile={profile} username={username} social={social} ambassador={ambassador}
     recognition={(recognition ?? []) as RecognitionBadge[]} signedIn={signedIn} />;

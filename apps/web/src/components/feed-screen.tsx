@@ -233,7 +233,7 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
       {post.social?.organization?.verified && <span>{social.verifiedOrganization}</span>}
       {organizationTimeline && post.social?.pinned && <span className="font-semibold">{social.pinned}</span>}
       {post.editedAt && <span>{t.edited}</span>}
-      {(post.own || post.visibility === "members_only") && <span>{t[post.visibility]}</span>}
+      {(post.own || post.visibility === "members_only" || post.visibility === "followers") && <span>{t[post.visibility]}</span>}
       {post.status === "hidden" && <span>{t.hidden}</span>}
     </p>
     {mode === "edit" ? <PostComposer post={post} onCancel={() => setMode(null)}

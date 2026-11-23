@@ -16,6 +16,7 @@ import { AccountSecurity } from "./account-security";
 import { ActiveSessions } from "./active-sessions";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
+import { FollowRequestsPanel, SocialPrivacySettings } from "./social-privacy-settings";
 import { NotificationPreferencesPanel } from "./notifications";
 import { MemberSafetySettings } from "./member-safety";
 import { GovernanceInvitations } from "./platform-governance";
@@ -93,6 +94,8 @@ export function AccountSettings({ subject }: { subject: string }) {
           <ActiveSessions subject={subject} />
           <FounderBootstrap />
         </section>
+        <SocialPrivacySettings />
+        <FollowRequestsPanel />
         <NotificationPreferencesPanel />
         <MemberSafetySettings />
         <GovernanceInvitations />

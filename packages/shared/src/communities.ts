@@ -68,15 +68,17 @@ export interface CommunityStats {
 }
 
 export type DiscoveryKind = "people" | "institutions";
-export type DiscoveryFilter = { kind: DiscoveryKind; q?: string; verified?: boolean; category?: OrganizationKind; country?: string; department?: string };
+export type DiscoveryFilter = { kind: DiscoveryKind; q?: string; verified?: boolean; category?: OrganizationKind; country?: string; department?: string; interest?: string; language?: string };
 type DiscoveryCardBase = { id: string; handle: string; name: string; verified: boolean; following: boolean };
 export type DiscoveryCard = DiscoveryCardBase & (
-  { kind: "member"; self: boolean; personalClaims?: PersonalClaim[]; founderVerified?: true }
+  { kind: "member"; self: boolean; avatarUrl?: string | null; canFollow?: boolean; requiresApproval?: boolean; requestPending?: boolean; personalClaims?: PersonalClaim[]; founderVerified?: true }
   | { kind: "institution"; targetId: string; verificationStatus: "verified" | "unverified"; category: OrganizationKind;
       countryCode: string; departmentCode: string | null; description: string | null }
 );
 export type DiscoveryPage = { accounts: DiscoveryCard[]; nextCursor: string | null };
 export type FollowTarget = { kind: "member" | "institution"; key: string };
 export type FollowStatus = { following: boolean; canFollow: boolean; verified: boolean; personalClaims?: PersonalClaim[];
-  followerCount: number; followingCount: number | null };
+  followerCount: number; followingCount: number | null;
+  self?: boolean; requestPending?: boolean; requiresApproval?: boolean; mutual?: boolean; showFollowers?: boolean; showFollowing?: boolean };
+export type FollowRequestEntry = { id: string; createdAt: string; username: string | null; displayName: string | null };
 export type FollowList = "followers" | "following";

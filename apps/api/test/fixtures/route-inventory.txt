@@ -5,6 +5,7 @@ DELETE /api/v1/communities/:key/membership 1024 -
 DELETE /api/v1/institutions/:key/follow 1024 -
 DELETE /api/v1/me/blocked/:id - -
 DELETE /api/v1/me/community-recommendation-feedback - -
+DELETE /api/v1/me/followers/:key - -
 DELETE /api/v1/me/muted/:id - -
 DELETE /api/v1/members/:key/follow 1024 -
 DELETE /api/v1/members/:username/block 1024 -
@@ -54,7 +55,9 @@ GET /api/v1/departments - -
 GET /api/v1/discover/hashtags - -
 GET /api/v1/discover/institutions - -
 GET /api/v1/discover/people - -
+GET /api/v1/discover/posts - -
 GET /api/v1/discover/suggestions - -
+GET /api/v1/discover/trending - -
 GET /api/v1/feed - -
 GET /api/v1/feed/social - -
 GET /api/v1/homepage/community-statistics - -
@@ -80,6 +83,7 @@ GET /api/v1/me/community-invitations - -
 GET /api/v1/me/community-recommendation-settings - -
 GET /api/v1/me/feed-moderation - -
 GET /api/v1/me/follow-reposts/:kind/:key 1024 -
+GET /api/v1/me/follow-requests - -
 GET /api/v1/me/following - -
 GET /api/v1/me/founder-bootstrap - -
 GET /api/v1/me/founder-identity - -
@@ -117,6 +121,7 @@ GET /api/v1/me/referral-code - -
 GET /api/v1/me/referrals - -
 GET /api/v1/me/sessions - -
 GET /api/v1/me/social-notification-preferences 1024 -
+GET /api/v1/me/social-privacy 2048 -
 GET /api/v1/me/verification - -
 GET /api/v1/me/verification-badge - -
 GET /api/v1/me/verification/appeals - -
@@ -125,6 +130,7 @@ GET /api/v1/members/:key/followers - -
 GET /api/v1/members/:key/following - -
 GET /api/v1/members/:username/ambassador - -
 GET /api/v1/members/:username/mute - -
+GET /api/v1/members/:username/timeline - -
 GET /api/v1/moderation/:kind/:id/activity - -
 GET /api/v1/moderation/appeals - -
 GET /api/v1/moderation/feed - -
@@ -201,7 +207,9 @@ HEAD /api/v1/departments - onSend
 HEAD /api/v1/discover/hashtags - onSend
 HEAD /api/v1/discover/institutions - onSend
 HEAD /api/v1/discover/people - onSend
+HEAD /api/v1/discover/posts - onSend
 HEAD /api/v1/discover/suggestions - onSend
+HEAD /api/v1/discover/trending - onSend
 HEAD /api/v1/feed - onSend
 HEAD /api/v1/feed/social - onSend
 HEAD /api/v1/homepage/community-statistics - onSend
@@ -227,6 +235,7 @@ HEAD /api/v1/me/community-invitations - onSend
 HEAD /api/v1/me/community-recommendation-settings - onSend
 HEAD /api/v1/me/feed-moderation - onSend
 HEAD /api/v1/me/follow-reposts/:kind/:key 1024 onSend
+HEAD /api/v1/me/follow-requests - onSend
 HEAD /api/v1/me/following - onSend
 HEAD /api/v1/me/founder-bootstrap - onSend
 HEAD /api/v1/me/founder-identity - onSend
@@ -263,6 +272,7 @@ HEAD /api/v1/me/referral-code - onSend
 HEAD /api/v1/me/referrals - onSend
 HEAD /api/v1/me/sessions - onSend
 HEAD /api/v1/me/social-notification-preferences 1024 onSend
+HEAD /api/v1/me/social-privacy 2048 onSend
 HEAD /api/v1/me/verification - onSend
 HEAD /api/v1/me/verification-badge - onSend
 HEAD /api/v1/me/verification/appeals - onSend
@@ -271,6 +281,7 @@ HEAD /api/v1/members/:key/followers - onSend
 HEAD /api/v1/members/:key/following - onSend
 HEAD /api/v1/members/:username/ambassador - onSend
 HEAD /api/v1/members/:username/mute - onSend
+HEAD /api/v1/members/:username/timeline - onSend
 HEAD /api/v1/moderation/:kind/:id/activity - onSend
 HEAD /api/v1/moderation/appeals - onSend
 HEAD /api/v1/moderation/feed - onSend
@@ -328,6 +339,7 @@ PATCH /api/v1/institutions/:id/roles/:roleId/assignments/:assignmentId 512 -
 PATCH /api/v1/institutions/:id/verified-representatives/me 256 -
 PATCH /api/v1/me/ambassadors/:id 6000 -
 PATCH /api/v1/me/community-invitations/:id 1024 -
+PATCH /api/v1/me/follow-requests/:id 512 -
 PATCH /api/v1/me/notifications/:id 1024 -
 PATCH /api/v1/me/profile - -
 PATCH /api/v1/me/profile/details - -
@@ -430,6 +442,7 @@ PUT /api/v1/me/notification-preferences 1024 -
 PUT /api/v1/me/organization-onboarding 1024 -
 PUT /api/v1/me/organization-onboarding/:id/details 4096 -
 PUT /api/v1/me/social-notification-preferences 1024 -
+PUT /api/v1/me/social-privacy 2048 -
 PUT /api/v1/members/:key/follow 1024 -
 PUT /api/v1/members/:username/block 1024 -
 PUT /api/v1/members/:username/mute 1024 -

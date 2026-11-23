@@ -73,8 +73,8 @@
     "DepartmentCommunity": "type:1d85fe96df7c6736d6b60fb08f92d63bde7f69cfc87a9fa30d6c3bed85c96c28",
     "departmentCommunityContent": "value:67bd3fedac063db9ef8e7701eeca5d6ea8ca7a7718beb00bc368554be2b77a01",
     "DepartmentCommunityContent": "type:45afacd2a51d5ba02bd0597191e9f8e6ed70e45213cab735556dfa2886d3ee07",
-    "DiscoveryCard": "type:f4398812da4e72a523212c3688a5a95bef9c805dbb734c9780d381d621bfac20",
-    "DiscoveryFilter": "type:b61b5c04c6f993c70370601dd1625c615546f23e9de50b0c88fbb2ed777b416a",
+    "DiscoveryCard": "type:e2454a7b823a0542c6d817ee274cd7f6ea68dbacbb3462b9f419486277a9f264",
+    "DiscoveryFilter": "type:106ce344fa5d2155ae91da52aa588d847448addac97ee8465e9a9edc1e68822c",
     "DiscoveryKind": "type:a55a16bc73f059fcf2ca42b35ab8bf86f3d123d3c904c73303596a83ed1e2756",
     "DiscoveryPage": "type:6647559d6b0a8bebd767d2c93499488ea3edb0244898b3f4bbfa9658cb9303a0",
     "EarlyPartnerCategory": "type:ee768ef2ef13a883c76c4c24b42044e54eab46593d4e9ec4644b3ed86c3c3cd9",
@@ -98,7 +98,9 @@
     "FeedReportPage": "type:22996d165b6ccaf225a568b4a382ec4eedf6015a88fd675c550860b22b070808",
     "FeedScope": "type:e52f06d94deadbe720778295624ce8a8ec11fc058f3f87567a384ed86844f699",
     "FollowList": "type:43edbaf5d1314f72e0795dfcc39a0c8087f5d01fe105e9112ff7569fc7e0e51a",
-    "FollowStatus": "type:69d82b502f1b0c2cfebca4aed7cc2430ae5e5a29f7b7acea6bba32be009176a7",
+    "followPolicies": "value:e2db51a46323f98f4f7bff15988c7634652b8a54bf967a076c58cab281897471",
+    "FollowRequestEntry": "type:525a454abf83288a01c00c6a834130682e477235ac3602f1025f5b12fdcc221e",
+    "FollowStatus": "type:971d290fac0f2ddcc940351e74a03202cbfae3b07028bbbd75cf9bc3a172dfa8",
     "FollowTarget": "type:7deb76e9e616e7f5dd59d1978b98aa86dfa555c4ff9fd9586e5248c02cd9e9bf",
     "FounderAppealItem": "type:94c5f1ba004003db84afcc419e2e757153b3aba85d5017c5e128a9bcbdb1f5e7",
     "founderCaseStates": "value:370559e6e750ae70f5eb92b689377023eb013384ab63878189c8ae0108f9957a",
@@ -152,13 +154,14 @@
     "memberExperienceFlags": "value:02a7687709e3503988502719bbe78abbf3875ab0d0dff572218405c618fd92f6",
     "MemberExperiencePolicy": "type:0c0df4a0db6c24359b943fa702dee911c086f3d57853351a91983ddf6e920331",
     "MemberGroup": "type:237fc2e570d41cefad3bbb9ec69b01d8b091487088c127ea069aaab29a843a76",
-    "MemberNotification": "type:7eeb5805eb68671fb870c2e849754513e5e396cb86b602e06267e1fd55cfa57b",
+    "MemberNotification": "type:e900a0be2bb0bc68ac4af3ec49f172ac201954e94364f6599c01d74383832778",
     "MemberProfile": "type:97a2677e28cc4f1404f47731b87afd08260b9c2655ef65148fb9d54ca3cd0e40",
     "MemberSafetyEntry": "type:5008e6ae013e295ea930d305a4fc46830b51993b62f31870ae384c1be8262527",
     "MemberSafetyPage": "type:7d1158d3a5117e6ba989afa2c0c58eb5f1cd9fa07ac79181be8e7547b126c1e6",
     "MembershipCategory": "type:b9efa5630ea5f47f9dd4058e80a9773b6de099c610e6209e82459c5588e9a12b",
     "membershipPolicies": "value:417e7e0fe3a3fc411158da2d090601673acb808cdfa0afe5afdb191f429f0920",
     "MembershipPolicy": "type:1d976578610460f8754f78b22beadb03b88f188f4112d5775a3a387803550e77",
+    "mentionPolicies": "value:1c1fd116eb9a208747a25f6f8540510b1c5804c721d92cb80c0220732a4989fb",
     "ModerationAction": "type:4e9ec83f3339679e9718613ef273ad59a944e41c7e80555ae9d7596e559fbb19",
     "moderationActions": "value:71e818bc8b0fc2f0eb8ded176c70acae75b69097f2f6f2f61080a5d3889f4b65",
     "ModerationAppeal": "type:50dd87949779bc5f68bd52a29776f2732d0cd640cf3bb0a3590296db60ced06d",
@@ -217,7 +220,7 @@
     "postBodyLimit": "value:9ff50d7c1fae4c3a3a38b1682bd59630e7ba46646e50af36082b77e304b524f7",
     "PostInput": "type:b6590fc808227bc5b28861f5dbb40cd5fa464cb04b5461eab1a77fb23ae9c672",
     "PostStatus": "type:1d5a11fc1e491f2c1357a2c974dde0d83fe7638e3b59ddd79835a443a62bb95e",
-    "postVisibilities": "value:b2885e76ac9409bf9d7fe73284b6467c3116ba5f4d317ad37b63944cff198f98",
+    "postVisibilities": "value:74e3d2141540807b76479667819442a2ef4e8beb4ecdbe9f2e8ce986c23b71f3",
     "PostVisibility": "type:314a18bbb4b9dabacb21123d9d4d2f67f9efb7b86fa22126b9e015c428600da9",
     "PrivacyRequestDetail": "type:17ee437e52e1284f939865c5c847d9ad5a34e32c9c73da5261eecd9bba683576",
     "PrivacyRequestKind": "type:99a82ee304ea6a22e8800c03429bb983d15c2b2c7d440d51f65d060737f5a527",
@@ -229,7 +232,9 @@
     "PrivateFlow": "type:d94e3fc6b7056c8a6ff9bc34cacbde8f9ed90fa9b6fc52695b09c2606ec1fbbd",
     "PrivateFlowReceipt": "type:a4cd562a1bd06bcde9c2b3ad5148f2045c75adb7e14bfb6644ff07208e609466",
     "ProfileChanges": "type:22220e2b1fdd86f210461ecd54b8b4ec9ca0a044f553398301fa090f584b307f",
-    "ProfilePreview": "type:b1e567a815a2f103ea71db93a9c7b245e567906dc281f4b1edc423f63b7f8c1b",
+    "profileModes": "value:3f5af297893958ec19d0481a191bdf8172fa7ce166dbd834653a05ea5fd35c54",
+    "ProfilePreview": "type:cddf6b05d4f532873143e102f92bcbe139504114c0587be3bb411ed53548c803",
+    "ProfileReply": "type:61fe4f094454cb795c9d203e5cd75b5d1a250673285274bd1ffae504dfb5fe02",
     "ProjectCard": "type:f8d51b4b57db5ba1a2f7a463686e46424c34962fdd3d90ceb5ea645f7bedc01d",
     "ProjectDetail": "type:7bf1cfd11c6ccafec8e70734e11ca5929134191a53be1c7941c41c9136f8cd66",
     "ProjectDraft": "type:6c29fa54dc12b6eeb88b79aca78a090be33bfd139cbfd9f90d9e049e9118d5b6",
@@ -299,6 +304,7 @@
     "SessionRevocation": "type:763fee4cb9f284983f281f9f8bc8f161f9a66f27149918459363b6ff0e5bfbad",
     "SignupPath": "type:c249b0e99290040736a8305eb062808769e3a3fd4b97384fae6c9aff4bbbecb5",
     "SocialPostInfo": "type:03a924480703340113d6d48c8a9039388ad540ffb53dcf77ca24bbadd0c99eb9",
+    "SocialPrivacy": "type:937f14607a1c2092604ebc2221633a286c40d3068a0626b23a5e6f52202c0a08",
     "StatusResponse": "type:bc13ad0e66a811fe283af87bbcf151d79cfa16d49663ff46b98018565d0459ff",
     "UpdateMemberProfile": "type:c096b49445347f2052c4afc8e8b07d8317425e21c9f6cf09319f5f2af29daa90",
     "UsernameAvailability": "type:208d313cc04cee671d0ec3c6c0f738370991d6b15846712572656bb9bc966d4f",
@@ -313,7 +319,7 @@
     "VerificationPolicyFlag": "type:15a679d6c374f43417783613b6ae83c7b94e05f3e0c2b0265de66cc9f0f8cc41",
     "verificationPolicyFlags": "value:7afc97a0d0e93eb91add8c32b5ab80ce085efa5636804d860626709b42e8f7e5",
     "VerificationStatus": "type:8ed940092989a0d58bfe3ab2dc780dbe6dcb43f54ad416b090abcad67746580f",
-    "VerificationWorkspace": "type:6266e37e5a245a1d0f1b892fd0cf1032f317409cb7519b5968c6861e2f71b3fb",
+    "VerificationWorkspace": "type:24f067633e281d9a3c3f19175f185f8fd498186cc951eef1180201ad111fdbb0",
     "VerifiedRepresentatives": "type:5c8fb9ec1f272a9e2e4cd7a86ab0ebf9709ce3ac185b3a853f5dff34c6150e4e"
   },
   "privateTypes": {
@@ -463,6 +469,11 @@
       "privacyRequests",
       "pollParticipation"
     ],
+    "followPolicies": [
+      "everyone",
+      "approval",
+      "no_one"
+    ],
     "founderCaseStates": [
       "consent_pending",
       "proof_pending",
@@ -609,6 +620,11 @@
       "approval_required",
       "invitation_only"
     ],
+    "mentionPolicies": [
+      "everyone",
+      "following",
+      "no_one"
+    ],
     "moderationActions": [
       "hide",
       "restore",
@@ -693,6 +709,7 @@
     "postVisibilities": [
       "public",
       "members_only",
+      "followers",
       "private"
     ],
     "privacyRequestKinds": [
@@ -703,6 +720,11 @@
       "deletion",
       "restriction",
       "appeal"
+    ],
+    "profileModes": [
+      "public",
+      "limited",
+      "private"
     ],
     "projectExecutionStatuses": [
       "approved",

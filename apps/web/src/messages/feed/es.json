@@ -49,6 +49,7 @@
   "language": "Idioma de la publicación",
   "visibility": "¿Quién puede ver esta publicación?",
   "public": "Pública",
+  "followers": "Seguidores",
   "members_only": "Solo miembros",
   "private": "Borrador privado",
   "publish": "Publicar",

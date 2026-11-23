@@ -51,8 +51,10 @@ test("synthetic export protects field boundaries, sessions, ballots and concurre
   const other = await steppedUp(outsider);
   const ownPost = "Omit subject free text containing third-party data";
   const otherPost = "Omit another author's private content";
+  const followerPost = "Omit the text of a follower-only post";
   await apiCall(owner, "/api/v1/posts", 201, "POST", { body: ownPost, visibility: "private", language: "fr" });
   await apiCall(other, "/api/v1/posts", 201, "POST", { body: otherPost, visibility: "private", language: "es" });
+  await apiCall(owner, "/api/v1/posts", 201, "POST", { body: followerPost, visibility: "followers", language: "ht" });
   const poll = await apiCall(owner, "/api/v1/polls", 201, "POST", {
     title: "Synthetic ballot export check", description: "Independently bound receipt.", scope: "individual",
     scopeId: null, taskId: null, policy: "advisory", kind: "community", language: "en", audience: "members",
@@ -90,8 +92,11 @@ test("synthetic export protects field boundaries, sessions, ballots and concurre
   const text = await reply.text();
   const archive = JSON.parse(text);
   expect(archive.data.pollParticipation).toEqual([{ hasParticipated: true }]);
-  expect(archive.data.posts).toEqual([{ language: "fr", visibility: "private", status: "draft", createdAt: expect.any(String) }]);
-  for (const omitted of [owner.email, other.email, optionId, poll.id, ownPost, otherPost, "Excluded choice one", "optionId"]) {
+  expect(archive.data.posts).toEqual([
+    { language: "ht", visibility: "followers", status: "published", createdAt: expect.any(String) },
+    { language: "fr", visibility: "private", status: "draft", createdAt: expect.any(String) },
+  ]);
+  for (const omitted of [owner.email, other.email, optionId, poll.id, ownPost, otherPost, followerPost, "Excluded choice one", "optionId"]) {
     expect(text).not.toContain(omitted);
   }
   expect(await apiCall(owner, pollPath + "/ballot", 200)).toEqual({ optionId });

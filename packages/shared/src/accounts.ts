@@ -55,7 +55,19 @@ export interface MemberProfile {
   interests?: InterestCode[];
 }
 
+export const profileModes = ["public", "limited", "private"] as const;
+export const followPolicies = ["everyone", "approval", "no_one"] as const;
+export const mentionPolicies = ["everyone", "following", "no_one"] as const;
+export type SocialPrivacy = {
+  mode: typeof profileModes[number]; followPolicy: typeof followPolicies[number];
+  showFollowers: boolean; showFollowing: boolean; showBiography: boolean; showActivity: boolean;
+  shareLanguage: boolean; mentions: typeof mentionPolicies[number]; followNotices: boolean;
+};
+
 export interface ProfilePreview {
+  mode?: SocialPrivacy["mode"];
+  detailsVisible?: boolean;
+  activityVisible?: boolean;
   founderVerified?: true;
   platformLeadership?: "founder" | "administrator";
   displayName: string | null;

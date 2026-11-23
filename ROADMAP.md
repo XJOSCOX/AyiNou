@@ -155,6 +155,12 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [ ] Finish organization engagement, announcement notifications and release verification.
 - [F2.3 implementation report](docs/F2_3_ORGANIZATION_PUBLISHING_IMPLEMENTATION_REPORT.md)
 
+## F2.4 — Discovery, member profiles, following and privacy
+
+- [x] Add member and post discovery, profile activity, follow requests, and a personal Followers audience.
+- [ ] Verify the hosted schema and application against the tested release.
+- [F2.4 implementation and release evidence](docs/F2_4_SOCIAL_PRIVACY_IMPLEMENTATION_REPORT.md)
+
 ## Phase 3D — For You recommendations
 
 - [x] Add an optional rules-based feed with explicit topics, explanations, and member controls.

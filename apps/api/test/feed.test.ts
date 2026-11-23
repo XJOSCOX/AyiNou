@@ -35,7 +35,7 @@ function fixture() {
       if (name === "list_feed_reports_for_client") return [] as T;
       if (name === "list_comment_reports_for_client") return [] as T;
       if (name === "list_comments_for_client") return [first, second] as T;
-      if (name === "search_discovery_for_client") return [
+      if (name === "search_members_f24_for_client" || name === "search_discovery_for_client") return [
         { id: "member:example", kind: "member", handle: "example", name: "Example", verified: false, following: false, self: false },
         { id: "member:second", kind: "member", handle: "second", name: "Second", verified: false, following: false, self: false },
       ] as T;
@@ -124,6 +124,12 @@ test("discovery validates shape, cursors and session-bound follow writes", async
     const discovery = "/api/v1/discover/people";
     const headers = { authorization: "Bearer member" };
     assert.equal((await app.inject(discovery)).statusCode, 401);
+    for (const url of ["/api/v1/discover/posts?q=Example", "/api/v1/discover/trending", "/api/v1/me/follow-requests?view=incoming",
+      "/api/v1/me/social-privacy"]) {
+      assert.equal((await app.inject(url)).statusCode, 401);
+    }
+    assert.equal((await app.inject({ method: "PUT", url: "/api/v1/me/social-privacy" })).statusCode, 401);
+    assert.equal((await app.inject({ method: "DELETE", url: "/api/v1/me/followers/example" })).statusCode, 401);
     assert.equal((await app.inject({ url: `${discovery}?q=x`, headers })).statusCode, 400);
     assert.equal((await app.inject({ url: `${discovery}?category=education`, headers })).statusCode, 400);
     const page = await app.inject({ url: `${discovery}?q=Example&limit=1`, headers });

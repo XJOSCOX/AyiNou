@@ -225,24 +225,21 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       return data;
     },
     async publicProfile(username, token) {
-      const client = token ? asMember(token) : admin;
-      const profile = await client.rpc(token ? "find_member_profile_for_client" : "find_public_profile_for_api", { p_username: username }).maybeSingle();
+      const client = token ? asMember(token) : publicClient;
+      const profile = await client.rpc("social_profile_for_client", { p_username: username });
       if (profile.error) throw unavailable();
       if (!profile.data) return null;
-      const row = profile.data as { user_id: string; display_name: string; username: string; biography: string | null; avatar_asset: string | null; membership_category: ProfilePreview["membershipCategory"] };
-      const [avatar, designation, leadership, disclosure] = await Promise.all([
-        avatarUrl(row.user_id, row.avatar_asset),
-        admin.rpc("founder_identity_public_for_api", { p_subject: row.user_id }),
-        admin.rpc("platform_leadership_for_api", { p_subject: row.user_id }),
-        admin.rpc("member_profile_disclosure_for_api", { p_user: row.user_id }),
+      const { userId, avatarAsset, ...publicFields } = profile.data as Omit<ProfilePreview, "avatarUrl"> & {
+        userId: string | null; avatarAsset: string | null;
+      };
+      if (!userId) return { ...publicFields, avatarUrl: null };
+      const [avatar, designation, leadership] = await Promise.all([
+        avatarUrl(userId, avatarAsset),
+        admin.rpc("founder_identity_public_for_api", { p_subject: userId }),
+        admin.rpc("platform_leadership_for_api", { p_subject: userId }),
       ]);
       return {
-        displayName: row.display_name, username: row.username, biography: row.biography, avatarUrl: avatar,
-        membershipCategory: row.membership_category,
-        countryCode: disclosure.error ? null : disclosure.data?.countryCode ?? null,
-        departmentCode: disclosure.error ? null : disclosure.data?.departmentCode ?? null,
-        departmentName: disclosure.error ? null : disclosure.data?.departmentName ?? null,
-        interests: disclosure.error ? null : disclosure.data?.interests ?? null,
+        ...publicFields, avatarUrl: avatar,
         ...(!designation.error && designation.data === true ? { founderVerified: true as const } : {}),
         ...(!leadership.error && (leadership.data === "founder" || leadership.data === "administrator")
           ? { platformLeadership: leadership.data } : {}),

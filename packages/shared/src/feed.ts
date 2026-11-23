@@ -2,7 +2,7 @@ import type { InterestCode } from "./accounts.js";
 import type { Locale } from "./core.js";
 import type { PersonalClaim } from "./trust.js";
 
-export const postVisibilities = ["public", "members_only", "private"] as const;
+export const postVisibilities = ["public", "members_only", "followers", "private"] as const;
 export const reportCategories = ["harassment", "hate", "spam", "privacy", "other"] as const;
 export const moderationActions = ["hide", "restore", "remove", "dismiss"] as const;
 export const postBodyLimit = 2_000;
@@ -127,6 +127,8 @@ export type FeedComment = CommentPosition & (
   | { available: false; body: null; language: null; editedAt: null; version: null;
     own: false; author: null; reactions: null }
 );
+export type ProfileReply = { id: string; postId: string; body: string; createdAt: string; language: Locale; mentions?: Record<string, string> };
+
 export interface CommentPage {
   comments: FeedComment[];
   nextCursor: string | null;

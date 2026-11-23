@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, hkdfSync, randomBytes } from "node:crypto";
-import { exportCategories, privacyRequestKinds } from "@ayinou/shared";
+import { exportCategories, postVisibilities, privacyRequestKinds } from "@ayinou/shared";
 import { z } from "zod";
 
 const policy = "synthetic-v1";
@@ -14,7 +14,7 @@ const projection = z.strictObject({
   residence: z.array(z.strictObject({ countryCode: country, departmentCode: department, diasporaDepartmentCode: department })).max(1),
   preferences: z.array(z.strictObject({ discoverable: z.boolean(), showMembershipCategory: z.boolean() })).max(1),
   interests: z.array(z.string().regex(/^[a-z]{1,32}$/)).max(101),
-  posts: z.array(z.strictObject({ language: locale, visibility: z.enum(["public", "members_only", "private"]),
+  posts: z.array(z.strictObject({ language: locale, visibility: z.enum(postVisibilities),
     status: z.enum(["draft", "published"]), createdAt: time })).max(101),
   comments: z.array(z.strictObject({ language: locale, createdAt: time })).max(101),
   affiliations: z.array(z.strictObject({ type: z.enum(["member", "volunteer", "staff", "supporter"]), directoryOptIn: z.boolean() })).max(101),
