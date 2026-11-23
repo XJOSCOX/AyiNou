@@ -67,7 +67,8 @@
     "test:e2e:smoke": "node scripts/run-e2e.mjs --grep @smoke",
     "test:e2e:headed": "node scripts/run-e2e.mjs --headed",
     "test": "npm run test:shared && npm run test:i18n && npm run test:client-errors && npm run test -ws --if-present",
-    "build": "npm run build -w @ayinou/api && npm run build -w @ayinou/web"
+    "build": "npm run build -w @ayinou/api && npm run build -w @ayinou/web",
+    "build:local": "npm run build -w @ayinou/api && npm run build:local -w @ayinou/web"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+import { PHASE_PRODUCTION_BUILD } from "next/constants";
+import { assertHostedOrigins } from "./web-environment.mjs";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@ayinou/shared"],
@@ -12,4 +14,9 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default function config(phase: string): NextConfig {
+  if (phase === PHASE_PRODUCTION_BUILD && process.env.AYINOU_LOCAL_WEB_BUILD !== "1") {
+    assertHostedOrigins(process.env);
+  }
+  return nextConfig;
+}

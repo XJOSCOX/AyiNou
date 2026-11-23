@@ -59,7 +59,7 @@ jobs:
       - name: Audit dependencies
         run: npm audit --audit-level=low
       - name: Build API and web
-        run: npm run build
+        run: npm run build:local
 
   browser:
     name: Chromium smoke with disposable Supabase

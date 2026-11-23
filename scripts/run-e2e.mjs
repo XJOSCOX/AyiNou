@@ -98,7 +98,7 @@ async function prepare(directory) {
       recursive: true,
       filter: (path) => !organizationRollout || !/^\d{14}_/.test(basename(path)) || basename(path).slice(0, 14) <= organizationBaseline,
     }),
-    ...["src", "public", "next.config.ts", "postcss.config.mjs", "tsconfig.json", "package.json"].map((name) =>
+    ...["src", "public", "next.config.ts", "web-environment.mjs", "postcss.config.mjs", "tsconfig.json", "package.json"].map((name) =>
       cp(fromRoot("apps", "web", name), join(web, name), { recursive: true })),
   ]);
   return web;

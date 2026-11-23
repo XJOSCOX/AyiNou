@@ -23,7 +23,7 @@ git branch --show-current       # must be main
 npm run lint                    # after scripts exist
 npm run typecheck
 npm test
-npm run build
+npm run build:local
 git diff --check
 git diff --stat
 git add <reviewed-files>
@@ -33,6 +33,12 @@ git push origin main
 ```
 
 Use specific paths for staging instead of `git add .` when possible. Never force-push shared main. If a push is rejected because upstream changed, fetch and inspect history before integrating it locally; never overwrite remote changes.
+
+## Web listener and deployment URLs
+
+Set `WEB_HOST` and `WEB_PORT` in `apps/web/.env.local` or the process environment. Both `npm run dev -w @ayinou/web` and `npm run start -w @ayinou/web` read them. The defaults are `127.0.0.1` and `4000`. If the browser origin changes, update `WEB_ORIGIN`, the API's `WEB_ORIGINS` allowlist, and the Supabase Auth redirect allowlist to match.
+
+Use `npm run build` for hosted builds. Set `WEB_ORIGIN`, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SUPABASE_URL` explicitly to non-loopback HTTPS origins without trailing slashes. Provide `WEB_ORIGIN` to the deployed server at runtime as well. Next.js embeds `NEXT_PUBLIC_*` values at build time. Use `npm run build:local` for local builds and CI.
 
 ## API refactoring checks
 
@@ -46,7 +52,7 @@ Run `npm run test:e2e -- --measure-polls` in a clean Phase 6F.6 checkout for the
 
 `Main checks` runs on direct pushes to `main`. Three jobs run workspace typecheck, lint and tests, an npm audit and both builds, and the Chromium smoke suite with isolated Docker Supabase. Each job uses Node 22.18.0 and `npm ci`. The build job fails on reported npm advisories at low severity or higher. The workflow uses SHA-pinned actions and a read-only repository token. Browser artifacts contain only result counts and expire after three days. The workflow uses no hosted credentials and performs no deployment or hosted migration.
 
-Follow the pushed commit in the repository's Actions tab or run `gh run list --workflow main-checks.yml --branch main`. Use `gh run view <run-id> --log-failed` when a job fails. Reproduce the job locally with `npm run typecheck`, `npm run lint`, `npm test`, `npm audit --audit-level=low`, `npm run build`, or `npm run test:e2e:smoke`. Continue to run the full Chromium suite for locally validated releases.
+Follow the pushed commit in the repository's Actions tab or run `gh run list --workflow main-checks.yml --branch main`. Use `gh run view <run-id> --log-failed` when a job fails. Reproduce the job locally with `npm run typecheck`, `npm run lint`, `npm test`, `npm audit --audit-level=low`, `npm run build:local`, or `npm run test:e2e:smoke`. Continue to run the full Chromium suite for locally validated releases.
 
 The [final Phase 6F review](audits/PHASE_6F_FINAL_REVIEW.md) records the engineering gate and remaining launch work. A green Actions run establishes the push's automated checks. Hosted staffing, incident response, email delivery, privacy operations and restoration have separate evidence requirements.
 

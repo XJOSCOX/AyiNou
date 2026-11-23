@@ -3,15 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --hostname 127.0.0.1 --port 4000",
-    "start": "next start --hostname 127.0.0.1 --port 4000",
+    "dev": "node scripts/next-web.mjs dev",
+    "start": "node scripts/next-web.mjs start",
+    "test": "node --test scripts/web-environment.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "build": "next build --webpack"
+    "build": "next build --webpack",
+    "build:local": "node scripts/next-web.mjs build-local"
   },
   "dependencies": {
     "@ayinou/shared": "*",
     "@fontsource-variable/dm-sans": "5.3.0",
+    "@next/env": "^16.1.0",
     "@supabase/ssr": "0.12.7",
     "@supabase/supabase-js": "2.119.2",
     "next": "^16.1.0",
