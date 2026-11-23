@@ -42,6 +42,12 @@ Disposable coverage is in `apps/web/e2e/verification-policy.spec.ts`. Existing i
 
 The additive migration is `20261122200000_r25_verification_roles_badges.sql`. Validate on an isolated stack, compare the checksum and review the hosted dry run before the hosted development roll forward. Reverting configuration creates a new audited revision. Schema corrections use forward migrations. Hosted application deployment is tracked separately from database migration status.
 
+## Hosted development evidence
+
+Applied only `20261122200000_r25_verification_roles_badges.sql` to linked project `hcbxulyfmdmuyccgrujs` from release `231b743c3ceb06eb6954eb3f76bbadb3d00da6ad`. The CLI labels the linked project production. Ayinou uses this project for hosted development. The SHA-256 was `cb90c3cfe4368556cd872ecedd2a58eea2ea06875e345af8b14d511cedf3fc10`. The final dry run found 94 applied migrations and zero pending. Five Auth accounts, two applications, two official verification records, three Gold grants and one recognized Founder were preserved. All five new ledgers have RLS and the expected restricted grants. Revision 1 has all thirteen flags enabled and there are zero hosted recognition awards.
+
+Local typecheck, lint, the engineering checks, both production builds, 53 API tests, seven client tests and four-language parity passed. The 16-test browser regression and the focused rerun exercised Founder Blue and Gold, registrations, onboarding, session-bound access, intake, roles, recognition, and display privacy. The rebuilt local API and web application passed their health checks against development configuration. Hosted application deployment remains a separate operation.
+
 ## Remaining blockers
 
 Track hosted application rollout separately and keep protected appeal paths available. Review retention under the existing privacy operations work before public launch.

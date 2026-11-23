@@ -7,7 +7,7 @@
 | R2.2 — Registration and referrals | Independent Personal Signup and Organization Signup, signup mode, referral intake and audited Founder controls. Deployed to hosted development and verified with the local app. [R2.2 report](R2_2_IMPLEMENTATION_REPORT.md) |
 | Policy audit history | Founder-only history for R2.1 and R2.2 showing the source actor, date, values and reason. Deployed and verified in hosted development. [Audit history](PLATFORM_POLICY_AUDIT_HISTORY.md) |
 | R2.3 — Member onboarding and profiles | Individual onboarding and profile visibility settings, with explicit member disclosure preferences. Deployed to hosted development and verified locally. [R2.3 implementation report](R2_3_MEMBER_ONBOARDING_AND_PROFILES.md) |
-| R2.5 — Verification, roles and badges | Versioned Founder settings, scoped assignment views, independent official badge display and decorative recognition. [R2.5 implementation report](R2_5_VERIFICATION_ROLES_AND_BADGES.md) |
+| R2.5 — Verification, roles and badges | Versioned Founder settings, scoped assignment views, independent official badge display and decorative recognition. The schema is deployed to hosted development and verified with the local app. [R2.5 implementation report](R2_5_VERIFICATION_ROLES_AND_BADGES.md) |
 | Other R2 phases | Deferred for separate owner direction. |
 
 ## Current registry and boundaries
