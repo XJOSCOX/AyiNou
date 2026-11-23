@@ -32,12 +32,21 @@ Already rendered content and short-lived signed avatar URLs can remain visible d
 
 ## Validation and CI
 
-Local validation covers the full migration chain, shared contracts, locale parity, API and web tests, production-mode builds, and Chromium in disposable Supabase. No GitHub Actions run was used for validation.
+Local validation passed for the full migration chain, typecheck, lint, shared contracts, locale parity, API and web tests, and production-mode builds. Fifteen distinct Chromium cases passed across the relevant suites, including mobile Settings in all four languages and a synthetic privacy export containing a Followers post. No GitHub Actions run was used for validation.
 
 ## Documentation and operations
 
-The roadmap and audit coverage matrix record the change.
+The roadmap, audit coverage matrix, and feature review registry record the change. The tested implementation is commit `8429314e8593a03e3ee8f67c34e72681d8df8fc9` on `main`.
+
+The authorized hosted project `hcbxulyfmdmuyccgrujs` applied exactly these four migrations:
+
+- `20261123125000_f24_profile_privacy`
+- `20261123125100_f24_discovery_timelines`
+- `20261123125200_f24_followers_audience`
+- `20261123125300_f24_audience_integrity`
+
+The postflight dry run reported zero pending migrations. Both new tables had RLS and denied direct member and guest reads. The member settings RPC rejected guest access, and both audience constraints were present. Recorded counts matched before and after for profiles, member follows, institution follows, posts, verification applications, and administration audit events. The refreshed local API returned a healthy response. Codex’s browser loaded post discovery, the social privacy settings, and the follow request list as test02 against hosted Supabase.
 
 ## Remaining blockers
 
-The hosted release requires approval for the four F2.4 migrations through 20261123125300. Preflight checks the exact pending files and project history. Postflight checks the applied versions and new access rules against the matching application. Recovery uses a reviewed forward migration that can close the new entry points while preserving user preferences, posts, and follow records.
+Hosted database migration and the connected local application are verified. Public application hosting is outside this release. Previously issued signed avatar URLs retain their existing expiration window, and trending ranks hashtags from eligible public posts.
