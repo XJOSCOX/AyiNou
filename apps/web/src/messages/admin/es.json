@@ -1,4 +1,8 @@
 {
+  "navigationSections": "Secciones",
+  "navigationPlatform": "Plataforma",
+  "navigationMembers": "Miembros",
+  "navigationPrograms": "Programas",
   "founder": "Fundador",
   "homepage": "Inicio",
   "homepageStatistics": "Estadísticas de la comunidad",

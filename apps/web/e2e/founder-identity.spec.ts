@@ -698,8 +698,23 @@ founderTest("Founder can turn homepage Community Statistics off and back on with
     await login(page, founder);
     await solveMfa(page, founder.secret);
     await openAdministration(page);
-    await page.getByRole("button", { name: t.homepage, exact: true }).click();
+    const navigation = page.getByRole("navigation", { name: t.administration });
+    const platform = navigation.getByRole("region", { name: t.navigationPlatform });
+    const members = navigation.getByRole("region", { name: t.navigationMembers });
+    await expect(members.getByRole("button", { name: t.accounts, exact: true })).toBeVisible();
+    await expect(platform.getByRole("button", { name: t.homepage, exact: true })).toBeVisible();
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    const sections = page.getByRole("button", { name: t.navigationSections });
+    await expect(sections).toHaveAttribute("aria-expanded", "false");
+    await sections.focus();
+    await sections.press("Enter");
+    await expect(sections).toHaveAttribute("aria-expanded", "true");
+    await platform.getByRole("button", { name: t.homepage, exact: true }).click();
+    await expect(sections).toHaveAttribute("aria-expanded", "false");
+    await expect(page.getByRole("region", { name: t.homepage, exact: true })).toBeFocused();
     await expect(page.getByText(t.homepageSavedOff)).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     await page.getByRole("radio", { name: t.homepageOn, exact: true }).check();
     await page.getByLabel(t.homepageReason).fill("Restore public statistics after the test.");
     await page.getByRole("button", { name: t.homepageSave }).click();

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { platformRoles, type AccountStatus, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
 import { adminMessages } from "@/lib/admin-i18n";
@@ -31,12 +31,25 @@ import { HomepageSettings } from "./homepage-settings";
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
 type AdminTab = "homepage" | "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
-const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder", "corrections", "governance", "partners", "homepage"];
+const adminSections = [
+  { label: "navigationPlatform", pages: ["overview", "homepage", "governance", "legal", "audit"] },
+  { label: "navigationMembers", pages: ["accounts", "trust", "founder", "corrections"] },
+  { label: "navigationPrograms", pages: ["ambassadors", "partners"] },
+] as const satisfies { label: keyof typeof adminMessages.en; pages: readonly AdminTab[] }[];
 
 export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceAction: ReactNode; workspaceId: string }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
   const [tab, setTab] = useState<AdminTab>("overview");
+  const [navigationOpen, setNavigationOpen] = useState(false);
+  const content = useRef<HTMLElement>(null);
+  const labels: Record<AdminTab, string> = {
+    overview: t.overview, homepage: t.homepage, accounts: t.accounts, audit: t.audit,
+    trust: trustMessages[locale].trustWorkspace, ambassadors: ambassadorMessages[locale].title,
+    legal: legalAdminMessages[locale].title, founder: founderMessages[locale].adminTitle,
+    corrections: governanceMessages[locale].corrections, governance: governanceMessages[locale].governance,
+    partners: earlyPartnerMessages[locale].title,
+  };
   const access = useInstitutionResource(loadPlatformAccess);
   const overview = useInstitutionResource(loadAdminOverview);
   const refresh = () => { access.refresh(); overview.refresh(); };
@@ -46,28 +59,55 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
       <PageHeader title={t.administration} actions={<>{access.data?.founder && <FounderMark />}{workspaceAction}</>} />
       {overview.error ? <AdminFeedback error={overview.error} totp={access.data?.totp} retry={refresh} />
         : !overview.data ? <p role="status">{authMessages[locale].working}</p> : <>
-          <nav aria-label={t.administration} className="flex flex-wrap gap-2">
-            {tabs.filter((section) => section !== "homepage" || access.data?.founder).map((section) => <button key={section} type="button" aria-pressed={tab === section} onClick={() => setTab(section)}
-              className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">
-              {section === "trust" ? trustMessages[locale].trustWorkspace : section === "ambassadors" ? ambassadorMessages[locale].title : section === "legal" ? legalAdminMessages[locale].title : section === "founder" ? founderMessages[locale].adminTitle : section === "governance" || section === "corrections" ? governanceMessages[locale][section] : section === "partners" ? earlyPartnerMessages[locale].title : t[section]}</button>)}
-            {access.data?.reviewer && <Link className={institutionLink} href="/verification/review">{t.reviewWorkspace}</Link>}
-          </nav>
-          {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {metrics.map((metric) => <div key={metric} className={institutionCard}>
-              <dt className="text-sm text-[var(--theme-body)]">{t[metric]}</dt>
-              <dd className="mt-2 text-3xl font-semibold tabular-nums">{new Intl.NumberFormat(locale).format(overview.data![metric])}</dd>
-            </div>)}
-          </dl><SafetyOverviewPanel /></>}
-          {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
-          {tab === "audit" && <AuditFeed />}
-          {tab === "trust" && <TrustAdministration founderWorkspace={access.data?.founder ? workspaceId : undefined} />}
-          {tab === "ambassadors" && <AmbassadorAdministration />}
-          {tab === "legal" && <LegalAdminPanel />}
-          {tab === "founder" && <FounderIdentityPanel admin workspaceId={workspaceId} />}
-          {tab === "corrections" && <AdminOnboardingCorrections />}
-          {tab === "governance" && <PlatformGovernance />}
-          {tab === "partners" && <AdminEarlyPartners />}
-          {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
+          <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[clamp(12rem,19vw,16rem)_minmax(0,1fr)]">
+            <aside className="min-w-0 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-2.5">
+              <button type="button" aria-expanded={navigationOpen} aria-controls="admin-section-navigation"
+                onClick={() => setNavigationOpen(!navigationOpen)}
+                className="flex min-h-11 w-full flex-wrap items-center justify-between gap-x-3 rounded-lg px-3 py-2 text-start lg:hidden">
+                <span className="font-semibold">{t.navigationSections}</span>
+                <span aria-hidden="true" className="text-sm text-[var(--theme-body)]">{labels[tab]} {navigationOpen ? "▴" : "▾"}</span>
+              </button>
+              <nav id="admin-section-navigation" aria-label={t.administration}
+                className={navigationOpen ? "mt-2 space-y-3 lg:mt-0" : "hidden space-y-3 lg:block"}>
+                {adminSections.map(({ label, pages }) => <section key={label} aria-labelledby={label}
+                  className="border-b border-[var(--theme-border)] pb-2 last:border-0 last:pb-0">
+                  <h2 id={label} className="px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)]">{t[label]}</h2>
+                  <ul className="space-y-0.5">
+                    {pages.filter((page) => page !== "homepage" || access.data?.founder).map((page) => <li key={page}>
+                      <button type="button" aria-pressed={tab === page} onClick={() => {
+                        setTab(page);
+                        if (navigationOpen) {
+                          content.current?.focus();
+                          setNavigationOpen(false);
+                        }
+                      }} className="min-h-11 w-full rounded-md px-3 py-2 text-start text-sm font-semibold hover:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)]">
+                        {labels[page]}
+                      </button>
+                    </li>)}
+                    {label === "navigationMembers" && access.data?.reviewer && <li><Link className={`${institutionLink} block px-3 py-2`} href="/verification/review">{t.reviewWorkspace}</Link></li>}
+                  </ul>
+                </section>)}
+              </nav>
+            </aside>
+            <section ref={content} tabIndex={-1} aria-label={labels[tab]} className="grid min-w-0 gap-4">
+              {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {metrics.map((metric) => <div key={metric} className={institutionCard}>
+                  <dt className="text-sm text-[var(--theme-body)]">{t[metric]}</dt>
+                  <dd className="mt-2 text-3xl font-semibold tabular-nums">{new Intl.NumberFormat(locale).format(overview.data![metric])}</dd>
+                </div>)}
+              </dl><SafetyOverviewPanel /></>}
+              {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
+              {tab === "audit" && <AuditFeed />}
+              {tab === "trust" && <TrustAdministration founderWorkspace={access.data?.founder ? workspaceId : undefined} />}
+              {tab === "ambassadors" && <AmbassadorAdministration />}
+              {tab === "legal" && <LegalAdminPanel />}
+              {tab === "founder" && <FounderIdentityPanel admin workspaceId={workspaceId} />}
+              {tab === "corrections" && <AdminOnboardingCorrections />}
+              {tab === "governance" && <PlatformGovernance />}
+              {tab === "partners" && <AdminEarlyPartners />}
+              {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
+            </section>
+          </div>
         </>}
     </div>
   </MemberShell>;

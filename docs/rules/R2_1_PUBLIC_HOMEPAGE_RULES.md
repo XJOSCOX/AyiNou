@@ -2,7 +2,7 @@
 
 ## Scope
 
-The public homepage shows Community Statistics to visitors and signed-in members by default. A recognized Founder can switch visibility in Platform administration → Homepage. OFF removes the complete section. The dashboard, statistics APIs, suppression rules and other policy domains keep their existing contracts.
+The public homepage shows Community Statistics to visitors and signed-in members by default. A recognized Founder can switch visibility in Platform administration → Platform → Homepage. OFF removes the complete section. The dashboard, statistics APIs, suppression rules and other policy domains keep their existing contracts.
 
 ## Data model and API
 
@@ -32,7 +32,7 @@ Disposable tests exercise default ON, revision races, replay, denied non-Founder
 
 ## Documentation and operations
 
-Use the Homepage tab in the private Founder workspace to select ON or OFF and provide the reason. The value takes effect on fresh public homepage reads. No application deployment is needed for subsequent value changes. See the [master plan](RULES_AND_PERMISSIONS_MASTER_PLAN.md) and the [R1 inventory](R1_COMPLETE_RULE_INVENTORY.md).
+Use Platform → Homepage in the private Founder workspace to select ON or OFF and provide the reason. The value takes effect on fresh public homepage reads. No application deployment is needed for subsequent value changes. See the [master plan](RULES_AND_PERMISSIONS_MASTER_PLAN.md) and the [R1 inventory](R1_COMPLETE_RULE_INVENTORY.md).
 
 ## Hosted development verification
 
