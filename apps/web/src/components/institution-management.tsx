@@ -13,6 +13,7 @@ import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
 import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
+import { organizationSetupMessages } from "@/lib/organization-setup";
 import { InstitutionForm } from "./institution-form";
 import { OrganizationRegistrationPanel } from "./organization-registration-panel";
 import { OrganizationEarlyPartners } from "./early-partner-workspace";
@@ -48,6 +49,8 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
   const auth = authMessages[locale];
   const { organization: org, role } = detail;
   const manageTeam = role === "owner" || role === "administrator";
+  const registration = organizationSetupMessages[locale];
+  const country = new Intl.DisplayNames(locale, { type: "region" }).of(org.countryCode) ?? org.countryCode;
   const inviteRoles = invitedRoles.filter((item) => role === "owner" || item !== "administrator");
   const applyAs = governmentKinds.includes(org.kind) ? "government" : "organization";
   const [editing, setEditing] = useState(false);
@@ -126,15 +129,46 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-xl font-semibold">{t.institutionProfile}</h2>
             {role !== "viewer" && <button type="button" className={workspaceButton} disabled={busy}
-              aria-expanded={editing} aria-controls="institution-profile-content" onClick={() => setEditing(!editing)}>
+              aria-expanded={editing} aria-controls="institution-profile-content"
+              onClick={() => {
+                if (editing && role === "owner" && detail.registration && !detail.registration.locked) refresh();
+                setEditing(!editing);
+              }}>
               {editing ? accountMessages[locale].cancel : t.editOrganizationProfile}
             </button>}
           </div>
           <div id="institution-profile-content">
             {!editing || role === "viewer" ? <>
-              <p className="text-sm text-[var(--theme-body)]">{org.departmentName ? `${org.departmentName} · ` : ""}{new Intl.DisplayNames(locale, { type: "region" }).of(org.countryCode)}</p>
-              {org.description && <p dir="auto" className="mt-2 whitespace-pre-line break-words">{org.description}</p>}
-              {org.website && <a className={`${institutionLink} mt-3 inline-block`} href={org.website} target="_blank" rel="noreferrer">{trustMessages[locale].listedWebsite}</a>}
+              {org.description && <div className="mb-5">
+                <h3 className="text-sm font-semibold text-[var(--theme-body)]">{t.description}</h3>
+                <p dir="auto" className="mt-1 whitespace-pre-line break-words leading-relaxed">{org.description}</p>
+              </div>}
+              <dl className="grid gap-x-6 gap-y-4 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-sm font-semibold text-[var(--theme-body)]">{t.kind}</dt>
+                  <dd className="mt-1">{t[org.kind]}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-semibold text-[var(--theme-body)]">{membershipMessages[locale].location}</dt>
+                  <dd className="mt-1">{[org.departmentName, country].filter(Boolean).join(" · ")}</dd>
+                </div>
+                {org.website && <div className="min-w-0">
+                  <dt className="text-sm font-semibold text-[var(--theme-body)]">{trustMessages[locale].listedWebsite}</dt>
+                  <dd className="mt-1">
+                    <a className={`${institutionLink} [overflow-wrap:anywhere]`} dir="ltr" href={org.website} target="_blank" rel="noreferrer">
+                      {org.website} <span aria-hidden="true">↗</span>
+                    </a>
+                  </dd>
+                </div>}
+                {detail.registration && <div>
+                  <dt className="text-sm font-semibold text-[var(--theme-body)]">{registration.registration}</dt>
+                  <dd className="mt-1">{registration.status[detail.registration.status]}</dd>
+                </div>}
+                {manageTeam && detail.contactEmail && <div className="min-w-0">
+                  <dt className="text-sm font-semibold text-[var(--theme-body)]">{t.contactEmail}</dt>
+                  <dd className="mt-1 break-words" dir="ltr">{detail.contactEmail}</dd>
+                </div>}
+              </dl>
             </> : <>
               <InstitutionForm initial={{ ...org, contactEmail: detail.contactEmail }} role={role} identityLocked={detail.identityLocked}
                 onSave={async (input) => { await saveInstitution(org.id, input); setEditing(false); setNotice("saved"); refresh(); }} />
