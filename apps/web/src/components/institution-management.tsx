@@ -18,7 +18,7 @@ import { InstitutionForm } from "./institution-form";
 import { OrganizationRegistrationPanel } from "./organization-registration-panel";
 import { OrganizationEarlyPartners } from "./early-partner-workspace";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, InstitutionLogo,
-  InstitutionStatus, useInstitutionResource, VerifiedBadge } from "./institution-ui";
+  InstitutionStatus, useInstitutionResource, VerifiedBadge, VerifiedCheck } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
 export function InstitutionManagementScreen({ id }: { id: string }) {
@@ -56,7 +56,9 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
   const applications = useInstitutionResource(loadApplications);
   const requestStates = applications.data?.institutionRequests?.[org.id];
   const institutionState = requestStates?.institution ?? (detail.identityLocked && org.verificationStatus !== "verified" ? "pending" : "available");
-  const representativeState = requestStates?.representative ?? (detail.representatives.some((rep) => rep.isSelf && rep.verified) ? "already_verified" : "available");
+  const representativeVerified = detail.representatives.some((rep) => rep.isSelf && rep.verified);
+  const verificationComplete = org.verificationStatus === "verified" && representativeVerified;
+  const representativeState = requestStates?.representative ?? (representativeVerified ? "already_verified" : "available");
   const requests = [
     ...(role === "owner" && org.verificationStatus !== "verified"
       ? [{ kind: applyAs, label: t.request, state: institutionState }]
@@ -272,7 +274,15 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
               <h2 className="text-xl font-semibold">{t.verification}</h2>
               <InstitutionStatus status={org.verificationStatus} kind={org.kind} />
             </div>
-            {applications.error ? <div className="mt-4">
+            {verificationComplete ? <div className="mt-4 flex items-start gap-3 rounded-lg bg-[var(--theme-verified-bg)] p-4 text-[var(--theme-verified-text)]">
+              <span className="mt-0.5 flex shrink-0" aria-hidden="true"><VerifiedCheck /></span>
+              <div className="min-w-0">
+                <h3 className="font-semibold">{t.workspaceVerificationComplete}</h3>
+                <p className="mt-1 break-words text-sm leading-relaxed">
+                  {t.workspaceVerificationCompleteDescription.replace("{organization}", () => org.name)}
+                </p>
+              </div>
+            </div> : applications.error ? <div className="mt-4">
               <p role="alert" className={institutionErrorBox}>{institutionError(t, applications.error)}</p>
               <button type="button" className={`${institutionLink} mt-2`} onClick={applications.refresh}>{auth.retry}</button>
             </div> : !applications.data ? <p className="mt-4 text-sm" role="status">{auth.working}</p>

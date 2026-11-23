@@ -1,6 +1,8 @@
 {
   "institutions": "Institutions",
   "verification": "Vérification",
+  "workspaceVerificationComplete": "Vérification terminée",
+  "workspaceVerificationCompleteDescription": "{organization} et votre rôle de représentant autorisé ont été vérifiés.",
   "switchAccount": "Changer de compte",
   "personalAccount": "Compte personnel",
   "institutionsIntro": "Gérez les institutions que vous représentez et répondez aux invitations.",

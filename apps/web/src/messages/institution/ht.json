@@ -1,6 +1,8 @@
 {
   "institutions": "Enstitisyon",
   "verification": "Verifikasyon",
+  "workspaceVerificationComplete": "Verifikasyon an fini",
+  "workspaceVerificationCompleteDescription": "{organization} verifye, epi wòl ou kòm reprezantan otorize li verifye tou.",
   "switchAccount": "Chanje kont",
   "personalAccount": "Kont pèsonèl",
   "institutionsIntro": "Jere enstitisyon ou reprezante yo epi reponn envitasyon yo.",

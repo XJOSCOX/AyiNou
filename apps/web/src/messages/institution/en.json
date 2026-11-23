@@ -1,6 +1,8 @@
 {
   "institutions": "Institutions",
   "verification": "Verification",
+  "workspaceVerificationComplete": "Verification complete",
+  "workspaceVerificationCompleteDescription": "{organization} is verified, and so is your role as its authorized representative.",
   "switchAccount": "Switch account",
   "personalAccount": "Personal account",
   "institutionsIntro": "Manage the institutions you represent and respond to invitations.",
