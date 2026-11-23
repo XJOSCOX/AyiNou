@@ -1,0 +1,72 @@
+{
+  "sections": {
+    "verificationSettings": "Paramèt verifikasyon",
+    "rolesAssignments": "Wòl ak afektasyon",
+    "officialBadges": "Badj ofisyèl",
+    "recognitionBadges": "Badj rekonesans",
+    "recognitionHistory": "Badj bay ak istorik"
+  },
+  "flags": {
+    "personalIntake": "Demann verifikasyon pèsonèl",
+    "organizationIntake": "Demann verifikasyon òganizasyon",
+    "publicFigureIntake": "Demann verifikasyon pèsonalite piblik",
+    "founderBlue": "Verifikasyon ble dirèk fondatè a",
+    "founderGold": "Pwosesis verifikasyon lò",
+    "appealsIntake": "Resevwa kontestasyon opsyonèl",
+    "administratorAppointments": "Nouvo nominasyon administratè",
+    "organizationAssignments": "Nouvo afektasyon wòl òganizasyon",
+    "showBlue": "Montre badj ble ofisyèl",
+    "showGold": "Montre badj lò ofisyèl",
+    "recognitionEnabled": "Badj rekonesans",
+    "recognitionAwards": "Bay nouvo badj rekonesans",
+    "recognitionPublic": "Montre badj rekonesans an piblik"
+  },
+  "copy": {
+    "appealsHelp": "Kontestasyon ki pwoteje yo toujou disponib dapre règ ki la deja.",
+    "governance": "Louvri gouvènans",
+    "organizations": "Louvri òganizasyon yo",
+    "recognition": "Rekonesans",
+    "name": "Non",
+    "description": "Deskripsyon",
+    "icon": "Ikòn",
+    "color": "Koulè (opsyonèl)",
+    "archive": "Achive",
+    "reactivate": "Reaktive",
+    "award": "Bay badj",
+    "revoke": "Retire badj",
+    "archived": "Achive",
+    "active": "Aktif",
+    "public": "Montre an piblik",
+    "username": "Non itilizatè manm nan",
+    "awards": "Istorik badj yo",
+    "changes": "Dènye chanjman",
+    "empty": "Pa gen dosye ankò.",
+    "create": "Kreye badj",
+    "edit": "Modifye badj",
+    "save": "Anrejistre paramèt",
+    "paused": "Platfòm nan mete aksyon sa a sou poz.",
+    "confirm": "Konfime aksyon sa a?",
+    "myBadges": "Badj rekonesans ou yo",
+    "decorative": "Rekonesans dekoratif"
+  },
+  "actions": {
+    "create": "Kreyasyon",
+    "edit": "Modifikasyon",
+    "archive": "Achiv",
+    "reactivate": "Reyaktivasyon",
+    "award": "Badj bay",
+    "revoke": "Badj retire"
+  },
+  "icons": {
+    "ribbon": "Riban",
+    "sun": "Solèy",
+    "leaf": "Fèy",
+    "hands": "Men"
+  },
+  "status": {
+    "active": "Aktif",
+    "restricted": "Restrenn",
+    "assigned": "Afekte",
+    "inactive": "Inaktif"
+  }
+}

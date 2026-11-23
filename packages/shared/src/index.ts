@@ -1,5 +1,6 @@
 export * from "./core";
 export * from "./trust";
+export * from "./verification-policy";
 export * from "./accounts";
 export * from "./session-security";
 export * from "./audit";

@@ -11,6 +11,9 @@ import { useLocale } from "@/lib/locale-store";
 import { founderMessages } from "@/lib/founder-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource, VerifiedBadge } from "./institution-ui";
+import { MyRecognition } from "./my-recognition";
+import { useVerificationPresentation } from "./verification-presentation";
+import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { MemberShell } from "./member-shell";
 import { FounderIdentityPanel } from "./founder-identity";
 import { PageHeader } from "./page-header";
@@ -56,6 +59,7 @@ export function VerificationScreen({ initialKind, institution }: {
               : <ApplicationHistory applications={applications.data.applications} locale={locale} messages={t} />}
           </section>
         </div>
+        <MyRecognition />
         <FounderIdentityPanel onSuperseded={applications.refresh} />
         {applications.data && <MyVerificationAppeals applications={applications.data.applications} />}
       </div>
@@ -111,6 +115,8 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
   const [failed, setFailed] = useState<unknown>(null);
   const [saved, setSaved] = useState(false);
   const [submittedAgainst, setSubmittedAgainst] = useState<VerificationWorkspace | null>(null);
+  const policy = useVerificationPresentation();
+  const intakePaused = !(kind === "identity" ? policy.personalIntake : kind === "notable_person" ? policy.publicFigureIntake : policy.organizationIntake);
   const isPersonal = kind === "identity" || kind === "notable_person";
   const personalState = isPersonal ? workspace?.personalRequests[kind] : undefined;
   const personalBlocked = isPersonal && (personalState !== "available" || workspace === submittedAgainst);
@@ -128,7 +134,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || personalBlocked) return;
+    if (busy || personalBlocked || intakePaused) return;
     setBusy(true);
     setSaved(false);
     setFailed(null);
@@ -162,7 +168,8 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
           {verificationKinds.filter((item) => item !== "claim").map((item) => <option key={item} value={item}>{t[item]}</option>)}
         </select>
       </label>
-      {needsOrganization && <label className="block text-sm font-semibold">{t.institutions}
+      {intakePaused && <p role="status" className={institutionErrorBox}>{verificationCopy[locale].copy.paused}</p>}
+      {!intakePaused && needsOrganization && <label className="block text-sm font-semibold">{t.institutions}
         <select className={institutionField} value={eligible.some((org) => org.id === organization) ? organization : ""}
           onChange={(event) => setOrganization(event.target.value)} required disabled={busy || !eligible.length}>
           <option value="">{eligible.length ? "—" : t.none}</option>
@@ -185,7 +192,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
           </div>
           <a className={institutionLink} href="#my-verification-applications">{t.viewMyApplications}</a>
         </div>
-      </div> : <>
+      </div> : !intakePaused && <>
         <label className="block text-sm font-semibold">{t.evidence}
           <textarea className={institutionField} value={evidence} rows={4} maxLength={905} required disabled={busy || personalBlocked}
             onChange={(event) => setEvidence(event.target.value)} aria-describedby="verification-evidence-hint" />
@@ -198,7 +205,7 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
         <button type="submit" className={institutionAction} disabled={busy || personalBlocked || (needsOrganization && !eligible.length)}>{busy ? auth.working : t.submit}</button>
       </>}
       {failed !== null && !hasNoticeForFailure && <p role="alert" className={institutionErrorBox}>{failureCode === "INSTITUTION_EVIDENCE_REQUIRED"
-        ? trustMessages[locale].institutionEvidenceRequired : institutionError(t, failed)}</p>}
+        ? trustMessages[locale].institutionEvidenceRequired : failureCode === "POLICY_PAUSED" ? verificationCopy[locale].copy.paused : institutionError(t, failed)}</p>}
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.submitted}</p>}
     </form>
   );

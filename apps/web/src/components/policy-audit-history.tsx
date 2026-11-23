@@ -6,6 +6,7 @@ import { adminMessages } from "@/lib/admin-i18n";
 import { authorizedRequest } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 
@@ -25,6 +26,7 @@ export function PolicyAuditHistory({ workspaceId }: { workspaceId: string }) {
   const page = history.data?.cursor === cursor ? history.data.page : null;
   const labels: Record<PolicyAuditEvent["changes"][number]["key"], string> = {
     ...t.memberExperience.flags,
+    ...verificationCopy[locale].flags,
     homepageStatistics: t.homepageStatistics, enabled: t.registrationPolicy.enabled,
     mode: t.registrationPolicy.mode, individualEnabled: t.registrationPolicy.individualEnabled,
     organizationEnabled: t.registrationPolicy.organizationEnabled,
@@ -43,7 +45,7 @@ export function PolicyAuditHistory({ workspaceId }: { workspaceId: string }) {
       : page.events.length ? <ol className="mt-3 divide-y divide-[var(--theme-border)]">
         {page.events.map((event) => <li className="grid gap-2 py-3" key={`${event.source}:${event.revision}`}>
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <h3 className="font-semibold">{event.source === "homepage" ? t.homepageStatistics : event.source === "registration" ? t.registrationPolicy.title : t.memberExperience.title}</h3>
+            <h3 className="font-semibold">{event.source === "homepage" ? t.homepageStatistics : event.source === "registration" ? t.registrationPolicy.title : event.source === "verification" ? verificationCopy[locale].sections.verificationSettings : t.memberExperience.title}</h3>
             <time className="text-sm text-[var(--theme-body)]" dateTime={event.occurredAt}>{formatTime.format(new Date(event.occurredAt))}</time>
           </div>
           <p className="break-words text-sm">{copy.changedBy} · {event.actorUsername ? `@${event.actorUsername}` : event.actorId}</p>

@@ -18,6 +18,7 @@ import { registerEarlyPartners } from "./routes/early-partners.js";
 import { registerOrganizationOnboarding } from "./routes/organization-onboarding.js";
 import { registerFounderIdentity } from "./routes/founder-identity.js";
 import { registerRegistrationPolicyRoutes } from "./routes/registration-policy.js";
+import { registerVerificationPolicy } from "./routes/verification-policy.js";
 import { registerMemberExperiencePolicy } from "./routes/member-experience-policy.js";
 import { registerHomepagePolicyRoutes } from "./routes/homepage-policy.js";
 import { registerPublicLegalRoutes } from "./routes/legal-publication.js";
@@ -81,6 +82,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
   app.register((instance) => registerHomepagePolicyRoutes(instance, auth, institutions));
   app.register((instance) => registerMemberExperiencePolicy(instance, auth, institutions));
+  app.register((instance) => registerVerificationPolicy(instance, auth, institutions));
   app.register((instance) => registerRegistrationPolicyRoutes(instance, auth, institutions, readBudget));
   app.register((instance) => registerPublicLegalRoutes(instance, institutions));
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { FollowStatus, ProfilePreview, PublicAmbassador } from "@ayinou/shared";
+import type { FollowStatus, ProfilePreview, PublicAmbassador, RecognitionBadge } from "@ayinou/shared";
 import { authMessages } from "@/lib/auth-i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { discoveryMessages } from "@/lib/discovery-i18n";
@@ -16,17 +16,22 @@ import { ProfileFollowPanel } from "./discovery-accounts";
 import { MemberSafetyControls } from "./member-safety";
 import { AdministratorMark, FounderMark, PersonalClaimChecks, institutionCard, institutionLink } from "./institution-ui";
 import { ImpersonationReportForm } from "./trust-workspace";
+import { RecognitionMark } from "./recognition-mark";
+import { useVerificationPresentation } from "./verification-presentation";
+import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { SiteBrand } from "./site-brand";
 import { SiteFooter } from "./site-footer";
 
-export function MemberPublic({ profile, username, social, ambassador, signedIn }: {
+export function MemberPublic({ profile, username, social, ambassador, recognition, signedIn }: {
   profile: ProfilePreview; username: string; social: FollowStatus; signedIn: boolean;
+  recognition: RecognitionBadge[];
   ambassador: Pick<PublicAmbassador, "category" | "statement"> | null;
 }) {
   const layout = signedIn ? "w-full px-4 sm:px-8" : "public-container";
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
   const trust = trustMessages[locale];
+  const presentation = useVerificationPresentation();
   const membership = membershipMessages[locale];
   const country = profile.countryCode && new Intl.DisplayNames([locale === "ht" ? "ht-HT" : locale], { type: "region" }).of(profile.countryCode);
   return <div id="top" className="flex min-h-dvh flex-col">
@@ -53,8 +58,8 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
           {profile.platformLeadership === "administrator" && <AdministratorMark />}
           {!!social.personalClaims?.length && <PersonalClaimChecks claims={social.personalClaims} compact={false} />}
         </div>
-        {!!social.personalClaims?.length && <p className="mt-2 text-sm text-[var(--theme-body)]">{trust.noEndorsement}</p>}
-        {profile.founderVerified && (social.personalClaims?.includes("identity") ?
+        {presentation.showBlue && !!social.personalClaims?.length && <p className="mt-2 text-sm text-[var(--theme-body)]">{trust.noEndorsement}</p>}
+        {presentation.showGold && profile.founderVerified && (presentation.showBlue && social.personalClaims?.includes("identity") ?
           <details className="mt-3">
             <summary className="cursor-pointer text-sm font-semibold">{founderMessages[locale].verificationDetails}</summary>
             <FounderVerifiedBadge />
@@ -66,6 +71,10 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
           {!!profile.interests?.length && <div><dt className="font-semibold">{membership.interests}</dt>
             <dd>{profile.interests.map((code) => membership[code]).join(", ")}</dd></div>}
         </dl>}
+        {!!recognition.length && <section className="mt-4 grid gap-2">
+          <h2 className="font-semibold">{verificationCopy[locale].copy.decorative}</h2>
+          <ul className="flex flex-wrap gap-2">{recognition.map((badge) => <li key={badge.id}><RecognitionMark badge={badge} /></li>)}</ul>
+        </section>}
         {ambassador && <AmbassadorRecognition ambassador={ambassador} />}
       </section>
       <ProfileFollowPanel target={{ kind: "member", key: username }} initial={social} signedIn={signedIn} />

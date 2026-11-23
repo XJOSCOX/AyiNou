@@ -29,6 +29,9 @@ import { earlyPartnerMessages } from "@/lib/early-partner-i18n";
 import { AdminEarlyPartners } from "./early-partner-workspace";
 import { HomepageSettings } from "./homepage-settings";
 import { RegistrationSettings } from "./registration-settings";
+import { VerificationSettings } from "./verification-settings";
+import { RecognitionAdmin } from "./recognition-admin";
+import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { MemberExperienceSettings } from "./member-experience-settings";
 import { PolicyAuditHistory } from "./policy-audit-history";
 import { AdminSectionContext, useAdminRenewalPath } from "./admin-section-context";
@@ -48,6 +51,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     legal: legalAdminMessages[locale].title, founder: founderMessages[locale].adminTitle,
     corrections: governanceMessages[locale].corrections, governance: governanceMessages[locale].governance,
     partners: earlyPartnerMessages[locale].title,
+    ...verificationCopy[locale].sections,
   };
   const access = useInstitutionResource(loadPlatformAccess);
   const visibleSections = adminSections.filter(({ label }) => label !== "navigationSettings" || access.data?.founder);
@@ -109,6 +113,10 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {tab === "corrections" && <AdminOnboardingCorrections />}
               {tab === "governance" && <PlatformGovernance />}
               {tab === "partners" && <AdminEarlyPartners />}
+              {access.data?.founder && (tab === "verificationSettings" || tab === "rolesAssignments" || tab === "officialBadges") &&
+                <VerificationSettings key={tab} section={tab} workspaceId={workspaceId} />}
+              {access.data?.founder && (tab === "recognitionBadges" || tab === "recognitionHistory") &&
+                <RecognitionAdmin key={tab} section={tab} workspaceId={workspaceId} />}
               {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
               {tab === "registration" && access.data?.founder && <RegistrationSettings key={workspaceId} workspaceId={workspaceId} />}
               {tab === "memberExperience" && access.data?.founder && <MemberExperienceSettings key={workspaceId} workspaceId={workspaceId} />}

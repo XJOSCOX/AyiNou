@@ -30,8 +30,11 @@ GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
 GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
 GET /api/v1/admin/privacy-requests/* 512 -
+GET /api/v1/admin/recognition - -
 GET /api/v1/admin/registration - -
+GET /api/v1/admin/role-assignments - -
 GET /api/v1/admin/safety - -
+GET /api/v1/admin/verification-policy - -
 GET /api/v1/administrator-activation/:id - -
 GET /api/v1/ambassadors - -
 GET /api/v1/comments/:id/reaction - -
@@ -169,8 +172,11 @@ HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
 HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend
 HEAD /api/v1/admin/privacy-requests/* 512 onSend
+HEAD /api/v1/admin/recognition - onSend
 HEAD /api/v1/admin/registration - onSend
+HEAD /api/v1/admin/role-assignments - onSend
 HEAD /api/v1/admin/safety - onSend
+HEAD /api/v1/admin/verification-policy - onSend
 HEAD /api/v1/administrator-activation/:id - onSend
 HEAD /api/v1/ambassadors - onSend
 HEAD /api/v1/comments/:id/reaction - onSend
@@ -296,6 +302,7 @@ PATCH /api/v1/admin/homepage/community-statistics 4096 -
 PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
+PATCH /api/v1/admin/verification-policy 4096 -
 PATCH /api/v1/comments/:id 12288 -
 PATCH /api/v1/communities/:key/membership 1024 -
 PATCH /api/v1/communities/:key/moderation/:target/:id 4096 -
@@ -338,6 +345,7 @@ POST /api/v1/admin/governance/proposals/:id/actions 1536 -
 POST /api/v1/admin/legal/actions 4096 -
 POST /api/v1/admin/organization-onboarding/:id/corrections 1536 -
 POST /api/v1/admin/privacy-requests/* 512 -
+POST /api/v1/admin/recognition 8192 -
 POST /api/v1/admin/registration/invitations 4096 -
 POST /api/v1/admin/usernames/review 512 -
 POST /api/v1/administrator-activation/:id 512 -

@@ -1,0 +1,72 @@
+{
+  "sections": {
+    "verificationSettings": "Configuración de verificación",
+    "rolesAssignments": "Roles y asignaciones",
+    "officialBadges": "Insignias oficiales",
+    "recognitionBadges": "Insignias de reconocimiento",
+    "recognitionHistory": "Otorgamientos e historial"
+  },
+  "flags": {
+    "personalIntake": "Solicitudes de verificación personal",
+    "organizationIntake": "Solicitudes de verificación de organizaciones",
+    "publicFigureIntake": "Solicitudes de verificación de figuras públicas",
+    "founderBlue": "Verificación azul directa del fundador",
+    "founderGold": "Proceso de verificación dorada",
+    "appealsIntake": "Recepción de apelaciones opcionales",
+    "administratorAppointments": "Nuevos nombramientos de administradores",
+    "organizationAssignments": "Nuevas asignaciones de roles de organización",
+    "showBlue": "Mostrar insignia azul oficial",
+    "showGold": "Mostrar insignia dorada oficial",
+    "recognitionEnabled": "Insignias de reconocimiento",
+    "recognitionAwards": "Nuevos otorgamientos",
+    "recognitionPublic": "Visibilidad pública del reconocimiento"
+  },
+  "copy": {
+    "appealsHelp": "Las apelaciones protegidas siguen disponibles según las reglas vigentes.",
+    "governance": "Abrir gobernanza",
+    "organizations": "Abrir organizaciones",
+    "recognition": "Reconocimiento",
+    "name": "Nombre",
+    "description": "Descripción",
+    "icon": "Icono",
+    "color": "Color (opcional)",
+    "archive": "Archivar",
+    "reactivate": "Reactivar",
+    "award": "Otorgar",
+    "revoke": "Revocar",
+    "archived": "Archivada",
+    "active": "Activa",
+    "public": "Mostrar en público",
+    "username": "Nombre de usuario del miembro",
+    "awards": "Historial de otorgamientos",
+    "changes": "Cambios recientes",
+    "empty": "Todavía no hay registros.",
+    "create": "Crear insignia",
+    "edit": "Editar insignia",
+    "save": "Guardar configuración",
+    "paused": "La plataforma ha pausado esta acción.",
+    "confirm": "¿Confirmar esta acción?",
+    "myBadges": "Tus insignias de reconocimiento",
+    "decorative": "Reconocimiento decorativo"
+  },
+  "actions": {
+    "create": "Creación",
+    "edit": "Edición",
+    "archive": "Archivo",
+    "reactivate": "Reactivación",
+    "award": "Otorgamiento",
+    "revoke": "Revocación"
+  },
+  "icons": {
+    "ribbon": "Cinta",
+    "sun": "Sol",
+    "leaf": "Hoja",
+    "hands": "Manos"
+  },
+  "status": {
+    "active": "Activo",
+    "restricted": "Restringido",
+    "assigned": "Asignado",
+    "inactive": "Inactivo"
+  }
+}

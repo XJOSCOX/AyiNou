@@ -1,0 +1,72 @@
+{
+  "sections": {
+    "verificationSettings": "Verification Settings",
+    "rolesAssignments": "Roles & Assignments",
+    "officialBadges": "Official Badge Settings",
+    "recognitionBadges": "Custom Recognition Badges",
+    "recognitionHistory": "Badge Awards & History"
+  },
+  "flags": {
+    "personalIntake": "Personal verification applications",
+    "organizationIntake": "Organization verification applications",
+    "publicFigureIntake": "Public figure verification applications",
+    "founderBlue": "Founder-direct Blue verification",
+    "founderGold": "Gold verification workflow",
+    "appealsIntake": "Optional appeals intake",
+    "administratorAppointments": "New Administrator appointments",
+    "organizationAssignments": "New organization role assignments",
+    "showBlue": "Show official Blue badge",
+    "showGold": "Show official Gold badge",
+    "recognitionEnabled": "Custom recognition badges",
+    "recognitionAwards": "New recognition awards",
+    "recognitionPublic": "Public recognition display"
+  },
+  "copy": {
+    "appealsHelp": "Protected appeals remain available under their existing rules.",
+    "governance": "Open platform governance",
+    "organizations": "Open organizations",
+    "recognition": "Recognition",
+    "name": "Name",
+    "description": "Description",
+    "icon": "Icon",
+    "color": "Color (optional)",
+    "archive": "Archive",
+    "reactivate": "Reactivate",
+    "award": "Award",
+    "revoke": "Revoke",
+    "archived": "Archived",
+    "active": "Active",
+    "public": "Public display",
+    "username": "Member username",
+    "awards": "Award history",
+    "changes": "Recent changes",
+    "empty": "No records yet.",
+    "create": "Create badge",
+    "edit": "Edit badge",
+    "save": "Save settings",
+    "paused": "This action is paused by platform policy.",
+    "confirm": "Confirm this action?",
+    "myBadges": "Your recognition badges",
+    "decorative": "Decorative recognition"
+  },
+  "actions": {
+    "create": "Create",
+    "edit": "Edit",
+    "archive": "Archive",
+    "reactivate": "Reactivate",
+    "award": "Award",
+    "revoke": "Revoke"
+  },
+  "icons": {
+    "ribbon": "Ribbon",
+    "sun": "Sun",
+    "leaf": "Leaf",
+    "hands": "Hands"
+  },
+  "status": {
+    "active": "Active",
+    "restricted": "Restricted",
+    "assigned": "Assigned",
+    "inactive": "Inactive"
+  }
+}

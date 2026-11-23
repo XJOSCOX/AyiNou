@@ -1,3 +1,6 @@
+"use client";
+
+import { useVerificationPresentation } from "./verification-presentation";
 import Image from "next/image";
 import styles from "./designation-mark.module.css";
 
@@ -11,6 +14,8 @@ const iconSources = {
 export function DesignationMark({ kind, label, title = label, compact = false }: {
   kind: keyof typeof iconSources; label: string; title?: string; compact?: boolean;
 }) {
+  const policy = useVerificationPresentation();
+  if (kind === "identity" && !policy.showBlue || kind === "founderIdentity" && !policy.showGold) return null;
   return <span className={`${styles.mark} ${styles[kind]} ${compact ? styles.compact : ""}`}
     data-designation={kind} title={title} role={compact ? "img" : undefined} aria-label={compact ? label : undefined}>
     <Image src={iconSources[kind]} width={18} height={18} alt="" unoptimized />

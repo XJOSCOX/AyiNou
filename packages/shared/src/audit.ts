@@ -1,3 +1,4 @@
+import type { VerificationPolicyFlag } from "./verification-policy.js";
 import type { MemberExperienceFlag } from "./accounts.js";
 
 export const auditCategories = ["platform", "governance", "security", "identity", "organization", "verification", "moderation"] as const;
@@ -40,14 +41,14 @@ export interface AuditPage {
 }
 
 export interface PolicyAuditEvent {
-  source: "homepage" | "registration" | "member_experience";
+  source: "homepage" | "registration" | "member_experience" | "verification";
   revision: number;
   actorId: string;
   actorUsername: string | null;
   occurredAt: string;
   reason: string;
   changes: {
-    key: "homepageStatistics" | "enabled" | "mode" | "individualEnabled" | "organizationEnabled" | "referralsEnabled" | "rewardsEnabled" | MemberExperienceFlag;
+    key: "homepageStatistics" | "enabled" | "mode" | "individualEnabled" | "organizationEnabled" | "referralsEnabled" | "rewardsEnabled" | MemberExperienceFlag | VerificationPolicyFlag;
     before: boolean | "public" | "invitation_only" | "closed";
     after: boolean | "public" | "invitation_only" | "closed";
   }[];

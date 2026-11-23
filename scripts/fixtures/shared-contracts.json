@@ -197,7 +197,7 @@
     "PlatformAccess": "type:3e8f425bff0b315a9a4238d00b463eb57b71620115d01c44edc3584b0c3e531a",
     "PlatformRole": "type:2473d46104c7b706217bd0b192fd22cde8c8f24d8bc7440bf9bf979aab8d0ffc",
     "platformRoles": "value:fb60ac1a18d4c44cc55ed616a10f6a001967bf074380ac189da46ea0f7ff037f",
-    "PolicyAuditEvent": "type:7e1803ddf1b65109898a3fe74895ac0208cf7fc72b2a7f0ddfd27b4c9995ec22",
+    "PolicyAuditEvent": "type:84d127e86c326b7874f95f73c14784fe5aeeb5a900e4984f81d95d4df168b5cf",
     "PolicyAuditPage": "type:3f1ebc555b928dcaea2f249357e47752b1615440afc96c1d35f045b1ec55c6fd",
     "PollCard": "type:625686661c256fee89db9c9b793aa57b593fa279dad9befa6e09da7cf60b3327",
     "PollConfigOptions": "type:09349449573ad315fe7ad6c59a485f5fb124939aafb6a3e225858886c17da7a9",
@@ -271,6 +271,13 @@
     "ReactionKind": "type:a38170e353259f45e5c52a41b1557d9c3a78ea5e94dc49830efdd71ed95e7749",
     "reactionKinds": "value:710fc09db62455ee107a2ab3fbcc8c359ee55a7f4ff359ec0503ba043c0bae41",
     "ReactionSummary": "type:97a660fdaee6ef8844bece8da5fab295e5b0a6ccdc2b9c17c1abc4770a2e7eec",
+    "RecognitionAdministration": "type:e4ce5a6b1ab4431ed75338ca6ba1b8fe258ce914dc2d428502cbde35748f6582",
+    "RecognitionAward": "type:c6c5d753e1ef588a0c9a626941f13137bcb898aed7fdc8e7c0bc0fbb27059cf1",
+    "RecognitionBadge": "type:6e015ab70cc0b8a43fd0472c665378c7bb6b4867f94168474ede77f20b873efd",
+    "RecognitionHistory": "type:aa523e66d796521be833b65bef614fce6aec011600fd60a98c9bad82b1b8aef7",
+    "RecognitionIcon": "type:d6af7ab2926360132a7e51c2b4b014e1b44aea969b22c9b42ac79deb2b603a8c",
+    "recognitionIcons": "value:84d2a9a198b40f5be3dbdaae1bf96667ccce092324e9e827f6211cb24ef59dd1",
+    "RecognitionText": "type:31188b828bd52848450b26986864b7364584cfe6432b3a61b11a902402f80d3d",
     "RecommendationAction": "type:99147794bff509a0c3949bfea100afe2ad4867339190b213b4ac5475955a6c0f",
     "recommendationActions": "value:497a07a681795a149120bceed66fb28815be3031b7e50abfa6f4824d0474cdd5",
     "RecommendationReason": "type:99dac0dd95bf88f438817bf9e27db431cd1bbc65a549d8fcbf963079cc078344",
@@ -287,6 +294,7 @@
     "reviewQueueModes": "value:1c2449683981396432c5fd8472db1c6b119ee092137eafd2b6fde9af04bd59f5",
     "SafetyOverview": "type:80df23c82d201cbb6949b16421e3175b88f31cda3956831f705d42f2ef703b74",
     "SavedMemberExperiencePolicy": "type:c10a029ffd250e00b0f25eac2adff650a72fa435f8706191991f0f8f669acf8f",
+    "SavedVerificationPolicy": "type:c5c48780b3df8463472a5f71060f078781211bf12b65b14d9172b9dd2d64cbe3",
     "ServiceState": "type:8e4e093967250fcb588cdee02424bfe167060ee6e7dedf5ac5db47e6fbfb841e",
     "SessionRevocation": "type:763fee4cb9f284983f281f9f8bc8f161f9a66f27149918459363b6ff0e5bfbad",
     "SignupPath": "type:c249b0e99290040736a8305eb062808769e3a3fd4b97384fae6c9aff4bbbecb5",
@@ -300,6 +308,9 @@
     "VerificationAssignment": "type:6a2e94eda1d819c5c869e1f981a684b37b2d7b1530c10be97a376e28e58d0858",
     "VerificationKind": "type:c9ea5fcff649971cb2982a100656b0d569dd60faaba1e8e25d5ea7e22e5e0474",
     "verificationKinds": "value:c93d14eefb9c0e90e975d6c988eec66cb38f31955455b312bb3691855041cdf0",
+    "VerificationPolicy": "type:273e69c8522bd0d3f0ce7bbb206c732f7257dedd43cb77a1f31fdd032c85d790",
+    "VerificationPolicyFlag": "type:15a679d6c374f43417783613b6ae83c7b94e05f3e0c2b0265de66cc9f0f8cc41",
+    "verificationPolicyFlags": "value:7afc97a0d0e93eb91add8c32b5ab80ce085efa5636804d860626709b42e8f7e5",
     "VerificationStatus": "type:8ed940092989a0d58bfe3ab2dc780dbe6dcb43f54ad416b090abcad67746580f",
     "VerificationWorkspace": "type:6266e37e5a245a1d0f1b892fd0cf1032f317409cb7519b5968c6861e2f71b3fb",
     "VerifiedRepresentatives": "type:5c8fb9ec1f272a9e2e4cd7a86ab0ebf9709ce3ac185b3a853f5dff34c6150e4e"
@@ -784,6 +795,12 @@
       "support",
       "celebrate"
     ],
+    "recognitionIcons": [
+      "ribbon",
+      "sun",
+      "leaf",
+      "hands"
+    ],
     "recommendationActions": [
       "not_interested",
       "less_author",
@@ -830,6 +847,21 @@
       "government",
       "representative",
       "claim"
+    ],
+    "verificationPolicyFlags": [
+      "personalIntake",
+      "organizationIntake",
+      "publicFigureIntake",
+      "founderBlue",
+      "founderGold",
+      "appealsIntake",
+      "administratorAppointments",
+      "organizationAssignments",
+      "showBlue",
+      "showGold",
+      "recognitionEnabled",
+      "recognitionAwards",
+      "recognitionPublic"
     ]
   }
 }
