@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { adminMessages } from "../src/lib/admin-i18n";
 import { governanceMessages } from "../src/lib/governance-i18n";
 
 const corrections = "/api/v1/me/onboarding-corrections";
@@ -213,12 +214,15 @@ governanceTest("O5 governance controls remain accessible on narrow screens in fo
   for (const locale of ["en", "ht", "fr", "es"] as const) {
     await select.selectOption(locale);
     const message = governanceMessages[locale];
-    const tab = page.getByRole("button", { name: message.governance, exact: true });
+    const labels = adminMessages[locale];
+    const sections = page.getByRole("button", { name: labels.navigationSections, exact: true });
+    await expect(sections).toHaveAttribute("aria-expanded", "false");
+    await sections.press("Enter");
+    const platform = page.getByRole("navigation", { name: labels.administration }).getByRole("region", { name: labels.navigationPlatform });
+    const tab = platform.getByRole("button", { name: message.governance, exact: true });
     await expect(tab).toBeVisible();
-    if (await tab.getAttribute("aria-pressed") !== "true") {
-      await tab.focus();
-      await page.keyboard.press("Enter");
-    }
+    await tab.press("Enter");
+    await expect(sections).toHaveAttribute("aria-expanded", "false");
     await expect(page.getByText(message.closed)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   }
