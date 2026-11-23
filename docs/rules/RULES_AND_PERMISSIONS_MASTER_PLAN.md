@@ -4,7 +4,7 @@
 | --- | --- |
 | R1 — inventory | Complete. Source and hosted catalog inventory and staged recommendation are recorded in the [R1 index](R1_COMPLETE_RULE_INVENTORY.md). |
 | R2.1 — Public Homepage Rules | Founder approved public Community Statistics ON by default. Versioned PostgreSQL setting, private Founder control and audited update are implemented. Deployed to hosted development and verified with the local application. [R2.1 report](R2_1_PUBLIC_HOMEPAGE_RULES.md) |
-| R2.2 — Registration and referrals | Independent Personal Signup and Organization Signup, signup mode, referral intake and audited Founder controls. Hosted rollout has a separate exact migration checkpoint. [R2.2 report](R2_2_IMPLEMENTATION_REPORT.md) |
+| R2.2 — Registration and referrals | Independent Personal Signup and Organization Signup, signup mode, referral intake and audited Founder controls. Deployed to hosted development and verified with the local app. [R2.2 report](R2_2_IMPLEMENTATION_REPORT.md) |
 | R2.3 and later | Deferred for separate owner direction. |
 
 ## Current registry and boundaries

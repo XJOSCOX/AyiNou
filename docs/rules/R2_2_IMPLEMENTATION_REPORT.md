@@ -26,7 +26,7 @@ The single policy row locks before account creation or policy mutation, so direc
 
 ## Validation and CI
 
-Disposable tests cover direct Auth signup, current session and workspace, closed and invitation-only modes, signup choices, concurrent and stale updates, referral privacy and Founder bootstrap. Existing individual and organization signup and verification tests continue to exercise confirmed referral attribution. The disposable registration and Founder scenarios passed, as did the existing individual and organization confirmation scenarios, typecheck, lint, engineering standards, legal checks and both production builds. The dependency audit found no vulnerabilities. Full release validation and hosted postflight are recorded at rollout.
+Disposable tests cover direct Auth signup, current session and workspace, closed and invitation-only modes, signup choices, concurrent and stale updates, referral privacy and Founder bootstrap. Existing individual and organization signup and verification tests continue to exercise confirmed referral attribution. The disposable registration and Founder scenarios passed, as did the existing individual and organization confirmation scenarios, typecheck, lint, engineering standards, legal checks and both production builds. The dependency audit found no vulnerabilities. Release `259c15a631aeda38d141332cd32a8dd87020003f` passed all 102 local Chromium tests, both dedicated development immediate-signup tests, typecheck and lint. GitHub is used to publish the release. The owner directed the rollout to use validated local results as the deployment gate.
 
 ## Documentation and operations
 
@@ -34,4 +34,8 @@ The [policy matrix](R2_2_POLICY_MATRIX.md) records defaults, entry points and cl
 
 ## Remaining blockers
 
-Hosted migration requires exact owner authorization after validated CI and preflight. Development auto-confirmation does not establish real mailbox ownership. Public launch still requires separately verified provider email settings and mailbox delivery.
+The approved migration was applied to hosted development project `hcbxulyfmdmuyccgrujs` after the dry run found exactly one pending migration and no seeds or role changes. The applied file had SHA-256 `99087e3b3cecd117a4e6c39534998eaa3488e39eafae2dd18e58086af1b0a5c7`. Postflight confirmed 91 applied migrations, zero pending, revision 1 with both signup paths ON, three RLS-protected relations, zero direct table grants, two service-only policy RPCs and the expected Auth triggers.
+
+The restarted local API returned the uncached public policy. The local registration page and R2.1 statistics endpoint responded successfully, and the private registration endpoint denied an anonymous request. Closed mode, invitation redemption and eligibility-changing tests ran in disposable Supabase. Hosted policy defaults were preserved during verification.
+
+Public launch still requires separately verified provider email settings and mailbox delivery. Development auto-confirmation does not establish real mailbox ownership.
