@@ -34,6 +34,10 @@ Disposable tests exercise default ON, revision races, replay, denied non-Founder
 
 Use the Homepage tab in the private Founder workspace to select ON or OFF and provide the reason. The value takes effect on fresh public homepage reads. No application deployment is needed for subsequent value changes. See the [master plan](RULES_AND_PERMISSIONS_MASTER_PLAN.md) and the [R1 inventory](R1_COMPLETE_RULE_INVENTORY.md).
 
-## Remaining blockers
+## Hosted development verification
 
-Hosted rollout requires a fresh dry run, a verified release and exact owner authorization. R2.2 remains outside this phase.
+The owner authorized the only pending migration for `hcbxulyfmdmuyccgrujs`. All three jobs passed on [release `1ec53fb`](https://github.com/XJOSCOX/AyiNou/actions/runs/45086681416). The exact migration SHA-256 was `f1d45272643d3f8e29910cb24b5dcd12d9833db05cadcfa25f927661dfc8bcbb`.
+
+Postflight confirmed 90 applied migrations and zero pending, default ON at revision 1, RLS on both relations, zero direct grants to browser or service roles, two service-only RPCs, and an empty mutation ledger. The local application using hosted development returned the public homepage and the three-field statistics projection with `Cache-Control: no-store`. The private API denied an anonymous read. OFF and ON writes were verified with disposable Supabase. No hosted toggle was needed to verify the deployment.
+
+Local validation included 53 API tests, 100 Chromium tests, shared and client contracts, translation parity, engineering standards, legal integrity, both production builds and a dependency audit with zero vulnerabilities. The local application uses the upgraded hosted database. A public application release was outside this rollout.
