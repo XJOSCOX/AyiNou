@@ -13,6 +13,7 @@
   "privateCode": "Code membre privé",
   "privateCodeHelp": "Votre référence AyiNou permanente. Gardez-la privée. Utilisez votre e-mail pour vous connecter.",
   "referrals": "Parrainages",
+  "referralSharingUnavailable": "Les liens de parrainage sont actuellement indisponibles. Votre code et vos parrainages confirmés sont conservés.",
   "referralHelp": "Partagez votre lien ou votre code d’invitation. Les nouveaux membres peuvent saisir le code lors de l’inscription.",
   "optionalReferral": "Code de parrainage (facultatif)",
   "invalidReferral": "Ce code de parrainage est indisponible. Vérifiez-le ou laissez le champ vide pour continuer.",

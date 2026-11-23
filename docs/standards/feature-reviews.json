@@ -1,6 +1,71 @@
 {
   "features": [
     {
+      "id": "r2-2-registration-referrals",
+      "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/registration/policy",
+          "contract": "GET /api/v1/registration/policy - -",
+          "access": "public",
+          "publicReason": "Public visitors need to know which signup paths are open before providing account details.",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only public signup flags with no private or receipt fields."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/registration",
+          "contract": "GET /api/v1/admin/registration - -",
+          "access": "restricted",
+          "authorization": {
+            "file": "apps/web/e2e/registration-policy.spec.ts",
+            "denialScenario": "Sessions without current authentication, recent MFA or the original Founder workspace are denied."
+          },
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only current registry and revision."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/registration",
+          "contract": "PATCH /api/v1/admin/registration 4096 -",
+          "access": "restricted",
+          "authorization": {
+            "file": "apps/web/e2e/registration-policy.spec.ts",
+            "denialScenario": "Ordinary users, copied workspaces and stale revisions cannot change the policy."
+          },
+          "audit": {
+            "kind": "durable",
+            "detail": "Policy revisions and private previous/new value events commit together."
+          }
+        },
+        {
+          "route": "POST /api/v1/admin/registration/invitations",
+          "contract": "POST /api/v1/admin/registration/invitations 4096 -",
+          "access": "restricted",
+          "authorization": {
+            "file": "apps/web/e2e/registration-policy.spec.ts",
+            "denialScenario": "Auth rejects use for a different email or signup path, even with a real code."
+          },
+          "audit": {
+            "kind": "durable",
+            "detail": "Private invitation lifecycle row records issuer, written reason, expiry and successful consumption."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122184000_r22_registration_referrals.sql",
+          "rlsAndGrants": "New private tables enforce RLS without direct client or service grants. The two approved RPCs are service-only.",
+          "authorization": "Private updates recheck the active Founder, recent MFA and original workspace. The locked Auth insert trigger enforces all signup paths.",
+          "compatibility": "Defaults retain public personal and organization signup. Existing referral codes and histories are retained; auto-confirmed timestamps alone cannot produce verified attribution.",
+          "validation": "Disposable direct signup, Founder policy races, protected registration, invite ownership and denial, referral persistence and localization regressions.",
+          "rolloutAndRollback": "Exact owner approval after migration dry run and CI. Restore policy through an audited revision or use a forward migration for schema recovery."
+        }
+      ]
+    },
+    {
       "id": "r2-1-homepage-community-statistics",
       "report": "docs/rules/R2_1_PUBLIC_HOMEPAGE_RULES.md",
       "routes": [

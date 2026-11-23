@@ -27,12 +27,13 @@ import { governanceMessages } from "@/lib/governance-i18n";
 import { earlyPartnerMessages } from "@/lib/early-partner-i18n";
 import { AdminEarlyPartners } from "./early-partner-workspace";
 import { HomepageSettings } from "./homepage-settings";
+import { RegistrationSettings } from "./registration-settings";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
-type AdminTab = "homepage" | "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
+type AdminTab = "registration" | "homepage" | "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
 const adminSections = [
-  { label: "navigationPlatform", pages: ["overview", "homepage", "governance", "legal", "audit"] },
+  { label: "navigationPlatform", pages: ["overview", "homepage", "registration", "governance", "legal", "audit"] },
   { label: "navigationMembers", pages: ["accounts", "trust", "founder", "corrections"] },
   { label: "navigationPrograms", pages: ["ambassadors", "partners"] },
 ] as const satisfies { label: keyof typeof adminMessages.en; pages: readonly AdminTab[] }[];
@@ -44,7 +45,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
   const [navigationOpen, setNavigationOpen] = useState(false);
   const content = useRef<HTMLElement>(null);
   const labels: Record<AdminTab, string> = {
-    overview: t.overview, homepage: t.homepage, accounts: t.accounts, audit: t.audit,
+    overview: t.overview, homepage: t.homepage, registration: t.registrationPolicy.title, accounts: t.accounts, audit: t.audit,
     trust: trustMessages[locale].trustWorkspace, ambassadors: ambassadorMessages[locale].title,
     legal: legalAdminMessages[locale].title, founder: founderMessages[locale].adminTitle,
     corrections: governanceMessages[locale].corrections, governance: governanceMessages[locale].governance,
@@ -73,7 +74,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
                   className="border-b border-[var(--theme-border)] pb-2 last:border-0 last:pb-0">
                   <h2 id={label} className="px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)]">{t[label]}</h2>
                   <ul className="space-y-0.5">
-                    {pages.filter((page) => page !== "homepage" || access.data?.founder).map((page) => <li key={page}>
+                    {pages.filter((page) => (page !== "homepage" && page !== "registration") || access.data?.founder).map((page) => <li key={page}>
                       <button type="button" aria-pressed={tab === page} onClick={() => {
                         setTab(page);
                         if (navigationOpen) {
@@ -106,6 +107,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
               {tab === "governance" && <PlatformGovernance />}
               {tab === "partners" && <AdminEarlyPartners />}
               {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
+              {tab === "registration" && access.data?.founder && <RegistrationSettings key={workspaceId} workspaceId={workspaceId} />}
             </section>
           </div>
         </>}

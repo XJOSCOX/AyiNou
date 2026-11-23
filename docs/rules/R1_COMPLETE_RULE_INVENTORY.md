@@ -50,6 +50,10 @@ The exhaustive tracked-text pass is a search census. It is distinct from semanti
 The audit covers account management, Founder authority, moderation, verification, organization permissions, communities, projects, polls, programs, legal, privacy, audit and deployment. Unresolved policy and unverified infrastructure are explicitly identified in the catalog. Existing applications, migrations, grants, active policies, local environment settings and untracked user files are unchanged by R1. R2 requires an owner decision.
 
 
+## R2.2 registration policy
+
+The six registration and referral settings are recorded as post-inventory additions. Public mode and the independent Personal Signup and Organization Signup switches default to ON. New referrals default to ON and rewards remain OFF. The [R2.2 matrix](R2_2_POLICY_MATRIX.md) traces direct Auth enforcement, invitations and eligibility.
+
 ## R2.1 implementation update
 
 `homepage.community_statistics.enabled` is a global homepage visibility setting. Its reviewed PostgreSQL migration seeds ON. The private Founder administration panel, versioned changes and audit ledger are described in the [R2.1 report](R2_1_PUBLIC_HOMEPAGE_RULES.md). The R1 census numbers above describe the original audited revision. See the [master progress tracker](RULES_AND_PERMISSIONS_MASTER_PLAN.md) for rollout status.

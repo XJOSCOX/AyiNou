@@ -77,6 +77,10 @@ Supabase setup, migrations, RLS, authentication, and registration were deferred 
 - Member privacy settings, a public profile preview, and privacy-filtered membership statistics.
 - External email delivery remains unverified. Synthetic confirmed accounts cover the hosted profile and authorization flows.
 
+## R2.2 — Registration, signup and referrals
+
+- Independent Personal Signup and Organization Signup controls, trusted Auth enforcement, registration invitations and referral settings. Hosted status follows the [implementation report](docs/rules/R2_2_IMPLEMENTATION_REPORT.md).
+
 ## Phase 2C — Account settings and referrals
 
 - [x] Harden profile writes at the database boundary and keep both profile RPCs compatible.

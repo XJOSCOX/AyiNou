@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
@@ -47,13 +48,15 @@ export default async function FounderSetup({ params, searchParams }: {
     const cookie = (await cookies()).get(founderCookie(id))?.value;
     const details = cookie && await workflowRequest<Details>(endpoint, { action: "form", authorization: cookie });
     const password = data.get("password");
-    if (!details || typeof password !== "string" || password !== data.get("confirmation") || !validNewPassword(password)
+    if (!cookie || !details || typeof password !== "string" || password !== data.get("confirmation") || !validNewPassword(password)
       || !await founderEmailConfirmationEnabled()) redirect(path + "?result=try");
     const auth = await serverSupabase();
+    const digest = createHash("sha256").update(cookie).digest("hex");
+    const proof = createHash("sha256").update("r22-founder:" + digest).digest("hex");
     const { error } = await auth.auth.signUp({
       email: details.email, password,
       options: { emailRedirectTo: new URL("/auth/callback?next=" + path, workflowOrigin).href,
-        data: { public_username: details.signupUsername, preferred_locale: isLocale(locale) ? locale : defaultLocale } },
+        data: { founder_signup_proof: proof, public_username: details.signupUsername, preferred_locale: isLocale(locale) ? locale : defaultLocale } },
     });
     redirect(path + (error ? "?result=try" : "?result=email"));
   }

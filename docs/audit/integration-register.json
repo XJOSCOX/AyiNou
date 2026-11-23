@@ -2,6 +2,27 @@
   "version": 1,
   "modules": [
     {
+      "module": "registration_policy",
+      "status": "partially covered",
+      "requiredEvents": "Founder registration and referral policy revisions, registration invitation issue and consumption, and eligible referral attribution.",
+      "sources": [
+        "private.registration_policy_events",
+        "private.registration_invitations",
+        "private.referrals"
+      ],
+      "observed": "Policy changes and invitation state commit in PostgreSQL. Referral attribution retains the existing subject-unique history.",
+      "missing": [
+        "Unified Audit Center read adapter for registration policy revisions and invitation lifecycle"
+      ],
+      "viewers": "Service-custodied administrative audit evidence; members see only their aggregate count and own stable code.",
+      "excluded": "Raw credentials, private recipient emails, provider proof, and referred-account identity.",
+      "tests": [
+        "apps/web/e2e/registration-policy.spec.ts",
+        "apps/web/e2e/organization-onboarding.spec.ts"
+      ],
+      "remediation": "Add a separately reviewed audit projection under the Audit Center workstream."
+    },
+    {
       "module": "platform",
       "status": "covered",
       "requiredEvents": "Restriction changes, ordinary platform role grants and revocations, trusted bootstrap",

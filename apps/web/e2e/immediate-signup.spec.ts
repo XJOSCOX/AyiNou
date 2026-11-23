@@ -11,11 +11,13 @@ const client = () => createClient("http://127.0.0.1:55321", process.env.AYINOU_E
 const password = "Disposable-immediate-signup!9";
 
 if (immediate) {
-  test("development signup skips email instructions and initializes the profile in the new session", async ({ page, context }) => {
+  test("development signup skips email instructions and initializes the profile in the new session", async ({ page, context, makeMember }) => {
     const username = "direct_" + randomUUID().slice(0, 8);
     const email = username + "@example.com";
     await inEnglish(context);
-    await page.goto("/register");
+    const referrer = await makeMember();
+    const { referralCode } = await apiCall(referrer, "/api/v1/me/referral-code", 200);
+    await page.goto("/register?ref=" + referralCode);
     await page.locator('input[name="signup-path"][value="organization"]').check();
     await page.getByLabel(membershipMessages.en.firstName, { exact: true }).fill("Synthetic");
     await page.getByLabel(membershipMessages.en.lastName, { exact: true }).fill("Member");
@@ -32,6 +34,9 @@ if (immediate) {
       .toBe(username + ":" + username + ":ht");
     expect(sql(`select count(*) from private.organization_onboarding_intents i join auth.users u on u.id=i.subject_id
       where u.email='${email}' and i.pathway='organization';`)).toBe("1");
+    expect(sql(`select count(*) from private.referrals r join auth.users u on u.id=r.referred_user_id
+      where u.email='${email}' and r.confirmed_at is not null;`)).toBe("0");
+    expect((await apiCall(referrer, "/api/v1/me/referrals", 200)).summary.confirmedCount).toBe(0);
   });
 
   test("automatic Auth confirmation cannot bypass a username or prove access to a reserved Founder email", async () => {

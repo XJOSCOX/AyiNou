@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { completePasswordRecovery } from "@/app/reset-password/actions";
@@ -10,6 +10,7 @@ import { AuthShell } from "./auth-shell";
 import { accountMessages } from "@/lib/account-i18n";
 import { getUsernameAvailability, validateReferralCode } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
+import { canRegister, loadRegistrationPolicy, type RegistrationPolicy } from "@/lib/registration";
 import { useLocale } from "@/lib/locale-store";
 import { browserSupabase, setRememberedSession } from "@/lib/supabase/browser";
 import { membershipMessages } from "@/lib/membership-i18n";
@@ -42,6 +43,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
     mismatch: passwordCopy.mismatch, samePassword: passwordCopy.samePassword, signOutPending: passwordCopy.signOutPending,
     invalidCredentials: t.invalidCredentials, invalidReferral: account.invalidReferral,
     invalidPrivateNames: m.invalidPrivateNames, confirmationUnavailable: t.confirmationUnavailable,
+    registrationUnavailable: t.registrationUnavailable, invitationInvalid: t.registrationInvitationInvalid,
     sessionNeeded: t.sessionNeeded, rateLimited: m.rateLimited, serviceError: m.serviceError, genericError: t.genericError,
   };
   const router = useRouter();
@@ -56,6 +58,24 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const [lastName, setLastName] = useState("");
   const [referral, setReferral] = useState(initialReferral);
   const [signupPath, setSignupPath] = useState<SignupPath>("individual");
+  const [policy, setPolicy] = useState<RegistrationPolicy | null>(null);
+  const [policyLoaded, setPolicyLoaded] = useState(false);
+  const [invitation, setInvitation] = useState("");
+  const signupPaths: SignupPath[] = [];
+  if (policy?.individualEnabled) signupPaths.push("individual");
+  if (policy?.organizationEnabled) signupPaths.push("organization");
+  const selectedPath = signupPaths.includes(signupPath) ? signupPath : signupPaths[0];
+
+  useEffect(() => {
+    if (mode !== "register") return;
+    const controller = new AbortController();
+    loadRegistrationPolicy(controller.signal).then((value) => {
+      if (!controller.signal.aborted) setPolicy(value);
+    }).catch(() => {}).finally(() => {
+      if (!controller.signal.aborted) setPolicyLoaded(true);
+    });
+    return () => controller.abort();
+  }, [mode]);
   const signupSlides = useRef<HTMLDivElement>(null);
   const signup = organizationOnboardingMessages[locale];
   const [visiblePassword, setVisiblePassword] = useState(false);
@@ -98,6 +118,16 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
     try {
       const supabase = browserSupabase();
       if (mode === "register") {
+        const latest = await loadRegistrationPolicy().catch(() => null);
+        setPolicy(latest);
+        if (!latest || !canRegister(latest) || !selectedPath ||
+          !(selectedPath === "individual" ? latest.individualEnabled : latest.organizationEnabled)) {
+          setError("registrationUnavailable"); return;
+        }
+        const inviteCode = invitation.trim().toLowerCase();
+        if (latest.mode === "invitation_only" && !/^[0-9a-f]{64}$/.test(inviteCode)) {
+          setError("invitationInvalid"); return;
+        }
         const status = usernameCheck.status === "available" ? "available"
           : await getUsernameAvailability(usernameCheck.candidate).catch(() => "network" as const);
         usernameCheck.report(status);
@@ -105,7 +135,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           setError(status === "network" ? "usernameNetwork" : "usernameConflict");
           return;
         }
-        const code = referral.trim().toUpperCase();
+        const code = latest.referralsEnabled ? referral.trim().toUpperCase() : "";
         if (code && (!referralCodePattern.test(code) || !await validateReferralCode(code))) {
           setError("invalidReferral");
           return;
@@ -117,7 +147,8 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
             emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
             data: {
               preferred_locale: locale, first_name: firstName.trim(), last_name: lastName.trim(),
-              signup_path: signupPath, public_username: usernameCheck.candidate,
+              signup_path: selectedPath, public_username: usernameCheck.candidate,
+              ...(latest.mode === "invitation_only" ? { registration_invitation: inviteCode } : {}),
               ...(code ? { referral_code: code } : {}),
             },
           },
@@ -136,6 +167,13 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
               setError("usernameConflict");
               return;
             }
+            const current = await loadRegistrationPolicy().catch(() => null);
+            setPolicy(current);
+            if (!current || !canRegister(current) ||
+              !(selectedPath === "individual" ? current.individualEnabled : current.organizationEnabled)) {
+              setError("registrationUnavailable"); return;
+            }
+            if (current.mode === "invitation_only") { setError("invitationInvalid"); return; }
           }
           throw authError;
         }
@@ -211,15 +249,20 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
 
       {mode === "verify" ? (
         <Link href="/login" className={`${primaryActionClass} mt-6 block text-center`}>{t.backLogin}</Link>
+      ) : mode === "register" && !canRegister(policy) ? (
+        <div className="mt-6 grid gap-4">
+          <p role="status">{policyLoaded ? t.registrationUnavailable : t.working}</p>
+          <Link href="/login" className={`${primaryActionClass} text-center`}>{t.backLogin}</Link>
+        </div>
       ) : (
         <form onSubmit={submit} className={`mt-6 ${mode === "register" ? "space-y-4" : "space-y-5"}`} aria-busy={loading} noValidate>
           {mode === "register" && (
             <fieldset className="grid min-w-0 gap-2" disabled={loading} aria-describedby="signup-path-help">
               <legend className="mb-2 font-semibold">{signup.choice}</legend>
               <div className="grid min-w-0 grid-cols-2 gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-1">
-                {(["individual", "organization"] as const).map((path, index) => (
+                {signupPaths.map((path, index) => (
                   <label key={path} className="relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center rounded-md px-2 py-2 text-center text-sm font-semibold has-checked:bg-[var(--theme-surface)] has-checked:text-[var(--theme-link)] focus-within:outline-2 focus-within:outline-[var(--theme-link)]">
-                    <input type="radio" name="signup-path" value={path} checked={signupPath === path} className="absolute inset-0 size-full cursor-pointer opacity-0"
+                    <input type="radio" name="signup-path" value={path} checked={selectedPath === path} className="absolute inset-0 size-full cursor-pointer opacity-0"
                       onChange={() => {
                         setSignupPath(path);
                         const track = signupSlides.current;
@@ -231,13 +274,13 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
               </div>
               <div ref={signupSlides} className={styles.signupSlides} dir="ltr"
                 onScroll={(event) => {
-                  if (loading) return;
+                  if (loading || signupPaths.length !== 2) return;
                   const { scrollLeft, clientWidth } = event.currentTarget;
                   if (clientWidth) setSignupPath(scrollLeft >= clientWidth / 2 ? "organization" : "individual");
                 }}>
-                {(["individual", "organization"] as const).map((path) => (
+                {signupPaths.map((path) => (
                   <div key={path} dir="auto" className="rounded-lg bg-[var(--theme-hero)] px-4 py-3"
-                    aria-hidden={signupPath !== path}>
+                    aria-hidden={selectedPath !== path}>
                     <strong className="block">{signup[path]}</strong>
                     <p className="mt-1 text-sm leading-relaxed text-[var(--theme-body)]">{signup[`${path}Help`]}</p>
                   </div>
@@ -309,7 +352,14 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
               placeholder=" " autoComplete="new-password" aria-invalid={error === "mismatch" || undefined} required />
             <span className={styles.fieldLabel}>{passwordCopy.confirm}</span>
           </label>}
-          {mode === "register" && (
+          {mode === "register" && policy?.mode === "invitation_only" && (
+            <label className="relative block">
+              <input value={invitation} onChange={(event) => setInvitation(event.target.value)} className={floatingFieldClass}
+                placeholder=" " autoComplete="off" maxLength={64} spellCheck={false} required />
+              <span className={styles.fieldLabel}>{t.registrationInvitation}</span>
+            </label>
+          )}
+          {mode === "register" && policy?.referralsEnabled && (
             <label className="relative block">
               <input value={referral} onChange={(event) => setReferral(event.target.value)} className={floatingFieldClass}
                 placeholder=" " autoComplete="off" autoCapitalize="characters" maxLength={64} spellCheck={false} />

@@ -16808,6 +16808,138 @@
   ],
   "postInventoryAdditions": [
     {
+      "id": "REG-01",
+      "phase": "R2.2",
+      "domain": "Registration and referrals",
+      "name": "Allow new accounts",
+      "key": "registration.enabled",
+      "default": true,
+      "initialRevision": 1,
+      "category": "PANEL_BUSINESS_POLICY",
+      "enforcement": "Auth insert blocks ordinary accounts when disabled.",
+      "actors": "Recognized Founder with current MFA and original workspace.",
+      "failureMode": "Unavailable policy fails closed.",
+      "audit": "Atomic versioned private policy ledger.",
+      "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122184000_r22_registration_referrals.sql",
+          "line": 2,
+          "anchor": "create table private.registration_policy"
+        }
+      ]
+    },
+    {
+      "id": "REG-02",
+      "phase": "R2.2",
+      "domain": "Registration and referrals",
+      "name": "Registration mode",
+      "key": "registration.mode",
+      "default": "public",
+      "initialRevision": 1,
+      "category": "PANEL_BUSINESS_POLICY",
+      "enforcement": "Auth insert permits public, invitation-only or closed modes.",
+      "actors": "Recognized Founder with current MFA and original workspace.",
+      "failureMode": "Unavailable policy fails closed.",
+      "audit": "Atomic versioned private policy ledger.",
+      "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122184000_r22_registration_referrals.sql",
+          "line": 2,
+          "anchor": "create table private.registration_policy"
+        }
+      ]
+    },
+    {
+      "id": "REG-03",
+      "phase": "R2.2",
+      "domain": "Registration and referrals",
+      "name": "Personal Signup",
+      "key": "registration.individual_enabled",
+      "default": true,
+      "initialRevision": 1,
+      "category": "PANEL_BUSINESS_POLICY",
+      "enforcement": "Auth insert independently checks personal signup.",
+      "actors": "Recognized Founder with current MFA and original workspace.",
+      "failureMode": "Unavailable policy fails closed.",
+      "audit": "Atomic versioned private policy ledger.",
+      "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122184000_r22_registration_referrals.sql",
+          "line": 2,
+          "anchor": "create table private.registration_policy"
+        }
+      ]
+    },
+    {
+      "id": "REG-04",
+      "phase": "R2.2",
+      "domain": "Registration and referrals",
+      "name": "Organization Signup",
+      "key": "registration.organization_enabled",
+      "default": true,
+      "initialRevision": 1,
+      "category": "PANEL_BUSINESS_POLICY",
+      "enforcement": "Auth insert independently checks the organization onboarding path.",
+      "actors": "Recognized Founder with current MFA and original workspace.",
+      "failureMode": "Unavailable policy fails closed.",
+      "audit": "Atomic versioned private policy ledger.",
+      "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122184000_r22_registration_referrals.sql",
+          "line": 2,
+          "anchor": "create table private.registration_policy"
+        }
+      ]
+    },
+    {
+      "id": "REG-05",
+      "phase": "R2.2",
+      "domain": "Registration and referrals",
+      "name": "New referrals",
+      "key": "referrals.enabled",
+      "default": true,
+      "initialRevision": 1,
+      "category": "PANEL_BUSINESS_POLICY",
+      "enforcement": "Trusted validation, capture and eligible confirmation check this flag.",
+      "actors": "Recognized Founder with current MFA and original workspace.",
+      "failureMode": "Unavailable policy fails closed.",
+      "audit": "Atomic versioned private policy ledger.",
+      "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122184000_r22_registration_referrals.sql",
+          "line": 2,
+          "anchor": "create table private.registration_policy"
+        }
+      ]
+    },
+    {
+      "id": "REG-06",
+      "phase": "R2.2",
+      "domain": "Registration and referrals",
+      "name": "Referral rewards",
+      "key": "referrals.rewards_enabled",
+      "default": false,
+      "initialRevision": 1,
+      "category": "GOVERNED_HIGH_RISK_POLICY",
+      "enforcement": "Typed registry constrains value to OFF pending separate approval.",
+      "actors": "Future owner-approved phase.",
+      "failureMode": "Unavailable policy fails closed.",
+      "audit": "Atomic versioned private policy ledger.",
+      "report": "docs/rules/R2_2_IMPLEMENTATION_REPORT.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122184000_r22_registration_referrals.sql",
+          "line": 2,
+          "anchor": "create table private.registration_policy"
+        }
+      ]
+    },
+    {
       "id": "HOM-01",
       "phase": "R2.1",
       "domain": "Public homepage",

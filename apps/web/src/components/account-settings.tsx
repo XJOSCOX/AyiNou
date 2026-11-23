@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { fetchAccountCodes } from "@/lib/api";
+import { canRegister, loadRegistrationPolicy } from "@/lib/registration";
 import { authMessages } from "@/lib/auth-i18n";
 import { privacyMessages } from "@/lib/privacy-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -30,11 +31,17 @@ export function AccountSettings({ subject }: { subject: string }) {
   const [details, setDetails] = useState<Awaited<ReturnType<typeof fetchAccountCodes>> | null>(null);
   const [invitation, setInvitation] = useState("");
   const [failed, setFailed] = useState(false);
+  const [shareAvailable, setShareAvailable] = useState(false);
   const [retry, setRetry] = useState(0);
   const [notice, setNotice] = useState<"copied" | "shareFailed" | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
+    loadRegistrationPolicy(controller.signal).then((policy) => {
+      if (!controller.signal.aborted) setShareAvailable(canRegister(policy) && policy.referralsEnabled && policy.mode === "public");
+    }).catch(() => {
+      if (!controller.signal.aborted) setShareAvailable(false);
+    });
     fetchAccountCodes(controller.signal).then((account) => {
       if (controller.signal.aborted) return;
       const link = new URL("/register", window.location.origin);
@@ -104,14 +111,16 @@ export function AccountSettings({ subject }: { subject: string }) {
             </section>
             <section className={card}>
               <h2 className="text-xl font-semibold">{a.referrals}</h2>
-              <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{a.referralHelp}</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{shareAvailable ? a.referralHelp : a.referralSharingUnavailable}</p>
               <code className="mt-4 block break-all font-semibold">{details.referralCode}</code>
+              {shareAvailable && <>
               <p className="mt-2 break-all text-sm text-[var(--theme-link)]">{invitation}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button type="button" className={secondaryAction} onClick={() => { void share(); }}>{a.copyLink}</button>
                 <button type="button" className={secondaryAction} onClick={() => { void share(true); }}>{a.shareLink}</button>
               </div>
-              {notice && <p role="status" className="mt-3 text-sm">{a[notice]}</p>}
+              </>}
+              {shareAvailable && notice && <p role="status" className="mt-3 text-sm">{a[notice]}</p>}
               <p className="mt-5 border-t border-[var(--theme-border)] pt-4 text-sm text-[var(--theme-body)]">
                 {details.confirmedCount === 0 ? a.emptyReferrals : `${a.confirmedReferrals} · ${new Intl.NumberFormat(locale).format(details.confirmedCount)}`}
               </p>

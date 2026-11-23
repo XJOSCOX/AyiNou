@@ -1,4 +1,7 @@
 {
+  "registrationUnavailable": "Les inscriptions sont actuellement indisponibles. Les membres peuvent toujours se connecter.",
+  "registrationInvitation": "Code d’invitation à s’inscrire",
+  "registrationInvitationInvalid": "Saisissez une invitation valide pour cette adresse e-mail et ce type d’inscription.",
   "rememberDevice": "Se souvenir de cet appareil",
   "sessionEnded": "Votre session a pris fin. Reconnectez-vous pour continuer.",
   "roleSessionChanged": "L’accès administrateur est prêt. Reconnectez-vous et confirmez avec votre application d’authentification.",

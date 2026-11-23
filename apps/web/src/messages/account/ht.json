@@ -13,6 +13,7 @@
   "privateCode": "Kòd manm prive",
   "privateCodeHelp": "Sa a se referans AyiNou ou pou tout tan. Kenbe l prive. Sèvi ak imèl ou pou konekte.",
   "referrals": "Envitasyon",
+  "referralSharingUnavailable": "Lyen parennaj yo pa disponib pou kounye a. Kòd ou ak parennaj ki konfime yo toujou anrejistre.",
   "referralHelp": "Pataje lyen oswa kòd envitasyon ou. Nouvo manm ka antre kòd la lè y ap enskri.",
   "optionalReferral": "Kòd envitasyon (si ou vle)",
   "invalidReferral": "Kòd envitasyon sa a pa disponib. Verifye kòd la oswa kite espas la vid pou kontinye.",

@@ -13,6 +13,7 @@
   "privateCode": "Código privado de miembro",
   "privateCodeHelp": "Tu referencia permanente en AyiNou. Mantenla en privado. Usa tu correo electrónico para iniciar sesión.",
   "referrals": "Invitaciones",
+  "referralSharingUnavailable": "Los enlaces de referencia no están disponibles en este momento. Tu código y tus referencias confirmadas se conservan.",
   "referralHelp": "Comparte tu enlace o código de invitación. Las personas nuevas pueden ingresar el código al registrarse.",
   "optionalReferral": "Código de invitación (opcional)",
   "invalidReferral": "Este código de invitación no está disponible. Verifícalo o deja el campo vacío para continuar.",

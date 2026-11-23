@@ -1,4 +1,7 @@
 {
+  "registrationUnavailable": "Registration is currently unavailable. Existing members can still sign in.",
+  "registrationInvitation": "Registration invitation code",
+  "registrationInvitationInvalid": "Enter a valid registration invitation for this email and signup option.",
   "rememberDevice": "Remember this device",
   "sessionEnded": "Your session has ended. Sign in again to continue.",
   "roleSessionChanged": "Administrator access is ready. Sign in again and verify with your authenticator.",

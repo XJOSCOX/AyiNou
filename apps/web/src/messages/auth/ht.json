@@ -1,4 +1,7 @@
 {
+  "registrationUnavailable": "Enskripsyon pa disponib pou kounye a. Manm ki deja gen kont ka toujou konekte.",
+  "registrationInvitation": "Kòd envitasyon pou enskri",
+  "registrationInvitationInvalid": "Antre yon envitasyon ki valab pou imèl sa a ak opsyon enskripsyon sa a.",
   "rememberDevice": "Sonje aparèy sa a",
   "sessionEnded": "Sesyon ou fini. Konekte ankò pou kontinye.",
   "roleSessionChanged": "Aksè administratè a pare. Konekte ankò epi verifye ak aplikasyon otantifikasyon ou.",
