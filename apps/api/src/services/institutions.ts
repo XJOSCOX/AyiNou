@@ -12,7 +12,7 @@ export class InstitutionError extends Error {
 type DbInstitution = Omit<Institution, "logoUrl"> & { logoAsset: string | null };
 type DbManagement = Omit<InstitutionManagement, "organization"> & { organization: DbInstitution };
 type DbAccounts = Omit<InstitutionAccounts, "organizations"> & {
-  organizations: Omit<InstitutionAccounts["organizations"][number], "logoUrl">[];
+  organizations: (Omit<InstitutionAccounts["organizations"][number], "logoUrl"> & { logoAsset?: string | null })[];
 };
 
 export interface InstitutionRepository {
@@ -89,7 +89,25 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
     },
     async accounts(actor) {
       const result = await rpc<DbAccounts>("institution_accounts_for_api", { p_actor: actor });
-      return { ...result, organizations: result.organizations.map((org) => ({ ...org, logoUrl: null })) };
+      const organizations = result.organizations.map(({ logoAsset, ...org }) => ({
+        org,
+        logoPath: logoAsset ? `${org.id}/${logoAsset}.webp` : null,
+      }));
+      const paths = organizations.flatMap(({ logoPath }) => logoPath ? [logoPath] : []);
+      const signed = new Map<string, string>();
+      if (paths.length) {
+        try {
+          const { data } = await logos.createSignedUrls(paths, 300);
+          for (const row of data ?? []) if (row.path && row.signedUrl) signed.set(row.path, row.signedUrl);
+        } catch { /* Unavailable logos fall back to initials without blocking the account list. */ }
+      }
+      return {
+        ...result,
+        organizations: organizations.map(({ org, logoPath }) => ({
+          ...org,
+          logoUrl: logoPath ? signed.get(logoPath) ?? null : null,
+        })),
+      };
     },
     async manage(actor, org) {
       const result = await readManagement(actor, org);
