@@ -33,7 +33,7 @@ export function registerRegistrationPolicyRoutes(app: FastifyInstance, auth: Aut
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
 
   app.get("/api/v1/registration/policy", async (request) => {
-    await read("discovery", null, request.ip);
+    await read("registration", null, request.ip);
     if (repo) {
       try { return publicPolicy.parse(await repo.rpc("registration_policy_for_api", {})); }
       catch { /* Policy reads fail closed. */ }

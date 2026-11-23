@@ -6,7 +6,7 @@ Registration policy, existing referral integration and the Founder-only Registra
 
 ## Data model and API
 
-Migration `20261122184000_r22_registration_referrals.sql` adds a typed versioned policy, a private policy event ledger and expiring signup invitations. It also installs a PostgreSQL trigger on `auth.users` and extends existing referral functions. The public GET policy route returns signup UI flags. Private GET/PATCH read and update the registry. The private invitation POST creates a receipt.
+Migration `20261122184000_r22_registration_referrals.sql` adds a typed versioned policy, a private policy event ledger and expiring signup invitations. It also installs a PostgreSQL trigger on `auth.users` and extends existing referral functions. The public GET policy route returns signup UI flags and uses a separate cross-instance read budget from discovery. Private GET/PATCH read and update the registry. The private invitation POST creates a receipt.
 
 ## Permissions and audit
 
@@ -14,7 +14,7 @@ Fastify and PostgreSQL independently enforce trusted Founder authority, a curren
 
 ## Privacy and lifecycle
 
-Raw invitations and Founder signup proofs are removed from Auth metadata before insert. Only invitation and recipient digests are stored with the private receipt. No signup credential or private referred-account details appear in the public response. Historical referral attribution is retained and can be read by the account through the existing aggregate. Existing privacy deletion plans continue to inventory Auth references; set any future retention or purge policy through the applicable audited lifecycle.
+Trigger-based redaction removes raw invitations and Founder signup proofs from Auth user and identity metadata before persistence. Only invitation and recipient digests are stored with the private receipt. No signup credential or private referred-account details appear in the public response. Historical referral attribution is retained and can be read by the account through the existing aggregate. Existing privacy deletion plans continue to inventory Auth references; set any future retention or purge policy through the applicable audited lifecycle.
 
 ## Localization and accessibility
 

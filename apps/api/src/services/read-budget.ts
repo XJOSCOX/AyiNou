@@ -5,7 +5,7 @@ import { ApiError } from "./api-error.js";
 import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
 
 const thresholds = {
-  feed: [90, 120], media: [120, 240], discovery: [30, 60], profile: [60, 120], notifications: [90, 90], username: [30, 30], audit: [15, 30],
+  feed: [90, 120], media: [120, 240], discovery: [30, 60], profile: [60, 120], notifications: [90, 90], username: [30, 30], audit: [15, 30], registration: [90, 90],
 } as const;
 
 export type ReadCategory = keyof typeof thresholds;

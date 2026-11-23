@@ -134,6 +134,36 @@ begin
 end;
 $$;
 
+-- Separate public signup reads from discovery, so crowding one cannot disable the other.
+alter table feed_data.read_limits drop constraint read_limits_category_check;
+alter table feed_data.read_limits add constraint read_limits_category_check
+  check(category in ('feed','media','discovery','profile','notifications','username','audit','registration'));
+
+create or replace function public.consume_safety_read_for_api(p_actor uuid,p_bucket integer,p_category text)
+returns boolean language plpgsql security definer set search_path='' as $$
+declare slot timestamptz:=date_trunc('minute',clock_timestamp()); ceiling integer; subject_key text;
+begin
+  if ((p_actor is null)=(p_bucket is null)) or (p_bucket is not null and p_bucket not between 0 and 4095)
+  then raise exception 'invalid rate key' using errcode='22023'; end if;
+  ceiling:=case p_category
+    when 'feed' then case when p_actor is null then 90 else 120 end
+    when 'media' then case when p_actor is null then 120 else 240 end
+    when 'discovery' then case when p_actor is null then 30 else 60 end
+    when 'profile' then case when p_actor is null then 60 else 120 end
+    when 'notifications' then 90
+    when 'username' then 30
+    when 'audit' then case when p_actor is null then 15 else 30 end
+    when 'registration' then 90 end;
+  if ceiling is null then raise exception 'invalid rate category' using errcode='22023'; end if;
+  subject_key:=coalesce('member:'||p_actor::text,'guest:'||p_bucket::text);
+  insert into feed_data.read_limits(subject,category,window_started,total) values(subject_key,p_category,slot,1)
+  on conflict(subject,category) do update set window_started=excluded.window_started,
+    total=case when read_limits.window_started=slot then read_limits.total+1 else 1 end
+  where read_limits.window_started<slot or (read_limits.window_started=slot and read_limits.total<ceiling);
+  return found;
+end;
+$$;
+
 -- All new Auth accounts go through this lock, including direct Auth traffic.
 create function private.enforce_registration_policy()
 returns trigger language plpgsql security definer set search_path='' as $$
@@ -193,6 +223,16 @@ $$;
 create trigger ayinou_scrub_signup_credentials before update of raw_user_meta_data on auth.users
   for each row execute function private.scrub_signup_credentials();
 
+create function private.scrub_signup_identity_credentials()
+returns trigger language plpgsql security definer set search_path='' as $$
+begin
+  new.identity_data:=new.identity_data - array['founder_signup_proof','registration_invitation'];
+  return new;
+end;
+$$;
+create trigger ayinou_scrub_signup_identity_credentials before insert or update of identity_data on auth.identities
+  for each row execute function private.scrub_signup_identity_credentials();
+
 create or replace function public.validate_referral_for_api(p_code text)
 returns boolean language sql stable security definer set search_path='' as $$
   select exists(select 1 from private.registration_policy where singleton and referrals_enabled)
@@ -231,7 +271,7 @@ end;
 $$;
 
 revoke all on function private.registration_policy_value(private.registration_policy),private.enforce_registration_policy(),
-  private.scrub_signup_credentials(),
+  private.scrub_signup_credentials(),private.scrub_signup_identity_credentials(),
   public.registration_policy_for_api(),public.founder_registration_policy_for_api(uuid,uuid,boolean,bigint,uuid,jsonb)
   from public,anon,authenticated,service_role;
 grant execute on function public.registration_policy_for_api(),
