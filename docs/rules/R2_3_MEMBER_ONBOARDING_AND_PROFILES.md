@@ -47,7 +47,7 @@ Each completed form stage persists through the existing transaction. When comple
 
 ## Validation and CI
 
-Disposable tests cover version conflicts, individual onboarding, owner profile editing, public opt-in, policy changes, visibility and authorization. Existing signup, username and organization workflows are included in local regression testing. The 103-test local Chromium suite, 53 API tests, typecheck, lint, shared contracts, four-language parity, both production builds, engineering standards and legal checks passed. Hosted release status is tracked below.
+Disposable tests cover version conflicts, individual onboarding, owner profile editing, public opt-in, policy changes, visibility and authorization. Existing signup, username and organization workflows are included in local regression testing. The 103-test local Chromium suite, 53 API tests, typecheck, lint, shared contracts, four-language parity, both production builds, engineering standards and legal checks passed. The two development immediate-signup cases and four final settings-navigation and onboarding checks also passed.
 
 ## Documentation and operations
 
@@ -55,4 +55,6 @@ Use Platform Settings → Member Onboarding & Profiles to change settings. Requi
 
 ## Remaining blockers
 
-Complete local release verification and hosted migration postflight before closing R2.3.
+Hosted development project `hcbxulyfmdmuyccgrujs` applied the exact R2.3 migration from `bf7f9524ce6f59174808c075b7f4457271e106fe`. The SHA-256 was `78b977426cf97e56c0345720cd8b5fc64b811f57433f603a175132096685ed0b`. The fresh hosted dry run listed one migration, zero seeds and zero roles.
+
+Postflight confirmed 93 applied migrations and zero pending, the expected 17 defaults at revision 1, RLS on all three new private tables and restricted RPC grants. The five existing accounts and profiles and the existing organization intent were preserved. No existing member was enrolled retroactively or opted into public sharing. The restarted local app returned the homepage, registration policy and public feed successfully, and denied anonymous policy administration. Hosted development verification is complete.
