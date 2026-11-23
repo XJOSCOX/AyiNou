@@ -45,12 +45,13 @@ export function MemberPublic({ profile, username, social, ambassador, recognitio
     : profile.membershipCategory === "international_supporter" ? membership.supporterCount : null;
   const interests = profile.interests ?? [];
   const hasAbout = showDetails && !!(profile.biography || category || country || profile.departmentName || interests.length);
+  const showActivity = showDetails && profile.activityVisible;
   const hasRecognition = showDetails && !!(recognition.length || ambassador);
   const memberTools = signedIn && !social.self;
   const showFollowPanel = social.showFollowers !== false || social.showFollowing !== false || signedIn && social.canFollow;
 
   return <MemberShell signedIn={signedIn}>
-    <div className="grid min-w-0 max-w-6xl gap-5">
+    <div className="grid min-w-0 gap-5">
       <section aria-labelledby="member-name" className="overflow-hidden rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-surface)] shadow-sm">
         <div aria-hidden="true" className="relative h-24 overflow-hidden border-b border-[var(--theme-border)] bg-gradient-to-br from-[var(--theme-hero)] to-[var(--theme-selected)] sm:h-32">
           <div className="absolute -end-8 -top-32 size-80 rounded-full border-[28px] border-[var(--theme-link)] opacity-[0.08]" />
@@ -87,12 +88,17 @@ export function MemberPublic({ profile, username, social, ambassador, recognitio
         </div>}
       </section>
 
-      <div className={`grid min-w-0 items-start gap-5 ${hasAbout || hasRecognition || memberTools ? "lg:grid-cols-[minmax(0,1fr)_minmax(16rem,20rem)]" : ""}`}>
-        <section aria-labelledby="member-activity" className="grid min-w-0 gap-3">
-          <h2 id="member-activity" className="text-xl font-semibold">{t.memberActivity}</h2>
-          {showDetails && profile.activityVisible
-            ? <MemberActivity username={username} signedIn={signedIn} />
-            : <p className={`${institutionCard} text-sm text-[var(--theme-body)]`}>{showDetails ? t.memberActivityHidden : t.privateProfile}</p>}
+      <div className={`grid min-w-0 items-start gap-5 ${hasAbout || hasRecognition || memberTools
+        ? showActivity ? "lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]" : "lg:grid-cols-[minmax(16rem,1fr)_minmax(0,2fr)]"
+        : ""}`}>
+        <section aria-labelledby="member-activity" className={`grid min-w-0 gap-3 ${showActivity ? "" : "order-2"}`}>
+          {showActivity ? <>
+            <h2 id="member-activity" className="text-xl font-semibold">{t.memberActivity}</h2>
+            <MemberActivity username={username} signedIn={signedIn} />
+          </> : <div className={institutionCard}>
+            <h2 id="member-activity" className="text-lg font-semibold">{t.memberActivity}</h2>
+            <p className="mt-2 text-sm text-[var(--theme-body)]">{showDetails ? t.memberActivityHidden : t.privateProfile}</p>
+          </div>}
         </section>
 
         {(hasAbout || hasRecognition || memberTools) && <div className="grid min-w-0 gap-4">

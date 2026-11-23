@@ -49,5 +49,6 @@
   "aboutMember": "À propos",
   "memberActivity": "Activité",
   "memberActivityHidden": "Ce membre ne partage aucune activité sur son profil.",
-  "editMemberProfile": "Modifier le profil"
+  "editMemberProfile": "Modifier le profil",
+  "followListVisibility": "Cette liste affiche uniquement les profils que vous pouvez consulter."
 }

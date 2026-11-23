@@ -61,3 +61,5 @@ Migration `20261123125400_explicit_profile_publication` was applied with separat
 ## Public member page
 
 The redesigned page uses a larger avatar, an integrated identity and follow header, and separate activity and About sections. Verification details and member safety actions open on demand. The owner sees a direct link to the profile editor. Displayed details, follower lists, and activity still use the existing server disclosure rules.
+
+Member totals count active relationships even when a follower’s profile is hidden. The list still shows only eligible profiles. Blocks, approval requirements, and count disclosure settings still apply. The profile uses the available content width and retains the original header design. Hosted rollout of migration `20261123125500_member_follow_totals` requires separate authorization.

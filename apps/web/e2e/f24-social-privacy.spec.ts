@@ -173,3 +173,34 @@ test("a saved hidden profile publishes once and appears in People search", async
   await apiCall(owner, profilePath, 200, "PATCH", { publishProfile: true });
   expect((await apiCall(owner, profilePath, 200, "PATCH", { publishProfile: true })).profile.isVisible).toBe(true);
 });
+
+
+test("member follower totals include active followers whose profiles are hidden", async ({ makeMember, page }) => {
+  const [owner, follower, viewer] = await Promise.all([
+    makeMember({ visible: true }), makeMember({ visible: false }), makeMember({ visible: true }),
+  ]);
+  for (const account of [owner, follower, viewer]) finishPersonalOnboarding(account);
+  const target = member(owner);
+  await apiCall(follower, target + "/follow", 200, "PUT");
+  expect(await apiCall(follower, target + "/follow", 200)).toMatchObject({ following: true, followerCount: 1 });
+  expect(await apiCall(viewer, target + "/follow", 200)).toMatchObject({ following: false, followerCount: 1 });
+  expect((await apiCall(viewer, target + "/followers", 200)).accounts).toEqual([]);
+  expect(await (await fetch(api + target + "/follow")).json()).toMatchObject({ followerCount: 1 });
+
+  await inEnglish(page.context());
+  await login(page, follower);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/members/" + owner.handle);
+  await expect(page.getByRole("button", { name: "Followers · 1", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Followers · 1", exact: true }).click();
+  await expect(page.getByText("This list only shows profiles you can view.")).toBeVisible();
+
+  const defaults: SocialPrivacy = await apiCall(owner, preferences, 200);
+  await save(owner, { ...defaults, showFollowers: false });
+  expect(await apiCall(viewer, target + "/follow", 200)).toMatchObject({ showFollowers: false, followerCount: 0 });
+  await save(owner, { ...defaults, followPolicy: "approval" });
+  expect(await apiCall(viewer, target + "/follow", 200)).toMatchObject({ followerCount: 0 });
+  await save(owner, defaults);
+  await apiCall(follower, target + "/block", 204, "PUT");
+  expect(await apiCall(viewer, target + "/follow", 200)).toMatchObject({ followerCount: 0 });
+});

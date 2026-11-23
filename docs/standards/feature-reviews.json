@@ -146,6 +146,14 @@
           "compatibility": "An explicit command publishes saved data even when discovery was already enabled. Existing profile saves, onboarding, social privacy and per-field selections keep their behavior.",
           "validation": "Disposable Chromium checks a legacy hidden profile, guest rejection, actor binding, discovery and following by a second member, and repeat publication.",
           "rolloutAndRollback": "Verify the approved single migration against hosted history. Withdraw the new RPC grant in a forward migration if needed; preserve member visibility choices."
+        },
+        {
+          "file": "supabase/migrations/20261123125500_member_follow_totals.sql",
+          "rlsAndGrants": "The existing private status helper and caller-bound public RPCs retain their grants. No table policies or identity projections change.",
+          "authorization": "Aggregate counts honor the member’s disclosure settings, active accounts, blocks and required follow approvals.",
+          "compatibility": "The response shape, relationship records, institution counts, and list visibility rules are preserved.",
+          "validation": "Disposable browser and API regression covers an unpublished follower counting without exposing their profile, plus block, approval and count privacy.",
+          "rolloutAndRollback": "Apply only the approved migration and verify the aggregate for the existing hosted relationship. Restore the previous projection via a forward migration if necessary."
         }
       ]
     },

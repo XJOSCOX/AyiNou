@@ -113,6 +113,8 @@ function DiscoveryAccount({ account, compact, onChange, onRemove }: { account: D
   </li>;
 }
 
+const profileMetric = "min-h-10 rounded-md px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-selected)] aria-expanded:bg-[var(--theme-selected)]";
+
 export function ProfileFollowPanel({ target, signedIn, initial, inline = false, featured = false }: { target: FollowTarget; signedIn: boolean; initial?: FollowStatus; inline?: boolean; featured?: boolean }) {
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
@@ -130,23 +132,27 @@ export function ProfileFollowPanel({ target, signedIn, initial, inline = false, 
   return <section className={inline ? "text-sm" : institutionCard} aria-label={t.accounts}>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!state && !resource.error && <p role="status">{feedMessages[locale].working}</p>}
-    {state && <div className="flex flex-wrap items-center gap-2">
-      {featured && signedIn && state.canFollow && <div className="me-2">
-        <FollowControl target={target} following={state.following} requestPending={state.requestPending}
-          requiresApproval={state.requiresApproval} onChange={setUpdated} primary />
-      </div>}
-      {state.showFollowers !== false && (signedIn ? <button type="button" className={discoveryTab} aria-expanded={list === "followers"} onClick={() => choose("followers")}>
-        {t.followers} · {count.format(state.followerCount)}
-      </button> : <p>{t.followers} · {count.format(state.followerCount)}</p>)}
-      {state.showFollowing !== false && state.followingCount !== null && (signedIn
-        ? <button type="button" className={discoveryTab} aria-expanded={list === "following"} onClick={() => choose("following")}>
-          {t.followingCount} · {count.format(state.followingCount)}
-        </button>
-        : <p>{t.followingCount} · {count.format(state.followingCount)}</p>)}
-      {!featured && signedIn && state.canFollow && <FollowControl target={target} following={state.following} requestPending={state.requestPending} requiresApproval={state.requiresApproval} onChange={setUpdated} />}
+    {state && <div className={featured ? "flex flex-wrap items-center justify-between gap-x-6 gap-y-2" : "flex flex-wrap items-center gap-2"}>
+      <div className="flex flex-wrap items-center gap-2">
+        {featured && signedIn && state.canFollow && <div className="me-2">
+          <FollowControl target={target} following={state.following} requestPending={state.requestPending}
+            requiresApproval={state.requiresApproval} onChange={setUpdated} primary />
+        </div>}
+        {state.showFollowers !== false && (signedIn ? <button type="button" className={featured ? profileMetric : discoveryTab} aria-expanded={list === "followers"} onClick={() => choose("followers")}>
+          {t.followers} · {count.format(state.followerCount)}
+        </button> : <p>{t.followers} · {count.format(state.followerCount)}</p>)}
+        {state.showFollowing !== false && state.followingCount !== null && (signedIn
+          ? <button type="button" className={featured ? profileMetric : discoveryTab} aria-expanded={list === "following"} onClick={() => choose("following")}>
+            {t.followingCount} · {count.format(state.followingCount)}
+          </button>
+          : <p>{t.followingCount} · {count.format(state.followingCount)}</p>)}
+        {!featured && signedIn && state.canFollow && <FollowControl target={target} following={state.following} requestPending={state.requestPending} requiresApproval={state.requiresApproval} onChange={setUpdated} />}
+      </div>
+      {featured && signedIn && state.following && <FollowRepostPreferences key={kind + ":" + key} target={target} />}
     </div>}
-    {signedIn && state?.following && <FollowRepostPreferences key={kind + ":" + key} target={target} />}
+    {!featured && signedIn && state?.following && <FollowRepostPreferences key={kind + ":" + key} target={target} />}
     {list && <div className="mt-4">
+      {featured && <p className="mb-2 text-sm text-[var(--theme-body)]">{f24Messages[locale].followListVisibility}</p>}
       <FollowAccountList key={list} target={target} list={list} allowRemoval={state?.self && list === "followers"} />
     </div>}
   </section>;
