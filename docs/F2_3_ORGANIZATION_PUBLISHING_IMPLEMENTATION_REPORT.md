@@ -2,7 +2,7 @@
 
 ## Scope
 
-An eligible representative can publish a regular post, an official announcement, or a quote as an organization. The organization page has a searchable-by-category Posts section with pinned posts, chronological pagination, and a signed-in composer. Personal publishing uses the existing composer.
+An eligible representative can publish a regular post, an official announcement, or a quote as an organization. The organization page has a Posts section with an announcements filter with pinned posts, chronological pagination, and a signed-in composer. Personal publishing uses the existing composer.
 
 ## Data model and API
 
@@ -26,7 +26,7 @@ Publication reuses the existing receipt and compares the organization, announcem
 
 ## Validation and CI
 
-Disposable Supabase applied the full migration chain. Five Chromium cases passed across F2.1, F2.2, and F2.3, including anonymous profile rendering, representative redaction, pin capacity, rejected project references, role loss, and archive behavior. Development testing runs locally.
+Disposable Supabase applied the full migration chain. Five Chromium cases passed across F2.1, F2.2, and F2.3, including anonymous profile rendering, representative redaction, pin capacity, rejected project references, role loss, and archive behavior. Local typecheck, lint, four-language parity, shared contracts, engineering standards, 53 API tests, client and web tests, and both production builds passed. GitHub was used for source delivery.
 
 ## Documentation and operations
 
@@ -35,3 +35,11 @@ The roadmap and audit coverage matrix track the work. Deploy the exact F2.3 migr
 ## Remaining blockers
 
 The F2.3 implementation does not cover organization-authored comments, replies, reactions, or native reposts, nor follower announcement notifications. Organization quotes and mentions are available. Announcements are selected at publication. Post previews show the public project title, description summary, and open opportunities. Inline project progress and a positive project and volunteer fixture remain to be verified. The restricted organization post ledger is not yet projected into Platform Audit History.
+
+## Hosted development verification
+
+Baseline commit: `8e2a9b3e93b31c6095fe97b59dc6e74bcb11e283`. Publishing commit: `3f1590a0c14cecfb66a6b038b0e6a39e3b7a2661`.
+
+The dry run for project `hcbxulyfmdmuyccgrujs` listed only `20261123100000_f23_organization_publishing.sql`. SHA-256: `1c87a2a7cb53a69d6d4f9efb3334af80bcc4036806ac1c7600df6f067c726711`. The migration applied and the postflight reported 96 applied, zero pending.
+
+The catalog confirmed audit RLS, no direct member audit SELECT, anonymous public timeline execution, and member-only pin execution. A locally started Fastify app using hosted development returned HTTP 200 and an empty result for a nonexistent organization. Real organization writes were verified only in disposable Supabase. No hosted application deployment occurred.
