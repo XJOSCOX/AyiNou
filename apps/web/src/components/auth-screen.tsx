@@ -260,7 +260,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
         </div>
       ) : (
         <form onSubmit={submit} className={`mt-6 ${mode === "register" ? "space-y-4" : "space-y-5"}`} aria-busy={loading} noValidate>
-          {mode === "register" && (
+          {mode === "register" && signupPaths.length === 2 && (
             <fieldset className="grid min-w-0 gap-2" disabled={loading} aria-describedby="signup-path-help">
               <legend className="mb-2 font-semibold">{signup.choice}</legend>
               <div className="grid min-w-0 grid-cols-2 gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-1">
@@ -278,7 +278,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
               </div>
               <div ref={signupSlides} className={styles.signupSlides} dir="ltr"
                 onScroll={(event) => {
-                  if (loading || signupPaths.length !== 2) return;
+                  if (loading) return;
                   const { scrollLeft, clientWidth } = event.currentTarget;
                   if (clientWidth) setSignupPath(scrollLeft >= clientWidth / 2 ? "organization" : "individual");
                 }}>
@@ -295,6 +295,8 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           )}
           {mode === "register" && (
             <>
+              {signupPaths.length === 1 && selectedPath === "organization" &&
+                <p className="text-sm leading-relaxed text-[var(--theme-body)]">{signup.organizationHelp}</p>}
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="relative block">
                   <input value={firstName} onChange={(event) => setFirstName(event.target.value)} autoComplete="given-name" maxLength={80} className={floatingFieldClass} placeholder=" " aria-describedby="private-names" required />

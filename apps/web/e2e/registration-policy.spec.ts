@@ -3,6 +3,8 @@ import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { adminMessages } from "../src/lib/admin-i18n";
 import { authMessages } from "../src/lib/auth-i18n";
 import { accountMessages } from "../src/lib/account-i18n";
+import { membershipMessages } from "../src/lib/membership-i18n";
+import { organizationOnboardingMessages } from "../src/lib/organization-onboarding-i18n";
 import { api, apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp } from "./fixtures";
 
 const authUrl = "http://127.0.0.1:55321";
@@ -62,6 +64,9 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
     const visit = await guest.newPage();
     await visit.goto("/register?ref=" + referralCode);
     await expect(visit.getByLabel(accountMessages.en.optionalReferral)).toHaveValue(referralCode);
+    const signupCopy = organizationOnboardingMessages.en;
+    const pathOptions = visit.getByRole("group", { name: signupCopy.choice });
+    await expect(pathOptions.getByRole("radio")).toHaveCount(2);
     expect(await visit.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     const ordinary = candidate();
     expect((await signup(ordinary)).error).toBeNull();
@@ -91,7 +96,9 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
     expect((await send(elevated.token, "PATCH", restricted)).status).toBe(200);
     await visit.reload();
     await expect(visit.getByLabel(authMessages.en.registrationInvitation)).toBeVisible();
-    await expect(visit.locator('input[name="signup-path"][value="individual"]')).toHaveCount(0);
+    await expect(pathOptions).toHaveCount(0);
+    await expect(visit.getByText(signupCopy.organizationHelp, { exact: true })).toBeVisible();
+    await expect(visit.getByText(signupCopy.explanation, { exact: true })).toHaveCount(0);
     const invited = candidate();
     const code = randomBytes(32).toString("hex");
     const invitation = { action: "invite", expectedRevision: baseline + 3, requestId: randomUUID(),
@@ -110,6 +117,11 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
 
     expect((await send(elevated.token, "PATCH", update(baseline + 3, { organizationEnabled: false, referralsEnabled: false }))).status).toBe(200);
     expect((await signup(candidate(), { signup_path: "organization" })).error).not.toBeNull();
+    await visit.reload();
+    await expect(visit.getByLabel(membershipMessages.en.firstName, { exact: true })).toBeVisible();
+    await expect(pathOptions).toHaveCount(0);
+    await expect(visit.getByText(signupCopy.individualHelp, { exact: true })).toHaveCount(0);
+    await expect(visit.getByText(signupCopy.explanation, { exact: true })).toHaveCount(0);
     const independent = candidate();
     expect((await signup(independent, { referral_code: referralCode })).error).toBeNull();
     expect(sql(`select count(*) from private.referrals r join auth.users u on u.id=r.referred_user_id where u.email='${independent.email}';`)).toBe("0");
