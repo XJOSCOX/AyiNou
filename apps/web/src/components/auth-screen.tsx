@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { completePasswordRecovery } from "@/app/reset-password/actions";
@@ -21,6 +21,8 @@ import { UsernameField, useUsernameAvailability } from "./username-field";
 import { usernameMessages } from "@/lib/username-i18n";
 import styles from "./auth-screen.module.css";
 
+const subscribeToHydration = () => () => {};
+
 export type AuthMode = "register" | "login" | "verify" | "forgot" | "reset";
 
 const fieldClass = "block w-full rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-4 text-[var(--theme-text)] outline-none focus:border-[var(--theme-link)] focus:ring-2 focus:ring-[var(--theme-link)]/20";
@@ -37,6 +39,8 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
   const account = accountMessages[locale];
   const passwordCopy = passwordSecurityMessages[locale];
   const creatingPassword = mode === "register" || mode === "reset";
+  const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
+  const preparingReset = mode === "reset" && !hydrated;
   const errors = {
     usernameConflict: usernameMessages[locale].conflict, usernameNetwork: usernameMessages[locale].network,
     invalidEmail: t.invalidEmail, invalidPassword: passwordCopy.invalid,
@@ -95,7 +99,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (loading || passwordChanged) return;
+    if (loading || passwordChanged || preparingReset) return;
     setShowLinkError(false);
     setError("");
     setSuccess("");
@@ -324,7 +328,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
             <div>
               <div className="relative">
                 <input id="password" type={visiblePassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className={`${floatingFieldClass} ${styles.passwordInput} pe-14`}
-                  placeholder=" " autoComplete={mode === "login" ? "current-password" : "new-password"} aria-describedby={creatingPassword ? "password-hint" : undefined} required />
+                  placeholder=" " autoComplete={mode === "login" ? "current-password" : "new-password"} aria-describedby={creatingPassword ? "password-hint" : undefined} disabled={preparingReset} required />
                 <label htmlFor="password" className={styles.fieldLabel}>{mode === "reset" ? t.newPassword : t.password}</label>
                 <button type="button" aria-controls="password" aria-label={visiblePassword ? m.hidePassword : m.showPassword}
                   className="absolute end-1 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-md text-[var(--theme-body)] hover:bg-[var(--theme-selected)] hover:text-[var(--theme-link)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]"
@@ -349,7 +353,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           {creatingPassword && <label className="relative block" htmlFor="confirm-password">
             <input id="confirm-password" type={visiblePassword ? "text" : "password"} value={confirmPassword}
               onChange={(event) => setConfirmPassword(event.target.value)} className={floatingFieldClass}
-              placeholder=" " autoComplete="new-password" aria-invalid={error === "mismatch" || undefined} required />
+              placeholder=" " autoComplete="new-password" aria-invalid={error === "mismatch" || undefined} disabled={preparingReset} required />
             <span className={styles.fieldLabel}>{passwordCopy.confirm}</span>
           </label>}
           {mode === "register" && policy?.mode === "invitation_only" && (
@@ -376,7 +380,7 @@ export function AuthScreen({ mode, invalidLink = false, initialReferral = "", cl
           {(error || showLinkError) && <p role="alert" className="rounded-md bg-[var(--theme-error-bg)] p-3 text-sm text-[var(--theme-error-text)]">{error ? errors[error] : t.sessionNeeded}</p>}
           {success && <p role="status" className="rounded-md bg-[var(--theme-control)] p-3 text-sm text-[var(--theme-link)]">{t[success]}</p>}
           {mode === "login" && <p className="text-right text-sm"><Link href="/forgot-password" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.forgotLink}</Link></p>}
-          <button type="submit" disabled={loading || passwordChanged} className={`${primaryActionClass} disabled:opacity-60`}>
+          <button type="submit" disabled={loading || passwordChanged || preparingReset} className={`${primaryActionClass} disabled:opacity-60`}>
             {loading ? t.working : { register: t.register, login: t.login, forgot: t.sendReset, reset: t.savePassword, verify: "" }[mode]}
           </button>
           {mode === "login" && <p className="border-t border-[var(--theme-border)] pt-5 text-center text-sm text-[var(--theme-body)]">{t.needAccount} <Link href="/register" className="font-semibold text-[var(--theme-link)] underline underline-offset-4">{t.register}</Link></p>}
