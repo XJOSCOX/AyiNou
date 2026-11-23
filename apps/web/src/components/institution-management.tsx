@@ -97,10 +97,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
     <div className="grid gap-5">
       <header className="min-w-0 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
         <div className="bg-[var(--theme-hero)] p-5 sm:px-7 sm:py-6">
-          <Link href="/institutions" className={institutionLink}>
-            <span aria-hidden="true">← </span>{t.institutions}
-          </Link>
-          <div className="mt-5 flex flex-wrap items-end justify-between gap-4 sm:gap-6">
+          <div className="flex flex-wrap items-end justify-between gap-4 sm:gap-6">
             <div className="flex min-w-0 items-center gap-4 sm:gap-5">
               <InstitutionLogo organization={org} large />
               <div className="min-w-0">
