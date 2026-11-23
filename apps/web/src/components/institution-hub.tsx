@@ -7,7 +7,6 @@ import { authMessages } from "@/lib/auth-i18n";
 import { loadInstitutionAccounts, resolveInvitation } from "@/lib/institution-api";
 import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { institutionAction, institutionCard, institutionErrorBox, institutionLink, InstitutionLogo, InstitutionStatus, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
@@ -34,10 +33,25 @@ export function InstitutionHub() {
   return (
     <MemberShell>
       <div className="grid gap-5">
-        <PageHeader title={t.institutions} description={t.institutionHubIntro} actions={<>
-          <Link className={institutionAction} href="/organization-onboarding">{organizationOnboardingMessages[locale].resume}</Link>
-          <Link className={institutionLink} href="/discover?view=institutions">{t.browseInstitutions}</Link>
-        </>} />
+        <PageHeader title={t.institutions} description={t.institutionHubIntro} actions={
+          <div className="flex min-w-0 flex-wrap gap-2">
+            <Link className={`${institutionAction} min-h-11 gap-2 border border-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]`}
+              href="/organization-onboarding">
+              <svg aria-hidden="true" className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              {t.createOrganization}
+            </Link>
+            <Link className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-[var(--theme-border)] px-4 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]"
+              href="/discover?view=institutions">
+              <svg aria-hidden="true" className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="10.5" cy="10.5" r="5.5" />
+                <path d="m15 15 4 4" />
+              </svg>
+              {t.browseInstitutions}
+            </Link>
+          </div>
+        } />
         {failure !== null && <p role="alert" className={institutionErrorBox}>{institutionError(t, failure)}</p>}
         {accounts.error ? <div className={institutionCard}>
           <p role="alert">{institutionError(t, accounts.error)}</p>
