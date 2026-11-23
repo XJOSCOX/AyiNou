@@ -1,4 +1,7 @@
 {
+  "workspaceRenewing": "Reopening private workspace",
+  "workspaceRenewingHelp": "Checking your session before returning to your section.",
+  "workspaceSignInHelp": "Sign in again to continue to your private workspace.",
   "workspaceMfaTitle": "Confirm workspace access",
   "workspaceMfaHelp": "Enter a fresh six-digit code from your authenticator app to open this private workspace.",
   "openReview": "Open verification review",

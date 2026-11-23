@@ -37,7 +37,7 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
     setError(null);
     try {
       const flow = await openPrivateFlow(kind, subject, sessionId);
-      const path = privateFlowPath(flow) + (admin && section !== "overview" ? "?section=" + section : "");
+      const path = privateFlowPath(flow, section);
       if (afterVerification) router.replace(path);
       else router.push(path);
     } catch (cause) {

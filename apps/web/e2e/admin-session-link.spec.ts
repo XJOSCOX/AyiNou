@@ -74,7 +74,8 @@ test("Platform Administration uses an original-session link and hides its direct
       expect(page.url()).not.toBe(original.href);
       const cancellable = page.url();
       await page.getByRole("button", { name: sessionSecurityMessages.en.closeWorkspace }).click();
-      await expect(page.getByText(sessionSecurityMessages.en.expiredLink)).toBeVisible();
+      await expect(page.getByRole("heading", { name: sessionSecurityMessages.en.unavailable })).toBeVisible();
+      await expect(page.getByRole("link", { name: sessionSecurityMessages.en.openAdmin })).toBeVisible();
       expect((await page.goto(cancellable))?.status()).toBe(404);
       await openAdministration(page);
       sql(`delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);
@@ -144,7 +145,7 @@ test("Workspace MFA renewal stays in administration and opens a private link aft
     }
   });
 
-test("Administration returns to Accounts after MFA renewal and private link expiry @smoke", async ({ makeMember, page }) => {
+test("Administration renews expired links automatically and keeps Accounts selected @smoke", async ({ makeMember, page }) => {
   const leader = await makeMember();
   finishPersonalOnboarding(leader);
   const secret = await enroll(leader);
@@ -153,6 +154,7 @@ test("Administration returns to Accounts after MFA renewal and private link expi
     await inEnglish(page.context());
     await login(page, leader);
     await solveMfa(page, secret);
+    await page.clock.install();
     await openAdministration(page);
 
     const accountsEndpoint = "**/api/v1/admin/accounts?*";
@@ -173,16 +175,35 @@ test("Administration returns to Accounts after MFA renewal and private link expi
     await expect(page).toHaveURL(/\/s\/[a-f0-9-]{36}\/admin\?section=accounts$/);
     await expect(accounts).toHaveAttribute("aria-pressed", "true");
 
-    const id = new URL(page.url()).pathname.split("/")[2];
-    sql(`update private.s2b_workflows set created_at=now()-interval '10 minutes',
-      expires_at=now()-interval '1 minute' where id='${id}';`);
-    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
-    await expect(page.getByText(sessionSecurityMessages.en.expiredLink)).toBeVisible();
-    const back = page.getByRole("link", { name: sessionSecurityMessages.en.back, exact: true });
-    await expect(back).toHaveAttribute("href", "/admin?section=accounts");
-    await back.click();
-    await page.getByRole("button", { name: sessionSecurityMessages.en.openAdmin }).click();
-    await expect(page).not.toHaveURL(new RegExp(id));
+    async function expireCurrentWorkspace() {
+      await page.clock.setSystemTime(new Date());
+      const id = new URL(page.url()).pathname.split("/")[2];
+      sql(`update private.s2b_workflows set expires_at=now()+interval '30 seconds' where id='${id}';`);
+      expect((await page.reload())?.status()).toBe(200);
+      await expect(accounts).toHaveAttribute("aria-pressed", "true");
+      sql(`update private.s2b_workflows set created_at=now()-interval '10 minutes',
+        expires_at=now()-interval '1 minute' where id='${id}';`);
+      await page.clock.fastForward(31_000);
+      return id;
+    }
+
+    const freshLink = await expireCurrentWorkspace();
+    await expect(page).toHaveURL(/\/s\/[a-f0-9-]{36}\/admin\?section=accounts$/);
+    await expect(page).not.toHaveURL(new RegExp(freshLink));
+    await expect(accounts).toHaveAttribute("aria-pressed", "true");
+
+    const openEndpoint = "**/api/v1/me/private-workflows";
+    await page.route(openEndpoint, (route) => route.request().method() === "POST"
+      ? route.fulfill({ status: 403, json: { error: { code: "MFA_REQUIRED" } }, headers: { "access-control-allow-origin": web } })
+      : route.fallback());
+    const staleLink = await expireCurrentWorkspace();
+    await expect(prompt.getByLabel(accountMessages.en.mfaChallengeCode)).toBeFocused();
+    await expect(page.getByRole("button", { name: sessionSecurityMessages.en.openAdmin })).toHaveCount(0);
+    await page.unroute(openEndpoint);
+    await prompt.getByLabel(accountMessages.en.mfaChallengeCode).fill(totp(secret));
+    await prompt.getByRole("button", { name: accountMessages.en.mfaSubmit }).click();
+    await expect(page).toHaveURL(/\/s\/[a-f0-9-]{36}\/admin\?section=accounts$/);
+    await expect(page).not.toHaveURL(new RegExp(staleLink));
     await expect(accounts).toHaveAttribute("aria-pressed", "true");
   } finally {
     sql(`delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);

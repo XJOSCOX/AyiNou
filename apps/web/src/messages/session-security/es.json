@@ -1,4 +1,7 @@
 {
+  "workspaceRenewing": "Reabriendo el espacio privado",
+  "workspaceRenewingHelp": "Estamos comprobando tu sesión antes de volver a tu sección.",
+  "workspaceSignInHelp": "Vuelve a iniciar sesión para continuar en tu espacio privado.",
   "workspaceMfaTitle": "Confirma el acceso al espacio privado",
   "workspaceMfaHelp": "Introduce un código nuevo de seis dígitos de tu aplicación de autenticación para abrir este espacio privado.",
   "openReview": "Abrir la revisión de verificaciones",
