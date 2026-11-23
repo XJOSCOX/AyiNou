@@ -26,11 +26,12 @@ import { PlatformGovernance } from "./platform-governance";
 import { governanceMessages } from "@/lib/governance-i18n";
 import { earlyPartnerMessages } from "@/lib/early-partner-i18n";
 import { AdminEarlyPartners } from "./early-partner-workspace";
+import { HomepageSettings } from "./homepage-settings";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
 const statuses: AccountStatus[] = ["active", "suspended", "banned"];
-type AdminTab = "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
-const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder", "corrections", "governance", "partners"];
+type AdminTab = "homepage" | "overview" | "accounts" | "audit" | "trust" | "ambassadors" | "legal" | "founder" | "corrections" | "governance" | "partners";
+const tabs: AdminTab[] = ["overview", "accounts", "audit", "trust", "ambassadors", "legal", "founder", "corrections", "governance", "partners", "homepage"];
 
 export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceAction: ReactNode; workspaceId: string }) {
   const [locale] = useLocale();
@@ -46,7 +47,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
       {overview.error ? <AdminFeedback error={overview.error} totp={access.data?.totp} retry={refresh} />
         : !overview.data ? <p role="status">{authMessages[locale].working}</p> : <>
           <nav aria-label={t.administration} className="flex flex-wrap gap-2">
-            {tabs.map((section) => <button key={section} type="button" aria-pressed={tab === section} onClick={() => setTab(section)}
+            {tabs.filter((section) => section !== "homepage" || access.data?.founder).map((section) => <button key={section} type="button" aria-pressed={tab === section} onClick={() => setTab(section)}
               className="rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold aria-pressed:bg-[var(--theme-selected)]">
               {section === "trust" ? trustMessages[locale].trustWorkspace : section === "ambassadors" ? ambassadorMessages[locale].title : section === "legal" ? legalAdminMessages[locale].title : section === "founder" ? founderMessages[locale].adminTitle : section === "governance" || section === "corrections" ? governanceMessages[locale][section] : section === "partners" ? earlyPartnerMessages[locale].title : t[section]}</button>)}
             {access.data?.reviewer && <Link className={institutionLink} href="/verification/review">{t.reviewWorkspace}</Link>}
@@ -66,6 +67,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId }: { workspaceActi
           {tab === "corrections" && <AdminOnboardingCorrections />}
           {tab === "governance" && <PlatformGovernance />}
           {tab === "partners" && <AdminEarlyPartners />}
+          {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
         </>}
     </div>
   </MemberShell>;

@@ -5,6 +5,8 @@ import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } 
 import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
 import { trustMessages } from "../src/lib/trust-i18n";
+import { adminMessages } from "../src/lib/admin-i18n";
+import { membershipMessages } from "../src/lib/membership-i18n";
 import { messages } from "../src/lib/i18n";
 import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 
@@ -619,6 +621,116 @@ founderTest("Founder-direct blue approval is confined to eligible identity appli
   await decisionForm.getByRole("button", { name: trust.founderBlueApprove }).click();
   expect((await result).status()).toBe(200);
   await expect(item.getByRole("button", { name: trust.founderBlueReview })).toHaveCount(0);
+});
+
+founderTest("Founder can turn homepage Community Statistics off and back on with private audited revisions @smoke", async ({
+  page, browser, makeMember, administrators: { founder, ordinaryAdmin },
+}) => {
+  test.setTimeout(90_000);
+  const key = "homepage.community_statistics.enabled";
+  const path = "/api/v1/admin/homepage/community-statistics";
+  const publicPath = "/api/v1/homepage/community-statistics";
+  const legacyPath = "/api/v1/community/stats";
+  const headings = membershipMessages.en;
+  const t = adminMessages.en;
+  const member = await makeMember();
+  finishPersonalOnboarding(member);
+  finishPersonalOnboarding(founder);
+
+  const guestContext = await browser.newContext({ viewport: { width: 360, height: 760 } });
+  const memberContext = await browser.newContext();
+  try {
+    await inEnglish(guestContext);
+    await inEnglish(memberContext);
+    const guest = await guestContext.newPage();
+    const signedIn = await memberContext.newPage();
+    await login(signedIn, member);
+    await expect(signedIn).toHaveURL(/\/dashboard/);
+    await Promise.all([guest.goto("/"), signedIn.goto("/")]);
+    await expect(guest.getByRole("heading", { name: headings.stats })).toBeVisible();
+    await expect(signedIn.getByRole("heading", { name: headings.stats })).toBeVisible();
+    expect(await guest.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+
+    const initial = await fetch(api + publicPath);
+    expect(initial.headers.get("cache-control")).toBe("no-store");
+    const legacy = (await (await fetch(api + legacyPath)).json()).stats;
+    expect((await initial.json()).stats).toEqual({ registered: legacy.registered, haiti: legacy.haiti, diaspora: legacy.diaspora });
+    const workspace = async (actor: Member) => (await apiCall(actor, "/api/v1/me/private-workflows", 200, "POST",
+      { kind: "admin_workspace" })).id as string;
+    const [own, other] = await Promise.all([workspace(founder), workspace(ordinaryAdmin)]);
+    const send = (actor: Member, ref: string, body?: object) => fetch(api + path, {
+      method: body ? "PATCH" : "GET", headers: { Authorization: "Bearer " + actor.token, "X-Ayinou-Workspace": ref,
+        ...(body && { "Content-Type": "application/json" }) }, body: body ? JSON.stringify(body) : undefined,
+    });
+    const setting = await (await send(founder, own)).json();
+    expect(setting).toMatchObject({ key, enabled: true, revision: 1 });
+    const input = { enabled: false, expectedRevision: setting.revision, reason: "Pause the public display for testing.", requestId: randomUUID() };
+    expect((await send(ordinaryAdmin, other, input)).status).toBe(403);
+    expect((await send(founder, other, input)).status).toBe(404);
+    expect((await send(founder, own, { ...input, enabled: null })).status).toBe(400);
+    expect((await send(founder, own, { ...input, expectedRevision: 900 })).status).toBe(409);
+    expect(sql(`select has_function_privilege('authenticated','public.homepage_community_statistics_for_api()','EXECUTE')
+      or has_function_privilege('authenticated','public.founder_homepage_policy_for_api(uuid,uuid,boolean,bigint,uuid,boolean,integer,text,uuid)','EXECUTE')
+      or has_function_privilege('anon','public.founder_homepage_policy_for_api(uuid,uuid,boolean,bigint,uuid,boolean,integer,text,uuid)','EXECUTE');`)).toBe("f");
+
+    const inputs = [input, { ...input, requestId: randomUUID() }];
+    const results = await Promise.all(inputs.map((body) => send(founder, own, body)));
+    expect(results.map((response) => response.status).sort()).toEqual([200, 409]);
+    const winner = results.findIndex((response) => response.ok);
+    const changed = await results[winner].json();
+    expect(changed).toMatchObject({ key, enabled: false, revision: 2 });
+    expect(await (await send(founder, own, inputs[winner])).json()).toEqual(changed);
+    expect((await send(founder, own, { ...inputs[winner], reason: "A different reason for the same command." })).status).toBe(409);
+
+    const off = await fetch(api + publicPath);
+    expect(off.headers.get("cache-control")).toBe("no-store");
+    expect(await off.json()).toEqual({ stats: null });
+    expect((await fetch(api + legacyPath)).status).toBe(200);
+    await Promise.all([guest, signedIn].map(async (visitor) => {
+      const checked = visitor.waitForResponse((response) => response.url().endsWith(publicPath));
+      await visitor.reload();
+      expect(await (await checked).json()).toEqual({ stats: null });
+    }));
+    await expect(guest.getByRole("heading", { name: headings.stats })).toHaveCount(0);
+    await expect(signedIn.getByRole("heading", { name: headings.stats })).toHaveCount(0);
+
+    await inEnglish(page.context());
+    await login(page, founder);
+    await solveMfa(page, founder.secret);
+    await openAdministration(page);
+    await page.getByRole("button", { name: t.homepage, exact: true }).click();
+    await expect(page.getByText(t.homepageSavedOff)).toBeVisible();
+    await page.getByRole("radio", { name: t.homepageOn, exact: true }).check();
+    await page.getByLabel(t.homepageReason).fill("Restore public statistics after the test.");
+    await page.getByRole("button", { name: t.homepageSave }).click();
+    await expect(page.getByText(t.homepageSavedOn)).toBeVisible();
+    expect(sql(`select string_agg(revision||':'||previous_enabled::text||':'||enabled::text,',' order by revision)
+      from private.platform_boolean_policy_events where policy_key='${key}' and actor_id='${founder.id}'
+        and reason is not null and occurred_at is not null;`)).toBe("2:true:false,3:false:true");
+
+    await Promise.all([guest.reload(), signedIn.reload()]);
+    await expect(guest.getByRole("heading", { name: headings.stats })).toBeVisible();
+    await expect(signedIn.getByRole("heading", { name: headings.stats })).toBeVisible();
+    await guest.route("**" + publicPath, (route) => route.fulfill({ status: 503, json: { error: { code: "SERVICE_UNAVAILABLE" } } }));
+    const failed = guest.waitForResponse((response) => response.url().endsWith(publicPath));
+    await guest.reload();
+    await failed;
+    await expect(guest.getByRole("heading", { name: headings.stats })).toHaveCount(0);
+    expect(sql(`begin;
+      delete from private.platform_boolean_policy_events where policy_key='${key}';
+      delete from private.platform_boolean_policies where policy_key='${key}';
+      select public.homepage_community_statistics_for_api() is null;
+      rollback;`).split("\n")).toContain("t");
+
+    revokeSession(founder);
+    expect((await send(founder, own, { ...input, expectedRevision: 3, requestId: randomUUID() })).status).toBe(401);
+  } finally {
+    // The disposable suite keeps the policy at its migration baseline for other homepage coverage.
+    sql(`delete from private.platform_boolean_policy_events where policy_key='${key}';
+      update private.platform_boolean_policies set enabled=true,revision=1 where policy_key='${key}';`);
+    await guestContext.close();
+    await memberContext.close();
+  }
 });
 
 founderTest("the recognized Founder opens consent without a manual assignment or member application", async ({

@@ -1,6 +1,58 @@
 {
   "features": [
     {
+      "id": "r2-1-homepage-community-statistics",
+      "report": "docs/rules/R2_1_PUBLIC_HOMEPAGE_RULES.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/homepage/community-statistics",
+          "contract": "GET /api/v1/homepage/community-statistics - -",
+          "access": "public",
+          "publicReason": "Visitors and signed-in members can view the same privacy-suppressed aggregate when the Founder enables the public homepage section.",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only homepage projection using the existing privacy-safe aggregate. Section is absent if the setting is off or unavailable."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/homepage/community-statistics",
+          "contract": "GET /api/v1/admin/homepage/community-statistics - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only current policy in the original-session Founder administration workspace."
+          },
+          "authorization": {
+            "file": "apps/api/test/homepage-policy.test.ts",
+            "denialScenario": "Anonymous, invalid, or expired sessions cannot access the private setting."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/homepage/community-statistics",
+          "contract": "PATCH /api/v1/admin/homepage/community-statistics 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The policy update and versioned audit event commit atomically with actual actor, old and new values and written reason."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "Non-Founder administrators, copied workspaces, expired sessions and stale revisions cannot change the policy."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122183000_r21_homepage_community_statistics.sql",
+          "rlsAndGrants": "Private policy and ledger tables enable RLS with direct grants denied. Both RPCs are service-only.",
+          "authorization": "The active trusted Founder, recent MFA and original private workspace are rechecked before any private policy access.",
+          "compatibility": "Default ON; the homepage reads only existing safe aggregate fields. Statistics service, privacy suppression and separate role rules are preserved.",
+          "validation": "Disposable visitor, member, Founder, audit, scope, revision and replay coverage with API contract tests.",
+          "rolloutAndRollback": "Apply only the approved exact migration after fresh dry run and CI. Restore earlier visibility as a new audited revision."
+        }
+      ]
+    },
+    {
       "id": "founder-authority-consolidation",
       "report": "docs/governance/FOUNDER_AUTHORITY_CONSOLIDATION.md",
       "routes": [

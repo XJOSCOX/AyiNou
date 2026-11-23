@@ -21,6 +21,8 @@ const statsSchema = z.object({
   membership: z.object({ haitian: count, internationalSupporter: count, unspecified: count }).nullable(),
 }).strict();
 
+export const homepageStatisticsSchema = statsSchema.pick({ registered: true, haiti: true, diaspora: true });
+
 export interface CommunityRepository { stats(): Promise<CommunityStats> }
 
 export function createCommunityRepository(config: ApiConfig): CommunityRepository | null {

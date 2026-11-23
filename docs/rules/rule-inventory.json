@@ -16805,5 +16805,59 @@
       ],
       "statusNote": "Name exists in hosted catalog; verify effective body for wrappers or overloads."
     }
+  ],
+  "postInventoryAdditions": [
+    {
+      "id": "HOM-01",
+      "phase": "R2.1",
+      "domain": "Public homepage",
+      "name": "Community Statistics visibility",
+      "key": "homepage.community_statistics.enabled",
+      "default": true,
+      "initialRevision": 1,
+      "category": "PANEL_OPERATIONAL_SETTING",
+      "enforcement": "Versioned service-only PostgreSQL setting. The public homepage uses the existing privacy-safe aggregate in a single uncached read.",
+      "actors": "Recognized Founder with recent TOTP and original-session admin workspace changes; all visitors may see safe homepage stats when enabled.",
+      "failureMode": "Hide the section on disabled, missing or unavailable policy data.",
+      "audit": "Private append-only version ledger, including actor, values, timestamp, reason and request UUID; exact retry is idempotent.",
+      "report": "docs/rules/R2_1_PUBLIC_HOMEPAGE_RULES.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122183000_r21_homepage_community_statistics.sql",
+          "line": 2,
+          "anchor": "create table private.platform_boolean_policies"
+        },
+        {
+          "path": "supabase/migrations/20261122183000_r21_homepage_community_statistics.sql",
+          "line": 8,
+          "anchor": "create table private.platform_boolean_policy_events"
+        },
+        {
+          "path": "apps/api/src/routes/community.ts",
+          "line": 26,
+          "anchor": "homepage_community_statistics_for_api"
+        },
+        {
+          "path": "apps/api/src/routes/homepage-policy.ts",
+          "line": 7,
+          "anchor": "const route"
+        },
+        {
+          "path": "apps/web/src/components/homepage-settings.tsx",
+          "line": 14,
+          "anchor": "export function HomepageSettings"
+        },
+        {
+          "path": "apps/web/src/components/welcome-stats.tsx",
+          "line": 20,
+          "anchor": "function WelcomeStats"
+        },
+        {
+          "path": "apps/web/e2e/founder-identity.spec.ts",
+          "line": 626,
+          "anchor": "Founder can turn homepage Community Statistics"
+        }
+      ]
+    }
   ]
 }

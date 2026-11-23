@@ -17,6 +17,7 @@ import { registerAdministrationGovernance } from "./routes/administration-govern
 import { registerEarlyPartners } from "./routes/early-partners.js";
 import { registerOrganizationOnboarding } from "./routes/organization-onboarding.js";
 import { registerFounderIdentity } from "./routes/founder-identity.js";
+import { registerHomepagePolicyRoutes } from "./routes/homepage-policy.js";
 import { registerPublicLegalRoutes } from "./routes/legal-publication.js";
 import { registerErrorHandling, requestIdentification } from "./services/api-error.js";
 import { registerFeedRoutes } from "./routes/feed.js";
@@ -59,7 +60,7 @@ export function createApp(config: ApiConfig, overrides?: {
   });
   app.register(statusRoutes);
   app.register((instance) => registerMemberRoutes(instance, auth, members, readBudget));
-  app.register((instance) => registerCommunityRoutes(instance, community));
+  app.register((instance) => registerCommunityRoutes(instance, community, institutions));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions, config.AYINOU_FOUNDER_BOOTSTRAP_ENABLED === "true"));
   app.register((instance) => registerPrivilegedSetup(instance, auth, institutions, config.AYINOU_FOUNDER_BOOTSTRAP_ENABLED === "true"));
@@ -69,6 +70,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerSessionSecurity(instance, auth, institutions));
   app.register((instance) => registerAuditRoutes(instance, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
+  app.register((instance) => registerHomepagePolicyRoutes(instance, auth, institutions));
   app.register((instance) => registerPublicLegalRoutes(instance, institutions));
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));
   app.register((instance) => registerPrivacyRoutes(instance, privacyEnabled, auth,

@@ -1,7 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import type { CommunityRepository } from "../services/community.js";
+import { homepageStatisticsSchema, type CommunityRepository } from "../services/community.js";
+import type { InstitutionRepository } from "../services/institutions.js";
 
-export async function registerCommunityRoutes(app: FastifyInstance, community: CommunityRepository | null) {
+export async function registerCommunityRoutes(
+  app: FastifyInstance, community: CommunityRepository | null, policies: InstitutionRepository | null,
+) {
   const requests = new Map<string, { count: number; resetAt: number }>();
   app.addHook("onRequest", async (request, reply) => {
     const now = Date.now();
@@ -13,6 +16,17 @@ export async function registerCommunityRoutes(app: FastifyInstance, community: C
     }
     if (requests.size > 1000) {
       for (const [key, value] of requests) if (value.resetAt <= now) requests.delete(key);
+    }
+  });
+
+  app.get("/api/v1/homepage/community-statistics", async (_request, reply) => {
+    reply.header("Cache-Control", "no-store");
+    try {
+      if (!policies) throw new Error("Homepage policy unavailable");
+      const result = await policies.rpc<unknown>("homepage_community_statistics_for_api", {});
+      return { stats: homepageStatisticsSchema.nullable().parse(result) };
+    } catch {
+      return reply.code(503).send({ error: { code: "SERVICE_UNAVAILABLE", message: "Homepage statistics unavailable" } });
     }
   });
 
