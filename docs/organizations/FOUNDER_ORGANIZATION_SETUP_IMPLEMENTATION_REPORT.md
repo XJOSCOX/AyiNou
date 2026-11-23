@@ -35,3 +35,9 @@ The Account and Authentication blueprint records the scoped rule. Hosted rollout
 ## Remaining blockers
 
 An eligible Founder must still open the saved draft and confirm their authority to create the organization. Organization verification follows its separate workflow.
+
+## Release verification
+
+The locally validated implementation is commit `b697945499886e94db0c46e1d3abf85958415a15`. Typecheck, lint, engineering standards, and all seven focused Chromium cases passed.
+
+Hosted development applied only `20261123101000_founder_new_organization_setup.sql` with SHA-256 `a692862f121b5446957049dee4f7b6913c189912bf7f4b6a82a83aa472297da8`. Postflight found 97 migrations and zero pending. The updated Founder predicate is present, direct member execution is denied, and the existing Founder business draft was preserved. The release required a database migration only.
