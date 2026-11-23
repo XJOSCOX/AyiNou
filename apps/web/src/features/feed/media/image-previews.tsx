@@ -50,7 +50,7 @@ export function RemotePreview({ post, id, alt, review, lazy, variant, onOpen, la
 
   const image = result && "url" in result && <Image src={result.url} alt={alt} width={variant === "display" ? 1440 : 480}
     height={variant === "display" ? 960 : 320} unoptimized
-    className={variant === "display" ? "max-h-[72dvh] w-full object-contain" : "aspect-[3/2] w-full object-cover"} />;
+    className={variant === "display" ? "max-h-[72dvh] w-full object-contain" : "aspect-[3/2] w-full object-contain"} />;
   return <div ref={frame} className="min-w-0 overflow-hidden rounded-md bg-[var(--theme-control)]">
     {result && "error" in result ? <ApiErrorNotice error={result.error} retry={() => { setResult(undefined); setRevision((n) => n + 1); }} />
       : image ? (onOpen ? <button className="block w-full cursor-zoom-in focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--theme-link)]"

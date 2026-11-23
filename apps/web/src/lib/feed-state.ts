@@ -13,7 +13,7 @@ type PageResult<T> = {
   failedPage: "initial" | "more";
 };
 
-export function useCursorPage<T extends { id: string }>(load: Loader<T>, revision = 0) {
+export function useCursorPage<T extends { id: string; timelineId?: string }>(load: Loader<T>, revision = 0) {
   const [result, setResult] = useState<PageResult<T> | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [loadingPage, setLoadingPage] = useState<Page<T> | null>(null);
@@ -46,9 +46,14 @@ export function useCursorPage<T extends { id: string }>(load: Loader<T>, revisio
     try {
       const next = await load(page.nextCursor, control.signal);
       if (control.signal.aborted) return;
-      const seen = new Set(page.rows.map(({ id }) => id));
-      setResult({ ...active, error: null,
-        page: { rows: [...page.rows, ...next.rows.filter(({ id }) => !seen.has(id))], nextCursor: next.nextCursor } });
+      const seen = new Set(page.rows.map(({ id, timelineId }) => timelineId ?? id));
+      const unique = next.rows.filter(({ id, timelineId }) => {
+        const key = timelineId ?? id;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      setResult({ ...active, error: null, page: { rows: [...page.rows, ...unique], nextCursor: next.nextCursor } });
     } catch (cause) {
       if (!control.signal.aborted) setResult({ ...active, error: cause, failedPage: "more" });
     } finally {

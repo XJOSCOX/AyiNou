@@ -101,5 +101,8 @@
   "restore": "Rétablir la publication",
   "remove": "Retirer la publication",
   "dismiss": "Clore les signalements",
-  "backToFeed": "Revenir au fil"
+  "backToFeed": "Revenir au fil",
+  "replyingTo": "Réponse à {author}",
+  "showReplies": "Afficher les réponses",
+  "hideReplies": "Masquer les réponses"
 }

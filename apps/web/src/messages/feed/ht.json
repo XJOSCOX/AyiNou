@@ -101,5 +101,8 @@
   "restore": "Remete piblikasyon an",
   "remove": "Retire piblikasyon an",
   "dismiss": "Fèmen rapò yo",
-  "backToFeed": "Retounen nan fil la"
+  "backToFeed": "Retounen nan fil la",
+  "replyingTo": "Reponn {author}",
+  "showReplies": "Montre repons yo",
+  "hideReplies": "Kache repons yo"
 }

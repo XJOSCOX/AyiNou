@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { type FeedPost, type FeedScope, type RecommendationAction } from "@ayinou/shared";
 import { apiErrorCode } from "@/lib/api-errors";
 import { deletePost, loadFeed, loadFeedModerationAccess, reportPost } from "@/lib/feed-api";
@@ -46,6 +46,7 @@ export function FeedScreen() {
   const [rankingRevision, setRankingRevision] = useState(0);
   const [notice, setNotice] = useState<PostNotice | null>(null);
   const access = useInstitutionResource(loadFeedModerationAccess);
+
 
   function setScope(next: FeedScope) {
     setVisited((open) => new Set([...open, scope, next]));
@@ -131,6 +132,16 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
   const hidden = suppressed?.revision === revision ? suppressed.keys : null;
   const rows = resource.page?.rows.filter((post) => !hidden?.has(post.id) && !hidden?.has(post.author?.username ?? ""));
   const expired = ranked && apiErrorCode(resource.error) === "FEED_REFRESH_REQUIRED";
+  useEffect(() => {
+    if (!resource.page) return;
+    const saved = window.sessionStorage.getItem("ayinou-feed-scroll");
+    if (!saved) return;
+    const [savedScope, position] = saved.split(":");
+    if (savedScope !== scope) return;
+    window.sessionStorage.removeItem("ayinou-feed-scroll");
+    const frame = requestAnimationFrame(() => window.scrollTo(0, Number(position)));
+    return () => cancelAnimationFrame(frame);
+  }, [resource.page, scope]);
 
   function hideRecommendation(post: FeedPost, action: RecommendationAction) {
     const key = action === "not_interested" ? post.id : post.author?.username ?? post.id;
@@ -146,12 +157,14 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
     </div>}
     {hidden?.size ? <p role="status" className="text-sm text-[var(--theme-link)]">{r.feedbackSaved}</p> : null}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={expired ? refreshForYou : resource.retry} />}
-    {!resource.page && resource.error === null && <p role="status">{t.working}</p>}
+    {!resource.page && resource.error === null && <div role="status" aria-label={t.working} aria-busy="true" className="grid gap-3">
+      {[0, 1].map((item) => <div key={item} className="h-44 animate-pulse rounded-xl border border-[var(--theme-border)] bg-[var(--theme-control)] motion-reduce:animate-none" />)}
+    </div>}
     {rows?.length === 0 && <div className={institutionCard}>
       <p>{ranked ? r.empty : scope === "following" ? d.followingFeedEmpty : scope === "feed" ? t.empty : t.mineEmpty}</p>
       {scope === "following" && <Link href="/discover" className={`${institutionLink} mt-3 inline-block`}>{d.viewAll}</Link>}
     </div>}
-    {rows?.map((post) => <PostCard key={post.timelineId ?? post.id} post={post} changed={changed}
+    {rows?.map((post) => <PostCard key={post.timelineId ?? post.id} post={post} changed={changed} returnScope={scope}
       recommendation={ranked && post.recommendationReason ? <RecommendationActions id={post.id} reason={post.recommendationReason}
         onFeedback={(action) => hideRecommendation(post, action)} /> : undefined} />)}
     {!expired && resource.page?.nextCursor && <button type="button" className={`${institutionAction} justify-self-start`}
@@ -159,8 +172,8 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
   </section>;
 }
 
-export function PostCard({ post, changed, recommendation, onBookmarkChange }: {
-  post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode; onBookmarkChange?: () => void;
+export function PostCard({ post, changed, recommendation, onBookmarkChange, returnScope }: {
+  post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode; onBookmarkChange?: () => void; returnScope?: FeedScope;
 }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
@@ -182,7 +195,10 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange }: {
   const saveAction = post.social && post.status === "published" ? [{ icon: "bookmark" as const,
     label: bookmark.value ? social.removeBookmark : social.bookmark, run: () => { void bookmark.toggle(); } }] : [];
   return <article className={institutionCard}>
-    {post.repostBy && <p className="mb-2 text-sm text-[var(--theme-body)]">{social.repostedBy.replace("{actor}", post.repostBy.displayName)}</p>}
+    {post.repostBy && <p className="mb-2 text-sm text-[var(--theme-body)]">
+      {post.repostBy.username ? <Link className="hover:underline" href={`/members/${post.repostBy.username}`}>
+        {social.repostedBy.replace("{actor}", post.repostBy.displayName)}</Link> : social.repostedBy.replace("{actor}", post.repostBy.displayName)}
+    </p>}
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
         {post.author?.avatarUrl ? <Image src={post.author.avatarUrl} alt="" width={40} height={40}
@@ -196,6 +212,7 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange }: {
             {!post.social?.organization && !!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
             {!post.social?.organization && post.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
           </p>
+          {post.social?.organization && <p className="break-all text-xs text-[var(--theme-body)]">@{post.social.organization.handle}</p>}
           {!post.social?.organization && post.author?.username && <p className="break-all text-xs text-[var(--theme-body)]">@{post.author.username}</p>}
         </div>
       </div>
@@ -206,7 +223,8 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange }: {
       ] : [...(!post.own && !reported ? [{ icon: "report" as const, label: t.report, run: () => setMode("report") }] : []), ...saveAction]} />}
     </header>
     <p className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-xs text-[var(--theme-body)]">
-      <Link className="hover:underline" href={`/posts/${post.id}`} aria-label={mediaNotificationMessages[locale].openPost}>
+      <Link className="hover:underline" href={`/posts/${post.id}`} aria-label={mediaNotificationMessages[locale].openPost}
+        onClick={() => { if (returnScope) window.sessionStorage.setItem("ayinou-feed-scroll", `${returnScope}:${window.scrollY}`); }}>
         <time dateTime={timestamp}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(timestamp))}</time>
       </Link>
       <span lang={post.language}>{languageNames[post.language]}</span>

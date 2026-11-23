@@ -36,5 +36,8 @@
   "saved": "Preferans yo anrejistre.",
   "more": "Chaje plis",
   "working": "Ap chaje…",
-  "linkedComment": "Kòmantè ki lye a"
+  "linkedComment": "Kòmantè ki lye a",
+  "previous": "Imaj anvan an",
+  "next": "Imaj apre a",
+  "position": "Imaj {current} sou {total}"
 }

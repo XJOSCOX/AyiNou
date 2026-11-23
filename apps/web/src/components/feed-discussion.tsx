@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import Link from "next/link";
 import {
   commentBodyLimit, locales, reactionKinds, type CommentInput, type FeedComment, type Locale,
   type ReactionKind, type ReactionSummary,
@@ -108,12 +109,13 @@ export function PostDiscussion({ postId, children }: { postId: string; children:
   </div>;
 }
 
-function Thread({ postId, parentId, compose, onCancel, onReplySaved }: {
+function Thread({ postId, parentId, compose, onCancel, onReplySaved, replyTo }: {
   postId: string;
   parentId: string | null;
   compose: boolean;
   onCancel?: () => void;
   onReplySaved?: () => void;
+  replyTo?: string;
 }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
@@ -128,14 +130,17 @@ function Thread({ postId, parentId, compose, onCancel, onReplySaved }: {
   const refresh = () => setRevision((count) => count + 1);
 
   return <section aria-label={parentId ? t.replies : t.comments} className="mt-3 grid min-w-0 gap-3">
-    {compose && <CommentForm postId={postId} parentId={parentId} cancel={onCancel} canSubmit={!inaccessible} onSaved={() => {
+    {compose && <CommentForm postId={postId} parentId={parentId} replyTo={replyTo} cancel={onCancel} canSubmit={!inaccessible} onSaved={() => {
       setSubmitted(true);
       refresh();
       onReplySaved?.();
     }} />}
     {submitted && <p role="status" className="text-sm text-[var(--theme-link)]">{parentId ? t.replySent : t.commentSent}</p>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
-    {!resource.page && resource.error === null && <p role="status" className="text-sm">{t.working}</p>}
+    {!resource.page && resource.error === null && <div role="status" aria-label={t.working} className="grid gap-2" aria-busy="true">
+      <div className="h-16 animate-pulse rounded-md bg-[var(--theme-control)] motion-reduce:animate-none" />
+      <div className="h-16 animate-pulse rounded-md bg-[var(--theme-control)] motion-reduce:animate-none" />
+    </div>}
     {!inaccessible && resource.page?.rows.length === 0 && <p className="text-sm text-[var(--theme-body)]">{parentId ? t.replyEmpty : t.commentEmpty}</p>}
     {!inaccessible && resource.page?.rows.map((comment) =>
       <CommentCard key={comment.id} value={comment} postId={postId} refresh={refresh} />)}
@@ -144,13 +149,14 @@ function Thread({ postId, parentId, compose, onCancel, onReplySaved }: {
   </section>;
 }
 
-function CommentForm({ postId, parentId, editing, onSaved, cancel, canSubmit = true }: {
+function CommentForm({ postId, parentId, editing, onSaved, cancel, canSubmit = true, replyTo }: {
   postId: string;
   parentId: string | null;
   editing?: VisibleComment;
   onSaved: () => void;
   cancel?: () => void;
   canSubmit?: boolean;
+  replyTo?: string;
 }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
@@ -185,6 +191,7 @@ function CommentForm({ postId, parentId, editing, onSaved, cancel, canSubmit = t
   }
 
   return <form className="grid min-w-0 gap-2" aria-busy={mutation.busy} onSubmit={save}>
+    {replyTo && <p className="text-sm text-[var(--theme-body)]">{t.replyingTo.replace("{author}", replyTo)}</p>}
     <label className="min-w-0 text-sm font-semibold">
       {editing ? t.editComment : parentId ? t.writeReply : t.writeComment}
       <textarea className={institutionField} value={body} rows={2} aria-describedby={hint} maxLength={commentBodyLimit * 2}
@@ -231,7 +238,8 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
     {value.available ? <>
       <header className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="min-w-0 break-words font-semibold">
-          {value.author?.displayName ?? (value.own ? t.you : t.unknownAuthor)}
+          {value.author?.username ? <Link className="hover:underline" href={`/members/${value.author.username}`}>
+            {value.author.displayName}</Link> : value.author?.displayName ?? (value.own ? t.you : t.unknownAuthor)}
           {!!value.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={value.author.personalClaims} /></>}
           {value.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
         </p>
@@ -273,11 +281,12 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
         cancel={() => setAction(null)} reported={() => { setAction(null); setReported(true); }} />}
       {reported && <p role="status" className="mt-2">{t.reportSent}</p>}
     </> : <p className="text-[var(--theme-body)]">{t.commentUnavailable}</p>}
-    {(value.hasReplies || addedReply || replies) && <button type="button" className={`${feedIconButton} mt-2`} aria-label={t.replies} title={t.replies}
-      aria-expanded={replies} aria-controls={replyId} onClick={() => { setReplies(!replies); setLoadedReplies(true); }}><FeedIcon name="thread" /></button>}
+    {(value.hasReplies || addedReply || replies) && <button type="button" className={`${compact} mt-2`} aria-label={replies ? t.hideReplies : t.showReplies} title={replies ? t.hideReplies : t.showReplies}
+      aria-expanded={replies} aria-controls={replyId} onClick={() => { setReplies(!replies); setLoadedReplies(true); }}><FeedIcon name="thread" />{replies ? t.hideReplies : t.showReplies}</button>}
     {!value.parentId && <div id={replyId} className="min-w-0 border-s border-[var(--theme-border)] ps-2 sm:ps-3" hidden={!replies}>
       {loadedReplies && <Thread postId={postId} parentId={value.id}
-        compose={replying && value.available} onReplySaved={() => setAddedReply(true)} onCancel={() => setReplying(false)} />}
+        compose={replying && value.available} replyTo={value.author?.displayName ?? t.unknownAuthor}
+        onReplySaved={() => setAddedReply(true)} onCancel={() => setReplying(false)} />}
     </div>}
   </article>;
 }

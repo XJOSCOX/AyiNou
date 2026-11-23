@@ -36,5 +36,8 @@
   "saved": "Préférences enregistrées.",
   "more": "Charger la suite",
   "working": "Chargement…",
-  "linkedComment": "Commentaire associé"
+  "linkedComment": "Commentaire associé",
+  "previous": "Image précédente",
+  "next": "Image suivante",
+  "position": "Image {current} sur {total}"
 }

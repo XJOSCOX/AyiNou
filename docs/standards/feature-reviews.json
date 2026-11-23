@@ -1,6 +1,12 @@
 {
   "features": [
     {
+      "id": "f2-2-feed-experience",
+      "report": "docs/F2_2_FEED_EXPERIENCE_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": []
+    },
+    {
       "id": "f2-1-social-interactions",
       "report": "docs/F2_1_SOCIAL_INTERACTIONS.md",
       "routes": [

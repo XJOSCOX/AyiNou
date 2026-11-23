@@ -1,7 +1,7 @@
 "use client";
 
-import { postBodyLimit, postVisibilities, type FeedPost, type InterestCode, type Locale, type PostInput, type PostVisibility } from "@ayinou/shared";
-import { useId, useRef, useState, type FormEvent } from "react";
+import { interestCodes, postBodyLimit, postVisibilities, type FeedPost, type InterestCode, type Locale, type PostInput, type PostVisibility } from "@ayinou/shared";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { ApiRequestError } from "@/lib/api-errors";
 import { MentionSuggestions } from "./social-text";
 import { createPost, editPost } from "@/lib/feed-api";
@@ -39,7 +39,7 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel 
   post?: FeedPost; community?: string; groupVersion?: number; onSaved: (message: SavedPost) => void; onCancel?: () => void;
 }) {
   const [locale] = useLocale();
-  const { displayName } = useMemberIdentity();
+  const { displayName, memberId } = useMemberIdentity();
   const t = feedMessages[locale];
   const r = recommendationMessages[locale];
   const m = mediaNotificationMessages[locale];
@@ -53,6 +53,8 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel 
   const [fileError, setFileError] = useState<ApiRequestError | "limit" | null>(null);
   const [progress, setProgress] = useState<{ current: number; total: number } | null>(null);
   const room = community ?? post?.community?.slug;
+  const draftKey = memberId && !post ? `ayinou-post-draft:${memberId}:${room ?? "feed"}` : null;
+  const [readyDraft, setReadyDraft] = useState<string | null>(null);
   const [visibility, setVisibility] = useState<PostVisibility>(room ? "members_only" : post?.visibility ?? "public");
   const [languageChoice, setLanguage] = useState<Locale | null>(post?.language ?? null);
   const language = languageChoice ?? locale;
@@ -61,7 +63,35 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel 
   const uploaded = useRef(new Map<string, number>());
   const submissions = useRef(new Map<string, string>());
   const count = Array.from(body).length;
-  const nearLimit = count >= postBodyLimit - 200;
+  useEffect(() => {
+    if (!draftKey) return;
+    const frame = requestAnimationFrame(() => {
+    setBody("");
+    setTopics([]);
+    setImages([]);
+    setLanguage(null);
+    setVisibility(room ? "members_only" : "public");
+    try {
+      const stored = window.sessionStorage.getItem(draftKey);
+      if (stored) {
+        const draft = JSON.parse(stored) as { body?: string; language?: Locale; visibility?: PostVisibility; topics?: InterestCode[] };
+        if (typeof draft.body === "string") setBody(draft.body.slice(0, postBodyLimit));
+        if (draft.language && isLocale(draft.language)) setLanguage(draft.language);
+        if (!room && draft.visibility && postVisibilities.includes(draft.visibility)) setVisibility(draft.visibility);
+        if (Array.isArray(draft.topics)) setTopics(draft.topics.filter((topic): topic is InterestCode => interestCodes.includes(topic)).slice(0, 3));
+      }
+    } catch { /* Browser storage may be unavailable. */ }
+    setReadyDraft(draftKey);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [draftKey, room]);
+  useEffect(() => {
+    if (!draftKey || readyDraft !== draftKey) return;
+    try {
+      if (body.trim() || topics.length) window.sessionStorage.setItem(draftKey, JSON.stringify({ body, language: languageChoice, visibility, topics }));
+      else window.sessionStorage.removeItem(draftKey);
+    } catch { /* Keep the working draft in component state. */ }
+  }, [body, draftKey, languageChoice, readyDraft, topics, visibility]);
 
   function selectImages(files: File[]) {
     setFileError(null);
@@ -97,6 +127,9 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel 
     setProgress(null);
     if (!sent) return;
     if (editTarget) { onSaved("editSaved"); return; }
+    if (draftKey) {
+      try { window.sessionStorage.removeItem(draftKey); } catch { /* Storage may be unavailable. */ }
+    }
     setBody("");
     setTopics([]);
     setShowTopics(false);
@@ -166,7 +199,7 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel 
         </label>
       </div>
       <div className="ms-auto flex flex-wrap items-center justify-end gap-2">
-        {nearLimit && <span aria-label={t.bodyCount.replace("{count}", String(count)).replace("{max}", String(postBodyLimit))}
+        {!!body && <span aria-label={t.bodyCount.replace("{count}", String(count)).replace("{max}", String(postBodyLimit))}
           className={`text-xs tabular-nums ${count > postBodyLimit ? "text-[var(--theme-error-text)]" : "text-[var(--theme-body)]"}`}>{count}/{postBodyLimit}</span>}
         {onCancel && <button type="button" className={institutionLink} disabled={mutation.busy} onClick={onCancel}>{t.cancel}</button>}
         <button type="submit" className={`${institutionAction} max-sm:px-3`} disabled={mutation.busy || !body.trim() || count > postBodyLimit}>

@@ -101,5 +101,8 @@
   "restore": "Restore post",
   "remove": "Remove post",
   "dismiss": "Close reports",
-  "backToFeed": "Back to feed"
+  "backToFeed": "Back to feed",
+  "replyingTo": "Replying to {author}",
+  "showReplies": "Show replies",
+  "hideReplies": "Hide replies"
 }

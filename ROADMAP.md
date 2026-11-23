@@ -144,6 +144,11 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Add reposts, quote posts, private saves, canonical mentions, Unicode hashtags, and interaction notification preferences.
 - [F2.1 implementation and release evidence](docs/F2_1_SOCIAL_INTERACTIONS.md)
 
+## F2.2 — Feed experience and conversations (IMPLEMENTED; LOCAL VALIDATION)
+
+- [x] Improve image gallery navigation, conversation context, post attribution, feed loading, and composer drafts.
+- [F2.2 implementation report](docs/F2_2_FEED_EXPERIENCE_IMPLEMENTATION_REPORT.md)
+
 ## Phase 3D — For You recommendations
 
 - [x] Add an optional rules-based feed with explicit topics, explanations, and member controls.
