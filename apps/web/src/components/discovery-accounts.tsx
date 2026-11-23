@@ -22,11 +22,12 @@ import { InstitutionStatus, PersonalClaimChecks, institutionAction, institutionC
 
 export const discoveryTab = "min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)] disabled:opacity-60";
 
-function FollowControl({ target, following, requestPending, requiresApproval, onChange }: {
+function FollowControl({ target, following, requestPending, requiresApproval, primary = false, onChange }: {
   target: FollowTarget;
   following: boolean;
   requestPending?: boolean;
   requiresApproval?: boolean;
+  primary?: boolean;
   onChange: (status: FollowStatus) => void;
 }) {
   const [locale] = useLocale();
@@ -44,7 +45,7 @@ function FollowControl({ target, following, requestPending, requiresApproval, on
 
   const requestLabel = requestPending ? f24Messages[locale].cancelRequest : requiresApproval && !following ? f24Messages[locale].requestFollow : null;
   return <div className="grid min-w-0 gap-2">
-    <button type="button" className={`${discoveryTab} justify-self-start`} aria-pressed={requestLabel ? undefined : following}
+    <button type="button" className={`${primary && !following && !requestPending ? institutionAction : discoveryTab} justify-self-start`} aria-pressed={requestLabel ? undefined : following}
       title={requestLabel ?? (following ? t.unfollow : t.follow)} disabled={mutation.busy} onClick={() => { void toggle(); }}>
       {requestLabel ?? (following ? t.following : t.follow)}
     </button>
@@ -112,7 +113,7 @@ function DiscoveryAccount({ account, compact, onChange, onRemove }: { account: D
   </li>;
 }
 
-export function ProfileFollowPanel({ target, signedIn, initial, inline = false }: { target: FollowTarget; signedIn: boolean; initial?: FollowStatus; inline?: boolean }) {
+export function ProfileFollowPanel({ target, signedIn, initial, inline = false, featured = false }: { target: FollowTarget; signedIn: boolean; initial?: FollowStatus; inline?: boolean; featured?: boolean }) {
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
   const [list, setList] = useState<FollowList | null>(null);
@@ -129,7 +130,11 @@ export function ProfileFollowPanel({ target, signedIn, initial, inline = false }
   return <section className={inline ? "text-sm" : institutionCard} aria-label={t.accounts}>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!state && !resource.error && <p role="status">{feedMessages[locale].working}</p>}
-    {state && <div className="flex flex-wrap items-start gap-2">
+    {state && <div className="flex flex-wrap items-center gap-2">
+      {featured && signedIn && state.canFollow && <div className="me-2">
+        <FollowControl target={target} following={state.following} requestPending={state.requestPending}
+          requiresApproval={state.requiresApproval} onChange={setUpdated} primary />
+      </div>}
       {state.showFollowers !== false && (signedIn ? <button type="button" className={discoveryTab} aria-expanded={list === "followers"} onClick={() => choose("followers")}>
         {t.followers} · {count.format(state.followerCount)}
       </button> : <p>{t.followers} · {count.format(state.followerCount)}</p>)}
@@ -138,7 +143,7 @@ export function ProfileFollowPanel({ target, signedIn, initial, inline = false }
           {t.followingCount} · {count.format(state.followingCount)}
         </button>
         : <p>{t.followingCount} · {count.format(state.followingCount)}</p>)}
-      {signedIn && state.canFollow && <FollowControl target={target} following={state.following} requestPending={state.requestPending} requiresApproval={state.requiresApproval} onChange={setUpdated} />}
+      {!featured && signedIn && state.canFollow && <FollowControl target={target} following={state.following} requestPending={state.requestPending} requiresApproval={state.requiresApproval} onChange={setUpdated} />}
     </div>}
     {signedIn && state?.following && <FollowRepostPreferences key={kind + ":" + key} target={target} />}
     {list && <div className="mt-4">

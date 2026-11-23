@@ -45,5 +45,9 @@
   "followRequestedNotice": "voye yon demann pou suiv ou.",
   "followApprovedNotice": "apwouve demann ou pou suiv li.",
   "suggestedMembers": "Manm nou sijere",
-  "followersAudienceHint": "Moun ki suiv ou ka wè piblikasyon sa a. Si kont ou mande apwobasyon, se sèlman moun ou apwouve ki ka wè li."
+  "followersAudienceHint": "Moun ki suiv ou ka wè piblikasyon sa a. Si kont ou mande apwobasyon, se sèlman moun ou apwouve ki ka wè li.",
+  "aboutMember": "Konsènan manm nan",
+  "memberActivity": "Aktivite",
+  "memberActivityHidden": "Manm sa a poko pataje aktivite sou pwofil li.",
+  "editMemberProfile": "Modifye pwofil la"
 }

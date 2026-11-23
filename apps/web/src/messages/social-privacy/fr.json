@@ -45,5 +45,9 @@
   "followRequestedNotice": "vous a envoyé une demande d’abonnement.",
   "followApprovedNotice": "a approuvé votre demande d’abonnement.",
   "suggestedMembers": "Membres suggérés",
-  "followersAudienceHint": "Vos abonnés peuvent voir cette publication. Si votre compte exige une approbation, seuls les abonnés approuvés y ont accès."
+  "followersAudienceHint": "Vos abonnés peuvent voir cette publication. Si votre compte exige une approbation, seuls les abonnés approuvés y ont accès.",
+  "aboutMember": "À propos",
+  "memberActivity": "Activité",
+  "memberActivityHidden": "Ce membre ne partage aucune activité sur son profil.",
+  "editMemberProfile": "Modifier le profil"
 }

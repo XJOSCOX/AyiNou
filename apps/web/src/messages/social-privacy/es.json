@@ -45,5 +45,9 @@
   "followRequestedNotice": "te envió una solicitud de seguimiento.",
   "followApprovedNotice": "aprobó tu solicitud de seguimiento.",
   "suggestedMembers": "Miembros sugeridos",
-  "followersAudienceHint": "Tus seguidores pueden ver esta publicación. Si tu cuenta requiere aprobación, solo tendrán acceso los seguidores que hayas aprobado."
+  "followersAudienceHint": "Tus seguidores pueden ver esta publicación. Si tu cuenta requiere aprobación, solo tendrán acceso los seguidores que hayas aprobado.",
+  "aboutMember": "Acerca de",
+  "memberActivity": "Actividad",
+  "memberActivityHidden": "Este miembro no comparte actividad en su perfil.",
+  "editMemberProfile": "Editar perfil"
 }

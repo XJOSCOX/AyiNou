@@ -10,7 +10,7 @@ import { safetyMessages } from "@/lib/safety-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 
-export function MemberSafetyControls({ username }: { username: string }) {
+export function MemberSafetyControls({ username, collapsible = false }: { username: string; collapsible?: boolean }) {
   const [locale] = useLocale();
   const t = safetyMessages[locale];
   const router = useRouter();
@@ -29,8 +29,7 @@ export function MemberSafetyControls({ username }: { username: string }) {
     if (await mutation.run(() => setMemberSafety(username, "mute", !muted))) setChanged(!muted);
   }
 
-  return <section className={institutionCard}>
-    <h2 className="mb-3 text-lg font-semibold">{t.title}</h2>
+  const controls = <>
     {status.error !== null && <ApiErrorNotice error={status.error} retry={status.refresh} />}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
     {confirming ? <div className="mt-2 grid gap-3" role="group" aria-label={t.confirmBlock}>
@@ -46,6 +45,13 @@ export function MemberSafetyControls({ username }: { username: string }) {
       </button>
       <button type="button" className={institutionLink} disabled={mutation.busy} onClick={() => setConfirming(true)}>{t.block}</button>
     </div>}
+  </>;
+  return collapsible ? <details className={institutionCard}>
+    <summary className="cursor-pointer font-semibold">{t.title}</summary>
+    <div className="mt-3">{controls}</div>
+  </details> : <section className={institutionCard}>
+    <h2 className="mb-3 text-lg font-semibold">{t.title}</h2>
+    {controls}
   </section>;
 }
 

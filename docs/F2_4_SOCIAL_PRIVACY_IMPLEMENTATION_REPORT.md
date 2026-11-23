@@ -55,4 +55,9 @@ Hosted database migration and the connected local application are verified. Publ
 
 The profile preview offers **Publish profile** for a member’s saved name and username. Publication sets the existing visibility and discoverability flags in one operation. Social privacy and per-field disclosure still determine what other members can see. The command leaves account data unchanged until the member uses it. Existing profile saves and onboarding continue to use the original flow.
 
-Migration `20261123125400_explicit_profile_publication` adds the session-bound command and requires separate hosted approval.
+Migration `20261123125400_explicit_profile_publication` was applied with separate authorization on hosted AyiNou. The postflight found zero pending migrations. Chromium exercised the button on a hidden profile with discovery already enabled, then verified that a second account could find and follow it. In the hosted-backed local app, test02 was already published and appeared in Discover.
+
+
+## Public member page
+
+The redesigned page uses a larger avatar, an integrated identity and follow header, and separate activity and About sections. Verification details and member safety actions open on demand. The owner sees a direct link to the profile editor. Displayed details, follower lists, and activity still use the existing server disclosure rules.

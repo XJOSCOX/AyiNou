@@ -45,5 +45,9 @@
   "followRequestedNotice": "sent you a follow request.",
   "followApprovedNotice": "approved your follow request.",
   "suggestedMembers": "Suggested members",
-  "followersAudienceHint": "Followers can see this post. If your account requires approval, access is limited to followers you’ve approved."
+  "followersAudienceHint": "Followers can see this post. If your account requires approval, access is limited to followers you’ve approved.",
+  "aboutMember": "About",
+  "memberActivity": "Activity",
+  "memberActivityHidden": "This member hasn’t shared profile activity.",
+  "editMemberProfile": "Edit profile"
 }

@@ -63,8 +63,13 @@ test("F2.4 protects private profiles, requests and follower-only posts across su
   await inEnglish(page.context());
   await login(page, historical);
   await expect(page).toHaveURL(/\/dashboard/);
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/members/" + author.handle);
   await expect(page.getByRole("heading", { name: "Celestine Lantern" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Activity" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(391);
+  await page.getByText("Member safety", { exact: true }).click();
+  await expect(page.getByRole("button", { name: "Block", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Replies", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Media", exact: true })).toBeVisible();
 
@@ -79,7 +84,6 @@ test("F2.4 protects private profiles, requests and follower-only posts across su
   await expect(page.getByText("This profile is private.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Request to follow" })).toBeVisible();
   await expect(page.getByText("Members can read this biography.")).toHaveCount(0);
-  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/settings#social-privacy");
   const language = page.getByRole("banner").getByRole("combobox");
   for (const locale of ["en", "fr", "ht", "es"] as const) {
