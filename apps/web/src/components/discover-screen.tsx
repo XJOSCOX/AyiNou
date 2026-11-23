@@ -11,10 +11,12 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { DiscoveryResults, FollowAccountList, discoveryTab } from "./discovery-accounts";
 import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { socialMessages } from "@/lib/social-i18n";
+import { HashtagSearch } from "./social-feed";
 import { PageHeader } from "./page-header";
 
-type View = DiscoveryKind | "following";
-const views = ["people", "institutions", "following"] as const;
+type View = DiscoveryKind | "following" | "hashtags";
+const views = ["people", "institutions", "following", "hashtags"] as const;
 const getDepartments = () => fetchDepartments();
 
 export function DiscoverScreen({ initial }: { initial: View }) {
@@ -27,10 +29,10 @@ export function DiscoverScreen({ initial }: { initial: View }) {
       <PageHeader title={t.discover} description={t.intro} />
       <div role="group" aria-label={t.accounts} className="flex flex-wrap gap-2">
         {views.map((value) => <button key={value} type="button" className={discoveryTab} aria-pressed={value === view} onClick={() => setView(value)}>
-          {value === "following" ? t.myFollowing : t[value]}
+          {value === "following" ? t.myFollowing : value === "hashtags" ? socialMessages[locale].hashtags : t[value]}
         </button>)}
       </div>
-      {view === "following" ? <FollowAccountList target={null} list="following" /> : <SearchForm key={view} kind={view} />}
+      {view === "following" ? <FollowAccountList target={null} list="following" /> : view === "hashtags" ? <HashtagSearch /> : <SearchForm key={view} kind={view} />}
     </div>
   </MemberShell>;
 }

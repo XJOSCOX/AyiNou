@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { FeedAuthor, FeedPost, InterestCode, PostAttachment, ReactionSummary } from "@ayinou/shared";
+import type { FeedAuthor, FeedPost, InterestCode, PostAttachment, ReactionSummary, SocialPostInfo } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { ApiError } from "./api-error.js";
 import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
@@ -130,16 +130,19 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
 
   async function hydrate<T extends PostRow>(token: string | null, posts: T[]) {
     const eligible = posts.filter(({ status }) => status === "published").map(({ id }) => id);
-    const ids = posts.map(({ id }) => id);
+    const ids = posts.filter(({ unavailable }) => !unavailable).map(({ id }) => id);
     const paths = posts.flatMap(({ author }) => author?.avatarPath ? [author.avatarPath] : []);
-    const [summaries, tags, media, signed] = await Promise.all([
+    const [summaries, tags, media, signed, social] = await Promise.all([
       eligible.length ? rpc<Partial<Record<string, ReactionSummary>>>(token, "post_reactions_for_client", { p_ids: eligible }) : undefined,
       ids.length ? rpc<Partial<Record<string, InterestCode[]>>>(token, "post_topics_for_client", { p_ids: ids }) : undefined,
       ids.length ? rpc<Partial<Record<string, PostAttachment[]>>>(token, "post_attachments_for_client", { p_ids: ids }) : undefined,
       signAvatars(paths),
+      eligible.length ? rpc<Partial<Record<string, SocialPostInfo>>>(token, "social_post_info_for_client", { p_ids: eligible }) : undefined,
     ]);
     return posts.map(({ author, ...post }) => {
       const reactions = summaries?.[post.id];
+      const details = social?.[post.id];
+      if (details) post.social = details;
       const topics = tags?.[post.id];
       const attachments = media?.[post.id] ?? [];
       if (!author) return { ...post, reactions, topics, attachments, author: null };
@@ -152,9 +155,11 @@ export function createFeedRepository(config: ApiConfig): FeedRepository | null {
     rpc,
     signAvatars,
     async read(token, params) {
-      const { p_scope, p_id, p_community, ...page } = params;
+      const { p_scope, p_id, p_community, p_tag, ...page } = params;
       const posts = p_scope === "community"
         ? await rpc<PostRow[]>(token, "read_department_posts_for_client", { ...page, p_key: p_community })
+        : p_scope === "saved" || p_scope === "hashtag"
+          ? await rpc<PostRow[]>(token, "read_social_feed_for_client", { ...page, p_scope, p_tag: p_tag ?? null })
         : p_scope === "following"
         ? await rpc<PostRow[]>(token, "read_following_feed_for_client", page)
         : await rpc<PostRow[]>(token, "read_feed_for_client", { ...page, p_scope, p_id });

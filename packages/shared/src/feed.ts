@@ -34,7 +34,24 @@ export interface FeedAuthor {
   avatarUrl: string | null;
   verified: boolean;
 }
+export interface SocialPostInfo {
+  shareable: boolean;
+  quotable: boolean;
+  bookmarked: boolean;
+  reposted: boolean;
+  repostCount: number;
+  quote: { unavailable: true } | { id: string; body: string; language: Locale; author: Omit<FeedAuthor, "avatarUrl"> | null;
+    organization: { handle: string; name: string } | null } | null;
+  organization: { handle: string; name: string } | null;
+  hashtags: string[];
+  mentions: Record<string, string>;
+}
 export interface FeedPost extends PostInput {
+  social?: SocialPostInfo;
+  timelineId?: string;
+  timelineAt?: string;
+  repostBy?: Omit<FeedAuthor, "avatarUrl"> | null;
+  unavailable?: true;
   attachments?: PostAttachment[];
   community?: { id: string; slug: string } | null;
   id: string;
@@ -97,12 +114,12 @@ export type SafetyOverview = {
   pendingPostReports: number; pendingCommentReports: number; pendingAppeals: number;
   restrictedAccounts: number; moderationActions30Days: number; cleanupBacklog: number;
 };
-export type CommentTarget = { id: string; body: string; language: Locale; createdAt: string };
+export type CommentTarget = { id: string; body: string; language: Locale; createdAt: string; mentions?: Record<string, string> };
 
 type CommentPosition = { id: string; parentId: string | null; createdAt: string; hasReplies: boolean };
 export type FeedComment = CommentPosition & (
   { available: true; body: string; language: Locale; editedAt: string | null; version: number;
-    own: boolean; author: Omit<FeedAuthor, "avatarUrl"> | null; reactions: ReactionSummary }
+    own: boolean; author: Omit<FeedAuthor, "avatarUrl"> | null; reactions: ReactionSummary; mentions?: Record<string, string> }
   | { available: false; body: null; language: null; editedAt: null; version: null;
     own: false; author: null; reactions: null }
 );

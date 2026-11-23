@@ -12,6 +12,8 @@ import { FounderVerifiedMark } from "./founder-verified-badge";
 import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { institutionCard, institutionLink, useInstitutionResource, PersonalClaimChecks } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { QuotePreview, SocialPostControls } from "./social-post";
+import { SocialText } from "./social-text";
 import { PostMediaGallery } from "./post-media";
 
 export function PostDetail({ id, comment }: { id: string; comment?: string }) {
@@ -28,15 +30,17 @@ export function PostDetail({ id, comment }: { id: string; comment?: string }) {
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!post && resource.error === null && <p role="status">{t.working}</p>}
     {post && <article className={institutionCard}>
-      <h1 className="break-words text-xl font-semibold">{post.author?.displayName ?? (post.own ? f.you : f.unknownAuthor)}
+      <h1 className="break-words text-xl font-semibold">{post.social?.organization?.name ?? post.author?.displayName ?? (post.own ? f.you : f.unknownAuthor)}
         {!!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
         {post.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
       </h1>
       <time className="text-sm text-[var(--theme-body)]" dateTime={post.publishedAt ?? post.createdAt}>
         {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(post.publishedAt ?? post.createdAt))}
       </time>
-      <p lang={post.language} dir="auto" className="mt-4 whitespace-pre-wrap break-words leading-6">{post.body}</p>
+      <p lang={post.language} dir="auto" className="mt-4 whitespace-pre-wrap break-words leading-6"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></p>
       {post.attachments && <PostMediaGallery post={post.id} attachments={post.attachments} />}
+      <QuotePreview post={post} />
+      <SocialPostControls post={post} onChange={resource.refresh} />
       {comment && <LinkedComment post={post.id} id={comment} />}
       {post.reactions && <PostDiscussion postId={post.id}><ReactionPicker target="posts" id={post.id} summary={post.reactions} /></PostDiscussion>}
     </article>}
@@ -53,6 +57,6 @@ function LinkedComment({ post, id }: { post: string; id: string }) {
     <h2 className="mb-2 text-sm font-semibold">{t.linkedComment}</h2>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!comment && resource.error === null && <p role="status">{t.working}</p>}
-    {comment && <p lang={comment.language} dir="auto" className="whitespace-pre-wrap break-words text-sm">{comment.body}</p>}
+    {comment && <p lang={comment.language} dir="auto" className="whitespace-pre-wrap break-words text-sm"><SocialText body={comment.body} mentions={comment.mentions} /></p>}
   </section>;
 }

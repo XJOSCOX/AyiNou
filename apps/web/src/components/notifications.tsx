@@ -8,6 +8,8 @@ import { projectWorkMessages } from "@/lib/project-work-i18n";
 import { projectProgressMessages } from "@/lib/project-progress-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import Link from "next/link";
+import { loadSocialPreferences, saveSocialPreferences, type SocialNoticePreferences } from "@/lib/social-api";
+import { socialMessages } from "@/lib/social-i18n";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
@@ -78,7 +80,9 @@ export function NotificationCenter() {
         : item.kind === "poll_event" ? item.pollEvent ? pollMessages[locale].notices[item.pollEvent.action] : t.unavailable
         : item.kind === "project_submitted" || item.kind === "project_assigned" || item.kind === "project_changes" ||
           item.kind === "project_approved" || item.kind === "project_rejected" ? projectMessages[locale].notices[item.kind]
-        : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
+        : item.kind === "post_mention" || item.kind === "post_repost" || item.kind === "post_quote"
+          ? socialMessages[locale][item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone)
+          : t[item.kind].replace("{actor}", () => item.actor?.displayName ?? t.someone);
       return <li key={item.id} className={`${institutionCard} flex flex-wrap items-center justify-between gap-3`}>
         <div className="min-w-0"><p className={`break-words ${newItem ? "font-semibold" : ""}`}>{text}</p>
           <p className="mt-1 flex flex-wrap gap-2 text-xs text-[var(--theme-body)]">
@@ -113,7 +117,7 @@ export function NotificationPreferencesPanel() {
   const [changes, setChanges] = useState<Partial<Awaited<ReturnType<typeof loadNotificationPreferences>>>>({});
   const [saved, setSaved] = useState(false);
   const preferences = resource.data ? { ...resource.data, ...changes } : null;
-  return <section className={institutionCard}>
+  return <><section className={institutionCard}>
     <h2 className="text-xl font-semibold">{t.preferences}</h2>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!preferences && resource.error === null && <p className="mt-3" role="status">{t.working}</p>}
@@ -133,6 +137,39 @@ export function NotificationPreferencesPanel() {
       {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.saved}</p>}
       <button className={`${institutionAction} justify-self-start`} type="submit" disabled={mutation.busy}>{t.save}</button>
+    </form>}
+  </section><SocialNotificationPreferences /></>;
+}
+
+function SocialNotificationPreferences() {
+  const [locale] = useLocale();
+  const t = socialMessages[locale];
+  const labels = mediaNotificationMessages[locale];
+  const resource = useInstitutionResource(loadSocialPreferences);
+  const mutation = useFeedMutation();
+  const [changes, setChanges] = useState<Partial<SocialNoticePreferences>>({});
+  const [saved, setSaved] = useState(false);
+  const preferences = resource.data ? { ...resource.data, ...changes } : null;
+  return <section className={institutionCard} aria-label={labels.preferences}>
+    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
+    {!preferences && resource.error === null && <p role="status">{labels.working}</p>}
+    {preferences && <form className="grid gap-3" onSubmit={(event) => {
+      event.preventDefault();
+      void mutation.run(async () => {
+        setChanges(await saveSocialPreferences(preferences));
+        setSaved(true);
+      });
+    }}>
+      {(["mentions", "reposts", "quotes"] as const).map((key) => <label key={key} className="flex items-center gap-2">
+        <input type="checkbox" checked={preferences[key]} disabled={mutation.busy} onChange={(event) => {
+          const checked = event.target.checked;
+          setSaved(false);
+          setChanges((prior) => ({ ...prior, [key]: checked }));
+        }} />{t[key]}
+      </label>)}
+      {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
+      {saved && <p role="status">{labels.saved}</p>}
+      <button className={`${institutionAction} justify-self-start`} disabled={mutation.busy}>{labels.save}</button>
     </form>}
   </section>;
 }

@@ -9,6 +9,10 @@ const art = {
   more: <g fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.65" /><circle cx="12" cy="12" r="1.65" /><circle cx="19" cy="12" r="1.65" /></g>,
   edit: <path d="m5 15-.8 4.8 4.8-.8L19.5 8.5a2.8 2.8 0 0 0-4-4L5 15Zm8.8-8.8 4 4" />,
   delete: <path d="M4.5 7h15m-13.5 0 1 13h10l1-13m-8-3h4v3m-4 3.5v6m4-6v6" />,
+  repost: <path d="M3 7h14l-3-3m3 3-3 3m7 7H7l3 3m-3-3 3-3M3 7v6m18-2v6" />,
+  quote: <path d="M4 5h16v12H9l-5 4V5Zm5 5h2v3H8m7-3h2v3h-3" />,
+  bookmark: <path d="M6 4h12v17l-6-4-6 4V4Z" />,
+  share: <path d="M12 16V3m-4 4 4-4 4 4M5 11v9h14v-9" />,
   report: <path d="M5 21V4m0 1c4-3.8 9 3 14 0v10c-5 3-10-3.8-14 0" />,
   remove: <path d="m6 6 12 12M18 6 6 18" />,
 };
@@ -22,7 +26,7 @@ export const feedIconButton = "relative inline-grid size-11 shrink-0 place-items
 
 export function FeedActions({ label, actions }: {
   label: string;
-  actions: { icon: "edit" | "delete" | "report"; label: string; run: () => void }[];
+  actions: { icon: "edit" | "delete" | "report" | "bookmark"; label: string; run: () => void }[];
 }) {
   return <details className="relative ms-auto shrink-0 text-sm" onKeyDown={(event) => {
     if (event.key !== "Escape" || !event.currentTarget.open) return;

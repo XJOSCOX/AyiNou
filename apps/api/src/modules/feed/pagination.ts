@@ -12,10 +12,10 @@ export function before(value?: string) {
   } catch { throw new ApiError(400, "INVALID_INPUT", "Invalid page cursor"); }
 }
 
-export function paginate<T extends { createdAt: string; id: string }>(rows: T[], limit: number) {
+export function paginate<T extends { createdAt: string; id: string; timelineAt?: string; timelineId?: string }>(rows: T[], limit: number) {
   const page = rows.slice(0, limit);
   const last = page.at(-1);
   const nextCursor = rows.length > limit && last
-    ? Buffer.from(JSON.stringify({ createdAt: last.createdAt, id: last.id })).toString("base64url") : null;
+    ? Buffer.from(JSON.stringify({ createdAt: last.timelineAt ?? last.createdAt, id: last.timelineId ?? last.id })).toString("base64url") : null;
   return { page, nextCursor };
 }

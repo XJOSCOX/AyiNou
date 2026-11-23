@@ -5,6 +5,8 @@ import { useCallback, useState } from "react";
 import type { DiscoveryCard, FollowList, FollowStatus, FollowTarget } from "@ayinou/shared";
 import { apiErrorCode } from "@/lib/api-errors";
 import { loadFollowList, readFollow, writeFollow } from "@/lib/discovery-api";
+import { followReposts } from "@/lib/social-api";
+import { socialMessages } from "@/lib/social-i18n";
 import { discoveryMessages } from "@/lib/discovery-i18n";
 import { feedMessages } from "@/lib/feed-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
@@ -114,10 +116,32 @@ export function ProfileFollowPanel({ target, signedIn, initial }: { target: Foll
         : <p>{t.followingCount} · {count.format(state.followingCount)}</p>)}
       {signedIn && state.canFollow && <FollowControl target={target} following={state.following} onChange={setUpdated} />}
     </div>}
+    {signedIn && state?.following && <FollowRepostPreferences key={kind + ":" + key} target={target} />}
     {list && <div className="mt-4">
       <FollowAccountList key={list} target={target} list={list} />
     </div>}
   </section>;
+}
+
+function FollowRepostPreferences({ target: { kind, key } }: { target: FollowTarget }) {
+  const [locale] = useLocale();
+  const t = socialMessages[locale];
+  const fetchPreferences = useCallback((signal: AbortSignal) => followReposts({ kind, key }, undefined, signal), [kind, key]);
+  const resource = useInstitutionResource(fetchPreferences);
+  const mutation = useFeedMutation();
+  const [setting, setSetting] = useState<boolean | null>(null);
+  const value = setting ?? resource.data?.showReposts;
+  return <div className="mt-2 flex flex-wrap items-center gap-4 text-sm">
+    {resource.data?.mutual && <span>{t.mutual}</span>}
+    {value != null && <label className="flex min-h-10 items-center gap-2">
+      <input type="checkbox" checked={value} disabled={mutation.busy} onChange={(event) => {
+        const enabled = event.target.checked;
+        void mutation.run(async () => { const result = await followReposts({ kind, key }, enabled); setSetting(result.showReposts); });
+      }} />{t.showReposts}
+    </label>}
+    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
+    {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
+  </div>;
 }
 
 export function FollowAccountList({ target, list }: { target: FollowTarget | null; list: FollowList }) {

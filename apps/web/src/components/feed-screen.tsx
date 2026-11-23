@@ -25,6 +25,9 @@ import { FounderVerifiedMark } from "./founder-verified-badge";
 import { PersonalClaimChecks, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
+import { OrganizationPublisher, QuotePreview, SocialPostControls, usePostBookmark } from "./social-post";
+import { SocialText } from "./social-text";
+import { socialMessages } from "@/lib/social-i18n";
 import { PostComposer } from "./post-composer";
 import { PostMediaGallery } from "./post-media";
 
@@ -61,10 +64,12 @@ export function FeedScreen() {
   return <MemberShell>
     <div className="grid w-full min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_clamp(17rem,28%,30rem)] xl:items-start xl:gap-5">
       <PageHeader className="xl:col-span-2" title={t.feed} description={t.intro}
-        actions={access.data?.allowed && <Link href="/feed/moderation" className={institutionLink}>{t.moderation}</Link>} />
+        actions={<><Link href="/feed/saved" className={institutionLink}>{socialMessages[locale].saved}</Link>
+          {access.data?.allowed && <Link href="/feed/moderation" className={institutionLink}>{t.moderation}</Link>}</>} />
       <div className="grid min-w-0 gap-4">
         <section className={`${institutionCard} max-sm:p-3`} aria-label={t.write}>
           <PostComposer onSaved={changed} />
+          <OrganizationPublisher onPublished={() => changed("published")} />
         </section>
         {notice && <p role="status" className="text-sm font-semibold text-[var(--theme-link)]">{t[notice]}</p>}
         <div role="group" aria-label={t.feed} className="flex flex-wrap gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1 sm:justify-self-start">
@@ -146,7 +151,7 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
       <p>{ranked ? r.empty : scope === "following" ? d.followingFeedEmpty : scope === "feed" ? t.empty : t.mineEmpty}</p>
       {scope === "following" && <Link href="/discover" className={`${institutionLink} mt-3 inline-block`}>{d.viewAll}</Link>}
     </div>}
-    {rows?.map((post) => <PostCard key={post.id} post={post} changed={changed}
+    {rows?.map((post) => <PostCard key={post.timelineId ?? post.id} post={post} changed={changed}
       recommendation={ranked && post.recommendationReason ? <RecommendationActions id={post.id} reason={post.recommendationReason}
         onFeedback={(action) => hideRecommendation(post, action)} /> : undefined} />)}
     {!expired && resource.page?.nextCursor && <button type="button" className={`${institutionAction} justify-self-start`}
@@ -154,13 +159,19 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
   </section>;
 }
 
-export function PostCard({ post, changed, recommendation }: { post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode }) {
+export function PostCard({ post, changed, recommendation, onBookmarkChange }: {
+  post: FeedPost; changed: (message: PostNotice) => void; recommendation?: ReactNode; onBookmarkChange?: () => void;
+}) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const [mode, setMode] = useState<"edit" | "delete" | "report" | null>(null);
   const [reported, setReported] = useState(false);
   const mutation = useFeedMutation();
-  const name = post.author?.displayName ?? (post.own ? t.you : t.unknownAuthor);
+  const bookmark = usePostBookmark(post, onBookmarkChange);
+  const social = socialMessages[locale];
+  const accountHref = post.social?.organization ? `/organization/${post.social.organization.handle}`
+    : post.author?.username ? `/members/${post.author.username}` : undefined;
+  const name = post.social?.organization?.name ?? post.author?.displayName ?? (post.own ? t.you : t.unknownAuthor);
   const timestamp = post.publishedAt ?? post.createdAt;
   const editable = post.own && (post.status === "published" || post.status === "draft");
 
@@ -168,7 +179,10 @@ export function PostCard({ post, changed, recommendation }: { post: FeedPost; ch
     if (await mutation.run(() => deletePost(post))) { setMode(null); changed("deleted"); }
   }
 
+  const saveAction = post.social && post.status === "published" ? [{ icon: "bookmark" as const,
+    label: bookmark.value ? social.removeBookmark : social.bookmark, run: () => { void bookmark.toggle(); } }] : [];
   return <article className={institutionCard}>
+    {post.repostBy && <p className="mb-2 text-sm text-[var(--theme-body)]">{social.repostedBy.replace("{actor}", post.repostBy.displayName)}</p>}
     <header className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex min-w-0 items-center gap-3">
         {post.author?.avatarUrl ? <Image src={post.author.avatarUrl} alt="" width={40} height={40}
@@ -178,17 +192,18 @@ export function PostCard({ post, changed, recommendation }: { post: FeedPost; ch
           </span>}
         <div className="min-w-0">
           <p className="break-words font-semibold">
-            {post.author?.username ? <Link className="hover:underline" href={`/members/${post.author.username}`}>{name}</Link> : name}
-            {!!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
-            {post.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
+            {accountHref ? <Link className="hover:underline" href={accountHref}>{name}</Link> : name}
+            {!post.social?.organization && !!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
+            {!post.social?.organization && post.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
           </p>
-          {post.author?.username && <p className="break-all text-xs text-[var(--theme-body)]">@{post.author.username}</p>}
+          {!post.social?.organization && post.author?.username && <p className="break-all text-xs text-[var(--theme-body)]">@{post.author.username}</p>}
         </div>
       </div>
-      {!mode && (editable || (!post.own && !reported)) && <FeedActions label={t.postActions} actions={editable ? [
+      {!mode && (editable || (!post.own && !reported) || saveAction.length > 0) && <FeedActions label={t.postActions} actions={editable ? [
         { icon: "edit", label: t.edit, run: () => setMode("edit") },
         { icon: "delete", label: t.delete, run: () => setMode("delete") },
-      ] : [{ icon: "report", label: t.report, run: () => setMode("report") }]} />}
+        ...saveAction,
+      ] : [...(!post.own && !reported ? [{ icon: "report" as const, label: t.report, run: () => setMode("report") }] : []), ...saveAction]} />}
     </header>
     <p className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-xs text-[var(--theme-body)]">
       <Link className="hover:underline" href={`/posts/${post.id}`} aria-label={mediaNotificationMessages[locale].openPost}>
@@ -201,7 +216,7 @@ export function PostCard({ post, changed, recommendation }: { post: FeedPost; ch
     </p>
     {mode === "edit" ? <PostComposer post={post} onCancel={() => setMode(null)}
       onSaved={(message) => { setMode(null); changed(message); }} /> :
-      <p lang={post.language} dir="auto" className="mt-4 max-w-[75ch] whitespace-pre-wrap break-words text-sm leading-6 sm:text-base">{post.body}</p>}
+      <p lang={post.language} dir="auto" className="mt-4 max-w-[75ch] whitespace-pre-wrap break-words text-sm leading-6 sm:text-base"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></p>}
     {mode !== "edit" && !!post.topics?.length && <PostTopicLabels topics={post.topics} />}
     {mode !== "edit" && post.attachments && <PostMediaGallery post={post.id} attachments={post.attachments} />}
     {mode === "delete" && <div className="mt-4 grid gap-3">
@@ -218,6 +233,7 @@ export function PostCard({ post, changed, recommendation }: { post: FeedPost; ch
       cancel={() => setMode(null)} reported={() => { setMode(null); setReported(true); }} />}
     {reported && <p role="status" className="mt-3 text-sm text-[var(--theme-link)]">{t.reportSent}</p>}
     {recommendation}
+    {mode !== "edit" && <><QuotePreview post={post} /><SocialPostControls post={post} bookmark={bookmark} onChange={() => changed("published")} /></>}
     {post.reactions && <PostDiscussion postId={post.id}>
       <ReactionPicker target="posts" id={post.id} summary={post.reactions} />
     </PostDiscussion>}

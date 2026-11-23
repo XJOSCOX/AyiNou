@@ -25,7 +25,10 @@ export function registerFeedEngagementRoutes(app: FastifyInstance, { viewer, rep
     const { id, commentId } = identifiers.extend({ commentId: z.uuid() }).parse(request.params);
     const comment = await repo().rpc<CommentTarget | null>(token, "post_comment_target_for_client", { p_post: id, p_comment: commentId });
     if (!comment) throw new ApiError(404, "NOT_FOUND", "Comment unavailable");
-    return { comment };
+    if (!comment.body?.includes("@")) return { comment };
+    const mentions = await repo().rpc<Record<string, Record<string, string>>>(token,
+      "social_comment_mentions_for_client", { p_post: id, p_ids: [commentId] });
+    return { comment: { ...comment, mentions: mentions[commentId] } };
   });
 
   for (const kind of ["posts", "comments"] as const) {
@@ -61,7 +64,10 @@ export function registerFeedEngagementRoutes(app: FastifyInstance, { viewer, rep
       p_post: id, p_parent: query.parent ?? null, p_limit: limit, p_after_at: cursor.p_before_at, p_after_id: cursor.p_before_id,
     });
     const { page, nextCursor } = paginate(rows, limit);
-    return { comments: page, nextCursor };
+    const marked = page.filter((comment) => comment.available && comment.body.includes("@")).map(({ id }) => id);
+    const mentions = marked.length ? await repo().rpc<Record<string, Record<string, string>>>(token,
+      "social_comment_mentions_for_client", { p_post: id, p_ids: marked }) : {};
+    return { comments: page.map((comment) => mentions[comment.id] ? { ...comment, mentions: mentions[comment.id] } : comment), nextCursor };
   });
   app.post("/api/v1/posts/:id/comments", { bodyLimit: 12_288 }, async (request, reply) => {
     const { token } = await viewer(request, true);

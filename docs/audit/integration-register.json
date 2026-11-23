@@ -236,6 +236,27 @@
       "remediation": "Feed lifecycle audit"
     },
     {
+      "module": "feed_social_interactions",
+      "status": "intentionally current-state only",
+      "requiredEvents": "Reuse existing publication receipts and scoped moderation records for material content commands. Private preferences and reversible social actions use current state.",
+      "sources": [
+        "feed_data.post_submissions",
+        "feed_data.post_quotes",
+        "feed_data.reposts",
+        "feed_data.bookmarks",
+        "feed_data.social_mentions",
+        "feed_data.notifications"
+      ],
+      "observed": "Organization and quote posts reuse the original command receipt. Repost and quote notifications are deduplicated in the existing ledger. Source visibility is checked again on read.",
+      "missing": [],
+      "viewers": "Owner-only saves and preferences. Eligible audiences for attribution and assigned moderators for existing moderation history.",
+      "excluded": "Bookmarks, private settings, notification recipients, restricted bodies, and member safety decisions from platform-wide reads.",
+      "tests": [
+        "apps/web/e2e/social-interactions.spec.ts"
+      ],
+      "remediation": "Retain native content moderation records and keep reversible interactions outside permanent administrative history."
+    },
+    {
       "module": "feed_moderation",
       "status": "partially covered",
       "requiredEvents": "Reports, hide, restore, remove, dismiss and appeal disposition",

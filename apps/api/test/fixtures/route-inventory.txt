@@ -51,10 +51,12 @@ GET /api/v1/community/departments - -
 GET /api/v1/community/diaspora - -
 GET /api/v1/community/stats - -
 GET /api/v1/departments - -
+GET /api/v1/discover/hashtags - -
 GET /api/v1/discover/institutions - -
 GET /api/v1/discover/people - -
 GET /api/v1/discover/suggestions - -
 GET /api/v1/feed - -
+GET /api/v1/feed/social - -
 GET /api/v1/homepage/community-statistics - -
 GET /api/v1/institutions/:id - -
 GET /api/v1/institutions/:id/activity - -
@@ -76,6 +78,7 @@ GET /api/v1/me/community-activity - -
 GET /api/v1/me/community-invitations - -
 GET /api/v1/me/community-recommendation-settings - -
 GET /api/v1/me/feed-moderation - -
+GET /api/v1/me/follow-reposts/:kind/:key 1024 -
 GET /api/v1/me/following - -
 GET /api/v1/me/founder-bootstrap - -
 GET /api/v1/me/founder-identity - -
@@ -112,6 +115,7 @@ GET /api/v1/me/projects/options - -
 GET /api/v1/me/referral-code - -
 GET /api/v1/me/referrals - -
 GET /api/v1/me/sessions - -
+GET /api/v1/me/social-notification-preferences 1024 -
 GET /api/v1/me/verification - -
 GET /api/v1/me/verification-badge - -
 GET /api/v1/me/verification/appeals - -
@@ -193,10 +197,12 @@ HEAD /api/v1/community/departments - onSend
 HEAD /api/v1/community/diaspora - onSend
 HEAD /api/v1/community/stats - onSend
 HEAD /api/v1/departments - onSend
+HEAD /api/v1/discover/hashtags - onSend
 HEAD /api/v1/discover/institutions - onSend
 HEAD /api/v1/discover/people - onSend
 HEAD /api/v1/discover/suggestions - onSend
 HEAD /api/v1/feed - onSend
+HEAD /api/v1/feed/social - onSend
 HEAD /api/v1/homepage/community-statistics - onSend
 HEAD /api/v1/institutions/:id - onSend
 HEAD /api/v1/institutions/:id/activity - onSend
@@ -218,6 +224,7 @@ HEAD /api/v1/me/community-activity - onSend
 HEAD /api/v1/me/community-invitations - onSend
 HEAD /api/v1/me/community-recommendation-settings - onSend
 HEAD /api/v1/me/feed-moderation - onSend
+HEAD /api/v1/me/follow-reposts/:kind/:key 1024 onSend
 HEAD /api/v1/me/following - onSend
 HEAD /api/v1/me/founder-bootstrap - onSend
 HEAD /api/v1/me/founder-identity - onSend
@@ -253,6 +260,7 @@ HEAD /api/v1/me/projects/options - onSend
 HEAD /api/v1/me/referral-code - onSend
 HEAD /api/v1/me/referrals - onSend
 HEAD /api/v1/me/sessions - onSend
+HEAD /api/v1/me/social-notification-preferences 1024 onSend
 HEAD /api/v1/me/verification - onSend
 HEAD /api/v1/me/verification-badge - onSend
 HEAD /api/v1/me/verification/appeals - onSend
@@ -399,6 +407,7 @@ POST /api/v1/posts 16384 -
 POST /api/v1/posts/:id/comments 12288 -
 POST /api/v1/posts/:id/recommendation-feedback 1024 -
 POST /api/v1/posts/:id/reports 4096 -
+POST /api/v1/posts/social 12288 -
 POST /api/v1/projects 28000 -
 POST /api/v1/projects/:id/progress/entries 20000 -
 POST /api/v1/projects/:id/progress/metrics 20000 -
@@ -414,13 +423,16 @@ POST /api/v1/verification/review/:id 4096 -
 PUT /api/v1/comments/:id/reaction 1024 -
 PUT /api/v1/institutions/:id/registration 1024 -
 PUT /api/v1/institutions/:key/follow 1024 -
+PUT /api/v1/me/follow-reposts/:kind/:key 1024 -
 PUT /api/v1/me/notification-preferences 1024 -
 PUT /api/v1/me/organization-onboarding 1024 -
 PUT /api/v1/me/organization-onboarding/:id/details 4096 -
+PUT /api/v1/me/social-notification-preferences 1024 -
 PUT /api/v1/members/:key/follow 1024 -
 PUT /api/v1/members/:username/block 1024 -
 PUT /api/v1/members/:username/mute 1024 -
 PUT /api/v1/posts/:id/reaction 1024 -
+PUT /api/v1/posts/:id/social 1024 -
 PUT /api/v1/projects/:id/image 4200000 -
 PUT /api/v1/projects/:id/progress/entries/:entry/image 4200000 -
 PUT /api/v1/recommendations/settings 2048 -

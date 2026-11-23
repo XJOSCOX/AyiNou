@@ -5,6 +5,7 @@ import {
   commentBodyLimit, locales, reactionKinds, type CommentInput, type FeedComment, type Locale,
   type ReactionKind, type ReactionSummary,
 } from "@ayinou/shared";
+import { MentionSuggestions, SocialText } from "./social-text";
 import { ApiErrorNotice } from "./api-error-notice";
 import { ContentReportForm } from "./content-report-form";
 import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
@@ -192,6 +193,7 @@ function CommentForm({ postId, parentId, editing, onSaved, cancel, canSubmit = t
           setBody(event.target.value);
         }} />
     </label>
+    <MentionSuggestions value={body} onChange={setBody} />
     <p id={hint} className={`text-xs ${count > commentBodyLimit ? "text-[var(--theme-error-text)]" : "text-[var(--theme-body)]"}`}>
       {body ? t.bodyCount.replace("{count}", String(count)).replace("{max}", String(commentBodyLimit)) : t.bodyHint.replace("{max}", String(commentBodyLimit))}
     </p>
@@ -242,7 +244,7 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
       {action === "edit" ? <div className="mt-2">
         <CommentForm postId={postId} parentId={value.parentId} editing={value} cancel={() => setAction(null)}
           onSaved={() => { setAction(null); refresh(); }} />
-      </div> : <p lang={value.language} dir="auto" className="mt-2 whitespace-pre-wrap break-words leading-relaxed">{value.body}</p>}
+      </div> : <p lang={value.language} dir="auto" className="mt-2 whitespace-pre-wrap break-words leading-relaxed"><SocialText body={value.body} mentions={value.mentions} /></p>}
 
       <div className="mt-2 flex min-w-0 flex-wrap items-start gap-2">
         <ReactionPicker target="comments" id={value.id} summary={value.reactions} />

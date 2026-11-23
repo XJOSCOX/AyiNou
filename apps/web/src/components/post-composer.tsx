@@ -3,6 +3,7 @@
 import { postBodyLimit, postVisibilities, type FeedPost, type InterestCode, type Locale, type PostInput, type PostVisibility } from "@ayinou/shared";
 import { useId, useRef, useState, type FormEvent } from "react";
 import { ApiRequestError } from "@/lib/api-errors";
+import { MentionSuggestions } from "./social-text";
 import { createPost, editPost } from "@/lib/feed-api";
 import { feedMessages } from "@/lib/feed-i18n";
 import { useFeedMutation } from "@/lib/feed-state";
@@ -118,6 +119,7 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel 
         className="min-w-0 flex-1 resize-y rounded-md border border-transparent bg-transparent px-2 py-1.5 text-base text-[var(--theme-text)] placeholder:text-[var(--theme-body)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)] sm:text-lg" />
       <span id={hint} className="sr-only">{t.bodyHint.replace("{max}", String(postBodyLimit))}</span>
     </div>
+    <MentionSuggestions value={body} onChange={setBody} />
     <PostImageEditor post={post?.id} images={images} onChange={(next) => {
       for (const id of uploaded.current.keys()) if (!next.some((image) => image.id === id)) uploaded.current.delete(id);
       setFileError(null);

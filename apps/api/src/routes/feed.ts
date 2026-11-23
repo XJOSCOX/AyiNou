@@ -11,6 +11,7 @@ import { registerNotificationRoutes } from "../modules/feed/notifications.js";
 import { registerPostMediaRoutes } from "../modules/feed/post-media.js";
 import { registerPostWriteRoutes } from "../modules/feed/posts.js";
 import { registerRecommendationRoutes } from "../modules/feed/recommendations.js";
+import { registerSocialRoutes } from "../modules/feed/social.js";
 import { registerFeedTimelineRoutes } from "../modules/feed/timeline.js";
 import { registerAmbassadorRoutes } from "./ambassadors.js";
 import { registerDiscoveryRoutes } from "./discovery.js";
@@ -40,6 +41,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   registerPostMediaRoutes(app, context);
   registerNotificationRoutes(app, context);
   registerFeedTimelineRoutes(app, context);
+  registerSocialRoutes(app, context);
   registerPostWriteRoutes(app, context);
   registerRecommendationRoutes(app, context);
   registerFeedModerationRoutes(app, context);

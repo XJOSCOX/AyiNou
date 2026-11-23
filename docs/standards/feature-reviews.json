@@ -1,6 +1,178 @@
 {
   "features": [
     {
+      "id": "f2-1-social-interactions",
+      "report": "docs/F2_1_SOCIAL_INTERACTIONS.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/feed/social",
+          "contract": "GET /api/v1/feed/social - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "HEAD /api/v1/feed/social",
+          "contract": "HEAD /api/v1/feed/social - onSend",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "GET /api/v1/discover/hashtags",
+          "contract": "GET /api/v1/discover/hashtags - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "HEAD /api/v1/discover/hashtags",
+          "contract": "HEAD /api/v1/discover/hashtags - onSend",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "PUT /api/v1/posts/:id/social",
+          "contract": "PUT /api/v1/posts/:id/social 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "POST /api/v1/posts/social",
+          "contract": "POST /api/v1/posts/social 12288 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Post publication retains its existing versioned state and request receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/follow-reposts/:kind/:key",
+          "contract": "GET /api/v1/me/follow-reposts/:kind/:key 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "PUT /api/v1/me/follow-reposts/:kind/:key",
+          "contract": "PUT /api/v1/me/follow-reposts/:kind/:key 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "HEAD /api/v1/me/follow-reposts/:kind/:key",
+          "contract": "HEAD /api/v1/me/follow-reposts/:kind/:key 1024 onSend",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/social-notification-preferences",
+          "contract": "GET /api/v1/me/social-notification-preferences 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "PUT /api/v1/me/social-notification-preferences",
+          "contract": "PUT /api/v1/me/social-notification-preferences 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        },
+        {
+          "route": "HEAD /api/v1/me/social-notification-preferences",
+          "contract": "HEAD /api/v1/me/social-notification-preferences 1024 onSend",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection or reversible current-state member interaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/social-interactions.spec.ts",
+            "denialScenario": "Session and source eligibility are required. Covered cases include blocked actors, unavailable originals, private saves, and unauthorized organization publication."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123090000_f21_social_interactions.sql",
+          "rlsAndGrants": "All five new social tables have RLS and no direct member grants. Callable projections operate as the live authenticated subject.",
+          "authorization": "Recheck account, session, source audience, block and mute predicates, and live organization roles.",
+          "compatibility": "Additive relationships and attribution preserve historical content, notifications and the original follow graph.",
+          "validation": "Disposable Supabase and Chromium cover feed and organization integration, including concurrent retries and access changes.",
+          "rolloutAndRollback": "Dry-run the linked development project, apply only the reviewed migration, verify grants and counts, and correct schema forward."
+        }
+      ]
+    },
+    {
       "id": "r2-5-verification-roles-badges",
       "report": "docs/rules/R2_5_VERIFICATION_ROLES_AND_BADGES.md",
       "routes": [
