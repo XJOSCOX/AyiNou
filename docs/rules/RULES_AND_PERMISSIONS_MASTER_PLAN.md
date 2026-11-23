@@ -6,7 +6,8 @@
 | R2.1 — Public Homepage Rules | Founder approved public Community Statistics ON by default. Versioned PostgreSQL setting, private Founder control and audited update are implemented. Deployed to hosted development and verified with the local application. [R2.1 report](R2_1_PUBLIC_HOMEPAGE_RULES.md) |
 | R2.2 — Registration and referrals | Independent Personal Signup and Organization Signup, signup mode, referral intake and audited Founder controls. Deployed to hosted development and verified with the local app. [R2.2 report](R2_2_IMPLEMENTATION_REPORT.md) |
 | Policy audit history | Founder-only history for R2.1 and R2.2 showing the source actor, date, values and reason. Deployed and verified in hosted development. [Audit history](PLATFORM_POLICY_AUDIT_HISTORY.md) |
-| R2.3 and later | Deferred for separate owner direction. |
+| R2.3 — Member onboarding and profiles | Individual onboarding and profile visibility settings, with explicit member disclosure preferences. [R2.3 implementation report](R2_3_MEMBER_ONBOARDING_AND_PROFILES.md) |
+| R2.4 and later | Deferred for separate owner direction. |
 
 ## Current registry and boundaries
 

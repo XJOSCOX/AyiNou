@@ -1,4 +1,33 @@
 {
+  "memberExperience": {
+    "title": "Demaraj ak pwofil manm",
+    "onboarding": "Demaraj pou manm",
+    "profiles": "Pwofil manm",
+    "save": "Sove paramèt yo",
+    "requiredDetails": "Ranpli enfòmasyon obligatwa pou etap sa a.",
+    "policyDisabled": "Paramèt platfòm nan bloke kèk chanjman nan pwofil. Ou ka toujou sispann pataje.",
+    "onboardingUnavailable": "Demaraj pou manm pa disponib pou kounye a.",
+    "finishLater": "Sove epi fini pita",
+    "flags": {
+      "onboardingEnabled": "Aktive demaraj pou manm",
+      "requireCompletion": "Mande demaraj anvan sèvis pou manm sèlman",
+      "requireCountry": "Mande peyi",
+      "requireDepartment": "Mande depatman pou manm k ap viv ann Ayiti",
+      "requireInterests": "Mande enterè",
+      "requireLanguage": "Mande lang prefere",
+      "allowSkip": "Pèmèt sote etap ki pa obligatwa",
+      "showProgress": "Montre pwogrè demaraj la",
+      "profilesEnabled": "Aktive pwofil manm yo",
+      "publicProfiles": "Pèmèt pwofil vizib pou tout moun",
+      "privateProfiles": "Montre apèsi pwofil prive",
+      "profileEdits": "Pèmèt modifye pwofil",
+      "profilePictures": "Pèmèt foto pwofil",
+      "profileBiographies": "Pèmèt biyografi",
+      "displayCountry": "Montre peyi sou pwofil piblik la",
+      "displayDepartment": "Montre depatman ann Ayiti sou pwofil piblik la",
+      "displayInterests": "Montre enterè sou pwofil piblik la"
+    }
+  },
   "policyAudit": {
     "title": "Chanjman nan paramèt yo",
     "changedBy": "Moun ki fè chanjman an",
@@ -35,6 +64,7 @@
   "navigationSections": "Seksyon",
   "navigationPlatform": "Platfòm",
   "navigationMembers": "Manm",
+  "navigationSettings": "Paramèt platfòm nan",
   "navigationPrograms": "Pwogram",
   "founder": "Fondatè",
   "homepage": "Paj dakèy",

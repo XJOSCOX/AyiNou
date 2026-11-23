@@ -13,6 +13,24 @@ export type MembershipCategory = "haitian" | "international_supporter";
 export const interestCodes = ["education", "peace", "healthcare", "agriculture", "technology", "entrepreneurship", "employment", "environment", "infrastructure", "culture"] as const;
 export type InterestCode = typeof interestCodes[number];
 
+export const memberExperienceFlags = [
+  "onboardingEnabled", "requireCompletion", "requireCountry", "requireDepartment", "requireInterests",
+  "requireLanguage", "allowSkip", "showProgress", "profilesEnabled", "publicProfiles", "privateProfiles",
+  "profileEdits", "profilePictures", "profileBiographies", "displayCountry", "displayDepartment", "displayInterests",
+] as const;
+export type MemberExperienceFlag = typeof memberExperienceFlags[number];
+export type MemberExperiencePolicy = Record<MemberExperienceFlag, boolean>;
+export interface MemberExperience {
+  policy: MemberExperiencePolicy;
+  applies: boolean;
+  memberAccess: boolean;
+}
+export interface SavedMemberExperiencePolicy {
+  value: MemberExperiencePolicy;
+  revision: number;
+  updatedAt: string;
+}
+
 export interface MemberProfile {
   userId: string;
   displayName: string | null;
@@ -30,6 +48,10 @@ export interface MemberProfile {
   avatarUrl?: string | null;
   discoverable?: boolean;
   showMembershipCategory?: boolean;
+  showCountry?: boolean;
+  showDepartment?: boolean;
+  showInterests?: boolean;
+  experience?: MemberExperience;
   interests?: InterestCode[];
 }
 
@@ -41,9 +63,13 @@ export interface ProfilePreview {
   biography: string | null;
   avatarUrl: string | null;
   membershipCategory: MembershipCategory | null;
+  countryCode?: string | null;
+  departmentCode?: string | null;
+  departmentName?: string | null;
+  interests?: InterestCode[] | null;
 }
 
-export type ProfileChanges = Partial<Omit<MemberProfile, "userId" | "isVisible" | "avatarUrl">>;
+export type ProfileChanges = Partial<Omit<MemberProfile, "userId" | "isVisible" | "avatarUrl" | "experience">> & { skipOptional?: boolean };
 
 export interface UpdateMemberProfile {
   displayName: string;

@@ -31,7 +31,7 @@ export function Dashboard() {
 
   useEffect(() => {
     fetchMyProfile().then((loaded) => {
-      if (!loaded.displayName || ((loaded.onboardingStep ?? 0) > 0 && loaded.onboardingStep !== 4)) {
+      if (!loaded.experience?.applies && (!loaded.displayName || ((loaded.onboardingStep ?? 0) > 0 && loaded.onboardingStep !== 4))) {
         router.replace("/onboarding"); return;
       }
       setProfile(loaded);
@@ -75,7 +75,7 @@ export function Dashboard() {
           </p>}
           {profileError && <p role="alert" className="mt-6 text-sm text-[var(--theme-on-primary-error)]">{auth.loadError}</p>}
           <div className="mt-7 flex flex-wrap gap-3">
-            {profile?.onboardingStep === 0 && <Link href="/onboarding" className="rounded-md border border-current px-4 py-2.5 text-sm font-bold">{m.finish}</Link>}
+            {profile && (profile.experience?.applies ? profile.experience.policy.onboardingEnabled && (profile.onboardingStep ?? 0) < 4 : profile.onboardingStep === 0) && <Link href="/onboarding" className="rounded-md border border-current px-4 py-2.5 text-sm font-bold">{m.finish}</Link>}
             <button type="button" disabled className="cursor-not-allowed rounded-md border border-current px-4 py-2.5 text-sm font-semibold opacity-75">{account.comingSoon}</button>
           </div>
         </div>

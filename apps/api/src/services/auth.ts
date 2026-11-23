@@ -7,6 +7,7 @@ import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js"
 export interface AuthVerifier {
   verify(token: string, requireMfa?: boolean): Promise<string | null>;
   verifySession?(token: string, requireMfa?: boolean): Promise<VerifiedSession | null>;
+  memberFeatureAccess?(token: string): Promise<boolean | null>;
 }
 
 export interface VerifiedSession {
@@ -74,6 +75,15 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
 
   return {
     verifySession,
+    async memberFeatureAccess(token) {
+      const member = createClient(config.SUPABASE_URL!, config.SUPABASE_PUBLISHABLE_KEY!, {
+        ...options, global: { ...options.global, headers: { Authorization: `Bearer ${token}` } },
+      });
+      const { data, error, status } = await member.rpc("member_feature_access_for_client");
+      if (status === 401 || status === 403) return null;
+      if (error) throw unavailable();
+      return typeof data === "boolean" ? data : null;
+    },
     async verify(token, requireMfa) {
       return (await verifySession(token, requireMfa))?.actor ?? null;
     },

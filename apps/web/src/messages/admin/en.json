@@ -1,4 +1,33 @@
 {
+  "memberExperience": {
+    "title": "Member Onboarding & Profiles",
+    "onboarding": "Member Onboarding",
+    "profiles": "Member Profiles",
+    "save": "Save settings",
+    "requiredDetails": "Complete the required details for this step.",
+    "policyDisabled": "Some profile changes are disabled by platform settings. You can still turn off sharing.",
+    "onboardingUnavailable": "Member onboarding is currently unavailable.",
+    "finishLater": "Save and finish later",
+    "flags": {
+      "onboardingEnabled": "Enable member onboarding",
+      "requireCompletion": "Require onboarding before member-only features",
+      "requireCountry": "Require country",
+      "requireDepartment": "Require department for members living in Haiti",
+      "requireInterests": "Require interests",
+      "requireLanguage": "Require preferred language",
+      "allowSkip": "Allow skipping optional steps",
+      "showProgress": "Show onboarding progress",
+      "profilesEnabled": "Enable member profiles",
+      "publicProfiles": "Allow public profile visibility",
+      "privateProfiles": "Show private profile preview",
+      "profileEdits": "Allow profile edits",
+      "profilePictures": "Allow profile pictures",
+      "profileBiographies": "Allow profile biographies",
+      "displayCountry": "Show country on public profile",
+      "displayDepartment": "Show Haitian department on public profile",
+      "displayInterests": "Show interests on public profile"
+    }
+  },
   "policyAudit": {
     "title": "Policy changes",
     "changedBy": "Changed by",
@@ -35,6 +64,7 @@
   "navigationSections": "Sections",
   "navigationPlatform": "Platform",
   "navigationMembers": "Members",
+  "navigationSettings": "Platform Settings",
   "navigationPrograms": "Programs",
   "founder": "Founder",
   "homepage": "Homepage",

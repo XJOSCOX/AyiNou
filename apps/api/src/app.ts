@@ -18,9 +18,10 @@ import { registerEarlyPartners } from "./routes/early-partners.js";
 import { registerOrganizationOnboarding } from "./routes/organization-onboarding.js";
 import { registerFounderIdentity } from "./routes/founder-identity.js";
 import { registerRegistrationPolicyRoutes } from "./routes/registration-policy.js";
+import { registerMemberExperiencePolicy } from "./routes/member-experience-policy.js";
 import { registerHomepagePolicyRoutes } from "./routes/homepage-policy.js";
 import { registerPublicLegalRoutes } from "./routes/legal-publication.js";
-import { registerErrorHandling, requestIdentification } from "./services/api-error.js";
+import { ApiError, registerErrorHandling, requestIdentification } from "./services/api-error.js";
 import { registerFeedRoutes } from "./routes/feed.js";
 import { createFeedRepository, type FeedRepository } from "./services/feed.js";
 import { createPostMediaService, type PostMediaService } from "./services/post-media.js";
@@ -59,6 +60,13 @@ export function createApp(config: ApiConfig, overrides?: {
     methods: ["GET", "PATCH", "POST", "PUT", "DELETE"],
     exposedHeaders: ["X-Request-ID", "Retry-After"],
   });
+  app.addHook("preHandler", async (request) => {
+    if (!auth?.memberFeatureAccess || !/^\/api\/v1\/(?:feed|posts|comments|groups|communities|projects|polls|discover|notifications|me\/(?:following|notifications|communities|community-activity|community-invitations|community-recommendation-settings|project-work|projects|polls))(?:[/?]|$)/.test(request.url)) return;
+    const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
+    if (token && await auth.memberFeatureAccess(token) === false) {
+      throw new ApiError(403, "ONBOARDING_REQUIRED", "Complete member onboarding first");
+    }
+  });
   app.register(statusRoutes);
   app.register((instance) => registerMemberRoutes(instance, auth, members, readBudget));
   app.register((instance) => registerCommunityRoutes(instance, community, institutions));
@@ -72,6 +80,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerAuditRoutes(instance, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
   app.register((instance) => registerHomepagePolicyRoutes(instance, auth, institutions));
+  app.register((instance) => registerMemberExperiencePolicy(instance, auth, institutions));
   app.register((instance) => registerRegistrationPolicyRoutes(instance, auth, institutions, readBudget));
   app.register((instance) => registerPublicLegalRoutes(instance, institutions));
   app.register((instance) => registerFeedRoutes(instance, auth, feed, media, readBudget));

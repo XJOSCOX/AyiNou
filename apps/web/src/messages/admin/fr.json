@@ -1,4 +1,33 @@
 {
+  "memberExperience": {
+    "title": "Accueil et profils des membres",
+    "onboarding": "Parcours d’accueil",
+    "profiles": "Profils des membres",
+    "save": "Enregistrer les paramètres",
+    "requiredDetails": "Renseignez les informations obligatoires de cette étape.",
+    "policyDisabled": "Les paramètres de la plateforme limitent certaines modifications du profil. Vous pouvez toujours arrêter le partage.",
+    "onboardingUnavailable": "Le parcours d’accueil est actuellement indisponible.",
+    "finishLater": "Enregistrer et terminer plus tard",
+    "flags": {
+      "onboardingEnabled": "Activer le parcours d’accueil",
+      "requireCompletion": "Exiger la fin du parcours avant les fonctions réservées aux membres",
+      "requireCountry": "Exiger le pays",
+      "requireDepartment": "Exiger le département pour les membres résidant en Haïti",
+      "requireInterests": "Exiger des centres d’intérêt",
+      "requireLanguage": "Exiger la langue préférée",
+      "allowSkip": "Autoriser à passer les étapes facultatives",
+      "showProgress": "Afficher la progression du parcours",
+      "profilesEnabled": "Activer les profils des membres",
+      "publicProfiles": "Autoriser les profils publics",
+      "privateProfiles": "Afficher l’aperçu du profil privé",
+      "profileEdits": "Autoriser la modification du profil",
+      "profilePictures": "Autoriser les photos de profil",
+      "profileBiographies": "Autoriser les biographies",
+      "displayCountry": "Afficher le pays sur le profil public",
+      "displayDepartment": "Afficher le département haïtien sur le profil public",
+      "displayInterests": "Afficher les centres d’intérêt sur le profil public"
+    }
+  },
   "policyAudit": {
     "title": "Modifications des paramètres",
     "changedBy": "Modifié par",
@@ -35,6 +64,7 @@
   "navigationSections": "Rubriques",
   "navigationPlatform": "Plateforme",
   "navigationMembers": "Membres",
+  "navigationSettings": "Paramètres de la plateforme",
   "navigationPrograms": "Programmes",
   "founder": "Fondateur",
   "homepage": "Accueil",

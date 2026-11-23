@@ -28,7 +28,11 @@ export async function proxy(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
   if (claims?.sub && !claims.is_anonymous) {
-    const { data: live, error } = await supabase.rpc("account_session_active");
+    const checkOnboarding = /^\/(?:dashboard|feed|discover|communities|projects|polls|notifications)(?:\/|$)/.test(request.nextUrl.pathname);
+    const [{ data: live, error }, experience] = await Promise.all([
+      supabase.rpc("account_session_active"),
+      checkOnboarding ? supabase.rpc("member_experience_for_member") : null,
+    ]);
     if (error) return new NextResponse(null, { status: 503, headers: { "Cache-Control": "no-store" } });
     if (!live) {
       const { data: eligible } = await supabase.rpc("s2a_observe_expiry");
@@ -40,6 +44,12 @@ export async function proxy(request: NextRequest) {
           redirected.cookies.set(name, "", { maxAge: 0, path: "/" });
         }
       }
+      return redirected;
+    }
+    if (experience?.error) return new NextResponse(null, { status: 503, headers: { "Cache-Control": "no-store" } });
+    if (experience?.data?.memberAccess === false) {
+      const redirected = NextResponse.redirect(new URL("/onboarding", request.url), { headers: { "Cache-Control": "no-store" } });
+      response.cookies.getAll().forEach((cookie) => redirected.cookies.set(cookie));
       return redirected;
     }
   }

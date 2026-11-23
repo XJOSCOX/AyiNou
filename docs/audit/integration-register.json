@@ -2,6 +2,22 @@
   "version": 1,
   "modules": [
     {
+      "module": "member_experience_policy",
+      "status": "covered",
+      "requiredEvents": "Member onboarding and profile policy revisions",
+      "sources": [
+        "private.member_experience_events"
+      ],
+      "observed": "The private ledger stores each policy change with actor, old/new values, reason and server time. The Founder history projects those committed changes.",
+      "missing": [],
+      "viewers": "Founder with current session, recent MFA and the original workspace",
+      "excluded": "Private profile values, onboarding form data and provider credentials",
+      "tests": [
+        "apps/web/e2e/member-experience.spec.ts"
+      ],
+      "remediation": "Retain source-controlled policy history and the existing privacy lifecycle."
+    },
+    {
       "module": "homepage_policy",
       "status": "covered",
       "requiredEvents": "Founder changes to public Community Statistics visibility.",

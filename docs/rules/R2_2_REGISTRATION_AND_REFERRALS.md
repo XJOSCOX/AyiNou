@@ -1,6 +1,6 @@
 # R2.2 Registration and referrals
 
-The Founder opens **Platform Administration → Platform → Registration**. Each change requires a current private workspace, recent authenticator verification, the current revision and a written reason of at least ten characters. The policy controls new accounts. Existing members can sign in, recover passwords and continue onboarding under the existing rules.
+The Founder opens **Platform Administration → Platform Settings → Registration**. Each change requires a current private workspace, recent authenticator verification, the current revision and a written reason of at least ten characters. The policy controls new accounts. Existing members can sign in, recover passwords and continue onboarding under the existing rules.
 
 ## Registration and invitations
 

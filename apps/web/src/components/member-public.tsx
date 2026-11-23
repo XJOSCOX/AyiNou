@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { FollowStatus, ProfilePreview, PublicAmbassador } from "@ayinou/shared";
+import { authMessages } from "@/lib/auth-i18n";
+import { membershipMessages } from "@/lib/membership-i18n";
 import { discoveryMessages } from "@/lib/discovery-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { founderMessages } from "@/lib/founder-i18n";
@@ -25,6 +27,8 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
   const trust = trustMessages[locale];
+  const membership = membershipMessages[locale];
+  const country = profile.countryCode && new Intl.DisplayNames([locale === "ht" ? "ht-HT" : locale], { type: "region" }).of(profile.countryCode);
   return <div id="top" className="flex min-h-dvh flex-col">
     <header className="border-b border-[var(--theme-border)] bg-[var(--theme-surface)]">
       <div className={`flex flex-wrap items-center justify-between gap-3 py-3 ${layout}`}>
@@ -56,6 +60,12 @@ export function MemberPublic({ profile, username, social, ambassador, signedIn }
             <FounderVerifiedBadge />
           </details> : <FounderVerifiedBadge />)}
         {profile.biography && <p className="mt-4 max-w-prose whitespace-pre-line break-words" dir="auto">{profile.biography}</p>}
+        {(country || profile.departmentName || !!profile.interests?.length) && <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+          {country && <div><dt className="font-semibold">{authMessages[locale].country}</dt><dd>{country}</dd></div>}
+          {profile.departmentName && <div><dt className="font-semibold">{authMessages[locale].departmentConnection}</dt><dd>{profile.departmentName}</dd></div>}
+          {!!profile.interests?.length && <div><dt className="font-semibold">{membership.interests}</dt>
+            <dd>{profile.interests.map((code) => membership[code]).join(", ")}</dd></div>}
+        </dl>}
         {ambassador && <AmbassadorRecognition ambassador={ambassador} />}
       </section>
       <ProfileFollowPanel target={{ kind: "member", key: username }} initial={social} signedIn={signedIn} />

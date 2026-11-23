@@ -63,6 +63,7 @@ test("Auth and quota outages fail closed and ambiguous poll writes are never rep
     }
     if (operation === "user") return Response.json({ id: actor, aud: "authenticated" });
     if (operation === "account_session_for_api") return Response.json(mode !== "revoked");
+    if (operation === "member_feature_access_for_client") return mode === "onboarding" ? Response.json(false) : Response.json(true);
     if (operation === "consume_safety_read_for_api") return mode === "quota-failure" ? responseError(503, "unavailable") : Response.json(true);
     if (operation === "poll_detail_for_client") return mode === "db-cancel" ? responseError(500, "57014") : Response.json({ ownBallot: choice, results: null });
     throw new Error("Unexpected synthetic upstream operation");
@@ -94,6 +95,12 @@ test("Auth and quota outages fail closed and ambiguous poll writes are never rep
       assert.equal((await app.inject({ url, headers: { authorization: auth } })).statusCode, 401);
       assert.ok(!calls.includes("poll_detail_for_client"));
     }
+    mode = "onboarding";
+    calls = [];
+    const blocked = await app.inject({ url, headers });
+    assert.equal(blocked.statusCode, 403);
+    assert.equal(blocked.json().error.code, "ONBOARDING_REQUIRED");
+    assert.ok(!calls.includes("poll_detail_for_client"));
     mode = "poll_vote_for_client";
     calls = [];
     assertUnavailable(await app.inject({ method: "POST", url: url + "/ballot", headers, payload: { optionId: choice } }));

@@ -1,3 +1,5 @@
+import type { MemberExperienceFlag } from "./accounts.js";
+
 export const auditCategories = ["platform", "governance", "security", "identity", "organization", "verification", "moderation"] as const;
 export const auditResourceTypes = ["account", "proposal", "session_policy", "private_workflow", "username", "organization_role",
   "verification_case", "post", "comment"] as const;
@@ -38,14 +40,14 @@ export interface AuditPage {
 }
 
 export interface PolicyAuditEvent {
-  source: "homepage" | "registration";
+  source: "homepage" | "registration" | "member_experience";
   revision: number;
   actorId: string;
   actorUsername: string | null;
   occurredAt: string;
   reason: string;
   changes: {
-    key: "homepageStatistics" | "enabled" | "mode" | "individualEnabled" | "organizationEnabled" | "referralsEnabled" | "rewardsEnabled";
+    key: "homepageStatistics" | "enabled" | "mode" | "individualEnabled" | "organizationEnabled" | "referralsEnabled" | "rewardsEnabled" | MemberExperienceFlag;
     before: boolean | "public" | "invitation_only" | "closed";
     after: boolean | "public" | "invitation_only" | "closed";
   }[];

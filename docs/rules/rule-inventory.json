@@ -16808,6 +16808,27 @@
   ],
   "postInventoryAdditions": [
     {
+      "id": "MEM-EXPERIENCE-01",
+      "phase": "R2.3",
+      "domain": "Membership and profiles",
+      "name": "Individual onboarding and member profile policies",
+      "key": "member_experience",
+      "initialRevision": 1,
+      "category": "PANEL_BUSINESS_POLICY",
+      "enforcement": "Typed versioned Founder policy, new individual cohort, SQL profile and feature boundaries, and explicit individual public disclosure.",
+      "actors": "Founder with recent MFA and original workspace changes policy; members own profile inputs and consent.",
+      "failureMode": "Protected updates fail closed. Stored individual visibility never changes because of a global setting.",
+      "audit": "Atomic member experience events integrated with Founder Policy changes.",
+      "report": "docs/rules/R2_3_MEMBER_ONBOARDING_AND_PROFILES.md",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261122190000_r23_member_experience.sql",
+          "line": 11,
+          "anchor": "create table private.member_experience_policy"
+        }
+      ]
+    },
+    {
       "id": "REG-01",
       "phase": "R2.2",
       "domain": "Registration and referrals",

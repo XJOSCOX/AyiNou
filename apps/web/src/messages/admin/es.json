@@ -1,4 +1,33 @@
 {
+  "memberExperience": {
+    "title": "Incorporación y perfiles de miembros",
+    "onboarding": "Incorporación de miembros",
+    "profiles": "Perfiles de miembros",
+    "save": "Guardar ajustes",
+    "requiredDetails": "Completa la información obligatoria de este paso.",
+    "policyDisabled": "La configuración de la plataforma limita algunos cambios del perfil. Puedes dejar de compartir en cualquier momento.",
+    "onboardingUnavailable": "La incorporación de miembros no está disponible en este momento.",
+    "finishLater": "Guardar y terminar más tarde",
+    "flags": {
+      "onboardingEnabled": "Activar la incorporación de miembros",
+      "requireCompletion": "Exigir completar la incorporación antes de usar las funciones para miembros",
+      "requireCountry": "Exigir el país",
+      "requireDepartment": "Exigir el departamento para quienes viven en Haití",
+      "requireInterests": "Exigir intereses",
+      "requireLanguage": "Exigir el idioma preferido",
+      "allowSkip": "Permitir omitir pasos opcionales",
+      "showProgress": "Mostrar el progreso de incorporación",
+      "profilesEnabled": "Activar perfiles de miembros",
+      "publicProfiles": "Permitir la visibilidad pública del perfil",
+      "privateProfiles": "Mostrar la vista previa privada del perfil",
+      "profileEdits": "Permitir editar el perfil",
+      "profilePictures": "Permitir fotos de perfil",
+      "profileBiographies": "Permitir biografías",
+      "displayCountry": "Mostrar el país en el perfil público",
+      "displayDepartment": "Mostrar el departamento haitiano en el perfil público",
+      "displayInterests": "Mostrar los intereses en el perfil público"
+    }
+  },
   "policyAudit": {
     "title": "Cambios de configuración",
     "changedBy": "Modificado por",
@@ -35,6 +64,7 @@
   "navigationSections": "Secciones",
   "navigationPlatform": "Plataforma",
   "navigationMembers": "Miembros",
+  "navigationSettings": "Configuración de la plataforma",
   "navigationPrograms": "Programas",
   "founder": "Fundador",
   "homepage": "Inicio",

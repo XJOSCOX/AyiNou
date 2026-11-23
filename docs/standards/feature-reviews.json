@@ -1,6 +1,48 @@
 {
   "features": [
     {
+      "id": "r2-3-member-experience",
+      "report": "docs/rules/R2_3_MEMBER_ONBOARDING_AND_PROFILES.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/member-experience",
+          "contract": "GET /api/v1/admin/member-experience - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only policy projection for the active Founder’s private workspace."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/member-experience.spec.ts",
+            "denialScenario": "Ordinary sessions and copied workspaces are denied."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/member-experience",
+          "contract": "PATCH /api/v1/admin/member-experience 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The policy mutation and versioned old/new event commit atomically."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/member-experience.spec.ts",
+            "denialScenario": "An ordinary member and stale or conflicting revisions cannot change settings."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261122190000_r23_member_experience.sql",
+          "rlsAndGrants": "Private policy, audit and cohort tables deny direct client grants. Authenticated wrappers are scoped to the caller; Founder policy RPC is service-only.",
+          "authorization": "Current session, Founder provenance, recent MFA and the matching private workspace are enforced. Existing protected account gates remain independent.",
+          "compatibility": "New-member cohort and disclosure columns are additive. Historical accounts, saved state and organization pathways are preserved.",
+          "validation": "Disposable tests cover enrollment access, direct profile API writes, optional disclosure, Founder writes, history and browser workflow.",
+          "rolloutAndRollback": "Validate the exact dry run and migration checksum before application. A policy rollback is a new event; schema rollback requires a forward migration."
+        }
+      ]
+    },
+    {
       "id": "platform-policy-audit-history",
       "report": "docs/rules/PLATFORM_POLICY_AUDIT_HISTORY.md",
       "routes": [

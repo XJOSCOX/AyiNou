@@ -25,6 +25,7 @@ GET /api/v1/admin/governance - -
 GET /api/v1/admin/homepage/community-statistics - -
 GET /api/v1/admin/legal - -
 GET /api/v1/admin/legal/audit - -
+GET /api/v1/admin/member-experience - -
 GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
 GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
@@ -163,6 +164,7 @@ HEAD /api/v1/admin/governance - onSend
 HEAD /api/v1/admin/homepage/community-statistics - onSend
 HEAD /api/v1/admin/legal - onSend
 HEAD /api/v1/admin/legal/audit - onSend
+HEAD /api/v1/admin/member-experience - onSend
 HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
 HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend
@@ -291,6 +293,7 @@ OPTIONS * - -
 PATCH /api/v1/admin/accounts/:id 4096 -
 PATCH /api/v1/admin/ambassadors/:id 6000 -
 PATCH /api/v1/admin/homepage/community-statistics 4096 -
+PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/comments/:id 12288 -

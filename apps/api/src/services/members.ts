@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
-import type { Department, MemberProfile, PersonalClaim, ProfileChanges, ProfilePreview, UpdateMemberProfile, UsernameAvailability } from "@ayinou/shared";
+import type { Department, MemberExperience, MemberProfile, PersonalClaim, ProfileChanges, ProfilePreview, UpdateMemberProfile, UsernameAvailability } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { accountRepository, type AccountRepository } from "./accounts.js";
 import { safeProfileImage } from "./profile-image.js";
@@ -101,13 +101,15 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
 
   async function readProfile(userId: string, token: string): Promise<MemberProfile> {
       const member = asMember(token);
-      const [publicResult, privateResult, settings, interests] = await Promise.all([
+      const [publicResult, privateResult, settings, interests, experience] = await Promise.all([
         member.from("profiles").select("user_id,display_name,preferred_locale,is_visible,username,biography,avatar_asset").eq("user_id", userId).single(),
         member.from("member_private").select("residence_country_code,residence_department_code,diaspora_department_code,first_name,last_name,membership_category,onboarding_step").eq("user_id", userId).single(),
-        member.from("user_settings").select("discoverable,show_membership_category").eq("user_id", userId).maybeSingle(),
+        member.from("user_settings").select("discoverable,show_membership_category,show_country,show_department,show_interests").eq("user_id", userId).maybeSingle(),
         member.from("member_interests").select("interest_code").eq("user_id", userId).order("interest_code"),
+        member.rpc("member_experience_for_member"),
       ]);
-      if (publicResult.error || privateResult.error || settings.error || interests.error) throw unavailable();
+      if (publicResult.error || privateResult.error || settings.error || interests.error || experience.error || !experience.data) throw unavailable();
+      const membershipExperience = experience.data as MemberExperience;
       return {
         ...toProfile({ ...publicResult.data, ...privateResult.data } as ProfileRow),
         firstName: privateResult.data.first_name,
@@ -116,9 +118,15 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
         onboardingStep: privateResult.data.onboarding_step,
         username: publicResult.data.username,
         biography: publicResult.data.biography,
-        avatarUrl: await avatarUrl(userId, publicResult.data.avatar_asset),
+        avatarUrl: membershipExperience.policy.profilePictures && membershipExperience.policy.profilesEnabled &&
+          (membershipExperience.policy.privateProfiles || (membershipExperience.policy.publicProfiles && settings.data?.discoverable))
+          ? await avatarUrl(userId, publicResult.data.avatar_asset) : null,
         discoverable: settings.data?.discoverable ?? false,
         showMembershipCategory: settings.data?.show_membership_category ?? false,
+        showCountry: settings.data?.show_country ?? false,
+        showDepartment: settings.data?.show_department ?? false,
+        showInterests: settings.data?.show_interests ?? false,
+        experience: membershipExperience,
         interests: interests.data.map((item) => item.interest_code),
       };
   }
@@ -147,6 +155,7 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
         p_diaspora_department_code: input.diasporaDepartmentCode,
       }).single();
       const row = data as ProfileRow | null;
+      if (error?.code === "R2302") throw new MemberError("PROFILE_POLICY_DISABLED", 403);
       if (error || !row || row.user_id !== userId) throw unavailable();
       await recordActivity(userId);
       return toProfile(row);
@@ -158,6 +167,8 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       if (error?.code === "U1001") throw new MemberError("USERNAME_NOT_PERMITTED", 400);
       if (error?.code === "U1002") throw new MemberError("USERNAME_CHANGE_LIMIT", 429);
       if (error?.code === "42501") throw new MemberError("FORBIDDEN", 403);
+      if (error?.code === "R2301") throw new MemberError("ONBOARDING_DETAILS_REQUIRED", 400);
+      if (error?.code === "R2302") throw new MemberError("PROFILE_POLICY_DISABLED", 403);
       if (error && ["23514", "23503"].includes(error.code)) throw new MemberError("INVALID_PROFILE", 400);
       if (error) throw unavailable();
       await recordActivity(userId);
@@ -181,7 +192,11 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       const saved = await (previous.data.avatar_asset
         ? update.eq("avatar_asset", previous.data.avatar_asset)
         : update.is("avatar_asset", null)).select("user_id").maybeSingle();
-      if (saved.error) throw unavailable();
+      if (saved.error) {
+        await avatars.remove([path]);
+        if (saved.error.code === "R2302") throw new MemberError("PROFILE_POLICY_DISABLED", 403);
+        throw unavailable();
+      }
       if (!saved.data) {
         await avatars.remove([path]);
         throw new MemberError("AVATAR_CONFLICT", 409);
@@ -215,14 +230,19 @@ export function createMemberRepository(config: ApiConfig): MemberRepository | nu
       if (profile.error) throw unavailable();
       if (!profile.data) return null;
       const row = profile.data as { user_id: string; display_name: string; username: string; biography: string | null; avatar_asset: string | null; membership_category: ProfilePreview["membershipCategory"] };
-      const [avatar, designation, leadership] = await Promise.all([
+      const [avatar, designation, leadership, disclosure] = await Promise.all([
         avatarUrl(row.user_id, row.avatar_asset),
         admin.rpc("founder_identity_public_for_api", { p_subject: row.user_id }),
         admin.rpc("platform_leadership_for_api", { p_subject: row.user_id }),
+        admin.rpc("member_profile_disclosure_for_api", { p_user: row.user_id }),
       ]);
       return {
         displayName: row.display_name, username: row.username, biography: row.biography, avatarUrl: avatar,
         membershipCategory: row.membership_category,
+        countryCode: disclosure.error ? null : disclosure.data?.countryCode ?? null,
+        departmentCode: disclosure.error ? null : disclosure.data?.departmentCode ?? null,
+        departmentName: disclosure.error ? null : disclosure.data?.departmentName ?? null,
+        interests: disclosure.error ? null : disclosure.data?.interests ?? null,
         ...(!designation.error && designation.data === true ? { founderVerified: true as const } : {}),
         ...(!leadership.error && (leadership.data === "founder" || leadership.data === "administrator")
           ? { platformLeadership: leadership.data } : {}),

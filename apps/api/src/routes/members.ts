@@ -33,6 +33,8 @@ const profileChanges = z.object({
   biography: z.string().trim().max(320).nullable(),
   discoverable: z.boolean(),
   showMembershipCategory: z.boolean(),
+  showCountry: z.boolean(), showDepartment: z.boolean(), showInterests: z.boolean(),
+  skipOptional: z.boolean(),
   interests: z.array(z.enum(interestCodes)).max(interestCodes.length)
     .transform((values) => [...new Set(values)]),
 }).partial().strict().refine((value) => Object.keys(value).length > 0);
@@ -191,7 +193,12 @@ export async function registerMemberRoutes(
       if (!members || !request.authUserId || !request.authToken) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
       const parsed = updateProfileSchema.safeParse(request.body);
       if (!parsed.success) return reply.code(400).send(error("INVALID_PROFILE", "Profile details are invalid"));
-      return { profile: await members.update(request.authUserId, request.authToken, parsed.data as UpdateMemberProfile) };
+      try {
+        return { profile: await members.update(request.authUserId, request.authToken, parsed.data as UpdateMemberProfile) };
+      } catch (cause) {
+        if (cause instanceof MemberError) return reply.code(cause.statusCode).send(error(cause.code, "Profile could not be saved"));
+        throw cause;
+      }
     });
 
     protectedApp.patch("/api/v1/me/profile/details", async (request, reply) => {
