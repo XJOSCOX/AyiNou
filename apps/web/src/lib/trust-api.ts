@@ -13,7 +13,7 @@ export const submitImpersonationReport = (username: string, kind: ImpersonationK
   authorizedSocialRequest(`/api/v1/members/${path(username)}/impersonation-reports`, json("POST", { kind, institution, explanation, references }));
 export const submitInstitutionReport = (handle: string, kind: ImpersonationKind, explanation: string, references: string[]): Promise<{ id: string }> =>
   authorizedSocialRequest(`/api/v1/institutions/by-handle/${path(handle)}/impersonation-reports`, json("POST", { kind, explanation, references }));
-export const loadVerificationAssignments = (signal: AbortSignal): Promise<{ applications: VerificationAssignment[] }> =>
+export const loadVerificationAssignments = (signal: AbortSignal): Promise<{ applications: (VerificationAssignment & { canRelease?: boolean })[] }> =>
   authorizedSocialRequest(`${ops}/application-assignments`, { signal });
 export const assignVerificationApplication = (id: string, reviewer: string, reason: string, assign: boolean): Promise<void> =>
   authorizedSocialRequest(`${ops}/applications/${path(id)}/assignment`, json("PATCH", { reviewer, reason, assign }));

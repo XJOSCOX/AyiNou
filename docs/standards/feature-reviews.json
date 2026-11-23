@@ -1,6 +1,21 @@
 {
   "features": [
     {
+      "id": "founder-organization-verification",
+      "report": "docs/organizations/FOUNDER_ORGANIZATION_VERIFICATION_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123102000_founder_organization_verification.sql",
+          "rlsAndGrants": "Existing private tables retain RLS and grants. The extended Founder decision RPC remains service-only and the scope helper is private.",
+          "authorization": "Founder provenance, current admin session and recent MFA are required for direct review; delegated reviewers are independently authorized. Protected kinds retain their original paths.",
+          "compatibility": "Additive audit events and queue metadata preserve existing applications, votes, and endpoints.",
+          "validation": "Disposable browser and API checks test the owned-organization queue, assignment, direct decision, and original safeguards.",
+          "rolloutAndRollback": "Exact scoped hosted migration with a read-only postflight. Remove the added authority with a forward migration and retain all audit history."
+        }
+      ]
+    },
+    {
       "id": "founder-new-organization-setup",
       "report": "docs/organizations/FOUNDER_ORGANIZATION_SETUP_IMPLEMENTATION_REPORT.md",
       "routes": [],

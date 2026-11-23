@@ -51,13 +51,13 @@ export function TrustAdministration({ founderWorkspace }: { founderWorkspace?: s
       {applications.error !== null && <TrustError error={applications.error} retry={applications.refresh} returnTo="/admin" />}
       {applications.data?.applications.length === 0 && <p>{t.emptyAssignments}</p>}
       {applications.data?.applications.map((application) => <details className="break-words border-t border-[var(--theme-border)] pt-2" key={application.id}>
-        <summary className="cursor-pointer font-semibold">{labels[application.kind]} {application.applicantUsername && `· @${application.applicantUsername}`}</summary>
+        <summary className="cursor-pointer font-semibold">{labels[application.kind]}{application.organizationName && ` · ${application.organizationName}`} {application.applicantUsername && `· @${application.applicantUsername}`}</summary>
         {application.eligibleReviewers < 2 && <p className="my-2 text-sm">{t.reviewersNeeded}</p>}
-        {founderWorkspace && application.kind === "identity" && application.status === "pending" &&
-          <FounderBlueApproval applicationId={application.id} workspace={founderWorkspace} refresh={applications.refresh} />}
+        {founderWorkspace && (application.kind === "identity" || application.kind === "organization") && application.status === "pending" &&
+          <FounderBlueApproval organization={application.kind === "organization"} applicationId={application.id} workspace={founderWorkspace} refresh={applications.refresh} />}
         {application.assigned.length > 0 && <p className="my-2 text-sm">{t.assignedReviewers} · {application.assigned
           .filter(({ eligible }) => eligible).map(({ handle }) => handle).join(", ") || "—"}</p>}
-        <AssignmentForm canRelease save={async (handle, reason, assign) => {
+        <AssignmentForm canRelease={application.canRelease !== false} save={async (handle, reason, assign) => {
           await assignVerificationApplication(application.id, handle, reason, assign);
           applications.refresh();
         }} />
@@ -82,20 +82,20 @@ export function TrustAdministration({ founderWorkspace }: { founderWorkspace?: s
   </div>;
 }
 
-function FounderBlueApproval({ applicationId, workspace, refresh }: {
-  applicationId: string; workspace: string; refresh(): void;
+function FounderBlueApproval({ applicationId, workspace, refresh, organization }: {
+  applicationId: string; workspace: string; refresh(): void; organization: boolean;
 }) {
   const [locale] = useLocale();
   const t = trustMessages[locale];
   const [open, setOpen] = useState(false);
   return <div className="my-3 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-3">
     <button type="button" className={institutionAction} aria-expanded={open} onClick={() => setOpen(!open)}>{t.founderBlueReview}</button>
-    {open && <FounderBlueDecision applicationId={applicationId} workspace={workspace} refresh={refresh} />}
+    {open && <FounderBlueDecision organization={organization} applicationId={applicationId} workspace={workspace} refresh={refresh} />}
   </div>;
 }
 
-function FounderBlueDecision({ applicationId, workspace, refresh }: {
-  applicationId: string; workspace: string; refresh(): void;
+function FounderBlueDecision({ applicationId, workspace, refresh, organization }: {
+  applicationId: string; workspace: string; refresh(): void; organization: boolean;
 }) {
   const [locale] = useLocale();
   const t = trustMessages[locale];
@@ -127,17 +127,17 @@ function FounderBlueDecision({ applicationId, workspace, refresh }: {
       refresh();
     });
   }}>
-    <p className="text-sm text-[var(--theme-body)]">{t.founderBlueHelp}</p>
+    <p className="text-sm text-[var(--theme-body)]">{organization ? t.founderOrgHelp : t.founderBlueHelp}</p>
     <PublicReferences references={references} />
     <label className="text-sm font-semibold">{t.reason}
       <textarea name="reason" className={institutionField} rows={3} required minLength={10} maxLength={1000} />
     </label>
     <label className="flex items-start gap-2 text-sm">
-      <input className="mt-1" type="checkbox" name="conflictFree" required />{labels.conflictFree}
+      <input className="mt-1" type="checkbox" name="conflictFree" required />{organization ? t.founderOrgConfirm : labels.conflictFree}
     </label>
     {mutation.error !== null && <TrustError error={mutation.error} retry={evidence.refresh} returnTo="/admin" />}
     <div className="flex flex-wrap gap-3">
-      <button value="approve" className={institutionAction} disabled={mutation.busy || references.length === 0}>{t.founderBlueApprove}</button>
+      <button value="approve" className={institutionAction} disabled={mutation.busy || references.length === 0}>{organization ? t.founderOrgApprove : t.founderBlueApprove}</button>
       <button value="reject" className={`${institutionField} mt-0 w-auto`} disabled={mutation.busy || references.length === 0}>{labels.reject}</button>
     </div>
   </form>;
