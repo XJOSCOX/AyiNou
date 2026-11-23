@@ -25,7 +25,7 @@ export function OrganizationTimeline({ handle, signedIn }: { handle: string; sig
   const result = useCursorPage(load, revision);
 
   return <section className="grid min-w-0 gap-3" aria-label={labels.organizationPosts}>
-    <div className={institutionCard + " grid gap-3"}>
+    <div className={institutionCard}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold">{labels.organizationPosts}</h2>
         {(filter !== "all" || Boolean(result.page?.rows.length)) && <select className={institutionField + " mt-0 w-auto max-w-full text-sm"} aria-label={labels.filterPosts} value={filter}
@@ -35,12 +35,12 @@ export function OrganizationTimeline({ handle, signedIn }: { handle: string; sig
         </select>}
       </div>
       {signedIn && <OrganizationPublisher handle={handle} onPublished={refresh} />}
+      {result.page?.rows.length === 0 && <p className="mt-4 rounded-lg border border-dashed border-[var(--theme-border)] bg-[var(--theme-control)] px-4 py-6 text-sm text-[var(--theme-body)]">
+        {filter === "announcements" ? labels.noOrganizationAnnouncements : labels.noOrganizationPosts}
+      </p>}
     </div>
     {result.error !== null && <ApiErrorNotice error={result.error} retry={result.retry} />}
     {!result.page && result.error === null && <p role="status">{feed.working}</p>}
-    {result.page?.rows.length === 0 && <p className={institutionCard + " text-sm text-[var(--theme-body)]"}>
-      {filter === "announcements" ? labels.noOrganizationAnnouncements : labels.noOrganizationPosts}
-    </p>}
     {result.page?.rows.map((post) => <PostCard key={post.id} post={post} changed={refresh} guest={!signedIn} organizationTimeline />)}
     {result.page?.nextCursor && <button type="button" className={institutionAction + " justify-self-start"}
       disabled={result.loadingMore} onClick={() => { void result.more(); }}>{result.loadingMore ? feed.working : feed.loadMore}</button>}
