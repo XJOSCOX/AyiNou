@@ -8,6 +8,6 @@ export function privateFlowPath(flow: Pick<PrivateFlow, "id" | "step">) {
   return "/s/" + flow.id + "/" + flow.step;
 }
 
-export function openPrivateFlow(kind: PrivateFlow["kind"], subject: string): Promise<PrivateFlow> {
-  return authorizedRequest(workflowsEndpoint, { method: "POST", body: JSON.stringify({ kind }) }, subject);
+export function openPrivateFlow(kind: PrivateFlow["kind"], subject: string, sessionId?: string): Promise<PrivateFlow> {
+  return authorizedRequest(workflowsEndpoint, { method: "POST", body: JSON.stringify({ kind }) }, subject, sessionId);
 }

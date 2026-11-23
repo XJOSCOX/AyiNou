@@ -1,14 +1,15 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { accountMessages } from "@/lib/account-i18n";
 import { useLocale } from "@/lib/locale-store";
 import styles from "./mfa-challenge.module.css";
 
 export const mfaActionClass = "rounded-md bg-[var(--theme-primary)] px-4 py-2.5 text-sm font-semibold text-[var(--theme-on-primary)] hover:bg-[var(--theme-primary-hover)] disabled:opacity-60";
 
-export function AuthenticatorCode({ busy, submitCode, challenge }: {
+export function AuthenticatorCode({ busy, submitCode, challenge, focusOnMount }: {
   busy: boolean;
+  focusOnMount?: boolean;
   submitCode: (code: string) => void;
   challenge?: { label: string; descriptionId: string; error?: string };
 }) {
@@ -17,6 +18,8 @@ export function AuthenticatorCode({ busy, submitCode, challenge }: {
   const [code, setCode] = useState("");
   const [caret, setCaret] = useState(0);
   const errorId = useId();
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => { if (focusOnMount) input.current?.focus(); }, [focusOnMount]);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +39,7 @@ export function AuthenticatorCode({ busy, submitCode, challenge }: {
                 </span>)}
             </span>)}
           </span>}
-          <input value={code} onChange={(event) => {
+          <input ref={input} value={code} onChange={(event) => {
             const value = event.currentTarget.value;
             setCode(value.replace(/[^0-9]/g, "").slice(0, 6));
             if (challenge) setCaret(value.slice(0, event.currentTarget.selectionStart ?? value.length).replace(/[^0-9]/g, "").length);

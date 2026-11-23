@@ -19,18 +19,23 @@ export async function fetchApiStatus(signal?: AbortSignal): Promise<StatusRespon
   return data as StatusResponse;
 }
 
-async function sessionHeaders(init?: RequestInit, expectedSubject?: string) {
-  const { data, error } = await browserSupabase().auth.getSession();
+async function sessionHeaders(init?: RequestInit, expectedSubject?: string, expectedSessionId?: string) {
+  const auth = browserSupabase().auth;
+  const { data, error } = await auth.getSession();
   const token = data.session?.access_token;
   if (error || !token) throw new ApiRequestError("UNAUTHORIZED", 401);
   if (expectedSubject && data.session?.user.id !== expectedSubject) throw new ApiRequestError("SESSION_CHANGED", 401);
+  if (expectedSessionId) {
+    const { data: verified } = await auth.getClaims(token);
+    if (verified?.claims.session_id !== expectedSessionId) throw new ApiRequestError("SESSION_CHANGED", 401);
+  }
   const headers = new Headers(init?.headers);
   headers.set("Authorization", `Bearer ${token}`);
   return headers;
 }
 
-export async function authorizedRequest(path: string, init?: RequestInit, expectedSubject?: string) {
-  return publicRequest(path, { ...init, headers: await sessionHeaders(init, expectedSubject) });
+export async function authorizedRequest(path: string, init?: RequestInit, expectedSubject?: string, expectedSessionId?: string) {
+  return publicRequest(path, { ...init, headers: await sessionHeaders(init, expectedSubject, expectedSessionId) });
 }
 
 export async function authorizedImage(path: string, signal: AbortSignal, guest = false) {

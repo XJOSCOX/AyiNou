@@ -1,50 +1,84 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { PlatformAccess, PrivateFlow } from "@ayinou/shared";
+import type { PrivateFlow } from "@ayinou/shared";
 import { adminMessages } from "@/lib/admin-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
-import { ApiRequestError } from "@/lib/api-errors";
+import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
 import { useLocale } from "@/lib/locale-store";
 import { openPrivateFlow, privateFlowPath } from "@/lib/session-security";
 import { sessionSecurityMessages } from "@/lib/session-security-i18n";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionAction, institutionCard } from "./institution-ui";
 import { MemberShell } from "./member-shell";
+import { MfaChallenge } from "./mfa-challenge";
 import { PageHeader } from "./page-header";
 
-export function WorkspaceEntry({ subject, access, kind }: {
-  subject: string; access: PlatformAccess; kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace">;
+export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, verify }: {
+  subject: string; sessionId: string; kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace">;
+  totp: boolean; factorIds: string[]; verify: boolean;
 }) {
   const [locale] = useLocale();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [verifying, setVerifying] = useState(verify && totp);
+  const [error, setError] = useState<unknown>(verify && !totp ? new ApiRequestError("MFA_REQUIRED", 403) : null);
+  const restoreFocus = useRef(false);
   const t = sessionSecurityMessages[locale];
   const admin = kind === "admin_workspace";
+  const entry = admin ? "/admin" : "/verification/review";
 
-  async function open() {
+  async function open(afterVerification = false) {
     if (busy) return;
     setBusy(true);
     setError(null);
     try {
-      const flow = await openPrivateFlow(kind, subject);
-      router.push(privateFlowPath(flow));
+      const flow = await openPrivateFlow(kind, subject, sessionId);
+      if (afterVerification) router.replace(privateFlowPath(flow));
+      else router.push(privateFlowPath(flow));
     } catch (cause) {
-      setError(cause instanceof ApiRequestError && cause.status === 404 ? new ApiRequestError("FORBIDDEN", 403) : cause);
+      const code = apiErrorCode(cause);
+      if (!afterVerification && totp && code === "MFA_REQUIRED") {
+        setVerifying(true);
+      } else {
+        setVerifying(false);
+        if (code === "SESSION_CHANGED") setError(new ApiRequestError("UNAUTHORIZED", 401));
+        else if (cause instanceof ApiRequestError && cause.status === 404) setError(new ApiRequestError("FORBIDDEN", 403));
+        else setError(cause);
+      }
       setBusy(false);
     }
+  }
+
+  function cancelVerification() {
+    restoreFocus.current = true;
+    setVerifying(false);
+    if (verify) window.history.replaceState(null, "", entry);
+  }
+
+  function endVerificationSession() {
+    setVerifying(false);
+    setError(new ApiRequestError("UNAUTHORIZED", 401));
   }
 
   return <MemberShell>
     <div className="grid gap-4">
       <PageHeader title={admin ? adminMessages[locale].administration : institutionMessages[locale].review} />
-      <section className={`${institutionCard} space-y-3`} aria-busy={busy}>
+      {verifying ? <div className={`${institutionCard} mx-auto w-full max-w-md py-6 sm:py-8`}>
+        <MfaChallenge factorIds={factorIds} subject={subject} sessionId={sessionId}
+          workspace={{ onVerified: () => open(true), onCancel: cancelVerification, onSessionEnded: endVerificationSession }} />
+      </div> : <section className={`${institutionCard} space-y-3`} aria-busy={busy}>
         <p>{t.adminLinkHelp}</p>
-        {error !== null && <AdminFeedback error={error} totp={access.totp} next={admin ? "/admin" : "/verification/review"} />}
-        <button type="button" className={institutionAction} disabled={busy} onClick={() => void open()}>{admin ? t.openAdmin : t.openReview}</button>
-      </section>
+        {error !== null && <AdminFeedback error={error} totp={totp} next={entry} />}
+        <button type="button" className={institutionAction} disabled={busy} onClick={() => void open()}
+          ref={(button) => {
+            if (button && restoreFocus.current) {
+              restoreFocus.current = false;
+              button.focus();
+            }
+          }}>{admin ? t.openAdmin : t.openReview}</button>
+      </section>}
     </div>
   </MemberShell>;
 }

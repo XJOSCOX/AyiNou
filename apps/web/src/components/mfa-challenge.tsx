@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { sessionSecurityMessages } from "@/lib/session-security-i18n";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { AuthShell } from "./auth-shell";
 import { AuthenticatorCode } from "./authenticator-code";
 import styles from "./mfa-challenge.module.css";
 
-export function MfaChallenge({ factorIds, next, subject, sessionId }: {
-  factorIds: string[]; next: string; subject: string; sessionId: string;
-}) {
+export function MfaChallenge({ factorIds, next, subject, sessionId, workspace }: {
+  factorIds: string[]; subject: string; sessionId: string;
+} & ({ next: string; workspace?: never } | {
+  next?: never;
+  workspace: { onVerified: () => Promise<void>; onCancel: () => void; onSessionEnded: () => void };
+})) {
   const [locale] = useLocale();
   const t = accountMessages[locale];
+  const security = sessionSecurityMessages[locale];
+  const titleId = useId();
+  const helpId = useId();
   const [factorId, setFactorId] = useState(factorIds[0] ?? "");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -25,7 +32,8 @@ export function MfaChallenge({ factorIds, next, subject, sessionId }: {
       const client = browserSupabase();
       const current = await client.auth.getClaims();
       if (current.data?.claims.sub !== subject || current.data.claims.session_id !== sessionId) {
-        window.location.replace("/login");
+        if (workspace) workspace.onSessionEnded();
+        else window.location.replace("/login");
         return;
       }
       const { data, error } = await client.auth.mfa.challengeAndVerify({ factorId, code });
@@ -33,13 +41,15 @@ export function MfaChallenge({ factorIds, next, subject, sessionId }: {
       const refreshed = await client.auth.getClaims(data.access_token);
       if (refreshed.data?.claims.sub !== subject || refreshed.data.claims.session_id !== sessionId ||
         refreshed.data.claims.aal !== "aal2") { setFailed(true); return; }
-      window.location.replace(next);
+      if (workspace) await workspace.onVerified();
+      else window.location.replace(next);
     } catch { setFailed(true); }
     finally { setBusy(false); }
   }
 
   async function cancel() {
     if (busy) return;
+    if (workspace) { workspace.onCancel(); return; }
     setBusy(true);
     try {
       const client = browserSupabase();
@@ -53,13 +63,14 @@ export function MfaChallenge({ factorIds, next, subject, sessionId }: {
     finally { setBusy(false); }
   }
 
-  return (
-    <AuthShell>
-      <section className={styles.challenge} aria-labelledby="mfa-title">
+  const content = (
+      <section className={styles.challenge} aria-labelledby={titleId}>
         <header className={styles.header}>
           <span className={styles.lock} aria-hidden="true" />
-          <h1 id="mfa-title" className={styles.title}>{t.mfaTitle}</h1>
-          <p id="mfa-help" className={styles.help}>{factorIds.length ? t.mfaHelp : t.mfaUnavailable}</p>
+          {workspace ? <h2 id={titleId} className="text-xl font-semibold">{security.workspaceMfaTitle}</h2>
+            : <h1 id={titleId} className={styles.title}>{t.mfaTitle}</h1>}
+          <p id={helpId} className={styles.help}>{factorIds.length
+            ? (workspace ? security.workspaceMfaHelp : t.mfaHelp) : t.mfaUnavailable}</p>
         </header>
         {factorIds.length > 1 && <label className={styles.factor}>
           {t.authenticator}
@@ -68,11 +79,12 @@ export function MfaChallenge({ factorIds, next, subject, sessionId }: {
           </select>
         </label>}
         {factorId && <AuthenticatorCode busy={busy} submitCode={(code) => { void verify(code); }}
-          challenge={{ label: t.mfaChallengeCode, descriptionId: "mfa-help", error: failed ? t.mfaError : undefined }} />}
+          focusOnMount={Boolean(workspace)}
+          challenge={{ label: t.mfaChallengeCode, descriptionId: helpId, error: failed ? t.mfaError : undefined }} />}
         <footer className={styles.footer}>
           <button type="button" disabled={busy} onClick={() => { void cancel(); }} className={styles.cancel}>{t.cancel}</button>
         </footer>
       </section>
-    </AuthShell>
   );
+  return workspace ? content : <AuthShell>{content}</AuthShell>;
 }

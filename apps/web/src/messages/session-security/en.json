@@ -1,4 +1,6 @@
 {
+  "workspaceMfaTitle": "Confirm workspace access",
+  "workspaceMfaHelp": "Enter a fresh six-digit code from your authenticator app to open this private workspace.",
   "openReview": "Open verification review",
   "closeWorkspace": "Close private workspace",
   "openAdmin": "Open administration",

@@ -1,4 +1,6 @@
 {
+  "workspaceMfaTitle": "Confirma el acceso al espacio privado",
+  "workspaceMfaHelp": "Introduce un código nuevo de seis dígitos de tu aplicación de autenticación para abrir este espacio privado.",
   "openReview": "Abrir la revisión de verificaciones",
   "closeWorkspace": "Cerrar el espacio de trabajo privado",
   "openAdmin": "Abrir la administración",

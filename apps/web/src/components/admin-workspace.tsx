@@ -134,7 +134,7 @@ export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
   return <div className={institutionErrorBox}>
     <p role="alert">{message}</p>
     {code === "MFA_REQUIRED" && <Link className={institutionLink}
-      href={totp === false ? "/settings" : `/mfa?next=${next}`}>{totp === false ? t.accountSecurity : t.verifyNow}</Link>}
+      href={totp === false ? "/settings" : `${next}?verify=1`}>{totp === false ? t.accountSecurity : t.verifyNow}</Link>}
     {code === "UNAUTHORIZED" && <Link className={institutionLink} href="/login">{authMessages[locale].loginTitle}</Link>}
     {retry && !["FORBIDDEN", "MFA_REQUIRED", "UNAUTHORIZED"].includes(code) &&
       <button type="button" className={institutionLink} onClick={retry}>{authMessages[locale].retry}</button>}

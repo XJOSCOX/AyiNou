@@ -1,5 +1,6 @@
 import { apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, localClient, login, openAdministration,
   solveMfa, sql, test, totp, web } from "./fixtures";
+import { accountMessages } from "../src/lib/account-i18n";
 import { adminMessages } from "../src/lib/admin-i18n";
 import { messages } from "../src/lib/i18n";
 import { sessionSecurityMessages } from "../src/lib/session-security-i18n";
@@ -85,6 +86,59 @@ test("Platform Administration uses an original-session link and hides its direct
       sql(`update private.s2a_session_policy set revoked_at=clock_timestamp() where session_id=
         (select bound_session from private.s2b_workflows where id='${revoked}');`);
       expect((await page.reload())?.status()).toBe(404);
+    } finally {
+      sql(`delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);
+    }
+  });
+
+test("Workspace MFA renewal stays in administration and opens a private link after confirmation @smoke",
+  async ({ makeMember, page, context }) => {
+    const leader = await makeMember();
+    finishPersonalOnboarding(leader);
+    const secret = await enroll(leader);
+    sql(`insert into public.role_assignments(user_id,role) values('${leader.id}','administrator');`);
+    try {
+      await inEnglish(context);
+      await login(page, leader);
+      await solveMfa(page, secret);
+      await page.setViewportSize({ width: 320, height: 900 });
+      await page.goto("/admin");
+
+      const endpoint = "**/api/v1/me/private-workflows";
+      await page.route(endpoint, async (route) => {
+        if (route.request().method() !== "POST") { await route.fallback(); return; }
+        await route.fulfill({
+          status: 403, json: { error: { code: "MFA_REQUIRED" } },
+          headers: { "access-control-allow-origin": web },
+        });
+      });
+      const open = page.getByRole("button", { name: sessionSecurityMessages.en.openAdmin });
+      const prompt = page.getByRole("region", { name: sessionSecurityMessages.en.workspaceMfaTitle });
+      const otp = prompt.getByLabel(accountMessages.en.mfaChallengeCode);
+      await open.click();
+      await expect(prompt).toBeVisible();
+      await expect(otp).toBeFocused();
+      await expect(page).toHaveURL(/\/admin$/);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+      await prompt.getByRole("button", { name: accountMessages.en.cancel }).click();
+      await expect(prompt).toHaveCount(0);
+      await expect(open).toBeFocused();
+      expect((await page.reload())?.status()).toBe(200);
+
+      await page.unroute(endpoint);
+      await page.goto("/mfa?next=/admin");
+      await expect(page).toHaveURL(/\/admin\?verify=1$/);
+      await expect(page.getByRole("heading", { name: adminMessages.en.administration })).toBeVisible();
+      await expect(prompt).toBeVisible();
+      const confirm = prompt.getByRole("button", { name: accountMessages.en.mfaSubmit });
+      await expect(confirm).toBeDisabled();
+      await otp.fill(String((Number(totp(secret)) + 100000) % 1000000).padStart(6, "0"));
+      await confirm.click();
+      await expect(prompt.getByRole("alert")).toHaveText(accountMessages.en.mfaError);
+      await otp.fill(totp(secret));
+      await confirm.click();
+      await expect(page).toHaveURL(/\/s\/[0-9a-f-]{36}\/admin$/);
+      await expect(page.getByRole("button", { name: sessionSecurityMessages.en.closeWorkspace })).toBeVisible();
     } finally {
       sql(`delete from public.role_assignments where user_id='${leader.id}' and role='administrator';`);
     }
