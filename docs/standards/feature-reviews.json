@@ -2627,6 +2627,21 @@
           "rolloutAndRollback": "Deploy only the separately approved version after verifying the linked database and release. Use a forward trigger correction if needed and preserve existing history."
         }
       ]
+    },
+    {
+      "id": "p1-production-readiness",
+      "report": "docs/production-readiness/P1_AUDIT_SUMMARY.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124154000_p1_media_and_account_audit.sql",
+          "rlsAndGrants": "Preserves service-only media execution, private A1A view grants, existing table policies and API signatures.",
+          "authorization": "Accepts ready state only with a current lease and active account under the existing moderation lock. The native feature guard still applies. A1A uses the existing authorized projection.",
+          "compatibility": "Historical rows and audit evidence remain unchanged. The view projects only proven persisted revisions. Authorized cancellation and cleanup remain available.",
+          "validation": "Disposable coverage checks stored media lease boundaries and scopes, vote privacy, policy revisions and previous audit projection integrity.",
+          "rolloutAndRollback": "Apply only after separately authorized scoped preflight. Use a reviewed forward correction to restore compatible definitions if required. No data backfill or destructive recovery."
+        }
+      ]
     }
   ]
 }

@@ -10,7 +10,7 @@
         "private.m22_account_events",
         "private.m23_events"
       ],
-      "observed": "The policy change commits atomically with its history. New native decisions carry the applicable policy revision. Existing cases and their records keep their original state.",
+      "observed": "The policy change commits atomically with its history. New native decisions carry the applicable policy revision. A1A exposes persisted account decision revisions above the ambiguous initial default. Historical records retain their original state.",
       "missing": [],
       "viewers": "The recognized Founder reads policy history in an original administration workspace with recent MFA. Eligible enforcement staff receive effective form settings.",
       "excluded": "Reporter identities, private evidence, appeal narratives and credentials.",
@@ -271,7 +271,8 @@
       "excluded": "Post and comment bodies",
       "tests": [
         "apps/web/e2e/forms.spec.ts",
-        "apps/web/e2e/feed-media.spec.ts"
+        "apps/web/e2e/feed-media.spec.ts",
+        "apps/web/e2e/production-readiness.spec.ts"
       ],
       "remediation": "Feed lifecycle audit"
     },

@@ -120,3 +120,7 @@ Founder-only updates and restorations append the actor, reason, previous and req
 ## M3 moderation integration audit
 
 The project event writer enforces the existing project-creation restriction before recording submissions and publication. The audited command, publication and member notification commit together or roll back together. Historical audit rows retain their original content. [Coverage and findings](../moderation/M3_AUDIT_SUMMARY.md)
+
+## P1 production readiness
+
+Account moderation projections reuse proven policy revisions from native events. Legacy and ambiguous initial-policy history retains its original meaning. Media completion rechecks the live lease and access boundary with the existing storage and audit design. [P1 historical audit](../production-readiness/P1_HISTORICAL_AUDIT_REVIEW.md)

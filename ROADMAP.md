@@ -18,6 +18,8 @@
 
 - [x] M3 audits moderation integration, authority, and lifecycle. The project guard is verified on the hosted database and the connected local app passed its read-only checks. [M3 audit](docs/moderation/M3_AUDIT_SUMMARY.md)
 
+- [ ] P1 verified launch boundaries and prepared two database corrections. Public release remains blocked on recovery and operating requirements and a Founder poll privacy decision. [P1 audit](docs/production-readiness/P1_AUDIT_SUMMARY.md)
+
 [M1 audit](docs/moderation/M1_AUDIT_SUMMARY.md) · [M2.1 implementation](docs/moderation/M2_1_IMPLEMENTATION_REPORT.md) · [M2.2 implementation](docs/moderation/M2_2_IMPLEMENTATION_REPORT.md) · [M2.3 implementation](docs/moderation/M2_3_IMPLEMENTATION_REPORT.md) · [M2.4 implementation](docs/moderation/M2_4_IMPLEMENTATION_REPORT.md) · [Approved policy baseline](docs/moderation/M2_APPROVED_POLICY_BASELINE.md)
 
 ## Phase 0 — Foundation (COMPLETE)

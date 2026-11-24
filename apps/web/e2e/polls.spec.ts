@@ -105,7 +105,11 @@ test("ballot receipt is bound to the voter and a stale write stays visible", asy
   await expect(ballot.getByRole("meter", { name: "One" })).toHaveAttribute("value", "100");
   await expect(ballot.getByRole("meter", { name: "Two" })).toHaveAttribute("value", "0");
   await expect(ballot.getByText(t.outcomes.winner, { exact: true })).toHaveCount(1);
-  expect(await apiCall(observer, path, 200)).toMatchObject({ ownBallot: null, results: { total: 2 } });
+  const readings = await Promise.all(Array.from({ length: 3 }, () => apiCall(observer, path, 200)));
+  for (const reading of readings) {
+    expect(reading).toMatchObject({ ownBallot: null, results: { total: 2 } });
+    expect(JSON.stringify(reading)).not.toContain('"ballot_cast"');
+  }
   const receipt = await apiCall(signedIn, path + "/ballot", 200);
   expect(receipt.optionId).toBeTruthy();
   expect(await apiCall(observer, path + "/ballot", 200)).toEqual({ optionId: null });

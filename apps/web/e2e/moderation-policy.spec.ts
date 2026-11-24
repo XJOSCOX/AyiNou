@@ -89,6 +89,13 @@ test("M2.5 protects policy administration and applies changes only to future dec
     expect(replay.status).toBe(200);
     expect((await request(admin, newAccount, a, "PATCH", command({ ...oldSuspension, requestId: randomUUID(), category: "safety" }))).status).toBe(409);
     expect((await request(admin, newAccount, a, "PATCH", command({ ...oldSuspension, requestId: randomUUID(), minutes: 60 }))).status).toBe(400);
+    const recorded = await request<{ eventId: string }>(admin, newAccount, a, "PATCH",
+      command({ action: "suspend", minutes: 60, category: "safety", expected: null }));
+    expect(recorded.status).toBe(200);
+    expect(sql(`select source_version from private.a1a_audit_source where uuid_id='${recorded.data.eventId}';`))
+      .toBe(String(revision + 1));
+    expect(sql(`select count(*) from private.a1a_audit_source where event_type='suspension_created'
+      and resource_ref='${oldSubject.id}' and source_version is null;`)).toBe("1");
     const restriction = command({ action: "restrict", subject: subject.id, capabilities: ["post"], scope: "platform",
       scopeId: null, category: "safety", minutes: 31 });
     expect((await request(mod, features, m, "POST", restriction)).status).toBe(409);
