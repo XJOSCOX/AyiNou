@@ -3,6 +3,7 @@ import sharp from "sharp";
 import type { ProjectProgress, ProjectWork } from "@ayinou/shared";
 import { api, expect, test } from "./fixtures";
 import { projectProgressMessages } from "../src/lib/project-progress-i18n";
+import { projectWorkMessages } from "../src/lib/project-work-i18n";
 
 const progressText = projectProgressMessages.en;
 
@@ -83,7 +84,12 @@ test("project progress preserves stale milestone edits and releases an outcome i
   expect(url).toMatch(/^blob:/);
   await page.getByRole("button", { name: progressText.milestones, exact: true }).click();
   await expect.poll(() => page.evaluate(() => Reflect.get(window, "revokedProgressUrls"))).toContain(url);
-  expect(reads).toEqual({ work: 1, progress: 1 });
+  for (const label of [progressText.progress, progressText.updates, projectWorkMessages.en.overview,
+    projectWorkMessages.en.tasks, projectWorkMessages.en.management, projectWorkMessages.en.activity]) {
+    await page.getByRole("button", { name: label, exact: true }).first().click();
+    await expect(page.getByRole("heading", { name: label, exact: true, level: 2 })).toBeVisible();
+  }
+  expect(reads.work).toBe(1);
   await testInfo.attach("progress timings", {
     body: JSON.stringify({ initialMs, tabMs, reads }), contentType: "application/json",
   });

@@ -1,4 +1,4 @@
-import type { FeedPage, FollowTarget, Locale } from "@ayinou/shared";
+import type { FeedPage, FollowTarget, Locale, OrganizationRole } from "@ayinou/shared";
 import { publicRequest } from "./api";
 import { authorizedSocialRequest } from "./feed-api";
 
@@ -25,6 +25,14 @@ export const setInteraction = (id: string, kind: "repost" | "bookmark", enabled:
 export function followReposts(target: FollowTarget, enabled?: boolean, signal?: AbortSignal): Promise<{ mutual: boolean; showReposts: boolean | null }> {
   return authorizedSocialRequest("/api/v1/me/follow-reposts/" + target.kind + "/" + encodeURIComponent(target.key),
     enabled === undefined ? { signal } : { method: "PUT", body: JSON.stringify({ enabled }) });
+}
+
+export function canPublishAsOrganization(role: OrganizationRole) {
+  return role === "owner" || role === "administrator" || role === "editor";
+}
+
+export function publishedProjectId(value: string) {
+  return value.trim().match(/(?:^|\/projects\/)([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})\/?$/i)?.[1];
 }
 
 export function publishSocialPost(input: ({ sourceId: string; organization?: undefined } | { organization: string; sourceId?: string; announcement?: boolean; projectId?: string }) & { body: string; language: Locale }, id: string): Promise<{ id: string }> {

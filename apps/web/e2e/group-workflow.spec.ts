@@ -45,4 +45,8 @@ test("a new private community admits an invited member through the inbox", async
   expect((await accepted).status()).toBe(204);
   await expect(invite).toHaveCount(0);
   await apiCall(recipient, groupPath + "/posts", 200);
+
+  await page.getByRole("region", { name: t.invitations }).getByRole("link", { name: "Communities", exact: true }).click();
+  await expect(page).toHaveURL(/\/communities$/);
+  await expect(page.getByRole("heading", { name: "Communities", exact: true })).toBeVisible();
 });

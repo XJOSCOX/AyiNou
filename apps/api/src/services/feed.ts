@@ -74,6 +74,8 @@ export function feedDatabaseError(code: string): ApiError {
     case "PJP22": return new ApiError(403, "PROJECT_IDENTITY_REVOKED", "Identity verification is unavailable");
     case "PJP23": return new ApiError(403, "PROJECT_INSTITUTION_AUTHORITY_UNAVAILABLE", "Current institutional authority is required");
     case "PJP24": return new ApiError(403, "PROJECT_COMMUNITY_AUTHORITY_UNAVAILABLE", "Current community authority is required");
+    case "PJP26": return new ApiError(409, "PROJECT_PREVIEW_REQUIRED", "Open the current proposal preview before approving");
+    case "PJP25": return new ApiError(409, "PROJECT_PUBLICATION_UNAVAILABLE", "The approved proposal is unavailable for listing");
     case "PJB01": return new ApiError(409, "PROJECT_WORK_INACTIVE", "Project is not active");
     case "PJB02": return new ApiError(409, "PROJECT_INVITATION_EXPIRED", "Invitation expired");
     case "PJB03": return new ApiError(404, "PROJECT_TEAM_UNAVAILABLE", "Team member or invitation unavailable");

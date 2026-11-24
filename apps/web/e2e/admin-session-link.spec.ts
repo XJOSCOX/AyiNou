@@ -34,6 +34,7 @@ test("Platform Administration uses an original-session link and hides its direct
       await page.goto("/admin");
       await expect(page.getByRole("button", { name: adminMessages.en.accounts, exact: true })).toHaveCount(0);
       await openAdministration(page);
+      await page.getByRole("button", { name: "Moderation Center", exact: true }).click();
       await expect(page.getByRole("button", { name: adminMessages.en.accounts, exact: true })).toBeVisible();
       const original = new URL(page.url());
       expect(original.search).toBe("");
@@ -162,8 +163,21 @@ test("Administration renews expired links automatically and keeps Accounts selec
       status: 403, json: { error: { code: "MFA_REQUIRED" } },
       headers: { "access-control-allow-origin": web },
     }));
-    const accounts = page.getByRole("button", { name: adminMessages.en.accounts, exact: true });
+    const t = adminMessages.en;
+    const navigation = page.getByRole("navigation", { name: t.administration });
+    const filter = navigation.getByRole("searchbox", { name: t.navigationSearch });
+    await navigation.getByRole("button", { name: t.navigationMembers, exact: true }).click();
+    await expect(navigation.getByRole("button", { name: "Trust and verification", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("region", { name: "Trust and verification", exact: true })).toBeVisible();
+    await navigation.getByRole("button", { name: t.navigationPrograms, exact: true }).click();
+    await expect(navigation.getByRole("button", { name: "Founding Ambassadors", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("region", { name: "Founding Ambassadors", exact: true })).toBeVisible();
+
+    const accounts = navigation.getByRole("button", { name: t.accounts, exact: true });
+    await filter.fill(t.accounts);
+    await expect(navigation.getByRole("button", { name: t.overview, exact: true })).toHaveCount(0);
     await accounts.click();
+    await expect(filter).toHaveValue("");
     const renew = page.getByRole("link", { name: adminMessages.en.verifyNow });
     await expect(renew).toHaveAttribute("href", "/admin?verify=1&section=accounts");
     await page.unroute(accountsEndpoint);

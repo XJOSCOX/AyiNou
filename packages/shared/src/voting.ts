@@ -1,4 +1,5 @@
 import type { Locale } from "./core.js";
+import type { PersonalClaim } from "./trust.js";
 import type { ProjectIdentityState } from "./projects.js";
 
 export const pollKinds = ["community", "priority", "decision", "person"] as const;
@@ -13,6 +14,7 @@ export type PollNotice = "nomination_requested" | "finalized" | "cancelled" | "d
 export type PollCard = {
   id: string; title: string; kind: PollKind; scope: PollScope; language: Locale;
   scopeName: string | null; status: PollStatus; policy: "advisory" | "governance"; closesAt: string; createdAt: string;
+  scopeBadges?: { personalClaims?: PersonalClaim[]; founderVerified?: true; verifiedOrganization?: true } | null;
 };
 export type PollConfiguration = {
   title: string; description: string; language: Locale; audience: "members" | "scope"; eligibility: "active" | "verified";

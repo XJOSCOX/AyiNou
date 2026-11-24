@@ -174,6 +174,8 @@ function ApplicationForm({ accounts, initialKind, initialOrg, workspace, refresh
         </select>
       </label>
       {intakePaused && <p role="status" className={institutionErrorBox}>{verificationCopy[locale].copy.paused}</p>}
+      {!intakePaused && kind === "identity" && workspace?.independentIdentityReview && !personalBlocked &&
+        <p className="rounded-md bg-[var(--theme-control)] p-3 text-sm text-[var(--theme-body)]">{t.independentIdentityReview}</p>}
       {!intakePaused && needsOrganization && <label className="block text-sm font-semibold">{t.institutions}
         <select className={institutionField} value={eligible.some((org) => org.id === organization) ? organization : ""}
           onChange={(event) => { setOrganization(event.target.value); setSaved(false); setFailed(null); }} required disabled={busy || !eligible.length}>

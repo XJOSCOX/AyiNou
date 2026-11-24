@@ -1,5 +1,8 @@
+import { accountEnforcementMessages } from "../src/lib/account-enforcement-i18n";
 import { accountMessages } from "../src/lib/account-i18n";
 import { authMessages } from "../src/lib/auth-i18n";
+import { f24Messages } from "../src/lib/f24-i18n";
+import { mediaNotificationMessages } from "../src/lib/media-notification-i18n";
 import { messages } from "../src/lib/i18n";
 import { apiCall, enroll, expect, inEnglish, login, logout, solveMfa, sql, test } from "./fixtures";
 
@@ -29,6 +32,53 @@ test("rejects a bad password, restores the session and signs out @smoke", async 
   expect((await context.cookies()).filter(({ name }) => /^sb-.*auth-token/.test(name))).toHaveLength(0);
   await page.goto("/settings");
   await expect(page).toHaveURL(/\/login/);
+});
+
+test("settings sections retain their links and open independently", async ({ page, signedIn }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/settings");
+  const a = accountMessages.en;
+  const tabs = page.getByRole("navigation", { name: a.settings, exact: true });
+  const security = page.getByRole("heading", { name: a.security, exact: true });
+  await expect(security).toBeVisible();
+  await expect(page.getByRole("heading", { name: a.privateCode })).toHaveCount(0);
+  const notifications = mediaNotificationMessages.en.preferences;
+  await tabs.getByRole("link", { name: notifications, exact: true }).click();
+  await expect(page).toHaveURL(/#notification-preferences$/);
+  await expect(security).toBeHidden();
+  await page.reload();
+  await expect(tabs.getByRole("link", { name: notifications, exact: true })).toHaveAttribute("aria-current", "location");
+  await page.goto("/settings#follow-requests");
+  await expect(tabs.getByRole("link", { name: f24Messages.en.privacy, exact: true })).toHaveAttribute("aria-current", "location");
+  await expect(page.getByRole("heading", { name: f24Messages.en.followRequests, exact: true })).toBeVisible();
+  await tabs.getByRole("link", { name: a.referrals, exact: true }).click();
+  await expect(page.getByRole("heading", { name: a.privateCode })).toBeVisible();
+  await tabs.getByRole("link", { name: a.security, exact: true }).click();
+  await expect(page.getByRole("heading", { name: a.privateCode })).toHaveCount(0);
+  await page.getByRole("link", { name: new RegExp(a.personal) }).click();
+  await expect(page).toHaveURL(/\/profile#personal$/);
+  await expect(page.getByRole("heading", { name: a.personal, exact: true })).toBeVisible();
+  await expect(page.getByText("@" + signedIn.handle, { exact: true })).toBeVisible();
+});
+
+test("Account access has its own status page for members and guests", async ({ page, context, makeMember }) => {
+  await inEnglish(context);
+  await login(page, await makeMember());
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/account-access");
+  const copy = accountEnforcementMessages.en;
+  await expect(page.getByRole("heading", { name: copy.noticesTitle })).toBeVisible();
+  await expect(page.getByText(copy.noActiveNotices)).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: authMessages.en.dashboard }))
+    .toHaveAttribute("href", "/dashboard");
+  await expect(page.getByRole("button", { name: "Pause slideshow", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: authMessages.en.logout, exact: true }).click();
+  await expect(page).toHaveURL(/\/login/);
+  await page.goto("/account-access");
+  await expect(page.getByText(copy.signInForNotices)).toBeVisible();
+  await expect(page.getByRole("main").getByRole("link", { name: authMessages.en.login })).toHaveAttribute("href", "/login");
+  await expect(page.getByRole("heading", { name: copy.noticesTitle })).toHaveCount(0);
 });
 
 test("a restricted member loses an existing browser session and API access", async ({ page, signedIn }) => {

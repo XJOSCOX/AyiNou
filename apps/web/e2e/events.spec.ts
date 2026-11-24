@@ -6,6 +6,8 @@ test("F2.5 events keep private details scoped and enforce capacity under concurr
   test.setTimeout(90_000);
   const [organizer, first, second] = await Promise.all(Array.from({ length: 3 }, () => makeMember({ visible: true })));
   for (const person of [organizer, first, second]) finishPersonalOnboarding(person);
+  sql(`insert into public.verification_records(user_id,verification_type,status,source,reviewed_by,verified_at)
+    values ('${organizer.id}','identity','verified','review','${first.id}',now());`);
   const cover = null;
   const title = "F25 workshop " + randomUUID().slice(0,8);
   const request = randomUUID();
@@ -24,7 +26,7 @@ test("F2.5 events keep private details scoped and enforce capacity under concurr
   await apiCall(first,path + "/status",404,"POST",{ version: event.version, status: "published" });
   const published = (await apiCall(organizer,path + "/status",200,"POST",{ version: event.version, status: "published" })).event;
   const guest = await (await fetch(api+path)).json();
-  expect(guest.event).toMatchObject({ venue: null, meetingUrl: null, counts: null });
+  expect(guest.event).toMatchObject({ venue: null, meetingUrl: null, counts: null, organizer: { personalClaims: ["identity"] } });
   const results = await apiCall(first,base+"?q="+encodeURIComponent(title)+"&department=HT-OU&category=education",200);
   expect(results.page.map(({id}: {id:string}) => id)).toEqual([event.id]);
   const attempts = await Promise.all([first,second].map((member) => fetch(api + path + "/rsvp",{
@@ -42,14 +44,58 @@ test("F2.5 events keep private details scoped and enforce capacity under concurr
   await apiCall(organizer,path + "/updates",200,"POST",{submission:randomUUID(),body:"Bring your workbook"});
   const {postId} = await apiCall(organizer,path + "/share",200,"POST",{submission:randomUUID(),body:"Join the workshop",language:"ht"});
   const shared = (await apiCall(observer,"/api/v1/posts/" + postId,200)).post;
-  expect(shared.social.event).toMatchObject({id:event.id,title});
+  expect(shared.social.event).toMatchObject({id:event.id,title,organizer:{personalClaims:["identity"]}});
   expect(JSON.stringify(shared)).not.toContain("private-room");
   const notices = await apiCall(attendee,"/api/v1/me/notifications",200);
   expect(notices.notifications.map((item: {communityEvent?: {action:string}}) => item.communityEvent?.action))
     .toEqual(expect.arrayContaining(["rsvp","announcement"]));
   await inEnglish(page.context()); await login(page,observer); await expect(page).toHaveURL(/\/dashboard/);
-  await page.goto("/events/" + event.id);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/events?scope=invalid");
+  const navigation = page.getByRole("navigation", { name: "Events", exact: true });
+  const tab = (name: string) => navigation.getByRole("link", { name, exact: true });
+  await expect(tab("Upcoming")).toHaveAttribute("aria-current", "page");
+  for (const [label, scope] of [
+    ["Following", "following"], ["My communities", "communities"], ["Past", "past"],
+    ["My RSVPs", "mine"], ["Organizing", "organizing"],
+  ]) {
+    await tab(label).click();
+    await expect(page).toHaveURL("/events?scope=" + scope);
+    await expect(tab(label)).toHaveAttribute("aria-current", "page");
+  }
+  await page.goBack();
+  await expect(tab("My RSVPs")).toHaveAttribute("aria-current", "page");
+  await page.goForward();
+  await expect(tab("Organizing")).toHaveAttribute("aria-current", "page");
+  await page.reload();
+  await expect(tab("Organizing")).toHaveAttribute("aria-current", "page");
+  await page.goto("/events?scope=past");
+  await expect(tab("Past")).toHaveAttribute("aria-current", "page");
+  await tab("Upcoming").click();
+  await expect(page).toHaveURL("/events");
+  const eventRow = page.getByRole("link", { name: title, exact: true });
+  await expect(eventRow.getByText(body.description, { exact: true })).toBeVisible();
+  await expect(eventRow.getByText("Port-au-Prince · Hybrid", { exact: true })).toBeVisible();
+  await expect(eventRow.locator("time")).toBeVisible();
+  await expect(eventRow.getByRole("img", { name: "Identity verified", exact: true })).toBeVisible();
+  await expect(eventRow.getByText(body.venue, { exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  const filters = page.getByRole("button", { name: "Filters", exact: true });
+  await expect(filters).toHaveAttribute("aria-expanded", "false");
+  await filters.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("combobox", { name: "Category", exact: true })).toBeVisible();
+  await filters.click();
+  await page.getByRole("searchbox", { name: "Search by title" }).fill(title);
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await eventRow.click();
+  await expect(page).toHaveURL("/events/" + event.id);
   await expect(page.getByRole("heading",{name:title})).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back", exact: true })).toHaveAttribute("href", "/events");
+  await expect(page.getByRole("navigation", { name: "Events", exact: true }).getByRole("link", { name: "My communities" }))
+    .toHaveAttribute("href", "/events?scope=communities");
+  await expect(page.locator("article header").getByRole("img", { name: "Identity verified", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   await expect(page.getByRole("link",{name:"Meeting URL"})).toHaveCount(0);
   await apiCall(organizer,path + "/status",200,"POST",{ version: published.version,status:"canceled" });
   expect((await apiCall(attendee,path,200)).event.meetingUrl).toBeNull();
@@ -57,6 +103,99 @@ test("F2.5 events keep private details scoped and enforce capacity under concurr
   sql("update feed_data.events set creator_id=null where id=" + "'" + event.id + "'");
   await apiCall(observer,path + "/status",404,"POST",{ version: published.version+1,status:"canceled" });
   expect(sql("select has_table_privilege('authenticated','feed_data.event_rsvps','select');")).toBe("f");
+});
+
+test("Events tabs show the right events for membership, following, RSVP, and ownership", async ({ makeMember, page }) => {
+  test.setTimeout(90_000);
+  const [host, viewer, outsider] = await Promise.all(Array.from({ length: 3 }, () => makeMember({ visible: true })));
+  for (const person of [host, viewer, outsider]) finishPersonalOnboarding(person);
+  const communityId = sql("select id from feed_data.communities where slug='ouest'");
+  sql(`insert into feed_data.community_memberships(community_id,user_id)
+    values ('${communityId}','${host.id}'), ('${communityId}','${viewer.id}');`);
+  await apiCall(viewer, "/api/v1/members/" + host.handle + "/follow", 200, "PUT");
+
+  const base = "/api/v1/events";
+  const timing = Date.now();
+  const prefix = "Scope test " + randomUUID().slice(0, 8);
+  const titles = {
+    community: prefix + " community workshop",
+    following: prefix + " member story circle",
+    past: prefix + " past cleanup",
+    draft: prefix + " planning draft",
+  };
+  const input = {
+    version: null, organizationId: null, projectId: null, description: "Fictional event for tab coverage",
+    category: "community", format: "online", startsAt: new Date(timing + 86_400_000).toISOString(),
+    endsAt: new Date(timing + 90_000_000).toISOString(), timeZone: "America/Port-au-Prince", country: null,
+    department: null, locality: null, venue: null, meetingUrl: null, coverUrl: null, capacity: null, language: "en",
+  };
+
+  const { event: community } = await apiCall(host, base, 200, "POST", {
+    ...input, request: randomUUID(), title: titles.community, visibility: "community", communityId,
+  });
+  await apiCall(host, base + "/" + community.id + "/status", 200, "POST", { status: "published", version: community.version });
+  await apiCall(viewer, base + "/" + community.id + "/rsvp", 200, "PUT", { response: "going", listMe: false });
+  await apiCall(outsider, base + "/" + community.id, 404);
+  const { event: open } = await apiCall(host, base, 200, "POST", {
+    ...input, request: randomUUID(), title: titles.following, visibility: "public", communityId,
+  });
+  const openPath = base + "/" + open.id;
+  await apiCall(host, openPath + "/status", 200, "POST", { status: "published", version: open.version });
+  const guest = await (await fetch(api + openPath)).json();
+  expect(guest.event).toMatchObject({ visibility: "public", communityId, communityName: "Ouest", canRsvp: false });
+  expect((await apiCall(outsider, openPath, 200)).event.canRsvp).toBe(true);
+  await apiCall(outsider, openPath + "/rsvp", 200, "PUT", { response: "going", listMe: false });
+  expect((await apiCall(outsider, base + "?scope=communities", 200)).page).toEqual([]);
+
+  const { event: past } = await apiCall(host, base, 200, "POST", {
+    ...input, request: randomUUID(), title: titles.past, visibility: "members", communityId: null,
+  });
+  const pastStatus = base + "/" + past.id + "/status";
+  const { event: published } = await apiCall(host, pastStatus, 200, "POST", { status: "published", version: past.version });
+  // Move the already published fixture into the past to exercise the normal completion action.
+  sql(`update feed_data.events set starts_at=now()-interval '2 hours', ends_at=now()-interval '1 hour' where id='${past.id}';`);
+  await apiCall(host, pastStatus, 200, "POST", { status: "completed", version: published.version });
+
+  await inEnglish(page.context());
+  await login(page, viewer);
+  await expect(page).toHaveURL(/\/dashboard/);
+  await page.goto("/events/new");
+  const form = page.locator("form");
+  await form.locator('[name="title"]').fill(titles.draft);
+  await form.locator('[name="description"]').fill(input.description);
+  await form.locator('[name="format"]').selectOption("online");
+  const audience = form.locator('[name="visibility"]');
+  const linkedCommunity = form.locator('[name="communityId"]');
+  await audience.selectOption("community");
+  await expect(linkedCommunity).toHaveAttribute("required", "");
+  await linkedCommunity.selectOption(communityId);
+  await audience.selectOption("members");
+  await expect(linkedCommunity).not.toHaveAttribute("required", "");
+  await expect(linkedCommunity).toHaveValue(communityId);
+  await form.locator('[name="timeZone"]').fill("UTC");
+  await form.locator('[name="startsAt"]').fill(input.startsAt.slice(0, 16));
+  await form.locator('[name="endsAt"]').fill(input.endsAt.slice(0, 16));
+  await form.getByRole("button", { name: "Save draft", exact: true }).click();
+  await expect(page.getByRole("heading", { name: titles.draft })).toBeVisible();
+  await expect(page.getByText("Linked community · Ouest")).toBeVisible();
+  await expect(page.getByText("Any signed-in AyiNou member can RSVP.")).toBeVisible();
+  await page.goto("/events");
+  const navigation = page.getByRole("navigation", { name: "Events", exact: true });
+  for (const [tab, expected] of [
+    ["Upcoming", [titles.community, titles.following]],
+    ["Following", [titles.community, titles.following]],
+    ["My communities", [titles.community, titles.following]],
+    ["Past", [titles.past]],
+    ["My RSVPs", [titles.community]],
+    ["Organizing", [titles.draft]],
+  ] as const) {
+    const link = navigation.getByRole("link", { name: tab, exact: true });
+    if (tab !== "Upcoming") await link.click();
+    await expect(link).toHaveAttribute("aria-current", "page");
+    const rows = page.getByRole("link", { name: new RegExp(prefix) });
+    await expect(rows).toHaveCount(expected.length);
+    for (const title of expected) await expect(rows.filter({ hasText: title })).toBeVisible();
+  }
 });
 
 test("F2.5 resolves local wall time at daylight-saving transitions", () => {

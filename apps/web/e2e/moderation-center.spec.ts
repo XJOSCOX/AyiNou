@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
-import type { ModerationCenterPage } from "@ayinou/shared";
+import type { ModerationCenterPage, ModerationSummary } from "@ayinou/shared";
 import {
   api, apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, localClient, login,
   openAdministration, solveMfa, sql, test, totp, type Member,
 } from "./fixtures";
 import { adminMessages } from "../src/lib/admin-i18n";
+import { messages } from "../src/lib/i18n";
 import { moderationCenterMessages } from "../src/lib/moderation-center-i18n";
 
 const endpoint = "/api/v1/admin/moderation-center";
@@ -144,10 +145,38 @@ test("M2.1 fits desktop and mobile and keeps navigation usable in four languages
     await login(page, admin);
     await solveMfa(page, secret);
     await openAdministration(page);
+    await page.getByRole("button", { name: moderationCenterMessages.en.title, exact: true }).click();
     await page.getByRole("button", { name: moderationCenterMessages.en.overview, exact: true }).click();
     await expect(page.getByText(moderationCenterMessages.en.hiddenContent, { exact: true })).toBeVisible();
     await page.getByRole("button", { name: moderationCenterMessages.en.content, exact: true }).click();
     await expect(page.getByRole("link", { name: moderationCenterMessages.en.feedTool })).toHaveAttribute("href", "/feed/moderation");
+
+    const recorded = new Date().toISOString();
+    const accountAction: ModerationSummary = {
+      id: randomUUID(), source: "account_enforcement", domain: "accounts", target: "account", targetId: admin.id,
+      status: "recorded", action: "suspension_created", occurredAt: recorded, scopeKey: null, expiresAt: null, actorRef: null,
+    };
+    const nextAction = { ...accountAction, id: randomUUID(), action: "restriction_revoked" };
+    const contentAction: ModerationSummary = {
+      ...accountAction, id: randomUUID(), source: "post_moderation", domain: "feed", target: "post", action: "hide",
+    };
+    await page.route(`**${endpoint}?**`, (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("view") !== "history") return route.fallback();
+      const more = params.has("cursor");
+      return route.fulfill({ json: { rows: more ? [nextAction] : [accountAction, contentAction], nextCursor: more ? null : "test-page", metrics: null } });
+    });
+    const t = moderationCenterMessages.en;
+    await page.getByRole("button", { name: t.history, exact: true }).click();
+    await expect(page.getByRole("heading", { name: t.historyByAccount })).toBeVisible();
+    const accountGroups = page.locator("details").filter({ has: page.locator("summary").getByText("@" + admin.handle, { exact: true }) });
+    await expect(accountGroups).toHaveCount(1);
+    await accountGroups.locator("summary").click();
+    await expect(accountGroups.getByRole("listitem")).toHaveCount(1);
+    await page.getByRole("button", { name: adminMessages.en.next, exact: true }).click();
+    await expect(accountGroups).toHaveCount(1);
+    await expect(accountGroups.getByRole("listitem")).toHaveCount(2);
+    await expect(page.getByRole("heading", { name: t.historyOther })).toBeVisible();
 
     await page.setViewportSize({ width: 320, height: 850 });
     const select = page.getByRole("banner").getByRole("combobox").last();
@@ -158,7 +187,14 @@ test("M2.1 fits desktop and mobile and keeps navigation usable in four languages
       await page.getByRole("button", { name: t.reports, exact: true }).press("Enter");
       await expect(page.getByRole("heading", { name: t.reports, exact: true })).toBeVisible();
       await expect(page.getByRole("button", { name: t.filter, exact: true })).toBeVisible();
+      const scope = page.getByLabel(t.scope, { exact: true });
+      await expect(scope).toBeHidden();
+      const advanced = page.locator("summary").filter({ hasText: messages[locale].filters });
+      await advanced.press("Enter");
+      await expect(scope).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+      await advanced.press("Enter");
+      await expect(scope).toBeHidden();
     }
   } finally {
     sql(`delete from public.role_assignments where user_id='${admin.id}' and role='administrator';`);

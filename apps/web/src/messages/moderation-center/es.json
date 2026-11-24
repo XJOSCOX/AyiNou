@@ -24,6 +24,8 @@
   "indefinite": "Indefinida",
   "actor": "Responsable",
   "accountHistory": "Historial de la cuenta",
+  "historyByAccount": "Historial por cuenta",
+  "historyOther": "Historial de contenido y otros registros",
   "feedTool": "Moderación del muro",
   "eventTool": "Denuncias de eventos",
   "projectTool": "Revisión de proyectos",

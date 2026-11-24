@@ -1,11 +1,12 @@
 import { EntryBody } from "./entry-content";
 import { type Controls, useProgressText, Change, nullable, value, actionRow, Reason } from "./progress-controls";
 import { ApiErrorNotice } from "@/components/api-error-notice";
-import { institutionField, institutionAction, institutionLink } from "@/components/institution-ui";
+import { institutionField, institutionAction } from "@/components/institution-ui";
 import { useFeedMutation } from "@/lib/feed-state";
 import { putProgressImage } from "@/lib/project-progress-api";
 import { projectProgressKinds, type ProjectProgress, type ProjectProgressEntry, type ProjectProgressContent } from "@ayinou/shared";
 import { useState } from "react";
+import { ProjectDisclosure } from "@/components/project-ui";
 
 function EntryForm({ kind, data, entry, parent, ...controls }: Controls & {
   kind: (typeof projectProgressKinds)[number]; data: ProjectProgress; entry?: ProjectProgressEntry; parent?: ProjectProgressEntry;
@@ -81,11 +82,12 @@ export function Entries({ data, reports, ...controls }: Controls & { data: Proje
   const allowedTime = reports ? !!data.completedOn && (data.status === "completed" || data.status === "archived") : data.status === "active";
   const authoring = allowedTime && (reports ? data.role === "owner" : !!data.role);
   const kinds = reports ? ["report"] as const : ["update", "evidence"] as const;
-  return <section className="grid gap-3">
-    <h3 className="font-semibold">{reports ? t.kinds.report : t.updates}</h3>
+  const Heading = reports ? "h4" : "h3";
+  return <div className="grid min-w-0 gap-3">
+    {reports && <h3 className="font-semibold">{t.kinds.report}</h3>}
     {reports && !data.completedOn && <p className="text-sm">{t.errors.reportUnavailable}</p>}
-    {authoring && kinds.map((kind) => <details key={kind}><summary className={institutionLink}>{t.createKinds[kind]}</summary>
-      <EntryForm {...controls} data={data} kind={kind} /></details>)}
+    {authoring && kinds.map((kind) => <ProjectDisclosure title={t.createKinds[kind]} key={kind}>
+      <EntryForm {...controls} data={data} kind={kind} /></ProjectDisclosure>)}
     {!current.length && <p>{t.empty}</p>}
     {current.map((entry) => {
       const key = { id: entry.id, version: entry.version };
@@ -93,28 +95,28 @@ export function Entries({ data, reports, ...controls }: Controls & { data: Proje
       return <article key={entry.id} className="grid min-w-0 gap-2 border-t border-[var(--theme-border)] pt-3" id={"progress-" + entry.id}>
         <p className="text-sm">{t.kinds[entry.kind]} · {t.entryStates[entry.state]} · {entry.visibility === "public" ? t.publicOnly : t.teamOnly}
           {entry.reviewed && <> · {t.internalReview}</>}{entry.superseded && <> · {t.previousVersion}</>}</p>
-        <h4 className="break-words font-semibold" dir="auto">{entry.content.title}</h4>
+        <Heading className="break-words font-semibold" dir="auto">{entry.content.title}</Heading>
         <EntryBody projectId={controls.id} entry={entry} signedIn />
         {authoring && entry.mine && draft && <>
-          <details><summary className={institutionLink}>{t.actions.entry_edit}</summary>
-            <EntryForm {...controls} data={data} kind={entry.kind} entry={entry} /></details>
-          <details><summary className={institutionLink}>{t.actions.entry_image}</summary><ImageForm {...controls} entry={entry} /></details>
+          <ProjectDisclosure title={t.actions.entry_edit}>
+            <EntryForm {...controls} data={data} kind={entry.kind} entry={entry} /></ProjectDisclosure>
+          <ProjectDisclosure title={t.actions.entry_image}><ImageForm {...controls} entry={entry} /></ProjectDisclosure>
           {entry.hasImage && <Change {...controls} section="entries" action="entry_remove_image" data={key} />}
           <div className={actionRow}><Change {...controls} section="entries" action="entry_submit" data={key} /></div>
         </>}
         {allowedTime && entry.canReview && (["entry_approve", "entry_return", "entry_reject"] as const).map((action) =>
-          <details key={action}><summary className={institutionLink}>{t.actions[action]}</summary>
+          <ProjectDisclosure title={t.actions[action]} key={action}>
             <Change {...controls} section="entries" action={action} data={key} read={(form) => ({ reason: value(form, "reason") })}><Reason /></Change>
-          </details>)}
+          </ProjectDisclosure>)}
         {entry.state !== "withdrawn" && (data.canManage || (entry.mine && entry.state !== "approved")) &&
-          <details><summary className={institutionLink}>{t.actions.entry_withdraw}</summary>
+          <ProjectDisclosure title={t.actions.entry_withdraw}>
             <Change {...controls} section="entries" action="entry_withdraw" data={key} read={(form) => ({ reason: value(form, "reason") })}><Reason /></Change>
-          </details>}
+          </ProjectDisclosure>}
         {authoring && !entry.superseded && (entry.state === "approved" || (entry.state === "withdrawn" && entry.approvedAt)) &&
           (entry.mine || data.canManage) &&
-          <details><summary className={institutionLink}>{t.addCorrection}</summary>
-            <EntryForm {...controls} data={data} kind={entry.kind} parent={entry} /></details>}
+          <ProjectDisclosure title={t.addCorrection}>
+            <EntryForm {...controls} data={data} kind={entry.kind} parent={entry} /></ProjectDisclosure>}
       </article>;
     })}
-  </section>;
+  </div>;
 }

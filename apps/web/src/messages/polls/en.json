@@ -1,5 +1,7 @@
 {
   "title": "Polls",
+  "opensIn": "Voting opens in",
+  "closesIn": "Voting ends in",
   "mine": "My polls",
   "create": "Create a poll",
   "rules": "Ayinou polls guide community discussions and project decisions. Each eligible account has one private ballot.",
@@ -81,7 +83,7 @@
   },
   "resultPolicies": {
     "after_close": "After finalization",
-    "after_vote": "After your ballot or finalization"
+    "after_vote": "During voting and after finalization"
   },
   "states": {
     "draft": "Draft",

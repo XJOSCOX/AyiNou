@@ -1,5 +1,9 @@
 {
+  "directoryHelp": "Encuentra próximos eventos, consulta tus respuestas o gestiona los eventos que organizas.",
+  "createHelp": "Elige el horario, la ubicación y la visibilidad. Guarda un borrador mientras preparas los detalles.",
+  "draftHelp": "Solo las personas organizadoras pueden ver este borrador. Publícalo cuando esté listo para los asistentes.",
   "events": "Eventos",
+  "back": "Volver",
   "create": "Crear evento",
   "upcoming": "Próximos",
   "following": "Siguiendo",
@@ -25,6 +29,17 @@
   "individual": "Cuenta personal",
   "community": "Comunidad",
   "visibility": "Visibilidad",
+  "participation": "Quién puede participar",
+  "memberAudience": "Miembros de AyiNou",
+  "communityAudience": "Miembros de la comunidad vinculada",
+  "audience": {
+    "public": "Cualquiera puede ver el evento. Inicia sesión para confirmar tu asistencia.",
+    "members": "Cualquier miembro de AyiNou que haya iniciado sesión puede confirmar su asistencia.",
+    "community": "Los miembros de la comunidad vinculada pueden confirmar su asistencia desde cualquier lugar."
+  },
+  "relatedCommunity": "Comunidad vinculada",
+  "noCommunity": "Ninguna comunidad vinculada",
+  "relatedCommunityHelp": "Cuando se publique, los miembros de la comunidad podrán encontrarlo en Mis comunidades.",
   "public": "Público",
   "members": "Solo miembros",
   "timeZone": "Zona horaria del evento",

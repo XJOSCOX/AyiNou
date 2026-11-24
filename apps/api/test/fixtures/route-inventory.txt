@@ -378,6 +378,7 @@ PATCH /api/v1/moderation/posts/:id 4096 -
 PATCH /api/v1/polls/:id 10000 -
 PATCH /api/v1/posts/:id 16384 -
 PATCH /api/v1/projects/:id 28000 -
+PATCH /api/v1/projects/:id/publication 512 -
 PATCH /api/v1/projects/:id/reports/:report 6000 -
 PATCH /api/v1/trust/applications/:id/assignment 4096 -
 PATCH /api/v1/trust/impersonation/:id/decision 6000 -

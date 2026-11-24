@@ -28,6 +28,51 @@
       "displayInterests": "Show interests on public profile"
     }
   },
+  "auditWorkspace": {
+    "activity": "Platform activity",
+    "decisions": "Decision records",
+    "intro": "Browse recorded platform and moderation activity. The default view covers the last 30 days.",
+    "filter": "Filter activity",
+    "category": "Category",
+    "outcome": "Outcome",
+    "all": "All",
+    "apply": "Apply filters",
+    "reset": "Reset",
+    "from": "From (UTC)",
+    "through": "Through (UTC)",
+    "range": "Use a date range of up to 90 days.",
+    "resource": "Resource ID",
+    "reference": "Record reference",
+    "request": "Request reference",
+    "before": "Previous state",
+    "after": "New state",
+    "empty": "No activity matches these filters.",
+    "decisionSearch": "Filter the latest decision records",
+    "decisionPlaceholder": "Search by action, name, username, ID, or reason",
+    "actorName": "Performed by",
+    "affectedName": "Affected member",
+    "selectMember": "Select a member from the suggestions, or clear the field.",
+    "newer": "Newer",
+    "older": "Older",
+    "page": "Page {page}",
+    "categories": {
+      "platform": "Platform",
+      "governance": "Governance",
+      "security": "Security",
+      "identity": "Identity",
+      "organization": "Organization",
+      "verification": "Verification",
+      "moderation": "Moderation"
+    },
+    "outcomes": {
+      "recorded": "Recorded",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "revoked": "Revoked",
+      "expired": "Expired",
+      "cancelled": "Canceled"
+    }
+  },
   "policyAudit": {
     "title": "Policy changes",
     "changedBy": "Changed by",
@@ -61,6 +106,10 @@
     "expires": "Expires",
     "copy": "Copy code"
   },
+  "administrationIntro": "Manage platform settings, member access, and moderation from this workspace.",
+  "navigationSearch": "Find a section",
+  "navigationNoResults": "No sections match your search.",
+  "openAdminSection": "Open {section}",
   "navigationSections": "Sections",
   "navigationPlatform": "Platform",
   "navigationMembers": "Members",

@@ -27,6 +27,8 @@ begin
   foreach actor in array array[owner_id,first_id,second_id,outsider,newcomer] loop
     insert into auth.users(id,email,email_confirmed_at) values(actor,actor::text||'@poll-rollback.invalid',now());
     perform public.initialize_member_for_api(actor);
+    update public.member_private set onboarding_step=4,first_name='Synthetic',last_name='Voter',membership_category='haitian'
+      where user_id=actor;
     update public.profiles set display_name='Synthetic voter',username='poll_'||left(replace(actor::text,'-',''),14),is_visible=true
       where user_id=actor;
     insert into public.user_settings(user_id,discoverable) values(actor,true) on conflict(user_id) do update set discoverable=true;
@@ -35,11 +37,12 @@ begin
       factor_key:=gen_random_uuid();
       insert into auth.mfa_factors(id,user_id,factor_type,status,secret,created_at,updated_at)
         values(factor_key,actor,'totp','verified','rollback-only',now(),now());
-      insert into auth.sessions(id,user_id,aal,factor_id) values(session_key,actor,'aal2',factor_key);
+      insert into auth.sessions(id,user_id,aal,factor_id,created_at,updated_at)
+        values(session_key,actor,'aal2',factor_key,now(),now());
       claims:=jsonb_build_object('sub',actor,'session_id',session_key,'aal','aal2',
         'amr',jsonb_build_array(jsonb_build_object('method','totp','timestamp',extract(epoch from now())::bigint)))::text;
     else
-      insert into auth.sessions(id,user_id,aal) values(session_key,actor,'aal1');
+      insert into auth.sessions(id,user_id,aal,created_at,updated_at) values(session_key,actor,'aal1',now(),now());
       claims:=jsonb_build_object('sub',actor,'session_id',session_key,'aal','aal1')::text;
     end if;
     case actor when owner_id then owner_claims:=claims; when first_id then first_claims:=claims;
@@ -61,6 +64,8 @@ begin
   updated:=public.poll_save_for_client(personal,fields||jsonb_build_object('version',(report->>'version')::integer));
   perform public.poll_transition_for_client(personal,'publish',(updated->>'version')::integer,null,null);
   first_option:=(public.poll_detail_for_client(personal)->'options'->0->>'id')::uuid;
+  if public.poll_detail_for_client(personal)->'results' is distinct from 'null'::jsonb
+    then raise exception 'scheduled poll exposed results'; end if;
   begin
     perform public.poll_vote_for_client(personal,first_option);
     raise exception 'early vote accepted';
@@ -71,7 +76,8 @@ begin
   exception when sqlstate 'PVG09' then null; end;
   update private.polls set opens_at=now()-interval '5 min' where id=personal;
   perform set_config('request.jwt.claims',outside_claims,true);
-  if public.poll_detail_for_client(personal)->'results'<>'null'::jsonb then raise exception 'premature totals'; end if;
+  if public.poll_detail_for_client(personal)->'results'->>'total' is distinct from '0'
+    then raise exception 'open poll did not expose empty aggregates before voting'; end if;
   report:=public.poll_vote_for_client(personal,first_option);
   if public.poll_vote_for_client(personal,first_option)<>report then raise exception 'receipt changed on retry'; end if;
   report:=public.poll_detail_for_client(personal);
@@ -87,8 +93,9 @@ begin
     raise exception 'ordinary account moderated poll';
   exception when sqlstate 'PVG04' then null; end;
   perform set_config('request.jwt.claims',first_claims,true);
-  if public.poll_detail_for_client(personal)->'ownBallot'<>'null'::jsonb
-    or public.poll_detail_for_client(personal)->'results'<>'null'::jsonb then raise exception 'another voter receipt or results leaked'; end if;
+  report:=public.poll_detail_for_client(personal);
+  if report->'ownBallot' is distinct from 'null'::jsonb or report->'results'->>'total' is distinct from '1'
+    then raise exception 'personal receipt or aggregate visibility mismatch'; end if;
   perform public.poll_vote_for_client(personal,second_option);
   update private.polls set closes_at=now()-interval '1 min' where id=personal;
   perform set_config('request.jwt.claims',second_claims,true);
@@ -232,8 +239,9 @@ begin
     or (select count(*) from feed_data.community_memberships m where m.community_id=group_id)<>5
     then raise exception 'withdrawal tally or separate community membership failed'; end if;
 
-  org_id:=public.institution_save_for_api(owner_id,null,jsonb_build_object('handle','poll-'||mark,
-    'name','Synthetic voting institution','kind','nonprofit','countryCode','HT'));
+  insert into private.organizations(handle,name,kind,country_code,created_by)
+    values('poll-'||mark,'Synthetic voting institution','nonprofit','HT',owner_id) returning id into org_id;
+  insert into private.organization_memberships(organization_id,user_id,role) values(org_id,owner_id,'owner');
   config:=fields||jsonb_build_object('scope','organization','scopeId',org_id,'audience','scope',
     'eligibility','verified','resultPolicy','after_close','key',gen_random_uuid());
   begin
@@ -270,7 +278,7 @@ begin
     perform public.poll_save_for_client(null,config);
     raise exception 'unapproved proposal accepted priority poll';
   exception when sqlstate 'PVG03' then null; end;
-  update private.community_projects set status='approved',submitted_by=owner_id,submitted_at=now(),approved_at=now()
+  update private.community_projects set status='approved',submitted_by=owner_id,submitted_at=now(),approved_at=now(),directory_published_at=now()
     where id=project;
   perform public.project_operation_for_client(project,'execution_status','{"status":"active","version":0}');
   priority:=(public.poll_save_for_client(null,config)->>'id')::uuid;

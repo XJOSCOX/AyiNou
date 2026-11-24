@@ -60,7 +60,8 @@ test("feed and project review preserve exact success and safe error envelopes", 
         case "save_recommendation_topics_for_client":
         case "clear_recommendation_feedback_for_client": return settings as T;
         case "notification_count_for_client": return 7 as T;
-        case "project_review_for_client": return 2 as T;
+        case "project_review_for_client":
+        case "project_set_publication_for_client": return 2 as T;
         case "project_report_for_client": return id as T;
         case "mutate_post_for_client":
           if (input?.p_version === 2) throw feedDatabaseError("PFR09");
@@ -140,9 +141,12 @@ test("feed and project review preserve exact success and safe error envelopes", 
   await check({ url: "/api/v1/projects/reports", headers: reviewer }, 200, { reports: [] },
     { calls: [["reviewer", "project_queue_for_client", { p_reports: true }]] });
   await check({ method: "POST", url: `/api/v1/projects/${id}/review`, headers: reviewer,
-    payload: { version: 1, action: "approve", reason: "Review fixture only" } }, 200, { version: 2 },
+    payload: { version: 1, action: "approve", reason: "Review fixture only", previewProof: "a".repeat(64) } }, 200, { version: 2 },
     { calls: [["reviewer", "project_review_for_client", { p_id: id, p_version: 1, p_action: "approve",
-      p_reason: "Review fixture only", p_reviewer: null }]] });
+      p_reason: "Review fixture only", p_reviewer: null, p_preview_proof: "a".repeat(64) }]] });
+  await check({ method: "PATCH", url: `/api/v1/projects/${id}/publication`, headers: member,
+    payload: { version: 1, publish: true } }, 200, { version: 2 },
+    { calls: [["member", "project_set_publication_for_client", { p_id: id, p_version: 1, p_publish: true }]] });
   await check({ method: "POST", url: `/api/v1/projects/${id}/reports`, headers: member,
     payload: { category: "privacy", explanation: "A local fixture report" } }, 201, { id });
   await check({ method: "PATCH", url: `/api/v1/projects/${id}/reports/${sibling}`, headers: reviewer,

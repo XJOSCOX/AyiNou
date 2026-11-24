@@ -37,6 +37,7 @@ export type PersonalVerificationRequestState = "available" | "pending" | "alread
 export type VerificationWorkspace = {
   applications: VerificationApplication[];
   personalRequests: Record<PersonalClaim, PersonalVerificationRequestState>;
+  independentIdentityReview?: boolean;
   institutionRequests?: Record<string, {
     institution: PersonalVerificationRequestState;
     representative: PersonalVerificationRequestState;

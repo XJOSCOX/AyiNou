@@ -11,6 +11,8 @@ export type AuditResourceType = typeof auditResourceTypes[number];
 export type AuditOutcome = typeof auditOutcomes[number];
 export type AuditAuthority = "founder";
 
+export type AuditPerson = { displayName: string | null; username: string | null };
+
 export interface AuditEvent {
   reference: string;
   source: string;
@@ -21,8 +23,10 @@ export interface AuditEvent {
   eventType: string;
   occurredAt: string;
   actorRef: string | null;
+  actor?: AuditPerson;
   resourceType: AuditResourceType;
   resourceRef: string | null;
+  affectedMember?: AuditPerson;
   organizationRef: string | null;
   outcome: AuditOutcome;
   reasonCode: string | null;
@@ -45,6 +49,7 @@ export interface PolicyAuditEvent {
   revision: number;
   actorId: string;
   actorUsername: string | null;
+  actor?: AuditPerson;
   occurredAt: string;
   reason: string;
   changes: {

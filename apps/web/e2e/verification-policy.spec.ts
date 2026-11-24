@@ -149,6 +149,7 @@ test("R2.5 restricts verification policies and recognition writes, preserving ex
       await login(page, founder);
       await solveMfa(page, secret);
       await openAdministration(page);
+      await page.getByRole("button", { name: "Platform Settings", exact: true }).click();
       await page.getByRole("button", { name: verificationCopy.en.sections.verificationSettings, exact: true }).click();
       await expect(page.getByRole("checkbox", { name: verificationCopy.en.flags.personalIntake })).not.toBeChecked();
       await update(policy, defaults.value);

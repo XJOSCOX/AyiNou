@@ -86,10 +86,10 @@ export function InstitutionLogo({ organization, large = false }: {
   organization: Pick<Institution, "name" | "logoUrl">;
   large?: boolean;
 }) {
-  const imageSize = large ? 112 : 56;
+  const imageSize = large ? 112 : 68;
   return (
     <span className={`grid shrink-0 place-items-center overflow-hidden font-bold text-[var(--theme-link)] ${
-      large ? "size-20 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-surface)] text-3xl sm:size-28 sm:text-4xl" : "size-14 rounded-lg bg-[var(--theme-hero)] text-xl"
+      large ? "size-20 rounded-2xl border border-[var(--theme-border)] bg-[var(--theme-surface)] text-3xl sm:size-28 sm:text-4xl" : "size-17 rounded-lg bg-[var(--theme-hero)] text-2xl"
     }`}>
       {organization.logoUrl
         ? <Image src={organization.logoUrl} width={imageSize} height={imageSize} alt="" unoptimized className="size-full object-cover" />

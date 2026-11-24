@@ -10,6 +10,8 @@ import { useMemberIdentity } from "@/lib/member-display-name";
 import { AdministratorInvitation } from "./administrator-invitation";
 import { GovernanceConfirmation, GovernanceFeedback, useGovernanceCommand } from "./governance-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { AdminMemberBadges } from "./admin-account-avatar";
+import { adminActionPanel, adminCompactCard, adminDisclosure } from "./admin-controls";
 
 const path = "/api/v1/admin/governance";
 const invites = "/api/v1/me/governance-invitations";
@@ -28,35 +30,50 @@ function GovernanceWorkspace({ actor }: { actor: string }) {
   const load = useCallback((signal: AbortSignal): Promise<GovernanceStatus> => authorizedRequest(path, { signal }, actor), [actor]);
   const resource = useInstitutionResource(load);
   const data = resource.data;
-  return <section className={`${institutionCard} grid gap-4`} aria-label={t.governance}>
-    <h2 className="text-xl font-semibold">{t.governance}</h2>
-    <p>{t.governanceHelp}</p>
+  return <section className="grid min-w-0 gap-3" aria-label={t.governance}>
+    <header className={adminCompactCard}>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <h2 className="text-lg font-semibold">{t.governance}</h2>
+        {data && <p className="rounded-md bg-[var(--theme-control)] px-2 py-1 text-sm"><strong>{t[data.mode]}</strong> · {t.closed}</p>}
+      </div>
+      <p className="mt-1 max-w-prose text-sm text-[var(--theme-body)]">{t.governanceHelp}</p>
+    </header>
     <GovernanceFeedback error={resource.error} />
     {!data && !resource.error && <p role="status">{authMessages[locale].working}</p>}
-    {data && <>
-      <p><strong>{t[data.mode]}</strong> · {t.closed}</p>
-      <h3 className="font-semibold">{t.administrators}</h3>
-      <ul className="grid gap-2">{data.administrators.map((item) => <li key={item.id} className="break-words text-sm">
-        {item.username ? "@" + item.username : item.id} · {item.eligible ? t.eligible : t.ineligible}
-        {item.founding && " · " + t.founding}
-      </li>)}</ul>
-      <p className="text-sm">{data.authorities.length ? t.delegatedScope + " · " +
-        data.authorities.map((scope) => governanceLabel(t, scope)).join(", ") : t.noAuthority}</p>
-      <h3 className="font-semibold">{t.proposals}</h3>
-      <ProposalForm actor={actor} version={data.version} reload={resource.refresh} />
-      {!data.proposals.length && <p>{t.none}</p>}
-      <ul className="grid gap-2">{data.proposals.map((item) =>
-        <ProposalRow key={item.id + ":" + item.version} actor={actor} item={item} reload={resource.refresh} />)}</ul>
-      <ClaimContainment actor={actor} data={data} reload={resource.refresh} />
-      <details>
-        <summary className="cursor-pointer font-semibold">{t.audit}</summary>
-        <ul className="mt-2 grid gap-2 text-sm">
-          {data.events.map((event) => <li key={event.id} className="break-words">
-            {governanceLabel(t, eventLabels[event.action] ?? event.action)} · {new Date(event.occurredAt).toLocaleString(locale)} · {event.id}
-          </li>)}
-        </ul>
-      </details>
-    </>}
+    {data && <div className="grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <section className={`${adminCompactCard} grid gap-3`}>
+        <h3 className="border-b border-[var(--theme-border)] pb-2 font-semibold">{t.proposals}</h3>
+        <ProposalForm actor={actor} version={data.version} reload={resource.refresh} />
+        {data.proposals.length ? <ul className="grid gap-2">{data.proposals.map((item) =>
+          <ProposalRow key={item.id + ":" + item.version} actor={actor} item={item} reload={resource.refresh} />)}</ul>
+          : <p className="text-sm text-[var(--theme-body)]">{t.none}</p>}
+      </section>
+      <aside className="grid min-w-0 gap-3">
+        <section className={`${adminCompactCard} grid gap-2`}>
+          <h3 className="border-b border-[var(--theme-border)] pb-2 font-semibold">{t.administrators}</h3>
+          <ul className="divide-y divide-[var(--theme-border)]">{data.administrators.map((item) => <li key={item.id} className="flex flex-wrap items-center justify-between gap-1.5 break-all py-2 text-sm">
+            <span className="flex min-w-0 flex-wrap items-center gap-1 font-medium">
+              <span>{item.username ? "@" + item.username : item.id}</span>
+              <AdminMemberBadges username={item.username ?? null} />
+            </span>
+            <span className="rounded-md bg-[var(--theme-control)] px-2 py-1 text-xs">{item.eligible ? t.eligible : t.ineligible}
+              {item.founding && " · " + t.founding}</span>
+          </li>)}</ul>
+          <p className="text-sm text-[var(--theme-body)]">{data.authorities.length ? t.delegatedScope + " · " +
+            data.authorities.map((scope) => governanceLabel(t, scope)).join(", ") : t.noAuthority}</p>
+        </section>
+        <ClaimContainment actor={actor} data={data} reload={resource.refresh} />
+        <details className="rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+          <summary className={adminDisclosure}>{t.audit}</summary>
+          {data.events.length ? <ul className="divide-y divide-[var(--theme-border)] border-t border-[var(--theme-border)] px-3 text-sm">
+            {data.events.map((event) => <li key={event.id} className="break-words py-2">
+              <p className="font-medium">{governanceLabel(t, eventLabels[event.action] ?? event.action)}</p>
+              <p className="break-all text-xs text-[var(--theme-body)]">{new Date(event.occurredAt).toLocaleString(locale)} · {event.id}</p>
+            </li>)}
+          </ul> : <p className="px-3 pb-3 text-sm">{t.none}</p>}
+        </details>
+      </aside>
+    </div>}
   </section>;
 }
 
@@ -76,7 +93,7 @@ function ProposalForm({ actor, version, reload }: { actor: string; version: numb
       target: targeted ? String(form.get("target")).trim() : null, reason: String(form.get("reason")).trim() }, reload);
   }
 
-  return <form className="grid max-w-xl gap-3" onSubmit={submit}>
+  return <form className={adminActionPanel} onSubmit={submit}>
     <label className="text-sm font-semibold">{t.propose}
       <select className={institutionField} value={kind} disabled={command.busy} onChange={(event) => {
         const value = governanceProposalKinds.find((item) => item === event.target.value);
@@ -125,7 +142,7 @@ function ProposalRow({ actor, item, reload, member = false }: {
       <AdministratorInvitation actor={actor} proposal={item.id} issued={item.invitationIssued} onRevoked={reload} />}
     {action && <details>
       <summary className="cursor-pointer">{t[action]}</summary>
-      <form className="mt-2 grid max-w-xl gap-2" onSubmit={submit}>
+      <form className={`${adminActionPanel} mt-3 max-w-2xl`} onSubmit={submit}>
         <GovernanceConfirmation reason={!member} conflict={action === "approve"} disabled={command.busy} />
         <button className={`${institutionAction} justify-self-start`} disabled={command.busy}>{t[action]}</button>
       </form>
@@ -148,12 +165,12 @@ function ClaimContainment({ actor, data, reload }: { actor: string; data: Govern
       ...(!existing && { reportId: String(form.get("reportId")).trim() }),
     }, reload);
   }
-  return <details>
-    <summary className="cursor-pointer font-semibold">{t.emergency}</summary>
-    <div className="mt-3 grid gap-3">
+  return <details className="rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+    <summary className={adminDisclosure}>{t.emergency}</summary>
+    <div className="grid gap-3 border-t border-[var(--theme-border)] p-3">
       <p>{t.emergencyHelp}</p>
       <GovernanceFeedback error={command.error} receipt={command.receipt} />
-      <form className="grid max-w-xl gap-3" onSubmit={send}>
+      <form className={adminActionPanel} onSubmit={send}>
         <label className="text-sm font-semibold">{t.claimId}
           <input className={institutionField} name="claimId" required maxLength={36} disabled={command.busy} />
         </label>

@@ -1,10 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { MemberProfile, MembershipCategory } from "@ayinou/shared";
 import { AdministratorMark, FounderMark, PersonalClaimChecks } from "@/components/institution-ui";
 import { FounderVerifiedMark } from "@/components/founder-verified-badge";
 import { authMessages } from "@/lib/auth-i18n";
 import type { Locale } from "@/lib/i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
+import { institutionMessages } from "@/lib/institution-i18n";
 import { action, errorBox } from "./profile-styles";
 import type { useMemberIdentity } from "@/lib/member-display-name";
 
@@ -39,14 +41,13 @@ export function SavedProfilePreview({ locale, saved, avatar, claims, administrat
 }
 
 export function DraftProfilePreview({
-  locale, saved, avatar, claims, administrator, founder, founderVerified, displayName, username, biography, showCategory, category, profileSections, publish, publishDisabled, publishError,
+  locale, saved, avatar, claims, administrator, founder, founderVerified, displayName, username, biography, showCategory, category, publish, publishDisabled, publishError,
 }: ProfilePreviewProps & {
   displayName: string;
   username: string;
   biography: string;
   showCategory: boolean;
   category: MembershipCategory | "";
-  profileSections: readonly (readonly [string, string])[];
   publish?: () => void;
   publishDisabled: boolean;
   publishError: string;
@@ -57,34 +58,42 @@ export function DraftProfilePreview({
   const initials = display.split(/\s+/).slice(0, 2).map((part) => Array.from(part)[0]).join("").toLocaleUpperCase(locale);
   const visible = saved.isVisible && saved.discoverable && saved.username;
   return (
-    <aside>
-      <section aria-label={m.preview} className="overflow-hidden rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)]">
-        <div className="h-16 bg-[var(--theme-hero)] sm:h-20" aria-hidden="true" />
-        <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-          <div className="-mt-9 grid size-[4.5rem] place-items-center overflow-hidden rounded-full border-4 border-[var(--theme-surface)] bg-[var(--theme-selected)] text-lg font-semibold text-[var(--theme-link)]">
+    <aside aria-labelledby="profile-preview-heading" className="min-w-0 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+      <div className="border-b border-[var(--theme-border)] px-4 py-3 sm:px-5">
+        <h2 id="profile-preview-heading" className="text-sm font-semibold">{m.preview}</h2>
+      </div>
+      <div className="grid gap-3 p-4 sm:p-5">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="grid size-18 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--theme-selected)] text-lg font-semibold text-[var(--theme-link)]">
             {avatar ? <Image src={avatar} alt="" width={72} height={72} className="size-full object-cover" unoptimized />
               : <span aria-hidden="true">{initials || "·"}</span>}
           </div>
-          <h2 className="mt-3 text-sm font-semibold text-[var(--theme-link)]">{m.preview}</h2>
-          <p className="mt-1 break-words text-2xl font-semibold leading-tight tracking-tight">
-            {display || t.displayName}{display && display === saved.displayName && <>{" "}<PersonalClaimChecks claims={claims} />
-              {founder ? <FounderMark /> : administrator && <AdministratorMark />}
-              {founderVerified && <FounderVerifiedMark />}</>}
-          </p>
-          {username.trim() && <p className="mt-1 break-all text-sm text-[var(--theme-body)]">@{username.trim().toLowerCase()}</p>}
-          {biography.trim() && <p className="mt-3 whitespace-pre-line break-words text-sm leading-6 text-[var(--theme-body)]">{biography.trim()}</p>}
-          {showCategory && category && <p className="mt-3 text-sm text-[var(--theme-link)]">{category === "haitian" ? m.haitianCount : m.supporterCount}</p>}
-          <p role="status" className="mt-4 border-t border-[var(--theme-border)] pt-3 text-sm text-[var(--theme-body)]">{visible ? m.profilePublished : m.profileHidden}</p>
-          {!visible && publish && <div className="mt-3 space-y-3">
-            <p className="text-sm text-[var(--theme-body)]">{m.profilePublishHint}</p>
-            <button type="button" className={action} disabled={publishDisabled} onClick={publish}>{m.profilePublish}</button>
-            {publishError && <p role="alert" className={errorBox}>{publishError}</p>}
-          </div>}
+          <div className="min-w-0">
+            <p className="break-words text-xl font-semibold leading-snug tracking-tight" dir="auto">{display || t.displayName}</p>
+            {username.trim() && <p className="break-all text-sm text-[var(--theme-body)]">@{username.trim().toLowerCase()}</p>}
+          </div>
         </div>
-      </section>
-      <nav aria-label={t.profileTitle} className="mt-4 flex flex-wrap gap-2 xl:flex-col">
-        {profileSections.map(([id, label]) => <a key={id} href={`#${id}`} className="rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">{label}</a>)}
-      </nav>
+        {display && display === saved.displayName && (claims.length > 0 || founder || administrator || founderVerified) &&
+          <div className="flex flex-wrap items-center gap-1.5">
+            <PersonalClaimChecks claims={claims} />
+            {founder ? <FounderMark /> : administrator && <AdministratorMark />}
+            {founderVerified && <FounderVerifiedMark />}
+          </div>}
+        {biography.trim() && <p className="whitespace-pre-line break-words text-sm leading-relaxed text-[var(--theme-body)]">{biography.trim()}</p>}
+        {showCategory && category && <p className="text-sm text-[var(--theme-body)]">{category === "haitian" ? m.haitianCount : m.supporterCount}</p>}
+      </div>
+      <div className="grid gap-2 border-t border-[var(--theme-border)] px-4 py-3 text-sm text-[var(--theme-body)] sm:px-5">
+        <p role="status">{visible ? m.profilePublished : m.profileHidden}</p>
+        {visible && <Link href={`/members/${saved.username}`}
+          className="w-fit font-semibold text-[var(--theme-link)] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2">
+          {institutionMessages[locale].publicProfile}
+        </Link>}
+        {!visible && publish && <div className="space-y-3">
+          <p>{m.profilePublishHint}</p>
+          <button type="button" className={action} disabled={publishDisabled} onClick={publish}>{m.profilePublish}</button>
+          {publishError && <p role="alert" className={errorBox}>{publishError}</p>}
+        </div>}
+      </div>
     </aside>
   );
 }

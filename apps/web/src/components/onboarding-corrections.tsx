@@ -13,6 +13,7 @@ import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i1
 import { organizationSetupMessages, organizationSetupPath } from "@/lib/organization-setup";
 import { GovernanceConfirmation, GovernanceFeedback, useGovernanceCommand } from "./governance-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { adminActionPanel } from "./admin-controls";
 
 const memberPath = "/api/v1/me/onboarding-corrections";
 const adminPath = "/api/v1/admin/organization-onboarding";
@@ -177,7 +178,7 @@ function AdminCorrectionDetail({ actor, id, updateQueue }: { actor: string; id: 
         <Link href="/verification/review" className={institutionLink}>{t.viewReview}</Link>
       </>}
       {item.currentIntentVersion !== item.intentVersion && <p>{t.stale}</p>}
-      {action && <form key={item.version} className="grid max-w-xl gap-3" onSubmit={submit}>
+      {action && <form key={item.version} className={`${adminActionPanel} max-w-2xl`} onSubmit={submit}>
         <GovernanceConfirmation reason disabled={command.busy} />
         <button className={`${institutionAction} justify-self-start`} disabled={command.busy}>{t[action]}</button>
       </form>}

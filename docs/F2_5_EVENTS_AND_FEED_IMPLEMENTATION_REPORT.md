@@ -18,7 +18,7 @@ Venue and meeting links appear only on event details for organizers and eligible
 
 ## Localization and accessibility
 
-Events and Feed controls include English, Haitian Creole, French, and Spanish. Event times use the viewer’s local time zone. The editor handles daylight-saving gaps and preserves an existing instant when editing an ambiguous wall time. Pages use the shared navigation, footer, responsive cards, labeled controls, and accessible status messages. The Filters button comes before the visible text search when a page has both. Opening and closing the filters preserves the selections.
+Events and Feed controls include English, Haitian Creole, French, and Spanish. The agenda, event detail, and shared event previews display the event’s time zone. The editor handles daylight-saving gaps and preserves an existing instant when editing an ambiguous wall time. Pages use the shared navigation, footer, responsive cards, labeled controls, and accessible status messages. The Filters button comes before the visible text search when a page has both. Opening and closing the filters preserves the selections.
 
 ## Reliability and recovery
 
@@ -33,6 +33,14 @@ The local browser suites exercise Events and Feed. Coverage includes simultaneou
 Deploy migrations in chronological order after local validation. The six Events controls and Feed language filtering default to on. Translation defaults to off. A Founder can find these controls in Platform administration under Events and Feed. Members manage event notices in notification settings and language choices on the Feed.
 
 Hosted AyiNou development project `hcbxulyfmdmuyccgrujs` received exactly migrations `20261123130000`, `20261123130100`, and `20261123130200` from commit `27eb229f05e8b4ac833206e5537eeaec6d5437f1`. The postflight confirmed the feature defaults, checked private RSVP table access, and found zero pending migrations. Existing account, organization, post, and notification counts matched the preflight. Events and Feed language settings loaded in the hosted-connected local app using the test02 account.
+
+## Events interface follow-up
+
+The Events directory uses a linked agenda with calendar dates, local times, locations, organizer badges, and descriptions. Filters stay collapsed until opened and search stays visible. The detail view groups the schedule, format, and organizer above the description and participant counts. Draft actions sit beside the draft notice. The copy is available in all four supported languages.
+
+Browser verification found fictional drafts under Organizing. The event browser and API suite passed against disposable Supabase, covering mobile navigation, private locations, RSVP capacity, and verified organizer metadata in the directory, detail API, and shared preview. The hosted organizer badge migration `20261124147000` updates the existing read helper without changing event rows or grants. The hosted postflight showed four events and zero pending migrations. The connected local app displayed the Founder Verified badge for test02.
+
+The directory and detail view share the Events header, description, and tab links. The detail view has a right-aligned Back link. Organizers can choose a linked community separately from the audience. Public events can be viewed without an account and signed-in members can RSVP. Community-only events require membership in the linked community. Published linked events appear under My communities for members of that community. Migration `20261124148000` was validated with the event browser and API suite and applied to hosted AyiNou. The postflight confirmed five identical event rows and zero pending migrations.
 
 ## Remaining blockers
 

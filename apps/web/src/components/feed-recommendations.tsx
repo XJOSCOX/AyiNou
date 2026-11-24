@@ -11,7 +11,8 @@ import {
 } from "@/lib/recommendation-api";
 import { recommendationMessages } from "@/lib/recommendation-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
-import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
+import { FeedIcon } from "./feed-actions";
+import { institutionAction, institutionLink, useInstitutionResource } from "./institution-ui";
 
 export function TopicOptions({ chosen, limit, busy, onChange }: {
   chosen: InterestCode[];
@@ -50,11 +51,10 @@ export function PostTopicLabels({ topics }: { topics: InterestCode[] }) {
 export function RecommendationSettingsPanel({ onChange }: { onChange: () => void }) {
   const [locale] = useLocale();
   const t = recommendationMessages[locale];
-  const [loaded, setLoaded] = useState(false);
-  return <details className={institutionCard} onToggle={(event) => { if (event.currentTarget.open) setLoaded(true); }}>
-    <summary className="cursor-pointer font-semibold text-[var(--theme-link)]">{t.preferences}</summary>
-    {loaded && <SettingsContent onChange={onChange} />}
-  </details>;
+  return <section aria-label={t.preferences} className="mt-2 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] px-3 pb-3 pt-2">
+    <h2 className="text-sm font-semibold">{t.preferences}</h2>
+    <SettingsContent onChange={onChange} />
+  </section>;
 }
 
 function SettingsContent({ onChange }: { onChange: () => void }) {
@@ -113,15 +113,27 @@ export function RecommendationActions({ id, reason, onFeedback }: {
   const [locale] = useLocale();
   const t = recommendationMessages[locale];
   const mutation = useFeedMutation();
-  return <details className="mt-3 border-t border-[var(--theme-border)] pt-3 text-sm">
-    <summary className="cursor-pointer font-semibold text-[var(--theme-link)]">{t.why}</summary>
-    <p className="mt-2 text-[var(--theme-body)]">{t[reason]}</p>
-    <div className="my-2 flex flex-wrap items-center gap-x-4 gap-y-2">
-      {recommendationActions.map((action) => <button key={action} type="button" className={`${institutionLink} min-h-9 text-start`}
-        disabled={mutation.busy} onClick={async () => {
-          if (await mutation.run(() => submitRecommendationFeedback(id, action))) onFeedback(action);
-        }}>{t[action]}</button>)}
+  return <details className="relative text-sm" onBlur={(event) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) event.currentTarget.open = false;
+  }} onKeyDown={(event) => {
+    if (event.key !== "Escape" || !event.currentTarget.open) return;
+    event.stopPropagation();
+    event.currentTarget.open = false;
+    event.currentTarget.querySelector("summary")?.focus();
+  }}>
+    <summary className="inline-flex min-h-9 max-w-full cursor-pointer list-none items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-[var(--theme-body)] hover:bg-[var(--theme-control)] hover:text-[var(--theme-link)] focus-visible:outline-2 [&::-webkit-details-marker]:hidden">
+      <FeedIcon name="info" /><span>{t.why}</span>
+    </summary>
+    <div className="absolute bottom-full end-0 z-20 mb-1.5 grid w-64 max-w-[calc(100vw-3rem)] gap-2 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-2 shadow-lg">
+      <p className="px-2 pt-1 text-xs leading-relaxed text-[var(--theme-body)]">{t[reason]}</p>
+      <div className="grid gap-0.5">
+        {recommendationActions.map((action) => <button key={action} type="button"
+          className="min-h-9 rounded-md px-2 py-1 text-start text-sm hover:bg-[var(--theme-selected)] focus-visible:outline-2"
+          disabled={mutation.busy} onClick={async () => {
+            if (await mutation.run(() => submitRecommendationFeedback(id, action))) onFeedback(action);
+          }}>{t[action]}</button>)}
+      </div>
+      {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
     </div>
-    {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
   </details>;
 }

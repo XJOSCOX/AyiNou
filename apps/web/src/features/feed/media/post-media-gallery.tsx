@@ -42,14 +42,15 @@ function ImageViewer({ post, attachments, index, onSelect, review, alt, onClose,
 export function PostMediaGallery({ post, attachments, review = false, guest = false }: { post: string; attachments: PostAttachment[]; review?: boolean; guest?: boolean }) {
   const [locale] = useLocale();
   const t = mediaNotificationMessages[locale];
+  const gallery = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<string | null>(null);
   const selectedIndex = attachments.findIndex((item) => item.id === active);
   const selected = attachments[selectedIndex];
   if (!attachments.length) return null;
   const alt = (item: PostAttachment, index: number) => item.alt || t.image.replace("{n}", String(index + 1));
-  return <div className={`mt-4 grid min-w-0 gap-2 ${attachments.length === 1 ? "max-w-[42rem]" : "grid-cols-2"}`}>
+  return <div ref={gallery} className={`mt-3 grid min-w-0 gap-2 ${attachments.length === 1 ? "max-w-[42rem]" : "grid-cols-2"}`}>
     {attachments.map((item, index) => <RemotePreview key={item.id} id={item.id} post={post} alt={alt(item, index)} review={review}
-      guest={guest} lazy variant="thumbnail" onOpen={() => setActive(item.id)} label={t.open.replace("{n}", String(index + 1))} />)}
+      guest={guest} lazy observe={gallery} natural={attachments.length === 1} variant="thumbnail" onOpen={() => setActive(item.id)} label={t.open.replace("{n}", String(index + 1))} />)}
     {selected && <ImageViewer post={post} attachments={attachments} index={selectedIndex} onSelect={(index) => setActive(attachments[index].id)}
       review={review} guest={guest} alt={alt(selected, selectedIndex)} onClose={() => setActive(null)} />}
   </div>;

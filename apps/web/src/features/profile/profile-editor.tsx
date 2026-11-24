@@ -18,9 +18,24 @@ import Link from "next/link";
 import { organizationOnboardingMessages } from "@/lib/organization-onboarding-i18n";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { useLocationFragment } from "@/lib/use-location-fragment";
 import { UsernameField, useUsernameAvailability } from "@/components/username-field";
 import { usernameMessages } from "@/lib/username-i18n";
 import { normalizePublicUsername, publicUsernamePattern } from "@ayinou/shared";
+
+const defaultSection = () => "public-profile";
+
+const errorSections = {
+  invalidPrivateNames: "personal",
+  categoryRequired: "personal",
+  countryCodeHint: "location",
+  usernameHint: "public-profile",
+  usernameConfirm: "public-profile",
+  usernameTaken: "public-profile",
+  usernameBlocked: "public-profile",
+  usernameLimit: "public-profile",
+  invalidName: "public-profile",
+} as const;
 
 const validName = (value: string) => value.trim().length >= 1 && value.trim().length <= 80 && !/\p{Cc}/u.test(value.trim());
 
@@ -67,6 +82,7 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
   const [showDepartment, setShowDepartment] = useState(profile.showDepartment ?? false);
   const [showInterests, setShowInterests] = useState(profile.showInterests ?? false);
   const [error, setError] = useState<keyof typeof errors | "">("");
+  const requestedSection = useLocationFragment();
   const [success, setSuccess] = useState(false);
   const [busy, setBusy] = useState(false);
   const [publishError, setPublishError] = useState("");
@@ -105,6 +121,12 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
     }
   }
 
+  function showError(key: keyof typeof errors) {
+    setError(key);
+    const section = errorSections[key as keyof typeof errorSections];
+    if (all && section && section !== requestedSection) window.location.hash = section;
+  }
+
   async function submit(event?: FormEvent<HTMLFormElement>, skip = false, later = false) {
     event?.preventDefault();
     if (busy || uploading) return;
@@ -112,8 +134,8 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
     setSuccess(false);
     const changes: ProfileChanges = {};
     if (editable && (all || step === 0)) {
-      if (!validName(firstName) || !validName(lastName)) { setError("invalidPrivateNames"); return; }
-      if (!category) { setError("categoryRequired"); return; }
+      if (!validName(firstName) || !validName(lastName)) { showError("invalidPrivateNames"); return; }
+      if (!category) { showError("categoryRequired"); return; }
       Object.assign(changes, { firstName: firstName.trim(), lastName: lastName.trim(), membershipCategory: category });
       if (!managed || policy?.requireLanguage || preferredLocaleChoice) changes.preferredLocale = preferredLocale;
     }
@@ -122,7 +144,7 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
       if (managed && (policy?.requireCountry && !normalized || policy?.requireDepartment && normalized === "HT" && !department)) {
         setError("requiredDetails"); return;
       }
-      if (normalized && !/^[A-Z]{2}$/.test(normalized)) { setError("countryCodeHint"); return; }
+      if (normalized && !/^[A-Z]{2}$/.test(normalized)) { showError("countryCodeHint"); return; }
       Object.assign(changes, {
         residenceCountryCode: normalized || null,
         residenceDepartmentCode: normalized === "HT" ? department || null : null,
@@ -130,10 +152,10 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
       });
     }
     if (editable && (all || step === 2)) {
-      if (changingUsername && !publicUsernamePattern.test(usernameCheck.candidate)) { setError("usernameHint"); return; }
-      if (changingUsername && saved.username && confirmedUsername !== usernameCheck.candidate) { setError("usernameConfirm"); return; }
+      if (changingUsername && !publicUsernamePattern.test(usernameCheck.candidate)) { showError("usernameHint"); return; }
+      if (changingUsername && saved.username && confirmedUsername !== usernameCheck.candidate) { showError("usernameConfirm"); return; }
       const publicName = useSignupDefaults ? usernameCheck.candidate : displayName.trim();
-      if (publicName.length < 2 || publicName.length > 80) { setError("invalidName"); return; }
+      if (publicName.length < 2 || publicName.length > 80) { showError("invalidName"); return; }
       changes.displayName = publicName;
       if (policy?.profileBiographies !== false) changes.biography = biography.trim() || null;
       if (changingUsername) changes.username = usernameCheck.candidate;
@@ -174,9 +196,9 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
     } catch (cause) {
       const code = cause instanceof Error ? cause.message : "";
       if (code === "UNAUTHORIZED") router.replace("/login");
-      else if (code === "USERNAME_TAKEN") setError("usernameTaken");
-      else if (code === "USERNAME_NOT_PERMITTED") setError("usernameBlocked");
-      else if (code === "USERNAME_CHANGE_LIMIT") setError("usernameLimit");
+      else if (code === "USERNAME_TAKEN") showError("usernameTaken");
+      else if (code === "USERNAME_NOT_PERMITTED") showError("usernameBlocked");
+      else if (code === "USERNAME_CHANGE_LIMIT") showError("usernameLimit");
       else if (code === "ONBOARDING_DETAILS_REQUIRED") setError("requiredDetails");
       else if (code === "PROFILE_POLICY_DISABLED") setError("policyDisabled");
       else setError("saveError");
@@ -190,6 +212,7 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
     ["privacy", m.privacy],
     ["interests", m.interests],
   ] as const;
+  const activeSection = profileSections.some(([id]) => id === requestedSection) ? requestedSection : defaultSection();
   if (managed && policy?.onboardingEnabled === false) return (
     <><h1 className="text-3xl font-semibold">{t.onboardingTitle}</h1>
       <p className="my-4 text-[var(--theme-body)]">{copy.onboardingUnavailable}</p>
@@ -280,7 +303,7 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
         <p id="avatar-hint" className="mt-1 text-xs text-[var(--theme-body)]">{m.photoHint}</p>
         {uploading && <p role="status">{t.working}</p>}
         {photoError && <p role="alert" className={`mt-2 ${errorBox}`}>{m[photoError]}</p>}
-        {avatar && <Image src={avatar} width={56} height={56} alt={m.photoAlt} className="mt-3 rounded-full" unoptimized />}
+        {avatar && (onboarding || !canShowPreview) && <Image src={avatar} width={56} height={56} alt={m.photoAlt} className="mt-3 rounded-full" unoptimized />}
       </div>}
       {onboarding && privacyFields}
     </fieldset>
@@ -310,29 +333,29 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
     <>
       {onboarding ? <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{t.onboardingTitle}</h1> :
         <PageHeader title={t.profileTitle} description={t.profileIntro} />}
+      {all && <nav aria-label={t.profileTitle} className="mt-3 flex flex-wrap gap-1 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-2">
+        {profileSections.map(([id, label]) => <a key={id} href={`#${id}`} aria-current={activeSection === id ? "location" : undefined}
+          className="inline-flex min-h-10 items-center rounded-md px-3 py-2 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-offset-2 aria-[current=location]:bg-[var(--theme-selected)] aria-[current=location]:text-[var(--theme-link)]">{label}</a>)}
+      </nav>}
       {onboarding && (!managed || policy?.showProgress !== false) && <ol className="my-5 grid grid-cols-2 gap-2 text-xs font-semibold sm:grid-cols-4">
         {titles.map((title, index) => <li key={title} aria-current={index === step ? "step" : undefined}
           className={`rounded-lg px-3 py-2 ${index === step ? "bg-[var(--theme-selected)]" : "bg-[var(--theme-control)]"}`}>{title}</li>)}
       </ol>}
-      <div className={all ? "mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)]" : ""}>
-        {all && canShowPreview && <div className="self-start xl:col-start-2 xl:row-start-1 xl:sticky xl:top-5"><DraftProfilePreview {...previewProps} displayName={displayName} username={username} biography={policy?.profileBiographies === false ? "" : biography}
-            showCategory={showCategory} category={category} profileSections={profileSections}
-            publish={canPublish && saved.username && saved.displayName ? () => { void publishProfile(); } : undefined}
-            publishDisabled={busy || uploading} publishError={publishError} /></div>}
-        <form className={all ? "min-w-0 space-y-4 xl:col-start-1 xl:row-start-1" : "mt-6 space-y-7"} onSubmit={submit}
+      <div className={all ? "mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,19rem)]" : ""}>
+        <form className={all ? profileCard + " self-start !p-4 sm:!p-5 lg:col-start-1 lg:row-start-1" : "mt-6 space-y-7"} onSubmit={submit}
           onChange={() => { if (success) setSuccess(false); }} aria-busy={busy || uploading} noValidate>
           {all ? profileSections.map(([id, label]) => (
-            <section key={id} id={id} className={profileCard}>
-              <h2 className="mb-4 text-xl font-semibold tracking-tight">{label}</h2>
+            <section key={id} id={id} hidden={activeSection !== id} aria-labelledby={`${id}-heading`}>
+              <h2 id={`${id}-heading`} className="mb-3 text-xl font-semibold tracking-tight">{label}</h2>
               {id === "privacy" ? sectionFields[id] : <fieldset disabled={!editable}>{sectionFields[id]}</fieldset>}
             </section>
           )) : [personalFields, locationFields, publicFields, interestFields][step]}
 
-          <div className={all ? "sticky bottom-0 space-y-3 rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)] p-3 shadow-sm sm:p-4" : "space-y-4"}>
+          <div className={all ? "mt-4 grid gap-2 border-t border-[var(--theme-border)] pt-3 sm:flex sm:flex-wrap sm:items-center sm:gap-x-4" : "space-y-4"}>
             {all && !editable && <p className="text-sm text-[var(--theme-body)]">{copy.policyDisabled}</p>}
             {error && <p role="alert" className={errorBox}>{errors[error]}</p>}
             {success && <p role="status" className="text-[var(--theme-link)]">{t.saved}</p>}
-            <div className="flex flex-wrap items-center gap-4">
+            <div className={all ? "flex flex-wrap items-center gap-3 sm:ms-auto" : "flex flex-wrap items-center gap-4"}>
               <button type="submit" disabled={busy || uploading || !editable && !privacyChanged} className={action}>{busy ? t.working : all ? t.saveProfile : step === 3 ? m.finish : m.continue}</button>
               {onboarding && allowSkip && optionalStep && <button type="button" disabled={busy || uploading} className="font-semibold underline" onClick={() => { void submit(undefined, true); }}>{m.skip}</button>}
               {managed && profile.experience?.memberAccess && step < 3 && <button type="button" disabled={busy || uploading}
@@ -341,6 +364,10 @@ export function ProfileEditor({ profile, departments, onboarding, useSignupDefau
             </div>
           </div>
         </form>
+        {all && canShowPreview && <div className="self-start lg:col-start-2 lg:row-start-1 lg:sticky lg:top-5"><DraftProfilePreview {...previewProps} displayName={displayName} username={username} biography={policy?.profileBiographies === false ? "" : biography}
+            showCategory={showCategory} category={category}
+            publish={canPublish && saved.username && saved.displayName ? () => { void publishProfile(); } : undefined}
+            publishDisabled={busy || uploading} publishError={publishError} /></div>}
       </div>
     </>
   );

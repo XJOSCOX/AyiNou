@@ -1,5 +1,6 @@
 import { type WorkProps, useWorkMessages, Operation, field, actionsClass, ReasonField } from "./work-controls";
-import { institutionCard, institutionLink, institutionField } from "@/components/institution-ui";
+import { institutionField } from "@/components/institution-ui";
+import { ProjectDisclosure, ProjectSection } from "@/components/project-ui";
 
 export function Volunteers(props: WorkProps) {
   const { work } = props;
@@ -7,10 +8,9 @@ export function Volunteers(props: WorkProps) {
   const manager = work.role === "owner" || work.role === "manager";
   const active = work.status === "active";
   return <div className="grid gap-4">
-    <section className={institutionCard}>
-      <h2 className="text-xl font-semibold">{t.volunteers}</h2>
-      <p className="mt-2 text-sm">{t.volunteerHelp}</p>
-      {manager && active && <details className="mt-3"><summary className={institutionLink}>{t.events.opportunity_publish}</summary>
+    <ProjectSection title={t.volunteers}>
+      <p className="text-sm text-[var(--theme-body)]">{t.volunteerHelp}</p>
+      {manager && active && <ProjectDisclosure title={t.events.opportunity_publish}>
         <Operation {...props} action="opportunity_publish" fields={(data) => ({
           title: field(data, "title"), description: field(data, "description"), skills: field(data, "skills"),
           commitment: field(data, "commitment"), capacity: Number(field(data, "capacity")), closesOn: field(data, "closesOn") || null,
@@ -24,7 +24,7 @@ export function Volunteers(props: WorkProps) {
           <label>{t.closesOn}<input className={institutionField} name="closesOn" type="date" /></label>
           <label><input type="checkbox" name="remote" /> {t.remote}</label>
         </Operation>
-      </details>}
+      </ProjectDisclosure>}
       {!work.opportunities.length && <p className="mt-3">{t.empty}</p>}
       <ul className="mt-3 grid gap-3">{work.opportunities.map((item) => <li className="grid gap-2 border-t border-[var(--theme-border)] pt-3" key={item.id}>
         <h3 className="break-words font-semibold">{item.title}</h3>
@@ -42,9 +42,8 @@ export function Volunteers(props: WorkProps) {
           {item.open && manager && <Operation {...props} action="opportunity_close" input={{ id: item.id }} />}
         </div>
       </li>)}</ul>
-    </section>
-    <section className={institutionCard}>
-      <h2 className="text-xl font-semibold">{t.applications}</h2>
+    </ProjectSection>
+    <ProjectSection title={t.applications}>
       {!work.applications.length && <p>{t.empty}</p>}
       <ul className="mt-3 grid gap-3">{work.applications.map((item) => <li className="grid gap-2 border-t border-[var(--theme-border)] pt-3" key={item.id}>
         <p className="break-words font-semibold">{item.title} · {t.applicationStates[item.status]}{item.applicant?.name && <> · {item.applicant.name}</>}</p>
@@ -54,11 +53,11 @@ export function Volunteers(props: WorkProps) {
           {item.mine && (active || work.status === "paused") && ["pending", "offered", "accepted"].includes(item.status) &&
             <Operation {...props} action="volunteer_withdraw" input={{ id: item.id }} />}
           {!item.mine && manager && active && item.status === "pending" && (["volunteer_offer", "volunteer_reject"] as const).map((action) =>
-            <details key={action} className="w-full"><summary className={institutionLink}>{t.events[action]}</summary>
+            <ProjectDisclosure title={t.events[action]} key={action} className="w-full">
               <Operation {...props} action={action} input={{ id: item.id }} fields={(data) => ({ reason: field(data, "reason") })}><ReasonField /></Operation>
-            </details>)}
+            </ProjectDisclosure>)}
         </div>
       </li>)}</ul>
-    </section>
+    </ProjectSection>
   </div>;
 }

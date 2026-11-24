@@ -131,7 +131,10 @@ begin
     raise exception 'approval bypassed identity publication hold';
   exception when sqlstate 'PJP13' then null; end;
   update public.verification_records set publication_held_at=null where user_id=author_id and verification_type='identity';
-  perform public.project_review_for_client(project,7,'approve',note,null);
+  perform public.project_review_for_client(project,7,'approve',note,null,
+    public.project_review_preview_for_client(project)#>>'{approval,proof}');
+  perform set_config('request.jwt.claims',author_jwt,true);
+  perform public.project_set_publication_for_client(project,8,true);
   perform set_config('request.jwt.claims','{}',true);
   payload:=public.project_detail_for_client(project);
   if payload->>'status'<>'approved' or payload->>'publishedAt' is null or payload->'history'<>'[]'::jsonb or payload->>'version' is not null
@@ -156,7 +159,7 @@ begin
   perform set_config('request.jwt.claims',review_jwt,true);
   if not exists(select 1 from jsonb_array_elements(public.project_queue_for_client(true)) e
     where e->>'id'=report::text and not (e ? 'reporterId')) then raise exception 'reporter privacy failed'; end if;
-  perform public.project_report_decide_for_client(project,report,8,true,note);
+  perform public.project_report_decide_for_client(project,report,9,true,note);
   perform set_config('request.jwt.claims','{}',true);
   begin
     perform public.project_media_for_client(project);
@@ -207,13 +210,15 @@ begin
   perform public.project_submit_for_client(pending_org_project,1);
   perform set_config('request.jwt.claims',review_jwt,true);
   perform public.project_review_for_client(pending_org_project,2,'assign',note,null);
-  perform public.project_review_for_client(pending_org_project,3,'approve',note,null);
+  perform public.project_review_for_client(pending_org_project,3,'approve',note,null,
+    public.project_review_preview_for_client(pending_org_project)#>>'{approval,proof}');
   perform set_config('request.jwt.claims',author_jwt,true);
   if public.project_detail_for_client(pending_org_project)->>'publicationEligibility'<>'pending_institution_verification'
     then raise exception 'unverified organization publication is not pending'; end if;
   insert into private.verification_applications(applicant_id,organization_id,kind,status,decided_at)
     values(author_id,org,'organization','approved',now());
   update private.organizations set verification_status='verified' where id=org;
+  perform public.project_set_publication_for_client(pending_org_project,4,true);
   perform set_config('request.jwt.claims','{}',true);
   if public.project_detail_for_client(pending_org_project)->>'publishedAt' is null
     then raise exception 'independently verified organization did not become eligible'; end if;
@@ -253,7 +258,8 @@ begin
   delete from feed_data.community_memberships where community_id=department_id and user_id=author_id;
   perform set_config('request.jwt.claims',review_jwt,true);
   perform public.project_review_for_client(group_project,2,'assign',note,null);
-  perform public.project_review_for_client(group_project,3,'approve',note,null);
+  perform public.project_review_for_client(group_project,3,'approve',note,null,
+    public.project_review_preview_for_client(group_project)#>>'{approval,proof}');
   perform public.project_review_for_client(department_project,2,'assign',note,null);
   begin
     perform public.project_review_for_client(department_project,3,'approve',note,null);

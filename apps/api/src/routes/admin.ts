@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { accountEnforcementCategories, maxSuspensionMinutes, platformRoles, type PlatformAccess } from "@ayinou/shared";
+import { accountEnforcementCategories, maxSuspensionMinutes, platformRoles, type AdminAuditEvent, type PlatformAccess } from "@ayinou/shared";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
 import { registerAdminLegalRoutes } from "./legal-publication.js";
@@ -111,9 +111,15 @@ export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifi
       });
       return reply.code(204).send();
     });
-    admin.get("/api/v1/admin/audit", async (request) => ({
-      events: await repo!.rpc("admin_audit_for_api", { p_actor: request.authUserId, p_before: null }),
-    }));
+    admin.get("/api/v1/admin/audit", async (request) => {
+      const events = await repo!.rpc<AdminAuditEvent[]>("admin_audit_for_api", { p_actor: request.authUserId, p_before: null });
+      const people = await repo!.auditPeople?.(events.flatMap(({ actorId, subjectId }) => [actorId, subjectId]));
+      return { events: events.map((event) => ({
+        ...event,
+        actor: event.actorId ? people?.get(event.actorId) : undefined,
+        affectedMember: event.subjectId ? people?.get(event.subjectId) : undefined,
+      })) };
+    });
     registerAdminLegalRoutes(admin, repo!);
   });
 }

@@ -17,7 +17,7 @@ import { browserSupabase } from "@/lib/supabase/browser";
 import { AdminWorkspace } from "./admin-workspace";
 import { FeatureEnforcementPanel } from "./feature-enforcement";
 import { VerificationReview } from "./verification-review";
-import { institutionAction, institutionCard, institutionLink } from "./institution-ui";
+import { institutionAction, institutionCard } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import styles from "./mfa-challenge.module.css";
@@ -135,7 +135,10 @@ export function SessionWorkspace({ subject, sessionId, flow, initialSection }: {
   }
 
   const action = <div>
-    <button type="button" disabled={busy} onClick={() => void close()} className={institutionLink}>{t.closeWorkspace}</button>
+    <button type="button" disabled={busy} onClick={() => void close()}
+      className="inline-flex min-h-10 items-center rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-offset-2 disabled:opacity-60">
+      {t.closeWorkspace}
+    </button>
     {failed && <p role="alert">{t.failed}</p>}
   </div>;
   if (delegated) return <MemberShell><div className="grid gap-4">

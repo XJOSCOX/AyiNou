@@ -10,7 +10,7 @@ import { TranslatableText } from "./feed-languages";
 import { MentionSuggestions, SocialText } from "./social-text";
 import { ApiErrorNotice } from "./api-error-notice";
 import { ContentReportForm } from "./content-report-form";
-import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
+import { FeedActions, FeedIcon, feedIconButton, feedToolbarButton } from "./feed-actions";
 import { FounderVerifiedMark } from "./founder-verified-badge";
 import { PersonalClaimChecks, institutionAction, institutionField, institutionLink } from "./institution-ui";
 import { apiErrorCode } from "@/lib/api-errors";
@@ -24,7 +24,7 @@ import { reconcileReaction } from "@/lib/reaction-state";
 const compact = "inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] px-2.5 py-1.5 text-start text-sm font-medium text-[var(--theme-link)] hover:bg-[var(--theme-selected)] focus-visible:outline-2 aria-expanded:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)] disabled:opacity-60";
 type VisibleComment = Extract<FeedComment, { available: true }>;
 
-export function ReactionPicker({ target, id, summary }: { target: "posts" | "comments"; id: string; summary: ReactionSummary }) {
+export function ReactionPicker({ target, id, summary, compact = false }: { target: "posts" | "comments"; id: string; summary: ReactionSummary; compact?: boolean }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const panelId = useId();
@@ -53,7 +53,7 @@ export function ReactionPicker({ target, id, summary }: { target: "posts" | "com
         trigger.current?.focus();
       }
     }}>
-      <button ref={trigger} type="button" aria-expanded={openMode !== null} aria-controls={panelId} className={feedIconButton}
+      <button ref={trigger} type="button" aria-expanded={openMode !== null} aria-controls={panelId} className={compact ? feedToolbarButton : feedIconButton}
         aria-label={total ? `${reactionLabel} ${number.format(total)}` : reactionLabel} title={reactionLabel}
         data-selected={state.mine !== null}
         onPointerEnter={(event) => {
@@ -89,21 +89,22 @@ function ReactionCount({ value }: { value: string }) {
   return <span aria-hidden="true" className="absolute end-0 top-0 max-w-full truncate rounded-sm bg-[var(--theme-surface)] px-0.5 text-[10px] leading-3 tabular-nums">{value}</span>;
 }
 
-export function PostDiscussion({ postId, children }: { postId: string; children: ReactNode }) {
+export function PostDiscussion({ postId, children }: { postId: string; children: ReactNode | ((comments: ReactNode) => ReactNode) }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const panelId = useId();
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  return <div className="mt-4 border-t border-[var(--theme-border)] pt-3">
-    <div className="flex flex-wrap items-start gap-2">
-      <button type="button" className={feedIconButton} aria-label={t.comments} title={t.comments} aria-controls={panelId} aria-expanded={open} onClick={() => {
-        setOpen(!open);
-        setLoaded(true);
-      }}><FeedIcon name="comments" /></button>
-      {children}
-    </div>
+  const renderToolbar = typeof children === "function";
+  const comments = <button type="button" className={renderToolbar ? feedToolbarButton : feedIconButton}
+    aria-label={t.comments} title={t.comments} aria-controls={panelId} aria-expanded={open} onClick={() => {
+      setOpen(!open);
+      setLoaded(true);
+    }}><FeedIcon name="comments" /></button>;
+
+  return <div className="mt-3 border-t border-[var(--theme-border)] pt-1.5">
+    {renderToolbar ? children(comments) : <div className="flex flex-wrap items-start gap-2">{comments}{children}</div>}
     <div id={panelId} hidden={!open}>
       {loaded && <Thread postId={postId} parentId={null} compose />}
     </div>

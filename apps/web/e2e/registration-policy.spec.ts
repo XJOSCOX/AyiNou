@@ -154,6 +154,7 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
     await solveMfa(page, secret);
     await openAdministration(page);
     const ui = adminMessages.en.registrationPolicy;
+    await page.getByRole("button", { name: adminMessages.en.navigationSettings, exact: true }).click();
     await page.getByRole("button", { name: ui.title, exact: true }).click();
     await expect(page.getByRole("heading", { name: ui.title, exact: true })).toBeVisible();
     await page.getByLabel(ui.organizationEnabled).check();
@@ -192,12 +193,17 @@ test("R2.2 protects Auth signup, invitation redemption, referral attribution and
     })).ok).toBe(false);
     expect((await fetch(api + historyPath, { headers: { ...historyHeaders, "X-Ayinou-Workspace": randomUUID() } })).status).toBe(404);
 
+    await page.getByRole("button", { name: adminMessages.en.navigationPlatform, exact: true }).click();
     await page.getByRole("button", { name: adminMessages.en.audit, exact: true }).click();
+    await page.getByRole("button", { name: adminMessages.en.policyAudit.title, exact: true }).click();
     const historySection = page.getByRole("region", { name: adminMessages.en.policyAudit.title });
     const entry = historySection.getByRole("listitem").filter({ hasText: homepageReason });
     await expect(entry.getByText("@" + founder.handle, { exact: false })).toBeVisible();
     await expect(entry.locator("time")).toHaveAttribute("datetime", /T/);
-    await expect(historySection.getByText(reason, { exact: true }).first()).toBeVisible();
+    const registrationEntry = historySection.getByRole("listitem").filter({ hasText: reason }).first();
+    await expect(registrationEntry.getByText(reason, { exact: true })).toBeHidden();
+    await registrationEntry.locator("summary").click();
+    await expect(registrationEntry.getByText(reason, { exact: true })).toBeVisible();
 
     sql(`insert into private.platform_boolean_policy_events(policy_key,revision,actor_id,previous_enabled,enabled,reason,request_id,occurred_at)
       select 'homepage.community_statistics.enabled',i,'${founder.id}',true,false,

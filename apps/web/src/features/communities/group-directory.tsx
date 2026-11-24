@@ -1,9 +1,8 @@
 import { TopicSelect, GroupMore } from "./group-controls";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { FilterPanel } from "@/components/filter-panel";
-import { CommunityCard } from "@/components/community-card";
+import { CommunityCard, CommunityLoading, communityEmpty, communityGrid, communitySearchBar } from "@/components/community-card";
 import { institutionField } from "@/components/institution-ui";
-import { communityDirectoryMessages } from "@/lib/communities-i18n";
 import { communityDiscoveryMessages } from "@/lib/community-discovery-i18n";
 import { useCursorPage } from "@/lib/feed-state";
 import { listGroups } from "@/lib/group-api";
@@ -17,7 +16,6 @@ export function GroupsDirectory({ kind, guest = false, search, initialTopic = ""
 }) {
   const [locale] = useLocale();
   const t = groupMessages[locale];
-  const c = communityDirectoryMessages[locale];
   const [country, setCountry] = useState("");
   const [topic, setTopic] = useState(initialTopic);
   const [changed, setChanged] = useState<Record<string, MemberGroup>>({});
@@ -30,8 +28,8 @@ export function GroupsDirectory({ kind, guest = false, search, initialTopic = ""
     return { rows: page.communities, nextCursor: page.nextCursor };
   }, [countryFilter, guest, kind, search, topicFilter]);
   const resource = useCursorPage(load);
-  return <section className="grid min-w-0 gap-4" aria-label={t.groups}>
-    {(kind || categoryFilter) && <FilterPanel search={searchControl}
+  return <section className="grid min-w-0 gap-4" aria-label={kind ? t[kind] : t.groups}>
+    {(kind || categoryFilter) && <FilterPanel search={searchControl} wideSearch={!guest} className={guest ? "" : communitySearchBar}
       active={Number(Boolean(countryFilter || topicFilter)) + Number(Boolean(categoryFilter && kind))}>
       <div className="grid gap-3 sm:grid-cols-2">
         {categoryFilter}
@@ -43,12 +41,12 @@ export function GroupsDirectory({ kind, guest = false, search, initialTopic = ""
       </div>
     </FilterPanel>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} signIn={!guest} />}
-    {!resource.page && resource.error === null && <p role="status">{c.loading}</p>}
-    {resource.page?.rows.length === 0 && <p role="status">{t.noGroups}</p>}
-    <ul className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-      {resource.error === null && resource.page?.rows.map((group) => <CommunityCard key={group.id} community={changed[group.id] ?? group} guest={guest}
+    {!resource.page && resource.error === null && <CommunityLoading />}
+    {resource.page?.rows.length === 0 && <p role="status" className={communityEmpty}>{t.noGroups}</p>}
+    {resource.error === null && !!resource.page?.rows.length && <ul className={communityGrid}>
+      {resource.page.rows.map((group) => <CommunityCard key={group.id} community={changed[group.id] ?? group} guest={guest}
         update={(next) => { if (next && next.kind !== "department") setChanged((current) => ({ ...current, [next.id]: next })); }} />)}
-    </ul>
+    </ul>}
     <GroupMore resource={resource} />
   </section>;
 }

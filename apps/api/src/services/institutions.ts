@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import type { Institution, InstitutionAccounts, InstitutionManagement } from "@ayinou/shared";
+import type { AuditPerson, Institution, InstitutionAccounts, InstitutionManagement } from "@ayinou/shared";
 import type { ApiConfig } from "../config.js";
 import { safeProfileImage } from "./profile-image.js";
 import { supabaseDatabaseOptions, supabaseFetch } from "./supabase-transport.js";
@@ -17,6 +17,7 @@ type DbAccounts = Omit<InstitutionAccounts, "organizations"> & {
 
 export interface InstitutionRepository {
   rpc<T>(name: string, input: Record<string, unknown>): Promise<T>;
+  auditPeople?(ids: readonly (string | null)[]): Promise<Map<string, AuditPerson>>;
   publicProfile(handle: string): Promise<Institution | null>;
   accounts(actor: string): Promise<InstitutionAccounts>;
   manage(actor: string, org: string): Promise<InstitutionManagement>;
@@ -88,6 +89,19 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
 
   return {
     rpc,
+    async auditPeople(ids) {
+      const unique = [...new Set(ids.filter((id): id is string => !!id))];
+      const people = new Map<string, AuditPerson>();
+      for (let offset = 0; offset < unique.length; offset += 100) {
+        const { data, error } = await client.from("profiles").select("user_id,display_name,username")
+          .in("user_id", unique.slice(offset, offset + 100));
+        if (error) continue;
+        for (const { user_id, display_name, username } of data) {
+          if (display_name || username) people.set(user_id, { displayName: display_name, username });
+        }
+      }
+      return people;
+    },
     async publicProfile(handle) {
       const row = await rpc<DbInstitution | null>("institution_public_for_api", { p_handle: handle });
       return row ? publishedProfile(row) : null;

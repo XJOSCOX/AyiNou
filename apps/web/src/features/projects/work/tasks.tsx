@@ -1,6 +1,7 @@
 import { type WorkProps, useWorkMessages, Operation, field, actionsClass, ReasonField } from "./work-controls";
-import { institutionField, institutionCard, institutionLink } from "@/components/institution-ui";
+import { institutionField } from "@/components/institution-ui";
 import { type ProjectWorkTask, projectTaskPriorities } from "@ayinou/shared";
+import { ProjectDisclosure, ProjectSection } from "@/components/project-ui";
 
 function TaskForm({ task, ...props }: WorkProps & { task?: ProjectWorkTask }) {
   const { t } = useWorkMessages();
@@ -22,9 +23,8 @@ export function Tasks(props: WorkProps) {
   const { t } = useWorkMessages();
   const supervisor = work.role === "owner" || work.role === "manager" || work.role === "supervisor";
   const active = work.status === "active";
-  return <section className={institutionCard}>
-    <h2 className="text-xl font-semibold">{t.tasks}</h2>
-    {supervisor && active && <details className="mt-3"><summary className={institutionLink}>{t.events.task_create}</summary><TaskForm {...props} /></details>}
+  return <ProjectSection title={t.tasks}>
+    {supervisor && active && <ProjectDisclosure title={t.events.task_create}><TaskForm {...props} /></ProjectDisclosure>}
     {!work.tasks.length && <p className="mt-3">{t.empty}</p>}
     <ul className="mt-3 grid gap-4 lg:grid-cols-2">{work.tasks.map((task) => {
       const input = { id: task.id, version: task.version };
@@ -39,8 +39,8 @@ export function Tasks(props: WorkProps) {
         {active && task.mine && open && <div className={actionsClass}>{ownActions.map((action) =>
           <Operation key={action} {...props} action={action} input={input} />)}</div>}
         {active && supervisor && !task.mine && open && <>
-          {!task.assigned && task.status !== "in_progress" && <details><summary className={institutionLink}>{t.events.task_edit}</summary><TaskForm {...props} task={task} /></details>}
-          <details><summary className={institutionLink}>{t.events.task_assign}</summary>
+          {!task.assigned && task.status !== "in_progress" && <ProjectDisclosure title={t.events.task_edit}><TaskForm {...props} task={task} /></ProjectDisclosure>}
+          <ProjectDisclosure title={t.events.task_assign}>
             <Operation {...props} action="task_assign" input={input} fields={(data) => ({ userId: field(data, "userId") || null })}>
               <label>{t.member}<select className={institutionField} name="userId" defaultValue={task.assignee?.id ?? ""}>
                 <option value="">{t.unassigned}</option>
@@ -48,14 +48,14 @@ export function Tasks(props: WorkProps) {
                   {item.person.name || item.person.handle || t.member}</option>)}
               </select></label>
             </Operation>
-          </details>
+          </ProjectDisclosure>
         </>}
         {active && supervisor && !task.mine && !["completed", "cancelled"].includes(task.status) &&
           (task.status === "submitted" ? ["task_approve", "task_return", "task_cancel"] as const : ["task_cancel"] as const).map((action) =>
-            <details key={action}><summary className={institutionLink}>{t.events[action]}</summary>
+            <ProjectDisclosure title={t.events[action]} key={action}>
               <Operation {...props} action={action} input={input} fields={(data) => ({ reason: field(data, "reason") })}><ReasonField /></Operation>
-            </details>)}
+            </ProjectDisclosure>)}
       </li>;
     })}</ul>
-  </section>;
+  </ProjectSection>;
 }

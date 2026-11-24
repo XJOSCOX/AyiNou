@@ -14,6 +14,7 @@ import { useMemberIdentity } from "@/lib/member-display-name";
 import { ApiErrorNotice } from "./api-error-notice";
 import { GovernanceConfirmation, useGovernanceCommand } from "./governance-controls";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { adminActionPanel, adminDangerAction, adminDisclosure } from "./admin-controls";
 
 export function AdminEarlyPartners() {
   const { memberId } = useMemberIdentity();
@@ -73,7 +74,7 @@ function PartnerWorkspace({ actor, org }: { actor: string; org?: string }) {
     {!org && program && <ProgramFacts program={program} />}
     {!org && program?.syntheticOpen && program.nominate && <details className="grid gap-2">
       <summary className="cursor-pointer font-semibold">{t.nominate}</summary>
-      <form className="mt-3 grid max-w-lg gap-3" onSubmit={(event) => {
+      <form className={`${adminActionPanel} mt-3 max-w-2xl`} onSubmit={(event) => {
         event.preventDefault();
         const values = new FormData(event.currentTarget);
         send({ action: "nominate", programId: program.id, organizationId: values.get("organization"),
@@ -188,9 +189,9 @@ function adminActions(entry: EarlyPartnerEnrollment, program: EarlyPartnerProgra
 function DecisionForm({ action, admin, busy, send }: { action: Decision; admin?: boolean; busy: boolean; send: (reason: string) => void }) {
   const [locale] = useLocale();
   const t = earlyPartnerMessages[locale];
-  return <details>
-    <summary className="cursor-pointer font-semibold">{t[action]}</summary>
-    <form className="mt-2 grid max-w-lg gap-2" onSubmit={(event) => {
+  return <details className={admin ? "max-w-2xl rounded-lg border border-[var(--theme-border)]" : undefined}>
+    <summary className={admin ? adminDisclosure : "cursor-pointer font-semibold"}>{t[action]}</summary>
+    <form className={admin ? `${adminActionPanel} m-2` : "mt-2 grid max-w-lg gap-2"} onSubmit={(event) => {
       event.preventDefault();
       send(String(new FormData(event.currentTarget).get("reason") ?? ""));
     }}>
@@ -202,7 +203,7 @@ function DecisionForm({ action, admin, busy, send }: { action: Decision; admin?:
         </label>
       </>}
       <GovernanceConfirmation reason={admin && action !== "resolve"} disabled={busy} />
-      <button className={`${institutionAction} justify-self-start`} disabled={busy}>{t[action]}</button>
+      <button className={`${admin && (action === "suspend" || action === "end" || action === "revoke_feedback") ? adminDangerAction : institutionAction} justify-self-start`} disabled={busy}>{t[action]}</button>
     </form>
   </details>;
 }

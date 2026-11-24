@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import { api, apiResponse, expect, login, logout, test } from "./fixtures";
+import { accountMessages } from "../src/lib/account-i18n";
 import { authMessages } from "../src/lib/auth-i18n";
 import { discoveryMessages } from "../src/lib/discovery-i18n";
 import { feedMessages } from "../src/lib/feed-i18n";
@@ -63,6 +64,7 @@ test("creates and reloads a poll draft @smoke", async ({ page, signedIn }) => {
 
 test("project draft keeps entered fields after a transient write failure", async ({ page, signedIn }) => {
   await page.goto("/projects/new");
+  await expect(page.getByText(projects.proposalIdentityRequired)).toBeVisible();
   const title = "Local training proposal";
   await page.getByLabel(projects.projectName).fill(title);
   await page.getByRole("combobox", { name: /^Category/ }).selectOption("education");
@@ -75,7 +77,29 @@ test("project draft keeps entered fields after a transient write failure", async
   await expect(page.getByRole("main").getByRole("alert")).toHaveText(errorMessages.en.server);
   await expect(page.getByLabel(projects.projectName)).toHaveValue(title);
   await page.getByRole("button", { name: projects.saveDraft }).click();
-  await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  await expect(page.getByRole("heading", { name: title, level: 2 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: projects.detailsHeading })).toBeVisible();
+  const navigation = page.getByRole("navigation", { name: projects.title, exact: true });
+  await expect(navigation.getByRole("link", { name: projects.manage, exact: true })).toHaveAttribute("aria-current", "page");
+  const edit = page.getByRole("button", { name: projects.edit, exact: true });
+  await expect(edit).toHaveAttribute("aria-expanded", "false");
+  await edit.click();
+  await expect(page.getByRole("heading", { name: projects.detailsHeading })).toBeHidden();
+  await page.getByLabel(projects.projectName).fill("Updated training proposal");
+  await edit.click();
+  await expect(page.getByLabel(projects.projectName)).toBeHidden();
+  await edit.click();
+  await expect(page.getByLabel(projects.projectName)).toHaveValue("Updated training proposal");
+  await page.getByRole("button", { name: projects.saveDraft }).click();
+  await expect(page.getByRole("heading", { name: "Updated training proposal", exact: true })).toBeVisible();
+  await expect(edit).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByLabel(projects.projectName)).toBeHidden();
+  await expect(page.getByRole("heading", { name: projects.detailsHeading })).toBeVisible();
+  await expect(page.getByRole("main").getByText(projects.saved, { exact: true })).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 850 });
+  await edit.click();
+  await expect(page.getByLabel(projects.projectName)).toHaveValue("Updated training proposal");
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   expect(signedIn.handle).toMatch(/^e2e_/);
 });
 
@@ -112,15 +136,25 @@ test("profile saves, replaces a selected image, renews it and clears it on accou
   expect((await access).ok()).toBe(true);
   expect(reads).toEqual({ profile: 1, access: 1 });
   page.off("request", onRequest);
+  const sections = page.getByRole("navigation", { name: t.profileTitle });
+  await sections.getByRole("link", { name: accountMessages.en.personal, exact: true }).click();
+  await expect(page.getByLabel(t.displayName, { exact: true })).toBeHidden();
   await page.getByRole("radio", { name: m.haitian }).check();
   await page.getByLabel(m.firstName, { exact: true }).fill("Browser");
   await page.getByLabel(m.lastName, { exact: true }).fill("Fixture");
+  await sections.getByRole("link", { name: m.publicProfile, exact: true }).click();
   await page.getByLabel(t.displayName, { exact: true }).fill("Updated browser fixture");
   await page.getByLabel(m.biography).fill("Disposable test biography");
   const saved = apiResponse(page, "/api/v1/me/profile/details", "PATCH");
   await page.getByRole("button", { name: t.saveProfile }).click();
   expect((await saved).ok()).toBe(true);
   await expect(page.getByRole("main").getByRole("status").filter({ hasText: t.saved })).toBeVisible();
+  const personal = sections.getByRole("link", { name: accountMessages.en.personal, exact: true });
+  await personal.click();
+  await page.reload();
+  await expect(personal).toHaveAttribute("aria-current", "location");
+  await expect(page.getByLabel(m.firstName, { exact: true })).toHaveValue("Browser");
+  await sections.getByRole("link", { name: m.publicProfile, exact: true }).click();
   const photo = page.getByLabel(m.addPhoto);
   const avatar = page.getByRole("banner").locator("summary img");
   let previous: string | null = null;
@@ -134,6 +168,9 @@ test("profile saves, replaces a selected image, renews it and clears it on accou
     previous = await avatar.getAttribute("src");
     await expect.poll(() => avatar.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   }
+  await page.goto("/feed");
+  const composerAvatar = page.getByRole("region", { name: feed.write }).locator("img");
+  await expect.poll(() => composerAvatar.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await page.goto("/settings");
   await expect(avatar).toBeVisible();
   await page.reload();

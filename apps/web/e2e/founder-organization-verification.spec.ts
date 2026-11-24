@@ -112,6 +112,7 @@ test("Founder can decide their own organization and representative requests and 
     await login(page, founder);
     await solveMfa(page, actor.secret);
     await openAdministration(page);
+    await page.getByRole("button", { name: "Members", exact: true }).click();
     await page.getByRole("button", { name: "Trust and verification" }).click();
     const repItem = page.locator("details").filter({
       has: page.locator("summary", { hasText: "Authorized representative · Founder Review Business" }),

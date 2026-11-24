@@ -13,7 +13,9 @@ import { authMessages } from "@/lib/auth-i18n";
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AdminFeedback } from "./admin-workspace";
-import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionField, useInstitutionResource } from "./institution-ui";
+import { AdminMemberBadges } from "./admin-account-avatar";
+import { adminActionPanel, adminCompactCard, adminConfirmation, adminDangerAction, adminSecondaryAction } from "./admin-controls";
 
 const endpoint = "/api/v1/moderation/feature-enforcement";
 const presets = ["hours1", "hours24", "days3", "days7", "days30", "days90"] as const;
@@ -50,16 +52,17 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
   const refresh = () => { setEdit(null); setPages([]); resource.refresh(); };
   const history = data?.history.filter((row) => row.action.includes("delegat") === delegate);
   const options = data?.subjects?.filter((item) => !delegate || item.moderator) ?? [];
-  return <div className="grid min-w-0 gap-4">
-    <section className={institutionCard}>
+  const selectedSubject = options.find((item) => item.id === subject);
+  return <div className="grid min-w-0 gap-2.5">
+    <section className={adminCompactCard}>
       <h2 className="text-xl font-semibold">{delegate ? t.delegations : t.features}</h2>
-      <form onSubmit={search} className="mt-3 flex flex-wrap items-end gap-3">
+      <form onSubmit={search} className="mt-3 grid items-end gap-3 sm:grid-cols-[minmax(0,32rem)_auto] sm:justify-start">
         <label className="min-w-0 flex-1 text-sm font-semibold">{t.lookup}
           <input type="search" name="search" minLength={2} maxLength={100} className={institutionField} />
         </label>
-        <button type="submit" className={institutionAction}>{admin.search}</button>
+        <button type="submit" className={`${institutionAction} min-h-11 justify-self-start`}>{admin.search}</button>
       </form>
-      {!!options.length && <label className="mt-3 block text-sm font-semibold">{t.subject}
+      {!!options.length && <label className="mt-3 block max-w-lg text-sm font-semibold">{t.subject}
         <select value={subject} className={institutionField} onChange={(event) => {
           setSubject(event.target.value); setPages([]); setEdit(null);
         }}>
@@ -67,13 +70,16 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
           {options.map((item) => <option value={item.id} key={item.id}>@{item.username}</option>)}
         </select>
       </label>}
+      {selectedSubject && <p className="mt-2 flex flex-wrap items-center gap-1 text-sm">
+        <span>@{selectedSubject.username}</span><AdminMemberBadges username={selectedSubject.username} />
+      </p>}
       {q && !options.length && !resource.error && <p className="mt-3 text-sm">{t.none}</p>}
       {resource.error ? <div className="mt-3"><AdminFeedback error={resource.error} retry={resource.refresh} section={delegate ? "moderatorDelegation" : "featureRestrictions"} /></div>
         : !data ? <p role="status" className="mt-3">{authMessages[locale].working}</p>
           : subject && !edit && (!delegate || data.authority !== "moderator") && <DecisionForm key={subject}
             workspace={workspace} data={data} subject={subject} action={delegate ? "delegate" : "restrict"} onSave={refresh} />}
     </section>
-    {data && <section className={institutionCard}>
+    {data && <section className={adminCompactCard}>
       <h3 className="font-semibold">{t.options}</h3>
       {!records?.length && <p className="mt-2 text-sm">{t.none}</p>}
       <ul className="mt-2 divide-y divide-[var(--theme-border)]">
@@ -84,15 +90,15 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
               && (data.authority === "administrator" || data.delegations.some((d) =>
               d.status === "active" && d.capability === record.capability &&
               (d.scope === "platform" || (d.scope === record.scope && d.scopeId === record.scopeId)))));
-          return <li key={record.id} className="grid min-w-0 gap-2 py-3">
+          return <li key={record.id} className="grid min-w-0 gap-1.5 py-2.5">
             <p className="font-semibold">{t[record.capability]} · {t[record.status]}</p>
             <p className="break-all text-sm">{t[record.scope]}{record.scopeId && " · " + record.scopeId} · {record.subject}</p>
             <p className="text-sm">{date.format(new Date(record.startsAt))} · {record.expiresAt ? date.format(new Date(record.expiresAt)) : t.indefinitely}</p>
             {record.maxMinutes != null && <p className="text-sm">{t.durationLimit} · {record.maxMinutes}</p>}
             {active && allowed && <div className="flex flex-wrap gap-4">
-              {(delegate || record.expiresAt !== null) && <button type="button" className={institutionLink}
+              {(delegate || record.expiresAt !== null) && <button type="button" className={adminSecondaryAction}
                 onClick={() => setEdit({ record, action: delegate ? "update_delegation" : "extend" })}>{delegate ? t.updateDecision : t.change}</button>}
-              <button type="button" className={institutionLink}
+              <button type="button" className={delegate ? adminDangerAction : adminSecondaryAction}
                 onClick={() => setEdit({ record, action: delegate ? "revoke_delegation" : "revoke" })}>{t.revokeDecision}</button>
             </div>}
             {edit?.record.id === record.id && record.subject && <DecisionForm key={record.id + edit.action}
@@ -102,7 +108,7 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
         })}
       </ul>
     </section>}
-    {data && <section className={institutionCard}>
+    {data && <section className={adminCompactCard}>
       <h3 className="font-semibold">{t.history}</h3>
       {!history?.length && <p className="mt-2 text-sm">{t.none}</p>}
       <ul className="mt-2 divide-y divide-[var(--theme-border)]">
@@ -112,8 +118,8 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
         </li>)}
       </ul>
       <div className="mt-3 flex gap-4">
-        {pages.length > 0 && <button type="button" className={institutionLink} onClick={() => setPages(pages.slice(0, -1))}>{t.newer}</button>}
-        {data.nextCursor && <button type="button" className={institutionLink}
+        {pages.length > 0 && <button type="button" className={adminSecondaryAction} onClick={() => setPages(pages.slice(0, -1))}>{t.newer}</button>}
+        {data.nextCursor && <button type="button" className={adminSecondaryAction}
           onClick={() => data.nextCursor && setPages([...pages, data.nextCursor])}>{t.older}</button>}
       </div>
     </section>}
@@ -171,7 +177,7 @@ function DecisionForm({ workspace, data, subject, action, record, onSave, onCanc
     finally { setBusy(false); }
   }
 
-  return <form className="mt-4 grid gap-3 border-t border-[var(--theme-border)] pt-4" onSubmit={submit} aria-busy={busy}>
+  return <form className={`${adminActionPanel} mt-4 max-w-3xl`} onSubmit={submit} aria-busy={busy}>
     {!record && <>
       <fieldset className="grid gap-2 sm:grid-cols-2">
         <legend className="mb-2 font-semibold">{t.capabilities}</legend>
@@ -220,13 +226,13 @@ function DecisionForm({ workspace, data, subject, action, record, onSave, onCanc
           : duration === "custom" ? t.custom : account[presets[suspensionMinutes.findIndex((n) => n===Number(duration))]])}
       </p>}
     </div>
-    <label className="flex items-start gap-2 text-sm"><input className="mt-1" name="confirm" value="yes" type="checkbox" required />{t.reasonReview}</label>
+    <label className={adminConfirmation}><input name="confirm" value="yes" type="checkbox" required />{t.reasonReview}</label>
     {error !== null && <AdminFeedback error={error} section={delegation ? "moderatorDelegation" : "featureRestrictions"} />}
     <div className="flex flex-wrap gap-3">
-      <button className={institutionAction} disabled={busy || capabilities.length === 0 || !record && !scopes.includes(scope) || !revoke && duration !== "indefinite" && duration !== "custom" && Number(duration)>max}>
+      <button className={action === "restrict" || action === "extend" || action === "revoke_delegation" ? adminDangerAction : institutionAction} disabled={busy || capabilities.length === 0 || !record && !scopes.includes(scope) || !revoke && duration !== "indefinite" && duration !== "custom" && Number(duration)>max}>
         {t.submit}
       </button>
-      {onCancel && <button type="button" className={institutionLink} disabled={busy} onClick={onCancel}>{accountMessages[locale].cancel}</button>}
+      {onCancel && <button type="button" className={adminSecondaryAction} disabled={busy} onClick={onCancel}>{accountMessages[locale].cancel}</button>}
     </div>
   </form>;
 }

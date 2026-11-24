@@ -1,35 +1,34 @@
+import Link from "next/link";
 import { useWorkMessages } from "./work-controls";
 import { ApiErrorNotice } from "@/components/api-error-notice";
-import { useInstitutionResource, institutionCard, institutionLink } from "@/components/institution-ui";
+import { useInstitutionResource } from "@/components/institution-ui";
 import { MemberShell } from "@/components/member-shell";
-import { PageHeader } from "@/components/page-header";
-import { authMessages } from "@/lib/auth-i18n";
+import { ProjectLoading, ProjectSection, ProjectStatusBadge, ProjectsHeader, projectBadge } from "@/components/project-ui";
 import { loadProjectWorkIndex } from "@/lib/project-work-api";
-import Link from "next/link";
+
+const row = "flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--theme-border)] px-4 py-3";
+const titleLink = "min-w-0 break-words text-sm font-semibold text-[var(--theme-link)] hover:underline focus-visible:underline";
 
 export function ProjectWorkIndexScreen() {
-  const { t, locale } = useWorkMessages();
+  const { t } = useWorkMessages();
   const resource = useInstitutionResource(loadProjectWorkIndex);
-  return <MemberShell><div className="grid gap-4">
-    <PageHeader title={t.workspace} />
+  return <MemberShell><div className="grid min-w-0 gap-4">
+    <ProjectsHeader title={t.workspace} description={t.workspaceHelp} current="work" />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
-    {!resource.data && resource.error === null && <p role="status">{authMessages[locale].working}</p>}
-    {resource.data && <>
-      <section className={institutionCard}>
-        <h2 className="text-xl font-semibold">{t.myWork}</h2>
-        <ul className="mt-2 grid gap-2">{resource.data.work.map((item) => <li key={item.id}>
-          <Link href={"/projects/" + item.id + "/work"} className={institutionLink}>{item.title}</Link> · {t.states[item.status]}
-        </li>)}</ul>
-        {!resource.data.work.length && <p>{t.empty}</p>}
-      </section>
-      <section className={institutionCard}>
-        <h2 className="text-xl font-semibold">{t.volunteers}</h2>
-        <ul className="mt-2 grid gap-2">{resource.data.opportunities.map((item) => <li key={item.id}>
-          <Link href={"/projects/" + item.projectId + "/work?section=volunteers"} className={institutionLink}>{item.title}</Link>
-          {item.remote && <> · {t.remote}</>}
-        </li>)}</ul>
-        {!resource.data.opportunities.length && <p>{t.empty}</p>}
-      </section>
-    </>}
+    {!resource.data && resource.error === null && <ProjectLoading />}
+    {resource.data && <div className="grid min-w-0 items-start gap-4 lg:grid-cols-2">
+      <ProjectSection title={t.myWork} count={resource.data.work.length}>
+        {resource.data.work.length ? <ul className="grid gap-2">{resource.data.work.map((item) => <li className={row} key={item.id}>
+          <Link href={`/projects/${item.id}/work`} className={titleLink} dir="auto">{item.title}</Link>
+          <ProjectStatusBadge status={item.status === "approved" ? "approved" : undefined}>{t.states[item.status]}</ProjectStatusBadge>
+        </li>)}</ul> : <p className="text-sm text-[var(--theme-body)]">{t.emptyWorkspace}</p>}
+      </ProjectSection>
+      <ProjectSection title={t.volunteers} count={resource.data.opportunities.length}>
+        {resource.data.opportunities.length ? <ul className="grid gap-2">{resource.data.opportunities.map((item) => <li className={row} key={item.id}>
+          <Link href={`/projects/${item.projectId}/work?section=volunteers`} className={titleLink} dir="auto">{item.title}</Link>
+          {item.remote && <span className={projectBadge}>{t.remote}</span>}
+        </li>)}</ul> : <p className="text-sm text-[var(--theme-body)]">{t.emptyOpportunities}</p>}
+      </ProjectSection>
+    </div>}
   </div></MemberShell>;
 }

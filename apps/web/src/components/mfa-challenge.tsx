@@ -5,7 +5,8 @@ import { accountMessages } from "@/lib/account-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { sessionSecurityMessages } from "@/lib/session-security-i18n";
 import { browserSupabase } from "@/lib/supabase/browser";
-import { AuthShell } from "./auth-shell";
+import { DisplayControls } from "./display-controls";
+import { SiteBrand } from "./site-brand";
 import { AuthenticatorCode } from "./authenticator-code";
 import styles from "./mfa-challenge.module.css";
 
@@ -13,7 +14,7 @@ export function MfaChallenge({ factorIds, next, subject, sessionId, workspace }:
   factorIds: string[]; subject: string; sessionId: string;
 } & ({ next: string; workspace?: never } | {
   next?: never;
-  workspace: { onVerified: () => Promise<void>; onCancel: () => void; onSessionEnded: () => void };
+  workspace: { help?: string; onVerified: () => void | Promise<void>; onCancel: () => void; onSessionEnded: () => void };
 })) {
   const [locale] = useLocale();
   const t = accountMessages[locale];
@@ -66,11 +67,12 @@ export function MfaChallenge({ factorIds, next, subject, sessionId, workspace }:
   const content = (
       <section className={styles.challenge} aria-labelledby={titleId}>
         <header className={styles.header}>
-          <span className={styles.lock} aria-hidden="true" />
+          <span className={styles.lock} data-standalone={!workspace} aria-hidden="true" />
           {workspace ? <h2 id={titleId} className="text-xl font-semibold">{security.workspaceMfaTitle}</h2>
             : <h1 id={titleId} className={styles.title}>{t.mfaTitle}</h1>}
           <p id={helpId} className={styles.help}>{factorIds.length
-            ? (workspace ? security.workspaceMfaHelp : t.mfaHelp) : t.mfaUnavailable}</p>
+            ? (workspace ? workspace.help ?? security.workspaceMfaHelp : t.mfaHelp)
+            : t.mfaUnavailable}</p>
         </header>
         {factorIds.length > 1 && <label className={styles.factor}>
           {t.authenticator}
@@ -86,5 +88,15 @@ export function MfaChallenge({ factorIds, next, subject, sessionId, workspace }:
         </footer>
       </section>
   );
-  return workspace ? content : <AuthShell>{content}</AuthShell>;
+  if (workspace) return content;
+
+  return <main className={styles.standalone}>
+    <div className={styles.panel}>
+      <div className={styles.toolbar}>
+        <SiteBrand href="/" />
+        <DisplayControls />
+      </div>
+      <div className={styles.panelBody}>{content}</div>
+    </div>
+  </main>;
 }

@@ -29,6 +29,17 @@ export function searchDiscovery(filter: DiscoveryFilter, cursor: string | null, 
 export const loadSuggestions = (signal: AbortSignal): Promise<{ accounts: DiscoveryCard[] }> =>
   authorizedSocialRequest("/api/v1/discover/suggestions", { signal });
 
+export async function loadFollowedInstitutions(cursor: string | null, signal: AbortSignal) {
+  const size = 15;
+  const query = new URLSearchParams({ limit: String(size + 1) });
+  if (cursor) query.set("cursor", cursor);
+  const { accounts }: DiscoveryPage = await authorizedSocialRequest(`/api/v1/me/following?${query}`, { signal });
+  // The combined list sorts institution keys before member keys. Its extra row tells us if another institution exists.
+  const institutions = accounts.filter((account) => account.kind === "institution");
+  const rows = institutions.slice(0, size);
+  return { rows, nextCursor: institutions.length > size ? (rows.at(-1)?.id ?? null) : null };
+}
+
 export function loadFollowList(target: FollowTarget | null, list: FollowList, cursor: string | null, signal: AbortSignal): Promise<DiscoveryPage> {
   const path = target ? `${followPath(target)}/${list}` : "/api/v1/me/following";
   return authorizedSocialRequest(cursor ? `${path}?cursor=${encodeURIComponent(cursor)}` : path, { signal });

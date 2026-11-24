@@ -28,6 +28,51 @@
       "displayInterests": "Montre enterè sou pwofil piblik la"
     }
   },
+  "auditWorkspace": {
+    "activity": "Aktivite platfòm nan",
+    "decisions": "Dosye desizyon yo",
+    "intro": "Gade aktivite platfòm ak moderasyon ki anrejistre. Paj la montre 30 dènye jou yo pa defo.",
+    "filter": "Filtre aktivite",
+    "category": "Kategori",
+    "outcome": "Rezilta",
+    "all": "Tout",
+    "apply": "Aplike filtè yo",
+    "reset": "Reyajiste",
+    "from": "Depi (UTC)",
+    "through": "Jiska (UTC)",
+    "range": "Chwazi yon peryòd ki pa depase 90 jou.",
+    "resource": "ID resous la",
+    "reference": "Referans dosye a",
+    "request": "Referans demann lan",
+    "before": "Eta anvan",
+    "after": "Nouvo eta",
+    "empty": "Pa gen aktivite ki koresponn ak filtè sa yo.",
+    "decisionSearch": "Filtre dènye dosye desizyon yo",
+    "decisionPlaceholder": "Chèche pa aksyon, non, non itilizatè, ID oswa rezon",
+    "actorName": "Moun ki fè aksyon an",
+    "affectedName": "Manm ki afekte",
+    "selectMember": "Chwazi yon manm nan sijesyon yo oswa efase sa ki nan chan an.",
+    "newer": "Pi resan",
+    "older": "Pi ansyen",
+    "page": "Paj {page}",
+    "categories": {
+      "platform": "Platfòm",
+      "governance": "Gouvènans",
+      "security": "Sekirite",
+      "identity": "Idantite",
+      "organization": "Òganizasyon",
+      "verification": "Verifikasyon",
+      "moderation": "Moderasyon"
+    },
+    "outcomes": {
+      "recorded": "Anrejistre",
+      "approved": "Apwouve",
+      "rejected": "Rejte",
+      "revoked": "Revoke",
+      "expired": "Ekspire",
+      "cancelled": "Anile"
+    }
+  },
   "policyAudit": {
     "title": "Chanjman nan paramèt yo",
     "changedBy": "Moun ki fè chanjman an",
@@ -61,6 +106,10 @@
     "expires": "Ekspire",
     "copy": "Kopye kòd la"
   },
+  "administrationIntro": "Jere paramèt platfòm nan, aksè manm yo ak moderasyon an.",
+  "navigationSearch": "Chèche yon seksyon",
+  "navigationNoResults": "Pa gen seksyon ki koresponn ak rechèch ou a.",
+  "openAdminSection": "Louvri {section}",
   "navigationSections": "Seksyon",
   "navigationPlatform": "Platfòm",
   "navigationMembers": "Manm",

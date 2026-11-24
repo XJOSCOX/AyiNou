@@ -48,7 +48,7 @@ begin
   project:=public.project_create_for_client(gen_random_uuid(),'individual',null,null,proposal);
   other:=public.project_create_for_client(gen_random_uuid(),'individual',null,null,proposal||'{"title":"Separate work proposal"}');
   -- Proposal review is covered by the Phase 6A regression. Only the approved state is seeded here.
-  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now()
+  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now()
     where id in (project,other);
   update public.verification_records set publication_held_at=now() where user_id=owner;
   begin
@@ -206,7 +206,7 @@ begin
   org:=public.institution_save_for_api(owner,null,jsonb_build_object('handle','work-'||left(replace(owner::text,'-',''),8),
     'name','Synthetic project institution','kind','nonprofit','countryCode','HT'));
   org_project:=public.project_create_for_client(gen_random_uuid(),'organization',org,null,proposal);
-  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now() where id=org_project;
+  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now() where id=org_project;
   begin
     perform public.project_operation_for_client(org_project,'execution_status','{"status":"active","version":0}');
     raise exception 'unverified institution activated operations';
@@ -238,7 +238,7 @@ begin
   insert into feed_data.community_memberships(community_id,user_id) values(room,owner),(room,supervisor);
   insert into feed_data.community_staff(community_id,user_id,role) values(room,owner,'administrator'),(room,supervisor,'administrator');
   group_project:=public.project_create_for_client(gen_random_uuid(),'community',room,null,proposal);
-  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now() where id=group_project;
+  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now() where id=group_project;
   perform public.project_operation_for_client(group_project,'execution_status','{"status":"active","version":0}');
   perform set_config('request.jwt.claims',supervisor_jwt,true);
   perform public.project_operation_for_client(group_project,'task_create',task_fields);
@@ -253,7 +253,7 @@ begin
       'Synthetic group description.','Synthetic group rules.','private',owner) returning id into private_room;
   insert into feed_data.community_memberships(community_id,user_id) values(private_room,owner);
   group_project:=public.project_create_for_client(gen_random_uuid(),'community',private_room,null,proposal);
-  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now() where id=group_project;
+  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now() where id=group_project;
   perform public.project_operation_for_client(group_project,'execution_status','{"status":"active","version":0}');
   perform public.project_operation_for_client(group_project,'task_create',task_fields);
   perform set_config('request.jwt.claims',visitor_jwt,true);

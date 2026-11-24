@@ -1,4 +1,5 @@
 import type { Locale } from "./core";
+import type { PersonalClaim } from "./trust";
 
 export const eventCategories = ["community", "culture", "education", "volunteer", "other"] as const;
 export const eventFormats = ["in_person", "online", "hybrid"] as const;
@@ -26,13 +27,16 @@ export interface EventInput {
   locality: string | null; venue: string | null; meetingUrl: string | null; coverUrl: string | null;
   capacity: number | null; projectId: string | null; language: Locale;
 }
-export interface EventOrganizer { kind: "member" | "organization"; name: string; handle: string | null; }
+export type EventOrganizer = { name: string; handle: string | null } & (
+  | { kind: "member"; personalClaims?: PersonalClaim[]; founderVerified?: true }
+  | { kind: "organization"; verified?: true }
+);
 export interface EventPreview {
   id: string; title: string; organizer: EventOrganizer; startsAt: string; timeZone: string; status: Exclude<EventStatus, "draft">;
 }
 export interface CommunityEvent extends EventInput {
   id: string; createdAt: string; version: number; status: EventStatus;
-  organizer: EventOrganizer; organizationId: string | null; communityId: string | null;
+  organizer: EventOrganizer; organizationId: string | null; communityId: string | null; communityName?: string | null;
   canManage: boolean; canComplete: boolean; canRsvp: boolean; canShare: boolean; response: EventResponse | null; listMe: boolean;
   counts: Record<EventResponse, number> | null;
 }

@@ -2,12 +2,14 @@ import { createClient } from "@supabase/supabase-js";
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { FounderIdentityReceipt, FounderIdentityQueue, FounderReviewCase } from "@ayinou/shared";
+import { accountMessages } from "../src/lib/account-i18n";
 import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
 import { trustMessages } from "../src/lib/trust-i18n";
 import { adminMessages } from "../src/lib/admin-i18n";
 import { moderationCenterMessages } from "../src/lib/moderation-center-i18n";
 import { membershipMessages } from "../src/lib/membership-i18n";
+import { projectMessages } from "../src/lib/project-i18n";
 import { messages } from "../src/lib/i18n";
 import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 
@@ -302,6 +304,7 @@ founderTest("founder lifecycle isolates access, proof, consent and public proven
       await login(staff, founder);
       await solveMfa(staff, founder.secret);
       await openAdministration(staff);
+      await staff.getByRole("button", { name: adminMessages.en.navigationMembers, exact: true }).click();
       await staff.getByRole("button", { name: founderMessages.en.adminTitle }).click();
       const workspace = staff.getByRole("region", { name: founderMessages.en.adminTitle });
       await workspace.getByText(founderMessages.en.caseHistory, { exact: true }).click();
@@ -612,6 +615,7 @@ founderTest("Founder-direct blue approval is confined to eligible identity appli
   await solveMfa(page, founder.secret);
   await openAdministration(page);
   const trust = trustMessages.en;
+  await page.getByRole("button", { name: adminMessages.en.navigationMembers, exact: true }).click();
   await page.getByRole("button", { name: trust.trustWorkspace, exact: true }).click();
   const item = page.locator("details").filter({ has: page.locator("summary", { hasText: `@${browserMember.handle}` }) });
   await item.locator("summary").click();
@@ -704,7 +708,9 @@ founderTest("Founder can turn homepage Community Statistics off and back on with
     const navigation = page.getByRole("navigation", { name: t.administration });
     const settings = navigation.getByRole("region", { name: t.navigationSettings });
     const moderation = navigation.getByRole("region", { name: moderationCenterMessages.en.title });
+    await navigation.getByRole("button", { name: moderationCenterMessages.en.title, exact: true }).click();
     await expect(moderation.getByRole("button", { name: t.accounts, exact: true })).toBeVisible();
+    await navigation.getByRole("button", { name: t.navigationSettings, exact: true }).click();
     await expect(settings.getByRole("button", { name: t.homepage, exact: true })).toBeVisible();
 
     await page.setViewportSize({ width: 390, height: 844 });
@@ -767,15 +773,27 @@ founderTest("the recognized Founder opens consent without a manual assignment or
   await solveMfa(page, founder.secret);
   await openAdministration(page);
   const t = founderMessages.en;
+  await page.getByRole("button", { name: adminMessages.en.navigationMembers, exact: true }).click();
   const tab = page.getByRole("button", { name: t.adminTitle, exact: true });
   const panel = page.getByRole("region", { name: t.adminTitle, exact: true });
   await tab.click();
   expect(sql(`select count(*) from private.founder_identity_authorities where actor_id='${founder.id}';`)).toBe("0");
-  await expect(panel.getByLabel(t.username)).toBeVisible();
+  await expect(panel.getByRole("combobox", { name: t.username })).toBeVisible();
   await expect(panel.getByText(t.openHelp)).toBeVisible();
   await expect(panel.getByText(t.disabled)).toBeVisible();
   expect(sql(`select count(*) from private.verification_applications where applicant_id='${member.id}';`)).toBe("0");
-  await panel.getByLabel(t.username).fill(member.handle);
+  const lookup = panel.getByRole("combobox", { name: t.username });
+  const suggestion = panel.getByRole("option", { name: new RegExp("@" + member.handle, "i") });
+  await lookup.fill("Browser Test " + member.handle.slice(4, 10));
+  await suggestion.click();
+  await expect(lookup).toHaveValue(member.handle);
+  await lookup.fill(member.handle.slice(0, -1));
+  await expect(suggestion).toBeVisible();
+  await lookup.press("ArrowDown");
+  await expect(suggestion).toHaveAttribute("aria-selected", "true");
+  await lookup.press("Enter");
+  await expect(lookup).toHaveValue(member.handle);
+  await expect(panel.getByRole("listbox")).toBeHidden();
   await panel.getByRole("button", { name: t.open, exact: true }).click();
   await expect(panel.getByText("@" + member.handle + " · " + t.states.consent_pending)).toBeVisible();
   const { cases } = await apiCall(member, ownerPath, 200) as FounderIdentityQueue;
@@ -820,6 +838,7 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
         await solveMfa(adminPage, founder.secret);
         await openVerification(adminPage, 503);
         await openAdministration(adminPage);
+        await adminPage.getByRole("button", { name: adminMessages.en.navigationMembers, exact: true }).click();
         await adminPage.getByRole("button", { name: founderMessages.en.adminTitle, exact: true }).click();
         const tab = adminPage.getByRole("region", { name: founderMessages.en.adminTitle, exact: true });
         await expect(tab.getByRole("status")).toHaveText(founderMessages.en.notDeployed);
@@ -842,7 +861,7 @@ founderTest("Founder identity hides empty member panels and reports a missing mi
 
 founderTest("Founder grants gold after account confirmation with or without member MFA @smoke",
   async ({ page, browser, makeMember, administrators: { founder, ordinaryAdmin } }) => {
-    test.setTimeout(100_000);
+    test.setTimeout(150_000);
     const members = [await makeMember({ visible: true }), await makeMember({ visible: true }), await makeMember({ visible: true })];
     const auditSession = (member: Member) => {
       const id: string = JSON.parse(Buffer.from(member.token.split(".")[1], "base64url").toString()).session_id;
@@ -1046,10 +1065,9 @@ founderTest("Founder grants gold after account confirmation with or without memb
         await run(ordinaryAdmin, issue, 403, grant, otherWorkspace);
         const granted = await run(founder, issue, 200, grant);
         expect(await run(founder, issue, 200, grant)).toEqual(granted);
-        const redundant = await apiCall(snapshot, "/api/v1/me/verification", 409, "POST", {
-          organizationId: null, kind: "identity", evidence: ["https://example.org/already-verified"],
+        expect(await apiCall(snapshot, "/api/v1/me/verification", 200)).toMatchObject({
+          personalRequests: { identity: "available" }, independentIdentityReview: true,
         });
-        expect(redundant.error.code).toBe("VERIFICATION_ALREADY_VERIFIED");
         expect((await publicProfile(target)).founderVerified).toBe(true);
         expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{founder}");
         if (i === 2) {
@@ -1071,7 +1089,7 @@ founderTest("Founder grants gold after account confirmation with or without memb
         }
         expect(sql(`select private.project_identity_state('${target.id}') || ':' ||
           private.organization_setup_identity_eligible('${target.id}')::text || ':' ||
-          has_table_privilege('authenticated','private.founder_identity_controls','SELECT,INSERT')::text;`)).toBe("required:false:false");
+          has_table_privilege('authenticated','private.founder_identity_controls','SELECT,INSERT')::text;`)).toBe("verified:true:false");
         expect(sql(`select count(*) from public.verification_records where user_id='${target.id}';`)).toBe("0");
         expect(sql(`select count(*) from private.founder_identity_events where case_id='${opened.caseId}'
           and action in ('account_control','attest','grant');`)).toBe("3");
@@ -1092,10 +1110,13 @@ founderTest("Founder grants gold after account confirmation with or without memb
         const saved = await apiCall(snapshot, setupPath + "/details", 200, "PUT", {
           expectedVersion: intent.version, requestId: randomUUID(), draft,
         });
-        expect((await apiCall(snapshot, organization + "/setup", 200)).eligible).toBe(!i);
-        const completion = await apiCall(snapshot, setupPath + "/complete", i ? 403 : 200, "POST", {
+        expect((await apiCall(snapshot, organization + "/setup", 200)).eligible).toBe(true);
+        const completion = await apiCall(snapshot, setupPath + "/complete", 200, "POST", {
           expectedVersion: saved.version, requestId: randomUUID(),
-          declaration: { authorityConfirmed: true, declarationVersion: 1 },
+          declaration: {
+            authorityConfirmed: true, declarationVersion: 1,
+            ...(i ? { evidence: ["https://example.org/organization-authority", "https://example.net/organization-proof"] } : {}),
+          },
         });
         if (!i) {
           sql(`begin; select pg_advisory_xact_lock(20261120,300);
@@ -1109,6 +1130,290 @@ founderTest("Founder grants gold after account confirmation with or without memb
           expect(completion).toMatchObject({ result: { kind: "created" } });
           claimTarget = sql(`select handle from private.organizations where id='${completion.result.organizationId}';`);
           expect(claimTarget).toMatch(/^fv-/);
+          const proposal = {
+            title: "Disposable reading club proposal", description: "A synthetic description for the proposal directory.",
+            problem: "Children need a safe place to practice reading.", solution: "Open two volunteer-led reading groups.",
+            objectives: "Hold twelve practice sessions with donated books.", beneficiaries: "Children in the participating communities.",
+            outcomes: "Participants complete the reading practice sessions.", category: "education", country: "HT",
+            department: null, startDate: null, endDate: null, references: [], publishRequested: true,
+          };
+          const projectRoot = "/api/v1/projects";
+          expect(await apiCall(snapshot, "/api/v1/me/projects/options", 200)).toMatchObject({
+            submissionIdentity: "verified", individualSubmissionIdentity: "verified",
+          });
+          expect((await apiCall(ordinaryAdmin, "/api/v1/discover/people?q=" + target.handle + "&verified=true", 200)).accounts)
+            .toContainEqual(expect.objectContaining({ handle: target.handle, verified: true, founderVerified: true }));
+          expect(sql(`select private.ambassador_public_eligible('${target.id}');`)).toBe("t");
+          expect(await apiCall(founder, "/api/v1/me/projects/options", 200)).toMatchObject({
+            submissionIdentity: "required", individualSubmissionIdentity: "verified", canReview: true,
+          });
+          const founderDraftPath = projectRoot + "/" + (await apiCall(founder, projectRoot, 201, "POST", {
+            kind: "individual", owner: null, association: null,
+            proposal: { ...proposal, title: "Founder-owned reading proposal", publishRequested: false },
+          })).id;
+          await apiCall(founder, founderDraftPath + "/submit", 200, "POST", { version: 1 });
+          const ownTitle = "Founder-owned reading proposal";
+          const ownReason = "Reviewed the plan and recorded direct Founder approval.";
+          await apiCall(founder, founderDraftPath + "/review", 403, "POST", {
+            action: "assign", version: 2, reason: ownReason,
+          });
+          await apiCall(founder, founderDraftPath + "/review", 403, "POST", {
+            action: "assign", version: 2, reviewer: founder.handle, reason: ownReason,
+          });
+          await apiCall(ordinaryAdmin, founderDraftPath + "/review", 403, "POST", {
+            action: "approve", version: 2, reason: ownReason,
+          });
+          const draftPath = projectRoot + "/" + (await apiCall(snapshot, projectRoot, 201, "POST", {
+            kind: "individual", owner: null, association: null, proposal,
+          })).id;
+          const organizationDraftPath = projectRoot + "/" + (await apiCall(snapshot, projectRoot, 201, "POST", {
+            kind: "organization", owner: completion.result.organizationId, association: null,
+            proposal: { ...proposal, title: "Organization reading proposal" },
+          })).id;
+          expect(await apiCall(snapshot, draftPath, 200)).toMatchObject({ canSubmit: true, submissionIdentity: "verified" });
+          await apiCall(snapshot, organizationDraftPath + "/submit", 200, "POST", { version: 1 });
+          await apiCall(ordinaryAdmin, organizationDraftPath, 404);
+          const cover = readFileSync("apps/web/public/project-approved.png").toString("base64");
+          const withCover = await apiCall(snapshot, draftPath + "/image", 200, "PUT", { version: 1, image: cover });
+          await apiCall(founder, draftPath + "?preview=review", 404);
+          const submission = await apiCall(snapshot, draftPath + "/submit", 200, "POST", { version: withCover.version });
+          await apiCall(snapshot, draftPath + "/review", 403, "POST", {
+            action: "approve", version: submission.version, reason: "A verified proposal owner is ineligible for direct approval.",
+          });
+          await apiCall(ordinaryAdmin, draftPath, 404);
+          await apiCall(snapshot, draftPath + "?preview=review", 404);
+          expect((await fetch(api + draftPath + "?preview=review")).status).toBe(401);
+          expect((await fetch(api + draftPath + "/image?preview=review", {
+            headers: { Authorization: "Bearer " + snapshot.token },
+          })).status).toBe(404);
+          expect(await apiCall(ordinaryAdmin, draftPath + "?preview=review", 200)).toMatchObject({
+            proposal, hasImage: true, status: "submitted", version: null, canDecide: false, canEdit: false,
+          });
+          const reason = "Reviewed the synthetic project proposal.";
+          const reviewContext = await browser.newContext({ baseURL: web, viewport: { width: 360, height: 800 } });
+          try {
+            const reviewPage = await reviewContext.newPage();
+            const labels = projectMessages.en;
+            await inEnglish(reviewContext);
+            await login(reviewPage, founder);
+            const mfa = accountMessages.en;
+            await expect(reviewPage.getByRole("heading", { name: mfa.mfaTitle })).toBeVisible();
+            const loginCode = totp(founder.secret);
+            await reviewPage.getByLabel(mfa.mfaChallengeCode).fill(loginCode);
+            await reviewPage.getByRole("button", { name: mfa.mfaSubmit }).click();
+            await expect(reviewPage).toHaveURL("/dashboard");
+            const lockedQueues = /\/api\/v1\/projects\/(review|reports)$/;
+            await reviewPage.route(lockedQueues, (route) => route.fulfill({
+              status: 403, json: { error: { code: "MFA_REQUIRED" } }, headers: { "access-control-allow-origin": web },
+            }));
+            await reviewPage.goto("/projects/review");
+            const verify = reviewPage.getByRole("link", { name: labels.verify, exact: true });
+            await expect(verify).toHaveCount(1);
+            await expect(reviewPage.getByText(labels.reviewGateHelp)).toBeVisible();
+            await verify.click();
+            await expect(reviewPage).toHaveURL("/projects/review?verify=1");
+            await expect(reviewPage.getByRole("heading", { name: labels.reviewQueue, exact: true })).toBeVisible();
+            await expect(reviewPage.getByText(labels.reviewCodeHelp)).toBeVisible();
+            expect(await reviewPage.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+            await reviewPage.getByRole("button", { name: mfa.cancel, exact: true }).click();
+            await expect(reviewPage).toHaveURL("/projects/review");
+            await verify.click();
+            await reviewPage.unroute(lockedQueues);
+            await expect.poll(() => totp(founder.secret), { timeout: 35_000, intervals: [1_000] }).not.toBe(loginCode);
+            await reviewPage.getByLabel(mfa.mfaChallengeCode).fill(totp(founder.secret));
+            await reviewPage.getByRole("button", { name: mfa.mfaSubmit }).click();
+            await expect(reviewPage).toHaveURL("/projects/review");
+            await reviewPage.goto("/projects");
+            await reviewPage.getByRole("navigation", { name: labels.title, exact: true })
+              .getByRole("link", { name: labels.reviewQueue }).click();
+            const queueItem = reviewPage.getByRole("article").filter({ hasText: proposal.title });
+            await expect(queueItem).toBeVisible();
+            await queueItem.getByRole("link", { name: labels.viewProposal, exact: true }).click();
+            await expect(reviewPage).toHaveURL(draftPath.replace("/api/v1", "") + "?preview=review");
+            await expect(reviewPage.getByRole("heading", { name: proposal.title, exact: true })).toBeVisible();
+            await expect(reviewPage.getByText(proposal.description, { exact: true })).toBeVisible();
+            await expect(reviewPage.getByRole("img", { name: labels.cover, exact: true })).toBeVisible();
+            await expect(reviewPage.getByRole("heading", { name: labels.reviewProposal, exact: true })).toHaveCount(0);
+            expect(await apiCall(snapshot, draftPath, 200)).toMatchObject({ status: "submitted", version: submission.version });
+            await reviewPage.getByRole("link", { name: membershipMessages.en.back, exact: true }).click();
+            await expect(reviewPage).toHaveURL("/projects/review");
+            await reviewPage.getByRole("link", { name: membershipMessages.en.back, exact: true }).click();
+            await expect(reviewPage).toHaveURL("/projects");
+            await reviewPage.getByRole("navigation", { name: labels.title, exact: true })
+              .getByRole("link", { name: labels.reviewQueue }).click();
+            const own = reviewPage.getByRole("article").filter({ hasText: ownTitle });
+            await expect(own.getByText(labels.status.submitted, { exact: true })).toBeVisible();
+            await expect(own.getByText(labels.selfReview, { exact: true })).toHaveCount(0);
+            expect(await reviewPage.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(360);
+            const earlierApproval = (await apiCall(founder, founderDraftPath + "?preview=review", 200)).approval;
+            await expect(own.getByText(labels.founderApprove, { exact: true })).toHaveCount(0);
+            await own.locator("summary").filter({ hasText: labels.reviewAssignment }).click();
+            await own.getByRole("textbox", { name: labels.reviewer, exact: true }).fill(ordinaryAdmin.handle);
+            await own.getByRole("textbox", { name: labels.reason, exact: true }).fill("Assigning an independent reviewer for the reading proposal.");
+            await own.getByRole("button", { name: labels.record, exact: true }).click();
+            await expect(own.getByText(labels.status.under_review, { exact: true })).toBeVisible();
+            expect((await apiCall(ordinaryAdmin, projectRoot + "/review", 200)).items)
+              .toContainEqual(expect.objectContaining({ title: ownTitle, assignedToMe: true, founderOwned: false }));
+            await apiCall(founder, founderDraftPath + "/review", 409, "POST", {
+              action: "approve", version: 2, reason: ownReason,
+            });
+            for (const previewProof of [undefined, earlierApproval.proof, "0".repeat(64)]) {
+              expect(await apiCall(founder, founderDraftPath + "/review", 409, "POST", {
+                action: "approve", version: 3, reason: ownReason, previewProof,
+              })).toMatchObject({ error: { code: "PROJECT_PREVIEW_REQUIRED" } });
+            }
+            const founderProof = (await apiCall(founder, founderDraftPath + "?preview=review", 200)).approval.proof;
+            expect(await apiCall(ordinaryAdmin, founderDraftPath + "/review", 409, "POST", {
+              action: "approve", version: 3, reason: ownReason, previewProof: founderProof,
+            })).toMatchObject({ error: { code: "PROJECT_PREVIEW_REQUIRED" } });
+            await own.getByRole("link", { name: labels.viewProposal, exact: true }).click();
+            await expect(reviewPage).toHaveURL(founderDraftPath.replace("/api/v1", "") + "?preview=review");
+            await expect(reviewPage.getByRole("heading", { name: labels.founderApprove, exact: true })).toBeVisible();
+            await reviewPage.getByRole("textbox", { name: labels.reason, exact: true }).fill(ownReason);
+            await reviewPage.getByRole("button", { name: labels.actions.approve, exact: true }).click();
+            await expect(reviewPage).toHaveURL(founderDraftPath.replace("/api/v1", ""));
+            await expect(reviewPage.getByText(labels.status.approved, { exact: true })).toBeVisible();
+            expect(await apiCall(founder, founderDraftPath, 200)).toMatchObject({ status: "approved", publishedAt: null });
+            expect(sql(`select string_agg(action,',' order by version) from private.project_events
+              where project_id='${founderDraftPath.split("/").at(-1)}' and founder_owner_action;`)).toBe("assign,approve");
+            await reviewPage.getByRole("button", { name: labels.edit, exact: true }).click();
+            await expect(reviewPage.getByText(labels.editApprovalHelp, { exact: true })).toBeVisible();
+            await reviewPage.goto("/projects/review");
+            await queueItem.locator("summary").filter({ hasText: labels.selfReview }).focus();
+            await reviewPage.keyboard.press("Enter");
+            await queueItem.getByRole("textbox", { name: labels.reason, exact: true }).fill(reason);
+            await queueItem.getByRole("button", { name: labels.startReview }).click();
+            await expect(reviewPage).toHaveURL(draftPath.replace("/api/v1", "") + "?preview=review");
+            await expect(reviewPage.getByRole("heading", { name: proposal.title })).toBeVisible();
+            await expect(reviewPage.getByRole("button", { name: labels.record })).toBeDisabled();
+            await reviewPage.getByRole("radio", { name: labels.actions.approve }).check();
+            await reviewPage.getByLabel(labels.reason, { exact: true }).fill(reason);
+            await reviewPage.getByRole("button", { name: labels.record }).click();
+            await expect(reviewPage).toHaveURL("/projects/review");
+            await expect(reviewPage.getByRole("heading", { name: "Organization reading proposal" })).toBeVisible();
+            await expect(reviewPage.getByRole("heading", { name: proposal.title })).toHaveCount(0);
+          } finally {
+            await reviewContext.close();
+          }
+          await apiCall(ordinaryAdmin, draftPath, 404);
+          await apiCall(founder, draftPath + "?preview=review", 404);
+          const approved = await apiCall(snapshot, draftPath, 200);
+          expect(approved).toMatchObject({ canOpenWork: true, canEdit: true, canPublish: true, publishedAt: null });
+          const labels = projectMessages.en;
+          const managedProposal = page.getByRole("link", { name: proposal.title, exact: true });
+          await page.goto("/projects/manage");
+          await expect(managedProposal.getByText(labels.status.approved, { exact: true })).toBeVisible();
+          await expect(managedProposal.getByText(labels.privateApproval, { exact: true })).toBeVisible();
+          await expect(managedProposal.getByText(labels.publishedStatus, { exact: true })).toHaveCount(0);
+          await apiCall(ordinaryAdmin, draftPath + "/publication", 404, "PATCH", { version: approved.version, publish: true });
+          const listed = await apiCall(snapshot, draftPath + "/publication", 200, "PATCH", { version: approved.version, publish: true });
+          await page.reload();
+          const publishedBadge = managedProposal.getByText(labels.publishedStatus, { exact: true });
+          await expect(publishedBadge).toBeVisible();
+          await expect(publishedBadge.locator("img").nth(0)).toHaveAttribute("src", "/project-approved.png");
+          await expect(publishedBadge.locator("img").nth(1)).toHaveAttribute("src", "/project-published.png");
+          await expect(managedProposal.getByText(labels.status.approved, { exact: true })).toHaveCount(0);
+          expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({
+            status: "approved", publishedAt: expect.any(String), owner: { founderVerified: true },
+          });
+          expect((await apiCall(ordinaryAdmin, projectRoot, 200)).projects).toContainEqual(
+            expect.objectContaining({ title: proposal.title, owner: expect.objectContaining({ founderVerified: true }) }),
+          );
+          const directoryContext = await browser.newContext({ baseURL: web, viewport: { width: 390, height: 844 } });
+          try {
+            await inEnglish(directoryContext);
+            const directory = await directoryContext.newPage();
+            await directory.goto("/projects");
+            const row = directory.getByRole("link", { name: proposal.title, exact: true });
+            await expect(row.getByRole("img", { name: founderMessages.en.badge, exact: true })).toBeVisible();
+            await expect(directory.getByRole("heading", { name: projectMessages.en.directoryHeading })).toBeVisible();
+            expect(await directory.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+            const filters = directory.getByRole("button", { name: "Filters", exact: true });
+            await filters.focus();
+            await directory.keyboard.press("Enter");
+            await expect(directory.getByRole("combobox", { name: projectMessages.en.category, exact: true })).toBeVisible();
+            await row.click();
+            await expect(directory.getByRole("heading", { name: proposal.title, exact: true })).toBeVisible();
+          } finally {
+            await directoryContext.close();
+          }
+          const madePrivate = await apiCall(snapshot, draftPath + "/publication", 200, "PATCH", { version: listed.version, publish: false });
+          await apiCall(ordinaryAdmin, draftPath, 404);
+          expect((await apiCall(snapshot, "/api/v1/me/projects", 200)).projects).toContainEqual(expect.objectContaining({
+            title: proposal.title, status: "approved", publishedAt: null,
+          }));
+          const relisted = await apiCall(snapshot, draftPath + "/publication", 200, "PATCH", { version: madePrivate.version, publish: true });
+          const revisedTitle = "Disposable reading club expanded";
+          const revised = await apiCall(snapshot, draftPath, 200, "PATCH", {
+            version: relisted.version, proposal: { ...proposal, title: revisedTitle }, removeImage: false,
+          });
+          expect(await apiCall(snapshot, draftPath, 200)).toMatchObject({
+            title: revisedTitle, status: "draft", revisionPending: true, canOpenWork: true, canPublish: false, canUnpublish: true,
+          });
+          await page.reload();
+          const managedRevision = page.getByRole("link", { name: revisedTitle, exact: true });
+          await expect(managedRevision.getByText(labels.status.draft, { exact: true })).toBeVisible();
+          await expect(managedRevision.getByText(labels.previousVersionPublished, { exact: true })).toBeVisible();
+          expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({ title: proposal.title, status: "approved" });
+          await apiCall(snapshot, draftPath + "/publication", 409, "PATCH", { version: revised.version, publish: true });
+          const submittedRevision = await apiCall(snapshot, draftPath + "/submit", 200, "POST", { version: revised.version });
+          expect((await apiCall(founder, projectRoot + "/review", 200)).items).toContainEqual(
+            expect.objectContaining({ title: revisedTitle, version: submittedRevision.version }),
+          );
+          expect(await apiCall(ordinaryAdmin, draftPath + "?preview=review", 200)).toMatchObject({
+            title: revisedTitle, status: "submitted", publishedAt: null, canDecide: false,
+          });
+          expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({ title: proposal.title });
+          const firstAssignment = await apiCall(founder, draftPath + "/review", 200, "POST", {
+            action: "assign", version: submittedRevision.version, reason,
+          });
+          const changeReason = "Please explain how volunteer readers will be trained before the workshops begin.";
+          const changes = await apiCall(founder, draftPath + "/review", 200, "POST", {
+            action: "request_changes", version: firstAssignment.version, reason: changeReason,
+          });
+          expect(JSON.stringify(await apiCall(ordinaryAdmin, draftPath, 200))).not.toContain(changeReason);
+          await page.goto(draftPath.replace("/api/v1", ""));
+          await expect(page.locator('img[src="/project-changes-requested.png"]')).toBeVisible();
+          const feedback = page.getByRole("region", { name: labels.reviewerFeedback });
+          await expect(feedback.getByText(changeReason, { exact: true })).toBeVisible();
+          await page.getByRole("button", { name: labels.edit, exact: true }).click();
+          await expect(page.getByRole("textbox", { name: labels.fields.solution, exact: true })).toBeVisible();
+          await expect(feedback.getByText(changeReason, { exact: true })).toBeVisible();
+          const resubmission = await apiCall(snapshot, draftPath + "/submit", 200, "POST", { version: changes.version });
+          await page.reload();
+          await expect(page.getByText(labels.status.submitted, { exact: true }).first()).toBeVisible();
+          await expect(feedback).toHaveCount(0);
+          const assignedRevision = await apiCall(founder, draftPath + "/review", 200, "POST", {
+            action: "assign", version: resubmission.version, reason,
+          });
+          expect(await apiCall(founder, draftPath, 200)).toMatchObject({ title: revisedTitle, canDecide: true });
+          expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({ title: proposal.title });
+          expect(await apiCall(founder, draftPath + "/review", 409, "POST", {
+            action: "approve", version: assignedRevision.version, reason,
+          })).toMatchObject({ error: { code: "PROJECT_PREVIEW_REQUIRED" } });
+          const amendmentApproval = (await apiCall(founder, draftPath + "?preview=review", 200)).approval;
+          const approvedRevision = await apiCall(founder, draftPath + "/review", 200, "POST", {
+            action: "approve", version: assignedRevision.version, reason, previewProof: amendmentApproval.proof,
+          });
+          await apiCall(ordinaryAdmin, draftPath, 404);
+          expect(await apiCall(snapshot, draftPath, 200)).toMatchObject({
+            title: revisedTitle, status: "approved", revisionPending: false, canOpenWork: true, canPublish: true,
+          });
+          await apiCall(snapshot, draftPath + "/publication", 200, "PATCH", { version: approvedRevision.version, publish: true });
+          expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({ title: revisedTitle, status: "approved" });
+          expect(sql(`select private.project_executable(p) from private.community_projects p where p.id='${draftPath.split("/").at(-1)}';`)).toBe("t");
+
+          const separateRequest = await apiCall(snapshot, "/api/v1/me/verification", 201, "POST", {
+            organizationId: null, kind: "identity", evidence: ["https://example.org/separate-independent-review"],
+          });
+          expect(await apiCall(snapshot, "/api/v1/me/verification", 200)).toMatchObject({ personalRequests: { identity: "pending" } });
+          await run(founder, "/api/v1/admin/founder-blue-verification/" + separateRequest.id, 404);
+          sql(`insert into public.verification_records(user_id,verification_type,status,source,reviewed_by)
+            values('${target.id}','identity','revoked','review','${ordinaryAdmin.id}');`);
+          expect(await apiCall(snapshot, "/api/v1/me/projects/options", 200)).toMatchObject({
+            submissionIdentity: "pending", individualSubmissionIdentity: "pending",
+          });
+          sql(`delete from public.verification_records where user_id='${target.id}' and verification_type='identity';`);
           const correction = await apiCall(snapshot, mine, 200, "POST", { ...version(granted.version), action: "correction" });
           const appeals = (await apiCall(snapshot, ownerPath, 200)).cases[0];
           expect(appeals).toMatchObject({ state: "held", appealStatus: "pending" });
@@ -1134,9 +1439,29 @@ founderTest("Founder grants gold after account confirmation with or without memb
           expect(await run(ordinaryAdmin, reviewPath + "/" + appeal, 200, disposition, reviewRef)).toEqual(completed);
           expect((await apiCall(snapshot, ownerPath, 200)).cases[0]).toMatchObject({ state: "revoked", appealStatus: "revoked" });
           expect((await publicProfile(target)).founderVerified).toBeUndefined();
+          await apiCall(ordinaryAdmin, draftPath, 404);
           continue;
         }
-        expect(completion.error.code).toBe("ORG_SETUP_IDENTITY_REQUIRED");
+        expect(completion).toMatchObject({ result: { kind: "claim", reviewStatus: "pending" } });
+        expect(sql(`select count(*) from private.organization_memberships
+          where organization_id='${completion.result.organizationId}' and user_id='${target.id}' and revoked_at is null;`)).toBe("0");
+        if (i === 1) {
+          // A historical Founder-direct blue decision remains in history during an independent upgrade.
+          const legacy = randomUUID();
+          sql(`insert into private.verification_applications(id,applicant_id,kind,status,decided_at,identity_review_route)
+              values('${legacy}','${target.id}','identity','approved',now(),'founder_direct');
+            insert into private.institution_audit(actor_id,subject_id,event)
+              values('${founder.id}','${legacy}','founder_identity_approved');
+            insert into public.verification_records(user_id,verification_type,status,reviewed_by,verified_at,review_application_id)
+              values('${target.id}','identity','verified','${founder.id}',now(),'${legacy}');`);
+          const request = await apiCall(snapshot, "/api/v1/me/verification", 201, "POST", {
+            organizationId: null, kind: "identity", evidence: ["https://example.org/independent-upgrade"],
+          });
+          expect(await apiCall(snapshot, "/api/v1/me/verification", 200)).toMatchObject({ personalRequests: { identity: "pending" } });
+          expect(sql(`select status from private.verification_applications where id='${legacy}';`)).toBe("approved");
+          expect(sql(`select identity_review_route from private.verification_applications where id='${request.id}';`)).toBe("independent");
+          await run(founder, "/api/v1/admin/founder-blue-verification/" + request.id, 404);
+        }
         if (i === 2) {
           expect(sql(`select count(*) from auth.mfa_factors where user_id='${target.id}';`)).toBe("0");
           expect(sql(`select count(*) from private.founder_identity_grants g join private.founder_identity_proofs p on p.id=g.proof_id
@@ -1150,7 +1475,7 @@ founderTest("Founder grants gold after account confirmation with or without memb
         }
         const held = await run(founder, issue, 200, decision("hold", granted.version, "account_risk"));
         expect((await publicProfile(target)).founderVerified).toBeUndefined();
-        expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe("{}");
+        expect(sql(`select private.personal_identity_provenance('${target.id}');`)).toBe(i === 1 ? "{founder_direct_blue}" : "{}");
         await run(founder, issue, 200, decision("revoke", held.version, "account_risk"));
       }
       const session = auditSession(founder);

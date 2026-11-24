@@ -11,11 +11,14 @@ import { authorizedRequest } from "@/lib/api";
 
 const assignmentAppeals = (signal: AbortSignal) => loadAppealQueue("assign", signal);
 
+import { adminActionPanel, adminDisclosure } from "@/components/admin-controls";
+import { AdminMemberBadges } from "@/components/admin-account-avatar";
+
 function AssignmentForm({ save, canRelease = false }: { save(handle: string, reason: string, assign: boolean): Promise<void>; canRelease?: boolean }) {
   const [locale] = useLocale();
   const t = trustMessages[locale];
   const mutation = useFeedMutation();
-  return <form className="grid gap-3" onSubmit={(event) => {
+  return <form className={adminActionPanel} onSubmit={(event) => {
     event.preventDefault();
     const form = fields(event);
     const element = event.currentTarget;
@@ -51,7 +54,10 @@ export function TrustAdministration({ founderWorkspace }: { founderWorkspace?: s
       {applications.error !== null && <TrustError error={applications.error} retry={applications.refresh} returnTo="/admin" />}
       {applications.data?.applications.length === 0 && <p>{t.emptyAssignments}</p>}
       {applications.data?.applications.map((application) => <details className="break-words border-t border-[var(--theme-border)] pt-2" key={application.id}>
-        <summary className="cursor-pointer font-semibold">{labels[application.kind]}{application.organizationName && ` · ${application.organizationName}`} {application.applicantUsername && `· @${application.applicantUsername}`}</summary>
+        <summary className={adminDisclosure}><span className="min-w-0 break-words">
+          {labels[application.kind]}{application.organizationName && ` · ${application.organizationName}`}
+          {application.applicantUsername && <> · @{application.applicantUsername} <AdminMemberBadges username={application.applicantUsername} /></>}
+        </span></summary>
         {application.eligibleReviewers < 2 && <p className="my-2 text-sm">{t.reviewersNeeded}</p>}
         {founderWorkspace && (application.canFounderReview ?? (application.kind === "identity" || application.kind === "organization")) && application.status === "pending" &&
           <FounderBlueApproval kind={application.kind} applicationId={application.id} workspace={founderWorkspace} refresh={applications.refresh} />}
@@ -68,7 +74,7 @@ export function TrustAdministration({ founderWorkspace }: { founderWorkspace?: s
       {appeals.error !== null && <TrustError error={appeals.error} retry={appeals.refresh} returnTo="/admin" />}
       {appeals.data?.appeals.length === 0 && <p>{t.noAppeals}</p>}
       {appeals.data?.appeals.map((appeal) => <details className="break-words border-t border-[var(--theme-border)] pt-2" key={appeal.id}>
-        <summary className="cursor-pointer font-semibold">{new Date(appeal.createdAt).toLocaleString(locale)} · {appeal.assigned ? t.assignedReviewers : t.pending}</summary>
+        <summary className={adminDisclosure}>{new Date(appeal.createdAt).toLocaleString(locale)} · {appeal.assigned ? t.assignedReviewers : t.pending}</summary>
         <p className="my-2 text-sm">{t.appealEvidence}</p>
         <AssignmentForm save={async (handle, reason) => { await assignVerificationAppeal(appeal.id, handle, reason); appeals.refresh(); }} />
       </details>)}
@@ -115,7 +121,7 @@ function FounderBlueDecision({ applicationId, workspace, refresh, kind }: {
     : kind === "organization" ? t.founderOrgHelp : t.founderBlueHelp;
   const approve = kind === "representative" ? t.founderRepresentativeApprove
     : kind === "organization" ? t.founderOrgApprove : t.founderBlueApprove;
-  return <form className="mt-3 grid gap-3" onSubmit={(event) => {
+  return <form className={`${adminActionPanel} mt-3`} onSubmit={(event) => {
     event.preventDefault();
     const form = fields(event);
     if (!form.has("conflictFree")) return;
@@ -157,11 +163,14 @@ function ImpersonationReviewCard({ item, refresh }: { item: ImpersonationReview;
   const holdOptions: ImpersonationRestriction[] = item.kind === "institution" ? ["restrict_institution"] : personalClaims.filter((claim) => item.kind === "badge" ||
     (item.kind === "profile" && claim === "identity") || (item.kind === "public_figure" && claim === "notable_person"));
   return <details className="break-words border-t border-[var(--theme-border)] pt-2">
-    <summary className="cursor-pointer font-semibold">{item.kind === "representative" ? t.representativeReport : t[item.kind]} · @{item.subjectHandle ?? item.organizationHandle ?? "—"}</summary>
+    <summary className={adminDisclosure}><span className="min-w-0 break-words">
+      {item.kind === "representative" ? t.representativeReport : t[item.kind]} · @{item.subjectHandle ?? item.organizationHandle ?? "—"}
+      {item.subjectHandle && <>{" "}<AdminMemberBadges username={item.subjectHandle} /></>}
+    </span></summary>
     <p className="my-2 whitespace-pre-wrap">{item.explanation}</p>
     {item.organizationHandle && <p className="text-sm">@{item.organizationHandle}</p>}
     <PublicReferences references={item.references} />
-    <form className="mt-3 grid gap-3" onSubmit={(event) => {
+    <form className={`${adminActionPanel} mt-3`} onSubmit={(event) => {
       event.preventDefault();
       const form = fields(event);
       const hold = holdOptions.find((option) => option === field(form, "hold")) ?? null;

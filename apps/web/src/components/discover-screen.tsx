@@ -9,18 +9,19 @@ import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { FilterPanel } from "./filter-panel";
 import { ApiErrorNotice } from "./api-error-notice";
-import { DiscoveryAccounts, DiscoveryResults, FollowAccountList, discoveryTab } from "./discovery-accounts";
-import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
+import { DiscoveryAccounts, DiscoveryResults, FollowAccountList } from "./discovery-accounts";
+import { institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { socialMessages } from "@/lib/social-i18n";
 import { f24Messages } from "@/lib/f24-i18n";
 import { InterestFilter, LanguageFilter, SearchPosts } from "./social-activity";
 import { FollowRequestsPanel } from "./social-privacy-settings";
 import { HashtagSearch } from "./social-feed";
-import { PageHeader } from "./page-header";
+import { DiscoverSearchInput, DiscoverSearchButton } from "./discover-search";
 
 type View = DiscoveryKind | "following" | "hashtags" | "posts" | "followRequests";
-const views = ["people", "institutions", "posts", "hashtags", "following", "followRequests"] as const;
+const searchViews = ["people", "institutions", "posts", "hashtags"] as const;
+const connectionViews = ["following", "followRequests"] as const;
 const getDepartments = () => fetchDepartments();
 
 export function DiscoverScreen({ initial }: { initial: View }) {
@@ -28,15 +29,35 @@ export function DiscoverScreen({ initial }: { initial: View }) {
   const t = discoveryMessages[locale];
   const [view, setView] = useState<View>(initial);
 
+  const labels = {
+    people: t.people,
+    institutions: t.institutions,
+    posts: f24Messages[locale].posts,
+    hashtags: socialMessages[locale].hashtags,
+    following: t.myFollowing,
+    followRequests: f24Messages[locale].followRequests,
+  };
+
+  function viewButton(value: View) {
+    return <button key={value} type="button" aria-pressed={value === view} onClick={() => setView(value)}
+      className="min-h-11 rounded-md px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]">
+      {labels[value]}
+    </button>;
+  }
+
   return <MemberShell>
     <div className="grid min-w-0 gap-4">
-      <PageHeader title={t.discover} description={t.intro} />
-      <div role="group" aria-label={t.accounts} className="flex flex-wrap gap-2">
-        {views.map((value) => <button key={value} type="button" className={discoveryTab} aria-pressed={value === view} onClick={() => setView(value)}>
-          {value === "following" ? t.myFollowing : value === "hashtags" ? socialMessages[locale].hashtags : value === "posts" || value === "followRequests" ? f24Messages[locale][value] : t[value]}
-        </button>)}
-      </div>
-      {view === "following" ? <FollowAccountList target={null} list="following" /> : view === "hashtags" ? <HashtagSearch /> : view === "posts" ? <SearchPosts /> : view === "followRequests" ? <FollowRequestsPanel /> : <SearchForm key={view} kind={view} />}
+      <section aria-labelledby="discover-heading" className="min-w-0 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+        <header className="px-4 py-5 sm:px-6">
+          <h1 id="discover-heading" className="text-3xl font-bold tracking-tight">{t.discover}</h1>
+          <p className="mt-1 text-sm text-[var(--theme-body)]">{t.intro}</p>
+        </header>
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--theme-border)] px-2 py-2 sm:px-3">
+          <div role="group" aria-label={t.search} className="flex min-w-0 flex-wrap gap-1">{searchViews.map(viewButton)}</div>
+          <div role="group" aria-label={t.accounts} className="flex min-w-0 flex-wrap gap-1">{connectionViews.map(viewButton)}</div>
+        </div>
+      </section>
+      {view === "following" ? <FollowAccountList target={null} list="following" directory /> : view === "hashtags" ? <HashtagSearch /> : view === "posts" ? <SearchPosts /> : view === "followRequests" ? <FollowRequestsPanel /> : <SearchForm key={view} kind={view} />}
     </div>
   </MemberShell>;
 }
@@ -65,26 +86,23 @@ function SearchForm({ kind }: { kind: DiscoveryKind }) {
   }
 
   return <>
-    <form onSubmit={submit} role="search" className={`${institutionCard} grid gap-4`}>
+    <form onSubmit={submit} role="search" className={institutionCard + " !p-3 sm:!p-4"}>
       <FilterPanel active={Number(Boolean(filter.category)) + Number(Boolean(filter.country)) + Number(Boolean(filter.department))
-        + Number(Boolean(filter.interest)) + Number(Boolean(filter.language)) + Number(Boolean(filter.verified))} search={<>
-        <label className="block min-w-0 text-sm font-semibold">{t.search}
-          <input type="search" name="q" className={institutionField} placeholder={t.searchPlaceholder} maxLength={80}
-            aria-invalid={invalid || undefined} onChange={() => setInvalid(false)} />
-        </label>
-        {invalid && <p role="alert" className="text-sm text-[var(--theme-error-text)]">{t.invalidSearch}</p>}
-      </>}>
+        + Number(Boolean(filter.interest)) + Number(Boolean(filter.language)) + Number(Boolean(filter.verified))}
+        search={<DiscoverSearchInput label={t.search} name="q" placeholder={t.searchPlaceholder} maxLength={80}
+          aria-invalid={invalid || undefined} onChange={() => setInvalid(false)} />}
+        submit={<DiscoverSearchButton label={t.search} />}>
         <div className="grid gap-3">
           <LocationFilters labels={kind === "institutions" ? labels : undefined} />
           {kind === "people" && <div className="grid gap-3 sm:grid-cols-2"><InterestFilter name="interest" /><LanguageFilter /></div>}
           <label className="inline-flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="verified" />{t.verifiedOnly}</label>
         </div>
       </FilterPanel>
-      <button type="submit" className={institutionAction + " justify-self-start"}>{t.search}</button>
+      {invalid && <p role="alert" className="mt-2 text-sm text-[var(--theme-error-text)]">{t.invalidSearch}</p>}
     </form>
     {kind === "people" && Object.keys(filter).length === 1 && !!suggested?.length && <section className="grid gap-3">
       <h2 className="font-semibold">{f24Messages[locale].suggestedMembers}</h2>
-      <DiscoveryAccounts rows={suggested} />
+      <DiscoveryAccounts rows={suggested} directory />
     </section>}
     <SearchResults key={JSON.stringify(filter)} filter={filter} />
   </>;
@@ -120,5 +138,5 @@ function SearchResults({ filter }: { filter: DiscoveryFilter }) {
     const { accounts, nextCursor } = await searchDiscovery(filter, cursor, signal);
     return { rows: accounts, nextCursor };
   }, [filter]);
-  return <DiscoveryResults load={load} empty={discoveryMessages[locale].empty} />;
+  return <DiscoveryResults load={load} empty={discoveryMessages[locale].empty} directory />;
 }

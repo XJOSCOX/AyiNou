@@ -28,6 +28,51 @@
       "displayInterests": "Afficher les centres d’intérêt sur le profil public"
     }
   },
+  "auditWorkspace": {
+    "activity": "Activité de la plateforme",
+    "decisions": "Registre des décisions",
+    "intro": "Consultez l’activité enregistrée de la plateforme et de la modération. Par défaut, les 30 derniers jours sont affichés.",
+    "filter": "Filtrer l’activité",
+    "category": "Catégorie",
+    "outcome": "Résultat",
+    "all": "Tout",
+    "apply": "Appliquer les filtres",
+    "reset": "Réinitialiser",
+    "from": "Du (UTC)",
+    "through": "Au (UTC)",
+    "range": "Choisissez une période de 90 jours maximum.",
+    "resource": "ID de la ressource",
+    "reference": "Référence de l’entrée",
+    "request": "Référence de la demande",
+    "before": "État précédent",
+    "after": "Nouvel état",
+    "empty": "Aucune activité ne correspond à ces filtres.",
+    "decisionSearch": "Filtrer les décisions récentes",
+    "decisionPlaceholder": "Rechercher par action, nom, nom d’utilisateur, ID ou motif",
+    "actorName": "Effectuée par",
+    "affectedName": "Membre concerné",
+    "selectMember": "Sélectionnez un membre dans les suggestions ou videz le champ.",
+    "newer": "Plus récents",
+    "older": "Plus anciens",
+    "page": "Page {page}",
+    "categories": {
+      "platform": "Plateforme",
+      "governance": "Gouvernance",
+      "security": "Sécurité",
+      "identity": "Identité",
+      "organization": "Organisation",
+      "verification": "Vérification",
+      "moderation": "Modération"
+    },
+    "outcomes": {
+      "recorded": "Enregistré",
+      "approved": "Approuvé",
+      "rejected": "Rejeté",
+      "revoked": "Révoqué",
+      "expired": "Expiré",
+      "cancelled": "Annulé"
+    }
+  },
   "policyAudit": {
     "title": "Modifications des paramètres",
     "changedBy": "Modifié par",
@@ -61,6 +106,10 @@
     "expires": "Expiration",
     "copy": "Copier le code"
   },
+  "administrationIntro": "Gérez les paramètres de la plateforme, l’accès des membres et la modération.",
+  "navigationSearch": "Rechercher une rubrique",
+  "navigationNoResults": "Aucune rubrique ne correspond à votre recherche.",
+  "openAdminSection": "Ouvrir {section}",
   "navigationSections": "Rubriques",
   "navigationPlatform": "Plateforme",
   "navigationMembers": "Membres",

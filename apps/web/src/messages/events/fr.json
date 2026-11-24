@@ -1,5 +1,9 @@
 {
+  "directoryHelp": "Trouvez les événements à venir, suivez vos réponses ou gérez les événements que vous organisez.",
+  "createHelp": "Choisissez les horaires, le lieu et la visibilité. Enregistrez un brouillon pendant que vous préparez les détails.",
+  "draftHelp": "Seuls les organisateurs voient ce brouillon. Publiez-le lorsqu’il est prêt pour les participants.",
   "events": "Événements",
+  "back": "Retour",
   "create": "Créer un événement",
   "upcoming": "À venir",
   "following": "Abonnements",
@@ -25,6 +29,17 @@
   "individual": "Compte personnel",
   "community": "Communauté",
   "visibility": "Visibilité",
+  "participation": "Qui peut participer",
+  "memberAudience": "Membres d’AyiNou",
+  "communityAudience": "Membres de la communauté associée",
+  "audience": {
+    "public": "Tout le monde peut voir l’événement. Connectez-vous pour répondre.",
+    "members": "Tout membre d’AyiNou connecté peut répondre.",
+    "community": "Les membres de la communauté associée peuvent répondre où qu’ils résident."
+  },
+  "relatedCommunity": "Communauté associée",
+  "noCommunity": "Aucune communauté associée",
+  "relatedCommunityHelp": "Une fois l’événement publié, les membres de la communauté peuvent le retrouver dans Mes communautés.",
   "public": "Public",
   "members": "Membres uniquement",
   "timeZone": "Fuseau horaire",

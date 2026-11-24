@@ -20,7 +20,7 @@
   "draftSaved": "Borrador guardado. Revise los datos antes de enviarlos.",
   "edit": "Editar los datos guardados",
   "incomplete": "Añada un nombre, identificador, tipo y país para completar este borrador.",
-  "identity": "Para completar la configuración se requiere una verificación independiente de su identidad personal.",
+  "identity": "Para completar la configuración se requiere verificar tu identidad personal.",
   "authority": "Confirmo que tengo autorización para configurar esta organización o solicitar su titularidad en su nombre.",
   "duplicate": "Ese identificador no está disponible. Elija otro o revise una ficha pública.",
   "references": "Proporcione dos o tres referencias públicas HTTPS de sitios distintos que respalden su autoridad. Use fuentes públicas y omita documentos privados.",

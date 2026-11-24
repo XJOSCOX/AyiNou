@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { performance } from "node:perf_hooks";
 import type { AuditPage } from "@ayinou/shared";
-import { api, apiCall, expect, localClient, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, localClient, login, openAdministration, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { adminMessages } from "../src/lib/admin-i18n";
 
 const platform = "/api/v1/admin/audit/events";
 const activity = "/api/v1/me/activity";
@@ -38,14 +39,14 @@ async function recent(member: Member) {
     return { ...member, token: result.data.access_token };
   };
   const elevated = await elevate();
-  return { member: elevated, another: async () => { await signIn(); return elevate(); } };
+  return { member: elevated, secret: factor.data.totp.secret, another: async () => { await signIn(); return elevate(); } };
 }
 
 async function workflow(member: Member, kind: "admin_workspace" | "verification_workspace") {
   return (await apiCall(member, "/api/v1/me/private-workflows", 200, "POST", { kind })).id as string;
 }
 
-test("A1A platform audit rechecks Founder, Administrator, MFA, clock and workspace on every page @smoke", async ({ makeMember }) => {
+test("A1A platform audit rechecks Founder, Administrator, MFA, clock and workspace on every page @smoke", async ({ makeMember, page }) => {
   test.setTimeout(90_000);
   const [first, second, subject] = await Promise.all([makeMember(), makeMember(), makeMember()]);
   const [founder, other] = await Promise.all([recent(first), recent(second)]);
@@ -97,6 +98,46 @@ test("A1A platform audit rechecks Founder, Administrator, MFA, clock and workspa
     expect(next.events).toHaveLength(1);
     expect(next.events[0].reference).not.toBe(firstPage.events[0].reference);
     expect(next.events[0].sourceEventId).not.toBe(newEvent);
+
+    sql(`insert into private.platform_admin_audit(actor_id,subject_id,event,reason)
+      select '${leader.id}', '${subject.id}', 'account_suspended', '${secretEvidence}' from generate_series(1,26);`);
+    finishPersonalOnboarding(first);
+    await inEnglish(page.context());
+    await login(page, first);
+    await solveMfa(page, founder.secret);
+    await openAdministration(page);
+    const labels = adminMessages.en;
+    const ui = labels.auditWorkspace;
+    const nav = page.getByRole("navigation", { name: labels.administration, exact: true });
+    await nav.getByRole("button", { name: labels.navigationPlatform, exact: true }).click();
+    await nav.getByRole("button", { name: labels.audit, exact: true }).click();
+    const activityView = page.getByRole("region", { name: ui.activity, exact: true });
+    await expect(activityView.getByText("Page 1", { exact: true })).toBeVisible();
+    await activityView.getByRole("combobox", { name: ui.category, exact: true }).selectOption("platform");
+    const performedBy = activityView.getByRole("combobox", { name: ui.actorName, exact: true });
+    await performedBy.fill("Browser Test " + first.handle.slice(4, 10));
+    await activityView.getByRole("option", { name: new RegExp("@" + first.handle, "i") }).click();
+    const affected = activityView.getByRole("combobox", { name: ui.affectedName, exact: true });
+    await affected.fill(subject.handle.slice(0, -1));
+    await activityView.getByRole("option", { name: new RegExp("@" + subject.handle, "i") }).click();
+    const filtered = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return url.pathname === platform && url.searchParams.get("actor") === leader.id &&
+        url.searchParams.get("resource") === subject.id && url.searchParams.get("resourceType") === "account";
+    });
+    await activityView.getByRole("button", { name: ui.apply, exact: true }).click();
+    expect((await filtered).ok()).toBe(true);
+    const entry = activityView.locator("details").filter({ hasText: labels.events.account_suspended }).first();
+    const summary = entry.locator("summary");
+    await expect(summary).toContainText("@" + first.handle);
+    await expect(summary).toContainText("@" + subject.handle);
+    await summary.click();
+    await expect(entry.getByText(subject.id, { exact: true })).toBeVisible();
+    await expect(entry.getByText(secretEvidence)).toHaveCount(0);
+    await activityView.getByRole("button", { name: ui.older, exact: true }).click();
+    await expect(activityView.getByText("Page 2", { exact: true })).toBeVisible();
+    await activityView.getByRole("button", { name: ui.newer, exact: true }).click();
+    await expect(activityView.getByText("Page 1", { exact: true })).toBeVisible();
 
     const adminPage: AuditPage = await send(admin, path, 200, a);
     expect(adminPage.nextCursor).toBeTruthy();

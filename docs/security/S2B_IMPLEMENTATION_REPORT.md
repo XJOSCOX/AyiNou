@@ -42,3 +42,7 @@ The matching application was exercised locally against the upgraded database. Th
 ## Remaining blockers
 
 Provider-native targeted session termination and reliable last-activity metadata remain unsupported in this integration. Ayinou revokes its own protected access while the provider retains control of Auth credentials. Public launch and the Unified Audit Center remain separate phases.
+
+## Platform administration layout
+
+The overview groups platform totals into one panel and links verification, restriction, and audit counts to their respective sections. The navigation sits above the full-width workspace. Selecting Platform, Platform Settings, Moderation Center, Members, or Programs shows that group’s sections. Search still finds sections across the groups available to the current account. On mobile, Sections opens the same grouped navigation. The Founder session was used to verify section filtering, the audit shortcut, and the overview layout. The existing section permissions, workspace renewal, and close operation continue to use the private workflow router. No database change is needed.

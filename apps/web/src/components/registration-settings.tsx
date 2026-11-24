@@ -12,6 +12,7 @@ import { useLocale } from "@/lib/locale-store";
 import type { RegistrationPolicy } from "@/lib/registration";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
+import { adminActionPanel, adminConfirmation } from "./admin-controls";
 
 type SavedPolicy = RegistrationPolicy & { revision: number; updatedAt: string; rewardsEnabled: false };
 const endpoint = "/api/v1/admin/registration";
@@ -75,22 +76,22 @@ function RegistrationForm({ current, workspaceId, onSave, refresh }: {
 
   return <>
     <p className="mt-3 text-sm" role="status">{t.savedMode} · {t[current.mode]} · {t.revision} {current.revision}</p>
-    <form className="mt-4 grid max-w-lg gap-4" onSubmit={save} aria-busy={busy}>
+    <form className={`${adminActionPanel} mt-4 max-w-2xl gap-4`} onSubmit={save} aria-busy={busy}>
       <fieldset className="grid gap-3" disabled={busy}>
         <legend className="sr-only">{t.title}</legend>
-        <label className="flex min-h-10 items-center gap-2"><input type="checkbox" checked={value.enabled}
+        <label className={adminConfirmation}><input type="checkbox" checked={value.enabled}
           onChange={(event) => setValue({ ...value, enabled: event.target.checked })} />{t.enabled}</label>
         <label>{t.mode}<select className={institutionField} value={value.mode} onChange={(event) =>
           setValue({ ...value, mode: event.target.value as RegistrationPolicy["mode"] })}>
           {modes.map((mode) => <option key={mode} value={mode}>{t[mode]}</option>)}
         </select></label>
-        {(["individualEnabled", "organizationEnabled"] as const).map((key) => <label key={key} className="flex min-h-10 items-center gap-2">
+        {(["individualEnabled", "organizationEnabled"] as const).map((key) => <label key={key} className={adminConfirmation}>
           <input type="checkbox" checked={value[key]} onChange={(event) => setValue({ ...value, [key]: event.target.checked })} />{t[key]}
         </label>)}
       </fieldset>
       <fieldset className="border-t border-[var(--theme-border)] pt-2" disabled={busy}>
         <legend className="font-semibold">{accountMessages[locale].referrals}</legend>
-        <label className="flex min-h-10 items-center gap-2"><input type="checkbox" checked={value.referralsEnabled}
+        <label className={adminConfirmation}><input type="checkbox" checked={value.referralsEnabled}
           onChange={(event) => setValue({ ...value, referralsEnabled: event.target.checked })} />{t.referralsEnabled}</label>
         <p className="text-sm text-[var(--theme-body)]">{t.rewardsOff}</p>
       </fieldset>
@@ -151,7 +152,7 @@ function RegistrationInvitation({ current, workspaceId }: { current: SavedPolicy
   return <section className="mt-6 border-t border-[var(--theme-border)] pt-5">
     <h3 className="text-lg font-semibold">{t.invite}</h3>
     <p className="mt-2 max-w-prose text-sm text-[var(--theme-body)]">{t.inviteHelp}</p>
-    <form className="mt-3 grid max-w-lg gap-3" onSubmit={issue} aria-busy={busy}>
+    <form className={`${adminActionPanel} mt-3 max-w-2xl`} onSubmit={issue} aria-busy={busy}>
       <label>{t.email}<input className={institutionField} type="email" autoComplete="off" maxLength={254} required
         value={email} onChange={(event) => setEmail(event.target.value)} disabled={busy} /></label>
       <label>{signup.choice}<select className={institutionField} value={pathway} disabled={busy}

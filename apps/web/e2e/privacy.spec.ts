@@ -57,22 +57,36 @@ test("a private group discussion is unavailable to guests and nonmembers", async
 test("notification links are recipient-scoped and blocking removes follow controls", async ({ page, context, makeMember }) => {
   const recipient = await makeMember({ visible: true });
   const sender = await makeMember({ visible: true });
-  const outside = await makeMember();
+  const outside = await makeMember({ visible: true });
   const follow = "/api/v1/members/" + recipient.handle + "/follow";
   await apiCall(sender, follow, 200, "PUT");
+  await apiCall(outside, follow, 200, "PUT");
   await inEnglish(context);
   await login(page, recipient);
   await expect(page).toHaveURL(/\/dashboard/);
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/notifications");
   const t = mediaNotificationMessages.en;
-  const target = page.getByRole("link", { name: t.openTarget });
-  await expect(target).toHaveAttribute("href", "/members/" + sender.handle);
-  const timestamp = page.getByRole("main").locator("time");
+  const main = page.getByRole("main");
+  const target = main.locator(`a[href="/members/${sender.handle}"]`);
+  await expect(target).toHaveAccessibleName(new RegExp(t.openTarget));
+  const row = main.getByRole("listitem").filter({ has: page.locator(`a[href="/members/${sender.handle}"]`) });
+  const timestamp = row.locator("time");
   const value = await timestamp.getAttribute("datetime");
   expect(value).toBeTruthy();
-  await expect(timestamp).toHaveText(new Intl.DateTimeFormat("en", {
-    dateStyle: "medium", timeStyle: "short", timeZone: "UTC",
-  }).format(new Date(value!)));
+  await expect(timestamp).toHaveText(new Intl.DateTimeFormat("en", { timeStyle: "short", timeZone: "UTC" }).format(new Date(value!)));
+  await expect(main.getByRole("heading", {
+    name: new Intl.DateTimeFormat("en", { dateStyle: "full", timeZone: "UTC" }).format(new Date(value!)),
+  })).toBeVisible();
+  await expect(main.getByRole("link", { name: t.preferences })).toHaveAttribute("href", "/settings#notification-preferences");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await expect(row.getByText(t.new, { exact: true })).toBeVisible();
+  await row.getByRole("button", { name: t.mark, exact: true }).click();
+  await expect(row.getByText(t.new, { exact: true })).toHaveCount(0);
+  await main.getByRole("button", { name: t.markAll }).click();
+  await expect(main.getByRole("listitem")).toHaveCount(2);
+  await expect(main.getByText(t.new, { exact: true })).toHaveCount(0);
+  expect((await apiCall(recipient, "/api/v1/me/notifications/unread-count", 200)).count).toBe(0);
   expect((await apiCall(outside, "/api/v1/me/notifications", 200)).notifications).toEqual([]);
   await apiCall(recipient, "/api/v1/members/" + sender.handle + "/block", 204, "PUT");
   await page.goto("/members/" + sender.handle);

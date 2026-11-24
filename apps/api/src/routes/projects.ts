@@ -24,6 +24,7 @@ const draft = z.strictObject({
   kind: z.enum(projectOwners), owner: z.uuid().nullable(), association: z.uuid().nullable(), proposal,
 }).refine(({ kind, owner }) => (kind === "individual") === (owner === null));
 const cursor = z.tuple([z.iso.datetime({ offset: true }), z.uuid()]);
+const projectReadQuery = z.object({ preview: z.literal("review").optional() });
 
 export function registerProjectRoutes(app: FastifyInstance, { viewer, repo, read, media }: ProjectRouteAccess & { media: PostMediaService | null }) {
   registerProjectWorkRoutes(app, { viewer, repo, read });
@@ -45,9 +46,11 @@ export function registerProjectRoutes(app: FastifyInstance, { viewer, repo, read
     return { projects, nextCursor: rows.length > 15 && last?.publishedAt ? last.publishedAt + "|" + last.id : null };
   });
   app.get(projectPath + "/:id", async (request) => {
-    const { token, actor } = await viewer(request);
+    const { preview } = projectReadQuery.parse(request.query);
+    const { token, actor } = await viewer(request, !!preview);
     await read("profile", actor, request.ip);
-    return repo().rpc<ProjectDetail>(token, "project_detail_for_client", { p_id: id.parse(request.params).id });
+    return repo().rpc<ProjectDetail>(token, preview ? "project_review_preview_for_client" : "project_detail_for_client",
+      { p_id: id.parse(request.params).id });
   });
   app.get(mine, async (request) => {
     const { token, actor } = await viewer(request, true);
@@ -82,6 +85,13 @@ export function registerProjectRoutes(app: FastifyInstance, { viewer, repo, read
       p_id: id.parse(request.params).id, p_version: input.version,
     }) };
   });
+  app.patch(projectPath + "/:id/publication", { bodyLimit: 512 }, async (request) => {
+    const { token } = await viewer(request, true);
+    const input = z.strictObject({ version, publish: z.boolean() }).parse(request.body);
+    return { version: await repo().rpc<number>(token, "project_set_publication_for_client", {
+      p_id: id.parse(request.params).id, p_version: input.version, p_publish: input.publish,
+    }) };
+  });
   app.put(projectPath + "/:id/image", { bodyLimit: 4_200_000 }, async (request) => {
     const { actor } = await viewer(request, true);
     if (!actor || !media?.uploadProjectImage) throw new ApiError(503, "STORAGE_UNAVAILABLE", "Image handling unavailable");
@@ -89,9 +99,11 @@ export function registerProjectRoutes(app: FastifyInstance, { viewer, repo, read
     return { version: await media.uploadProjectImage(actor, id.parse(request.params).id, input.version, Buffer.from(input.image, "base64")) };
   });
   app.get(projectPath + "/:id/image", async (request, reply) => {
-    const { token, actor } = await viewer(request);
+    const { preview } = projectReadQuery.parse(request.query);
+    const { token, actor } = await viewer(request, !!preview);
     await read("media", actor, request.ip);
-    const image = await repo().rpc<string | null>(token, "project_media_for_client", { p_id: id.parse(request.params).id });
+    const image = await repo().rpc<string | null>(token, preview ? "project_review_preview_media_for_client" : "project_media_for_client",
+      { p_id: id.parse(request.params).id });
     if (!image) throw new ApiError(404, "ATTACHMENT_UNAVAILABLE", "Image unavailable");
     return reply.type("image/webp").header("X-Content-Type-Options", "nosniff").send(Buffer.from(image, "base64"));
   });

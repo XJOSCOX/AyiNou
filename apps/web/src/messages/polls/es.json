@@ -1,5 +1,7 @@
 {
   "title": "Encuestas",
+  "opensIn": "La votación abre en",
+  "closesIn": "La votación termina en",
   "mine": "Mis encuestas",
   "create": "Crear una encuesta",
   "rules": "Las encuestas de Ayinou orientan los debates y las decisiones de los proyectos. Cada cuenta habilitada dispone de un voto privado.",
@@ -81,7 +83,7 @@
   },
   "resultPolicies": {
     "after_close": "Tras el cierre definitivo",
-    "after_vote": "Tras tu voto o el cierre definitivo"
+    "after_vote": "Durante la votación y tras el cierre definitivo"
   },
   "states": {
     "draft": "Borrador",

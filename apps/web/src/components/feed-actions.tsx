@@ -6,6 +6,9 @@ const art = {
   love: <path d="M20 9.1c0 4-8 9.4-8 9.4S4 13.1 4 9.1C4 5.2 9 4.1 12 7.7c3-3.6 8-2.5 8 1.4Z" />,
   support: <><path d="M19 7.4c0 2.4-4.5 5-4.5 5S10 9.8 10 7.4c0-2.3 3-2.8 4.5-.8C16 4.6 19 5.1 19 7.4Z" /><path d="M3.5 14.5h3l2-1.5H12a1.5 1.5 0 0 1 0 3H9.5m-3 3h8l5-3.5a1.4 1.4 0 0 0-1.6-2.3l-3.8 2.5M3.5 13v7" /></>,
   celebrate: <><path d="m5 12-2 8 8-2m-6-6 6 6m-3-8 6 6m-4-10 1 2m4-5-.5 3m4 2 2-1m-3 5 3 .5m-5 .5 1 2" /></>,
+  refresh: <path d="M20 12a8 8 0 1 1-2.3-5.7L21 10m0-6v6h-6" />,
+  sliders: <><path d="M4 6h5m4 0h7M4 12h9m4 0h3M4 18h3m4 0h9M9 4v4m8 2v4m-6 2v4" /></>,
+  info: <path d="M12 11v5m0-8h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />,
   more: <g fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.65" /><circle cx="12" cy="12" r="1.65" /><circle cx="19" cy="12" r="1.65" /></g>,
   edit: <path d="m5 15-.8 4.8 4.8-.8L19.5 8.5a2.8 2.8 0 0 0-4-4L5 15Zm8.8-8.8 4 4" />,
   delete: <path d="M4.5 7h15m-13.5 0 1 13h10l1-13m-8-3h4v3m-4 3.5v6m4-6v6" />,
@@ -23,6 +26,8 @@ export function FeedIcon({ name }: { name: keyof typeof art }) {
 }
 
 export const feedIconButton = "relative inline-grid size-11 shrink-0 place-items-center rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] text-[var(--theme-link)] hover:bg-[var(--theme-selected)] focus-visible:outline-2 aria-expanded:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)] data-[selected=true]:bg-[var(--theme-selected)] disabled:opacity-60";
+
+export const feedToolbarButton = "relative inline-grid size-11 shrink-0 place-items-center rounded-md text-[var(--theme-body)] hover:bg-[var(--theme-control)] hover:text-[var(--theme-link)] focus-visible:outline-2 aria-expanded:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)] data-[selected=true]:bg-[var(--theme-selected)] data-[selected=true]:text-[var(--theme-link)] disabled:opacity-60";
 
 export function FeedActions({ label, actions }: {
   label: string;

@@ -58,6 +58,8 @@ export function localizedApiError(locale: Locale, cause: unknown) {
     case "ORGANIZATION_GRANT_DENIED": return organizationRoleMessages[locale].grantDenied;
     case "ORGANIZATION_RELATIONSHIP_UNAVAILABLE": return organizationRoleMessages[locale].relationshipUnavailable;
     case "PROJECT_INVALID": return projectMessages[locale].invalid;
+    case "PROJECT_PREVIEW_REQUIRED": return projectMessages[locale].approvalPreviewRequired;
+    case "PROJECT_PUBLICATION_UNAVAILABLE": return projectMessages[locale].publicationUnavailable;
     case "PROJECT_UNAVAILABLE": return projectMessages[locale].unavailable;
     case "PROJECT_CHANGED": return projectMessages[locale].changed;
     case "PROJECT_OWNER_UNAVAILABLE": return projectMessages[locale].ownerUnavailable;

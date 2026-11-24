@@ -1,5 +1,9 @@
 {
+  "directoryHelp": "Find upcoming events, track your RSVPs, or manage events you organize.",
+  "createHelp": "Set the schedule, location, and visibility. Save a draft while you get the details ready.",
+  "draftHelp": "Only the organizers can see this draft. Publish it when it’s ready for attendees.",
   "events": "Events",
+  "back": "Back",
   "create": "Create event",
   "upcoming": "Upcoming",
   "following": "Following",
@@ -25,6 +29,17 @@
   "individual": "Personal account",
   "community": "Community",
   "visibility": "Visibility",
+  "participation": "Who can participate",
+  "memberAudience": "AyiNou members",
+  "communityAudience": "Linked community members",
+  "audience": {
+    "public": "Anyone can view. Sign in to RSVP.",
+    "members": "Any signed-in AyiNou member can RSVP.",
+    "community": "Members of the linked community can RSVP from any location."
+  },
+  "relatedCommunity": "Linked community",
+  "noCommunity": "No linked community",
+  "relatedCommunityHelp": "Once published, community members can find it under My communities.",
   "public": "Public",
   "members": "Members only",
   "timeZone": "Event time zone",

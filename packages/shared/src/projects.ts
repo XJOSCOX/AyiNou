@@ -1,5 +1,6 @@
 import type { InterestCode } from "./accounts.js";
 import type { OperationalOrganization } from "./institutions.js";
+import type { PersonalClaim } from "./trust.js";
 
 export const projectOwners = ["individual", "organization", "community"] as const;
 export const projectReviewActions = ["assign", "release", "request_changes", "approve", "reject"] as const;
@@ -16,7 +17,9 @@ export type ProjectProposal = {
 export type ProjectDraft = { kind: ProjectOwnerKind; owner: string | null; association: string | null; proposal: ProjectProposal };
 export type ProjectCard = {
   id: string; status: ProjectStatus; title: string; category: InterestCode; department: string | null; country: string;
-  publishedAt: string | null; hasImage: boolean; owner: { kind: ProjectOwnerKind; name: string | null; handle: string | null };
+  publishedAt: string | null; hasImage: boolean;
+  owner: { kind: ProjectOwnerKind; name: string | null; handle: string | null;
+    personalClaims?: PersonalClaim[] | null; founderVerified?: true | null };
   association: { name: string; handle: string } | null;
 };
 export type ProjectIdentityState = "verified" | "required" | "pending" | "revoked";
@@ -24,16 +27,19 @@ export type ProjectDetail = ProjectCard & {
   proposal: ProjectProposal; version: number | null; restricted: boolean; canEdit: boolean; canSubmit: boolean;
   submissionIdentity: ProjectIdentityState | null;
   publicationEligibility: "published" | "private" | "pending_institution_verification" | "unavailable" | null;
+  revisionPending?: boolean; canPublish?: boolean; canUnpublish?: boolean;
   canDecide: boolean; canReport: boolean; canOpenWork?: boolean;
-  history: { action: "submit" | "request_changes" | "approve" | "reject" | "restrict"; revision: number; reason: string | null; createdAt: string }[];
+  approval?: { version: number; proof: string; founderOwned: boolean } | null;
+  history: { action: "submit" | "request_changes" | "approve" | "reject" | "restrict" | "publish" | "unpublish"; revision: number; reason: string | null; createdAt: string }[];
 };
 export type ProjectOptions = {
   submissionIdentity: ProjectIdentityState;
+  individualSubmissionIdentity?: ProjectIdentityState;
   organizations: OperationalOrganization[]; communities: (OperationalOrganization & { canOwn: boolean })[];
   canReview: boolean; canModerate: boolean; canAssignOthers: boolean;
 };
 export type ProjectReviewItem = Pick<ProjectCard, "id" | "title" | "category" | "status"> & {
-  version: number; assigned: boolean; assignedToMe: boolean; canClaim: boolean;
+  version: number; assigned: boolean; assignedToMe: boolean; canClaim: boolean; founderOwned?: boolean;
 };
 export type ProjectReport = {
   id: string; projectId: string; title: string; version: number; restricted: boolean; category: ProjectReportCategory; explanation: string;

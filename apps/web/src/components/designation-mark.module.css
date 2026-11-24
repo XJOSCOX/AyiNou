@@ -61,3 +61,9 @@
   color: #ffd275;
   background: #443417;
 }
+
+:global([data-admin-workspace]) .compact:is(.identity, .founderIdentity) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}

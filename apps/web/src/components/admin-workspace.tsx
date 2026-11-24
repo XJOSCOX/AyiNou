@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { f25FeaturePolicyKeys, platformRoles, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
-import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
+import { changeAdminAccount, loadAdminAccounts, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
 import { adminEntryPath, adminSections, type AdminTab } from "@/lib/admin-navigation";
 import { feedLanguageMessages } from "@/lib/feed-language-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
@@ -14,7 +14,8 @@ import { useLocale } from "@/lib/locale-store";
 import { apiErrorCode } from "@/lib/api-errors";
 import { localizedApiError } from "@/lib/error-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
-import { AdministratorMark, FounderMark, institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, PersonalClaimChecks, useInstitutionResource } from "./institution-ui";
+import { FounderMark, institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { adminActionPanel, adminCompactCard, adminSecondaryAction } from "./admin-controls";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
@@ -22,6 +23,7 @@ import { ModerationAppeals, ModerationList, ModerationOverview } from "./moderat
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { FeatureEnforcementPanel } from "./feature-enforcement";
 import { StaffAppeals } from "./enforcement-appeals";
+import { AdminAccountIdentity } from "./admin-account-avatar";
 import { AdminAccountEnforcement } from "./admin-account-enforcement";
 import { EnforcementDetails } from "./account-enforcement-details";
 import { accountEnforcementMessages } from "@/lib/account-enforcement-i18n";
@@ -42,10 +44,22 @@ import { VerificationSettings } from "./verification-settings";
 import { RecognitionAdmin } from "./recognition-admin";
 import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { MemberExperienceSettings } from "./member-experience-settings";
-import { PolicyAuditHistory } from "./policy-audit-history";
+import { AdminAuditWorkspace } from "./admin-audit-workspace";
 import { AdminSectionContext, useAdminRenewalPath } from "./admin-section-context";
 
-const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
+const metrics = [
+  { key: "members" },
+  { key: "organizations" },
+  { key: "recentMembershipEvents" },
+  { key: "pendingVerifications", destination: "trust" },
+  { key: "restrictedAccounts", destination: "moderationRestrictions" },
+  { key: "recentAdminActions", destination: "audit" },
+] as const satisfies readonly { key: keyof AdminOverview; destination?: AdminTab }[];
+type AdminSectionGroup = typeof adminSections[number]["label"];
+const adminNavigationButton = "inline-flex min-h-10 max-w-full items-center rounded-md px-3 py-1.5 text-start text-sm font-semibold leading-snug focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]";
+const adminCategoryButton = `${adminNavigationButton} border border-transparent hover:bg-[var(--theme-control)] aria-pressed:bg-[var(--theme-primary)] aria-pressed:text-[var(--theme-on-primary)]`;
+const adminSectionButton = `${adminNavigationButton} border border-[var(--theme-border)] hover:bg-[var(--theme-control)] aria-pressed:border-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]`;
+
 export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectionChange }: {
   workspaceAction: ReactNode; workspaceId: string; section: AdminTab; onSectionChange: (section: AdminTab) => void;
 }) {
@@ -53,6 +67,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
   const t = adminMessages[locale];
   const moderation = moderationCenterMessages[locale];
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const [navigationQuery, setNavigationQuery] = useState("");
   const [accountFilter, setAccountFilter] = useState<string>();
   const content = useRef<HTMLElement>(null);
   const labels: Record<AdminTab, string> = {
@@ -69,7 +84,22 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
   const access = useInstitutionResource(loadPlatformAccess);
   const visibleSections = adminSections.filter(({ label }) => label !== "navigationSettings" || access.data?.founder);
   const tab = visibleSections.some(({ pages }) => pages.some((page) => page === section)) ? section : "overview";
+  const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase(locale);
+  const query = normalize(navigationQuery.trim());
+  const groupLabel = (label: AdminSectionGroup) => label === "navigationModeration" ? moderation.title : t[label];
+  const activeGroup = visibleSections.find(({ pages }) => pages.some((page) => page === tab))?.label;
+  const navigationGroups = visibleSections.filter(({ label }) => query || label === activeGroup).map(({ label, pages }) => {
+    const heading = groupLabel(label);
+    const groupMatch = normalize(heading).includes(query);
+    return {
+      label, heading,
+      pages: pages.filter((page) => groupMatch || normalize(labels[page]).includes(query)),
+      showReview: label === "navigationMembers" && access.data?.reviewer &&
+        (groupMatch || normalize(t.reviewWorkspace).includes(query)),
+    };
+  }).filter(({ pages, showReview }) => pages.length || showReview);
   const overview = useInstitutionResource(loadAdminOverview);
+  const number = new Intl.NumberFormat(locale);
   const refresh = () => { access.refresh(); overview.refresh(); };
   function navigate(next: AdminTab, account?: string) {
     setAccountFilter(account);
@@ -77,47 +107,77 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
   }
 
   return <AdminSectionContext.Provider value={tab}><MemberShell>
-    <div className="grid gap-4">
-      <PageHeader title={t.administration} actions={<>{access.data?.founder && <FounderMark />}{workspaceAction}</>} />
+    <div className="grid gap-4" data-admin-workspace>
+      <PageHeader title={t.administration} description={tab === "overview" ? t.administrationIntro : labels[tab]} actions={<>{access.data?.founder && <FounderMark />}{workspaceAction}</>} />
       {overview.error ? <AdminFeedback error={overview.error} totp={access.data?.totp} retry={refresh} />
-        : !overview.data ? <p role="status">{authMessages[locale].working}</p> : <>
-          <div className="grid min-w-0 items-start gap-4 lg:grid-cols-[clamp(12rem,19vw,16rem)_minmax(0,1fr)]">
-            <aside className="min-w-0 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-2.5">
+        : !overview.data ? <p role="status" className={institutionCard}>{authMessages[locale].working}</p> : <>
+          <div className="grid min-w-0 gap-4">
+            <div className="min-w-0 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
               <button type="button" aria-expanded={navigationOpen} aria-controls="admin-section-navigation"
                 onClick={() => setNavigationOpen(!navigationOpen)}
-                className="flex min-h-11 w-full flex-wrap items-center justify-between gap-x-3 rounded-lg px-3 py-2 text-start lg:hidden">
+                className="flex min-h-11 w-full flex-wrap items-center justify-between gap-x-3 rounded-lg px-3 py-2 text-start focus-visible:outline-2 focus-visible:-outline-offset-2 lg:hidden">
                 <span className="font-semibold">{t.navigationSections}</span>
-                <span aria-hidden="true" className="text-sm text-[var(--theme-body)]">{labels[tab]} {navigationOpen ? "▴" : "▾"}</span>
+                <span aria-hidden="true" className="flex min-w-0 items-center gap-2 text-sm text-[var(--theme-body)]">
+                  {labels[tab]}
+                  <svg viewBox="0 0 24 24" className={`size-4 shrink-0 motion-safe:transition-transform ${navigationOpen ? "rotate-180" : ""}`}
+                    fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                </span>
               </button>
-              <nav id="admin-section-navigation" aria-label={t.administration}
-                className={navigationOpen ? "mt-2 space-y-3 lg:mt-0" : "hidden space-y-3 lg:block"}>
-                {visibleSections.map(({ label, pages }) => <section key={label} aria-labelledby={label}
-                  className="border-b border-[var(--theme-border)] pb-2 last:border-0 last:pb-0">
-                  <h2 id={label} className="px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)]">{label === "navigationModeration" ? moderation.title : t[label]}</h2>
-                  <ul className="space-y-0.5">
-                    {pages.map((page) => <li key={page}>
-                      <button type="button" aria-pressed={tab === page} onClick={() => {
-                        navigate(page);
-                        if (navigationOpen) {
-                          content.current?.focus();
+              <nav id="admin-section-navigation" aria-label={t.administration} className={navigationOpen ? "block" : "hidden lg:block"}>
+                <div className="flex min-w-0 flex-wrap items-center gap-2 border-b border-[var(--theme-border)] p-2 sm:px-3">
+                  <div className="flex min-w-0 flex-1 flex-wrap gap-1">
+                    {visibleSections.map(({ label, pages }) => <button key={label} type="button" aria-pressed={!query && activeGroup === label}
+                      className={adminCategoryButton}
+                      onClick={() => { setNavigationQuery(""); navigate(pages[0]); }}>{groupLabel(label)}</button>)}
+                  </div>
+                  <label className="relative block min-w-0 basis-full sm:basis-48 lg:basis-52">
+                    <span className="sr-only">{t.navigationSearch}</span>
+                    <svg aria-hidden="true" viewBox="0 0 24 24" className="pointer-events-none absolute start-3 top-3 size-4 text-[var(--theme-body)]"
+                      fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="10.5" cy="10.5" r="5.5" /><path d="m15 15 4 4" /></svg>
+                    <input type="search" value={navigationQuery} onChange={(event) => setNavigationQuery(event.target.value)}
+                      placeholder={t.navigationSearch}
+                      className="min-h-10 w-full rounded-md border border-[var(--theme-border)] bg-[var(--theme-control)] pe-2 ps-9 text-sm focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]" />
+                  </label>
+                </div>
+                <div className="grid gap-2 p-2 sm:px-3">
+                  {!navigationGroups.length && <p role="status" className="px-2 py-1 text-sm text-[var(--theme-body)]">{t.navigationNoResults}</p>}
+                  {navigationGroups.map(({ label, heading, pages, showReview }) => <section key={label} aria-labelledby={label}>
+                    <h2 id={label} className={query ? "px-2 pb-1 text-xs font-semibold text-[var(--theme-body)]" : "sr-only"}>{heading}</h2>
+                    <ul className="flex flex-wrap items-center gap-1.5">
+                      {pages.map((page) => <li key={page}>
+                        <button type="button" aria-pressed={tab === page} className={adminSectionButton} onClick={() => {
+                          navigate(page);
+                          if (navigationQuery) setNavigationQuery("");
+                          if (navigationOpen || query) content.current?.focus();
                           setNavigationOpen(false);
-                        }
-                      }} className="min-h-11 w-full rounded-md px-3 py-2 text-start text-sm font-semibold hover:bg-[var(--theme-selected)] aria-pressed:bg-[var(--theme-selected)]">
-                        {labels[page]}
-                      </button>
-                    </li>)}
-                    {label === "navigationMembers" && access.data?.reviewer && <li><Link className={`${institutionLink} block px-3 py-2`} href="/verification/review">{t.reviewWorkspace}</Link></li>}
-                  </ul>
-                </section>)}
+                        }}>{labels[page]}</button>
+                      </li>)}
+                      {showReview && <li><Link className={`${institutionLink} inline-flex min-h-10 items-center px-3 py-2`} href="/verification/review">{t.reviewWorkspace}</Link></li>}
+                    </ul>
+                  </section>)}
+                </div>
               </nav>
-            </aside>
-            <section ref={content} tabIndex={-1} aria-label={labels[tab]} className="grid min-w-0 gap-4">
-              {tab === "overview" && <><dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {metrics.map((metric) => <div key={metric} className={institutionCard}>
-                  <dt className="text-sm text-[var(--theme-body)]">{t[metric]}</dt>
-                  <dd className="mt-2 text-3xl font-semibold tabular-nums">{new Intl.NumberFormat(locale).format(overview.data![metric])}</dd>
-                </div>)}
-              </dl><SafetyOverviewPanel /></>}
+            </div>
+            <section ref={content} tabIndex={-1} aria-label={labels[tab]} className="grid min-w-0 gap-4 [&_button:disabled]:cursor-not-allowed [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-[var(--theme-link)]">
+              {tab === "overview" && <>
+                <section aria-labelledby="platform-overview" className="overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+                  <h2 id="platform-overview" className="border-b border-[var(--theme-border)] px-4 py-3 text-lg font-semibold sm:px-5">{t.overview}</h2>
+                  <dl className="grid gap-2 p-3 sm:grid-cols-2 sm:p-4 xl:grid-cols-3 min-[2000px]:grid-cols-6">
+                    {metrics.map((metric) => <div key={metric.key} className="relative min-w-0 rounded-lg bg-[var(--theme-control)] p-3">
+                      <dt className="text-sm text-[var(--theme-body)]">{t[metric.key]}</dt>
+                      <dd className="mt-1 text-2xl font-semibold tabular-nums">{number.format(overview.data![metric.key])}
+                        {"destination" in metric && <button type="button" onClick={() => { navigate(metric.destination); content.current?.focus(); }}
+                          aria-label={t.openAdminSection.replace("{section}", labels[metric.destination])}
+                          className="absolute inset-0 flex items-end justify-end rounded-lg p-3 text-[var(--theme-link)] hover:ring-1 hover:ring-inset hover:ring-[var(--theme-link)] focus-visible:outline-2 focus-visible:-outline-offset-2">
+                          <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor"
+                            strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14m-6-6 6 6-6 6" /></svg>
+                        </button>}
+                      </dd>
+                    </div>)}
+                  </dl>
+                </section>
+                <SafetyOverviewPanel />
+              </>}
               {tab === "moderationOverview" && <ModerationOverview workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationReports" && <ModerationList key="reports" view="reports" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationContent" && <ModerationList key="content" view="content" workspace={workspaceId} onNavigate={navigate} />}
@@ -132,10 +192,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {tab === "accounts" && <AccountManagement key={accountFilter ?? "accounts"} initialQuery={accountFilter}
                 workspace={workspaceId} founder={access.data?.founder === true}
                 onHistory={(id) => navigate("moderationHistory", id)} onChange={overview.refresh} />}
-              {tab === "audit" && <>
-                {access.data?.founder && <PolicyAuditHistory key={workspaceId} workspaceId={workspaceId} />}
-                <AuditFeed />
-              </>}
+              {tab === "audit" && <AdminAuditWorkspace key={workspaceId} workspaceId={workspaceId} founder={access.data?.founder === true} />}
               {tab === "trust" && <TrustAdministration founderWorkspace={access.data?.founder ? workspaceId : undefined} />}
               {tab === "ambassadors" && <AmbassadorAdministration />}
               {tab === "legal" && <LegalAdminPanel />}
@@ -148,9 +205,13 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {access.data?.founder && (tab === "recognitionBadges" || tab === "recognitionHistory") &&
                 <RecognitionAdmin key={tab} section={tab} workspaceId={workspaceId} />}
               {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
-              {tab === "eventFeedSettings" && access.data?.founder && <div className="grid gap-4 xl:grid-cols-2">
-                {f25FeaturePolicyKeys.map((key) => <HomepageSettings key={workspaceId + key} workspaceId={workspaceId}
-                  path={"/api/v1/admin/feature-policy/" + key} title={feedLanguageMessages[locale].features[key]} />)}
+              {tab === "eventFeedSettings" && access.data?.founder && <div className="grid min-w-0 items-start gap-3 xl:grid-cols-2">
+                {(["events", "feed"] as const).map((group) => <section key={group} className={`${adminCompactCard} grid gap-2`} aria-labelledby={`admin-policy-${group}`}>
+                  <h2 id={`admin-policy-${group}`} className="border-b border-[var(--theme-border)] pb-2 text-lg font-semibold">{moderation[group]}</h2>
+                  {f25FeaturePolicyKeys.filter((key) => key.startsWith(group + ".")).map((key) => <HomepageSettings
+                    key={workspaceId + key} workspaceId={workspaceId}
+                    path={"/api/v1/admin/feature-policy/" + key} title={feedLanguageMessages[locale].features[key]} />)}
+                </section>)}
               </div>}
               {tab === "registration" && access.data?.founder && <RegistrationSettings key={workspaceId} workspaceId={workspaceId} />}
               {tab === "memberExperience" && access.data?.founder && <MemberExperienceSettings key={workspaceId} workspaceId={workspaceId} />}
@@ -201,52 +262,57 @@ function AccountManagement({ initialQuery = "", founder, workspace, onChange, on
     setOffset(0);
   }
 
-  return <section className="grid min-w-0 gap-3">
-    <form onSubmit={search} className={institutionCard}>
-      <label className="block text-sm font-semibold">{t.search}
+  return <section className="grid min-w-0 gap-2.5">
+    <form onSubmit={search} className={`${adminCompactCard} grid items-end gap-3 sm:grid-cols-[minmax(0,32rem)_auto] sm:justify-start`}>
+      <label className="block min-w-0 text-sm font-semibold">{t.search}
         <input name="query" type="search" maxLength={100} className={institutionField} placeholder={t.searchHelp} defaultValue={initialQuery} />
       </label>
-      <button className={`${institutionAction} mt-3`}>{t.search}</button>
+      <button className={`${institutionAction} min-h-11 justify-self-start`}>{t.search}</button>
     </form>
     {accounts.error ? <AdminFeedback error={accounts.error} retry={accounts.refresh} /> : !accounts.data ? <p role="status">{authMessages[locale].working}</p>
-      : accounts.data.length ? accounts.data.map((account) => <article className={institutionCard} key={account.id}>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="break-words font-semibold">{account.displayName ?? t.unnamed}{!!account.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={account.personalClaims} /></>}
-              {account.founder ? <>{" "}<FounderMark /></> : account.roles.includes("administrator") && <>{" "}<AdministratorMark /></>}</h2>
-            {account.bootstrapTrust && <p className="text-sm text-[var(--theme-body)]">{trustMessages[locale].bootstrapTrust}</p>}
-            {account.username && <p className="break-all text-sm">@{account.username}</p>}
-            <p className="break-all text-xs text-[var(--theme-body)]">{account.id}</p>
+      : accounts.data.length ? <div className="min-w-0 divide-y divide-[var(--theme-border)] rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+        {accounts.data.map((account) => <article className="@container min-w-0 px-3 py-2.5 sm:px-4" key={account.id}>
+          <div className="flex min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+              <AdminAccountIdentity account={account} fallback={t.unnamed} />
+            </div>
+            <p className={`rounded-md px-2 py-1 text-xs font-semibold ${account.status === "active" && !account.authBanned
+              ? "bg-[var(--theme-control)]" : "bg-[var(--theme-error-bg)] text-[var(--theme-error-text)]"}`}>{account.authBanned ? t.authBanned : t[account.status]}</p>
+            <div className="flex w-full flex-wrap gap-1.5 @min-[44rem]:w-auto">
+              <button type="button" className={`${adminSecondaryAction} group gap-1.5 aria-expanded:border-[var(--theme-link)] aria-expanded:bg-[var(--theme-selected)]`} aria-expanded={selected === account.id}
+                onClick={() => setSelected(selected === account.id ? null : account.id)}>
+                {t.manage}
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0 group-aria-expanded:rotate-180"
+                  fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+              </button>
+              <button type="button" className={adminSecondaryAction} onClick={() => onHistory(account.id)}>{moderationCenterMessages[locale].accountHistory}</button>
+            </div>
           </div>
-          <p className="font-semibold">{t[account.status]}</p>
-        </div>
-        <p className="mt-2 text-sm text-[var(--theme-body)]">
-          {[account.confirmed ? t.confirmed : t.unconfirmed, account.authBanned ? t.authBanned : null, account.totp ? t.totpOn : t.totpOff,
-            ...account.roles.map((role) => t[role])].filter(Boolean).join(" · ")}
-        </p>
-        <p className="mt-2 text-sm">{t.joined} · {new Intl.DateTimeFormat(locale).format(new Date(account.createdAt))}</p>
-        {account.restrictionUpdatedAt && <p className="mt-2 text-sm">
-          {moderationCenterMessages[locale].updated} · {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(account.restrictionUpdatedAt))}
-        </p>}
-        {account.reason && <p className="mt-1 break-words text-sm">{account.reason}</p>}
-        {account.enforcement && <div className="mt-4">
-          <EnforcementDetails notice={account.enforcement} />
-          <p className="mt-2 text-sm text-[var(--theme-body)]">{accountEnforcementMessages[locale].noticeReady}</p>
-        </div>}
-        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
-          <button type="button" className={institutionLink} aria-expanded={selected === account.id}
-            onClick={() => setSelected(selected === account.id ? null : account.id)}>{t.manage}</button>
-          <button type="button" className={institutionLink} onClick={() => onHistory(account.id)}>{moderationCenterMessages[locale].accountHistory}</button>
-        </div>
-        {selected === account.id && <>
-          <AdminAccountEnforcement key={account.restrictionRevision ?? account.id} account={account}
-            founder={founder} workspace={workspace} onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />
-          <AccountAction key={account.id} account={account} onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />
-        </>}
-      </article>) : <p>{t.emptyAccounts}</p>}
+          {selected === account.id && <div className="mt-3 grid gap-2">
+            <div className="grid gap-1 rounded-md bg-[var(--theme-control)] p-3 text-sm">
+              {account.bootstrapTrust && <p>{trustMessages[locale].bootstrapTrust}</p>}
+              <p>{[account.confirmed ? t.confirmed : t.unconfirmed, account.authBanned ? t.authBanned : null, account.totp ? t.totpOn : t.totpOff,
+                ...account.roles.map((role) => t[role])].filter(Boolean).join(" · ")}</p>
+              <p>{t.joined} · {new Intl.DateTimeFormat(locale).format(new Date(account.createdAt))}</p>
+              <p className="break-all text-xs text-[var(--theme-body)]">{t.subject} · {account.id}</p>
+              {account.restrictionUpdatedAt && <p>{moderationCenterMessages[locale].updated} · {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(account.restrictionUpdatedAt))}</p>}
+              {account.reason && <p className="break-words">{account.reason}</p>}
+            </div>
+            {account.enforcement && <div>
+              <EnforcementDetails notice={account.enforcement} />
+              <p className="mt-1 text-sm text-[var(--theme-body)]">{accountEnforcementMessages[locale].noticeReady}</p>
+            </div>}
+            <div className="grid items-start gap-3 @min-[52rem]:grid-cols-2">
+              <AdminAccountEnforcement key={account.restrictionRevision ?? account.id} account={account}
+                founder={founder} workspace={workspace} onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />
+              <AccountAction key={account.id} account={account} onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />
+            </div>
+          </div>}
+        </article>)}
+      </div> : <p className={adminCompactCard}>{t.emptyAccounts}</p>}
     {(offset > 0 || accounts.data?.length === 25) && <div className="flex flex-wrap gap-3">
-      {offset > 0 && <button type="button" className={institutionLink} onClick={() => setOffset(offset - 25)}>{t.previous}</button>}
-      {offset < 10000 && accounts.data?.length === 25 && <button type="button" className={institutionLink} onClick={() => setOffset(offset + 25)}>{t.next}</button>}
+      {offset > 0 && <button type="button" className={adminSecondaryAction} onClick={() => setOffset(offset - 25)}>{t.previous}</button>}
+      {offset < 10000 && accounts.data?.length === 25 && <button type="button" className={adminSecondaryAction} onClick={() => setOffset(offset + 25)}>{t.next}</button>}
     </div>}
   </section>;
 }
@@ -273,7 +339,7 @@ function AccountAction({ account, onChange }: { account: AdminAccount; onChange:
     finally { setBusy(false); }
   }
 
-  return <form onSubmit={submit} className="mt-3 grid gap-3 border-t border-[var(--theme-border)] pt-3 sm:max-w-xl" aria-busy={busy}>
+  return <form onSubmit={submit} className={adminActionPanel} aria-busy={busy}>
     <label className="text-sm font-semibold">{t.changeRole}
       <select className={institutionField} name="value" required defaultValue="" disabled={busy}>
         <option value="" disabled>{t.select}</option>
@@ -290,26 +356,4 @@ function AccountAction({ account, onChange }: { account: AdminAccount; onChange:
     {error !== null && <AdminFeedback error={error} />}
     <button className={`${institutionAction} justify-self-start`} disabled={busy}>{t.apply}</button>
   </form>;
-}
-
-function AuditFeed() {
-  const [locale] = useLocale();
-  const t = adminMessages[locale];
-  const audit = useInstitutionResource(loadAdminAudit);
-  const labels: Partial<Record<string, string>> = t.events;
-  return <section className={institutionCard}>
-    <h2 className="text-xl font-semibold">{t.audit}</h2>
-    <p className="mt-2 text-sm text-[var(--theme-body)]">{t.auditScope}</p>
-    {audit.error ? <AdminFeedback error={audit.error} retry={audit.refresh} /> : !audit.data ? <p role="status">{authMessages[locale].working}</p>
-      : audit.data.length ? <ol className="mt-3 divide-y divide-[var(--theme-border)]">
-        {audit.data.map((event) => <li className="py-3" key={event.id}>
-          <p className="font-semibold">{labels[event.event] ?? t.audit}{event.role && ` · ${t[event.role]}`}</p>
-          <time className="text-sm" dateTime={event.occurredAt}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(event.occurredAt))}</time>
-          {event.reason && <p className="break-words text-sm">{event.reason}</p>}
-          {event.actorId && <p className="break-all text-xs">{t.actor} · {event.actorId}</p>}
-          {event.subjectId && <p className="break-all text-xs">{t.subject} · {event.subjectId}</p>}
-          {event.organizationId && <p className="break-all text-xs">{t.organizationId} · {event.organizationId}</p>}
-        </li>)}
-      </ol> : <p className="mt-3">{t.emptyAudit}</p>}
-  </section>;
 }

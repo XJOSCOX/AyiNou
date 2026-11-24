@@ -10,10 +10,10 @@ const body = (method: string, data: object) => ({ method, body: JSON.stringify(d
 export const loadProjects = (signedIn: boolean, filters: Record<string, string>, cursor: string | null, signal: AbortSignal):
   Promise<{ projects: ProjectCard[]; nextCursor: string | null }> =>
   (signedIn ? authorizedSocialRequest : publicRequest)(`${root}?${new URLSearchParams({ ...filters, ...(cursor ? { cursor } : {}) })}`, { signal });
-export const loadProject = (id: string, signedIn: boolean, signal: AbortSignal): Promise<ProjectDetail> =>
-  (signedIn ? authorizedSocialRequest : publicRequest)(`${root}/${id}`, { signal });
-export const loadProjectImage = (id: string, signedIn: boolean, signal: AbortSignal) =>
-  authorizedImage(`${root}/${id}/image`, signal, !signedIn);
+export const loadProject = (id: string, signedIn: boolean, signal: AbortSignal, reviewPreview = false): Promise<ProjectDetail> =>
+  (signedIn ? authorizedSocialRequest : publicRequest)(`${root}/${id}${reviewPreview ? "?preview=review" : ""}`, { signal });
+export const loadProjectImage = (id: string, signedIn: boolean, signal: AbortSignal, reviewPreview = false) =>
+  authorizedImage(`${root}/${id}/image${reviewPreview ? "?preview=review" : ""}`, signal, !signedIn);
 export const loadMyProjects = (signal: AbortSignal): Promise<{ projects: (ProjectCard & { createdByMe: boolean; restricted: boolean })[] }> =>
   authorizedSocialRequest(mine, { signal });
 export const loadProjectOptions = (signal: AbortSignal): Promise<ProjectOptions> =>
@@ -24,6 +24,8 @@ export const saveProject = (id: string, version: number, proposal: ProjectPropos
   authorizedSocialRequest(`${root}/${id}`, body("PATCH", { version, proposal, removeImage }));
 export const submitProject = (id: string, version: number): Promise<{ version: number }> =>
   authorizedSocialRequest(`${root}/${id}/submit`, body("POST", { version }));
+export const setProjectPublication = (id: string, version: number, publish: boolean): Promise<{ version: number }> =>
+  authorizedSocialRequest(`${root}/${id}/publication`, body("PATCH", { version, publish }));
 export const readProjectImage = (file: File) =>
   new Promise<string>((resolve, reject) => {
     if (file.size > 3_145_728) { reject(new Error("PAYLOAD_TOO_LARGE")); return; }
@@ -36,8 +38,8 @@ export const uploadProjectImage = (id: string, version: number, file: File): Pro
   readProjectImage(file).then((image) => authorizedSocialRequest(`${root}/${id}/image`, body("PUT", { version, image })));
 export const loadProjectQueue = (signal: AbortSignal): Promise<{ items: ProjectReviewItem[] }> =>
   authorizedSocialRequest(root + "/review", { signal });
-export const reviewProject = (id: string, version: number, action: ProjectReviewAction, reason: string, reviewer: string | null = null) =>
-  authorizedSocialRequest(`${root}/${id}/review`, body("POST", { version, action, reason, reviewer }));
+export const reviewProject = (id: string, version: number, action: ProjectReviewAction, reason: string, reviewer: string | null = null, previewProof?: string) =>
+  authorizedSocialRequest(`${root}/${id}/review`, body("POST", { version, action, reason, reviewer, previewProof }));
 export const loadProjectReports = (signal: AbortSignal): Promise<{ reports: ProjectReport[] }> =>
   authorizedSocialRequest(root + "/reports", { signal });
 export const reportProject = (id: string, category: ProjectReportCategory, explanation: string) =>

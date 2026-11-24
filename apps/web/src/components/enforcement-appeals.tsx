@@ -19,6 +19,7 @@ import { useLocale } from "@/lib/locale-store";
 import { localizedApiError } from "@/lib/error-i18n";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { adminCompactCard, adminDisclosure, adminSecondaryAction } from "./admin-controls";
 
 const memberPath = "/api/v1/me/enforcement-appeals";
 const staffPath = "/api/v1/moderation/enforcement-appeals";
@@ -107,8 +108,12 @@ function MemberAppealAction({ label, action, decision, appeal, onSaved }: {
   onSaved: () => void;
 }) {
   const { t } = useAppealLabels();
-  return <details className="mt-2">
-    <summary className={`${institutionLink} cursor-pointer`}>{label}</summary>
+  return <details className="group mt-3">
+    <summary className="inline-flex min-h-11 max-w-full cursor-pointer list-none items-center gap-2 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-offset-2 group-open:bg-[var(--theme-control)] [&::-webkit-details-marker]:hidden">
+      <span>{action === "submit" ? t.appealForm : label}</span>
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="size-4 shrink-0 motion-safe:transition-transform group-open:rotate-180"
+        fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+    </summary>
     <AppealForm label={label} description={action === "submit" ? t.intro : undefined}
       reasonLabel={action === "withdraw" ? undefined : t.reason} max={2000} onSaved={onSaved}
       submit={(reason, requestId) => authorizedRequest(memberPath, { method: "POST", body: JSON.stringify(action === "submit"
@@ -148,7 +153,7 @@ function AppealForm({ label, description, reasonLabel, max, onSaved, submit }: {
       <textarea name="reason" minLength={10} maxLength={max} rows={3} required className={institutionField} />
     </label>}
     {error !== null && <p className={institutionErrorBox} role="alert">{localizedApiError(locale, error)}</p>}
-    <button type="submit" disabled={busy} className={`${institutionAction} justify-self-start`}>{label}</button>
+    <button type="submit" disabled={busy} className={`${institutionAction} min-h-11 justify-self-start focus-visible:outline-2 focus-visible:outline-offset-2`}>{label}</button>
   </form>;
 }
 
@@ -167,10 +172,10 @@ export function StaffAppeals({ workspace, lane }: { workspace: string; lane: "ad
   }, [lane, search, status, cursor, workspace]);
   const resource = useInstitutionResource(load);
   const items = resource.data?.cases ?? [];
-  return <section className="grid min-w-0 gap-3" aria-label={t.title}>
-    <div className={institutionCard}>
+  return <section className="grid min-w-0 gap-2.5" aria-label={t.title}>
+    <div className={adminCompactCard}>
       <h2 className="text-lg font-semibold">{t.title}</h2>
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+      <div className="mt-2 grid max-w-4xl items-end gap-2.5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <label className="text-sm font-semibold">{t.status}
           <select className={institutionField} value={status} onChange={(event) => { setStatus(event.target.value); setCursor(undefined); }}>
             <option value="">{admin.select}</option>
@@ -195,9 +200,9 @@ export function StaffAppeals({ workspace, lane }: { workspace: string; lane: "ad
     </div>
     {items.map((item) => <StaffAppealCard key={item.id + item.revision} item={item} reviewers={resource.data?.reviewers ?? []}
       workspace={workspace} lane={lane} onSaved={resource.refresh} />)}
-    {(cursor || resource.data?.nextCursor) && <div className="flex gap-3">
-      {cursor && <button type="button" className={institutionLink} onClick={() => setCursor(undefined)}>{featureMessages[locale].newer}</button>}
-      {resource.data?.nextCursor && <button type="button" className={institutionLink}
+    {(cursor || resource.data?.nextCursor) && <div className="flex flex-wrap gap-2">
+      {cursor && <button type="button" className={adminSecondaryAction} onClick={() => setCursor(undefined)}>{featureMessages[locale].newer}</button>}
+      {resource.data?.nextCursor && <button type="button" className={adminSecondaryAction}
         onClick={() => setCursor(resource.data?.nextCursor ?? undefined)}>{featureMessages[locale].older}</button>}
     </div>}
   </section>;
@@ -218,22 +223,23 @@ function StaffAppealCard({ item, reviewers, workspace, lane, onSaved }: {
     if (reviewers.length) available.push("assign");
     if (!item.decisionInfo || item.decisionInfo.state === "revoked") available.push("close");
   }
-  return <article className={institutionCard}>
+  return <article className={adminCompactCard}>
     <h3 className="font-semibold">{t[item.domain]} · {t[item.status]}</h3>
     <p className="my-2 break-all text-sm">{t.reference} · {item.id}</p>
     {item.reviewer && <p className="my-2 break-all text-sm">{t.assignedTo} · {item.reviewer}</p>}
     {item.decisionInfo && <DecisionDetails item={item.decisionInfo} />}
-    <details className="mt-3">
-      <summary className="cursor-pointer font-semibold">{t.history}</summary>
-      <ul className="mt-2 grid gap-3 text-sm">
+    <details className="mt-3 max-w-2xl rounded-lg border border-[var(--theme-border)]">
+      <summary className={adminDisclosure}>{t.history}</summary>
+      <ul className="grid gap-3 border-t border-[var(--theme-border)] p-3 text-sm">
         {item.history.map((entry) => <li key={entry.id} className="min-w-0 break-words">
           <p>{actions["appeal_" + entry.action] ?? t.recorded} · {dates.format(new Date(entry.occurredAt))}</p>
           {entry.narrative && <p className="whitespace-pre-wrap">{entry.narrative}</p>}
         </li>)}
       </ul>
     </details>
-    {available.map((action) => <details className="mt-3" key={action}>
-      <summary className={`${institutionLink} cursor-pointer`}>{t[action]}</summary>
+    {available.map((action) => <details className="mt-3 max-w-2xl rounded-lg border border-[var(--theme-border)]" key={action}>
+      <summary className={adminDisclosure}>{t[action]}</summary>
+      <div className="border-t border-[var(--theme-border)] bg-[var(--theme-control)] p-3 sm:p-4">
       {action === "assign" && <label className="mt-2 block text-sm font-semibold">{t.assignedTo}
         <select className={institutionField} value={reviewer} onChange={(event) => setReviewer(event.target.value)}>
           <option value="">{adminMessages[locale].select}</option>
@@ -246,6 +252,7 @@ function StaffAppealCard({ item, reviewers, workspace, lane, onSaved }: {
           method: "POST", headers: { "X-Ayinou-Workspace": workspace },
           body: JSON.stringify({ id: item.id, revision: item.revision, requestId, action, reason, ...(action === "assign" ? { reviewer } : {}) }),
         })} />}
+      </div>
     </details>)}
   </article>;
 }

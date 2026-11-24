@@ -256,6 +256,7 @@ pilotTest("O6 serializes acceptance and suspension and rechecks expiry and organ
   await solveMfa(page, first.secret);
   await openAdministration(page);
   const t = earlyPartnerMessages.en;
+  await page.getByRole("button", { name: "Programs", exact: true }).click();
   await page.getByRole("button", { name: t.title, exact: true }).click();
   const view = page.getByRole("region", { name: t.title });
   await view.getByLabel(t.program).selectOption(programId);

@@ -28,7 +28,8 @@ export default async function MfaPage({ searchParams }: { searchParams: Promise<
   const securityOnly = !live && requested === "/reset-password" &&
     (await supabase.rpc("m22_recovery_session_active")).data === true;
   if ((!live && !securityOnly) || user.error || user.data.user?.id !== session.sub) redirect("/login");
-  if (requested === "/admin" || requested === "/verification/review") redirect(`${requested}?verify=1`);
+  if (requested === "/admin" || requested === "/verification/review" || requested === "/projects/review")
+    redirect(`${requested}?verify=1`);
   if (session.aal === "aal2" && !privileged) redirect(next);
   const factors = user.data.user.factors?.filter((factor) => factor.status === "verified") ?? [];
   if (privileged && !factors.some((factor) => factor.factor_type === "totp")) redirect("/settings");

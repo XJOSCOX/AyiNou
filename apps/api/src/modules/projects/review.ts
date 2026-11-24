@@ -12,11 +12,13 @@ export function registerProjectReviewRoutes(app: FastifyInstance, { viewer, repo
   app.post(projectPath + "/:id/review", { bodyLimit: 6000 }, async (request) => {
     const { token } = await viewer(request, true);
     const input = z.strictObject({ version, action: z.enum(projectReviewActions), reason: reason(1000),
-      reviewer: z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/).nullable().optional() })
+      reviewer: z.string().regex(/^[a-z0-9][a-z0-9_]{2,23}$/).nullable().optional(),
+      previewProof: z.string().regex(/^[a-f0-9]{64}$/).optional() })
       .refine(({ action, reviewer }) => !reviewer || action === "assign").parse(request.body);
     return { version: await repo().rpc<number>(token, "project_review_for_client", {
       p_id: id.parse(request.params).id, p_version: input.version, p_action: input.action,
       p_reason: input.reason, p_reviewer: input.reviewer ?? null,
+      ...(input.previewProof ? { p_preview_proof: input.previewProof } : {}),
     }) };
   });
   app.get(projectPath + "/reports", async (request) => {

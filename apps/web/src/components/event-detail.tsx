@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { MemberAppeals } from "./enforcement-appeals";
 import { useCallback, useRef, useState, type FormEvent } from "react";
@@ -10,7 +11,7 @@ import { eventMessages } from "@/lib/events-i18n";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
-import { EventCover, EventDate, EventEditor, eventResponses, eventSecondary } from "./events";
+import { EventCover, EventDate, EventEditor, EventOrganizerBadges, EventSectionHeader, eventResponses, eventSecondary } from "./events";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 
@@ -64,6 +65,7 @@ export function EventDetail({ initial, signedIn }: { initial: CommunityEvent; si
   const load = useCallback((cursor: string | null, signal: AbortSignal) => loadEventUpdates(initial.id,signedIn,cursor,signal),[initial.id,signedIn]);
   const updates = useCursorPage(load,revision);
   const path = "/" + event.id;
+  const publishIcon = <Image src="/project-published.png" alt="" width={100} height={100} unoptimized className="size-5 shrink-0" />;
 
   function transition(status: "published" | "canceled" | "completed") {
     void mutation.run(async () => {
@@ -78,42 +80,79 @@ export function EventDetail({ initial, signedIn }: { initial: CommunityEvent; si
     });
   }
 
-  return <MemberShell signedIn={signedIn}><article className="grid gap-5">
-    <header className="overflow-hidden rounded-[10px] border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+  return <MemberShell signedIn={signedIn}><article className="grid w-full min-w-0 gap-4">
+    <EventSectionHeader />
+    <header className="min-w-0 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
       {event.coverUrl && <EventCover url={event.coverUrl} detail />}
-      <div className="grid gap-4 p-5 sm:p-8">
-        <div className="flex flex-wrap gap-3 text-sm font-semibold text-[var(--theme-link)]">
-          <span>{t[event.category]}</span><span>{t[event.format]}</span><span>{t[event.status]}</span>
+      <div className="grid gap-4 px-4 py-5 sm:px-6 sm:py-6">
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+          <div className="grid min-w-0 flex-1 gap-1">
+            <h1 dir="auto" className="max-w-4xl wrap-anywhere text-2xl font-bold leading-tight sm:text-4xl">{event.title}</h1>
+            <p className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+              <span className="font-semibold text-[var(--theme-link)]">{t[event.category]}</span>
+              {event.communityName && <span className="text-[var(--theme-body)]">{t.relatedCommunity} · <bdi>{event.communityName}</bdi></span>}
+            </p>
+          </div>
+          <span className={"inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold " + (event.status === "canceled"
+            ? "bg-[var(--theme-error-bg)] text-[var(--theme-error-text)]"
+            : "bg-[var(--theme-selected)] text-[var(--theme-link)]")}>
+            {event.status === "published" && publishIcon}
+            {t[event.status]}
+          </span>
         </div>
-        <h1 className="break-words text-3xl font-bold sm:text-4xl">{event.title}</h1>
-        <div className="flex flex-wrap gap-x-5 gap-y-2">
-          {event.organizer.handle ? <Link className={institutionLink}
-            href={(event.organizer.kind === "organization" ? "/organization/" : "/members/") + event.organizer.handle}>{event.organizer.name}</Link>
-            : <span>{event.organizer.name}</span>}
-          <EventDate value={event.startsAt} end={event.endsAt} />
-          {(event.locality || event.country) && <span>{[event.locality,event.country].filter(Boolean).join(", ")}</span>}
-        </div>
-        {event.canManage && <div className="flex flex-wrap items-center gap-2">
-          {!["canceled","completed"].includes(event.status) &&
-            <button className={eventSecondary} onClick={() => setEditing(!editing)} aria-expanded={editing}>{t.edit}</button>}
-          {event.status === "draft" && <button className={institutionAction} disabled={mutation.busy} onClick={() => transition("published")}>{t.publish}</button>}
-          {event.canComplete &&
-            <button className={eventSecondary} disabled={mutation.busy} onClick={() => transition("completed")}>{t.complete}</button>}
-          {["draft","published"].includes(event.status) && <button className={eventSecondary} onClick={() => setConfirmation(!confirmation)}
-            aria-expanded={confirmation}>{t.cancel}</button>}
-          {confirmation && <button className={institutionAction} disabled={mutation.busy} onClick={() => transition("canceled")}>{t.cancel}?</button>}
-        </div>}
+        <dl className="grid gap-3 rounded-lg bg-[var(--theme-control)] px-3 py-3 sm:grid-cols-2 sm:px-4 xl:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
+          <div className="min-w-0">
+            <dt className="text-xs font-semibold text-[var(--theme-body)]">{t.starts} / {t.ends}</dt>
+            <dd className="mt-1 text-sm font-semibold"><EventDate value={event.startsAt} end={event.endsAt} timeZone={event.timeZone} /></dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="text-xs font-semibold text-[var(--theme-body)]">{t.format}</dt>
+            <dd className="mt-1 text-sm font-semibold">{t[event.format]}
+              {(event.locality || event.country) && <bdi className="wrap-anywhere">{' · ' + [event.locality, event.country].filter(Boolean).join(", ")}</bdi>}
+            </dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="text-xs font-semibold text-[var(--theme-body)]">{t.organizer}</dt>
+            <dd className="mt-1 flex flex-wrap items-center gap-1.5 text-sm">
+              {event.organizer.handle ? <Link className={institutionLink + " wrap-anywhere"}
+                href={(event.organizer.kind === "organization" ? "/organization/" : "/members/") + event.organizer.handle}>
+                <bdi>{event.organizer.name}</bdi>
+              </Link> : <bdi className="wrap-anywhere">{event.organizer.name}</bdi>}
+              <EventOrganizerBadges organizer={event.organizer} />
+            </dd>
+          </div>
+          <div className="min-w-0">
+            <dt className="text-xs font-semibold text-[var(--theme-body)]">{t.participation}</dt>
+            <dd className="mt-1 text-sm font-semibold">{t.audience[event.visibility]}</dd>
+          </div>
+        </dl>
       </div>
+      {event.canManage && (!["canceled", "completed"].includes(event.status) || event.canComplete) &&
+        <div className="grid gap-3 border-t border-[var(--theme-border)] px-4 py-3 sm:flex sm:items-center sm:justify-end sm:px-6">
+          {event.status === "draft" && <p className="me-auto max-w-prose text-sm text-[var(--theme-body)]">{t.draftHelp}</p>}
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+            {event.status === "draft" && <button className={institutionAction + " gap-2"} disabled={mutation.busy} onClick={() => transition("published")}>
+              {publishIcon}{t.publish}
+            </button>}
+            {!["canceled","completed"].includes(event.status) &&
+              <button className={eventSecondary} onClick={() => setEditing(!editing)} aria-expanded={editing}>{t.edit}</button>}
+            {event.canComplete &&
+              <button className={eventSecondary} disabled={mutation.busy} onClick={() => transition("completed")}>{t.complete}</button>}
+            {["draft","published"].includes(event.status) && <button className={eventSecondary} onClick={() => setConfirmation(!confirmation)}
+              aria-expanded={confirmation}>{t.cancel}</button>}
+            {confirmation && <button className={institutionAction} disabled={mutation.busy} onClick={() => transition("canceled")}>{t.cancel}?</button>}
+          </div>
+        </div>}
     </header>
     {mutation.error !== null && (mutation.error instanceof ApiRequestError && mutation.error.code === "EVENT_FULL"
       ? <p className={institutionCard} role="alert">{t.full}</p> : <ApiErrorNotice error={mutation.error} />)}
     {event.canManage && <MemberAppeals eventId={event.id} />}
     {editing && <EditEvent event={event} done={(changed) => { setEvent(changed); setEditing(false); }} />}
-    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,22rem)]">
       <div className="grid min-w-0 gap-4">
         <section className={institutionCard + " grid gap-4"}>
           <h2 className="text-xl font-bold">{t.description}</h2>
-          <p dir="auto" lang={event.language} className="whitespace-pre-wrap break-words">{event.description}</p>
+          <p dir="auto" lang={event.language} className="max-w-[72ch] whitespace-pre-wrap wrap-anywhere leading-relaxed text-[var(--theme-body)]">{event.description}</p>
           {event.projectId && <Link className={institutionLink} href={"/projects/" + event.projectId}>{t.project}</Link>}
           {event.venue && <p className="break-words">{event.venue}</p>}
           {event.meetingUrl && <a className={institutionLink} href={event.meetingUrl} target="_blank" rel="noreferrer">{t.meeting}</a>}
@@ -147,8 +186,12 @@ export function EventDetail({ initial, signedIn }: { initial: CommunityEvent; si
         </section>}
         {event.counts && <section className={institutionCard + " grid gap-3"}>
           <h2 className="text-xl font-bold">{t.participants}</h2>
-          <dl className="grid gap-1">{eventResponses.map((response) => <div className="flex justify-between gap-3" key={response}>
-            <dt>{t[response]}</dt><dd>{event.counts?.[response]}</dd></div>)}</dl>
+          <dl className="grid grid-cols-3 gap-2 rounded-lg bg-[var(--theme-control)] p-2 text-center">
+            {eventResponses.map((response) => <div className="flex min-w-0 flex-col-reverse gap-0.5 py-1" key={response}>
+              <dt className="wrap-anywhere text-xs text-[var(--theme-body)]">{t[response]}</dt>
+              <dd className="text-base font-semibold tabular-nums">{event.counts?.[response]}</dd>
+            </div>)}
+          </dl>
           <button type="button" className={eventSecondary} aria-expanded={participants} onClick={() => setParticipants(!participants)}>{t.participants}</button>
           {participants && <ParticipantList id={event.id} />}
         </section>}

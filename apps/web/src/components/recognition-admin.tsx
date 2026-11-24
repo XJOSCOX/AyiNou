@@ -10,7 +10,9 @@ import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { AdminFeedback } from "./admin-workspace";
-import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
+import { AdminMemberBadges } from "./admin-account-avatar";
+import { adminActionPanel, adminCompactCard, adminDangerAction, adminSecondaryAction } from "./admin-controls";
 import { RecognitionMark } from "./recognition-mark";
 import { VerificationSettings } from "./verification-settings";
 
@@ -31,10 +33,14 @@ export function RecognitionAdmin({ workspaceId, section }: { workspaceId: string
   const [selection, select] = useState<Selection | null>(null);
   const catalog = section === "recognitionBadges";
   const badges = new Map(result.data?.badges.map((badge) => [badge.id, badge]));
+  const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const dateTime = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+  const command = selection && <RecognitionCommand key={JSON.stringify(selection)} selection={selection} workspaceId={workspaceId}
+    cancel={() => select(null)} done={() => { select(null); result.refresh(); }} />;
   return <>
     {catalog && <VerificationSettings section="recognitionBadges" workspaceId={workspaceId} />}
-    <section className={institutionCard}>
-      <h2 className="text-xl font-semibold">{catalog ? t.copy.decorative : t.sections[section]}</h2>
+    <section className={catalog ? institutionCard : `${adminCompactCard} grid gap-3`}>
+      <h2 className={catalog ? "text-xl font-semibold" : "border-b border-[var(--theme-border)] pb-2.5 text-lg font-semibold"}>{catalog ? t.copy.decorative : t.sections[section]}</h2>
       {result.error ? <AdminFeedback error={result.error} retry={result.refresh} /> : !result.data ? <p role="status">{authMessages[locale].working}</p> : <>
         {catalog ? <>
           <button className={`${institutionAction} mt-3`} onClick={() => select({ action: "create" })}>{t.copy.create}</button>
@@ -44,42 +50,55 @@ export function RecognitionAdmin({ workspaceId, section }: { workspaceId: string
                 <RecognitionMark badge={badge} /> <span>{badge.archived ? t.copy.archived : t.copy.active}</span>
               </div>
               <div className="flex flex-wrap gap-4">
-                <button className={institutionLink} onClick={() => select({ action: "edit", badge })}>{t.copy.edit}</button>
+                <button type="button" className={adminSecondaryAction} onClick={() => select({ action: "edit", badge })}>{t.copy.edit}</button>
                 {badge.archived
-                  ? <button className={institutionLink} onClick={() => select({ action: "reactivate", badge })}>{t.copy.reactivate}</button>
+                  ? <button type="button" className={adminSecondaryAction} onClick={() => select({ action: "reactivate", badge })}>{t.copy.reactivate}</button>
                   : <>
-                    <button className={institutionLink} disabled={!badge.awardsEnabled} onClick={() => select({ action: "award", badge })}>{t.copy.award}</button>
-                    <button className={institutionLink} onClick={() => select({ action: "archive", badge })}>{t.copy.archive}</button>
+                    <button type="button" className={adminSecondaryAction} disabled={!badge.awardsEnabled} onClick={() => select({ action: "award", badge })}>{t.copy.award}</button>
+                    <button type="button" className={adminDangerAction} onClick={() => select({ action: "archive", badge })}>{t.copy.archive}</button>
                   </>}
               </div>
             </li>)}
           </ul>
-        </> : <>
-          <h3 className="mt-4 font-semibold">{t.copy.awards}</h3>
-          {!result.data.awards.length && <p>{t.copy.empty}</p>}
-          <ul className="divide-y divide-[var(--theme-border)]">
-            {result.data.awards.map((award) => <li key={award.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-              <span>{badges.get(award.badgeId)?.name[locale] ?? award.badgeId}</span>
-              {award.username && <span>@{award.username}</span>}
-              <time dateTime={award.awardedAt}>{new Date(award.awardedAt).toLocaleDateString(locale)}</time>
-              {award.revokedAt ? <span>{t.actions.revoke}</span> :
-                <button className={institutionLink} onClick={() => select({ action: "revoke", award })}>{t.copy.revoke}</button>}
-            </li>)}
-          </ul>
-          <h3 className="mt-4 font-semibold">{t.copy.changes}</h3>
-          {!result.data.history.length && <p>{t.copy.empty}</p>}
-          <ol className="divide-y divide-[var(--theme-border)]">
-            {result.data.history.map((event) => <li key={JSON.stringify(event)} className="grid gap-1 py-2 text-sm">
-              <p>{t.actions[event.action as keyof typeof t.actions]} · {badges.get(event.badgeId)?.name[locale] ?? event.badgeId}
-                {event.actor && ` · @${event.actor}`} · <time dateTime={event.at}>{new Date(event.at).toLocaleString(locale)}</time></p>
-              <p className="break-words">{event.reason}</p>
-            </li>)}
-          </ol>
-        </>}
+        </> : <div className="grid min-w-0 items-start gap-3 xl:grid-cols-2">
+          <section className="grid min-w-0 gap-2 rounded-lg border border-[var(--theme-border)] p-3">
+            <h3 className="font-semibold">{t.copy.awards}</h3>
+            {result.data.awards.length ? <ul className="divide-y divide-[var(--theme-border)]">
+              {result.data.awards.map((award) => {
+                const badge = badges.get(award.badgeId);
+                const expanded = selection?.action === "revoke" && selection.award.id === award.id;
+                return <li key={award.id} className="grid min-w-0 gap-2 py-2.5 text-sm">
+                  <div className="flex flex-wrap items-center justify-between gap-2.5">
+                    <div className="grid min-w-0 gap-1">
+                      {badge ? <RecognitionMark badge={badge} /> : <span className="break-all font-semibold">{award.badgeId}</span>}
+                      <p className="break-words text-xs text-[var(--theme-body)]">
+                        {award.username && <>@{award.username} <AdminMemberBadges username={award.username} /> · </>}<time dateTime={award.awardedAt}>{date.format(new Date(award.awardedAt))}</time>
+                      </p>
+                    </div>
+                    {award.revokedAt ? <time className="rounded-md bg-[var(--theme-control)] px-2 py-1 text-xs font-medium" dateTime={award.revokedAt}>
+                      {t.actions.revoke} · {date.format(new Date(award.revokedAt))}
+                    </time> : <button type="button" className={adminDangerAction} aria-expanded={expanded}
+                      onClick={() => select({ action: "revoke", award })}>{t.copy.revoke}</button>}
+                  </div>
+                  {expanded && command}
+                </li>;
+              })}
+            </ul> : <p className="text-sm text-[var(--theme-body)]">{t.copy.empty}</p>}
+          </section>
+          <section className="grid min-w-0 gap-2 rounded-lg border border-[var(--theme-border)] p-3">
+            <h3 className="font-semibold">{t.copy.changes}</h3>
+            {result.data.history.length ? <ol className="divide-y divide-[var(--theme-border)]">
+              {result.data.history.map((event) => <li key={JSON.stringify(event)} className="grid min-w-0 gap-1 py-2.5 text-sm">
+                <p className="break-words font-semibold">{t.actions[event.action as keyof typeof t.actions] ?? event.action} · {badges.get(event.badgeId)?.name[locale] ?? event.badgeId}</p>
+                <p className="break-words text-xs text-[var(--theme-body)]">{event.actor && <>@{event.actor} <AdminMemberBadges username={event.actor} /> · </>}<time dateTime={event.at}>{dateTime.format(new Date(event.at))}</time></p>
+                <p className="whitespace-pre-wrap break-words">{event.reason}</p>
+              </li>)}
+            </ol> : <p className="text-sm text-[var(--theme-body)]">{t.copy.empty}</p>}
+          </section>
+        </div>}
       </>}
     </section>
-    {selection && <RecognitionCommand key={JSON.stringify(selection)} selection={selection} workspaceId={workspaceId}
-      cancel={() => select(null)} done={() => { select(null); result.refresh(); }} />}
+    {catalog && command}
   </>;
 }
 
@@ -125,7 +144,7 @@ function RecognitionCommand({ selection, workspaceId, cancel, done }: {
   return <section className={institutionCard} aria-labelledby="recognition-command">
     <h2 id="recognition-command" ref={focus} tabIndex={-1} className="text-xl font-semibold">{t.actions[selection.action]}
       {badge && ` · ${badge.name[locale]}`}</h2>
-    <form onSubmit={submit} className="mt-4 grid gap-4">
+    <form onSubmit={submit} className={`${adminActionPanel} mt-4 gap-4`}>
       {metadata && <>
         <div className="grid gap-4 md:grid-cols-2">
           {locales.map((language) => <fieldset key={language} className="grid gap-2">
@@ -155,8 +174,8 @@ function RecognitionCommand({ selection, workspaceId, cancel, done }: {
         value={reason} onChange={(event) => setReason(event.target.value)} /></label>
       {error != null && (apiErrorCode(error) === "POLICY_PAUSED" ? <p role="alert">{t.copy.paused}</p> : <AdminFeedback error={error} />)}
       <div className="flex flex-wrap gap-4">
-        <button className={institutionAction} disabled={busy}>{t.copy.save}</button>
-        <button type="button" className={institutionLink} onClick={cancel} disabled={busy}>{accountMessages[locale].cancel}</button>
+        <button className={selection.action === "archive" || selection.action === "revoke" ? adminDangerAction : institutionAction} disabled={busy}>{t.copy.save}</button>
+        <button type="button" className={adminSecondaryAction} onClick={cancel} disabled={busy}>{accountMessages[locale].cancel}</button>
       </div>
     </form>
   </section>;

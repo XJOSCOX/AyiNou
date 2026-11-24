@@ -1,19 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { FeedPost } from "@ayinou/shared";
 import { postBodyLimit } from "@ayinou/shared";
 import { loadInstitutionAccounts } from "@/lib/institution-api";
 import { useFeedMutation } from "@/lib/feed-state";
 import { feedMessages } from "@/lib/feed-i18n";
 import { useLocale } from "@/lib/locale-store";
-import { publishSocialPost, setInteraction } from "@/lib/social-api";
+import { canPublishAsOrganization, publishedProjectId, publishSocialPost, setInteraction } from "@/lib/social-api";
 import { socialMessages } from "@/lib/social-i18n";
 import { EventPostPreview } from "./events";
 import { ApiErrorNotice } from "./api-error-notice";
-import { FeedIcon, feedIconButton } from "./feed-actions";
-import { institutionAction, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { FeedIcon, feedIconButton, feedToolbarButton } from "./feed-actions";
+import { institutionAction, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "./institution-ui";
 import { MentionSuggestions } from "./social-text";
 
 export function usePostBookmark(post: FeedPost, onChange?: () => void) {
@@ -24,6 +24,18 @@ export function usePostBookmark(post: FeedPost, onChange?: () => void) {
     if (await mutation.run(() => setInteraction(post.id, "bookmark", !value))) { setSaved(!value); onChange?.(); }
   }
   return { value, toggle, error: mutation.error, busy: mutation.busy };
+}
+
+export function OrganizationPostBadges({ post }: { post: FeedPost }) {
+  const [locale] = useLocale();
+  const t = socialMessages[locale];
+  if (!post.social?.organization) return null;
+  return <>
+    {post.social.organization.verified && <VerifiedCheck label={t.verifiedOrganization} />}
+    {post.social.announcement && <span className="rounded-md bg-[var(--theme-selected)] px-2 py-1 text-xs font-semibold text-[var(--theme-link)]">
+      {t.announcement}
+    </span>}
+  </>;
 }
 
 export function QuotePreview({ post }: { post: FeedPost }) {
@@ -39,7 +51,9 @@ export function QuotePreview({ post }: { post: FeedPost }) {
   </aside>;
 }
 
-export function SocialPostControls({ post, bookmark, onChange }: { post: FeedPost; bookmark?: ReturnType<typeof usePostBookmark>; onChange?: () => void }) {
+export function SocialPostControls({ post, bookmark, onChange, leading, trailing }: {
+  post: FeedPost; leading?: ReactNode; trailing?: ReactNode; bookmark?: ReturnType<typeof usePostBookmark>; onChange?: () => void;
+}) {
   const [locale] = useLocale();
   const t = socialMessages[locale];
   const ownBookmark = usePostBookmark(post, onChange);
@@ -49,27 +63,31 @@ export function SocialPostControls({ post, bookmark, onChange }: { post: FeedPos
   const [reposted, setReposted] = useState<boolean | null>(null);
   const [quote, setQuote] = useState(false);
   const [copied, setCopied] = useState(false);
-  if (!social && !post.unavailable) return null;
+  if (!social && !post.unavailable) return leading || trailing
+    ? <div className="flex flex-wrap items-center gap-1">{leading}{trailing}</div> : null;
   const active = reposted ?? social?.reposted ?? false;
   const count = Math.max(0, (social?.repostCount ?? 0) + Number(active) - Number(social?.reposted ?? false));
-  return <div className="mt-3 grid gap-2">
-    <div className="flex flex-wrap items-center gap-2">
-      {(social?.shareable || social?.reposted) && <button type="button" className={feedIconButton}
+  const buttonClass = leading ? feedToolbarButton : feedIconButton;
+  return <div className={leading ? "grid gap-2" : "mt-3 grid gap-2"}>
+    <div className="flex flex-wrap items-start gap-1">
+      {leading}
+      {(social?.shareable || social?.reposted) && <button type="button" className={buttonClass}
         aria-label={active ? t.undoRepost : t.repost} title={active ? t.undoRepost : t.repost} aria-pressed={active}
         disabled={mutation.busy} onClick={() => { void mutation.run(async () => {
           await setInteraction(post.id, "repost", !active); setReposted(!active);
         }); }}><FeedIcon name="repost" /></button>}
-      {!!count && <span className="text-xs" aria-label={t.reposts}>{new Intl.NumberFormat(locale).format(count)}</span>}
-      {social?.quotable && <button type="button" className={feedIconButton} aria-label={t.quote} title={t.quote} aria-expanded={quote}
+      {!!count && <span className="self-center text-xs" aria-label={t.reposts}>{new Intl.NumberFormat(locale).format(count)}</span>}
+      {social?.quotable && <button type="button" className={buttonClass} aria-label={t.quote} title={t.quote} aria-expanded={quote}
         onClick={() => setQuote(!quote)}><FeedIcon name="quote" /></button>}
-      <button type="button" className={feedIconButton} aria-label={save.value ? t.removeBookmark : t.bookmark}
+      <button type="button" className={buttonClass} aria-label={save.value ? t.removeBookmark : t.bookmark}
         title={save.value ? t.removeBookmark : t.bookmark} aria-pressed={save.value} disabled={save.busy}
         onClick={() => { void save.toggle(); }}><FeedIcon name="bookmark" /></button>
-      {post.visibility === "public" && post.status === "published" && <button type="button" className={feedIconButton}
+      {post.visibility === "public" && post.status === "published" && <button type="button" className={buttonClass}
         aria-label={t.share} title={t.share} onClick={() => { void mutation.run(async () => {
           await navigator.clipboard.writeText(new URL(`/posts/${post.id}`, window.location.origin).href); setCopied(true);
         }); }}><FeedIcon name="share" /></button>}
-      {copied && <span role="status" className="text-sm">{t.copied}</span>}
+      {copied && <span role="status" className="self-center text-sm">{t.copied}</span>}
+      {trailing && <div className="ms-auto min-w-0 self-center">{trailing}</div>}
     </div>
     {save.error !== null && <ApiErrorNotice error={save.error} />}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
@@ -91,7 +109,7 @@ export function SocialComposer({ source, onPublished, onCancel }: {
   const labels = socialMessages[locale];
   const [announcement, setAnnouncement] = useState(false);
   const [project, setProject] = useState("");
-  const projectId = project.trim().match(/(?:^|\/projects\/)([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})\/?$/i)?.[1];
+  const projectId = publishedProjectId(project);
   const invalidProject = Boolean(project.trim() && !projectId);
   const allowed = Boolean(body.trim()) && Array.from(body).length <= postBodyLimit && !mutation.busy && !invalidProject;
   async function submit(event: FormEvent) {
@@ -133,7 +151,7 @@ export function OrganizationPublisher({ onPublished, handle, sourceId }: { onPub
   const [expanded, setExpanded] = useState(false);
   const [selected, setSelected] = useState("");
   const accounts = useInstitutionResource(loadInstitutionAccounts);
-  const eligible = accounts.data?.organizations.filter((account) => (!handle || handle === account.handle) && ["owner", "administrator", "editor"].includes(account.role));
+  const eligible = accounts.data?.organizations.filter((account) => (!handle || handle === account.handle) && canPublishAsOrganization(account.role));
   if (!eligible?.length) return null;
   const current = eligible.find(({ handle }) => handle === selected) ?? eligible[0];
   return <div className="mt-3 grid gap-2">

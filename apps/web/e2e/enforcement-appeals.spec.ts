@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { EnforcementAppeal, MemberEnforcementAppeals, StaffEnforcementAppeals } from "@ayinou/shared";
+import { accountEnforcementMessages } from "../src/lib/account-enforcement-i18n";
+import { authMessages } from "../src/lib/auth-i18n";
 import { enforcementAppealMessages } from "../src/lib/enforcement-appeal-i18n";
 import { api, apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, localClient, login, sql, test, totp, type Member } from "./fixtures";
 
@@ -82,6 +84,29 @@ test("M2.4 independent appeals preserve decision authority and unrelated sanctio
     const details: MemberEnforcementAppeals = await request(suspended, memberPath, 200);
     expect(details.decisions).toMatchObject([{ id: account.reference, canAppeal: true, kind: "suspended" }]);
     expect(JSON.stringify(details)).not.toContain(decisionText);
+    await inEnglish(context);
+    await login(page, suspended);
+    await expect(page).toHaveURL(/\/account-access$/);
+    const copy = accountEnforcementMessages.en;
+    const appeals = enforcementAppealMessages.en;
+    const notices = page.getByRole("region", { name: copy.noticesTitle, exact: true });
+    await expect(notices.getByText(copy.memberReasonCategory, { exact: true })).toBeVisible();
+    await expect(notices.getByText(copy.safety, { exact: true })).toBeVisible();
+    const expiry = notices.getByText(copy.ends, { exact: true }).locator("..").locator("time");
+    await expect(expiry).toBeVisible();
+    const expiredAt = sql(`select expires_at from private.m22_account_sanctions where id='${account.reference}';`);
+    expect(Date.parse((await expiry.getAttribute("datetime"))!)).toBe(Date.parse(expiredAt));
+    await expect(page.getByRole("main").getByText(decisionText, { exact: false })).toHaveCount(0);
+    await notices.getByRole("link", { name: copy.appealOptions }).click();
+    await expect(page).toHaveURL(/#account-appeals$/);
+    const appealRegion = page.getByRole("region", { name: appeals.title });
+    await expect(appealRegion.getByText(appeals.deadline, { exact: true })).toBeVisible();
+    await appealRegion.locator("summary").filter({ hasText: appeals.appealForm }).click();
+    await expect(appealRegion.getByRole("textbox", { name: appeals.reason })).toBeVisible();
+    await expect(appealRegion.getByRole("button", { name: appeals.submit })).toBeEnabled();
+    await page.getByRole("button", { name: authMessages.en.logout, exact: true }).click();
+    await expect(page).toHaveURL(/\/login$/);
+
     const input = newAppeal("account", account.reference);
     const same = await Promise.all([request(suspended, memberPath, 200, "POST", input), request(suspended, memberPath, 200, "POST", input)]);
     expect(same[0]).toEqual(same[1]);

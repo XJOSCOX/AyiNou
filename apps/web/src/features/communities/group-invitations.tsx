@@ -1,4 +1,5 @@
 import { GroupMore } from "./group-controls";
+import { CommunityLoading, communityEmpty, communityGrid, communitySection, communitySectionMessage } from "@/components/community-card";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { institutionLink, institutionCard, institutionAction } from "@/components/institution-ui";
 import { MemberShell } from "@/components/member-shell";
@@ -12,11 +13,7 @@ import Link from "next/link";
 import { useState, useCallback } from "react";
 
 export function GroupInbox() {
-  const [locale] = useLocale();
-  return <MemberShell><div className="grid gap-4">
-    <Link className={institutionLink} href="/communities">← {communityDirectoryMessages[locale].title}</Link>
-    <GroupInvitationList standalone />
-  </div></MemberShell>;
+  return <MemberShell><GroupInvitationList standalone /></MemberShell>;
 }
 
 export function GroupInvitationList({ standalone = false, onRespond }: { standalone?: boolean; onRespond?(): void }) {
@@ -31,13 +28,17 @@ export function GroupInvitationList({ standalone = false, onRespond }: { standal
   }, []);
   const resource = useCursorPage(load, revision);
   const entries = resource.error === null ? resource.page?.rows.filter(({ id }) => !handled.includes(id)) : null;
-  return <section className="grid gap-4" aria-label={t.invitations}>
-    {standalone ? <PageHeader title={t.invitations} /> : <h2 className="text-xl font-semibold">{t.invitations}</h2>}
+  return <section className={standalone ? "grid gap-4" : communitySection} aria-label={t.invitations}>
+    {standalone ? <PageHeader title={t.invitations} actions={
+      <Link href="/communities" className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-offset-2">
+        <span aria-hidden="true">←</span>{communityDirectoryMessages[locale].title}
+      </Link>
+    } /> : <h2 className="text-base font-semibold">{t.invitations}</h2>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
-    {!resource.page && resource.error === null && <p role="status">{communityDirectoryMessages[locale].loading}</p>}
+    {!resource.page && resource.error === null && <CommunityLoading single={!standalone} />}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
-    {entries?.length === 0 && <p>{t.noInvites}</p>}
-    <ul className="grid gap-3">
+    {entries?.length === 0 && <p className={standalone ? communityEmpty : communitySectionMessage}>{t.noInvites}</p>}
+    {!!entries?.length && <ul className={standalone ? communityGrid : "grid min-w-0 gap-3"}>
       {entries?.map((invite) => <li key={invite.id} className={`${institutionCard} grid gap-2`}>
         <p className="text-sm text-[var(--theme-link)]">{t[invite.purpose]}</p>
         <h2 dir="auto" className="break-words text-xl font-semibold">{invite.name}</h2>
@@ -53,7 +54,7 @@ export function GroupInvitationList({ standalone = false, onRespond }: { standal
           {invite.purpose === "ownership" && <Link href="/mfa?next=%2Fcommunities%2Finvitations" className={institutionLink}>{t.manageMfa}</Link>}
         </div>
       </li>)}
-    </ul>
+    </ul>}
     <GroupMore resource={resource} />
   </section>;
 }

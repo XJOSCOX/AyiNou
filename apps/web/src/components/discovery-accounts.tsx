@@ -17,6 +17,7 @@ import { reconcileFollow } from "@/lib/follow-state";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
+import { FeedAvatar, OrganizationAvatar } from "./feed-avatar";
 import { FounderVerifiedMark } from "./founder-verified-badge";
 import { InstitutionStatus, PersonalClaimChecks, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 
@@ -55,18 +56,21 @@ function FollowControl({ target, following, requestPending, requiresApproval, pr
 
 type FollowChange = (account: DiscoveryCard, state: FollowStatus) => void;
 
-export function DiscoveryAccounts({ rows, compact, onChange, onRemove }: {
+export function DiscoveryAccounts({ rows, compact, directory, onChange, onRemove }: {
   rows: DiscoveryCard[];
   compact?: boolean;
+  directory?: boolean;
   onChange?: FollowChange;
   onRemove?: (account: DiscoveryCard) => void;
 }) {
-  return <ul className={compact ? "divide-y divide-[var(--theme-border)]" : "grid min-w-0 gap-3 md:grid-cols-2"}>
-    {rows.map((account) => <DiscoveryAccount key={account.id} account={account} compact={compact} onChange={onChange} onRemove={onRemove} />)}
+  const layout = directory ? "grid min-w-0 grid-cols-[repeat(auto-fill,minmax(min(100%,21rem),1fr))] gap-3"
+    : compact ? "divide-y divide-[var(--theme-border)]" : "grid min-w-0 gap-3 md:grid-cols-2";
+  return <ul className={layout}>
+    {rows.map((account) => <DiscoveryAccount key={account.id} account={account} compact={compact} directory={directory} onChange={onChange} onRemove={onRemove} />)}
   </ul>;
 }
 
-function DiscoveryAccount({ account, compact, onChange, onRemove }: { account: DiscoveryCard; compact?: boolean; onChange?: FollowChange; onRemove?: (account: DiscoveryCard) => void }) {
+function DiscoveryAccount({ account, compact, directory, onChange, onRemove }: { account: DiscoveryCard; compact?: boolean; directory?: boolean; onChange?: FollowChange; onRemove?: (account: DiscoveryCard) => void }) {
   const [locale] = useLocale();
   const [updated, setUpdated] = useState<FollowStatus | null>(null);
   const followState = updated ?? account;
@@ -79,25 +83,30 @@ function DiscoveryAccount({ account, compact, onChange, onRemove }: { account: D
     ? new Intl.DisplayNames([locale], { type: "region" }).of(account.countryCode)
     : null;
 
-  return <li className={compact ? "min-w-0 py-3" : institutionCard}>
-    <div className="flex flex-wrap items-start justify-between gap-2">
-      {account.kind === "member" && account.avatarUrl && <Image src={account.avatarUrl} width={40} height={40} alt="" unoptimized className="size-10 shrink-0 rounded-full object-cover" />}
-      <div className="min-w-0 flex-1">
-        <Link className={`${institutionLink} break-words`} href={href}>{account.name}</Link>
+  return <li className={directory ? institutionCard + " flex flex-col !p-4" : compact ? "min-w-0 py-3" : institutionCard}>
+    <div className={directory ? "flex min-w-0 flex-wrap items-center gap-3" : "flex flex-wrap items-start justify-between gap-2"}>
+      {directory && (account.kind === "institution"
+        ? <OrganizationAvatar key={account.handle} handle={account.handle} name={account.name} />
+        : <FeedAvatar name={account.name} url={account.avatarUrl} />)}
+      {!directory && account.kind === "member" && account.avatarUrl && <Image src={account.avatarUrl} width={40} height={40} alt="" unoptimized className="size-10 shrink-0 rounded-full object-cover" />}
+      <div className={compact && account.kind === "institution" ? "min-w-0 basis-full" : "min-w-0 flex-1"}>
+        <Link className={directory ? "break-words font-semibold text-[var(--theme-text)] hover:underline" : `${institutionLink} break-words`} href={href}>{account.name}</Link>
         {account.kind === "member" && !!account.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={account.personalClaims} /></>}
         {account.kind === "member" && account.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
         <p className="break-all text-xs text-[var(--theme-body)]">@{account.handle}</p>
       </div>
-      {account.kind === "institution" && <InstitutionStatus status={account.verificationStatus} kind={account.category} />}
+      {!directory && account.kind === "institution" && <InstitutionStatus status={account.verificationStatus} kind={account.category} />}
     </div>
     {account.kind === "institution" && <>
+      {directory && <div className="mt-3"><InstitutionStatus status={account.verificationStatus} kind={account.category} /></div>}
       <p className="mt-2 break-words text-sm text-[var(--theme-body)]">{[labels[account.category], country, account.departmentCode].filter(Boolean).join(" · ")}</p>
       {!compact && account.description && <p className="mt-2 whitespace-pre-line break-words text-sm">{account.description}</p>}
     </>}
-    {(account.kind !== "member" || (!account.self && (updated?.canFollow ?? account.canFollow) !== false)) && <div className="mt-3">
+    {(account.kind !== "member" || (!account.self && (updated?.canFollow ?? account.canFollow) !== false)) && <div className={directory ? "mt-auto flex justify-end pt-3" : "mt-3"}>
       <FollowControl target={target} following={followState.following}
         requestPending={account.kind === "member" ? updated?.requestPending ?? account.requestPending : undefined}
         requiresApproval={account.kind === "member" ? updated?.requiresApproval ?? account.requiresApproval : undefined}
+        primary={directory}
         onChange={(status) => {
         setUpdated(status);
         onChange?.(account, status);
@@ -179,7 +188,7 @@ function FollowRepostPreferences({ target: { kind, key } }: { target: FollowTarg
   </div>;
 }
 
-export function FollowAccountList({ target, list, allowRemoval = false }: { target: FollowTarget | null; list: FollowList; allowRemoval?: boolean }) {
+export function FollowAccountList({ target, list, allowRemoval = false, directory }: { target: FollowTarget | null; list: FollowList; allowRemoval?: boolean; directory?: boolean }) {
   const kind = target?.kind;
   const key = target?.key;
   const loader = useCallback(async (cursor: string | null, signal: AbortSignal) => {
@@ -189,12 +198,13 @@ export function FollowAccountList({ target, list, allowRemoval = false }: { targ
   const [locale] = useLocale();
   const t = discoveryMessages[locale];
   return <DiscoveryResults load={loader} empty={list === "followers" ? t.emptyFollowers : t.emptyFollowing}
-    removeUnfollowed={target === null} allowRemoval={allowRemoval} />;
+    removeUnfollowed={target === null} allowRemoval={allowRemoval} directory={directory} />;
 }
 
-export function DiscoveryResults({ load, empty, removeUnfollowed = false, allowRemoval = false }: {
+export function DiscoveryResults({ load, empty, removeUnfollowed = false, allowRemoval = false, directory }: {
   load: (cursor: string | null, signal: AbortSignal) => Promise<{ rows: DiscoveryCard[]; nextCursor: string | null }>;
   empty: string;
+  directory?: boolean;
   removeUnfollowed?: boolean;
   allowRemoval?: boolean;
 }) {
@@ -209,7 +219,7 @@ export function DiscoveryResults({ load, empty, removeUnfollowed = false, allowR
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
     {!resource.page && resource.error === null && <p role="status">{t.working}</p>}
     {!unavailable && resource.page && <>
-      {visible.length ? <DiscoveryAccounts rows={visible}
+      {visible.length ? <DiscoveryAccounts rows={visible} directory={directory}
         onRemove={allowRemoval ? (account) => setRemoved((current) => new Set([...current, account.id])) : undefined}
         onChange={(account, state) => {
         if (removeUnfollowed && !state.following) setRemoved((current) => new Set([...current, account.id]));

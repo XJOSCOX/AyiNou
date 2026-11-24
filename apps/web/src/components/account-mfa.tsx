@@ -88,7 +88,7 @@ export function AccountMfa() {
   }
 
   return (
-    <div className="mt-5 border-t border-[var(--theme-border)] pt-5">
+    <div className="mt-4 border-t border-[var(--theme-border)] pt-4 lg:border-s lg:border-t-0 lg:ps-5 lg:pt-0">
       <h3 className="font-semibold">{t.authenticator}</h3>
       {!factors && (failed
         ? <p role="alert" className="mt-2 text-sm text-[var(--theme-error-text)]">{t.mfaUnavailable}</p>

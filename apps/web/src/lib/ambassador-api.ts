@@ -1,4 +1,4 @@
-import type { AmbassadorAdminAction, AmbassadorAdminPage, AmbassadorCase, AmbassadorCategory, PublicAmbassador } from "@ayinou/shared";
+import type { AmbassadorAdminAction, AmbassadorAdminPage, AmbassadorCase, AmbassadorCategory, AmbassadorMemberCase, PublicAmbassador } from "@ayinou/shared";
 import { publicRequest } from "./api";
 import { authorizedSocialRequest } from "./feed-api";
 
@@ -12,7 +12,7 @@ export function loadAmbassadors(signedIn: boolean, q: string, category: string, 
   return (signedIn ? authorizedSocialRequest : publicRequest)(`/api/v1/ambassadors?${query}`, { signal });
 }
 
-export const loadMyAmbassadorCases = (signal: AbortSignal): Promise<{ cases: AmbassadorCase[] }> =>
+export const loadMyAmbassadorCases = (signal: AbortSignal): Promise<{ cases: AmbassadorMemberCase[] }> =>
   authorizedSocialRequest(mine, { signal });
 
 type MemberAction = { action: "accept" | "decline" | "withdraw" } |
@@ -26,5 +26,5 @@ export function loadAmbassadorAdmin(handle: string, cursor: string | null, signa
 }
 export const proposeAmbassador = (username: string, category: AmbassadorCategory, reason: string): Promise<{ id: string }> =>
   authorizedSocialRequest(admin, json("POST", { username, category, reason }));
-export const decideAmbassador = ({ id, version }: AmbassadorCase, action: AmbassadorAdminAction, reason: string): Promise<void> =>
-  authorizedSocialRequest(`${admin}/${id}`, json("PATCH", { version, action, reason }));
+export const decideAmbassador = ({ id, version }: AmbassadorCase, action: AmbassadorAdminAction, reason: string, invitationMessage?: string): Promise<void> =>
+  authorizedSocialRequest(`${admin}/${id}`, json("PATCH", { version, action, reason, invitationMessage }));

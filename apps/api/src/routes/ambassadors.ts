@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { ambassadorAdminActions, ambassadorCategories, type AmbassadorAdminPage, type AmbassadorCase, type PublicAmbassador } from "@ayinou/shared";
+import { ambassadorAdminActions, ambassadorCategories, type AmbassadorAdminPage, type AmbassadorMemberCase, type PublicAmbassador } from "@ayinou/shared";
 import { z } from "zod";
 import type { FeedRepository } from "../services/feed.js";
 import type { ReadBudget } from "../services/read-budget.js";
@@ -55,7 +55,7 @@ export function registerAmbassadorRoutes(app: FastifyInstance, { viewer, repo, r
   app.get(mine, async (request) => {
     const { token, actor } = await viewer(request, true);
     await read("profile", actor, request.ip);
-    return { cases: await repo().rpc<AmbassadorCase[]>(token, "ambassador_own_for_client") };
+    return { cases: await repo().rpc<AmbassadorMemberCase[]>(token, "ambassador_own_for_client") };
   });
   app.patch(mine + "/:id", { bodyLimit: 6_000 }, async (request, reply) => {
     const { token } = await viewer(request, true);
@@ -88,10 +88,15 @@ export function registerAmbassadorRoutes(app: FastifyInstance, { viewer, repo, r
   });
   app.patch(administration + "/:id", { bodyLimit: 6_000 }, async (request, reply) => {
     const { token } = await viewer(request, true);
-    const input = z.strictObject({ version, action: z.enum(ambassadorAdminActions), reason }).parse(request.body);
-    await repo().rpc(token, "ambassador_admin_action_for_client", {
-      p_id: id.parse(request.params).id, p_version: input.version, p_action: input.action, p_reason: input.reason,
-    });
+    const input = z.strictObject({
+      version, action: z.enum(ambassadorAdminActions), reason, invitationMessage: reason.optional(),
+    }).refine((payload) => payload.invitationMessage === undefined || payload.action === "invite").parse(request.body);
+    const params = { p_id: id.parse(request.params).id, p_version: input.version, p_reason: input.reason };
+    if (input.invitationMessage !== undefined) {
+      await repo().rpc(token, "ambassador_send_invitation_for_client", { ...params, p_message: input.invitationMessage });
+    } else {
+      await repo().rpc(token, "ambassador_admin_action_for_client", { ...params, p_action: input.action });
+    }
     return reply.code(204).send();
   });
 }

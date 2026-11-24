@@ -63,3 +63,17 @@ Migration `20261123125400_explicit_profile_publication` was applied with separat
 The redesigned page uses a larger avatar, an integrated identity and follow header, and separate activity and About sections. Verification details and member safety actions open on demand. The owner sees a direct link to the profile editor. Displayed details, follower lists, and activity still use the existing server disclosure rules.
 
 Member totals count active relationships even when a follower’s profile is hidden. The list still shows only eligible profiles. Blocks, approval requirements, and count disclosure settings still apply. The profile uses the available content width and retains the original header design. Migration `20261123125500_member_follow_totals` was applied to hosted AyiNou with separate authorization. The postflight found zero pending migrations. Both the public API and the hosted-backed app returned one follower for test02.
+
+## Institutions hub
+
+My institutions shows compact organization rows with the profile logo, verification, role, type, location, available website and description, and separate workspace and public profile actions. Invitations and membership history sit in a right column on wide screens and stack on narrow screens. The Following tab uses a shareable URL and the current member’s existing paginated following list. Institution cursor keys precede member keys, so the tab requests one extra row to tell whether another institution page exists. Existing follow authorization, write behavior, and visibility rules still apply. No API, database, or organization record changes are required.
+
+The hosted-backed local browser showed test02’s followed institution after refresh and verified the management row and history placement. The disposable regression covers organization-only pagination, the empty view, unfollowing, and management-row details.
+
+## Profile editor layout
+
+The editor shows one section at a time and remembers the section in the URL fragment. Edits stay in the form while switching sections. The compact public preview shows current verification badges, saved publication status, and a link to the published member page. The editor still previews drafts locally and keeps the existing save, upload, publication, and account-privacy rules. The local browser confirmed test02’s Founder Verified badge, published profile link, and Location anchor. The layout uses the existing text in all four languages.
+
+## Account settings layout
+
+Account security remains the default view and displays authentication and session controls beside a compact list of profile and account links. The navigation opens separate views for social privacy, notification preferences, member safety, and referrals. Existing notification, safety, and follow-request fragments open their corresponding view. Private member codes load when the member opens Referrals. All existing authentication, authorization, and saving behavior stays in the underlying panels.

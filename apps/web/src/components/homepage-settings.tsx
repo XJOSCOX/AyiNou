@@ -6,12 +6,13 @@ import { apiErrorCode } from "@/lib/api-errors";
 import { adminMessages } from "@/lib/admin-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AdminFeedback } from "./admin-workspace";
-import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionField, useInstitutionResource } from "./institution-ui";
+import { adminActionPanel, adminCompactCard, adminDisclosure } from "./admin-controls";
 
 type Setting = { enabled: boolean; revision: number; updatedAt: string };
 const homepagePath = "/api/v1/admin/homepage/community-statistics";
 
-export function HomepageSettings({ workspaceId, path = homepagePath, title, help }: { workspaceId: string; path?: string; title?: string; help?: string }) {
+export function HomepageSettings({ workspaceId, path = homepagePath, title }: { workspaceId: string; path?: string; title?: string }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
   const heading = useId();
@@ -21,24 +22,45 @@ export function HomepageSettings({ workspaceId, path = homepagePath, title, help
   const [receipt, setReceipt] = useState<Setting | null>(null);
   const current = resource.data && receipt && receipt.revision > resource.data.revision ? receipt : resource.data;
 
-  return <section className={institutionCard} aria-labelledby={heading}>
-    <h2 id={heading} className="text-xl font-semibold">{title ?? t.homepageStatistics}</h2>
-    {(help || !title) && <p className="mt-1 max-w-prose text-sm text-[var(--theme-body)]">{help ?? t.homepageStatisticsHelp}</p>}
-    {resource.error ? <div className="mt-3"><AdminFeedback error={resource.error} retry={resource.refresh} /></div>
-      : !current ? <p role="status" className="mt-3">{t.homepageLoading}</p>
-      : <>
-        <p className="mt-4 font-semibold" role="status">
-          {current.enabled ? t.homepageSavedOn : t.homepageSavedOff}
-          {receipt?.revision === current.revision && <span className="ms-2 text-sm font-normal">{t.homepageSaved}</span>}
-        </p>
-        <HomepageSettingForm key={current.revision} current={current} workspaceId={workspaceId} path={path} refresh={resource.refresh}
-          onSave={(saved) => { setReceipt(saved); resource.refresh(); }} />
-      </>}
+  const form = resource.error ? <AdminFeedback error={resource.error} retry={resource.refresh} />
+    : !current ? <p role="status" className="text-sm">{t.homepageLoading}</p>
+    : <HomepageSettingForm key={current.revision} current={current} workspaceId={workspaceId} path={path} refresh={resource.refresh}
+      wide={!title} onSave={(saved) => { setReceipt(saved); resource.refresh(); }} />;
+  const saved = current && !resource.error && receipt?.revision === current.revision;
+  const status = current && !resource.error && <span className={`rounded-md px-2 py-1 text-xs font-semibold ${current.enabled ? "bg-[var(--theme-selected)] text-[var(--theme-link)]" : "bg-[var(--theme-control)] text-[var(--theme-body)]"}`}>
+    {title ? (current.enabled ? t.homepageOn : t.homepageOff) : (current.enabled ? t.homepageSavedOn : t.homepageSavedOff)}
+  </span>;
+
+  if (title) return <details className="rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+    <summary className={adminDisclosure}>
+      <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2 break-words">
+        {title}
+        {status}
+      </span>
+    </summary>
+    <div className="grid gap-2 border-t border-[var(--theme-border)] p-3">
+      {form}
+      {saved && <p className="text-sm" role="status">{t.homepageSaved}</p>}
+    </div>
+  </details>;
+
+  return <section className={`${adminCompactCard} grid gap-3`} aria-labelledby={heading}>
+    <header className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--theme-border)] pb-3">
+      <div>
+        <h2 id={heading} className="text-lg font-semibold">{t.homepageStatistics}</h2>
+        <p className="mt-1 max-w-prose text-sm text-[var(--theme-body)]">{t.homepageStatisticsHelp}</p>
+      </div>
+      <div className="flex flex-wrap items-center gap-2" role="status">
+        {status}
+        {saved && <span className="text-sm">{t.homepageSaved}</span>}
+      </div>
+    </header>
+    {form}
   </section>;
 }
 
-function HomepageSettingForm({ current, workspaceId, path, onSave, refresh }: {
-  current: Setting; workspaceId: string; path: string; onSave: (setting: Setting) => void; refresh: () => void;
+function HomepageSettingForm({ current, workspaceId, path, wide, onSave, refresh }: {
+  current: Setting; workspaceId: string; path: string; wide: boolean; onSave: (setting: Setting) => void; refresh: () => void;
 }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
@@ -74,13 +96,14 @@ function HomepageSettingForm({ current, workspaceId, path, onSave, refresh }: {
     }
   }
 
-  return <form className="mt-4 grid max-w-lg gap-4" onSubmit={save} aria-busy={busy}>
-    <fieldset disabled={busy || stale}>
+  const option = "flex min-h-10 min-w-0 items-center gap-2 rounded-md border border-[var(--theme-border)] bg-[var(--theme-surface)] px-3 py-2 text-sm has-[:checked]:border-[var(--theme-link)] has-[:checked]:bg-[var(--theme-selected)]";
+  return <form className={`${adminActionPanel} ${wide ? "max-w-4xl sm:grid-cols-[minmax(10rem,1fr)_minmax(0,2fr)]" : ""}`} onSubmit={save} aria-busy={busy}>
+    <fieldset className="min-w-0" disabled={busy || stale}>
       <legend className="text-sm font-semibold">{t.homepageVisibility}</legend>
-      <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
-        <label className="flex min-h-10 items-center gap-2"><input name={field} type="radio" checked={enabled}
+      <div className="mt-1.5 grid grid-cols-2 gap-2">
+        <label className={option}><input name={field} type="radio" className="accent-[var(--theme-primary)]" checked={enabled}
           onChange={() => setEnabled(true)} />{t.homepageOn}</label>
-        <label className="flex min-h-10 items-center gap-2"><input name={field} type="radio" checked={!enabled}
+        <label className={option}><input name={field} type="radio" className="accent-[var(--theme-primary)]" checked={!enabled}
           onChange={() => setEnabled(false)} />{t.homepageOff}</label>
       </div>
     </fieldset>
@@ -91,9 +114,9 @@ function HomepageSettingForm({ current, workspaceId, path, onSave, refresh }: {
         rows={3} required minLength={minimumReasonLength} maxLength={500} disabled={busy || stale} />
       <p id={field + "-help"} className="mt-1 text-sm text-[var(--theme-body)]">{t.homepageReasonHelp}</p>
     </div>
-    {error !== null && <AdminFeedback error={error} />}
-    <button className={`${institutionAction} justify-self-start`} disabled={!canSave}>
-      {t.homepageSave}
-    </button>
+    <div className="col-span-full grid gap-2">
+      {error !== null && <AdminFeedback error={error} />}
+      <button className={`${institutionAction} justify-self-start`} disabled={!canSave}>{t.homepageSave}</button>
+    </div>
   </form>;
 }

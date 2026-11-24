@@ -108,6 +108,7 @@ test("R2.3 enforces individual onboarding and profile privacy, preserves data an
     await solveMfa(page, secret);
     await openAdministration(page);
     const t = adminMessages.en;
+    await page.getByRole("button", { name: t.navigationSettings, exact: true }).click();
     const settings = page.getByRole("region", { name: t.navigationSettings });
     await settings.getByRole("button", { name: t.memberExperience.title, exact: true }).click();
     const publicOption = page.getByRole("checkbox", { name: t.memberExperience.flags.publicProfiles });

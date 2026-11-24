@@ -43,7 +43,7 @@ export function Operation({ work, refresh, action, input, children, label, field
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} retry={refresh} signIn />}
     {apiErrorCode(mutation.error) === "MFA_REQUIRED" &&
       <Link className={institutionLink} href={"/mfa?next=/projects/" + work.projectId + "/work"}>{t.authenticator}</Link>}
-    <button className={institutionAction} disabled={mutation.busy}>{mutation.busy ? authMessages[locale].working : label ?? t.events[action]}</button>
+    <button className={institutionAction + " justify-self-start"} disabled={mutation.busy}>{mutation.busy ? authMessages[locale].working : label ?? t.events[action]}</button>
   </form>;
 }
 

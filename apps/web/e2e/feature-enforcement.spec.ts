@@ -212,6 +212,7 @@ test("M2.3 enforces authority, scope and duration on live writes @smoke", async 
     expect(suite.subjects).toEqual([expect.objectContaining({ id: subject.id, username: subject.handle })]);
     await inEnglish(context);
     await login(page, subject);
+    await expect(page).toHaveURL(/\/dashboard/);
     await page.goto("/account-access");
     const languages = page.getByRole("combobox").last();
     for (const locale of ["en", "ht", "fr", "es"] as const) {

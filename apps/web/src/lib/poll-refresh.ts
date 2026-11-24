@@ -3,7 +3,10 @@ type Snapshot = {
   opensAt: string;
   closesAt: string;
   serverNow?: number;
+  results?: unknown;
 };
+
+const resultsRefreshInterval = 15_000;
 
 export function pollRefreshDelay(poll: Snapshot, elapsed: number, wallTime: number) {
   const at = poll.status === "scheduled" ? poll.opensAt : poll.status === "open" ? poll.closesAt : null;
@@ -17,7 +20,7 @@ export function pollRefreshDelay(poll: Snapshot, elapsed: number, wallTime: numb
 
 export function watchPoll<T extends Snapshot>(options: {
   load(signal: AbortSignal): Promise<T>;
-  publish(poll: T): void;
+  publish(poll: T, sampledAt: number): void;
   fail(error: unknown): void;
   visible(): boolean;
   monotonic(): number;
@@ -47,8 +50,8 @@ export function watchPoll<T extends Snapshot>(options: {
       pending = null;
       poll = next;
       sampledAt = start;
-      options.publish(next);
-      scheduleBoundary();
+      options.publish(next, sampledAt);
+      scheduleRefresh();
     }).catch((error: unknown) => {
       if (controller.signal.aborted) return;
       pending = null;
@@ -57,10 +60,12 @@ export function watchPoll<T extends Snapshot>(options: {
     });
   }
 
-  function scheduleBoundary() {
+  function scheduleRefresh() {
     clearTimer();
     if (!poll || !options.visible()) return;
-    const delay = pollRefreshDelay(poll, options.monotonic() - sampledAt, options.wallTime());
+    const boundaryDelay = pollRefreshDelay(poll, options.monotonic() - sampledAt, options.wallTime());
+    const refreshLiveResults = poll.status === "open" && poll.results != null;
+    const delay = refreshLiveResults ? Math.min(boundaryDelay ?? Infinity, resultsRefreshInterval) : boundaryDelay;
     if (delay !== null) cancelTimer = options.schedule(() => refresh(), delay);
   }
 

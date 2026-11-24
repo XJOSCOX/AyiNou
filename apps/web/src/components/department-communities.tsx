@@ -19,8 +19,8 @@ import { DiscoveryAccounts } from "./discovery-accounts";
 import { PostCard } from "./feed-screen";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
-import { PageHeader } from "./page-header";
-import { CommunityCard, CommunitySummary, MembershipControl } from "./community-card";
+import { DiscoverSearchInput } from "./discover-search";
+import { CommunityCard, CommunityLoading, CommunitySummary, MembershipControl, communityEmpty, communityGrid, communitySearchBar, communitySection, communitySectionMessage } from "./community-card";
 import { MyGroupActivities, RecommendedCommunities } from "./community-discovery";
 import { PostComposer } from "./post-composer";
 import { GroupManagement, GroupsDirectory, ReadOnlyGroupPost } from "./groups";
@@ -50,21 +50,31 @@ export function DepartmentDirectory() {
     .map((community) => changed[community.id] ?? community)
     .filter((community) => (!membershipsOnly || community.joined) &&
       [community.name, community.departmentCode ?? "", community.slug].some((part) => normalize(part).includes(needle)));
-  const searchControl = <label className="block text-sm font-semibold">{category === "official" ? t.search : category === "mine" ? groups.searchCommunities : groups.searchGroups}
-    <input type="search" className={institutionField} value={query} onChange={(event) => setQuery(event.target.value)} maxLength={80} />
-  </label>;
+  const searchLabel = category === "official" ? t.search : category === "mine" ? groups.searchCommunities : groups.searchGroups;
+  const searchControl = <DiscoverSearchInput label={searchLabel} placeholder={searchLabel} value={query}
+    onChange={(event) => setQuery(event.target.value)} maxLength={80} />;
   return <MemberShell><div className="grid min-w-0 gap-4">
-    <PageHeader title={t.title} description={groups.intro} actions={<>
-      <Link href="/communities/new" className={institutionAction}>{groups.newGroup}</Link>
-      <Link href="/communities/invitations" className={institutionLink}>{groups.invitations}</Link>
-    </>} />
-    <div className="rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-2">
-      <div className="flex flex-wrap gap-2" role="group" aria-label={t.title}>
+    <section aria-labelledby="communities-heading" className="min-w-0 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+      <header className="flex flex-wrap items-center justify-between gap-4 px-4 py-5 sm:px-6">
+        <div className="min-w-0">
+          <h1 id="communities-heading" className="text-3xl font-bold tracking-tight">{t.title}</h1>
+          <p className="mt-1 text-sm text-[var(--theme-body)]">{groups.intro}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/communities/new" className={institutionAction + " gap-2"}>
+            <span aria-hidden="true" className="text-lg leading-none">+</span>{groups.newGroup}
+          </Link>
+          <Link href="/communities/invitations" className="inline-flex min-h-10 items-center rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
+            {groups.invitations}
+          </Link>
+        </div>
+      </header>
+      <div className="flex flex-wrap gap-1 border-t border-[var(--theme-border)] px-2 py-2 sm:px-3" role="group" aria-label={t.title}>
         {(["recommended", "official", "diaspora", "interest", "mine"] as const).map((value) => <button key={value} type="button" aria-pressed={category === value}
-          className="min-h-10 rounded-md px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]"
+          className="min-h-11 rounded-md px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]"
           onClick={() => setCategory(value)}>{value === "recommended" ? discovery.recommended : value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
       </div>
-    </div>
+    </section>
     {category === "recommended" && <RecommendedCommunities search={search} searchControl={searchControl} onMembership={(next) =>
       setChanged((items) => ({ ...items, [next.id]: next }))} explore={(next) => {
       setQuery("");
@@ -73,19 +83,23 @@ export function DepartmentDirectory() {
       setCategory("interest");
     }} />}
     {(category === "official" || membershipsOnly) && <>
-    <div className="w-full max-w-xl">{searchControl}</div>
-    {membershipsOnly && <h2 className="text-xl font-semibold">{discovery.departmentsJoined}</h2>}
-    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
-    {!rooms && resource.error === null && <p role="status">{t.loading}</p>}
-    {rooms?.length === 0 && <p role="status">{membershipsOnly && !needle ? t.emptyMine : t.noMatches}</p>}
-    {!!rooms?.length && <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))] gap-3">
-      {rooms.map((community) => <CommunityCard key={community.id} community={community}
-        update={(next) => { if (next) setChanged((items) => ({ ...items, [next.id]: next })); }} />)}
-    </ul>}
+      <div className={communitySearchBar}>{searchControl}</div>
+      <div className={membershipsOnly ? "grid min-w-0 content-start items-start gap-4 lg:grid-cols-2" : "min-w-0"}>
+        <section className={membershipsOnly ? communitySection : "grid min-w-0 gap-2"} aria-label={membershipsOnly ? discovery.departmentsJoined : groups.officialDepartments}>
+          {membershipsOnly && <h2 className="text-base font-semibold">{discovery.departmentsJoined}</h2>}
+          {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
+          {!rooms && resource.error === null && <CommunityLoading single={membershipsOnly} />}
+          {rooms?.length === 0 && <p role="status" className={membershipsOnly ? communitySectionMessage : communityEmpty}>{membershipsOnly && !needle ? t.emptyMine : t.noMatches}</p>}
+          {!!rooms?.length && <ul className={membershipsOnly ? "grid min-w-0 gap-3" : communityGrid}>
+            {rooms.map((community) => <CommunityCard key={community.id} community={community}
+              update={(next) => { if (next) setChanged((items) => ({ ...items, [next.id]: next })); }} />)}
+          </ul>}
+        </section>
+        {membershipsOnly && <MyGroupActivities search={search} />}
+      </div>
     </>}
     {(category === "diaspora" || category === "interest") && <GroupsDirectory key={`${category}:${topic}`} search={search} searchControl={searchControl}
       kind={category} initialTopic={category === "interest" ? topic : ""} />}
-    {membershipsOnly && <MyGroupActivities search={search} />}
   </div></MemberShell>;
 }
 

@@ -50,7 +50,7 @@ begin
   project:=public.project_create_for_client(gen_random_uuid(),'individual',null,null,proposal);
   other:=public.project_create_for_client(gen_random_uuid(),'individual',null,null,proposal||'{"title":"Separate work proposal"}');
   -- Proposal review is covered by the Phase 6A regression. Only the approved state is seeded here.
-  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now()
+  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now()
     where id in (project,other);
   perform public.project_operation_for_client(project,'execution_status','{"status":"active","version":0}');
   perform public.project_operation_for_client(other,'execution_status','{"status":"active","version":0}');
@@ -225,7 +225,7 @@ begin
   org:=public.institution_save_for_api(owner,null,jsonb_build_object('handle','progress-'||left(replace(owner::text,'-',''),8),
     'name','Synthetic progress institution','kind','nonprofit','countryCode','HT'));
   org_project:=public.project_create_for_client(gen_random_uuid(),'organization',org,null,proposal);
-  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now() where id=org_project;
+  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now() where id=org_project;
   insert into private.verification_applications(applicant_id,organization_id,kind,status,decided_at)
     values(owner,org,'organization','approved',now());
   update private.organizations set verification_status='verified' where id=org;
@@ -241,7 +241,7 @@ begin
   insert into feed_data.community_memberships(community_id,user_id) values(room,owner);
   insert into feed_data.community_staff(community_id,user_id,role) values(room,owner,'administrator');
   community_project:=public.project_create_for_client(gen_random_uuid(),'community',room,null,proposal);
-  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now() where id=community_project;
+  update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now() where id=community_project;
   perform public.project_operation_for_client(community_project,'execution_status','{"status":"active","version":0}');
   perform public.project_milestone_for_client(community_project,'milestone_create',milestone_fields||jsonb_build_object('key',gen_random_uuid()));
   delete from feed_data.community_staff where community_id=room and user_id=owner;

@@ -1,5 +1,9 @@
 {
+  "directoryHelp": "Jwenn evènman k ap vini yo, suiv repons ou yo oswa jere evènman w ap òganize yo.",
+  "createHelp": "Chwazi dat, kote ak moun ki ka wè evènman an. Anrejistre yon bouyon pandan w ap prepare detay yo.",
+  "draftHelp": "Se sèlman òganizatè yo ki ka wè bouyon sa a. Pibliye li lè li pare pou patisipan yo.",
   "events": "Evènman",
+  "back": "Retounen",
   "create": "Kreye yon evènman",
   "upcoming": "K ap vini",
   "following": "Moun mwen swiv",
@@ -25,6 +29,17 @@
   "individual": "Kont pèsonèl",
   "community": "Kominote",
   "visibility": "Vizibilite",
+  "participation": "Kiyès ki ka patisipe",
+  "memberAudience": "Manm AyiNou",
+  "communityAudience": "Manm kominote ki lye a",
+  "audience": {
+    "public": "Tout moun ka wè l. Konekte pou konfime patisipasyon w.",
+    "members": "Nenpòt manm AyiNou ki konekte ka konfime patisipasyon l.",
+    "community": "Manm kominote ki lye a ka konfime patisipasyon yo kèlkeswa kote yo ye."
+  },
+  "relatedCommunity": "Kominote ki lye",
+  "noCommunity": "Pa gen kominote ki lye",
+  "relatedCommunityHelp": "Lè evènman an pibliye, manm kominote a ka jwenn li nan Kominote mwen yo.",
   "public": "Piblik",
   "members": "Pou manm sèlman",
   "timeZone": "Zòn lè evènman an",

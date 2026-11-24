@@ -1,6 +1,7 @@
 import { type Controls, useProgressText, Change, value, nullable } from "./progress-controls";
 import { institutionField, institutionLink } from "@/components/institution-ui";
 import { type ProjectMetric, type ProjectProgress } from "@ayinou/shared";
+import { ProjectDisclosure } from "@/components/project-ui";
 
 function MeasureForm({ metric, ...controls }: Controls & { metric?: ProjectMetric }) {
   const { t } = useProgressText();
@@ -19,7 +20,7 @@ export function Metrics({ data, ...controls }: Controls & { data: ProjectProgres
   const editable = data.canManage && data.status === "active";
   return <section className="grid gap-3">
     <h3 className="font-semibold">{t.selfReported}</h3>
-    {editable && <details><summary className={institutionLink}>{t.actions.metric_create}</summary><MeasureForm {...controls} /></details>}
+    {editable && <ProjectDisclosure title={t.actions.metric_create}><MeasureForm {...controls} /></ProjectDisclosure>}
     {!data.metrics.length && <p>{t.empty}</p>}
     <ul className="grid gap-3 lg:grid-cols-2">{data.metrics.map((metric) => <li key={metric.id} className="min-w-0 grid gap-2 rounded-md border border-[var(--theme-border)] p-3">
       <h4 className="font-semibold break-words">{metric.name}</h4>
@@ -29,9 +30,9 @@ export function Metrics({ data, ...controls }: Controls & { data: ProjectProgres
         {item.explanation && <p className="text-sm whitespace-pre-line">{item.explanation}</p>}
         {item.reference && <a href={item.reference} className={institutionLink + " break-all"} target="_blank" rel="noreferrer">{item.reference}</a>}
       </div>)}
-      {editable && !metric.observations.length && <details><summary className={institutionLink}>{t.actions.metric_edit}</summary>
-        <MeasureForm {...controls} metric={metric} /></details>}
-      {editable && <details><summary className={institutionLink}>{t.actions.metric_observe}</summary>
+      {editable && !metric.observations.length && <ProjectDisclosure title={t.actions.metric_edit}>
+        <MeasureForm {...controls} metric={metric} /></ProjectDisclosure>}
+      {editable && <ProjectDisclosure title={t.actions.metric_observe}>
         <Change {...controls} section="metrics" action="metric_observe" data={{ id: metric.id }} read={(form) => ({
           startsOn: value(form, "startsOn"), endsOn: value(form, "endsOn"), actual: Number(value(form, "actual")),
           explanation: value(form, "explanation"), reference: nullable(form, "reference"),
@@ -44,7 +45,7 @@ export function Metrics({ data, ...controls }: Controls & { data: ProjectProgres
           <label>{t.explanation}<textarea className={institutionField} name="explanation" minLength={3} maxLength={800} required rows={3} /></label>
           <label>{t.reference}<input className={institutionField} name="reference" type="url" maxLength={300} /></label>
         </Change>
-      </details>}
+      </ProjectDisclosure>}
     </li>)}</ul>
   </section>;
 }

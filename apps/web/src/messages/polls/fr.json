@@ -1,5 +1,7 @@
 {
   "title": "Sondages",
+  "opensIn": "Le vote ouvre dans",
+  "closesIn": "Le vote se termine dans",
   "mine": "Mes sondages",
   "create": "Créer un sondage",
   "rules": "Les sondages Ayinou éclairent les échanges et les décisions de projet. Chaque compte admissible dispose d’un vote privé.",
@@ -81,7 +83,7 @@
   },
   "resultPolicies": {
     "after_close": "Après la clôture officielle",
-    "after_vote": "Après votre vote ou la clôture officielle"
+    "after_vote": "Pendant le vote et après la clôture officielle"
   },
   "states": {
     "draft": "Brouillon",

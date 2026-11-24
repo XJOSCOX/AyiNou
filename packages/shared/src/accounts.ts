@@ -127,7 +127,9 @@ export type AdminAccountAction =
 export interface AdminAuditEvent {
   id: string;
   actorId: string | null;
+  actor?: import("./audit").AuditPerson;
   subjectId: string | null;
+  affectedMember?: import("./audit").AuditPerson;
   organizationId: string | null;
   event: string;
   role: PlatformRole | null;

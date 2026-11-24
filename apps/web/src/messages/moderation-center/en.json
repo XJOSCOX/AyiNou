@@ -24,6 +24,8 @@
   "indefinite": "Indefinite",
   "actor": "Actor",
   "accountHistory": "Account history",
+  "historyByAccount": "History by account",
+  "historyOther": "History for content and other records",
   "feedTool": "Feed moderation",
   "eventTool": "Event reports",
   "projectTool": "Project review",

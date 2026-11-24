@@ -1,6 +1,91 @@
 {
   "features": [
     {
+      "id": "founder-verified-individual-proposals",
+      "report": "docs/identity/FOUNDER_VERIFIED_PROJECTS_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "PATCH /api/v1/projects/:id/publication",
+          "contract": "PATCH /api/v1/projects/:id/publication 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The versioned publish or unpublish change and its revision-bound event commit together."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/founder-identity.spec.ts",
+            "denialScenario": "An ordinary administrator without owner authority cannot publish; a revision awaiting review cannot publish."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123135000_founder_verified_individual_proposals.sql",
+          "rlsAndGrants": "The proposal and identity helpers are private. Existing RPC grants and table RLS apply to the updated projections and commands.",
+          "authorization": "Current Founder Verified or the recognized Founder with an active account and verified authenticator may satisfy identity for their own individual proposal. Independent proposal review, owner scope, publication consent and protected project operations keep their existing gates. Independent identity upgrades require two eligible reviewers.",
+          "compatibility": "Stored proposals and verification evidence remain intact. Existing Founder-direct decisions are classified using their audit events. RPC paths are unchanged and the new workspace fields are additive.",
+          "validation": "Disposable founder lifecycle coverage exercises submission and approval, loss of publication on revocation, organization denial, protected execution and independent request eligibility. Personal verification tests exercise duplicate and concurrent intake.",
+          "rolloutAndRollback": "Apply the exact migration only after hosted preflight. Use a forward correction for eligibility rules and retain request, proposal and decision history."
+        },
+        {
+          "file": "supabase/migrations/20261123136000_founder_verified_identity_parity.sql",
+          "rlsAndGrants": "The shared identity helpers are private and existing RPC grants and RLS apply. The Discover projection exposes public badge eligibility only when disclosures and audience checks allow.",
+          "authorization": "A current Founder Verified grant satisfies the same identity prerequisite as independent verification. Role, scope, MFA, consent, evidence, assignments and conflict gates continue to apply.",
+          "compatibility": "Existing records, badge styles, grants, scopes, RPC signatures and reviewer provenance remain compatible.",
+          "validation": "Disposable founder, project, verification and governance scenarios exercise live gold, holds, revocation and the separate action-level permission checks.",
+          "rolloutAndRollback": "Verify the exact migration and target after preflight. A forward correction can narrow the shared eligibility function without modifying identity, project or governance history."
+        },
+        {
+          "file": "supabase/migrations/20261123137000_founder_own_project_review.sql",
+          "rlsAndGrants": "The owner predicate is private, the audit flag stays on the RLS-protected event ledger, and the existing authenticated review RPC grants are preserved.",
+          "authorization": "Requires active trusted Founder provenance, administrator eligibility, recent TOTP, and a proposal individually owned, created and submitted by the Founder. Assignment requires a named independent reviewer. Direct approval rechecks submission authority, identity eligibility and version. The proposal conflict predicate is unchanged.",
+          "compatibility": "The existing audit events retain their previous meanings and default to ordinary review. The queue adds a bounded Founder-owned group and an additive flag. Report and unrelated moderation scope are unchanged.",
+          "validation": "Disposable browser and API checks cover named independent assignment, stale approval, denial of implicit or explicit self-assignment, denial of approval by an unassigned administrator or verified ordinary owner, and separately flagged Founder audit events.",
+          "rolloutAndRollback": "Verify exact hosted history and apply this migration after local checks. Roll back behavior with a forward correction that restores the independent queue and decision predicates while retaining recorded audit events."
+        },
+        {
+          "file": "supabase/migrations/20261123138000_project_reapproval_and_publication.sql",
+          "rlsAndGrants": "Pending revision fields and publish events remain on existing RLS-protected tables. The publication RPC is authenticated and rechecks owner submit authority. Public queries use the canonical approved revision and explicit listing timestamp.",
+          "authorization": "Versioned edits and review use the existing scope checks. Publishing requires an unchanged approved revision and directory eligibility. Unpublishing is an owner action even when publication eligibility has since changed.",
+          "compatibility": "Previously approved publication choices are carried forward. New approvals and approved revisions are private until the owner publishes. Existing project work and its pinned operational revision remain available based on the canonical approved content.",
+          "validation": "Disposable workflow checks cover manual publication, unpublish, owner permission denial, private edits against public snapshots, the reviewer queue and reapproval.",
+          "rolloutAndRollback": "Apply the exact tested migration after hosted history checks. Roll back with a forward correction preserving canonical approvals, pending revisions and audit events."
+        },
+        {
+          "file": "supabase/migrations/20261124143000_project_owner_badges.sql",
+          "rlsAndGrants": "The existing private projection keeps its grants and all callers keep their project access checks.",
+          "authorization": "Project owner badges use the existing member identity, audience, block, and Founder disclosure checks.",
+          "compatibility": "Adds optional owner badge fields to project reads. The migration changes no stored records.",
+          "validation": "The disposable Founder Verified lifecycle exercises the approved project detail, directory listing, revocation, and publication.",
+          "rolloutAndRollback": "Verify the targeted hosted migration and project inventory. A forward correction can restore the previous projection while preserving all project data."
+        },
+        {
+          "file": "supabase/migrations/20261124144000_project_review_preview.sql",
+          "rlsAndGrants": "Authenticated callers can use the preview RPCs. The private guard and existing proposal and media tables retain their grants and RLS.",
+          "authorization": "The guard checks the submitted working copy, restrictions, reviewer scope, conflicts and recent MFA before returning proposal details or media. The Founder-owned queue uses its existing exception.",
+          "compatibility": "Only explicit review preview requests use the new reads. Existing published views, reviewer assignments, decisions and records retain their behavior.",
+          "validation": "The disposable project workflow covers read-only text and media, anonymous and conflicted denials, unpublished draft denial and canonical versus submitted revision reads.",
+          "rolloutAndRollback": "Apply the verified migration before enabling the preview UI. The schema adds only read functions, so a forward correction requires no proposal data repair."
+        },
+        {
+          "file": "supabase/migrations/20261124145000_project_approval_requires_preview.sql",
+          "rlsAndGrants": "The random signing key is stored in a private RLS-protected table without client grants. Both approval signatures require the same authenticated command checks.",
+          "authorization": "Approval requires preview proof bound to the authenticated actor, session, proposal and submitted version. Claiming, reviewing and assigning retain their existing scope and MFA checks.",
+          "compatibility": "The existing command signature still supports non-approval actions. Preview proof adds no personal data or preview history. Approval retains its existing versioned event.",
+          "validation": "Disposable regression covers missing, stale and forged proof and valid Founder and assigned-reviewer approval from preview.",
+          "rolloutAndRollback": "Release the matching API and migration together. Any forward correction should preserve proposal history and the signed-preview approval requirement."
+        },
+        {
+          "file": "supabase/migrations/20261124146000_project_management_publication_status.sql",
+          "rlsAndGrants": "The existing authenticated management RPC keeps its grants and protected project reads.",
+          "authorization": "The listing date uses the canonical proposal and existing public visibility predicate. Management still requires the existing owner or operator checks.",
+          "compatibility": "The existing publication date field now reflects live directory visibility when a private working revision exists. No writes, decisions or records change.",
+          "validation": "Disposable workflow checks cover private approval, publishing, making private, and a public version with a pending revision.",
+          "rolloutAndRollback": "Verify the hosted inventory and the matching migration. A forward change can adjust the read projection without modifying any stored data."
+        }
+      ]
+    },
+    {
       "id": "m24-independent-appeals",
       "report": "docs/moderation/M2_4_IMPLEMENTATION_REPORT.md",
       "routes": [
@@ -2107,6 +2192,71 @@
       ]
     },
     {
+      "id": "ambassador-invitation-details",
+      "report": "docs/AMBASSADOR_INVITATION_DETAILS_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/ambassadors",
+          "contract": "GET /api/v1/me/ambassadors - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Recipient-only read uses the existing private case and audit history without recording a duplicate event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/ambassador-invitation.spec.ts",
+            "denialScenario": "An unrelated member receives no invitation or message."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/ambassadors/:id",
+          "contract": "PATCH /api/v1/admin/ambassadors/:id 6000 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The same transaction records the existing invite event with the private decision rationale."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/ambassador-invitation.spec.ts",
+            "denialScenario": "A regular member cannot send an invitation or attach a message."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124151000_ambassador_invitation_details.sql",
+          "rlsAndGrants": "Keeps case data private. Only authenticated clients may call the admin send RPC, which requires an authorized admin with recent MFA.",
+          "authorization": "The existing transition authorizes the admin send. The member projection returns messages only for their own sent invitations.",
+          "compatibility": "An optional case field and additive recipient response preserve existing invitations and API callers.",
+          "validation": "Disposable browser and API regression includes cross-member denial, history isolation, stale sends, and expiration.",
+          "rolloutAndRollback": "Apply only the authorized migration. On rollback restore the previous recipient projection and retain messages."
+        }
+      ]
+    },
+    {
+      "id": "poll-organizer-badges",
+      "report": "docs/POLLS_BALLOT_AND_ORGANIZER_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124149000_poll_organizer_badges.sql",
+          "rlsAndGrants": "Uses the existing authorized poll projections and preserves grants.",
+          "authorization": "Shows verified designations only for visible poll owners and applies existing member and organization disclosure rules.",
+          "compatibility": "Adds optional badge metadata without changing poll, ballot, or tally records.",
+          "validation": "Disposable browser tests check the organizer badge on the directory and detail views and exercise ballot visibility and countdown boundaries.",
+          "rolloutAndRollback": "Apply the tested projection migration. Restore the prior projection if a rollback is needed."
+        },
+        {
+          "file": "supabase/migrations/20261124150000_poll_results_during_voting.sql",
+          "rlsAndGrants": "Preserves existing poll and ballot grants and the authorized detail projection.",
+          "authorization": "Eligible viewers can see aggregates once the configured poll opens. Personal voting receipts and finalization-only results remain protected.",
+          "compatibility": "Retains the stored policy key and existing ballot and tally records.",
+          "validation": "Covers zero and nonzero aggregates before voting, refresh, personal receipt isolation, and sealed results.",
+          "rolloutAndRollback": "Apply the tested read projection. Restore the previous projection to restore after-ballot visibility."
+        }
+      ]
+    },
+    {
       "id": "f25-community-events-and-multilingual-feed",
       "report": "docs/F2_5_EVENTS_AND_FEED_IMPLEMENTATION_REPORT.md",
       "routes": [
@@ -2389,6 +2539,22 @@
           "compatibility": "Preserves existing Feed, organization, and member data and existing API callers.",
           "validation": "Clean disposable migrations plus browser/API access, concurrency, policy, and regression coverage.",
           "rolloutAndRollback": "Apply the exact tested migrations to the verified project. Turn features off through audited Founder controls without discarding history."
+        },
+        {
+          "file": "supabase/migrations/20261124147000_event_organizer_badges.sql",
+          "rlsAndGrants": "Preserves existing event and Feed grants and row visibility.",
+          "authorization": "Uses existing member identity disclosure and organization verification eligibility rules.",
+          "compatibility": "Adds optional organizer badge metadata to existing event and Feed preview payloads.",
+          "validation": "Disposable event browser and API tests cover organizer badges, event sharing and private event details.",
+          "rolloutAndRollback": "Apply the tested migration to the linked project. Restore the previous organizer helper if a rollback is needed."
+        },
+        {
+          "file": "supabase/migrations/20261124148000_event_audience_and_community.sql",
+          "rlsAndGrants": "Keeps existing RLS and function grants. The scope predicate still controls event and RSVP access.",
+          "authorization": "Only organizers with community membership may link an event. Community-only events require a link. Public and member audiences use their existing eligibility checks.",
+          "compatibility": "Preserves prior rows and adds a community display name to the existing authorized event projection.",
+          "validation": "Browser and API tests cover a public linked event, a members-only linked draft, and a community-only event.",
+          "rolloutAndRollback": "Deploy the additive read shape and compatible constraint. Any rollback must account for open events that now have a linked community."
         }
       ]
     }

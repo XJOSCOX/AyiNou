@@ -13,7 +13,7 @@ import { pollMessages } from "@/lib/poll-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
-import { PageHeader } from "./page-header";
+import { PollsHeader } from "./polls-header";
 import { ProjectIdentityNotice } from "./project-form";
 
 const text = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
@@ -28,10 +28,8 @@ function localInput(value?: string) {
 }
 
 export function NewPoll() {
-  const [locale] = useLocale();
-  const t = pollMessages[locale];
   return <MemberShell><section className="grid min-w-0 gap-4">
-    <PageHeader title={t.create} actions={<Link className={institutionLink} href="/polls">{t.title}</Link>} />
+    <PollsHeader area="new" />
     <div className={institutionCard}><PollForm /></div>
   </section></MemberShell>;
 }
@@ -85,7 +83,7 @@ export function PollForm({ detail, refresh }: { detail?: PollDetail; refresh?: (
   }
 
   return <form className="grid gap-4" onSubmit={submit}>
-    <p className="text-sm">{t.rules}</p>
+    {detail && <p className="text-sm text-[var(--theme-body)]">{t.rules}</p>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {!detail && resource.data && resource.data.identity !== "verified" && <div>
       <p className="text-sm">{t.verifiedHelp}</p>

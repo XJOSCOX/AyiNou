@@ -14,14 +14,14 @@ import { SocialText } from "./social-text";
 
 export const TranslationEnabled = createContext(false);
 
-export function FeedLanguageControl({ settings, onSave }: { settings: FeedLanguageSettings; onSave: (settings: FeedLanguageSettings) => void }) {
+export function FeedLanguageControl({ settings, onSave, views, actions }: { settings: FeedLanguageSettings; views?: ReactNode; actions?: ReactNode; onSave: (settings: FeedLanguageSettings) => void }) {
   const [locale] = useLocale();
   const t = feedLanguageMessages[locale];
   const mutation = useFeedMutation();
   const [draft,setDraft] = useState(settings.languages);
   const selected = new Set(draft);
-  if (!settings.enabled) return null;
-  return <FilterPanel summary={settings.languages.length
+  if (!settings.enabled) return <div className="flex flex-wrap items-center justify-between gap-2">{views}{actions}</div>;
+  return <FilterPanel leading={views} actions={actions} summary={settings.languages.length
     ? t.active + " " + settings.languages.map((language) => languageNames[language]).join(", ") : t.all}>
     <form className="grid gap-3" onSubmit={(event) => {
       event.preventDefault();

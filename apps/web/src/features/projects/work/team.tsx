@@ -1,6 +1,7 @@
 import { type WorkProps, useWorkMessages, Operation, field, actionsClass } from "./work-controls";
-import { institutionCard, institutionLink, institutionField } from "@/components/institution-ui";
+import { institutionField } from "@/components/institution-ui";
 import { projectTeamRoles } from "@ayinou/shared";
+import { ProjectDisclosure, ProjectSection } from "@/components/project-ui";
 
 export function Team(props: WorkProps) {
   const { work } = props;
@@ -10,15 +11,13 @@ export function Team(props: WorkProps) {
   const active = work.status === "active";
   const canRevoke = active || work.status === "paused";
   const roles = ownerScope ? projectTeamRoles : ["contributor", "volunteer"] as const;
-  return <section className={institutionCard}>
-    <h2 className="text-xl font-semibold">{t.team}</h2>
-    {canManage && active && <details className="mt-3">
-      <summary className={institutionLink}>{t.events.invite}</summary>
+  return <ProjectSection title={t.team}>
+    {canManage && active && <ProjectDisclosure title={t.events.invite}>
       <Operation {...props} action="invite" fields={(data) => ({ handle: field(data, "handle").toLowerCase(), role: field(data, "role") })}>
         <label>{t.username}<input className={institutionField} name="handle" required maxLength={24} autoCapitalize="none" /></label>
         <label>{t.role}<select className={institutionField} name="role">{roles.map((role) => <option key={role} value={role}>{t.roles[role]}</option>)}</select></label>
       </Operation>
-    </details>}
+    </ProjectDisclosure>}
     {!work.invites.length && !work.team.length && <p className="mt-2">{t.empty}</p>}
     <ul className="mt-3 grid gap-3">{work.invites.map((item) => <li className="border-t border-[var(--theme-border)] pt-3" key={item.id}>
       <p>{t.roles[item.role]}{item.recipient?.name && <> · {item.recipient.name}</>} · {new Date(item.expiresAt).toLocaleDateString(locale)}</p>
@@ -33,5 +32,5 @@ export function Team(props: WorkProps) {
       {!item.mine && canRevoke && canManage && (ownerScope || item.role === "contributor" || item.role === "volunteer") &&
         <Operation {...props} action="member_revoke" input={{ userId: item.person.id }} />}
     </li>)}</ul>
-  </section>;
+  </ProjectSection>;
 }

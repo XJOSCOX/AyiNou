@@ -5,8 +5,8 @@ import { Milestones } from "./milestones";
 import { useProgressText } from "./progress-controls";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { useInstitutionResource, institutionCard, institutionLink } from "@/components/institution-ui";
+import { ProjectLoading, ProjectSection } from "@/components/project-ui";
 import { apiErrorCode } from "@/lib/api-errors";
-import { authMessages } from "@/lib/auth-i18n";
 import { loadProgress } from "@/lib/project-progress-api";
 import { type ProjectProgress, type ProjectWork } from "@ayinou/shared";
 import { useCallback } from "react";
@@ -59,10 +59,9 @@ export function ProjectProgressWork({ work, tab, refreshWork }: { work: ProjectW
   const data = resource.data;
   const refresh = () => { resource.refresh(); refreshWork(); };
   const controls = { id, refresh };
-  return <section className={institutionCard + " grid gap-4"}>
-    <h2 className="text-xl font-semibold">{t[tab]}</h2>
+  return <ProjectSection title={t[tab]}>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={refresh} signIn />}
-    {!data && resource.error === null && <p role="status">{authMessages[locale].working}</p>}
+    {!data && resource.error === null && <ProjectLoading cards={1} className="grid" />}
     {data && <>
       {tab === "progress" && <>
         <StatusSummary data={data} />
@@ -81,5 +80,5 @@ export function ProjectProgressWork({ work, tab, refreshWork }: { work: ProjectW
         <Entries {...controls} data={data} reports />
       </>}
     </>}
-  </section>;
+  </ProjectSection>;
 }

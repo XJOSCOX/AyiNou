@@ -20,7 +20,7 @@
   "draftSaved": "Draft saved. Review the details before you submit.",
   "edit": "Edit saved details",
   "incomplete": "Add a name, handle, type, and country to finish this draft.",
-  "identity": "Independently reviewed personal identity is required to finish setup.",
+  "identity": "Verified personal identity is required to finish setup.",
   "authority": "I confirm that I’m authorized to set up this organization or request ownership on its behalf.",
   "duplicate": "That handle is unavailable. Choose another handle or review a public match.",
   "references": "Provide two or three public HTTPS references on distinct sites that support your authority. Use public sources and leave out private documents.",

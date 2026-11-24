@@ -13,7 +13,9 @@ import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { AdminFeedback } from "./admin-workspace";
-import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
+import { AdminMemberBadges } from "./admin-account-avatar";
+import { adminActionPanel, adminCompactCard, adminConfirmation, adminSecondaryAction } from "./admin-controls";
 
 const path = "/api/v1/admin/verification-policy";
 const sections = {
@@ -29,20 +31,21 @@ export function VerificationSettings({ section, workspaceId }: { section: keyof 
   const load = useCallback((signal: AbortSignal): Promise<SavedVerificationPolicy> =>
     authorizedRequest(path, { signal, headers: { "X-Ayinou-Workspace": workspaceId } }), [workspaceId]);
   const policy = useInstitutionResource(load);
+  const roles = section === "rolesAssignments";
   return <>
-    <section className={institutionCard}>
-      <h2 className="text-xl font-semibold">{t.sections[section]}</h2>
+    <section className={roles ? adminCompactCard : institutionCard}>
+      <h2 className={roles ? "border-b border-[var(--theme-border)] pb-2.5 text-lg font-semibold" : "text-xl font-semibold"}>{t.sections[section]}</h2>
       {section === "verificationSettings" && <p className="mt-2 text-sm">{t.copy.appealsHelp}</p>}
       {policy.error ? <AdminFeedback error={policy.error} retry={policy.refresh} /> : policy.data
-        ? <PolicyForm key={policy.data.revision} flags={sections[section]} current={policy.data} workspaceId={workspaceId} refresh={policy.refresh} />
+        ? <PolicyForm key={policy.data.revision} flags={sections[section]} current={policy.data} workspaceId={workspaceId} refresh={policy.refresh} compact={roles} />
         : <p role="status">{authMessages[locale].working}</p>}
     </section>
     {section === "rolesAssignments" && <RoleAssignments workspaceId={workspaceId} />}
   </>;
 }
 
-function PolicyForm({ flags, current, workspaceId, refresh }: {
-  flags: readonly VerificationPolicyFlag[]; current: SavedVerificationPolicy; workspaceId: string; refresh: () => void;
+function PolicyForm({ flags, current, workspaceId, refresh, compact }: {
+  flags: readonly VerificationPolicyFlag[]; current: SavedVerificationPolicy; workspaceId: string; refresh: () => void; compact: boolean;
 }) {
   const [locale] = useLocale();
   const t = verificationCopy[locale];
@@ -71,19 +74,19 @@ function PolicyForm({ flags, current, workspaceId, refresh }: {
       if (apiErrorCode(cause) === "STALE_VERSION") refresh();
     } finally { setBusy(false); }
   }
-  return <form className="mt-3 grid gap-4" onSubmit={save}>
-    <fieldset disabled={busy} className="grid gap-2 sm:grid-cols-2">
-      {flags.map((flag) => <label key={flag} className="flex min-h-10 items-center gap-2">
+  return <form className={`${adminActionPanel} mt-3 max-w-5xl gap-4 ${compact ? "lg:grid-cols-2" : ""}`} onSubmit={save}>
+    <fieldset disabled={busy} className={compact ? "grid content-start gap-2" : "grid gap-2 sm:grid-cols-2"}>
+      {flags.map((flag) => <label key={flag} className={adminConfirmation}>
         <input type="checkbox" checked={value[flag]} onChange={(event) => setValue({ ...value, [flag]: event.target.checked })} />
         {t.flags[flag]}
       </label>)}
     </fieldset>
-    <label className="max-w-lg">{adminMessages[locale].registrationPolicy.reason}
+    <label className="max-w-lg text-sm font-semibold">{adminMessages[locale].registrationPolicy.reason}
       <textarea className={institutionField} required minLength={10} maxLength={500} value={reason}
         onChange={(event) => setReason(event.target.value)} />
     </label>
-    {error != null && <AdminFeedback error={error} />}
-    <button className={`${institutionAction} justify-self-start`} disabled={!canSave}>{t.copy.save}</button>
+    {error != null && (compact ? <div className="col-span-full"><AdminFeedback error={error} /></div> : <AdminFeedback error={error} />)}
+    <button className={`${institutionAction} justify-self-start ${compact ? "col-span-full" : ""}`} disabled={!canSave}>{t.copy.save}</button>
   </form>;
 }
 
@@ -102,15 +105,28 @@ function RoleAssignments({ workspaceId }: { workspaceId: string }) {
     if (!organization && ["founder", "administrator", "moderator", "verification_reviewer"].includes(role)) return platformRoles[role as "founder" | "administrator" | "moderator" | "verification_reviewer"];
     return role;
   };
-  return <section className={institutionCard}>
-    <div className="flex flex-wrap gap-4">
-      <Link className={institutionLink} href={adminEntryPath("governance")}>{t.copy.governance}</Link>
-      <Link className={institutionLink} href="/institutions">{t.copy.organizations}</Link>
-    </div>
-    {result.error != null && <AdminFeedback error={result.error} retry={result.refresh} />}
-    {result.data && <ul className="mt-3 divide-y divide-[var(--theme-border)]">
-      {[...result.data.platform, ...result.data.organizations].map((item, index) =>
-        <li key={index} className="py-2 text-sm">{item.organization && `${item.organization} · `}@{item.username} · {roleLabel(item)} · {t.status[item.status]}</li>)}
-    </ul>}
-  </section>;
+  if (result.error != null) return <AdminFeedback error={result.error} retry={result.refresh} />;
+  if (!result.data) return <p className={adminCompactCard} role="status">{authMessages[locale].working}</p>;
+  const groups = [
+    { title: platformRoles.navigationPlatform, items: result.data.platform, label: t.copy.governance, href: adminEntryPath("governance") },
+    { title: organizationRoles.institutions, items: result.data.organizations, label: t.copy.organizations, href: "/institutions" },
+  ];
+  return <div className="grid min-w-0 items-start gap-3 xl:grid-cols-2">
+    {groups.map(({ title, items, label, href }) => <section key={href} className={`${adminCompactCard} grid gap-2.5`}>
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--theme-border)] pb-2.5">
+        <h3 className="font-semibold">{title}</h3>
+        <Link className={`${adminSecondaryAction} gap-2 text-start`} href={href}>{label}<span aria-hidden="true">↗</span></Link>
+      </header>
+      {items.length ? <ul className="divide-y divide-[var(--theme-border)]">
+        {items.map((item, index) => <li key={JSON.stringify([item.organization, item.username, item.role, index])}
+          className="flex min-w-0 flex-wrap items-center justify-between gap-2 py-2 text-sm">
+          <div className="min-w-0 break-words">
+            <p className="flex flex-wrap items-center gap-1 font-semibold"><span>@{item.username}</span><AdminMemberBadges username={item.username} /></p>
+            <p className="text-[var(--theme-body)]">{item.organization && `${item.organization} · `}{roleLabel(item)}</p>
+          </div>
+          <span className={`rounded-md px-2 py-1 text-xs font-semibold ${item.status === "restricted" ? "bg-[var(--theme-error-bg)] text-[var(--theme-error-text)]" : "bg-[var(--theme-control)]"}`}>{t.status[item.status]}</span>
+        </li>)}
+      </ul> : <p className="text-sm text-[var(--theme-body)]">{t.copy.empty}</p>}
+    </section>)}
+  </div>;
 }

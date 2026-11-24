@@ -1,3 +1,5 @@
+import type { PersonalClaim } from "./trust.js";
+
 export const ambassadorCategories = ["community", "education", "culture", "technology", "service"] as const;
 export const ambassadorAdminActions = ["invite", "revoke", "suspend", "resume", "complete", "uphold", "allow_new_invitation"] as const;
 export type AmbassadorCategory = (typeof ambassadorCategories)[number];
@@ -9,6 +11,10 @@ export type AmbassadorCase = {
   createdAt: string; updatedAt: string; expiresAt: string | null; acceptedAt: string | null;
   publicOptIn: boolean; statement: string | null; publicEligible: boolean;
   reconsideration: "pending" | "upheld" | "new_invitation" | null; canRequestReview: boolean;
+};
+export type AmbassadorMemberCase = AmbassadorCase & {
+  invitedAt?: string | null; invitationMessage?: string | null;
+  sender?: { displayName: string; personalClaims: PersonalClaim[]; founderVerified: boolean } | null;
 };
 export type AmbassadorAdminCase = AmbassadorCase & {
   username: string | null; displayName: string | null;

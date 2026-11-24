@@ -75,7 +75,14 @@ export function registerAuditRoutes(app: FastifyInstance, auth: AuthVerifier | n
         high: result.high, at: last.occurredAt, source: last.source, id: last.sourceEventId,
         expires: cursor?.expires ?? Date.now() + 5 * 60_000,
       }, binding) : null;
-      return { version: 1, events, nextCursor };
+      if (scope !== "platform") return { version: 1, events, nextCursor };
+      const people = await repo.auditPeople?.(events.flatMap((event) =>
+        [event.actorRef, event.resourceType === "account" ? event.resourceRef : null]));
+      return { version: 1, nextCursor, events: events.map((event) => ({
+        ...event,
+        actor: event.actorRef ? people?.get(event.actorRef) : undefined,
+        affectedMember: event.resourceType === "account" && event.resourceRef ? people?.get(event.resourceRef) : undefined,
+      })) };
     } catch (cause) {
       if (cause instanceof ApiError) throw cause;
       if (cause instanceof InstitutionError && cause.statusCode === 400) throw invalid();
@@ -114,7 +121,8 @@ export function registerAuditRoutes(app: FastifyInstance, auth: AuthVerifier | n
       high: result.high, at: last.occurredAt, source: last.source, id: String(last.revision),
       expires: cursor?.expires ?? Date.now() + 5 * 60_000,
     }, binding) : null;
-    return { events, nextCursor };
+    const people = await repo.auditPeople?.(events.map(({ actorId }) => actorId));
+    return { nextCursor, events: events.map((event) => ({ ...event, actor: people?.get(event.actorId) })) };
   });
 
   registerModerationCenterRead(app, auth, repo, limitReads, cursors);

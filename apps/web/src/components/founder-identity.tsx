@@ -16,6 +16,9 @@ import { useMemberIdentity } from "@/lib/member-display-name";
 import { useAdminRenewalPath } from "./admin-section-context";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { AdminMemberBadges } from "./admin-account-avatar";
+import { FounderConsentLookup } from "./founder-consent-lookup";
+import { adminActionPanel, adminCompactCard, adminConfirmation, adminDangerAction, adminDisclosure, adminSecondaryAction } from "./admin-controls";
 
 type Review = { action: FounderReviewAction; reason: NonNullable<FounderIdentityCase["decision"]> };
 type Send = (path: string, body: Record<string, unknown>) => Promise<void>;
@@ -92,40 +95,55 @@ function FounderCases({ actor, admin, onSuperseded, workspaceId }: { actor: stri
   const title = admin ? t.adminTitle : t.title;
   const activeCases = resource.data?.cases.filter((item) => activeStates.has(item.state)) ?? [];
   const caseHistory = resource.data?.cases.filter((item) => !activeStates.has(item.state)) ?? [];
-  const renderCase = (item: FounderReviewCase) => <FounderCase key={item.id + ":" + item.version} item={item}
-    admin={admin} busy={busy} enabled={resource.data?.issuanceEnabled === true && (!admin || resource.data.canIssue !== false)}
+  const renderCase = (item: FounderReviewCase, compact = false) => <FounderCase key={item.id + ":" + item.version} item={item}
+    admin={admin} compact={compact} busy={busy} enabled={resource.data?.issuanceEnabled === true && (!admin || resource.data.canIssue !== false)}
     liveProof={resource.data?.liveProofEnabled === true && (!admin || resource.data.canIssue !== false)} send={send} />;
-  return <section className={`${institutionCard} grid gap-4`} aria-label={title}>
-    <h2 className="text-xl font-semibold">{title}</h2>
+  return <section className={`${admin ? "grid min-w-0 gap-3" : `${institutionCard} grid gap-4`}`} aria-label={title}>
+    <h2 className={admin ? `${adminCompactCard} text-lg font-semibold` : "text-xl font-semibold"}>{title}</h2>
     {reviewAccessRequired ? <p role="status" className="max-w-prose text-sm">{t.reviewAccessRequired}</p>
       : notDeployed ? <p role="status">{t.notDeployed}</p>
       : fault != null && <ApiErrorNotice error={fault} retry={resource.refresh} signIn />}
-    {admin && apiErrorCode(fault) === "MFA_REQUIRED" && <Link className={institutionLink} href={renewalPath}>{t.verifySession}</Link>}
+    {admin && apiErrorCode(fault) === "MFA_REQUIRED" && <Link className={`${adminSecondaryAction} justify-self-start`} href={renewalPath}>{t.verifySession}</Link>}
     {!resource.data && !fault && <p role="status">{authMessages[locale].working}</p>}
     {resource.data && <>
       {!resource.data.issuanceEnabled && <p role="status" className="max-w-prose text-sm">{t.disabled}</p>}
-      {admin && <p className="max-w-prose text-sm">{t.openHelp}</p>}
-      {admin && resource.data.canIssue === false && <p className="max-w-prose text-sm">{t.founderIssuanceOnly}</p>}
-      {admin && <form className="flex flex-wrap items-end gap-3" onSubmit={(event) => {
-        event.preventDefault();
-        void send("", { username: username.trim().toLowerCase(), reason: "member_request" });
-      }}>
-        <label className="min-w-0 text-sm font-semibold">{t.username}
-          <input className={institutionField} value={username} onChange={(event) => setUsername(event.target.value)}
-            required pattern="[A-Za-z0-9][A-Za-z0-9_]{2,23}" maxLength={24} />
-        </label>
-        <button className={institutionAction} disabled={busy}>{t.open}</button>
-      </form>}
-      {receipt && <p role="status" className="break-words text-sm">{t.receipt} <code>{receipt.auditId}</code></p>}
-      {admin && !resource.data.cases.length && <p>{t.noAssigned}</p>}
-      {activeCases.length > 0 && <section aria-label={t.activeCases} className="grid gap-3">
-        <h3 className="font-semibold">{t.activeCases}</h3>
-        {activeCases.map(renderCase)}
-      </section>}
-      {caseHistory.length > 0 && <details className="rounded-md border border-[var(--theme-border)] p-3 sm:p-4">
-        <summary className="cursor-pointer font-semibold">{t.caseHistory}</summary>
-        <div className="mt-3 grid gap-3">{caseHistory.map(renderCase)}</div>
-      </details>}
+      <div className={admin ? "grid min-w-0 items-start gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]" : "contents"}>
+        {admin && <section className={`${adminCompactCard} grid gap-2 xl:col-start-1 xl:row-start-1`}>
+          <h3 className="border-b border-[var(--theme-border)] pb-2 font-semibold">{t.open}</h3>
+          <p className="max-w-prose text-sm text-[var(--theme-body)]">{t.openHelp}</p>
+          {resource.data.canIssue === false && <p className="max-w-prose text-sm">{t.founderIssuanceOnly}</p>}
+          <form className="grid gap-2.5" onSubmit={(event) => {
+            event.preventDefault();
+            void send("", { username: username.trim().toLowerCase(), reason: "member_request" });
+          }}>
+            <FounderConsentLookup value={username} onChange={setUsername} workspaceId={workspaceId} disabled={busy} />
+            <button className={`${institutionAction} min-h-11 justify-self-start`} disabled={busy}>{t.open}</button>
+          </form>
+          {receipt && <p role="status" className="break-words text-sm">{t.receipt} <code>{receipt.auditId}</code></p>}
+        </section>}
+        <div className={admin ? "grid min-w-0 gap-3 xl:col-start-2 xl:row-start-1" : "contents"}>
+          {!admin && receipt && <p role="status" className="break-words text-sm">{t.receipt} <code>{receipt.auditId}</code></p>}
+          {((admin && !caseHistory.length) || activeCases.length > 0) && <section aria-label={t.activeCases} className={admin ? `${adminCompactCard} grid gap-2` : "grid gap-3"}>
+            <h3 className="font-semibold">{t.activeCases}</h3>
+            {admin && !activeCases.length && !caseHistory.length && <p className="text-sm text-[var(--theme-body)]">{t.noAssigned}</p>}
+            {activeCases.map((item) => admin ? <details key={item.id} className="min-w-0 rounded-md border border-[var(--theme-border)]">
+              <summary className={adminDisclosure}>
+                <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
+                  <span className="min-w-0 break-words">{item.username && `@${item.username} · `}{t.states[item.state]}
+                    {item.username && <>{" "}<AdminMemberBadges key={item.version} username={item.username} /></>}
+                  </span>
+                  <time className="text-xs font-normal text-[var(--theme-body)]" dateTime={item.updatedAt}>{new Date(item.updatedAt).toLocaleDateString(locale)}</time>
+                </span>
+              </summary>
+              {renderCase(item, true)}
+            </details> : renderCase(item))}
+          </section>}
+          {caseHistory.length > 0 && <details className={admin ? "rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)]" : "rounded-md border border-[var(--theme-border)] p-3 sm:p-4"}>
+            <summary className={admin ? adminDisclosure : "cursor-pointer font-semibold"}>{t.caseHistory}</summary>
+            <div className={admin ? "grid gap-2 border-t border-[var(--theme-border)] p-3" : "mt-3 grid gap-3"}>{caseHistory.map((item) => renderCase(item))}</div>
+          </details>}
+        </div>
+      </div>
     </>}
   </section>;
 }
@@ -147,8 +165,8 @@ function reviewActions(item: FounderReviewCase, enabled: boolean): Review[] {
   ];
 }
 
-function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
-  item: FounderReviewCase; admin: boolean; enabled: boolean; busy: boolean; liveProof: boolean; send: Send;
+function FounderCase({ item, admin, compact, busy, enabled, liveProof, send }: {
+  item: FounderReviewCase; admin: boolean; compact: boolean; enabled: boolean; busy: boolean; liveProof: boolean; send: Send;
 }) {
   const [locale] = useLocale();
   const t = founderMessages[locale];
@@ -179,8 +197,10 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
     if (review && (!grant || conflictFree)) void act({ ...review, ...(grant ? { noConflict: true } : {}) });
   }
 
-  return <article className="grid min-w-0 gap-3 rounded-md border border-[var(--theme-border)] p-3 sm:p-4">
-    <h3 className="break-words font-semibold">{admin && item.username ? `@${item.username} · ` : ""}{t.states[item.state]}</h3>
+  return <article className={`grid min-w-0 gap-3 p-3 sm:p-4 ${compact ? "border-t border-[var(--theme-border)]" : "rounded-md border border-[var(--theme-border)]"}`}>
+    {!compact && <h3 className="break-words font-semibold">{admin && item.username && `@${item.username} · `}{t.states[item.state]}
+      {admin && item.username && <>{" "}<AdminMemberBadges username={item.username} /></>}
+    </h3>}
     {item.decision && <p className="text-sm">{t.reasons[item.decision]}</p>}
     {!activeStates.has(item.state) && <p className="text-sm text-[var(--theme-body)]">
       {t.lastUpdated} · <time dateTime={item.updatedAt}>{new Date(item.updatedAt).toLocaleString(locale)}</time>
@@ -195,9 +215,12 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
       {item.supersessionOutcome && <p className="text-sm">
         {canSupersede && application?.status === "pending" ? t.supersessionReady : t.supersessionResults[item.supersessionOutcome]}
       </p>}
-      <p className="text-sm">{item.consented ? t.consentRecorded : t.consentMissing} · {item.proofReady ? t.proofReady : t.proofMissing}</p>
+      <ul className="flex flex-wrap gap-2 text-xs font-semibold">
+        <li className="rounded-md bg-[var(--theme-control)] px-2 py-1.5">{item.consented ? t.consentRecorded : t.consentMissing}</li>
+        <li className="rounded-md bg-[var(--theme-control)] px-2 py-1.5">{item.proofReady ? t.proofReady : t.proofMissing}</li>
+      </ul>
       {pendingProof && !item.controlReady && <p role="status">{t.liveProof.waitForMember}</p>}
-      {pendingProof && item.controlReady && <form className="grid max-w-md gap-3" onSubmit={(event) => {
+      {pendingProof && item.controlReady && <form className={`${adminActionPanel} max-w-2xl`} onSubmit={(event) => {
         event.preventDefault();
         if (attested) void act({ action: "attest", basis, noConflict: true });
       }}>
@@ -208,11 +231,11 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
             if (next) setBasis(next);
           }}>{founderIdentityBases.map((value) => <option key={value} value={value}>{t.liveProof.methods[value]}</option>)}</select>
         </label>
-        <label className="flex items-start gap-2 text-sm"><input type="checkbox" checked={attested} required
+        <label className={adminConfirmation}><input type="checkbox" checked={attested} required
           onChange={(event) => setAttested(event.target.checked)} />{t.liveProof.attestation}</label>
         <button className={institutionAction} disabled={busy || !attested}>{t.actions.attest}</button>
       </form>}
-      {controls.length > 0 && <form onSubmit={submitReview} className="grid max-w-md gap-3">
+      {controls.length > 0 && <form onSubmit={submitReview} className={`${adminActionPanel} max-w-2xl`}>
         <label className="text-sm font-semibold">{t.reviewAction}
           <select className={institutionField} value={review?.action ?? ""} onChange={(event) => {
             setReview(controls.find(({ action }) => action === event.target.value) ?? null);
@@ -223,14 +246,14 @@ function FounderCase({ item, admin, enabled, busy, liveProof, send }: {
           </select>
         </label>
         {review && <p className="text-sm">{t.reasons[review.reason]}</p>}
-        {grant && <label className="flex items-start gap-2 text-sm">
+        {grant && <label className={adminConfirmation}>
           <input className="mt-1" type="checkbox" checked={conflictFree} onChange={(event) => setConflictFree(event.target.checked)} required />{t.noConflict}
         </label>}
-        <button className={`${institutionAction} justify-self-start`} disabled={busy || !review || (grant && !conflictFree)}>{t.confirm}</button>
+        <button className={`${review?.action === "revoke" || review?.action === "hold" ? adminDangerAction : institutionAction} justify-self-start`} disabled={busy || !review || (grant && !conflictFree)}>{t.confirm}</button>
       </form>}
-      <details>
-        <summary className="cursor-pointer font-semibold">{t.history}</summary>
-        <ul className="mt-2 grid gap-2 text-sm">
+      <details className="rounded-md border border-[var(--theme-border)]">
+        <summary className={adminDisclosure}>{t.history}</summary>
+        <ul className="grid gap-2 border-t border-[var(--theme-border)] p-3 text-sm">
           {item.history.map((entry) => <li key={entry.id} className="break-words">
             {t.actions[entry.action]} · <time dateTime={entry.occurredAt}>{new Date(entry.occurredAt).toLocaleString(locale)}</time>
             {" · "}<code>{entry.id}</code>

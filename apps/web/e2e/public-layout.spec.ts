@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { projectMessages } from "../src/lib/project-i18n";
 
 test("public pages align with the navigation and footer at each viewport", async ({ page }) => {
   const paths = ["/", "/about", "/legal"];
@@ -60,5 +61,24 @@ test("signed-in project browsing uses the available workspace width", async ({ p
   await expect(main).toHaveAttribute("id", "member-main");
   const bounds = await main.boundingBox();
   expect(bounds!.width).toBeGreaterThan(1500);
+  await page.setViewportSize({ width: 390, height: 900 });
+  const projects = projectMessages.en;
+  const filters = main.getByRole("button", { name: /^Filters/ });
+  const category = main.getByRole("combobox", { name: projects.category, exact: true });
+  await expect(category).toBeHidden();
+  await filters.click();
+  await category.selectOption("education");
+  const filtered = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.pathname === "/api/v1/projects" && url.searchParams.get("category") === "education";
+  });
+  await main.getByRole("button", { name: projects.filter }).click();
+  expect((await filtered).ok()).toBe(true);
+  await expect(filters).toContainText("Education");
+  await expect(main.getByText(projects.emptyFiltered)).toBeVisible();
+  await main.getByRole("button", { name: projects.clearFilters }).click();
+  await expect(category).toHaveValue("");
+  await expect(main.getByText(projects.emptyDirectory)).toBeVisible();
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
   expect(signedIn.handle).toMatch(/^e2e_/);
 });

@@ -24,6 +24,8 @@
   "indefinite": "Durée indéterminée",
   "actor": "Intervenant",
   "accountHistory": "Historique du compte",
+  "historyByAccount": "Historique par compte",
+  "historyOther": "Historique des contenus et autres éléments",
   "feedTool": "Modération du fil",
   "eventTool": "Signalements d’événements",
   "projectTool": "Examen des projets",

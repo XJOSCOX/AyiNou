@@ -20,7 +20,7 @@
   "draftSaved": "Brouillon enregistré. Vérifiez les informations avant de soumettre.",
   "edit": "Modifier le brouillon",
   "incomplete": "Ajoutez un nom, un identifiant, un type et un pays pour terminer ce brouillon.",
-  "identity": "La configuration exige une vérification indépendante de votre identité personnelle.",
+  "identity": "La configuration exige une vérification de votre identité personnelle.",
   "authority": "Je confirme être habilité à configurer cette organisation ou à demander sa propriété en son nom.",
   "duplicate": "Cet identifiant est indisponible. Choisissez-en un autre ou examinez une fiche publique.",
   "references": "Fournissez deux ou trois références publiques HTTPS sur des sites distincts à l’appui de votre mandat. Laissez de côté les documents privés.",

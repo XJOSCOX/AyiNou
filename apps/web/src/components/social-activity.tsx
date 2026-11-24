@@ -10,6 +10,7 @@ import { useCursorPage } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { FilterPanel } from "./filter-panel";
+import { DiscoverSearchInput, DiscoverSearchButton } from "./discover-search";
 import { ApiErrorNotice } from "./api-error-notice";
 import { discoveryTab } from "./discovery-accounts";
 import { SocialText } from "./social-text";
@@ -103,8 +104,10 @@ export function SearchPosts() {
   }
 
   return <>
-    <form role="search" className={`${institutionCard} grid gap-3`} onSubmit={submit}>
-      <FilterPanel active={filters ? Object.keys(filters).filter((key) => key !== "q").length : 0} search={<label className="block max-w-sm text-sm font-semibold">{t.keywords}<input type="search" name="q" maxLength={100} className={institutionField} /></label>}>
+    <form role="search" className={institutionCard + " !p-3 sm:!p-4"} onSubmit={submit}>
+      <FilterPanel active={filters ? Object.keys(filters).filter((key) => key !== "q").length : 0}
+        search={<DiscoverSearchInput name="q" label={t.keywords} placeholder={t.keywords} maxLength={100} />}
+        submit={<DiscoverSearchButton label={t.postSearch} />}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <label className="text-sm font-semibold">{t.hashtag}<input name="tag" maxLength={49} className={institutionField} /></label>
           <LanguageFilter />
@@ -112,8 +115,7 @@ export function SearchPosts() {
           <label className="text-sm font-semibold">{t.since}<input type="date" name="since" className={institutionField} /></label>
         </div>
       </FilterPanel>
-      {invalid && <p role="alert">{t.chooseFilter}</p>}
-      <button type="submit" className={`${institutionAction} justify-self-start`}>{t.postSearch}</button>
+      {invalid && <p role="alert" className="mt-2 text-sm text-[var(--theme-error-text)]">{t.chooseFilter}</p>}
     </form>
     {!!trending.data?.tags.length && <section className={institutionCard}>
       <h2 className="mb-2 font-semibold">{t.trending}</h2>

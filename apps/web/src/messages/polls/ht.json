@@ -1,5 +1,7 @@
 {
   "title": "Sondaj",
+  "opensIn": "Vòt la ap kòmanse nan",
+  "closesIn": "Vòt la ap fini nan",
   "mine": "Sondaj mwen yo",
   "create": "Kreye yon sondaj",
   "rules": "Sondaj Ayinou yo gide diskisyon kominotè ak desizyon sou pwojè. Chak kont ki kalifye gen yon vòt prive.",
@@ -81,7 +83,7 @@
   },
   "resultPolicies": {
     "after_close": "Apre validasyon final",
-    "after_vote": "Apre vòt ou oswa validasyon final"
+    "after_vote": "Pandan vòt la ak apre validasyon final"
   },
   "states": {
     "draft": "Bouyon",

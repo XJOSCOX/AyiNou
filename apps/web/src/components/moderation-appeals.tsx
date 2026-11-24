@@ -10,6 +10,7 @@ import { decideAppeal, loadMemberAppeals, loadReviewAppeals, loadSafetyOverview,
 import { safetyMessages } from "@/lib/safety-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { adminCompactCard, adminSecondaryAction } from "./admin-controls";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { PostMediaGallery } from "./post-media";
@@ -78,7 +79,7 @@ export function AppealReviewQueue() {
   return <section className="grid gap-3" aria-label={t.review}>
     <div className="flex flex-wrap gap-3">
       {(["pending", "history"] as const).map((value) => <button key={value} type="button" aria-pressed={value === scope}
-        className="min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]"
+        className={`${adminSecondaryAction} min-h-11 aria-pressed:border-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]`}
         onClick={() => setScope(value)}>{value === "pending" ? t.pendingQueue : t.history}</button>)}
     </div>
     <ReviewList key={scope} scope={scope} />
@@ -114,7 +115,7 @@ function ReviewCard({ item, refresh }: { item: AppealReview; refresh: () => void
   const mutation = useFeedMutation();
   const allowed = appealOutcomes.filter((value) => value !== "overturned" || item.canRestore);
   const valid = outcome !== "" && allowed.some((value) => value === outcome);
-  return <article className={institutionCard}>
+  return <article className={adminCompactCard}>
     <h2 className="font-semibold">{item.kind === "post" ? t.hidePost : t.hideComment}</h2>
     <p lang={item.language} dir="auto" className="mt-2 whitespace-pre-wrap break-words rounded-md bg-[var(--theme-control)] p-3 text-sm">{item.body}</p>
     {item.attachments && <PostMediaGallery post={item.postId} attachments={item.attachments} review />}
@@ -159,7 +160,7 @@ function More({ resource }: { resource: { page: { nextCursor: string | null } | 
     onClick={() => { void resource.more(); }}>{resource.loadingMore ? t.loading : t.more}</button> : null;
 }
 
-const metrics: (keyof SafetyOverview)[] = ["pendingPostReports", "pendingCommentReports", "pendingAppeals", "restrictedAccounts", "moderationActions30Days", "cleanupBacklog"];
+const metrics: (keyof SafetyOverview)[] = ["pendingPostReports", "pendingCommentReports", "pendingAppeals", "moderationActions30Days", "cleanupBacklog"];
 
 export function SafetyOverviewPanel() {
   const [locale] = useLocale();
@@ -170,7 +171,7 @@ export function SafetyOverviewPanel() {
     <h2 className="text-xl font-semibold">{t.overview}</h2>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!resource.data && resource.error === null && <p role="status">{t.loading}</p>}
-    {resource.data && <dl className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    {resource.data && <dl className="mt-3 grid grid-cols-[repeat(auto-fit,minmax(min(100%,9rem),1fr))] gap-2">
       {metrics.map((key) => <div key={key} className="min-w-0 rounded-md border border-[var(--theme-border)] p-3">
         <dt className="text-sm text-[var(--theme-body)]">{t[key]}</dt>
         <dd className="mt-1 text-xl font-semibold tabular-nums">{number.format(resource.data![key])}</dd>

@@ -9,6 +9,7 @@ import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
+import { adminConfirmation } from "./admin-controls";
 
 const route = "/api/v1/admin/member-experience";
 const groups = [
@@ -73,13 +74,13 @@ function PolicyForm({ current, workspaceId, saveReceipt, reload }: {
     <div className="grid gap-4 lg:grid-cols-2">
       {groups.map(({ title, flags }) => <fieldset className="rounded-md border border-[var(--theme-border)] p-3" key={title} disabled={busy || stale}>
         <legend className="px-2 font-semibold">{t[title]}</legend>
-        {flags.map((flag) => <label key={flag} className="flex min-h-10 items-center gap-2 text-sm">
+        {flags.map((flag) => <label key={flag} className={`${adminConfirmation} my-2`}>
           <input type="checkbox" checked={value[flag]} onChange={(event) => setValue({ ...value, [flag]: event.target.checked })} />
           {t.flags[flag]}
         </label>)}
       </fieldset>)}
     </div>
-    <label className="max-w-lg">{labels.registrationPolicy.reason}
+    <label className="max-w-lg text-sm font-semibold">{labels.registrationPolicy.reason}
       <textarea className={institutionField} value={reason} onChange={(event) => setReason(event.target.value)}
         required minLength={10} maxLength={500} disabled={busy || stale} />
     </label>

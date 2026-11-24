@@ -1,6 +1,7 @@
 import { ProfileEditor } from "./profile-editor";
 import { errorBox, action } from "./profile-styles";
 import { MemberShell } from "@/components/member-shell";
+import { PageHeader } from "@/components/page-header";
 import { fetchMyProfile, fetchDepartments } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { isLocale } from "@/lib/i18n";
@@ -43,11 +44,6 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
     return () => { cancelled = true; };
   }, [onboarding, retry, router]);
 
-  useEffect(() => {
-    if (!loaded || onboarding) return;
-    document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
-  }, [loaded, onboarding]);
-
   return (
     <MemberShell>
       <div className={onboarding ? "min-w-0 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-5 sm:p-9" : "min-w-0"}>
@@ -56,7 +52,16 @@ export function ProfileForm({ onboarding }: { onboarding: boolean }) {
             <p role="alert" className={errorBox}>{t.loadError}</p>
             <button className={`mt-4 ${action}`} onClick={() => { setFailed(false); setRetry((value) => value + 1); }}>{t.retry}</button>
           </>
-        ) : <p role="status">{t.working}</p>}
+        ) : onboarding ? <p role="status">{t.working}</p> : (
+          <div className="grid gap-4">
+            <PageHeader title={t.profileTitle} description={t.profileIntro} />
+            <div role="status" className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,19rem)]">
+              <span className="sr-only">{t.working}</span>
+              <div aria-hidden="true" className="h-64 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] motion-safe:animate-pulse" />
+              <div aria-hidden="true" className="hidden h-44 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] motion-safe:animate-pulse lg:block" />
+            </div>
+          </div>
+        )}
       </div>
     </MemberShell>
   );

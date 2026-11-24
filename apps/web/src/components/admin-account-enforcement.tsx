@@ -12,6 +12,7 @@ import { apiErrorCode } from "@/lib/api-errors";
 import { useLocale } from "@/lib/locale-store";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionAction, institutionField } from "./institution-ui";
+import { adminActionPanel, adminConfirmation, adminDangerAction } from "./admin-controls";
 
 const durations = ["hours1", "hours24", "days3", "days7", "days30", "days90"] as const;
 
@@ -61,7 +62,7 @@ export function AdminAccountEnforcement({ account, founder, workspace, onChange 
     finally { setBusy(false); }
   }
 
-  return <form onSubmit={submit} className="mt-4 grid gap-3 border-t border-[var(--theme-border)] pt-3 sm:max-w-xl" aria-busy={busy}>
+  return <form onSubmit={submit} className={adminActionPanel} aria-busy={busy}>
     <label className="text-sm font-semibold">{labels.changeStatus}
       <select className={institutionField} value={action} disabled={busy} onChange={(event) => {
         const selected = options.find((item) => item === event.target.value);
@@ -86,14 +87,14 @@ export function AdminAccountEnforcement({ account, founder, workspace, onChange 
       </select>
     </label>}
     <label className="text-sm font-semibold">{labels.reason}
-      <textarea name="reason" className={institutionField} required minLength={10} maxLength={500} disabled={busy} />
+      <textarea name="reason" rows={3} className={institutionField} required minLength={10} maxLength={500} disabled={busy} />
     </label>
-    <label key={action} className="flex items-start gap-2 text-sm">
+    <label key={action} className={adminConfirmation}>
       <input className="mt-1" name="confirm" value="yes" type="checkbox" required disabled={busy} />
       {t.confirm}
     </label>
     {error !== null && (apiErrorCode(error) === "ACCOUNT_ENFORCEMENT_LIMIT"
       ? <p className="text-sm" role="alert">{t.limit}</p> : <AdminFeedback error={error} />)}
-    <button className={`${institutionAction} justify-self-start`} disabled={busy}>{t[action]}</button>
+    <button className={`${needsCategory || action === "extend" ? adminDangerAction : institutionAction} justify-self-start`} disabled={busy}>{t[action]}</button>
   </form>;
 }

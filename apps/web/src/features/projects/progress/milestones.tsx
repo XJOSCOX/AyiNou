@@ -1,6 +1,7 @@
 import { type Controls, useProgressText, Change, value, nullable, actionRow, Reason } from "./progress-controls";
-import { institutionField, institutionLink } from "@/components/institution-ui";
+import { institutionField } from "@/components/institution-ui";
 import { type ProjectMilestone, type ProjectWork, type ProjectProgress } from "@ayinou/shared";
+import { ProjectDisclosure } from "@/components/project-ui";
 
 function MilestoneForm({ milestone, work, ...controls }: Controls & { milestone?: ProjectMilestone; work: ProjectWork }) {
   const { t } = useProgressText();
@@ -35,9 +36,9 @@ export function Milestones({ data, work, ...controls }: Controls & { data: Proje
   const active = data.status === "active";
   const mayLink = data.canManage || data.role === "supervisor";
   return <>
-    {data.canManage && active && <details><summary className={institutionLink}>{t.actions.milestone_create}</summary>
+    {data.canManage && active && <ProjectDisclosure title={t.actions.milestone_create}>
       <MilestoneForm {...controls} work={work} />
-    </details>}
+    </ProjectDisclosure>}
     {!data.milestones.length && <p>{t.empty}</p>}
     <ul className="grid gap-4 lg:grid-cols-2">{data.milestones.map((milestone) => {
       const editable = active && !["submitted", "completed", "cancelled"].includes(milestone.status);
@@ -47,8 +48,8 @@ export function Milestones({ data, work, ...controls }: Controls & { data: Proje
         <p className="break-words whitespace-pre-line">{milestone.description}</p>
         <p className="text-sm">{t.milestoneStates[milestone.status]}{milestone.targetOn && <> · {milestone.targetOn}</>}</p>
         {milestone.target !== null && <p>{t.target} {milestone.target} {milestone.unit}</p>}
-        {editable && data.canManage && <details className="mt-2"><summary className={institutionLink}>{t.actions.milestone_edit}</summary>
-          <MilestoneForm {...controls} work={work} milestone={milestone} /></details>}
+        {editable && data.canManage && <ProjectDisclosure title={t.actions.milestone_edit} className="mt-2">
+          <MilestoneForm {...controls} work={work} milestone={milestone} /></ProjectDisclosure>}
         <div className={actionRow + " mt-2"}>
           {editable && (data.canManage || milestone.mine) && <Change {...controls} section="milestones" action="milestone_submit" data={key} />}
           {editable && (data.canManage || (milestone.mine && data.role === "supervisor")) &&
@@ -56,21 +57,20 @@ export function Milestones({ data, work, ...controls }: Controls & { data: Proje
               <Change key={action} {...controls} section="milestones" action={action} data={key} />)}
         </div>
         {active && milestone.canReview && (milestone.canApprove ? ["milestone_approve", "milestone_return"] as const : ["milestone_return"] as const).map((action) =>
-          <details key={action} className="mt-2"><summary className={institutionLink}>{t.actions[action]}</summary>
+          <ProjectDisclosure title={t.actions[action]} key={action} className="mt-2">
             <Change {...controls} section="milestones" action={action} data={key} read={(fields) => ({ reason: value(fields, "reason") })}><Reason /></Change>
-          </details>)}
+          </ProjectDisclosure>)}
         {data.canManage && ((active && milestone.status !== "completed" && milestone.status !== "cancelled") ||
           (milestone.publicRequested && milestone.status === "completed")) &&
-          <details className="mt-2"><summary className={institutionLink}>{t.actions[milestone.status === "completed" ? "milestone_hide" : "milestone_cancel"]}</summary>
+          <ProjectDisclosure title={t.actions[milestone.status === "completed" ? "milestone_hide" : "milestone_cancel"]} className="mt-2">
             <Change {...controls} section="milestones" action={milestone.status === "completed" ? "milestone_hide" : "milestone_cancel"}
               data={key} read={(fields) => ({ reason: value(fields, "reason") })}><Reason /></Change>
-          </details>}
+          </ProjectDisclosure>}
       </li>;
     })}</ul>
     {active && mayLink && work.tasks.length > 0 && <section className="grid gap-2">
       <h3 className="font-semibold">{t.actions.task_milestone}</h3>
-      {work.tasks.filter((task) => data.canManage || task.canCoordinate).map((task) => <details key={task.id}>
-        <summary className={institutionLink}>{task.title}</summary>
+      {work.tasks.filter((task) => data.canManage || task.canCoordinate).map((task) => <ProjectDisclosure title={task.title} key={task.id}>
         <Change {...controls} section="milestones" action="task_milestone" data={{ id: task.id, version: task.version }}
           read={(form) => ({ milestoneId: nullable(form, "milestoneId") })}>
           <label>{t.milestones}<select className={institutionField} name="milestoneId" defaultValue={task.milestoneId ?? ""}>
@@ -78,7 +78,7 @@ export function Milestones({ data, work, ...controls }: Controls & { data: Proje
             {data.milestones.filter((row) => row.status !== "cancelled").map((row) => <option key={row.id} value={row.id}>{row.title}</option>)}
           </select></label>
         </Change>
-      </details>)}
+      </ProjectDisclosure>)}
     </section>}
   </>;
 }

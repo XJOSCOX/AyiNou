@@ -1,11 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useState, type ReactNode } from "react";
 import { type FeedPost, type FeedScope, type RecommendationAction } from "@ayinou/shared";
 import { apiErrorCode } from "@/lib/api-errors";
 import { deletePost, loadFeed, loadFeedModerationAccess, reportPost } from "@/lib/feed-api";
+import { loadInstitutionAccounts } from "@/lib/institution-api";
 import { loadSuggestions } from "@/lib/discovery-api";
 import { discoveryMessages } from "@/lib/discovery-i18n";
 import { feedMessages } from "@/lib/feed-i18n";
@@ -18,23 +18,25 @@ import { recommendationMessages } from "@/lib/recommendation-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
 import { DiscoveryAccounts } from "./discovery-accounts";
 import { ContentReportForm } from "./content-report-form";
-import { FeedActions, FeedIcon, feedIconButton } from "./feed-actions";
+import { PostAuthorAvatar } from "./feed-avatar";
+import { FeedActions, FeedIcon, feedIconButton, feedToolbarButton } from "./feed-actions";
 import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { PostTopicLabels, RecommendationActions, RecommendationSettingsPanel } from "./feed-recommendations";
 import { FounderVerifiedMark } from "./founder-verified-badge";
 import { PersonalClaimChecks, institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
-import { PageHeader } from "./page-header";
-import { OrganizationPublisher, QuotePreview, SocialPostControls, usePostBookmark } from "./social-post";
+import { OrganizationPostBadges, QuotePreview, SocialPostControls, usePostBookmark } from "./social-post";
 import { FeedLanguageControl, TranslatableText, TranslationEnabled } from "./feed-languages";
 import { loadFeedLanguages, type FeedLanguageSettings } from "@/lib/feed-languages-api";
 import { eventMessages } from "@/lib/events-i18n";
 import { SocialText } from "./social-text";
-import { setOrganizationPin } from "@/lib/social-api";
+import { canPublishAsOrganization, setOrganizationPin } from "@/lib/social-api";
 import { socialMessages } from "@/lib/social-i18n";
 import { PostComposer } from "./post-composer";
 import { PostMediaGallery } from "./post-media";
 
+const feedCard = "min-w-0 rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-4 sm:p-5";
+const feedUtility = "inline-flex min-h-11 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-selected)] focus-visible:outline-2 focus-visible:outline-offset-2";
 const tabStyle = "min-h-11 flex-1 rounded-md px-3 py-2 text-sm font-semibold text-[var(--theme-body)] hover:text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)] sm:flex-none";
 type PostNotice = "published" | "draftSaved" | "editSaved" | "deleted";
 const scopes = ["feed", "following", "for_you", "mine"] as const;
@@ -42,6 +44,9 @@ const scopes = ["feed", "following", "for_you", "mine"] as const;
 export function FeedScreen() {
   const [locale] = useLocale();
   const t = feedMessages[locale];
+  const r = recommendationMessages[locale];
+  const recommendationPanel = useId();
+  const [recommendationsOpen, setRecommendationsOpen] = useState<boolean | null>(null);
   const preferred = usePreferredFeedMode();
   const [personal, setPersonal] = useState(false);
   const scope: FeedScope = personal ? "mine" : preferred;
@@ -50,6 +55,8 @@ export function FeedScreen() {
   const [rankingRevision, setRankingRevision] = useState(0);
   const [notice, setNotice] = useState<PostNotice | null>(null);
   const access = useInstitutionResource(loadFeedModerationAccess);
+  const accounts = useInstitutionResource(loadInstitutionAccounts);
+  const publishers = accounts.data?.organizations.filter(({ role }) => canPublishAsOrganization(role));
   const preferences = useInstitutionResource(loadFeedLanguages);
   const [savedLanguages, setSavedLanguages] = useState<FeedLanguageSettings | null>(null);
   const languageSettings = savedLanguages ?? preferences.data;
@@ -65,44 +72,80 @@ export function FeedScreen() {
 
   function changed(message: PostNotice) {
     if (message === "draftSaved") setScope("mine");
-    setNotice(message);
+    setNotice(message === "published" ? null : message);
     setRevision((current) => current + 1);
   }
 
+  const views = <div role="group" aria-label={t.feed} className="flex flex-wrap gap-1">
+    <button type="button" className={tabStyle} aria-pressed={scope === "feed"} onClick={() => setScope("feed")}>{t.timeline}</button>
+    <button type="button" className={tabStyle} aria-pressed={scope === "following"} onClick={() => setScope("following")}>
+      {discoveryMessages[locale].followingFeed}
+    </button>
+    <button type="button" className={tabStyle} aria-pressed={scope === "for_you"} onClick={() => setScope("for_you")}>
+      {r.forYou}
+    </button>
+    <button type="button" className={tabStyle} aria-pressed={scope === "mine"} onClick={() => setScope("mine")}>{t.mine}</button>
+  </div>;
+
+  const recommendationTools = scope === "for_you" && <div role="group" aria-label={r.forYou} className="ms-auto flex shrink-0 items-center gap-1">
+      <button type="button" className={feedToolbarButton} aria-label={r.refresh} title={r.refresh} onClick={refreshForYou}>
+        <FeedIcon name="refresh" />
+      </button>
+      <button type="button" className={feedToolbarButton} aria-label={r.preferences} title={r.preferences}
+        aria-expanded={recommendationsOpen === true} aria-controls={recommendationPanel}
+        onClick={() => setRecommendationsOpen((current) => !current)}>
+        <FeedIcon name="sliders" />
+      </button>
+  </div>;
+
   return <TranslationEnabled.Provider value={languageSettings?.translationEnabled ?? false}><MemberShell>
-    <div className="grid w-full min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_clamp(17rem,28%,30rem)] xl:items-start xl:gap-5">
-      <PageHeader className="xl:col-span-2" title={t.feed} description={t.intro}
-        actions={<><Link href="/feed/saved" className={institutionLink}>{socialMessages[locale].saved}</Link>
-          {access.data?.allowed && <><Link href="/feed/moderation" className={institutionLink}>{t.moderation}</Link><Link href="/events/moderation" className={institutionLink}>{eventMessages[locale].moderation}</Link></>}</>} />
-      <div className="grid min-w-0 gap-4">
-        <section className={`${institutionCard} max-sm:p-3`} aria-label={t.write}>
-          <PostComposer onSaved={changed} />
-          <OrganizationPublisher onPublished={() => changed("published")} />
+    <div className="grid w-full min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_clamp(16rem,23%,23rem)] xl:items-start xl:gap-x-6">
+      <header className={feedCard + " flex flex-wrap items-center justify-between gap-x-6 gap-y-4 xl:col-span-2"}>
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-[2rem]" dir="auto">{t.feed}</h1>
+          <p className="mt-1 max-w-prose text-sm leading-relaxed text-[var(--theme-body)]" dir="auto">{t.intro}</p>
+        </div>
+        <nav aria-label={t.feed} className="flex max-w-full flex-wrap items-center gap-1 rounded-xl bg-[var(--theme-control)] p-1">
+          <Link href="/feed/saved" className={feedUtility}><FeedIcon name="bookmark" />{socialMessages[locale].saved}</Link>
+          {access.data?.allowed && <details className="relative" onKeyDown={(event) => {
+            if (event.key !== "Escape" || !event.currentTarget.open) return;
+            event.currentTarget.open = false;
+            event.currentTarget.querySelector("summary")?.focus();
+          }}>
+            <summary className={feedUtility + " cursor-pointer list-none [&::-webkit-details-marker]:hidden"}>
+              <FeedIcon name="report" />{t.moderation}
+              <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 shrink-0" fill="none" stroke="currentColor"
+                strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m4 6 4 4 4-4" /></svg>
+            </summary>
+            <div className="absolute end-0 z-20 mt-1 grid w-48 gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5 shadow-md">
+              <Link href="/feed/moderation" className={feedUtility}>{t.moderation}</Link>
+              <Link href="/events/moderation" className={feedUtility}>{eventMessages[locale].moderation}</Link>
+            </div>
+          </details>}
+        </nav>
+      </header>
+      <div className="grid min-w-0 gap-3">
+        <section className={feedCard} aria-label={t.write}>
+          <PostComposer onSaved={changed} publishers={publishers ?? (accounts.error ? [] : null)} />
         </section>
         {notice && <p role="status" className="text-sm font-semibold text-[var(--theme-link)]">{t[notice]}</p>}
-        <div role="group" aria-label={t.feed} className="flex flex-wrap gap-1 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1 sm:justify-self-start">
-          <button type="button" className={tabStyle} aria-pressed={scope === "feed"} onClick={() => setScope("feed")}>{t.timeline}</button>
-          <button type="button" className={tabStyle} aria-pressed={scope === "following"} onClick={() => setScope("following")}>
-            {discoveryMessages[locale].followingFeed}
-          </button>
-          <button type="button" className={tabStyle} aria-pressed={scope === "for_you"} onClick={() => setScope("for_you")}>
-            {recommendationMessages[locale].forYou}
-          </button>
-          <button type="button" className={tabStyle} aria-pressed={scope === "mine"} onClick={() => setScope("mine")}>{t.mine}</button>
+        <div className="rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)] p-1.5">
+          {scope !== "mine" && languageSettings
+            ? <FeedLanguageControl settings={languageSettings} views={views} actions={recommendationTools}
+                onSave={(result) => { setSavedLanguages(result); setRevision((current) => current + 1); }} />
+            : <div className="flex flex-wrap items-center justify-between gap-2">{views}{recommendationTools}</div>}
+          <div id={recommendationPanel} hidden={scope !== "for_you" || recommendationsOpen !== true}>
+            {recommendationsOpen !== null && <RecommendationSettingsPanel onChange={refreshForYou} />}
+          </div>
         </div>
         {scope !== "mine" && preferences.error !== null && <ApiErrorNotice error={preferences.error} retry={preferences.refresh} />}
-        {scope !== "mine" && languageSettings && <FeedLanguageControl settings={languageSettings} onSave={(result) => { setSavedLanguages(result); setRevision((current) => current + 1); }} />}
         {scopes.filter((mode) => mode === scope || visited.has(mode)).map((mode) => <div key={mode} hidden={mode !== scope}>
           <Timeline scope={mode} revision={revision + (mode === "for_you" ? rankingRevision : 0)}
             changed={changed} refreshForYou={refreshForYou} />
         </div>)}
       </div>
-      <aside aria-label={t.discover} className="grid min-w-0 gap-3">
+      <aside aria-label={t.discover} className="min-w-0">
         <SuggestedAccounts onChange={() => { if (scope === "following") setRevision((current) => current + 1); }} />
-        <section className={institutionCard}>
-          <h2 className="text-lg font-semibold">{t.communityNews}</h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--theme-body)]">{t.newsEmpty}</p>
-        </section>
       </aside>
     </div>
   </MemberShell></TranslationEnabled.Provider>;
@@ -112,12 +155,12 @@ function SuggestedAccounts({ onChange }: { onChange: () => void }) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
   const resource = useInstitutionResource(loadSuggestions);
-  return <section className={institutionCard}>
-    <h2 className="text-lg font-semibold">{t.suggestedAccounts}</h2>
+  const hasSuggestions = Boolean(resource.data?.accounts.length);
+  return <section className={feedCard}>
+    <h2 className="text-base font-semibold">{hasSuggestions ? t.suggestedAccounts : t.discover}</h2>
     {resource.error !== null && <div className="mt-2"><ApiErrorNotice error={resource.error} retry={resource.refresh} /></div>}
     {!resource.data && resource.error === null && <p role="status" className="mt-2 text-sm">{t.working}</p>}
-    {resource.data && (resource.data.accounts.length ? <DiscoveryAccounts rows={resource.data.accounts} compact onChange={onChange} />
-      : <p className="mt-2 text-sm text-[var(--theme-body)]">{t.suggestionsEmpty}</p>)}
+    {hasSuggestions && resource.data && <div className="mt-3"><DiscoveryAccounts rows={resource.data.accounts} compact onChange={onChange} /></div>}
     <Link href="/discover" className={`${institutionLink} mt-3 inline-block`}>{discoveryMessages[locale].viewAll}</Link>
   </section>;
 }
@@ -160,10 +203,6 @@ function Timeline({ scope, revision, changed, refreshForYou }: {
   }
 
   return <section aria-label={title} className="grid gap-3">
-    {ranked && <div className="grid gap-2">
-      <RecommendationSettingsPanel onChange={refreshForYou} />
-      <button className={`${institutionLink} justify-self-start`} type="button" onClick={refreshForYou}>{r.refresh}</button>
-    </div>}
     {hidden?.size ? <p role="status" className="text-sm text-[var(--theme-link)]">{r.feedbackSaved}</p> : null}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={expired ? refreshForYou : resource.retry} />}
     {!resource.page && resource.error === null && <div role="status" aria-label={t.working} aria-busy="true" className="grid gap-3">
@@ -191,10 +230,13 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
   const mutation = useFeedMutation();
   const bookmark = usePostBookmark(post, onBookmarkChange);
   const social = socialMessages[locale];
-  const accountHref = post.social?.organization ? `/organization/${post.social.organization.handle}`
+  const organization = post.social?.organization;
+  const accountHref = organization ? `/organization/${organization.handle}`
     : post.author?.username ? `/members/${post.author.username}` : undefined;
   const name = post.social?.organization?.name ?? post.author?.displayName ?? (post.own ? t.you : t.unknownAuthor);
+  const handle = post.social?.organization?.handle ?? post.author?.username;
   const timestamp = post.publishedAt ?? post.createdAt;
+  const reactions = post.reactions;
   const editable = post.own && (post.status === "published" || post.status === "draft");
 
   async function remove() {
@@ -203,26 +245,37 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
 
   const saveAction = post.social && post.status === "published" ? [{ icon: "bookmark" as const,
     label: bookmark.value ? social.removeBookmark : social.bookmark, run: () => { void bookmark.toggle(); } }] : [];
-  return <article className={institutionCard}>
+  return <article className={feedCard}>
     {post.repostBy && <p className="mb-2 text-sm text-[var(--theme-body)]">
       {post.repostBy.username ? <Link className="hover:underline" href={`/members/${post.repostBy.username}`}>
         {social.repostedBy.replace("{actor}", post.repostBy.displayName)}</Link> : social.repostedBy.replace("{actor}", post.repostBy.displayName)}
     </p>}
     <header className="flex flex-wrap items-start justify-between gap-3">
-      <div className="flex min-w-0 items-center gap-3">
-        {post.author?.avatarUrl ? <Image src={post.author.avatarUrl} alt="" width={40} height={40}
-          className="size-10 shrink-0 rounded-full object-cover" unoptimized />
-          : <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-full bg-[var(--theme-selected)] font-semibold text-[var(--theme-link)]">
-            {Array.from(name)[0]?.toLocaleUpperCase(locale)}
-          </span>}
+      <div className="flex min-w-0 items-start gap-3">
+        <PostAuthorAvatar post={post} name={name} guest={guest} />
         <div className="min-w-0">
-          <p className="break-words font-semibold">
-            {accountHref ? <Link className="hover:underline" href={accountHref}>{name}</Link> : name}
-            {!post.social?.organization && !!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
-            {!post.social?.organization && post.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <p className="min-w-0 break-words font-semibold">
+              {accountHref ? <Link className="hover:underline" href={accountHref}>{name}</Link> : name}
+              {!organization && !!post.author?.personalClaims?.length && <>{" "}<PersonalClaimChecks claims={post.author.personalClaims} /></>}
+              {!organization && post.author?.founderVerified && <>{" "}<FounderVerifiedMark compact /></>}
+            </p>
+            {organization && <OrganizationPostBadges post={post} />}
+          </div>
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--theme-body)]">
+            {handle && <span className="break-all">@{handle}</span>}
+            {organization && handle && <span aria-hidden="true">·</span>}
+            <Link className="hover:underline" href={`/posts/${post.id}`} aria-label={mediaNotificationMessages[locale].openPost}
+              onClick={() => { if (returnScope) window.sessionStorage.setItem("ayinou-feed-scroll", `${returnScope}:${window.scrollY}`); }}>
+              <time dateTime={timestamp}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(timestamp))}</time>
+            </Link>
+            {organization && <span aria-hidden="true">·</span>}
+            <span lang={post.language}>{languageNames[post.language]}</span>
+            {organizationTimeline && post.social?.pinned && <span className="font-semibold">{social.pinned}</span>}
+            {post.editedAt && <span>{t.edited}</span>}
+            {((post.own && !organization) || post.visibility === "members_only" || post.visibility === "followers") && <span>{t[post.visibility]}</span>}
+            {post.status === "hidden" && <span>{t.hidden}</span>}
           </p>
-          {post.social?.organization && <p className="break-all text-xs text-[var(--theme-body)]">@{post.social.organization.handle}</p>}
-          {!post.social?.organization && post.author?.username && <p className="break-all text-xs text-[var(--theme-body)]">@{post.author.username}</p>}
         </div>
       </div>
       {!guest && !mode && (editable || (!post.own && !reported) || saveAction.length > 0) && <FeedActions label={t.postActions} actions={editable ? [
@@ -231,22 +284,9 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
         ...saveAction,
       ] : [...(!post.own && !reported ? [{ icon: "report" as const, label: t.report, run: () => setMode("report") }] : []), ...saveAction]} />}
     </header>
-    <p className="mt-2 flex flex-wrap gap-x-2 gap-y-1 text-xs text-[var(--theme-body)]">
-      <Link className="hover:underline" href={`/posts/${post.id}`} aria-label={mediaNotificationMessages[locale].openPost}
-        onClick={() => { if (returnScope) window.sessionStorage.setItem("ayinou-feed-scroll", `${returnScope}:${window.scrollY}`); }}>
-        <time dateTime={timestamp}>{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(timestamp))}</time>
-      </Link>
-      <span lang={post.language}>{languageNames[post.language]}</span>
-      {post.social?.announcement && <span className="font-semibold">{social.announcement}</span>}
-      {post.social?.organization?.verified && <span>{social.verifiedOrganization}</span>}
-      {organizationTimeline && post.social?.pinned && <span className="font-semibold">{social.pinned}</span>}
-      {post.editedAt && <span>{t.edited}</span>}
-      {(post.own || post.visibility === "members_only" || post.visibility === "followers") && <span>{t[post.visibility]}</span>}
-      {post.status === "hidden" && <span>{t.hidden}</span>}
-    </p>
     {mode === "edit" ? <PostComposer post={post} onCancel={() => setMode(null)}
       onSaved={(message) => { setMode(null); changed(message); }} /> :
-      <TranslatableText key={post.version} kind="post" id={post.id} language={post.language} allowed={!guest && post.visibility === "public" && post.status === "published" && !post.community && !post.social?.event} mentions={post.social?.mentions} hashtags={post.social?.hashtags} className="mt-4 max-w-[75ch] whitespace-pre-wrap break-words text-sm leading-6 sm:text-base"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></TranslatableText>}
+      <TranslatableText key={post.version} kind="post" id={post.id} language={post.language} allowed={!guest && post.visibility === "public" && post.status === "published" && !post.community && !post.social?.event} mentions={post.social?.mentions} hashtags={post.social?.hashtags} className="mt-3 max-w-[75ch] whitespace-pre-wrap break-words text-[0.95rem] leading-6 sm:text-base"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></TranslatableText>}
     {mode !== "edit" && !!post.topics?.length && <PostTopicLabels topics={post.topics} />}
     {mode !== "edit" && post.attachments && <PostMediaGallery post={post.id} attachments={post.attachments} guest={guest} />}
     {mode === "delete" && <div className="mt-4 grid gap-3">
@@ -276,10 +316,12 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
         }); }}>{post.social.pinned ? social.unpin : social.pin}</button>
       {mutation.error !== null && mode !== "delete" && <ApiErrorNotice error={mutation.error} />}
     </div>}
-    {recommendation}
-    {mode !== "edit" && <><QuotePreview post={post} />{!guest && <SocialPostControls post={post} bookmark={bookmark} onChange={() => changed("published")} />}</>}
-    {!guest && post.reactions && <PostDiscussion postId={post.id}>
-      <ReactionPicker target="posts" id={post.id} summary={post.reactions} />
-    </PostDiscussion>}
+    {mode !== "edit" && <QuotePreview post={post} />}
+    {!guest && mode !== "edit" && (reactions
+      ? <PostDiscussion postId={post.id}>
+          {(comments) => <SocialPostControls post={post} bookmark={bookmark} trailing={recommendation} onChange={() => changed("published")}
+            leading={<><ReactionPicker target="posts" id={post.id} summary={reactions} compact />{comments}</>} />}
+        </PostDiscussion>
+      : <SocialPostControls post={post} bookmark={bookmark} trailing={recommendation} onChange={() => changed("published")} />)}
   </article>;
 }
