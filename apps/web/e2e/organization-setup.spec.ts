@@ -208,7 +208,8 @@ test("O4 draft resumes across sessions and four locales with keyboard and respon
   await page.getByRole("button", { name: organizationSetupMessages.en.complete }).press("Enter");
   await expect(page.getByText(organizationSetupMessages.en.created, { exact: true })).toBeVisible();
   await page.getByRole("link", { name: organizationSetupMessages.en.manage }).click();
-  await expect(page.getByRole("combobox", { name: organizationSetupMessages.en.registration, exact: true })).toHaveValue("pursuing_registration");
+  await expect(page.getByRole("definition").getByText(organizationSetupMessages.en.status.pursuing_registration, { exact: true }))
+    .toBeVisible();
 });
 
 test("Recognized Founder can finish a new business draft without granting identity or claim authority", async ({ makeMember }) => {

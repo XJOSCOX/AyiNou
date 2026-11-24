@@ -68,7 +68,7 @@ test("Founder release checks routine and restricted capabilities across five rol
     expect((await apiCall(reviewer, "/api/v1/verification/review", 200)).applications)
       .toContainEqual(expect.objectContaining({ id: application, evidence: [evidence], assignedToMe: true }));
     expect((await apiCall(founder, "/api/v1/admin/accounts?q=" + member.handle, 200)).accounts)
-      .toContainEqual(expect.objectContaining({ id: member.id, personalClaims: [] }));
+      .toContainEqual(expect.objectContaining({ id: member.id, verified: false }));
     for (const actor of [founder, administrator]) {
       const dependencies = JSON.parse(sql(`select private.lifecycle_inventory('${actor.id}')->'dependencies';`));
       expect(dependencies).toContainEqual(expect.objectContaining({ kind: "privileged_role", disposition: "block" }));

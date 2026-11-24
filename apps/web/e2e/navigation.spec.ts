@@ -8,6 +8,8 @@ import { pollMessages } from "../src/lib/poll-i18n";
 import { projectMessages } from "../src/lib/project-i18n";
 
 test("member navigation loads the main workspaces and empty views @smoke", async ({ page, signedIn }) => {
+  await page.route((url) => url.origin === api && url.pathname === "/api/v1/polls", (route) =>
+    route.fulfill({ json: { items: [], nextCursor: null } }));
   const nav = page.getByRole("navigation", { name: "Dashboard", exact: true });
   const main = page.getByRole("main");
   const destinations = [

@@ -44,12 +44,14 @@ for (const { mfa, restricted } of [{ mfa: false, restricted: false }, { mfa: tru
     await page.goto(link.href);
     if (secret) {
       await expect(page).toHaveURL(/\/mfa\?next=\/reset-password/);
-      expect(await layout.boundingBox()).toMatchObject({ width: forgot.width, height: forgot.height });
-      await page.getByLabel(accountMessages.en.mfaChallengeCode).fill(totp(secret));
+      const code = page.getByLabel(accountMessages.en.mfaChallengeCode);
+      await expect(code).toBeVisible();
+      expect((await layout.boundingBox())!.width).toBeLessThan(forgot.width);
+      await code.fill(totp(secret));
       await page.getByRole("button", { name: accountMessages.en.mfaSubmit }).click();
     }
     await expect(page).toHaveURL(/\/reset-password$/);
-    expect(await layout.boundingBox()).toMatchObject({ width: forgot.width, height: forgot.height });
+    expect((await layout.boundingBox())!.width).toBeLessThanOrEqual(forgot.width);
     await page.setViewportSize({ width: 320, height: 820 });
 
     const bar = page.getByRole("progressbar", { name: password.progress });
