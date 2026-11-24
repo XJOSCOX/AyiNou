@@ -34,11 +34,17 @@ export async function proxy(request: NextRequest) {
       checkOnboarding ? supabase.rpc("member_experience_for_member") : null,
     ]);
     if (error) return new NextResponse(null, { status: 503, headers: { "Cache-Control": "no-store" } });
-    if (!live) {
+    const recoveryPath = request.nextUrl.pathname === "/reset-password" ||
+      (request.nextUrl.pathname === "/mfa" && request.nextUrl.searchParams.get("next") === "/reset-password");
+    const recovery = !live && recoveryPath ? await supabase.rpc("m22_recovery_session_active") : null;
+    if (!live && recovery?.data !== true) {
       const { data: eligible } = await supabase.rpc("s2a_observe_expiry");
       const destination = eligible === true ? "/login?session=ended" : "/account-access";
       const redirected = NextResponse.redirect(new URL(destination, request.url), { headers: { "Cache-Control": "no-store" } });
-      if (destination === "/account-access") return redirected;
+      if (destination === "/account-access") {
+        response.cookies.getAll().forEach((cookie) => redirected.cookies.set(cookie));
+        return redirected;
+      }
       for (const { name } of request.cookies.getAll()) {
         if (authCookieName(url, name) || name === rememberedSessionCookie) {
           redirected.cookies.set(name, "", { maxAge: 0, path: "/" });

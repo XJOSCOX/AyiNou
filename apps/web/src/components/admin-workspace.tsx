@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { f25FeaturePolicyKeys, platformRoles, type AccountStatus, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
+import { f25FeaturePolicyKeys, platformRoles, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
 import { adminSections, type AdminTab } from "@/lib/admin-navigation";
 import { feedLanguageMessages } from "@/lib/feed-language-i18n";
@@ -19,6 +19,9 @@ import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
 import { ModerationAppeals, ModerationList, ModerationOverview } from "./moderation-center";
+import { AdminAccountEnforcement } from "./admin-account-enforcement";
+import { EnforcementDetails } from "./account-enforcement-details";
+import { accountEnforcementMessages } from "@/lib/account-enforcement-i18n";
 import { TrustAdministration } from "./trust-workspace";
 import { AmbassadorAdministration } from "./ambassador-workspaces";
 import { LegalAdminPanel } from "./legal-admin-panel";
@@ -40,7 +43,6 @@ import { PolicyAuditHistory } from "./policy-audit-history";
 import { AdminSectionContext, useAdminRenewalPath } from "./admin-section-context";
 
 const metrics: (keyof AdminOverview)[] = ["members", "organizations", "recentMembershipEvents", "pendingVerifications", "restrictedAccounts", "recentAdminActions"];
-const statuses: AccountStatus[] = ["active", "suspended", "banned"];
 export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectionChange }: {
   workspaceAction: ReactNode; workspaceId: string; section: AdminTab; onSectionChange: (section: AdminTab) => void;
 }) {
@@ -119,6 +121,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {tab === "moderationHistory" && <ModerationList key={accountFilter ?? "history"} view="history" workspace={workspaceId} target={accountFilter} onNavigate={navigate} />}
               {tab === "moderationAppeals" && <ModerationAppeals reviewer={access.data?.reviewer === true} onNavigate={navigate} />}
               {tab === "accounts" && <AccountManagement key={accountFilter ?? "accounts"} initialQuery={accountFilter}
+                workspace={workspaceId} founder={access.data?.founder === true}
                 onHistory={(id) => navigate("moderationHistory", id)} onChange={overview.refresh} />}
               {tab === "audit" && <>
                 {access.data?.founder && <PolicyAuditHistory key={workspaceId} workspaceId={workspaceId} />}
@@ -169,15 +172,15 @@ export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
   </div>;
 }
 
-function AccountManagement({ initialQuery = "", onChange, onHistory }: {
-  initialQuery?: string; onChange: () => void; onHistory: (id: string) => void;
+function AccountManagement({ initialQuery = "", founder, workspace, onChange, onHistory }: {
+  initialQuery?: string; founder: boolean; workspace: string; onChange: () => void; onHistory: (id: string) => void;
 }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
   const [query, setQuery] = useState(initialQuery);
   const [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
-  const loader = useCallback((signal: AbortSignal) => loadAdminAccounts(query, offset, signal), [query, offset]);
+  const loader = useCallback((signal: AbortSignal) => loadAdminAccounts(query, offset, workspace, signal), [query, offset, workspace]);
   const accounts = useInstitutionResource(loader);
 
   function search(event: FormEvent<HTMLFormElement>) {
@@ -217,13 +220,20 @@ function AccountManagement({ initialQuery = "", onChange, onHistory }: {
           {moderationCenterMessages[locale].updated} · {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(account.restrictionUpdatedAt))}
         </p>}
         {account.reason && <p className="mt-1 break-words text-sm">{account.reason}</p>}
+        {account.enforcement && <div className="mt-4">
+          <EnforcementDetails notice={account.enforcement} />
+          <p className="mt-2 text-sm text-[var(--theme-body)]">{accountEnforcementMessages[locale].noticeReady}</p>
+        </div>}
         <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
           <button type="button" className={institutionLink} aria-expanded={selected === account.id}
             onClick={() => setSelected(selected === account.id ? null : account.id)}>{t.manage}</button>
           <button type="button" className={institutionLink} onClick={() => onHistory(account.id)}>{moderationCenterMessages[locale].accountHistory}</button>
         </div>
-        {selected === account.id && <AccountAction key={account.id} account={account}
-          onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />}
+        {selected === account.id && <>
+          <AdminAccountEnforcement key={account.restrictionRevision ?? account.id} account={account}
+            founder={founder} workspace={workspace} onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />
+          <AccountAction key={account.id} account={account} onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />
+        </>}
       </article>) : <p>{t.emptyAccounts}</p>}
     {(offset > 0 || accounts.data?.length === 25) && <div className="flex flex-wrap gap-3">
       {offset > 0 && <button type="button" className={institutionLink} onClick={() => setOffset(offset - 25)}>{t.previous}</button>}
@@ -235,8 +245,6 @@ function AccountManagement({ initialQuery = "", onChange, onHistory }: {
 function AccountAction({ account, onChange }: { account: AdminAccount; onChange: () => void }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
-  const protectedAccount = account.founder || account.roles.includes("administrator");
-  const [kind, setKind] = useState<"status" | "roles">(protectedAccount ? "roles" : "status");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
@@ -247,11 +255,8 @@ function AccountAction({ account, onChange }: { account: AdminAccount; onChange:
     const reason = String(form.get("reason") ?? "").trim();
     const option = form.get("value");
     const role = platformRoles.find((item) => item === option);
-    const status = statuses.find((item) => item === option);
-    const input: AdminAccountAction | null = kind === "roles" && role
-      ? { action: account.roles.includes(role) ? "revoke" : "grant", value: role, reason }
-      : kind === "status" && status ? { action: "status", value: status, reason } : null;
-    if (!input) return;
+    if (!role) return;
+    const input: AdminAccountAction = { action: account.roles.includes(role) ? "revoke" : "grant", value: role, reason };
     setError(null);
     setBusy(true);
     try { await changeAdminAccount(account.id, input); onChange(); }
@@ -260,16 +265,10 @@ function AccountAction({ account, onChange }: { account: AdminAccount; onChange:
   }
 
   return <form onSubmit={submit} className="mt-3 grid gap-3 border-t border-[var(--theme-border)] pt-3 sm:max-w-xl" aria-busy={busy}>
-    <label className="text-sm font-semibold">{t.action}
-      <select className={institutionField} value={kind} disabled={busy} onChange={(event) => setKind(event.target.value === "roles" ? "roles" : "status")}>
-        {!protectedAccount && <option value="status">{t.changeStatus}</option>}<option value="roles">{t.changeRole}</option>
-      </select>
-    </label>
-    <label className="text-sm font-semibold">{t.value}
-      <select key={kind} className={institutionField} name="value" required defaultValue="" disabled={busy}>
+    <label className="text-sm font-semibold">{t.changeRole}
+      <select className={institutionField} name="value" required defaultValue="" disabled={busy}>
         <option value="" disabled>{t.select}</option>
-        {kind === "status" ? statuses.filter((status) => status !== account.status).map((status) =>
-          <option key={status} value={status}>{t[status]}</option>) : platformRoles.filter((role) => role !== "administrator").map((role: PlatformRole) =>
+        {platformRoles.filter((role) => role !== "administrator").map((role: PlatformRole) =>
           <option key={role} value={role} disabled={!account.roles.includes(role) && !account.totp}>
             {account.roles.includes(role) ? t.revoke : t.grant} · {t[role]}
           </option>)}

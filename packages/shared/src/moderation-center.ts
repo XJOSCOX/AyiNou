@@ -3,7 +3,8 @@ export const moderationDomains = ["feed", "communities", "events", "projects", "
 export const moderationStatuses = ["pending", "closed", "resolved", "dismissed", "restricted", "substantiated",
   "restored", "suspended", "banned", "provider_ban", "recorded", "hidden", "removed"] as const;
 export const moderationHistoryActions = ["hide", "restore", "remove", "dismiss", "restricted", "restored", "dismissed",
-  "account_suspended", "account_banned", "account_reinstated", "institution_restricted"] as const;
+  "account_suspended", "account_banned", "account_reinstated", "institution_restricted",
+  "suspension_created", "suspension_extended", "restriction_expired", "restriction_revoked", "ban_issued", "ban_lifted"] as const;
 
 export type ModerationCenterView = (typeof moderationCenterViews)[number];
 export type ModerationDomain = (typeof moderationDomains)[number];
@@ -20,6 +21,7 @@ export interface ModerationSummary {
   occurredAt: string | null;
   expiresAt: string | null;
   actorRef: string | null;
+  caseReference?: string | null;
 }
 
 export interface ModerationCenterMetrics {

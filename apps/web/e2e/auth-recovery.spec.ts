@@ -2,21 +2,23 @@ import { createClient } from "@supabase/supabase-js";
 import { accountMessages } from "../src/lib/account-i18n";
 import { authMessages } from "../src/lib/auth-i18n";
 import { passwordSecurityMessages } from "../src/lib/password-security-i18n";
-import { enroll, expect, finishPersonalOnboarding, inEnglish, login, test, totp } from "./fixtures";
+import { enroll, expect, finishPersonalOnboarding, inEnglish, login, sql, test, totp } from "./fixtures";
 
 const t = authMessages.en;
 const password = passwordSecurityMessages.en;
 const supabase = "http://127.0.0.1:55321";
 const mailbox = "http://127.0.0.1:55324/api/v1";
 
-for (const mfa of [false, true]) {
-  test(`password recovery uses the verified account and fresh session${mfa ? " through MFA @smoke" : ""}`, async ({
+for (const { mfa, restricted } of [{ mfa: false, restricted: false }, { mfa: true, restricted: false }, { mfa: true, restricted: true }]) {
+  test(`password recovery uses the verified account and fresh session${restricted ? " while suspended" : ""}${mfa ? " through MFA @smoke" : ""}`, async ({
     page, context, makeMember,
   }) => {
     const [target, other] = await Promise.all([makeMember(), makeMember()]);
     finishPersonalOnboarding(target);
     finishPersonalOnboarding(other);
     const secret = mfa ? await enroll(target) : null;
+    if (restricted) sql(`insert into private.account_restrictions(user_id,status,reason)
+      values ('${target.id}','suspended','Synthetic recovery restriction');`);
     await inEnglish(context);
     await page.setViewportSize({ width: 1440, height: 900 });
     await login(page, other);
@@ -77,6 +79,6 @@ for (const mfa of [false, true]) {
       .toBe("invalid_credentials");
     expect((await verifier.auth.signInWithPassword({ email: other.email, password: other.password })).error).toBeNull();
     await login(page, { ...target, password: updated });
-    await expect(page).toHaveURL(secret ? /\/mfa/ : /\/dashboard/);
+    await expect(page).toHaveURL(restricted ? /\/account-access/ : secret ? /\/mfa/ : /\/dashboard/);
   });
 }

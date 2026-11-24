@@ -8,10 +8,13 @@
     }
   },
   "symbols": {
+    "accountEnforcementCategories": "value:559f56d0cb7401732c5dca77b71403aa13ed70296432ddf15bda0ae977d79249",
+    "AccountEnforcementCategory": "type:e1297814d3ee52cdfa0af039b8bc4009338ff24ce0ab6439a9794829ab3914e8",
+    "AccountEnforcementNotice": "type:c71531eefea03733a77c66cc24d7c18c73fff14bb05664f4186315dcf55cce30",
     "AccountStatus": "type:5af2f22f3f54680b0f22e3f7381031cc362aa3830ef4a946872505d5c9e0ce18",
     "ActiveSession": "type:0732e6fdc82f1a12ed87f3bb50117206d1d94c90d34604964b60255208cbe7df",
     "ActiveSessionList": "type:8f6345ddfb3b55c2b89b442e1a14f3d6da7acec3cb16cfcc1cebc94680539e75",
-    "AdminAccount": "type:3854315271ad7456abc0a2645539892b77d851178da8d69304666168f16d6d9e",
+    "AdminAccount": "type:aebbaef6ba2df47591c35e31b0abe3e45cb650561bcb328e54d1c245f6d94db9",
     "AdminAccountAction": "type:c8781d2d398c3170136f97fa0543f81aa17f54fb165444483508113805ba2ba8",
     "AdminAuditEvent": "type:201a5c5452b465762fc136a9eb93a58ae94e335c66ef03667e30916308dfa42b",
     "AdminOverview": "type:60d96b7d506175495c515c660846278b8c9aeef6b1b177c1244530f4656a4ae0",
@@ -87,6 +90,7 @@
     "EarlyPartnerProgram": "type:345a9e39734248a60af7aa90e15ded1e0001233a99f6051269ae59459e1e10bd",
     "EarlyPartnerState": "type:e6a22a1f98ee0ad300b17a398022df1500a31a1db09c41172e8cc0b82db13da0",
     "EarlyPartnerWorkspace": "type:1abf5040b136f35a32e58f229c6ea4267acd24aa0e0aac601c7a53c56313accb",
+    "EnforcementAction": "type:e539def3ad78a2804692a777dce137c81d69fc647f54642a4e067ebd3f9a3553",
     "eventCategories": "value:588b43d45393e9f6028202c994f4e58c1ea213822ee55bcb2acc5fec89aa1f00",
     "EventCategory": "type:fc96b07ec88cfd5756a80dcf22bce21dfec59bc47e0545393b5257ad89f315ce",
     "EventFormat": "type:2b79c08157328784a1977a9ea3402ab7356da8d14de33720da5d74c8672e041c",
@@ -169,6 +173,8 @@
     "lifecycleWarnings": "value:bde744d33d452182af5816ae238d933e123fb2fb644b8634ccd48e4f244ba4be",
     "Locale": "type:cfab49dcd47d920ceea4e43be327db91e984d065ac8cacc2b3b96ed984cfa489",
     "locales": "value:5754755983d2448d8820de92be6a01aa90921ee2c1fb68db7dd90312482ab915",
+    "maxSuspensionMinutes": "value:4a30d4629021a811187b8a310566d37f51419c4e055cbce4c4e2388bd793e596",
+    "MemberAccountEnforcement": "type:a077e9ffb9eeee521a0fcff547e99dfa7a689ae50ec56076f4735ffe2c4a62ec",
     "MemberAppealDecision": "type:543a5c9c62bb12534fba02ee5f75991857cb8c0cecb449adf87ab686dbdc0f42",
     "MemberExperience": "type:8b5b55587121809281219f577f8b49e374e1e9772e73bfb8f1c46135c4510a9d",
     "MemberExperienceFlag": "type:9197a07413f785abbd01fcf20d3cbb28d89773aed6e4ade33ba00e195e3155e6",
@@ -192,10 +198,10 @@
     "moderationCenterViews": "value:c0c87941adc058e3eebc70596f0f41c380486bc7e4dbcdb8e821626366817118",
     "ModerationDomain": "type:04a7d08f9cae1566f32f4175cda1c1576779473c55fbbf96d7632091ddaa2761",
     "moderationDomains": "value:4326477047b2dddbdfece5aa8b6dfc42b08dff2ee45baef7bc33ad6f97b1dcc9",
-    "moderationHistoryActions": "value:133630d52b682c4e9d92a390ec80e5d38e0cda867665201fcc08c5f951e6d64f",
+    "moderationHistoryActions": "value:0e4494910da19e901a9f4b09274ea8ed071a672f3b9bf99aa1a635bd9376a449",
     "ModerationScope": "type:3ab63e4516193cd957a85d1fa4857072b9accbadf6645194aaf492580b736985",
     "moderationStatuses": "value:11698789f03624aa4e2001e0ffb3114762e02a24995bc5bd72bd7188bb71a0f0",
-    "ModerationSummary": "type:f279247967363f16181624a14c76ef9657d56deb7393758b49f94fc492ec7b77",
+    "ModerationSummary": "type:5c6c0547690bce27ee4ea1f8136ecde2dc17f0faff4694667d8a7773ca16d927",
     "MyAffiliations": "type:e9d1a45bb46bfe782eb839867579b3bdccb797ba664a28e17395f98ecd71c801",
     "normalizePublicUsername": "value:d70dc898ce23c7f6ddfca81993530ce528d90978a448d1b953dc2f56d4c6cf51",
     "NotificationPage": "type:c5f0a7c9792b4f9a5c960ca07de7025fe40127c8a6278197514bdab5e617ae5c",
@@ -336,6 +342,7 @@
     "SocialPostInfo": "type:69159b1a02aa5579e8f8ecbf7d94d141d81d5db95c8e9241727ad54ac7c39c41",
     "SocialPrivacy": "type:937f14607a1c2092604ebc2221633a286c40d3068a0626b23a5e6f52202c0a08",
     "StatusResponse": "type:bc13ad0e66a811fe283af87bbcf151d79cfa16d49663ff46b98018565d0459ff",
+    "suspensionMinutes": "value:ee6445e6971118deb2b763a6c6ff575b19e94fbec367edc8378b2599fc528844",
     "UpdateMemberProfile": "type:c096b49445347f2052c4afc8e8b07d8317425e21c9f6cf09319f5f2af29daa90",
     "UsernameAvailability": "type:208d313cc04cee671d0ec3c6c0f738370991d6b15846712572656bb9bc966d4f",
     "VerificationAppeal": "type:14003233a9a40b18831272ef5d9454c973964b04bc833e058913310cc9dbcdac",
@@ -359,10 +366,18 @@
     "CommentPosition": "5df097e303664afdbec2e7eafcbed3af365b9f11192eaa1f9774b335ec7815e5",
     "Decision": "ef732a66483fce22eaa7fe869ec1e5096016fd2e9199574440cf40ed2b7f11b5",
     "DiscoveryCardBase": "69b892e7a10fb8f268aa238ac0e5d1ba769d657f5c6cee7dcd1811454eda3996",
+    "EnforcementRequest": "b3251a98bc3e7802030af9daec26cdf861bed31905281a6e42de0547c7d96b18",
     "FounderCaseEvent": "cfc94ae19ef6b0e89938d47aaff4c18e9266c731635dc0cc33fcd98cf3339872",
     "PollScopeOption": "22e329c97789758409c871c4d6468cc06d4c5408dd12dd84e7ca247e504b9a14"
   },
   "runtime": {
+    "accountEnforcementCategories": [
+      "safety",
+      "harassment",
+      "spam",
+      "integrity",
+      "other"
+    ],
     "affiliationActions": [
       "suspend",
       "reinstate",
@@ -680,6 +695,7 @@
       "en",
       "es"
     ],
+    "maxSuspensionMinutes": 129600,
     "memberExperienceFlags": [
       "onboardingEnabled",
       "requireCompletion",
@@ -741,7 +757,13 @@
       "account_suspended",
       "account_banned",
       "account_reinstated",
-      "institution_restricted"
+      "institution_restricted",
+      "suspension_created",
+      "suspension_extended",
+      "restriction_expired",
+      "restriction_revoked",
+      "ban_issued",
+      "ban_lifted"
     ],
     "moderationStatuses": [
       "pending",
@@ -985,6 +1007,14 @@
       "rejected",
       "revoked",
       "closed"
+    ],
+    "suspensionMinutes": [
+      60,
+      1440,
+      4320,
+      10080,
+      43200,
+      129600
     ],
     "verificationAppealOutcomes": [
       "upheld",

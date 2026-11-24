@@ -1,6 +1,35 @@
 {
   "features": [
     {
+      "id": "m22-account-enforcement",
+      "report": "docs/moderation/M2_2_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "PATCH /api/v1/admin/accounts/:id",
+          "contract": "PATCH /api/v1/admin/accounts/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Account enforcement changes and decision events commit together in the private M2.2 ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/account-enforcement.spec.ts",
+            "denialScenario": "Administrator ban, protected targets, moderator action, stolen workspace and legacy status mutations are denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123132000_m22_account_enforcement.sql",
+          "rlsAndGrants": "Private case, event and session fence tables are RLS protected. The command is service-only. Notice and password recovery checks are authenticated and caller-bound.",
+          "authorization": "Live Founder or Administrator, original-session workspace, recent MFA, ordinary target and exact request/revision are checked by PostgreSQL.",
+          "compatibility": "Legacy sanctions and audit rows survive intact. The legacy status writer cannot issue or lift sanctions, while role actions and read shapes remain compatible.",
+          "validation": "Disposable PostgreSQL, API and browser tests cover expiry boundaries, repeat actions, notices, historical read redaction and legacy bypass denial.",
+          "rolloutAndRollback": "Apply only the exact approved migration. Keep data and the closed legacy write channel in place during application rollback and use forward remediation."
+        }
+      ]
+    },
+    {
       "id": "m21-moderation-center",
       "report": "docs/moderation/M2_1_IMPLEMENTATION_REPORT.md",
       "routes": [

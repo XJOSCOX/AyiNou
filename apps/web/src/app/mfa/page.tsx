@@ -25,7 +25,9 @@ export default async function MfaPage({ searchParams }: { searchParams: Promise<
   if (claims.error || !session?.sub || typeof session.session_id !== "string" || session.is_anonymous) redirect("/login");
   if (requested === "/reset-password" && !recoverySessionId(session)) redirect("/forgot-password?error=verification");
   const [user, { data: live }] = await Promise.all([supabase.auth.getUser(), supabase.rpc("account_session_active")]);
-  if (!live || user.error || user.data.user?.id !== session.sub) redirect("/login");
+  const securityOnly = !live && requested === "/reset-password" &&
+    (await supabase.rpc("m22_recovery_session_active")).data === true;
+  if ((!live && !securityOnly) || user.error || user.data.user?.id !== session.sub) redirect("/login");
   if (requested === "/admin" || requested === "/verification/review") redirect(`${requested}?verify=1`);
   if (session.aal === "aal2" && !privileged) redirect(next);
   const factors = user.data.user.factors?.filter((factor) => factor.status === "verified") ?? [];

@@ -102,6 +102,9 @@ export type AccountStatus = "active" | "suspended" | "banned";
 export type PlatformAccess = { administrator: boolean; reviewer: boolean; totp: boolean; founder?: boolean; founderVerified?: boolean };
 export type AdminOverview = Record<"members" | "organizations" | "recentMembershipEvents" | "pendingVerifications" | "restrictedAccounts" | "recentAdminActions", number>;
 export interface AdminAccount {
+  enforcement?: import("./account-enforcement").AccountEnforcementNotice | null;
+  restrictionRevision?: string | null;
+  enforcementEligible?: boolean;
   bootstrapTrust?: boolean;
   personalClaims?: PersonalClaim[];
   founder?: boolean;

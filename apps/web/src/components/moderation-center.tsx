@@ -6,6 +6,7 @@ import {
   moderationDomains, moderationHistoryActions, moderationStatuses,
   type ModerationCenterMetrics, type ModerationCenterPage, type ModerationCenterView, type ModerationSummary,
 } from "@ayinou/shared";
+import { accountEnforcementMessages } from "@/lib/account-enforcement-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
 import type { AdminTab } from "@/lib/admin-navigation";
 import { authorizedRequest } from "@/lib/api";
@@ -98,6 +99,7 @@ export function ModerationList({ workspace, view, onNavigate, target }: {
   const [locale] = useLocale();
   const t = moderationCenterMessages[locale];
   const common = adminMessages[locale];
+  const actions: Record<string, string> = { ...t, ...accountEnforcementMessages[locale] };
   const [filters, setFilters] = useState(view === "reports" ? "status=pending" : "");
   const dated = view === "reports" || view === "history";
   const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
@@ -153,7 +155,7 @@ export function ModerationList({ workspace, view, onNavigate, target }: {
         {view === "history" && <label className="text-sm font-semibold">{t.action}
           <select name="action" className={institutionField}>
             <option value="">{t.all}</option>
-            {moderationHistoryActions.map((action) => <option value={action} key={action}>{t[action]}</option>)}
+            {moderationHistoryActions.map((action) => <option value={action} key={action}>{actions[action]}</option>)}
           </select>
         </label>}
         {dated && <>
@@ -182,7 +184,7 @@ function ModerationRow({ row, view, onNavigate, format }: {
 }) {
   const [locale] = useLocale();
   const t = moderationCenterMessages[locale];
-  const labels: Record<string, string> = t;
+  const labels: Record<string, string> = { ...accountEnforcementMessages[locale], ...t };
   const feed = feedMessages[locale];
   const categories: Record<string, string> = { harassment: feed.harassment, hate: feed.hate, spam: feed.spam, privacy: feed.privacy, other: feed.other };
   const contentTool = row.scopeKey ? "/communities/" + encodeURIComponent(row.scopeKey) + "/moderation" : "/feed/moderation";
@@ -199,6 +201,8 @@ function ModerationRow({ row, view, onNavigate, format }: {
     </div>
     <dl className="grid gap-x-5 gap-y-1 text-sm text-[var(--theme-body)] sm:grid-cols-2">
       <div className="min-w-0"><dt className="font-semibold">{t.reference}</dt><dd className="break-all">{row.source}:{row.id}</dd></div>
+      {row.caseReference && <div className="min-w-0"><dt className="font-semibold">{accountEnforcementMessages[locale].reference}</dt>
+        <dd className="break-all">{row.caseReference}</dd></div>}
       <div className="min-w-0"><dt className="font-semibold">{t.target}</dt><dd className="break-words">{t[row.target]}{row.scopeKey && " · " + row.scopeKey}</dd></div>
       <div><dt className="font-semibold">{t.updated}</dt><dd>{row.occurredAt
         ? <time dateTime={row.occurredAt}>{format.format(new Date(row.occurredAt))}</time> : t.effectiveUnknown}</dd></div>

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { platformRoles, type PlatformAccess } from "@ayinou/shared";
+import { accountEnforcementCategories, maxSuspensionMinutes, platformRoles, type PlatformAccess } from "@ayinou/shared";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
 import { registerAdminLegalRoutes } from "./legal-publication.js";
@@ -10,6 +10,18 @@ const reason = z.string().trim().min(10).max(500).refine((value) => !/\p{Cc}/u.t
 const actionInput = z.discriminatedUnion("action", [
   z.strictObject({ action: z.literal("status"), value: z.enum(["active", "suspended", "banned"]), reason }),
   z.strictObject({ action: z.enum(["grant", "revoke"]), value: z.enum(platformRoles), reason }),
+]);
+
+const enforcementRequest = {
+  expected: z.uuid().nullable(), requestId: z.uuid(), reason, confirmed: z.literal(true),
+};
+const minutes = z.number().int().min(1).max(maxSuspensionMinutes);
+const category = z.enum(accountEnforcementCategories);
+const enforcement = z.discriminatedUnion("action", [
+  z.strictObject({ ...enforcementRequest, action: z.literal("suspend"), minutes, category }),
+  z.strictObject({ ...enforcementRequest, action: z.literal("extend"), minutes, reference: z.uuid() }),
+  z.strictObject({ ...enforcementRequest, action: z.literal("ban"), category }),
+  z.strictObject({ ...enforcementRequest, action: z.enum(["lift", "lift_legacy"]), reference: z.uuid() }),
 ]);
 
 export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null, founderBootstrapEnabled = false) {
@@ -58,6 +70,14 @@ export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifi
         throw new InstitutionError("MFA_REQUIRED", 403);
       }
     });
+    async function enforcementAccess(token: string, rawWorkspace: unknown) {
+      const workspace = z.uuid().safeParse(rawWorkspace);
+      if (!workspace.success) throw new InstitutionError("FORBIDDEN", 403);
+      const session = await auth?.verifySession?.(token, true);
+      if (!session) throw new InstitutionError("MFA_REQUIRED", 403);
+      return { p_actor: session.actor, p_session: session.session, p_aal2: session.aal2,
+        p_totp: session.totpAt ?? null, p_workspace: workspace.data };
+    }
     admin.get("/api/v1/admin/overview", async (request) => repo!.rpc("admin_overview_for_api", { p_actor: request.authUserId }));
     admin.get("/api/v1/admin/safety", async (request) => repo!.rpc("safety_overview_for_api", { p_actor: request.authUserId }));
     admin.get("/api/v1/admin/accounts", async (request) => {
@@ -65,11 +85,27 @@ export async function registerAdminRoutes(app: FastifyInstance, auth: AuthVerifi
         q: z.string().trim().max(100).default(""),
         offset: z.string().regex(/^\d{1,5}$/).transform(Number).pipe(z.number().max(10000)).optional(),
       }).parse(request.query);
+      const workspace = request.headers["x-ayinou-workspace"];
+      if (workspace !== undefined) {
+        const binding = await enforcementAccess(request.authToken!, workspace);
+        return { accounts: await repo!.rpc("m22_admin_accounts_for_api", { ...binding, p_query: q, p_offset: offset ?? 0 }) };
+      }
       return { accounts: await repo!.rpc("admin_accounts_for_api", { p_actor: request.authUserId, p_query: q, p_offset: offset ?? 0 }) };
     });
     admin.patch("/api/v1/admin/accounts/:id", { bodyLimit: 4096 }, async (request, reply) => {
       const { id } = z.object({ id: z.uuid() }).parse(request.params);
-      const { action, value, reason } = actionInput.parse(request.body);
+      const command = actionInput.or(enforcement).parse(request.body);
+      if (!("value" in command)) {
+        const binding = await enforcementAccess(request.authToken!, request.headers["x-ayinou-workspace"]);
+        return repo!.rpc("m22_enforce_account_for_api", {
+          ...binding, p_subject: id, p_action: command.action, p_expected: command.expected,
+          p_request: command.requestId, p_reason: command.reason, p_confirmed: command.confirmed,
+          p_minutes: "minutes" in command ? command.minutes : null,
+          p_category: "category" in command ? command.category : null,
+          p_case: "reference" in command ? command.reference : null,
+        });
+      }
+      const { action, value, reason } = command;
       await repo!.rpc("admin_account_action_for_api", {
         p_actor: request.authUserId, p_subject: id, p_action: action, p_value: value, p_reason: reason,
       });

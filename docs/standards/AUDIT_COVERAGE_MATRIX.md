@@ -89,6 +89,10 @@ See the [verified audit source inventory](../audit/A1A_SOURCE_INVENTORY.md) and 
 
 The private center reads native A1A account and Feed events, scoped content actions, event decisions, project report decisions and institution restrictions. This projection emits no new moderation actions. The API and database require the original private Admin workspace, recent MFA and live authority. Evidence and free-text reasons stay in the native authorized workflows. [M2.1 field and coverage boundaries](../moderation/M2_1_IMPLEMENTATION_REPORT.md#authorization-and-evidence)
 
+## M2.2 Account enforcement
+
+New account decisions atomically append to the private enforcement ledger. Natural expiry has a stable event ID recorded with the case and is projected at the database expiry boundary. The existing A1A and Moderation Center histories display safe native references. Member notices show only their own case, category and time information. [M2.2 details](../moderation/M2_2_IMPLEMENTATION_REPORT.md)
+
 ## Founder Verified live-proof candidate
 
 Member account-control confirmation and Founder attestation use the existing Founder event ledger and its transactional command receipts. Retain original application supersession reasons and closure provenance. The private proof session remains outside general audit reads. [Founder Verified audit](../identity/FOUNDER_VERIFIED_COMPLETION_AUDIT.md)

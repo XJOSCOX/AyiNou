@@ -2,6 +2,7 @@ export * from "./core";
 export * from "./trust";
 export * from "./verification-policy";
 export * from "./accounts";
+export * from "./account-enforcement";
 export * from "./session-security";
 export * from "./audit";
 export * from "./moderation-center";

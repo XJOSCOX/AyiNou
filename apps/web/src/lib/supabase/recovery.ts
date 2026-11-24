@@ -11,7 +11,8 @@ export async function readRecoverySession() {
     supabase.auth.getUser(),
     supabase.rpc("account_session_active"),
   ]);
-  if (!live || !user.user || user.user.id !== claims?.sub) return null;
+  const securityOnly = live !== true && (await supabase.rpc("m22_recovery_session_active")).data === true;
+  if ((!live && !securityOnly) || !user.user || user.user.id !== claims?.sub) return null;
   const needsMfa = claims.aal !== "aal2" && !!user.user.factors?.some((factor) => factor.status === "verified");
   return { supabase, sessionId, needsMfa };
 }

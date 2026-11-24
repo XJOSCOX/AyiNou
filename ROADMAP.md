@@ -10,9 +10,10 @@
 
 - [x] M1 audited moderation, enforcement, appeal and audit coverage.
 - [x] M2.1 adds a read-only Moderation Center to private Platform Administration. Local acceptance and hosted migration status are recorded separately.
-- [ ] Future enforcement phases depend on the approved policy baseline and their own implementation review.
+- [x] M2.2 adds temporary account suspensions, Founder-only bans, authorized reinstatement and member notices.
+- [ ] Scoped enforcement and independent account appeal adjudication remain future phases.
 
-[M1 audit](docs/moderation/M1_AUDIT_SUMMARY.md) · [M2.1 implementation](docs/moderation/M2_1_IMPLEMENTATION_REPORT.md) · [Approved policy baseline](docs/moderation/M2_APPROVED_POLICY_BASELINE.md)
+[M1 audit](docs/moderation/M1_AUDIT_SUMMARY.md) · [M2.1 implementation](docs/moderation/M2_1_IMPLEMENTATION_REPORT.md) · [M2.2 implementation](docs/moderation/M2_2_IMPLEMENTATION_REPORT.md) · [Approved policy baseline](docs/moderation/M2_APPROVED_POLICY_BASELINE.md)
 
 ## Phase 0 — Foundation (COMPLETE)
 

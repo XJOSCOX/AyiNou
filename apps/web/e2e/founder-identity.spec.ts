@@ -6,6 +6,7 @@ import { institutionMessages } from "../src/lib/institution-i18n";
 import { founderMessages } from "../src/lib/founder-i18n";
 import { trustMessages } from "../src/lib/trust-i18n";
 import { adminMessages } from "../src/lib/admin-i18n";
+import { moderationCenterMessages } from "../src/lib/moderation-center-i18n";
 import { membershipMessages } from "../src/lib/membership-i18n";
 import { messages } from "../src/lib/i18n";
 import { api, apiCall, expect, finishPersonalOnboarding, inEnglish, login, openAdministration, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
@@ -446,10 +447,10 @@ founderTest("formal Founder provenance gives routine admin authority and reserve
   await apiCall(founder, "/api/v1/admin/overview", 200);
   await apiCall(ordinaryAdmin, "/api/v1/admin/overview", 200);
   const member = await makeMember();
-  await action(founder, member, { action: "status", value: "suspended" }, 204);
-  await action(ordinaryAdmin, member, { action: "status", value: "active" }, 204);
+  await action(founder, member, { action: "status", value: "suspended" }, 403);
+  await action(ordinaryAdmin, member, { action: "status", value: "active" }, 403);
   expect(sql(`select count(*) from private.platform_admin_audit where subject_id='${member.id}'
-    and event in ('account_suspended','account_reinstated');`)).toBe("2");
+    and event in ('account_suspended','account_reinstated');`)).toBe("0");
   await action(ordinaryAdmin, founder, { action: "status", value: "suspended" }, 409);
   await action(ordinaryAdmin, founder, { action: "revoke", value: "founder" }, 400);
   await action(ordinaryAdmin, member, { action: "grant", value: "founder" }, 400);
@@ -504,9 +505,11 @@ founderTest("formal Founder provenance gives routine admin authority and reserve
       await expect(blue).toHaveCSS("color", "rgb(25, 86, 165)");
       await expect(blue.locator("img")).toHaveAttribute("src", "/verified.png");
       await expect(blue.locator("img")).toHaveJSProperty("naturalWidth", 100);
-      await expect(gold).toBeHidden();
-      await page.getByText(founderMessages.en.verificationDetails, { exact: true }).click();
       await expect(gold).toBeVisible();
+      const meaning = page.getByText(founderMessages.en.badgeMeaning, { exact: true });
+      await expect(meaning).toBeHidden();
+      await page.getByText(founderMessages.en.verificationDetails, { exact: true }).click();
+      await expect(meaning).toBeVisible();
 
       await apiCall(founder, founderAction, 200, "POST", decision("revoke", 4, "account_risk"));
       await page.reload();
@@ -700,8 +703,8 @@ founderTest("Founder can turn homepage Community Statistics off and back on with
     await openAdministration(page);
     const navigation = page.getByRole("navigation", { name: t.administration });
     const settings = navigation.getByRole("region", { name: t.navigationSettings });
-    const members = navigation.getByRole("region", { name: t.navigationMembers });
-    await expect(members.getByRole("button", { name: t.accounts, exact: true })).toBeVisible();
+    const moderation = navigation.getByRole("region", { name: moderationCenterMessages.en.title });
+    await expect(moderation.getByRole("button", { name: t.accounts, exact: true })).toBeVisible();
     await expect(settings.getByRole("button", { name: t.homepage, exact: true })).toBeVisible();
 
     await page.setViewportSize({ width: 390, height: 844 });
