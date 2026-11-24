@@ -28,11 +28,11 @@ PostgreSQL time determines decision and expiry boundaries. Restriction writes an
 
 ## Validation and CI
 
-Local verification uses a disposable Supabase/PostgreSQL project and local Next.js and Fastify processes. The M2.3 suite exercises authorization, live database enforcement, expiry, overlap, audit visibility, and notices in four languages. M2.1 and M2.2 regression suites exercise existing moderation reads and account enforcement.
+Local verification passed TypeScript, ESLint, shared contracts, four-language translation checks, client error tests, 53 API tests, two web environment tests, engineering standards, and the local production build. A ten-test disposable browser run passed M2.1, M2.2, M2.3, events, groups, and polls. The final four-test run exercised the delegated browser workspace, alternate organization and event publishing paths, direct database writes, duration and scope limits, protected ballots, audit visibility, and notices in four languages.
 
 ## Documentation and operations
 
-The migration is `20261123133000_m23_feature_restrictions.sql`. Hosted rollout requires a dry run showing this exact migration, successful local checks, and approval for the linked project. Verify the migration history, protected roles, existing account state, and connected local application after applying it.
+The approved migration `20261123133000_m23_feature_restrictions.sql` was applied to hosted AyiNou project `hcbxulyfmdmuyccgrujs` on November 23, 2026. The postflight dry run showed an up-to-date database. Read-only checks confirmed all 25 entries, the previous M2.2 migration, the same Founder and Administrator counts, unchanged account case, ledger and legacy counts, authenticated member notice access, and service-only staff authority. The local web served the new Account access section. The rebuilt local API returned the expected health, public read, and authorization responses against the hosted configuration. Synthetic enforcement decisions were exercised on the disposable instance.
 
 ## Remaining blockers
 
