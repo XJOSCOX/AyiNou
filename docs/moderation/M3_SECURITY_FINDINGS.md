@@ -9,7 +9,7 @@
 
 ## M3-01 · Project restrictions and newer proposal transitions
 
-**Severity:** High. **Status:** Code corrected. Rollout status is recorded with the [test results](M3_TEST_RESULTS.md).
+**Severity:** High. **Status:** Corrected and verified on the hosted database. [Test and rollout evidence](M3_TEST_RESULTS.md)
 
 The established project capability guard covers initial submission on the project row. Later project code introduced a pending review state and a distinct publication field. Those two ordinary mutations did not share the project submission guard. The source trace compared the effective status-based guard with the current review and directory writers. No hosted mutation was used to establish the finding.
 
