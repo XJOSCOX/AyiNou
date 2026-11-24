@@ -43,4 +43,4 @@ The roadmap, engineering review and audit inventory record M2.2. Hosted prefligh
 
 ## Remaining blockers
 
-The owner approved the exact M2.2 migration on linked AyiNou project `hcbxulyfmdmuyccgrujs`. The rollout and connected application checks are tracked separately. Independent account appeal intake and feature-specific restrictions are future work.
+The approved migration `20261123132000_m22_account_enforcement` was applied to linked AyiNou project `hcbxulyfmdmuyccgrujs` from implementation commit `d4d82a5d40d01e38fb816eb47cffbc6ea6e0337e`. Postflight confirmed no pending migrations, preserved legacy and Founder verification history, verified RLS, service-only command execution, caller-bound notices and the closed legacy status writer. The rollout created no member sanctions. Local Fastify connected to the upgraded hosted database and passed read and authorization checks. The end-to-end browser workflows ran against disposable Supabase. Hosted application deployment remains a separate step. Independent account appeal intake and feature-specific restrictions are future work.
