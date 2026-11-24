@@ -50,4 +50,6 @@ The additive migration creates only read views, indexes, a guarded read RPC and 
 
 ## Remaining blockers
 
-The hosted dry run identified only migration `20261123131000_m21_moderation_center_reads` for AyiNou development project `hcbxulyfmdmuyccgrujs`. Targeted authorization was recorded. Application hosting and authenticated hosted UI verification are separate from the database rollout. [Hosted development workflow](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md)
+The approved migration `20261123131000_m21_moderation_center_reads` was applied to AyiNou project `hcbxulyfmdmuyccgrujs` from implementation commit `3682ee04a6e98242f1f8fba08b9a1ff4a0afaa07`. The postflight found no pending migrations. It confirmed service-only RPC execution, four private views, denial without a workspace and continued RLS on six native relations. All eight sampled native enforcement functions kept their pre-deploy fingerprint.
+
+Application hosting and authenticated hosted UI verification remain separate from the verified database rollout. The authenticated UI and API authorization checks ran against the local disposable stack. [Hosted development workflow](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md)
