@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { platformRoles, type AccountStatus, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
+import { f25FeaturePolicyKeys, platformRoles, type AccountStatus, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
 import { adminSections, type AdminTab } from "@/lib/admin-navigation";
+import { feedLanguageMessages } from "@/lib/feed-language-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { authMessages } from "@/lib/auth-i18n";
@@ -46,7 +47,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
   const [navigationOpen, setNavigationOpen] = useState(false);
   const content = useRef<HTMLElement>(null);
   const labels: Record<AdminTab, string> = {
-    overview: t.overview, homepage: t.homepage, registration: t.registrationPolicy.title, memberExperience: t.memberExperience.title, accounts: t.accounts, audit: t.audit,
+    overview: t.overview, homepage: t.homepage, eventFeedSettings: feedLanguageMessages[locale].settings, registration: t.registrationPolicy.title, memberExperience: t.memberExperience.title, accounts: t.accounts, audit: t.audit,
     trust: trustMessages[locale].trustWorkspace, ambassadors: ambassadorMessages[locale].title,
     legal: legalAdminMessages[locale].title, founder: founderMessages[locale].adminTitle,
     corrections: governanceMessages[locale].corrections, governance: governanceMessages[locale].governance,
@@ -118,6 +119,10 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {access.data?.founder && (tab === "recognitionBadges" || tab === "recognitionHistory") &&
                 <RecognitionAdmin key={tab} section={tab} workspaceId={workspaceId} />}
               {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
+              {tab === "eventFeedSettings" && access.data?.founder && <div className="grid gap-4 xl:grid-cols-2">
+                {f25FeaturePolicyKeys.map((key) => <HomepageSettings key={workspaceId + key} workspaceId={workspaceId}
+                  path={"/api/v1/admin/feature-policy/" + key} title={feedLanguageMessages[locale].features[key]} />)}
+              </div>}
               {tab === "registration" && access.data?.founder && <RegistrationSettings key={workspaceId} workspaceId={workspaceId} />}
               {tab === "memberExperience" && access.data?.founder && <MemberExperienceSettings key={workspaceId} workspaceId={workspaceId} />}
             </section>

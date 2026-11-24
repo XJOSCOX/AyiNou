@@ -1,6 +1,6 @@
 export const adminSections = [
   { label: "navigationPlatform", pages: ["overview", "governance", "legal", "audit"] },
-  { label: "navigationSettings", pages: ["homepage", "registration", "memberExperience", "verificationSettings", "rolesAssignments", "officialBadges", "recognitionBadges", "recognitionHistory"] },
+  { label: "navigationSettings", pages: ["homepage", "eventFeedSettings", "registration", "memberExperience", "verificationSettings", "rolesAssignments", "officialBadges", "recognitionBadges", "recognitionHistory"] },
   { label: "navigationMembers", pages: ["accounts", "trust", "founder", "corrections"] },
   { label: "navigationPrograms", pages: ["ambassadors", "partners"] },
 ] as const;

@@ -1911,6 +1911,305 @@
           "rolloutAndRollback": "Apply only the separately approved migration with the matching app. Preserve case histories and existing issuance policies."
         }
       ]
+    },
+    {
+      "id": "f25-community-events-and-multilingual-feed",
+      "report": "docs/F2_5_EVENTS_AND_FEED_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/feature-policy/:key",
+          "contract": "GET /api/v1/admin/feature-policy/:key - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "Anonymous requests cannot enter the Founder workspace policy route."
+          }
+        },
+        {
+          "route": "GET /api/v1/events",
+          "contract": "GET /api/v1/events - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "GET /api/v1/events/:id",
+          "contract": "GET /api/v1/events/:id - -",
+          "access": "public",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "publicReason": "Guests only receive public live-visible event details, with private venue and meeting fields redacted."
+        },
+        {
+          "route": "GET /api/v1/events/:id/participants",
+          "contract": "GET /api/v1/events/:id/participants - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "GET /api/v1/events/:id/updates",
+          "contract": "GET /api/v1/events/:id/updates - -",
+          "access": "public",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "publicReason": "Guests only receive public live-visible event details, with private venue and meeting fields redacted."
+        },
+        {
+          "route": "GET /api/v1/events/capabilities",
+          "contract": "GET /api/v1/events/capabilities - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "GET /api/v1/events/moderation/reports",
+          "contract": "GET /api/v1/events/moderation/reports - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "GET /api/v1/events/notification-preference",
+          "contract": "GET /api/v1/events/notification-preference - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/feed-languages",
+          "contract": "GET /api/v1/me/feed-languages - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/feed-languages.spec.ts",
+            "denialScenario": "Guests cannot access preferences and a private post cannot supply a translation source."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/feature-policy/:key",
+          "contract": "PATCH /api/v1/admin/feature-policy/:key 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Versioned change appended to private.platform_boolean_policy_events."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "Anonymous requests cannot enter the Founder workspace policy route."
+          }
+        },
+        {
+          "route": "POST /api/v1/events",
+          "contract": "POST /api/v1/events - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Lifecycle decisions are retained in feed_data.event_audit."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "POST /api/v1/events/:id/report",
+          "contract": "POST /api/v1/events/:id/report - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "POST /api/v1/events/:id/share",
+          "contract": "POST /api/v1/events/:id/share - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "POST /api/v1/events/:id/status",
+          "contract": "POST /api/v1/events/:id/status - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Lifecycle decisions are retained in feed_data.event_audit."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "POST /api/v1/events/:id/updates",
+          "contract": "POST /api/v1/events/:id/updates - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Lifecycle decisions are retained in feed_data.event_audit."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "POST /api/v1/events/moderation/reports/:id",
+          "contract": "POST /api/v1/events/moderation/reports/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Lifecycle decisions are retained in feed_data.event_audit."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "POST /api/v1/feed/translation",
+          "contract": "POST /api/v1/feed/translation 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/feed-languages.spec.ts",
+            "denialScenario": "Guests cannot access preferences and a private post cannot supply a translation source."
+          }
+        },
+        {
+          "route": "PUT /api/v1/events/:id",
+          "contract": "PUT /api/v1/events/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Lifecycle decisions are retained in feed_data.event_audit."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "PUT /api/v1/events/:id/rsvp",
+          "contract": "PUT /api/v1/events/:id/rsvp - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "PUT /api/v1/events/notification-preference",
+          "contract": "PUT /api/v1/events/notification-preference - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/events.spec.ts",
+            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
+          }
+        },
+        {
+          "route": "PUT /api/v1/me/feed-languages",
+          "contract": "PUT /api/v1/me/feed-languages 1024 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read, personal preference, participation, or existing post/report lifecycle is scoped to live access and keeps no duplicate administrative audit record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/feed-languages.spec.ts",
+            "denialScenario": "Guests cannot access preferences and a private post cannot supply a translation source."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123130000_f25_community_events.sql",
+          "rlsAndGrants": "RLS on all event relations, no raw client grants, caller-bound RPCs.",
+          "authorization": "Uses live individual and organization authority, audience checks, and manager-only attendee reads.",
+          "compatibility": "Preserves existing Feed, organization, and member data and existing API callers.",
+          "validation": "Clean disposable migrations plus browser/API access, concurrency, policy, and regression coverage.",
+          "rolloutAndRollback": "Apply the exact tested migrations to the verified project. Turn features off through audited Founder controls without discarding history."
+        },
+        {
+          "file": "supabase/migrations/20261123130100_f25_event_integration.sql",
+          "rlsAndGrants": "Keeps raw notices and Feed relations private and grants only caller-bound integration operations.",
+          "authorization": "Rechecks event share eligibility and enforces moderator role and recent MFA.",
+          "compatibility": "Preserves existing Feed, organization, and member data and existing API callers.",
+          "validation": "Clean disposable migrations plus browser/API access, concurrency, policy, and regression coverage.",
+          "rolloutAndRollback": "Apply the exact tested migrations to the verified project. Turn features off through audited Founder controls without discarding history."
+        },
+        {
+          "file": "supabase/migrations/20261123130200_f25_multilingual_feed.sql",
+          "rlsAndGrants": "RLS on content-language preferences with caller-bound reads. Founder changes remain service-only.",
+          "authorization": "Keeps existing Feed visibility and checks source and comment ancestry before authorizing public translation.",
+          "compatibility": "Preserves existing Feed, organization, and member data and existing API callers.",
+          "validation": "Clean disposable migrations plus browser/API access, concurrency, policy, and regression coverage.",
+          "rolloutAndRollback": "Apply the exact tested migrations to the verified project. Turn features off through audited Founder controls without discarding history."
+        }
+      ]
     }
   ]
 }

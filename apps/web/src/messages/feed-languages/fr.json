@@ -1,0 +1,21 @@
+{
+  "preferences": "Langues du fil",
+  "all": "Toutes les langues",
+  "active": "Publications affichées en",
+  "apply": "Enregistrer les langues du fil",
+  "translate": "Traduire",
+  "original": "Afficher l’original",
+  "machine": "Traduction automatique",
+  "unavailable": "La traduction est actuellement indisponible.",
+  "settings": "Événements et fil",
+  "features": {
+    "events.enabled": "Événements communautaires",
+    "events.individual": "Création d’événements par les membres",
+    "events.organization": "Création d’événements par les organisations",
+    "events.discovery": "Découverte des événements",
+    "events.rsvp": "Réponses aux événements",
+    "events.notifications": "Notifications d’événements",
+    "feed.language_filter": "Filtrage du fil par langue",
+    "feed.translation": "Traduction des publications et commentaires"
+  }
+}

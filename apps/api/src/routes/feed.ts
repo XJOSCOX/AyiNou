@@ -12,8 +12,10 @@ import { registerPostMediaRoutes } from "../modules/feed/post-media.js";
 import { registerPostWriteRoutes } from "../modules/feed/posts.js";
 import { registerRecommendationRoutes } from "../modules/feed/recommendations.js";
 import { registerSocialRoutes } from "../modules/feed/social.js";
+import { registerFeedLanguageRoutes } from "../modules/feed/languages.js";
 import { registerFeedTimelineRoutes } from "../modules/feed/timeline.js";
 import { registerAmbassadorRoutes } from "./ambassadors.js";
+import { registerEventRoutes } from "./events.js";
 import { registerDiscoveryRoutes } from "./discovery.js";
 import { registerGroupRoutes } from "./groups.js";
 import { registerOrganizationRoleRoutes } from "./organization-roles.js";
@@ -30,6 +32,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   // Register on this plugin instance so every route inherits the same cache and error hooks.
   app.addHook("onRequest", async (_request, reply) => { reply.header("Cache-Control", "private, no-store"); });
   registerDiscoveryRoutes(app, viewer, repo, read);
+  registerEventRoutes(app, context);
   registerSafetyRoutes(app, context);
   registerGroupRoutes(app, { viewer, repo, read });
   registerTrustRoutes(app, { viewer, repo, read });
@@ -41,6 +44,7 @@ export async function registerFeedRoutes(app: FastifyInstance, auth: AuthVerifie
   registerPostMediaRoutes(app, context);
   registerNotificationRoutes(app, context);
   registerFeedTimelineRoutes(app, context);
+  registerFeedLanguageRoutes(app, context);
   registerSocialRoutes(app, context);
   registerPostWriteRoutes(app, context);
   registerRecommendationRoutes(app, context);

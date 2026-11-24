@@ -20,6 +20,8 @@ export interface FeedRepository {
 export function feedDatabaseError(code: string): ApiError {
   switch (code) {
     case "42501": return new ApiError(403, "FORBIDDEN", "This action is not permitted");
+    case "PEV03": return new ApiError(403, "EVENT_UNAVAILABLE", "This event action is unavailable");
+    case "PEV09": return new ApiError(409, "EVENT_FULL", "Event capacity has been reached");
     case "PFR04": return new ApiError(404, "NOT_FOUND", "Content unavailable");
     case "PF323": return new ApiError(409, "CONFLICT", "At most three organization posts may be pinned");
     case "PFR09": return new ApiError(409, "CONFLICT", "The content or request has changed");

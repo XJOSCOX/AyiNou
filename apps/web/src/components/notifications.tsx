@@ -18,13 +18,16 @@ import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { safetyMessages } from "@/lib/safety-i18n";
 import { trustMessages } from "@/lib/trust-i18n";
 import { loadNotificationPreferences, loadNotifications, markNotifications, saveNotificationPreferences } from "@/lib/notification-api";
+import { eventMessages } from "@/lib/events-i18n";
+import { EventNoticePreference } from "./event-settings";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 
-function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent }: MemberNotification) {
+function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent }: MemberNotification) {
   if (!available) return null;
+  if (kind === "event_notice") return communityEvent ? "/events/" + communityEvent.eventId : null;
   if (kind === "poll_event") return pollEvent ? pollEvent.action === "nomination_requested" ? "/polls/nominations" : "/polls/" + pollEvent.pollId : null;
   if (kind === "follow_requested") return "/settings#follow-requests";
   if (kind === "new_follower" || kind === "follow_approved") return actor?.username ? `/members/${encodeURIComponent(actor.username)}` : null;
@@ -79,6 +82,7 @@ export function NotificationCenter() {
         : item.kind === "ambassador_updated" ? ambassadorMessages[locale].updatedNotice
         : item.kind === "organization_access_changed" ? organizationRoleMessages[locale].notification
         : item.kind === "project_operation" ? operationMessage(locale, item.projectOperation?.action)
+        : item.kind === "event_notice" ? item.communityEvent ? eventMessages[locale][({ rsvp: "rsvpNotice", changed: "changeNotice", canceled: "cancellationNotice", announcement: "announcementNotice" } as const)[item.communityEvent.action]] : t.unavailable
         : item.kind === "poll_event" ? item.pollEvent ? pollMessages[locale].notices[item.pollEvent.action] : t.unavailable
         : item.kind === "project_submitted" || item.kind === "project_assigned" || item.kind === "project_changes" ||
           item.kind === "project_approved" || item.kind === "project_rejected" ? projectMessages[locale].notices[item.kind]
@@ -142,7 +146,7 @@ export function NotificationPreferencesPanel() {
       {saved && <p role="status" className="text-sm text-[var(--theme-link)]">{t.saved}</p>}
       <button className={`${institutionAction} justify-self-start`} type="submit" disabled={mutation.busy}>{t.save}</button>
     </form>}
-  </section><SocialNotificationPreferences /></>;
+  </section><SocialNotificationPreferences /><EventNoticePreference /></>;
 }
 
 function SocialNotificationPreferences() {

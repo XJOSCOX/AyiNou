@@ -1,3 +1,4 @@
+import type { EventPreview } from "./events";
 import type { InterestCode } from "./accounts.js";
 import type { Locale } from "./core.js";
 import type { PersonalClaim } from "./trust.js";
@@ -35,6 +36,7 @@ export interface FeedAuthor {
   verified: boolean;
 }
 export interface SocialPostInfo {
+  event?: EventPreview;
   shareable: boolean;
   quotable: boolean;
   bookmarked: boolean;

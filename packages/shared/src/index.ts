@@ -20,3 +20,4 @@ export * from "./privacy";
 export * from "./privacy-export";
 export * from "./privacy-lifecycle";
 export { departmentCommunityContent, type DepartmentCommunityContent } from "./department-community-content";
+export * from "./events";

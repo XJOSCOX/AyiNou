@@ -56,6 +56,7 @@
     "Community": "type:82e02fdf8656e7aff4f3738c1ea7a02bd2ded85a3fcb0098d9e50f3069257f80",
     "CommunityCountryCount": "type:960589ddb9820cca9d1d055a019920b634b83f9f9e9c9ce14121cc723c03dc77",
     "CommunityDepartmentCount": "type:f433639b14d89825d3fc640b94b4013b89be77bce0bc31e840c9d9d9637c8788",
+    "CommunityEvent": "type:266c187a4a820fcde3232cb6087b8a9748507d4b7282195965eb730658828565",
     "communityKinds": "value:3292a931ed22ae622f67369781c601ef921e65d596ccca3a1945a803a9e6f8c6",
     "CommunityMembers": "type:2fb1a2b74421e3a21b638364833bf4c0fafc250291685b314ad6f1a24416980d",
     "CommunityRecommendation": "type:552bf40879ae8ad083b1e9a6474d6f46ea3a248ec088e0086b582bbee5fdc543",
@@ -86,10 +87,30 @@
     "EarlyPartnerProgram": "type:345a9e39734248a60af7aa90e15ded1e0001233a99f6051269ae59459e1e10bd",
     "EarlyPartnerState": "type:e6a22a1f98ee0ad300b17a398022df1500a31a1db09c41172e8cc0b82db13da0",
     "EarlyPartnerWorkspace": "type:1abf5040b136f35a32e58f229c6ea4267acd24aa0e0aac601c7a53c56313accb",
+    "eventCategories": "value:588b43d45393e9f6028202c994f4e58c1ea213822ee55bcb2acc5fec89aa1f00",
+    "EventCategory": "type:fc96b07ec88cfd5756a80dcf22bce21dfec59bc47e0545393b5257ad89f315ce",
+    "EventFormat": "type:2b79c08157328784a1977a9ea3402ab7356da8d14de33720da5d74c8672e041c",
+    "eventFormats": "value:79840c52bf7d569becac935c02e4f7364317f9fb2d7ade2f582bd6ecd6b558ac",
+    "EventInput": "type:b3826e9cbe386f2d10e98e80056c27981852faf891dbfbf58c81d96a6a89d5c1",
+    "EventOrganizer": "type:64751b55e7e6a2c53f8de8066d7d9ac8ef42242c1359a9a42f0d32887f095237",
+    "EventParticipant": "type:17dcc6382c6d985308c3cc166f2e21cfe4b41a1e2927d31b18f52854c4927f61",
+    "eventPolicyKeys": "value:89e3fd3bbd9ed5033e9573a668e91c65c20aaae09638f9847fe1cb0fa0c37fdf",
+    "EventPreview": "type:06b077a37f1b3f288d34485a2afa5a786cfe477dd8a440783d9683a8a90bf3b8",
+    "EventResponse": "type:5f0c51abd4feb7ad367d27668f4fb6f43559d8cbe16c482b45cd5af883c936e6",
+    "eventResponses": "value:85eb2d35e4ff7b36e9257d5ea74b577118b043078ae3cd3c8dbbfdd64ee70763",
+    "EventScope": "type:266f0d14ed0125f8b1a1ed3112ac1f236484feda6919245ee8448014c4e42ea2",
+    "eventScopes": "value:9fb3174f227ab06e5a8d5b89ad705cd32d3bf7cb43e5293e8b35b38c548c233f",
+    "EventStatus": "type:f2ecb4791b35de760d1e0267a15e0bfd92640c9a0f50a6be8ba4888dff64ce88",
+    "eventStatuses": "value:b7b977ec07d9ba6120f8ba7f664dea452e0cd5c23338eaf7e5b3f780fc8e5867",
+    "EventUpdate": "type:214dbcad86aefb60b0545df535c52d2b2a94fcc2113f3ecd9b388a149a285743",
+    "eventVisibilities": "value:7730e11d3a22e5668783cd59abd64c6cd55a13eb3d44237d9c1ed846b925aafb",
+    "EventVisibility": "type:0089f871c08de9deebd196867cb3fb5d1d6e071f4aff9559795ab606e0975e39",
     "exportCategories": "value:67737dc65dcd30720c47c214caa8e4b689af9e79f4be93eee47b366d8177cf12",
     "ExportCategory": "type:fd50ca33cc1a2f01629e0d33072f6ddeb582977d474c10da93f711eea5463f22",
     "ExportState": "type:a3d4bb1d75024ef77ce73df9a90a31da158d99598aecb74798e1f8c9810316c9",
     "ExportStatus": "type:d8372a141bfeff030745c4cba3a99ba50911a00eeb535e5e0fcfaf8e03c9a904",
+    "f25FeaturePolicyKeys": "value:e2ee4fb342be87f4092f3adb5fd8190308bbc4f8814e4284764da329d2f5c6b6",
+    "F25PolicyKey": "type:95d6ad7a9452e40b0b4556d51b63259cc01179545ee5c96562f1af085aae8ea7",
     "FeedAuthor": "type:87ac258d26e3b8ffbf9724c1516eaa87610c442aff07dd6a7e77c0682f583b9a",
     "FeedComment": "type:174e32e80335a883c5588d303e2d813337338579b806489ceb4db9de2d9aebbe",
     "FeedPage": "type:e1184753223739dd8ab32bfe9a05d0c84c03ced5bb6575561949818fb30b6117",
@@ -154,7 +175,7 @@
     "memberExperienceFlags": "value:02a7687709e3503988502719bbe78abbf3875ab0d0dff572218405c618fd92f6",
     "MemberExperiencePolicy": "type:0c0df4a0db6c24359b943fa702dee911c086f3d57853351a91983ddf6e920331",
     "MemberGroup": "type:237fc2e570d41cefad3bbb9ec69b01d8b091487088c127ea069aaab29a843a76",
-    "MemberNotification": "type:e900a0be2bb0bc68ac4af3ec49f172ac201954e94364f6599c01d74383832778",
+    "MemberNotification": "type:56afbc720230b00d9585f5091a797a58cead705723edf902a486ddbee40b9992",
     "MemberProfile": "type:97a2677e28cc4f1404f47731b87afd08260b9c2655ef65148fb9d54ca3cd0e40",
     "MemberSafetyEntry": "type:5008e6ae013e295ea930d305a4fc46830b51993b62f31870ae384c1be8262527",
     "MemberSafetyPage": "type:7d1158d3a5117e6ba989afa2c0c58eb5f1cd9fa07ac79181be8e7547b126c1e6",
@@ -303,7 +324,7 @@
     "ServiceState": "type:8e4e093967250fcb588cdee02424bfe167060ee6e7dedf5ac5db47e6fbfb841e",
     "SessionRevocation": "type:763fee4cb9f284983f281f9f8bc8f161f9a66f27149918459363b6ff0e5bfbad",
     "SignupPath": "type:c249b0e99290040736a8305eb062808769e3a3fd4b97384fae6c9aff4bbbecb5",
-    "SocialPostInfo": "type:03a924480703340113d6d48c8a9039388ad540ffb53dcf77ca24bbadd0c99eb9",
+    "SocialPostInfo": "type:69159b1a02aa5579e8f8ecbf7d94d141d81d5db95c8e9241727ad54ac7c39c41",
     "SocialPrivacy": "type:937f14607a1c2092604ebc2221633a286c40d3068a0626b23a5e6f52202c0a08",
     "StatusResponse": "type:bc13ad0e66a811fe283af87bbcf151d79cfa16d49663ff46b98018565d0459ff",
     "UpdateMemberProfile": "type:c096b49445347f2052c4afc8e8b07d8317425e21c9f6cf09319f5f2af29daa90",
@@ -458,6 +479,50 @@
       "defect",
       "suggestion"
     ],
+    "eventCategories": [
+      "community",
+      "culture",
+      "education",
+      "volunteer",
+      "other"
+    ],
+    "eventFormats": [
+      "in_person",
+      "online",
+      "hybrid"
+    ],
+    "eventPolicyKeys": [
+      "events.enabled",
+      "events.individual",
+      "events.organization",
+      "events.discovery",
+      "events.rsvp",
+      "events.notifications"
+    ],
+    "eventResponses": [
+      "going",
+      "interested",
+      "not_going"
+    ],
+    "eventScopes": [
+      "upcoming",
+      "following",
+      "communities",
+      "past",
+      "mine",
+      "organizing"
+    ],
+    "eventStatuses": [
+      "draft",
+      "published",
+      "canceled",
+      "completed"
+    ],
+    "eventVisibilities": [
+      "public",
+      "members",
+      "community"
+    ],
     "exportCategories": [
       "profile",
       "residence",
@@ -468,6 +533,16 @@
       "affiliations",
       "privacyRequests",
       "pollParticipation"
+    ],
+    "f25FeaturePolicyKeys": [
+      "events.enabled",
+      "events.individual",
+      "events.organization",
+      "events.discovery",
+      "events.rsvp",
+      "events.notifications",
+      "feed.language_filter",
+      "feed.translation"
     ],
     "followPolicies": [
       "everyone",

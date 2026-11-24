@@ -10,6 +10,7 @@ import { feedMessages } from "@/lib/feed-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { publishSocialPost, setInteraction } from "@/lib/social-api";
 import { socialMessages } from "@/lib/social-i18n";
+import { EventPostPreview } from "./events";
 import { ApiErrorNotice } from "./api-error-notice";
 import { FeedIcon, feedIconButton } from "./feed-actions";
 import { institutionAction, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -29,7 +30,7 @@ export function QuotePreview({ post }: { post: FeedPost }) {
   const [locale] = useLocale();
   const t = socialMessages[locale];
   const quote = post.social?.quote;
-  if (!quote) return null;
+  if (!quote) return post.social?.event ? <EventPostPreview event={post.social.event} /> : null;
   return <aside className="mt-3 grid min-w-0 gap-1 rounded-md border border-[var(--theme-border)] p-3 text-sm" aria-label={t.original}>
     {"unavailable" in quote ? <p>{t.unavailable}</p> : <>
       <Link className={institutionLink} href={`/posts/${quote.id}`}>{quote.organization?.name ?? quote.author?.displayName ?? t.original}</Link>

@@ -26,6 +26,9 @@ import { PersonalClaimChecks, institutionAction, institutionCard, institutionLin
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { OrganizationPublisher, QuotePreview, SocialPostControls, usePostBookmark } from "./social-post";
+import { FeedLanguageControl, TranslatableText, TranslationEnabled } from "./feed-languages";
+import { loadFeedLanguages, type FeedLanguageSettings } from "@/lib/feed-languages-api";
+import { eventMessages } from "@/lib/events-i18n";
 import { SocialText } from "./social-text";
 import { setOrganizationPin } from "@/lib/social-api";
 import { socialMessages } from "@/lib/social-i18n";
@@ -47,6 +50,9 @@ export function FeedScreen() {
   const [rankingRevision, setRankingRevision] = useState(0);
   const [notice, setNotice] = useState<PostNotice | null>(null);
   const access = useInstitutionResource(loadFeedModerationAccess);
+  const preferences = useInstitutionResource(loadFeedLanguages);
+  const [savedLanguages, setSavedLanguages] = useState<FeedLanguageSettings | null>(null);
+  const languageSettings = savedLanguages ?? preferences.data;
 
 
   function setScope(next: FeedScope) {
@@ -63,11 +69,11 @@ export function FeedScreen() {
     setRevision((current) => current + 1);
   }
 
-  return <MemberShell>
+  return <TranslationEnabled.Provider value={languageSettings?.translationEnabled ?? false}><MemberShell>
     <div className="grid w-full min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_clamp(17rem,28%,30rem)] xl:items-start xl:gap-5">
       <PageHeader className="xl:col-span-2" title={t.feed} description={t.intro}
         actions={<><Link href="/feed/saved" className={institutionLink}>{socialMessages[locale].saved}</Link>
-          {access.data?.allowed && <Link href="/feed/moderation" className={institutionLink}>{t.moderation}</Link>}</>} />
+          {access.data?.allowed && <><Link href="/feed/moderation" className={institutionLink}>{t.moderation}</Link><Link href="/events/moderation" className={institutionLink}>{eventMessages[locale].moderation}</Link></>}</>} />
       <div className="grid min-w-0 gap-4">
         <section className={`${institutionCard} max-sm:p-3`} aria-label={t.write}>
           <PostComposer onSaved={changed} />
@@ -84,6 +90,8 @@ export function FeedScreen() {
           </button>
           <button type="button" className={tabStyle} aria-pressed={scope === "mine"} onClick={() => setScope("mine")}>{t.mine}</button>
         </div>
+        {scope !== "mine" && preferences.error !== null && <ApiErrorNotice error={preferences.error} retry={preferences.refresh} />}
+        {scope !== "mine" && languageSettings && <FeedLanguageControl settings={languageSettings} onSave={(result) => { setSavedLanguages(result); setRevision((current) => current + 1); }} />}
         {scopes.filter((mode) => mode === scope || visited.has(mode)).map((mode) => <div key={mode} hidden={mode !== scope}>
           <Timeline scope={mode} revision={revision + (mode === "for_you" ? rankingRevision : 0)}
             changed={changed} refreshForYou={refreshForYou} />
@@ -97,7 +105,7 @@ export function FeedScreen() {
         </section>
       </aside>
     </div>
-  </MemberShell>;
+  </MemberShell></TranslationEnabled.Provider>;
 }
 
 function SuggestedAccounts({ onChange }: { onChange: () => void }) {
@@ -238,7 +246,7 @@ export function PostCard({ post, changed, recommendation, onBookmarkChange, retu
     </p>
     {mode === "edit" ? <PostComposer post={post} onCancel={() => setMode(null)}
       onSaved={(message) => { setMode(null); changed(message); }} /> :
-      <p lang={post.language} dir="auto" className="mt-4 max-w-[75ch] whitespace-pre-wrap break-words text-sm leading-6 sm:text-base"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></p>}
+      <TranslatableText key={post.version} kind="post" id={post.id} language={post.language} allowed={!guest && post.visibility === "public" && post.status === "published" && !post.community && !post.social?.event} mentions={post.social?.mentions} hashtags={post.social?.hashtags} className="mt-4 max-w-[75ch] whitespace-pre-wrap break-words text-sm leading-6 sm:text-base"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></TranslatableText>}
     {mode !== "edit" && !!post.topics?.length && <PostTopicLabels topics={post.topics} />}
     {mode !== "edit" && post.attachments && <PostMediaGallery post={post.id} attachments={post.attachments} guest={guest} />}
     {mode === "delete" && <div className="mt-4 grid gap-3">

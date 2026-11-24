@@ -161,6 +161,12 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Verify the hosted schema and the local application connected to it against the tested release.
 - [F2.4 implementation and release evidence](docs/F2_4_SOCIAL_PRIVACY_IMPLEMENTATION_REPORT.md)
 
+## F2.5 — Community Events and Multilingual Feed
+
+- [x] Add scoped Events discovery, organizer tools, RSVP capacity, event notices, and event sharing to Feed.
+- [x] Add independent content-language preferences and explicit translation controls with a provider-unavailable state.
+- [Implementation and release notes](docs/F2_5_EVENTS_AND_FEED_IMPLEMENTATION_REPORT.md)
+
 ## Phase 3D — For You recommendations
 
 - [x] Add an optional rules-based feed with explicit topics, explanations, and member controls.

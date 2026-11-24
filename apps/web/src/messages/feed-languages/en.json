@@ -1,0 +1,21 @@
+{
+  "preferences": "Feed languages",
+  "all": "All languages",
+  "active": "Showing posts in",
+  "apply": "Save Feed languages",
+  "translate": "Translate",
+  "original": "Show original",
+  "machine": "Machine translation",
+  "unavailable": "Translation is currently unavailable.",
+  "settings": "Events and Feed",
+  "features": {
+    "events.enabled": "Community events",
+    "events.individual": "Individual event creation",
+    "events.organization": "Organization event creation",
+    "events.discovery": "Event discovery",
+    "events.rsvp": "Event RSVPs",
+    "events.notifications": "Event notifications",
+    "feed.language_filter": "Feed language filtering",
+    "feed.translation": "Post and comment translation"
+  }
+}

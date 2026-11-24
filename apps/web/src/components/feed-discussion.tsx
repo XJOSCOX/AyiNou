@@ -6,6 +6,7 @@ import {
   commentBodyLimit, locales, reactionKinds, type CommentInput, type FeedComment, type Locale,
   type ReactionKind, type ReactionSummary,
 } from "@ayinou/shared";
+import { TranslatableText } from "./feed-languages";
 import { MentionSuggestions, SocialText } from "./social-text";
 import { ApiErrorNotice } from "./api-error-notice";
 import { ContentReportForm } from "./content-report-form";
@@ -252,7 +253,7 @@ function CommentCard({ value, postId, refresh }: { value: FeedComment; postId: s
       {action === "edit" ? <div className="mt-2">
         <CommentForm postId={postId} parentId={value.parentId} editing={value} cancel={() => setAction(null)}
           onSaved={() => { setAction(null); refresh(); }} />
-      </div> : <p lang={value.language} dir="auto" className="mt-2 whitespace-pre-wrap break-words leading-relaxed"><SocialText body={value.body} mentions={value.mentions} /></p>}
+      </div> : <TranslatableText key={value.version} id={value.id} kind="comment" language={value.language} mentions={value.mentions} className="mt-2 whitespace-pre-wrap break-words leading-relaxed"><SocialText body={value.body} mentions={value.mentions} /></TranslatableText>}
 
       <div className="mt-2 flex min-w-0 flex-wrap items-start gap-2">
         <ReactionPicker target="comments" id={value.id} summary={value.reactions} />

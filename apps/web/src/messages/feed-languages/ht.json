@@ -1,0 +1,21 @@
+{
+  "preferences": "Lang pou fil la",
+  "all": "Tout lang",
+  "active": "Piblikasyon ki parèt nan lang sa yo",
+  "apply": "Anrejistre lang pou fil la",
+  "translate": "Tradui",
+  "original": "Montre tèks orijinal la",
+  "machine": "Tradiksyon otomatik",
+  "unavailable": "Tradiksyon pa disponib kounye a.",
+  "settings": "Evènman ak fil la",
+  "features": {
+    "events.enabled": "Evènman kominotè",
+    "events.individual": "Manm yo ka kreye evènman",
+    "events.organization": "Òganizasyon yo ka kreye evènman",
+    "events.discovery": "Dekouvri evènman",
+    "events.rsvp": "Repons pou evènman",
+    "events.notifications": "Notifikasyon pou evènman",
+    "feed.language_filter": "Filtre fil la selon lang",
+    "feed.translation": "Tradiksyon piblikasyon ak kòmantè"
+  }
+}

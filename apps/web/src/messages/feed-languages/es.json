@@ -1,0 +1,21 @@
+{
+  "preferences": "Idiomas del muro",
+  "all": "Todos los idiomas",
+  "active": "Publicaciones en",
+  "apply": "Guardar idiomas del muro",
+  "translate": "Traducir",
+  "original": "Mostrar original",
+  "machine": "Traducción automática",
+  "unavailable": "La traducción no está disponible en este momento.",
+  "settings": "Eventos y muro",
+  "features": {
+    "events.enabled": "Eventos comunitarios",
+    "events.individual": "Creación de eventos por miembros",
+    "events.organization": "Creación de eventos por organizaciones",
+    "events.discovery": "Descubrimiento de eventos",
+    "events.rsvp": "Respuestas a eventos",
+    "events.notifications": "Notificaciones de eventos",
+    "feed.language_filter": "Filtro de idiomas del muro",
+    "feed.translation": "Traducción de publicaciones y comentarios"
+  }
+}

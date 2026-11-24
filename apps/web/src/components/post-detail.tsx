@@ -13,6 +13,8 @@ import { PostDiscussion, ReactionPicker } from "./feed-discussion";
 import { institutionCard, institutionLink, useInstitutionResource, PersonalClaimChecks } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { QuotePreview, SocialPostControls } from "./social-post";
+import { TranslatableText, TranslationEnabled } from "./feed-languages";
+import { loadFeedLanguages } from "@/lib/feed-languages-api";
 import { SocialText } from "./social-text";
 import { PostMediaGallery } from "./post-media";
 
@@ -23,7 +25,8 @@ export function PostDetail({ id, comment }: { id: string; comment?: string }) {
   const load = useCallback((signal: AbortSignal) => loadPostDetail(id, signal), [id]);
   const resource = useInstitutionResource(load);
   const post = resource.data?.post;
-  return <MemberShell><section className="grid gap-4">
+  const preferences = useInstitutionResource(loadFeedLanguages);
+  return <TranslationEnabled.Provider value={preferences.data?.translationEnabled ?? false}><MemberShell><section className="grid gap-4">
     <Link href={post?.community ? `/communities/${post.community.slug}` : "/feed"} className={`${institutionLink} justify-self-start`}>
       ← {post?.community ? communityDirectoryMessages[locale].back : f.backToFeed}
     </Link>
@@ -37,14 +40,14 @@ export function PostDetail({ id, comment }: { id: string; comment?: string }) {
       <time className="text-sm text-[var(--theme-body)]" dateTime={post.publishedAt ?? post.createdAt}>
         {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(post.publishedAt ?? post.createdAt))}
       </time>
-      <p lang={post.language} dir="auto" className="mt-4 whitespace-pre-wrap break-words leading-6"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></p>
+      <TranslatableText key={post.version} kind="post" id={post.id} language={post.language} allowed={post.visibility === "public" && post.status === "published" && !post.community && !post.social?.event} mentions={post.social?.mentions} hashtags={post.social?.hashtags} className="mt-4 whitespace-pre-wrap break-words leading-6"><SocialText body={post.body} mentions={post.social?.mentions} hashtags={post.social?.hashtags} /></TranslatableText>
       {post.attachments && <PostMediaGallery post={post.id} attachments={post.attachments} />}
       <QuotePreview post={post} />
       <SocialPostControls post={post} onChange={resource.refresh} />
       {comment && <LinkedComment post={post.id} id={comment} />}
       {post.reactions && <PostDiscussion postId={post.id}><ReactionPicker target="posts" id={post.id} summary={post.reactions} /></PostDiscussion>}
     </article>}
-  </section></MemberShell>;
+  </section></MemberShell></TranslationEnabled.Provider>;
 }
 
 function LinkedComment({ post, id }: { post: string; id: string }) {
@@ -57,6 +60,6 @@ function LinkedComment({ post, id }: { post: string; id: string }) {
     <h2 className="mb-2 text-sm font-semibold">{t.linkedComment}</h2>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!comment && resource.error === null && <p role="status">{t.working}</p>}
-    {comment && <p lang={comment.language} dir="auto" className="whitespace-pre-wrap break-words text-sm"><SocialText body={comment.body} mentions={comment.mentions} /></p>}
+    {comment && <TranslatableText key={comment.body} kind="comment" id={comment.id} language={comment.language} mentions={comment.mentions} className="whitespace-pre-wrap break-words text-sm"><SocialText body={comment.body} mentions={comment.mentions} /></TranslatableText>}
   </section>;
 }
