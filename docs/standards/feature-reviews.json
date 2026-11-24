@@ -1,6 +1,35 @@
 {
   "features": [
     {
+      "id": "m21-moderation-center",
+      "report": "docs/moderation/M2_1_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/moderation-center",
+          "contract": "GET /api/v1/admin/moderation-center - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only scoped projection over native decisions. Reuses the A1A audit read budget and cursor."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/moderation-center.spec.ts",
+            "denialScenario": "Missing or foreign workspace, insufficient MFA, and platform or resource moderator access cannot read center summaries."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123131000_m21_moderation_center_reads.sql",
+          "rlsAndGrants": "Native RLS is preserved. Projected views are private and only the service role can execute the guarded read RPC.",
+          "authorization": "Every call rechecks active Founder/Administrator, recent MFA, session-bound admin workspace and applicable native case conflict checks.",
+          "compatibility": "No changes to native moderation writers, source records, retention, or account sanction semantics.",
+          "validation": "Disposable migration and browser suite exercise authorization, redaction, cursor scoping, native actions and responsive localized navigation.",
+          "rolloutAndRollback": "Apply the exact additive migration after hosted authorization and preflight. Roll back the application entry points if needed while preserving all native records."
+        }
+      ]
+    },
+    {
       "id": "f2-4-social-privacy",
       "report": "docs/F2_4_SOCIAL_PRIVACY_IMPLEMENTATION_REPORT.md",
       "routes": [

@@ -85,6 +85,10 @@ O7 reconciles onboarding receipts with durable organization audit events and rev
 
 See the [verified audit source inventory](../audit/A1A_SOURCE_INVENTORY.md) and [integration register](../audit/A1A_MISSING_COVERAGE_REGISTER.md) for the current ledger coverage, gaps, authorization and exclusions. A1A indexes and reads native sources and does not backfill events.
 
+## M2.1 Moderation Center
+
+The private center reads native A1A account and Feed events, scoped content actions, event decisions, project report decisions and institution restrictions. This projection emits no new moderation actions. The API and database require the original private Admin workspace, recent MFA and live authority. Evidence and free-text reasons stay in the native authorized workflows. [M2.1 field and coverage boundaries](../moderation/M2_1_IMPLEMENTATION_REPORT.md#authorization-and-evidence)
+
 ## Founder Verified live-proof candidate
 
 Member account-control confirmation and Founder attestation use the existing Founder event ledger and its transactional command receipts. Retain original application supersession reasons and closure provenance. The private proof session remains outside general audit reads. [Founder Verified audit](../identity/FOUNDER_VERIFIED_COMPLETION_AUDIT.md)

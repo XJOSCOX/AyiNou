@@ -6,6 +6,14 @@
 
 **Rule:** Work on one phase at a time. Each phase is complete only when its acceptance checklist is met, documentation is updated, and local quality checks pass. Do not use calendar deadlines as a substitute for testing.
 
+## Moderation and enforcement
+
+- [x] M1 audited moderation, enforcement, appeal and audit coverage.
+- [x] M2.1 adds a read-only Moderation Center to private Platform Administration. Local acceptance and hosted migration status are recorded separately.
+- [ ] Future enforcement phases depend on the approved policy baseline and their own implementation review.
+
+[M1 audit](docs/moderation/M1_AUDIT_SUMMARY.md) · [M2.1 implementation](docs/moderation/M2_1_IMPLEMENTATION_REPORT.md) · [Approved policy baseline](docs/moderation/M2_APPROVED_POLICY_BASELINE.md)
+
 ## Phase 0 — Foundation (COMPLETE)
 
 **Outcome:** A secure, runnable, maintainable local application without premature social features.

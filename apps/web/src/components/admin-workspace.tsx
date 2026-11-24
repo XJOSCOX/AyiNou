@@ -7,6 +7,7 @@ import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOvervie
 import { adminSections, type AdminTab } from "@/lib/admin-navigation";
 import { feedLanguageMessages } from "@/lib/feed-language-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
+import { moderationCenterMessages } from "@/lib/moderation-center-i18n";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -17,6 +18,7 @@ import { AdministratorMark, FounderMark, institutionAction, institutionCard, ins
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
+import { ModerationAppeals, ModerationList, ModerationOverview } from "./moderation-center";
 import { TrustAdministration } from "./trust-workspace";
 import { AmbassadorAdministration } from "./ambassador-workspaces";
 import { LegalAdminPanel } from "./legal-admin-panel";
@@ -44,7 +46,9 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
 }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
+  const moderation = moderationCenterMessages[locale];
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const [accountFilter, setAccountFilter] = useState<string>();
   const content = useRef<HTMLElement>(null);
   const labels: Record<AdminTab, string> = {
     overview: t.overview, homepage: t.homepage, eventFeedSettings: feedLanguageMessages[locale].settings, registration: t.registrationPolicy.title, memberExperience: t.memberExperience.title, accounts: t.accounts, audit: t.audit,
@@ -52,6 +56,8 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     legal: legalAdminMessages[locale].title, founder: founderMessages[locale].adminTitle,
     corrections: governanceMessages[locale].corrections, governance: governanceMessages[locale].governance,
     partners: earlyPartnerMessages[locale].title,
+    moderationOverview: moderation.overview, moderationReports: moderation.reports, moderationContent: moderation.content,
+    moderationRestrictions: moderation.restrictions, moderationAppeals: moderation.appeals, moderationHistory: moderation.history,
     ...verificationCopy[locale].sections,
   };
   const access = useInstitutionResource(loadPlatformAccess);
@@ -59,6 +65,10 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
   const tab = visibleSections.some(({ pages }) => pages.some((page) => page === section)) ? section : "overview";
   const overview = useInstitutionResource(loadAdminOverview);
   const refresh = () => { access.refresh(); overview.refresh(); };
+  function navigate(next: AdminTab, account?: string) {
+    setAccountFilter(account);
+    onSectionChange(next);
+  }
 
   return <AdminSectionContext.Provider value={tab}><MemberShell>
     <div className="grid gap-4">
@@ -77,11 +87,11 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                 className={navigationOpen ? "mt-2 space-y-3 lg:mt-0" : "hidden space-y-3 lg:block"}>
                 {visibleSections.map(({ label, pages }) => <section key={label} aria-labelledby={label}
                   className="border-b border-[var(--theme-border)] pb-2 last:border-0 last:pb-0">
-                  <h2 id={label} className="px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)]">{t[label]}</h2>
+                  <h2 id={label} className="px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)]">{label === "navigationModeration" ? moderation.title : t[label]}</h2>
                   <ul className="space-y-0.5">
                     {pages.map((page) => <li key={page}>
                       <button type="button" aria-pressed={tab === page} onClick={() => {
-                        onSectionChange(page);
+                        navigate(page);
                         if (navigationOpen) {
                           content.current?.focus();
                           setNavigationOpen(false);
@@ -102,7 +112,14 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                   <dd className="mt-2 text-3xl font-semibold tabular-nums">{new Intl.NumberFormat(locale).format(overview.data![metric])}</dd>
                 </div>)}
               </dl><SafetyOverviewPanel /></>}
-              {tab === "accounts" && <AccountManagement onChange={overview.refresh} />}
+              {tab === "moderationOverview" && <ModerationOverview workspace={workspaceId} onNavigate={navigate} />}
+              {tab === "moderationReports" && <ModerationList key="reports" view="reports" workspace={workspaceId} onNavigate={navigate} />}
+              {tab === "moderationContent" && <ModerationList key="content" view="content" workspace={workspaceId} onNavigate={navigate} />}
+              {tab === "moderationRestrictions" && <ModerationList key="restrictions" view="restrictions" workspace={workspaceId} onNavigate={navigate} />}
+              {tab === "moderationHistory" && <ModerationList key={accountFilter ?? "history"} view="history" workspace={workspaceId} target={accountFilter} onNavigate={navigate} />}
+              {tab === "moderationAppeals" && <ModerationAppeals reviewer={access.data?.reviewer === true} onNavigate={navigate} />}
+              {tab === "accounts" && <AccountManagement key={accountFilter ?? "accounts"} initialQuery={accountFilter}
+                onHistory={(id) => navigate("moderationHistory", id)} onChange={overview.refresh} />}
               {tab === "audit" && <>
                 {access.data?.founder && <PolicyAuditHistory key={workspaceId} workspaceId={workspaceId} />}
                 <AuditFeed />
@@ -152,10 +169,12 @@ export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
   </div>;
 }
 
-function AccountManagement({ onChange }: { onChange: () => void }) {
+function AccountManagement({ initialQuery = "", onChange, onHistory }: {
+  initialQuery?: string; onChange: () => void; onHistory: (id: string) => void;
+}) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [offset, setOffset] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const loader = useCallback((signal: AbortSignal) => loadAdminAccounts(query, offset, signal), [query, offset]);
@@ -173,7 +192,7 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
   return <section className="grid min-w-0 gap-3">
     <form onSubmit={search} className={institutionCard}>
       <label className="block text-sm font-semibold">{t.search}
-        <input name="query" type="search" maxLength={100} className={institutionField} placeholder={t.searchHelp} />
+        <input name="query" type="search" maxLength={100} className={institutionField} placeholder={t.searchHelp} defaultValue={initialQuery} />
       </label>
       <button className={`${institutionAction} mt-3`}>{t.search}</button>
     </form>
@@ -194,10 +213,15 @@ function AccountManagement({ onChange }: { onChange: () => void }) {
             ...account.roles.map((role) => t[role])].filter(Boolean).join(" · ")}
         </p>
         <p className="mt-2 text-sm">{t.joined} · {new Intl.DateTimeFormat(locale).format(new Date(account.createdAt))}</p>
-        {account.reason && <p className="mt-2 break-words text-sm">{account.restrictionUpdatedAt &&
-          `${new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(account.restrictionUpdatedAt))} · `}{account.reason}</p>}
-        <button type="button" className={`${institutionLink} mt-3`} aria-expanded={selected === account.id}
-          onClick={() => setSelected(selected === account.id ? null : account.id)}>{t.manage}</button>
+        {account.restrictionUpdatedAt && <p className="mt-2 text-sm">
+          {moderationCenterMessages[locale].updated} · {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(account.restrictionUpdatedAt))}
+        </p>}
+        {account.reason && <p className="mt-1 break-words text-sm">{account.reason}</p>}
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2">
+          <button type="button" className={institutionLink} aria-expanded={selected === account.id}
+            onClick={() => setSelected(selected === account.id ? null : account.id)}>{t.manage}</button>
+          <button type="button" className={institutionLink} onClick={() => onHistory(account.id)}>{moderationCenterMessages[locale].accountHistory}</button>
+        </div>
         {selected === account.id && <AccountAction key={account.id} account={account}
           onChange={() => { setSelected(null); accounts.refresh(); onChange(); }} />}
       </article>) : <p>{t.emptyAccounts}</p>}

@@ -28,6 +28,7 @@ GET /api/v1/admin/homepage/community-statistics - -
 GET /api/v1/admin/legal - -
 GET /api/v1/admin/legal/audit - -
 GET /api/v1/admin/member-experience - -
+GET /api/v1/admin/moderation-center - -
 GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
 GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
@@ -189,6 +190,7 @@ HEAD /api/v1/admin/homepage/community-statistics - onSend
 HEAD /api/v1/admin/legal - onSend
 HEAD /api/v1/admin/legal/audit - onSend
 HEAD /api/v1/admin/member-experience - onSend
+HEAD /api/v1/admin/moderation-center - onSend
 HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
 HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend

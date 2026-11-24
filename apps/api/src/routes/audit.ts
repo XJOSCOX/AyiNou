@@ -4,6 +4,7 @@ import { z } from "zod";
 import { auditCategories, auditOutcomes, auditResourceTypes, type AuditEvent, type AuditPage, type PolicyAuditEvent, type PolicyAuditPage } from "@ayinou/shared";
 import { ApiError } from "../services/api-error.js";
 import { auditTimestamp, createAuditCursor } from "../services/audit-cursor.js";
+import { registerModerationCenterRead } from "./moderation-center.js";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
 import type { ReadBudget } from "../services/read-budget.js";
@@ -115,6 +116,8 @@ export function registerAuditRoutes(app: FastifyInstance, auth: AuthVerifier | n
     }, binding) : null;
     return { events, nextCursor };
   });
+
+  registerModerationCenterRead(app, auth, repo, limitReads, cursors);
 
   app.get("/api/v1/admin/audit/events", (request) => read(request, "platform", filters.parse(request.query), null, null, null));
   app.get("/api/v1/admin/audit/events/:reference", async (request) => {

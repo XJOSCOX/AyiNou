@@ -26,11 +26,13 @@ function moderationMfa(community?: string) {
   return `/mfa?next=${encodeURIComponent(community ? `/communities/${community}/moderation` : "/feed/moderation")}`;
 }
 
-export function FeedModeration({ community }: { community?: string }) {
+export function FeedModeration({ community, initialTarget = "posts", initialScope = "reports" }: {
+  community?: string; initialTarget?: Target; initialScope?: ModerationScope;
+}) {
   const [locale] = useLocale();
   const t = feedMessages[locale];
-  const [scope, setScope] = useState<ModerationScope>("reports");
-  const [target, setTarget] = useState<Target>("posts");
+  const [scope, setScope] = useState<ModerationScope>(initialScope);
+  const [target, setTarget] = useState<Target>(initialTarget);
   const [appeals, setAppeals] = useState(false);
   const safety = safetyMessages[locale];
   const c = communityDirectoryMessages[locale];

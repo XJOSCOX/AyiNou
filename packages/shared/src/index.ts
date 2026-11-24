@@ -4,6 +4,7 @@ export * from "./verification-policy";
 export * from "./accounts";
 export * from "./session-security";
 export * from "./audit";
+export * from "./moderation-center";
 export * from "./institutions";
 export * from "./organization-onboarding";
 export * from "./founder-identity";
