@@ -122,7 +122,7 @@ export function registerAuditRoutes(app: FastifyInstance, auth: AuthVerifier | n
       expires: cursor?.expires ?? Date.now() + 5 * 60_000,
     }, binding) : null;
     const people = await repo.auditPeople?.(events.map(({ actorId }) => actorId));
-    return { nextCursor, events: events.map((event) => ({ ...event, actor: people?.get(event.actorId) })) };
+    return { nextCursor, events: events.map((event) => ({ ...event, actor: event.actorId ? people?.get(event.actorId) : undefined })) };
   });
 
   registerModerationCenterRead(app, auth, repo, limitReads, cursors);

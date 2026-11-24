@@ -112,3 +112,7 @@ Restriction and delegation commands atomically record the decision, scope, subje
 ## M2.4 Independent enforcement appeals
 
 The appeal ledger records submissions, assignments, revisions, findings, protected dispositions, conflict denials and exact native enforcement reversals. Report-linked event moderation records the originating report and actor. The Moderation Center and A1A expose safe references through the existing private access controls. [M2.4 details](../moderation/M2_4_IMPLEMENTATION_REPORT.md)
+
+## M2.5 Founder moderation policy
+
+Founder-only updates and restorations append the actor, reason, previous and requested values, request, revision, and timestamp in the same transaction. Platform Policy History reads the revision ledger. M2.2 and M2.3 decision ledgers record the applicable revision without exporting reasons or evidence to new audiences. [Implementation report](../moderation/M2_5_IMPLEMENTATION_REPORT.md)

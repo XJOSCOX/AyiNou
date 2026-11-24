@@ -4,6 +4,7 @@ export * from "./verification-policy";
 export * from "./accounts";
 export * from "./account-enforcement";
 export * from "./feature-enforcement";
+export * from "./moderation-policy";
 export * from "./enforcement-appeals";
 export * from "./session-security";
 export * from "./audit";

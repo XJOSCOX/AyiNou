@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState, type FormEvent } from "react";
 import {
-  accountEnforcementCategories, featureScopes, suspensionMinutes,
+  featureScopes, suspensionMinutes, type ModerationPolicy,
   type FeatureCapability, type FeatureCommand, type FeatureEnforcementCase, type FeatureEnforcementPage, type FeatureScope,
 } from "@ayinou/shared";
 import { accountMessages } from "@/lib/account-i18n";
@@ -11,6 +11,8 @@ import { adminMessages } from "@/lib/admin-i18n";
 import { authorizedRequest } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
+import { loadModerationActionPolicy } from "@/lib/moderation-policy";
+import { moderationPolicyMessages } from "@/lib/moderation-policy-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { AdminFeedback } from "./admin-workspace";
 import { institutionAction, institutionField, useInstitutionResource } from "./institution-ui";
@@ -35,10 +37,12 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
     const result: FeatureEnforcementPage = await authorizedRequest(endpoint + "?" + params, {
       signal, cache: "no-store", headers: { "X-Ayinou-Workspace": workspace },
     });
-    return { result, key: params.toString() };
+    const policy = await loadModerationActionPolicy(workspace, signal);
+    return { result, policy, key: params.toString() };
   }, [q, subject, cursor, workspace]);
   const resource = useInstitutionResource(load);
   const data = resource.data?.result;
+  const policy = resource.data?.policy;
   const labels: Record<string, string> = t;
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
   const records = delegate ? data?.delegations : data?.restrictions;
@@ -75,11 +79,11 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
       </p>}
       {q && !options.length && !resource.error && <p className="mt-3 text-sm">{t.none}</p>}
       {resource.error ? <div className="mt-3"><AdminFeedback error={resource.error} retry={resource.refresh} section={delegate ? "moderatorDelegation" : "featureRestrictions"} /></div>
-        : !data ? <p role="status" className="mt-3">{authMessages[locale].working}</p>
+        : !data || !policy ? <p role="status" className="mt-3">{authMessages[locale].working}</p>
           : subject && !edit && (!delegate || data.authority !== "moderator") && <DecisionForm key={subject}
-            workspace={workspace} data={data} subject={subject} action={delegate ? "delegate" : "restrict"} onSave={refresh} />}
+            workspace={workspace} data={data} policy={policy} subject={subject} action={delegate ? "delegate" : "restrict"} onSave={refresh} />}
     </section>
-    {data && <section className={adminCompactCard}>
+    {data && policy && <section className={adminCompactCard}>
       <h3 className="font-semibold">{t.options}</h3>
       {!records?.length && <p className="mt-2 text-sm">{t.none}</p>}
       <ul className="mt-2 divide-y divide-[var(--theme-border)]">
@@ -96,13 +100,14 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
             <p className="text-sm">{date.format(new Date(record.startsAt))} · {record.expiresAt ? date.format(new Date(record.expiresAt)) : t.indefinitely}</p>
             {record.maxMinutes != null && <p className="text-sm">{t.durationLimit} · {record.maxMinutes}</p>}
             {active && allowed && <div className="flex flex-wrap gap-4">
-              {(delegate || record.expiresAt !== null) && <button type="button" className={adminSecondaryAction}
+              {(delegate || record.expiresAt !== null)
+                && (!(delegate || data.authority === "moderator") || policy.delegableCapabilities.includes(record.capability)) && <button type="button" className={adminSecondaryAction}
                 onClick={() => setEdit({ record, action: delegate ? "update_delegation" : "extend" })}>{delegate ? t.updateDecision : t.change}</button>}
               <button type="button" className={delegate ? adminDangerAction : adminSecondaryAction}
                 onClick={() => setEdit({ record, action: delegate ? "revoke_delegation" : "revoke" })}>{t.revokeDecision}</button>
             </div>}
             {edit?.record.id === record.id && record.subject && <DecisionForm key={record.id + edit.action}
-              workspace={workspace} data={data} subject={record.subject} record={record} action={edit.action}
+              workspace={workspace} data={data} policy={policy} subject={record.subject} record={record} action={edit.action}
               onSave={refresh} onCancel={() => setEdit(null)} />}
           </li>;
         })}
@@ -126,8 +131,8 @@ export function FeatureEnforcementPanel({ workspace, delegate = false }: { works
   </div>;
 }
 
-function DecisionForm({ workspace, data, subject, action, record, onSave, onCancel }: {
-  workspace: string; data: FeatureEnforcementPage; subject: string; action: FeatureCommand;
+function DecisionForm({ workspace, data, policy, subject, action, record, onSave, onCancel }: {
+  workspace: string; data: FeatureEnforcementPage; policy: ModerationPolicy; subject: string; action: FeatureCommand;
   record?: FeatureEnforcementCase; onSave: () => void; onCancel?: () => void;
 }) {
   const [locale] = useLocale();
@@ -136,21 +141,26 @@ function DecisionForm({ workspace, data, subject, action, record, onSave, onCanc
   const revoke = action.startsWith("revoke");
   const [capabilities, setCapabilities] = useState<FeatureCapability[]>(record ? [record.capability] : []);
   const [preferredScope, setScope] = useState<FeatureScope>(record?.scope ?? "platform");
-  const [duration, setDuration] = useState(record?.maxMinutes ? "indefinite" : "60");
+  const [selectedDuration, setDuration] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const pending = useRef<{ key: string; id: string } | null>(null);
   const assigned = data.delegations.filter((item) => item.status === "active");
   const delegated = data.authority === "moderator";
   const selectable = data.capabilities.filter(({ key, highImpact }) =>
-    (!highImpact || !delegation && data.authority === "founder") && (!delegated || assigned.some((item) => item.capability === key)));
+    (!highImpact || !delegation && data.authority === "founder")
+    && (!(delegation || delegated) || policy.delegableCapabilities.includes(key)) && (!delegated || assigned.some((item) => item.capability === key)));
   const scopes = featureScopes.filter((kind) => capabilities.every((key) =>
     (kind === "platform" || selectable.find((item) => item.key === key)?.scopes.includes(kind))
     && (!delegated || assigned.some((item) => item.capability === key && (item.scope === "platform" || item.scope === kind)))));
   const scope = record?.scope ?? (scopes.includes(preferredScope) ? preferredScope : scopes[0] ?? "platform");
-  const max = delegated ? Math.min(10080, ...capabilities.map((key) =>
+  const max = delegated ? Math.min(policy.moderatorMaxMinutes, ...capabilities.map((key) =>
     Math.max(1, ...assigned.filter((item) => item.capability === key && (item.scope === scope || item.scope === "platform"))
-      .map((item) => item.maxMinutes ?? 1)))) : 129600;
+      .map((item) => item.maxMinutes ?? 1))))
+    : data.authority === "administrator" && !delegation ? policy.administratorMaxMinutes : 129600;
+  const suggested = Math.min(policy.defaultMinutes, max);
+  const shownPresets = policy.suspensionPresets.filter((value) => value <= max);
+  const duration = selectedDuration ?? (record && delegation ? "indefinite" : shownPresets.includes(suggested) ? String(suggested) : "custom");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -199,22 +209,25 @@ function DecisionForm({ workspace, data, subject, action, record, onSave, onCanc
     {!revoke && <>
       <label className="text-sm font-semibold">{t.term}
         <select className={institutionField} value={duration} onChange={(event) => setDuration(event.target.value)}>
-          {suspensionMinutes.map((value, i) => value<=max ? <option key={value} value={value}>{account[presets[i]]}</option> : null)}
+          {suspensionMinutes.map((value, i) => shownPresets.includes(value) ? <option key={value} value={value}>{account[presets[i]]}</option> : null)}
           <option value="custom">{t.custom}</option>
           {(delegation || action === "restrict" && data.authority === "founder") && <option value="indefinite">{t.indefinitely}</option>}
         </select>
       </label>
       {duration === "custom" && <label className="text-sm font-semibold">{account.minutes}
-        <input className={institutionField} type="number" name="minutes" min={1} max={max} required />
+        <input className={institutionField} type="number" name="minutes" min={1} max={max} defaultValue={suggested} required />
       </label>}
       {delegation && <label className="text-sm font-semibold">{t.durationLimit}
-        <input className={institutionField} type="number" name="max" min={1} max={10080} defaultValue={record?.maxMinutes ?? 10080} required />
+        <input className={institutionField} type="number" name="max" min={1} max={policy.moderatorMaxMinutes} defaultValue={Math.min(record?.maxMinutes ?? policy.moderatorMaxMinutes, policy.moderatorMaxMinutes)} required />
       </label>}
       {action === "restrict" && <label className="text-sm font-semibold">{t.category}
-        <select className={institutionField} name="category">{accountEnforcementCategories.map((value) =>
+        <select className={institutionField} name="category">{policy.reasonCategories.map((value) =>
           <option value={value} key={value}>{account[value]}</option>)}</select>
       </label>}
     </>}
+    {policy.notifyStaffGuidance && action === "restrict" && <p role="status" className="rounded-md bg-[var(--theme-surface)] p-2 text-sm">
+      <strong>{moderationPolicyMessages[locale].staffGuidance}</strong> · {policy.repeatViolationGuidance}
+    </p>}
     <label className="text-sm font-semibold">{admin.reason}
       <textarea className={institutionField} name="reason" required minLength={10} maxLength={500} />
     </label>

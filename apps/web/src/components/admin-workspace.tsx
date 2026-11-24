@@ -39,6 +39,8 @@ import { governanceMessages } from "@/lib/governance-i18n";
 import { earlyPartnerMessages } from "@/lib/early-partner-i18n";
 import { AdminEarlyPartners } from "./early-partner-workspace";
 import { HomepageSettings } from "./homepage-settings";
+import { ModerationPolicySettings } from "./moderation-policy-settings";
+import { moderationPolicyMessages } from "@/lib/moderation-policy-i18n";
 import { RegistrationSettings } from "./registration-settings";
 import { VerificationSettings } from "./verification-settings";
 import { RecognitionAdmin } from "./recognition-admin";
@@ -79,6 +81,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     moderationOverview: moderation.overview, moderationReports: moderation.reports, moderationContent: moderation.content,
     moderationRestrictions: moderation.restrictions, moderationAppeals: moderation.appeals, moderationHistory: moderation.history,
     featureRestrictions: featureMessages[locale].features, moderatorDelegation: featureMessages[locale].delegations,
+    moderationPolicies: moderationPolicyMessages[locale].title,
     ...verificationCopy[locale].sections,
   };
   const access = useInstitutionResource(loadPlatformAccess);
@@ -213,6 +216,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                     path={"/api/v1/admin/feature-policy/" + key} title={feedLanguageMessages[locale].features[key]} />)}
                 </section>)}
               </div>}
+              {tab === "moderationPolicies" && access.data?.founder && <ModerationPolicySettings key={workspaceId} workspace={workspaceId} />}
               {tab === "registration" && access.data?.founder && <RegistrationSettings key={workspaceId} workspaceId={workspaceId} />}
               {tab === "memberExperience" && access.data?.founder && <MemberExperienceSettings key={workspaceId} workspaceId={workspaceId} />}
             </section>

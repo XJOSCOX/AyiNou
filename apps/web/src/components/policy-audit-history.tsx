@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { PolicyAuditEvent, PolicyAuditPage } from "@ayinou/shared";
+import type { ModerationPolicy, PolicyAuditEvent, PolicyAuditPage } from "@ayinou/shared";
 import { adminMessages } from "@/lib/admin-i18n";
 import { authorizedRequest } from "@/lib/api";
 import { authMessages } from "@/lib/auth-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { moderationPolicyMessages } from "@/lib/moderation-policy-i18n";
+import { formatModerationPolicyValue } from "./moderation-policy-values";
 import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { AdminFeedback } from "./admin-workspace";
 import { useInstitutionResource } from "./institution-ui";
@@ -27,6 +29,7 @@ export function PolicyAuditHistory({ workspaceId }: { workspaceId: string }) {
   const history = useInstitutionResource(load);
   const page = history.data?.cursor === cursor ? history.data.page : null;
   const labels: Record<PolicyAuditEvent["changes"][number]["key"], string> = {
+    ...moderationPolicyMessages[locale],
     ...t.memberExperience.flags,
     ...verificationCopy[locale].flags,
     homepageStatistics: t.homepageStatistics, enabled: t.registrationPolicy.enabled,
@@ -34,8 +37,12 @@ export function PolicyAuditHistory({ workspaceId }: { workspaceId: string }) {
     organizationEnabled: t.registrationPolicy.organizationEnabled,
     referralsEnabled: t.registrationPolicy.referralsEnabled, rewardsEnabled: copy.rewards,
   };
-  const formatValue = (value: PolicyAuditEvent["changes"][number]["before"]) =>
-    typeof value === "boolean" ? (value ? t.homepageOn : t.homepageOff) : t.registrationPolicy[value];
+  function formatValue(event: PolicyAuditEvent, key: PolicyAuditEvent["changes"][number]["key"], value: PolicyAuditEvent["changes"][number]["before"]) {
+    if (event.source === "moderation") return formatModerationPolicyValue(locale, key as keyof ModerationPolicy, value);
+    if (typeof value === "boolean") return value ? t.homepageOn : t.homepageOff;
+    if (value === "public" || value === "invitation_only" || value === "closed") return t.registrationPolicy[value];
+    return String(value);
+  }
   const formatTime = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" });
 
   return <section className={adminCompactCard} aria-labelledby="policy-history-heading">
@@ -50,7 +57,7 @@ export function PolicyAuditHistory({ workspaceId }: { workspaceId: string }) {
             <summary className={adminDisclosure}>
               <span className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-2">
                 <span className="min-w-0 break-words">
-                  <span className="block">{event.source === "homepage" ? t.homepageStatistics : event.source === "registration" ? t.registrationPolicy.title : event.source === "verification" ? verificationCopy[locale].sections.verificationSettings : t.memberExperience.title}</span>
+                  <span className="block">{event.source === "homepage" ? t.homepageStatistics : event.source === "registration" ? t.registrationPolicy.title : event.source === "verification" ? verificationCopy[locale].sections.verificationSettings : event.source === "moderation" ? moderationPolicyMessages[locale].title : t.memberExperience.title}</span>
                   <span className="block break-words text-xs font-normal text-[var(--theme-body)]">
                     {event.actor?.displayName && `${event.actor.displayName} · `}
                     {event.actorUsername ? `@${event.actorUsername}` : event.actor?.username ? `@${event.actor.username}` : !event.actor?.displayName && event.actorId}
@@ -63,7 +70,7 @@ export function PolicyAuditHistory({ workspaceId }: { workspaceId: string }) {
             <dl className="grid gap-2 border-t border-[var(--theme-border)] bg-[var(--theme-control)] px-3 py-2.5 text-sm">
               {event.changes.map((change) => <div className="grid gap-0.5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" key={change.key}>
                 <dt className="font-medium">{labels[change.key]}</dt>
-                <dd>{formatValue(change.before)} → {formatValue(change.after)}</dd>
+                <dd>{formatValue(event, change.key, change.before)} → {formatValue(event, change.key, change.after)}</dd>
               </div>)}
               <div className="min-w-0 border-t border-[var(--theme-border)] pt-2">
                 <dt className="font-medium">{copy.reason}</dt>

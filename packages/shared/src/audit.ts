@@ -44,18 +44,20 @@ export interface AuditPage {
   nextCursor: string | null;
 }
 
+type ModerationPolicyValue = import("./moderation-policy").ModerationPolicy;
+
 export interface PolicyAuditEvent {
-  source: "homepage" | "registration" | "member_experience" | "verification";
+  source: "homepage" | "registration" | "member_experience" | "verification" | "moderation";
   revision: number;
-  actorId: string;
+  actorId: string | null;
   actorUsername: string | null;
   actor?: AuditPerson;
   occurredAt: string;
   reason: string;
   changes: {
-    key: "homepageStatistics" | "enabled" | "mode" | "individualEnabled" | "organizationEnabled" | "referralsEnabled" | "rewardsEnabled" | MemberExperienceFlag | VerificationPolicyFlag;
-    before: boolean | "public" | "invitation_only" | "closed";
-    after: boolean | "public" | "invitation_only" | "closed";
+    key: "homepageStatistics" | "enabled" | "mode" | "individualEnabled" | "organizationEnabled" | "referralsEnabled" | "rewardsEnabled" | MemberExperienceFlag | VerificationPolicyFlag | keyof ModerationPolicyValue;
+    before: ModerationPolicyValue[keyof ModerationPolicyValue];
+    after: ModerationPolicyValue[keyof ModerationPolicyValue];
   }[];
 }
 

@@ -55,7 +55,7 @@ test("F2.3 scopes announcements, pin capacity and organization post history", as
   await login(page, owner);
   await expect(page).toHaveURL(/\/dashboard/);
   await page.goto("/institutions");
-  const organizationRow = page.getByRole("listitem").filter({ has: page.getByRole("link", { name: "Public publishing fixture", exact: true }) });
+  const organizationRow = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: "Public publishing fixture", exact: true }) });
   const logo = organizationRow.locator('img[src*="institution-logos"]');
   await expect(logo).toBeVisible();
   await expect.poll(() => logo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);

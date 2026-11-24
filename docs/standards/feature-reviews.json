@@ -2557,6 +2557,61 @@
           "rolloutAndRollback": "Deploy the additive read shape and compatible constraint. Any rollback must account for open events that now have a linked community."
         }
       ]
+    },
+    {
+      "id": "m25-founder-moderation-policies",
+      "report": "docs/moderation/M2_5_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/moderation-policy",
+          "contract": "GET /api/v1/admin/moderation-policy - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A live MFA- and workspace-bound read adds no separate mutation event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/moderation-policy.spec.ts",
+            "denialScenario": "An Administrator, Moderator, unverified session or different originating session cannot manage Founder policy. Action settings require a live enforcement workspace."
+          }
+        },
+        {
+          "route": "GET /api/v1/moderation/action-policy",
+          "contract": "GET /api/v1/moderation/action-policy - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A live MFA- and workspace-bound read adds no separate mutation event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/moderation-policy.spec.ts",
+            "denialScenario": "An Administrator, Moderator, unverified session or different originating session cannot manage Founder policy. Action settings require a live enforcement workspace."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/moderation-policy",
+          "contract": "PATCH /api/v1/admin/moderation-policy 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The policy change and its before/after revision commit together."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/moderation-policy.spec.ts",
+            "denialScenario": "An Administrator, Moderator, unverified session or different originating session cannot manage Founder policy. Action settings require a live enforcement workspace."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124152000_m25_founder_moderation_policies.sql",
+          "rlsAndGrants": "Private policy and history have RLS and no client or service table grants. The two service-only RPCs apply separate live authority and workspace checks.",
+          "authorization": "Only the recognized Founder can change policy. Native enforcement and appeals retain existing scope, MFA, conflict and protected target checks.",
+          "compatibility": "Existing categories, limits, presets and grants start active. New decisions receive policy revisions. Existing sanctions and appeal deadlines keep their stored values.",
+          "validation": "Disposable integration tests cover direct RPC grants, race conditions, role denials, restoration, enforcement ceilings, existing decisions and four locales.",
+          "rolloutAndRollback": "Verify exact hosted history, approve the sole migration and compare preservation evidence. Restore values with an audited revision or correct the schema with a forward migration."
+        }
+      ]
     }
   ]
 }
