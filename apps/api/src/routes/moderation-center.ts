@@ -74,8 +74,8 @@ export function registerModerationCenterRead(app: FastifyInstance, auth: AuthVer
       high: result.high, at: last.sortAt, source: last.source, id: last.id,
       expires: cursor?.expires ?? Date.now() + 5 * 60_000,
     }, binding) : null;
-    const rows = selected.map(({ id, source, domain, target, targetId, scopeKey, status, action, occurredAt, expiresAt, actorRef, caseReference }) =>
-      ({ id, source, domain, target, targetId, scopeKey, status, action, occurredAt, expiresAt, actorRef, caseReference }));
+    const rows = selected.map(({ id, source, domain, target, targetId, scopeKey, status, action, occurredAt, expiresAt, actorRef, caseReference, capability }) =>
+      ({ id, source, domain, target, targetId, scopeKey, status, action, occurredAt, expiresAt, actorRef, caseReference, capability }));
     return { metrics: result.metrics, nextCursor, rows };
   });
 }

@@ -19,6 +19,7 @@ export interface FeedRepository {
 
 export function feedDatabaseError(code: string): ApiError {
   switch (code) {
+    case "M2301": return new ApiError(403, "FEATURE_RESTRICTED", "This feature is currently restricted");
     case "42501": return new ApiError(403, "FORBIDDEN", "This action is not permitted");
     case "PEV03": return new ApiError(403, "EVENT_UNAVAILABLE", "This event action is unavailable");
     case "PEV09": return new ApiError(409, "EVENT_FULL", "Event capacity has been reached");

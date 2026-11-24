@@ -143,6 +143,8 @@ GET /api/v1/members/:username/mute - -
 GET /api/v1/members/:username/timeline - -
 GET /api/v1/moderation/:kind/:id/activity - -
 GET /api/v1/moderation/appeals - -
+GET /api/v1/moderation/feature-enforcement - -
+GET /api/v1/moderation/feature-enforcement/access - -
 GET /api/v1/moderation/feed - -
 GET /api/v1/polls - -
 GET /api/v1/polls/:id - -
@@ -304,6 +306,8 @@ HEAD /api/v1/members/:username/mute - onSend
 HEAD /api/v1/members/:username/timeline - onSend
 HEAD /api/v1/moderation/:kind/:id/activity - onSend
 HEAD /api/v1/moderation/appeals - onSend
+HEAD /api/v1/moderation/feature-enforcement - onSend
+HEAD /api/v1/moderation/feature-enforcement/access - onSend
 HEAD /api/v1/moderation/feed - onSend
 HEAD /api/v1/polls - onSend
 HEAD /api/v1/polls/:id - onSend
@@ -441,6 +445,7 @@ POST /api/v1/me/verification 4096 -
 POST /api/v1/me/verification/appeals 9000 -
 POST /api/v1/members/:username/impersonation-reports 9000 -
 POST /api/v1/moderation/actions/:id/appeals 8192 -
+POST /api/v1/moderation/feature-enforcement 8192 -
 POST /api/v1/polls 10000 -
 POST /api/v1/polls/:id/ballot 512 -
 POST /api/v1/polls/:id/nominations/:option 512 -

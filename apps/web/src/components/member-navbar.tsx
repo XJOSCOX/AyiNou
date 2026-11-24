@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
+import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
@@ -31,6 +32,7 @@ export function MemberNavbar() {
   const accountLinks = [
     { href: "/profile", label: auth.myProfile },
     { href: "/settings", label: settings },
+    { href: "/account-access", label: featureMessages[locale].accountAccess },
     { href: "/verification", label: institution.verification },
   ];
   if (administrator) accountLinks.push({ href: "/admin", label: adminMessages[locale].administration });

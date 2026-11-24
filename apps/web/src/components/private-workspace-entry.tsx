@@ -17,12 +17,16 @@ export async function PrivateWorkspaceEntry({ kind, verify, section = "overview"
   if (!subject || typeof sessionId !== "string" || data?.claims.is_anonymous) notFound();
 
   const access = await workflowRequest<PlatformAccess>("/api/v1/me/platform-access", undefined, true);
-  if (!access || !(kind === "admin_workspace" ? access.administrator : access.reviewer)) notFound();
+  if (!access) notFound();
+  const features = kind === "admin_workspace" && section === "featureRestrictions" && !access.administrator
+    ? await workflowRequest<{ allowed: boolean }>("/api/v1/moderation/feature-enforcement/access", undefined, true) : null;
+  if (!(kind === "admin_workspace" ? access.administrator || features?.allowed : access.reviewer)) notFound();
+  const entryKind = features?.allowed ? "moderation_workspace" : kind;
   const user = access.totp ? await supabase.auth.getUser() : null;
   const factorIds = user?.data.user?.id === subject
     ? (user.data.user.factors ?? []).filter((factor) => factor.factor_type === "totp" && factor.status === "verified")
       .map((factor) => factor.id)
     : [];
-  return <WorkspaceEntry key={sessionId + kind + verify + section} subject={subject} sessionId={sessionId} kind={kind}
+  return <WorkspaceEntry key={sessionId + entryKind + verify + section} subject={subject} sessionId={sessionId} kind={entryKind}
     totp={access.totp} factorIds={factorIds} verify={verify} section={section} />;
 }

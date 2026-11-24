@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useState, type FormEvent } from "react";
 import { moderationActions, type FeedReport, type ModerationAction, type ModerationScope } from "@ayinou/shared";
+import { adminEntryPath } from "@/lib/admin-navigation";
+import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { apiErrorCode } from "@/lib/api-errors";
 import { loadModeration, moderateFeedContent } from "@/lib/feed-api";
 import { feedMessages } from "@/lib/feed-i18n";
@@ -41,7 +43,7 @@ export function FeedModeration({ community, initialTarget = "posts", initialScop
   return <MemberShell>
     <div className="grid w-full min-w-0 gap-5">
       <PageHeader title={community ? c.moderation : t.moderation} description={t.moderationIntro}
-        actions={<Link href={community ? `/communities/${community}` : "/feed"} className={institutionLink}>{community ? c.back : t.backToFeed}</Link>} />
+        actions={<>{!community && <Link href={adminEntryPath("featureRestrictions")} className={institutionLink}>{featureMessages[locale].moderationEntry}</Link>}<Link href={community ? `/communities/${community}` : "/feed"} className={institutionLink}>{community ? c.back : t.backToFeed}</Link></>} />
       {!community && <div role="group" aria-label={t.moderation} className="flex flex-wrap gap-2">
         <button type="button" className={choiceStyle} aria-pressed={!appeals} onClick={() => setAppeals(false)}>{t.pendingReports}</button>
         <button type="button" className={choiceStyle} aria-pressed={appeals} onClick={() => setAppeals(true)}>{safety.review}</button>

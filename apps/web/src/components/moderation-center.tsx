@@ -7,6 +7,7 @@ import {
   type ModerationCenterMetrics, type ModerationCenterPage, type ModerationCenterView, type ModerationSummary,
 } from "@ayinou/shared";
 import { accountEnforcementMessages } from "@/lib/account-enforcement-i18n";
+import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
 import type { AdminTab } from "@/lib/admin-navigation";
 import { authorizedRequest } from "@/lib/api";
@@ -99,7 +100,7 @@ export function ModerationList({ workspace, view, onNavigate, target }: {
   const [locale] = useLocale();
   const t = moderationCenterMessages[locale];
   const common = adminMessages[locale];
-  const actions: Record<string, string> = { ...t, ...accountEnforcementMessages[locale] };
+  const actions: Record<string, string> = { ...t, ...accountEnforcementMessages[locale], ...featureMessages[locale] };
   const [filters, setFilters] = useState(view === "reports" ? "status=pending" : "");
   const dated = view === "reports" || view === "history";
   const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
@@ -127,8 +128,8 @@ export function ModerationList({ workspace, view, onNavigate, target }: {
   }
 
   const domains = target ? ["accounts"] as const : view === "content" ? ["feed", "communities"] as const
-    : view === "reports" ? moderationDomains.filter((key) => key !== "accounts")
-      : view === "restrictions" ? ["accounts", "events", "projects", "trust"] as const : moderationDomains;
+    : view === "reports" ? moderationDomains.filter((key) => key !== "accounts" && key !== "features")
+      : view === "restrictions" ? ["accounts", "events", "projects", "trust", "features"] as const : moderationDomains;
   const format = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
   return <>
     <section className={institutionCard}>
@@ -140,7 +141,7 @@ export function ModerationList({ workspace, view, onNavigate, target }: {
         <label className="text-sm font-semibold">{t.domain}
           <select name="domain" className={institutionField} defaultValue={target ? "accounts" : ""}>
             <option value="">{t.all}</option>
-            {domains.map((name) => <option value={name} key={name}>{t[name]}</option>)}
+            {domains.map((name) => <option value={name} key={name}>{name === "features" ? featureMessages[locale].features : t[name]}</option>)}
           </select>
         </label>
         <label className="text-sm font-semibold">{t.status}
@@ -184,7 +185,7 @@ function ModerationRow({ row, view, onNavigate, format }: {
 }) {
   const [locale] = useLocale();
   const t = moderationCenterMessages[locale];
-  const labels: Record<string, string> = { ...accountEnforcementMessages[locale], ...t };
+  const labels: Record<string, string> = { ...accountEnforcementMessages[locale], ...t, ...featureMessages[locale] };
   const feed = feedMessages[locale];
   const categories: Record<string, string> = { harassment: feed.harassment, hate: feed.hate, spam: feed.spam, privacy: feed.privacy, other: feed.other };
   const contentTool = row.scopeKey ? "/communities/" + encodeURIComponent(row.scopeKey) + "/moderation" : "/feed/moderation";
@@ -196,14 +197,14 @@ function ModerationRow({ row, view, onNavigate, format }: {
   const action = labels[row.action] ?? categories[row.action] ?? t.unavailable;
   return <li className="grid gap-2 py-4 first:pt-0 last:pb-0">
     <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-      <h3 className="font-semibold">{t[row.domain]} <span aria-hidden="true">·</span> {action}</h3>
+      <h3 className="font-semibold">{row.domain === "features" ? featureMessages[locale].features : t[row.domain]} <span aria-hidden="true">·</span> {action}</h3>
       <span className="rounded-md bg-[var(--theme-selected)] px-2 py-1 text-xs font-semibold">{labels[row.status] ?? t.unavailable}</span>
     </div>
     <dl className="grid gap-x-5 gap-y-1 text-sm text-[var(--theme-body)] sm:grid-cols-2">
       <div className="min-w-0"><dt className="font-semibold">{t.reference}</dt><dd className="break-all">{row.source}:{row.id}</dd></div>
       {row.caseReference && <div className="min-w-0"><dt className="font-semibold">{accountEnforcementMessages[locale].reference}</dt>
         <dd className="break-all">{row.caseReference}</dd></div>}
-      <div className="min-w-0"><dt className="font-semibold">{t.target}</dt><dd className="break-words">{t[row.target]}{row.scopeKey && " · " + row.scopeKey}</dd></div>
+      <div className="min-w-0"><dt className="font-semibold">{t.target}</dt><dd className="break-words">{row.capability ? featureMessages[locale][row.capability] : t[row.target]}{row.scopeKey && " · " + row.scopeKey}</dd></div>
       <div><dt className="font-semibold">{t.updated}</dt><dd>{row.occurredAt
         ? <time dateTime={row.occurredAt}>{format.format(new Date(row.occurredAt))}</time> : t.effectiveUnknown}</dd></div>
       {view === "restrictions" && <div><dt className="font-semibold">{t.expires}</dt><dd>{row.expiresAt
@@ -212,6 +213,6 @@ function ModerationRow({ row, view, onNavigate, format }: {
     </dl>
     {href ? <Link className={`${institutionLink} justify-self-start`} href={href}>{t.openTool}</Link>
       : <button type="button" className={`${institutionLink} justify-self-start`}
-        onClick={() => row.domain === "accounts" ? onNavigate("accounts", row.targetId ?? undefined) : onNavigate("trust")}>{t.openTool}</button>}
+        onClick={() => row.domain === "accounts" ? onNavigate("accounts", row.targetId ?? undefined) : onNavigate(row.domain === "features" ? "featureRestrictions" : "trust")}>{t.openTool}</button>}
   </li>;
 }

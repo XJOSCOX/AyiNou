@@ -50,6 +50,8 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
       if (error.code === "O4005") throw new InstitutionError("ORG_SETUP_HANDLE_UNAVAILABLE", 409);
       if (error.code === "O4006") throw new InstitutionError("ORG_SETUP_PROFILE_REQUIRED", 409);
       if (error.code === "O5001") throw new InstitutionError("MFA_REQUIRED", 403);
+      if (error.code === "M2301") throw new InstitutionError("FEATURE_RESTRICTED", 403);
+      if (error.code === "M2302") throw new InstitutionError("FEATURE_RESTRICTION_LIMIT", 409);
       if (error.code === "M2201") throw new InstitutionError("ACCOUNT_ENFORCEMENT_LIMIT", 409);
       if (error.code === "O5002") throw new InstitutionError("GOVERNANCE_REQUIRED", 409);
       if (error.code === "O5003") throw new InstitutionError("CLAIM_APPROVAL_HELD", 409);

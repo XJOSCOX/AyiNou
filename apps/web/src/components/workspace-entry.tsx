@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { PrivateFlow } from "@ayinou/shared";
 import { adminEntryPath, type AdminTab } from "@/lib/admin-navigation";
 import { adminMessages } from "@/lib/admin-i18n";
+import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
 import { useLocale } from "@/lib/locale-store";
@@ -18,7 +19,7 @@ import { MfaChallenge } from "./mfa-challenge";
 import { PageHeader } from "./page-header";
 
 export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, verify, section }: {
-  subject: string; sessionId: string; kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace">;
+  subject: string; sessionId: string; kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace" | "moderation_workspace">;
   totp: boolean; factorIds: string[]; verify: boolean; section: AdminTab;
 }) {
   const [locale] = useLocale();
@@ -28,7 +29,8 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
   const [error, setError] = useState<unknown>(verify && !totp ? new ApiRequestError("MFA_REQUIRED", 403) : null);
   const restoreFocus = useRef(false);
   const t = sessionSecurityMessages[locale];
-  const admin = kind === "admin_workspace";
+  const delegated = kind === "moderation_workspace";
+  const admin = kind !== "verification_workspace";
   const entry = admin ? adminEntryPath(section) : "/verification/review";
 
   async function open(afterVerification = false) {
@@ -67,7 +69,7 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
 
   return <MemberShell>
     <div className="grid gap-4">
-      <PageHeader title={admin ? adminMessages[locale].administration : institutionMessages[locale].review} />
+      <PageHeader title={delegated ? featureMessages[locale].features : admin ? adminMessages[locale].administration : institutionMessages[locale].review} />
       {verifying ? <div className={`${institutionCard} mx-auto w-full max-w-md py-6 sm:py-8`}>
         <MfaChallenge factorIds={factorIds} subject={subject} sessionId={sessionId}
           workspace={{ onVerified: () => open(true), onCancel: cancelVerification, onSessionEnded: endVerificationSession }} />
@@ -82,7 +84,7 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
               restoreFocus.current = false;
               button.focus();
             }
-          }}>{admin ? t.openAdmin : t.openReview}</button>
+          }}>{delegated ? featureMessages[locale].moderationEntry : admin ? t.openAdmin : t.openReview}</button>
       </section>}
     </div>
   </MemberShell>;

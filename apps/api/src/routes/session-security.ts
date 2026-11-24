@@ -8,7 +8,7 @@ import { InstitutionError, type InstitutionRepository } from "../services/instit
 const sessions = "/api/v1/me/sessions";
 const workflows = "/api/v1/me/private-workflows";
 const workflow = workflows + "/:id/:step";
-const location = z.strictObject({ id: z.uuid(), step: z.enum(["resume", "confirm", "admin", "review"]) });
+const location = z.strictObject({ id: z.uuid(), step: z.enum(["resume", "confirm", "admin", "review", "moderation"]) });
 const command = z.strictObject({ requestId: z.uuid() });
 const unavailable = () => new ApiError(404, "NOT_FOUND", "Resource unavailable");
 
@@ -54,7 +54,7 @@ export function registerSessionSecurity(app: FastifyInstance, auth: AuthVerifier
   });
 
   app.post(workflows, { bodyLimit: 512 }, (request) => {
-    const input = z.strictObject({ kind: z.enum(["organization_draft", "revoke_other_sessions", "admin_workspace", "verification_workspace"]) }).parse(request.body);
+    const input = z.strictObject({ kind: z.enum(["organization_draft", "revoke_other_sessions", "admin_workspace", "verification_workspace", "moderation_workspace"]) }).parse(request.body);
     return call<PrivateFlow>(request, "s2b_workflow_for_api", {
       p_action: "open", p_kind: input.kind, p_id: null, p_step: null, p_expected: null, p_request: null,
     });

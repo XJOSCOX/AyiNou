@@ -96,3 +96,6 @@ New account decisions atomically append to the private enforcement ledger. Natur
 ## Founder Verified live-proof candidate
 
 Member account-control confirmation and Founder attestation use the existing Founder event ledger and its transactional command receipts. Retain original application supersession reasons and closure provenance. The private proof session remains outside general audit reads. [Founder Verified audit](../identity/FOUNDER_VERIFIED_COMPLETION_AUDIT.md)
+## M2.3 Feature restrictions and moderator delegation
+
+Restriction and delegation commands atomically record the decision, scope, subject, authority, reason, and case reference. Stable expiration references enter the existing Moderation Center and A1A projections once the effective term ends. Member notices expose a caller-bound category and public-safe case details. [M2.3 details](../moderation/M2_3_IMPLEMENTATION_REPORT.md)

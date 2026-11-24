@@ -1,10 +1,12 @@
 export const moderationCenterViews = ["overview", "reports", "content", "restrictions", "history"] as const;
-export const moderationDomains = ["feed", "communities", "events", "projects", "trust", "accounts"] as const;
+export const moderationDomains = ["feed", "communities", "events", "projects", "trust", "accounts", "features"] as const;
 export const moderationStatuses = ["pending", "closed", "resolved", "dismissed", "restricted", "substantiated",
   "restored", "suspended", "banned", "provider_ban", "recorded", "hidden", "removed"] as const;
 export const moderationHistoryActions = ["hide", "restore", "remove", "dismiss", "restricted", "restored", "dismissed",
   "account_suspended", "account_banned", "account_reinstated", "institution_restricted",
-  "suspension_created", "suspension_extended", "restriction_expired", "restriction_revoked", "ban_issued", "ban_lifted"] as const;
+  "suspension_created", "suspension_extended", "restriction_expired", "restriction_revoked", "ban_issued", "ban_lifted",
+  "feature_restrict", "feature_extend", "feature_revoke", "feature_expired", "feature_delegate",
+  "feature_update_delegation", "feature_revoke_delegation", "feature_delegation_expired"] as const;
 
 export type ModerationCenterView = (typeof moderationCenterViews)[number];
 export type ModerationDomain = (typeof moderationDomains)[number];
@@ -22,6 +24,7 @@ export interface ModerationSummary {
   expiresAt: string | null;
   actorRef: string | null;
   caseReference?: string | null;
+  capability?: import("./feature-enforcement").FeatureCapability | null;
 }
 
 export interface ModerationCenterMetrics {

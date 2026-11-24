@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { f25FeaturePolicyKeys, platformRoles, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminAudit, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
-import { adminSections, type AdminTab } from "@/lib/admin-navigation";
+import { adminEntryPath, adminSections, type AdminTab } from "@/lib/admin-navigation";
 import { feedLanguageMessages } from "@/lib/feed-language-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
 import { moderationCenterMessages } from "@/lib/moderation-center-i18n";
@@ -19,6 +19,8 @@ import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
 import { ModerationAppeals, ModerationList, ModerationOverview } from "./moderation-center";
+import { featureMessages } from "@/lib/feature-enforcement-i18n";
+import { FeatureEnforcementPanel } from "./feature-enforcement";
 import { AdminAccountEnforcement } from "./admin-account-enforcement";
 import { EnforcementDetails } from "./account-enforcement-details";
 import { accountEnforcementMessages } from "@/lib/account-enforcement-i18n";
@@ -60,6 +62,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     partners: earlyPartnerMessages[locale].title,
     moderationOverview: moderation.overview, moderationReports: moderation.reports, moderationContent: moderation.content,
     moderationRestrictions: moderation.restrictions, moderationAppeals: moderation.appeals, moderationHistory: moderation.history,
+    featureRestrictions: featureMessages[locale].features, moderatorDelegation: featureMessages[locale].delegations,
     ...verificationCopy[locale].sections,
   };
   const access = useInstitutionResource(loadPlatformAccess);
@@ -120,6 +123,8 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {tab === "moderationRestrictions" && <ModerationList key="restrictions" view="restrictions" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationHistory" && <ModerationList key={accountFilter ?? "history"} view="history" workspace={workspaceId} target={accountFilter} onNavigate={navigate} />}
               {tab === "moderationAppeals" && <ModerationAppeals reviewer={access.data?.reviewer === true} onNavigate={navigate} />}
+              {tab === "featureRestrictions" && <FeatureEnforcementPanel key="features" workspace={workspaceId} />}
+              {tab === "moderatorDelegation" && <FeatureEnforcementPanel key="delegation" workspace={workspaceId} delegate />}
               {tab === "accounts" && <AccountManagement key={accountFilter ?? "accounts"} initialQuery={accountFilter}
                 workspace={workspaceId} founder={access.data?.founder === true}
                 onHistory={(id) => navigate("moderationHistory", id)} onChange={overview.refresh} />}
@@ -152,8 +157,8 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
   </MemberShell></AdminSectionContext.Provider>;
 }
 
-export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
-  error: unknown; totp?: boolean; retry?: () => void; next?: "/admin" | "/verification/review";
+export function AdminFeedback({ error, totp, retry, section, next = "/admin" }: {
+  error: unknown; totp?: boolean; retry?: () => void; section?: AdminTab; next?: "/admin" | "/verification/review";
 }) {
   const [locale] = useLocale();
   const t = adminMessages[locale];
@@ -165,7 +170,7 @@ export function AdminFeedback({ error, totp, retry, next = "/admin" }: {
   return <div className={institutionErrorBox}>
     <p role="alert">{message}</p>
     {code === "MFA_REQUIRED" && <Link className={institutionLink}
-      href={totp === false ? "/settings" : next === "/admin" ? adminRenewalPath : `${next}?verify=1`}>{totp === false ? t.accountSecurity : t.verifyNow}</Link>}
+      href={totp === false ? "/settings" : section ? adminEntryPath(section, true) : next === "/admin" ? adminRenewalPath : `${next}?verify=1`}>{totp === false ? t.accountSecurity : t.verifyNow}</Link>}
     {code === "UNAUTHORIZED" && <Link className={institutionLink} href="/login">{authMessages[locale].loginTitle}</Link>}
     {retry && !["FORBIDDEN", "MFA_REQUIRED", "UNAUTHORIZED"].includes(code) &&
       <button type="button" className={institutionLink} onClick={retry}>{authMessages[locale].retry}</button>}

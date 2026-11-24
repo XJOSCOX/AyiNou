@@ -1,6 +1,61 @@
 {
   "features": [
     {
+      "id": "m23-feature-enforcement",
+      "report": "docs/moderation/M2_3_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/moderation/feature-enforcement",
+          "contract": "GET /api/v1/moderation/feature-enforcement - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Private, bounded summaries reuse the audit read budget."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/feature-enforcement.spec.ts",
+            "denialScenario": "A foreign workspace or expired delegation cannot read case data."
+          }
+        },
+        {
+          "route": "GET /api/v1/moderation/feature-enforcement/access",
+          "contract": "GET /api/v1/moderation/feature-enforcement/access - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Authenticated, budgeted boolean for the requesting actor’s current delegation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/feature-enforcement.spec.ts",
+            "denialScenario": "A moderator role alone has no feature-restriction authority."
+          }
+        },
+        {
+          "route": "POST /api/v1/moderation/feature-enforcement",
+          "contract": "POST /api/v1/moderation/feature-enforcement 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Accepted restrictions and delegation commands commit with an append-only decision event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/feature-enforcement.spec.ts",
+            "denialScenario": "Protected subjects, overlong terms and absent or revoked delegation are denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123133000_m23_feature_restrictions.sql",
+          "rlsAndGrants": "Capability, delegation, restriction and event tables are private and RLS protected. Staff RPCs are service-only and notices are owner-bound.",
+          "authorization": "Recognized live authority, recent MFA and an original-session workspace are required. A Moderator additionally needs an active in-scope grant.",
+          "compatibility": "Preserves existing account restrictions and resource records. Ballots, security recovery and eligible withdrawals keep their native access rules.",
+          "validation": "Disposable SQL, API and browser checks exercise protected accounts, direct RPC authorization, scoped writes, expiry and redacted notices.",
+          "rolloutAndRollback": "Apply only the exact approved migration after local checks. Preserve records during rollback and use forward remediation for database changes."
+        }
+      ]
+    },
+    {
       "id": "m22-account-enforcement",
       "report": "docs/moderation/M2_2_IMPLEMENTATION_REPORT.md",
       "routes": [

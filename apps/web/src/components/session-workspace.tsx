@@ -15,6 +15,7 @@ import { sessionSecurityMessages } from "@/lib/session-security-i18n";
 import { openPrivateFlow, privateFlowPath, workflowsEndpoint } from "@/lib/session-security";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { AdminWorkspace } from "./admin-workspace";
+import { FeatureEnforcementPanel } from "./feature-enforcement";
 import { VerificationReview } from "./verification-review";
 import { institutionAction, institutionCard, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -33,7 +34,8 @@ export function SessionWorkspace({ subject, sessionId, flow, initialSection }: {
   const requestId = useRef<string | null>(null);
   const closing = useRef(false);
   const t = sessionSecurityMessages[locale];
-  const admin = flow.kind === "admin_workspace";
+  const delegated = flow.kind === "moderation_workspace";
+  const admin = flow.kind === "admin_workspace" || delegated;
   const entry = admin ? adminEntryPath(section) : "/verification/review";
   const endpoint = workflowsEndpoint + "/" + flow.id + "/" + flow.step;
 
@@ -76,7 +78,7 @@ export function SessionWorkspace({ subject, sessionId, flow, initialSection }: {
     if (state !== "renewing") return;
     const active = new AbortController();
     const signal = AbortSignal.any([active.signal, AbortSignal.timeout(10_000)]);
-    void openPrivateFlow("admin_workspace", subject, sessionId, signal).then((replacement) => {
+    void openPrivateFlow(delegated ? "moderation_workspace" : "admin_workspace", subject, sessionId, signal).then((replacement) => {
       if (active.signal.aborted) return;
       if (replacement.id === flow.id) setState("closed");
       else router.replace(privateFlowPath(replacement, section));
@@ -87,7 +89,7 @@ export function SessionWorkspace({ subject, sessionId, flow, initialSection }: {
       else setState(code === "UNAUTHORIZED" || code === "SESSION_CHANGED" ? "signedOut" : "closed");
     });
     return () => active.abort();
-  }, [flow.id, router, section, sessionId, state, subject]);
+  }, [delegated, flow.id, router, section, sessionId, state, subject]);
 
   async function close() {
     if (closing.current) return;
@@ -136,5 +138,9 @@ export function SessionWorkspace({ subject, sessionId, flow, initialSection }: {
     <button type="button" disabled={busy} onClick={() => void close()} className={institutionLink}>{t.closeWorkspace}</button>
     {failed && <p role="alert">{t.failed}</p>}
   </div>;
+  if (delegated) return <MemberShell><div className="grid gap-4">
+    <PageHeader title={adminMessages[locale].administration} actions={action} />
+    <FeatureEnforcementPanel workspace={flow.id} />
+  </div></MemberShell>;
   return admin ? <AdminWorkspace workspaceId={flow.id} workspaceAction={action} section={section} onSectionChange={setSection} /> : <VerificationReview workspaceAction={action} workspaceId={flow.id} />;
 }

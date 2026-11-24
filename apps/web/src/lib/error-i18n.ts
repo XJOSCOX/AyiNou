@@ -17,6 +17,7 @@ import { organizationRoleMessages } from "./organization-role-i18n";
 import { projectMessages } from "./project-i18n";
 import { projectWorkMessages } from "./project-work-i18n";
 import { projectProgressMessages } from "./project-progress-i18n";
+import { featureMessages } from "./feature-enforcement-i18n";
 import { pollMessages } from "./poll-i18n";
 
 export const errorMessages = { ht, fr, en, es } satisfies Record<Locale, typeof en>;
@@ -34,6 +35,8 @@ export function localizedApiError(locale: Locale, cause: unknown) {
   const code = apiErrorCode(cause);
   const safety = safetyMessages[locale];
   switch (code) {
+    case "FEATURE_RESTRICTED": return featureMessages[locale].blocked;
+    case "FEATURE_RESTRICTION_LIMIT": return featureMessages[locale].limit;
     case "GOVERNANCE_REQUIRED": return governanceMessages[locale].protectedRole;
     case "CLAIM_APPROVAL_HELD": return governanceMessages[locale].claimHeld;
     case "COMMUNITY_UNAVAILABLE": return communityDirectoryMessages[locale].unavailable;
