@@ -77,6 +77,7 @@
   "homepageOn": "On",
   "homepageOff": "Off",
   "homepageReason": "Reason for this change",
+  "homepageReasonHelp": "Enter at least 10 characters explaining why you’re changing visibility.",
   "homepageSave": "Save visibility",
   "homepageSaved": "Change saved.",
   "administration": "Platform administration",

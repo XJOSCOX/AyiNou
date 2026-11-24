@@ -47,11 +47,13 @@ function HomepageSettingForm({ current, workspaceId, onSave, refresh }: {
   const [stale, setStale] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const retry = useRef<{ requestId: string; value: boolean; reason: string } | null>(null);
+  const minimumReasonLength = 10;
+  const note = reason.trim();
+  const canSave = !busy && !stale && enabled !== current.enabled && note.length >= minimumReasonLength;
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || stale || enabled === current.enabled) return;
-    const note = reason.trim();
+    if (!canSave) return;
     if (retry.current?.value !== enabled || retry.current.reason !== note)
       retry.current = { requestId: crypto.randomUUID(), value: enabled, reason: note };
     setBusy(true);
@@ -80,12 +82,15 @@ function HomepageSettingForm({ current, workspaceId, onSave, refresh }: {
           onChange={() => setEnabled(false)} />{t.homepageOff}</label>
       </div>
     </fieldset>
-    <label className="text-sm font-semibold">{t.homepageReason}
-      <textarea className={institutionField} value={reason} onChange={(event) => setReason(event.target.value)}
-        rows={3} required minLength={10} maxLength={500} disabled={busy || stale} />
-    </label>
+    <div>
+      <label className="text-sm font-semibold" htmlFor="homepage-visibility-reason">{t.homepageReason}</label>
+      <textarea id="homepage-visibility-reason" aria-describedby="homepage-visibility-reason-help"
+        className={institutionField} value={reason} onChange={(event) => setReason(event.target.value)}
+        rows={3} required minLength={minimumReasonLength} maxLength={500} disabled={busy || stale} />
+      <p id="homepage-visibility-reason-help" className="mt-1 text-sm text-[var(--theme-body)]">{t.homepageReasonHelp}</p>
+    </div>
     {error !== null && <AdminFeedback error={error} />}
-    <button className={`${institutionAction} justify-self-start`} disabled={busy || stale || enabled === current.enabled || reason.trim().length < 10}>
+    <button className={`${institutionAction} justify-self-start`} disabled={!canSave}>
       {t.homepageSave}
     </button>
   </form>;

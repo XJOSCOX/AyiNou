@@ -716,8 +716,14 @@ founderTest("Founder can turn homepage Community Statistics off and back on with
     await expect(page.getByText(t.homepageSavedOff)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     await page.getByRole("radio", { name: t.homepageOn, exact: true }).check();
-    await page.getByLabel(t.homepageReason).fill("Restore public statistics after the test.");
-    await page.getByRole("button", { name: t.homepageSave }).click();
+    const reason = page.getByLabel(t.homepageReason);
+    const save = page.getByRole("button", { name: t.homepageSave });
+    await expect(reason).toHaveAccessibleDescription(t.homepageReasonHelp);
+    await reason.fill("Ok");
+    await expect(save).toBeDisabled();
+    await reason.fill("Restore public statistics after the test.");
+    await expect(save).toBeEnabled();
+    await save.click();
     await expect(page.getByText(t.homepageSavedOn)).toBeVisible();
     expect(sql(`select string_agg(revision||':'||previous_enabled::text||':'||enabled::text,',' order by revision)
       from private.platform_boolean_policy_events where policy_key='${key}' and actor_id='${founder.id}'
