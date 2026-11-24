@@ -34,7 +34,7 @@ Local verification passed TypeScript, ESLint, shared contracts, four-language tr
 
 ## Documentation and operations
 
-The additive migration is `20261123134000_m24_independent_appeals.sql`. Verify the exact linked project, release SHA and migration history before applying the approved migration. Postflight checks cover the new grants, unchanged existing enforcement records and the connected local application. Rolling back UI entry points preserves the audit and existing restrictions. Database remediation should preserve original decisions and the associated evidence.
+The additive migration is `20261123134000_m24_independent_appeals.sql`. Verify the exact linked project, release SHA and migration history before applying the approved migration. The approved migration was applied to hosted AyiNou project `hcbxulyfmdmuyccgrujs`. Read-only postflight checks verified the new grants, existing M2.1–M2.3 migration history, and unchanged account, feature, role, and event record counts. The connected local API served the new endpoints and required sign-in. The browser loaded the authenticated Account access appeals view for test02 and denied staff-queue access to that account. Hosted had no appeal cases. Submission, assigned review, and reversal were exercised with synthetic cases in disposable Supabase. Rolling back UI entry points preserves the audit and existing restrictions. Database remediation should preserve original decisions and the associated evidence.
 
 ## Remaining blockers
 
