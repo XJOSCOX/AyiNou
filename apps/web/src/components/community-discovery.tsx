@@ -1,7 +1,7 @@
 "use client";
 
 import { communityKinds, type Community, type CommunityRecommendationFeedbackAction, type InterestCode } from "@ayinou/shared";
-import { useCallback, useId, useState } from "react";
+import { useCallback, useId, useState, type ReactNode } from "react";
 import { ApiRequestError, apiErrorCode } from "@/lib/api-errors";
 import { communityDiscoveryMessages } from "@/lib/community-discovery-i18n";
 import { communityDirectoryMessages } from "@/lib/communities-i18n";
@@ -13,14 +13,15 @@ import { groupMessages } from "@/lib/groups-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { ApiErrorNotice } from "./api-error-notice";
+import { FilterPanel } from "./filter-panel";
 import { CommunityCard } from "./community-card";
 import { GroupInvitationList, GroupMore, TopicSelect } from "./groups";
 import { institutionAction, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 
 type FeedbackChange = { id: string; action: CommunityRecommendationFeedbackAction } | { action: "reset" };
 
-export function RecommendedCommunities({ search, explore, onMembership }: {
-  search: string; explore(topic: InterestCode): void; onMembership(community: Community): void;
+export function RecommendedCommunities({ search, searchControl, explore, onMembership }: {
+  search: string; searchControl: ReactNode; explore(topic: InterestCode): void; onMembership(community: Community): void;
 }) {
   const [locale] = useLocale();
   const t = communityDiscoveryMessages[locale];
@@ -79,30 +80,32 @@ export function RecommendedCommunities({ search, explore, onMembership }: {
     });
   }
   return <section className="grid gap-4" aria-label={t.recommended}>
-    <div className="grid items-start gap-4 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-4 lg:grid-cols-[minmax(0,1fr)_minmax(16rem,25rem)]">
+    <div className="grid gap-4 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-surface)] p-4">
       <header>
         <h2 className="text-xl font-semibold">{t.recommended}</h2>
         <p className="mt-1 max-w-prose text-sm text-[var(--theme-body)]">{t.recommendIntro}</p>
       </header>
-      <div className="grid gap-3 sm:max-w-2xl sm:grid-cols-2">
-        <label className="min-w-0 text-sm font-semibold">{groups.category}
-          <select value={kind} className={institutionField} onChange={(event) => {
-            setKind(event.target.value as Community["kind"] | "");
-            setCountry("");
-            setTopic("");
-          }}>
-            <option value="">{t.allCategories}</option>
-            {communityKinds.map((value) => <option key={value} value={value}>{value === "department" ? groups.officialDepartments : groups[value]}</option>)}
-          </select>
-        </label>
-        {kind === "interest" && <TopicSelect value={topic} change={setTopic} />}
-        {kind === "diaspora" && <label className="text-sm font-semibold">{groups.country}
-          <input value={country} onChange={(event) => setCountry(event.target.value.toUpperCase())} maxLength={2}
-            aria-invalid={invalidCountry} aria-describedby={invalidCountry ? countryError : undefined} className={institutionField} placeholder="HT" />
-          {invalidCountry && <span id={countryError} className="mt-1 block text-[var(--theme-body)]">{t.invalidCountry}</span>}
-        </label>}
-      </div>
-      <details className="border-t border-[var(--theme-border)] pt-3 lg:col-span-2">
+      <FilterPanel active={Number(Boolean(kind)) + Number(Boolean(topic || countryFilter))} search={searchControl}>
+        <div className="grid gap-3 sm:max-w-2xl sm:grid-cols-2">
+          <label className="min-w-0 text-sm font-semibold">{groups.category}
+            <select value={kind} className={institutionField} onChange={(event) => {
+              setKind(event.target.value as Community["kind"] | "");
+              setCountry("");
+              setTopic("");
+            }}>
+              <option value="">{t.allCategories}</option>
+              {communityKinds.map((value) => <option key={value} value={value}>{value === "department" ? groups.officialDepartments : groups[value]}</option>)}
+            </select>
+          </label>
+          {kind === "interest" && <TopicSelect value={topic} change={setTopic} />}
+          {kind === "diaspora" && <label className="text-sm font-semibold">{groups.country}
+            <input value={country} onChange={(event) => setCountry(event.target.value.toUpperCase())} maxLength={2}
+              aria-invalid={invalidCountry} aria-describedby={invalidCountry ? countryError : undefined} className={institutionField} placeholder="HT" />
+            {invalidCountry && <span id={countryError} className="mt-1 block text-[var(--theme-body)]">{t.invalidCountry}</span>}
+          </label>}
+        </div>
+      </FilterPanel>
+      <details className="border-t border-[var(--theme-border)] pt-3">
         <summary className="cursor-pointer text-sm font-semibold text-[var(--theme-link)]">{t.reset}</summary>
         {settings.data && <p className="mt-2 text-sm text-[var(--theme-body)]">{t.feedbackSummary
           .replace("{hidden}", new Intl.NumberFormat(locale).format(settings.data.hidden))

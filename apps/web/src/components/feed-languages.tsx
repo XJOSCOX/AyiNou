@@ -8,7 +8,8 @@ import { useFeedMutation } from "@/lib/feed-state";
 import { languageNames } from "@/lib/i18n";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
-import { institutionAction, institutionCard, institutionLink } from "./institution-ui";
+import { FilterPanel } from "./filter-panel";
+import { institutionAction, institutionLink } from "./institution-ui";
 import { SocialText } from "./social-text";
 
 export const TranslationEnabled = createContext(false);
@@ -20,13 +21,9 @@ export function FeedLanguageControl({ settings, onSave }: { settings: FeedLangua
   const [draft,setDraft] = useState(settings.languages);
   const selected = new Set(draft);
   if (!settings.enabled) return null;
-  return <details className={institutionCard + " !p-4"}>
-    <summary className="cursor-pointer text-sm font-semibold">
-      {t.preferences} · <span className="text-[var(--theme-link)]">
-        {settings.languages.length ? t.active + " " + settings.languages.map((language) => languageNames[language]).join(", ") : t.all}
-      </span>
-    </summary>
-    <form className="mt-3 grid gap-3" onSubmit={(event) => {
+  return <FilterPanel summary={settings.languages.length
+    ? t.active + " " + settings.languages.map((language) => languageNames[language]).join(", ") : t.all}>
+    <form className="grid gap-3" onSubmit={(event) => {
       event.preventDefault();
       void mutation.run(async () => {
         const result = await saveFeedLanguages(draft);
@@ -46,7 +43,7 @@ export function FeedLanguageControl({ settings, onSave }: { settings: FeedLangua
       {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
       <button className={institutionAction + " justify-self-start"} disabled={mutation.busy}>{t.apply}</button>
     </form>
-  </details>;
+  </FilterPanel>;
 }
 
 export function TranslatableText({ id, kind, language, allowed = true, children, className, mentions, hashtags }: {

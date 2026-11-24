@@ -1,4 +1,6 @@
 {
+  "filters": "Filters",
+  "activeFilters": "{count} active",
   "pageTitle": "AYINOU — Ansanm pou Ayiti",
   "pageDescription": "Ayinou brings Haitians together through peaceful dialogue, collaboration, and community action.",
   "notFound": "Page not found",

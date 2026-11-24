@@ -7,6 +7,7 @@ import { loadSuggestions, searchDiscovery } from "@/lib/discovery-api";
 import { discoveryMessages } from "@/lib/discovery-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { FilterPanel } from "./filter-panel";
 import { ApiErrorNotice } from "./api-error-notice";
 import { DiscoveryAccounts, DiscoveryResults, FollowAccountList, discoveryTab } from "./discovery-accounts";
 import { institutionAction, institutionCard, institutionField, useInstitutionResource } from "./institution-ui";
@@ -65,17 +66,21 @@ function SearchForm({ kind }: { kind: DiscoveryKind }) {
 
   return <>
     <form onSubmit={submit} role="search" className={`${institutionCard} grid gap-4`}>
-      <label className="min-w-0 text-sm font-semibold">{t.search}
-        <input type="search" name="q" className={institutionField} placeholder={t.searchPlaceholder} maxLength={80}
-          aria-invalid={invalid || undefined} onChange={() => setInvalid(false)} />
-      </label>
-      {invalid && <p role="alert" className="text-sm text-[var(--theme-error-text)]">{t.invalidSearch}</p>}
-      <LocationFilters labels={kind === "institutions" ? labels : undefined} />
-      {kind === "people" && <div className="grid gap-3 sm:grid-cols-2"><InterestFilter name="interest" /><LanguageFilter /></div>}
-      <div className="flex flex-wrap items-center gap-4">
-        <label className="inline-flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="verified" />{t.verifiedOnly}</label>
-        <button type="submit" className={institutionAction}>{t.search}</button>
-      </div>
+      <FilterPanel active={Number(Boolean(filter.category)) + Number(Boolean(filter.country)) + Number(Boolean(filter.department))
+        + Number(Boolean(filter.interest)) + Number(Boolean(filter.language)) + Number(Boolean(filter.verified))} search={<>
+        <label className="block min-w-0 text-sm font-semibold">{t.search}
+          <input type="search" name="q" className={institutionField} placeholder={t.searchPlaceholder} maxLength={80}
+            aria-invalid={invalid || undefined} onChange={() => setInvalid(false)} />
+        </label>
+        {invalid && <p role="alert" className="text-sm text-[var(--theme-error-text)]">{t.invalidSearch}</p>}
+      </>}>
+        <div className="grid gap-3">
+          <LocationFilters labels={kind === "institutions" ? labels : undefined} />
+          {kind === "people" && <div className="grid gap-3 sm:grid-cols-2"><InterestFilter name="interest" /><LanguageFilter /></div>}
+          <label className="inline-flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="verified" />{t.verifiedOnly}</label>
+        </div>
+      </FilterPanel>
+      <button type="submit" className={institutionAction + " justify-self-start"}>{t.search}</button>
     </form>
     {kind === "people" && Object.keys(filter).length === 1 && !!suggested?.length && <section className="grid gap-3">
       <h2 className="font-semibold">{f24Messages[locale].suggestedMembers}</h2>

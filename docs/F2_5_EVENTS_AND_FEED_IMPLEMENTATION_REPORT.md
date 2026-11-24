@@ -18,7 +18,7 @@ Venue and meeting links appear only on event details for organizers and eligible
 
 ## Localization and accessibility
 
-Events and Feed controls include English, Haitian Creole, French, and Spanish. Event times use the viewer’s local time zone. The editor handles daylight-saving gaps and preserves an existing instant when editing an ambiguous wall time. Pages use the shared navigation, footer, responsive cards, labeled controls, and accessible status messages.
+Events and Feed controls include English, Haitian Creole, French, and Spanish. Event times use the viewer’s local time zone. The editor handles daylight-saving gaps and preserves an existing instant when editing an ambiguous wall time. Pages use the shared navigation, footer, responsive cards, labeled controls, and accessible status messages. The Filters button comes before the visible text search when a page has both. Opening and closing the filters preserves the selections.
 
 ## Reliability and recovery
 
@@ -31,6 +31,8 @@ The local browser suites exercise Events and Feed. Coverage includes simultaneou
 ## Documentation and operations
 
 Deploy migrations in chronological order after local validation. The six Events controls and Feed language filtering default to on. Translation defaults to off. A Founder can find these controls in Platform administration under Events and Feed. Members manage event notices in notification settings and language choices on the Feed.
+
+Hosted AyiNou development project `hcbxulyfmdmuyccgrujs` received exactly migrations `20261123130000`, `20261123130100`, and `20261123130200` from commit `27eb229f05e8b4ac833206e5537eeaec6d5437f1`. The postflight confirmed the feature defaults, checked private RSVP table access, and found zero pending migrations. Existing account, organization, post, and notification counts matched the preflight. Events and Feed language settings loaded in the hosted-connected local app using the test02 account.
 
 ## Remaining blockers
 

@@ -12,6 +12,7 @@ import { membershipMessages } from "@/lib/membership-i18n";
 import { loadMyProjects, loadProject, loadProjectImage, loadProjectOptions, loadProjects, reportProject, submitProject, uploadProjectImage } from "@/lib/project-api";
 import { projectMessages } from "@/lib/project-i18n";
 import { projectWorkMessages } from "@/lib/project-work-i18n";
+import { FilterPanel } from "./filter-panel";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -54,30 +55,32 @@ export function ProjectsDirectory({ signedIn }: { signedIn: boolean }) {
         <Link href="/projects/manage" className={institutionLink}>{t.manage}</Link>
         <Link href="/projects/team" className={institutionLink}>{projectWorkMessages[locale].workspace}</Link>
     </>} />
-    <form className={`${institutionCard} grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]`} onSubmit={(event) => {
-      event.preventDefault();
-      const values = new FormData(event.currentTarget);
-      setFilter(Object.fromEntries(["category", "country", "department"].map((key) =>
-        [key, String(values.get(key) ?? "").trim()]).filter(([, value]) => value)));
-    }}>
-      <label className="min-w-0 text-sm font-semibold">{t.category}
-        <select name="category" className={institutionField}>
-          <option value="">{t.all}</option>
-          {interestCodes.map((key) => <option key={key} value={key}>{membershipMessages[locale][key]}</option>)}
-        </select>
-      </label>
-      <label className="min-w-0 text-sm font-semibold">{t.country}
-        <input name="country" maxLength={2} pattern="[A-Za-z]{2}" placeholder="HT" className={institutionField}
-          onChange={(event) => { event.currentTarget.value = event.currentTarget.value.toUpperCase(); }} />
-      </label>
-      <label className="min-w-0 text-sm font-semibold">{t.department}
-        <select name="department" className={institutionField} disabled={!departments.data}>
-          <option value="">{t.all}</option>
-          {departments.data?.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}
-        </select>
-      </label>
-      <button className={institutionAction}>{t.filter}</button>
-    </form>
+    <FilterPanel active={Object.keys(filter).length}>
+      <form className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]" onSubmit={(event) => {
+        event.preventDefault();
+        const values = new FormData(event.currentTarget);
+        setFilter(Object.fromEntries(["category", "country", "department"].map((key) =>
+          [key, String(values.get(key) ?? "").trim()]).filter(([, value]) => value)));
+      }}>
+        <label className="min-w-0 text-sm font-semibold">{t.category}
+          <select name="category" className={institutionField}>
+            <option value="">{t.all}</option>
+            {interestCodes.map((key) => <option key={key} value={key}>{membershipMessages[locale][key]}</option>)}
+          </select>
+        </label>
+        <label className="min-w-0 text-sm font-semibold">{t.country}
+          <input name="country" maxLength={2} pattern="[A-Za-z]{2}" placeholder="HT" className={institutionField}
+            onChange={(event) => { event.currentTarget.value = event.currentTarget.value.toUpperCase(); }} />
+        </label>
+        <label className="min-w-0 text-sm font-semibold">{t.department}
+          <select name="department" className={institutionField} disabled={!departments.data}>
+            <option value="">{t.all}</option>
+            {departments.data?.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}
+          </select>
+        </label>
+        <button className={institutionAction}>{t.filter}</button>
+      </form>
+    </FilterPanel>
     {departments.error !== null && <ApiErrorNotice error={departments.error} retry={departments.refresh} />}
     {error !== null && <ApiErrorNotice error={error} retry={retry} signIn={signedIn} />}
     {!page && error === null && <p role="status">{authMessages[locale].working}</p>}

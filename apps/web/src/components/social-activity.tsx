@@ -9,6 +9,7 @@ import { feedMessages } from "@/lib/feed-i18n";
 import { useCursorPage } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { membershipMessages } from "@/lib/membership-i18n";
+import { FilterPanel } from "./filter-panel";
 import { ApiErrorNotice } from "./api-error-notice";
 import { discoveryTab } from "./discovery-accounts";
 import { SocialText } from "./social-text";
@@ -103,13 +104,14 @@ export function SearchPosts() {
 
   return <>
     <form role="search" className={`${institutionCard} grid gap-3`} onSubmit={submit}>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <label className="text-sm font-semibold">{t.keywords}<input type="search" name="q" maxLength={100} className={institutionField} /></label>
-        <label className="text-sm font-semibold">{t.hashtag}<input name="tag" maxLength={49} className={institutionField} /></label>
-        <LanguageFilter />
-        <InterestFilter name="topic" />
-        <label className="text-sm font-semibold">{t.since}<input type="date" name="since" className={institutionField} /></label>
-      </div>
+      <FilterPanel active={filters ? Object.keys(filters).filter((key) => key !== "q").length : 0} search={<label className="block max-w-sm text-sm font-semibold">{t.keywords}<input type="search" name="q" maxLength={100} className={institutionField} /></label>}>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <label className="text-sm font-semibold">{t.hashtag}<input name="tag" maxLength={49} className={institutionField} /></label>
+          <LanguageFilter />
+          <InterestFilter name="topic" />
+          <label className="text-sm font-semibold">{t.since}<input type="date" name="since" className={institutionField} /></label>
+        </div>
+      </FilterPanel>
       {invalid && <p role="alert">{t.chooseFilter}</p>}
       <button type="submit" className={`${institutionAction} justify-self-start`}>{t.postSearch}</button>
     </form>

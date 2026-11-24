@@ -9,6 +9,7 @@ import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { authMessages } from "@/lib/auth-i18n";
 import { useCursorPage } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
+import { FilterPanel } from "./filter-panel";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink } from "./institution-ui";
 import { MemberShell } from "./member-shell";
@@ -46,19 +47,20 @@ export function AmbassadorDirectory({ signedIn }: { signedIn: boolean }) {
         actions={signedIn && <Link className={institutionAction} href="/settings/ambassadors">{t.myProgram}</Link>} />
       <section aria-labelledby="ambassador-directory" className={institutionCard}>
         <h2 id="ambassador-directory" className="text-2xl font-semibold">{t.directory}</h2>
-        <form className="my-4 grid max-w-4xl items-end gap-3 sm:grid-cols-2 2xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto]" onSubmit={(event) => {
+        <form className="my-4 grid gap-3" onSubmit={(event) => {
           event.preventDefault();
           const data = new FormData(event.currentTarget);
           setFilter({ q: String(data.get("q") ?? "").trim(), category: String(data.get("category") ?? "") });
         }}>
-          <label className="min-w-0 text-sm font-semibold">{t.searchLabel}<input type="search" name="q" maxLength={80} className={institutionField} /></label>
-          <label className="min-w-0 text-sm font-semibold">{t.category}
-            <select name="category" className={institutionField}>
-              <option value="">{t.allCategories}</option>
-              {ambassadorCategories.map((category) => <option key={category} value={category}>{t.categories[category]}</option>)}
-            </select>
-          </label>
-          <button className={institutionAction + " w-full sm:w-fit"}>{t.search}</button>
+          <FilterPanel active={Number(Boolean(filter.category))} search={<label className="block max-w-sm text-sm font-semibold">{t.searchLabel}<input type="search" name="q" maxLength={80} className={institutionField} /></label>}>
+            <label className="block max-w-sm text-sm font-semibold">{t.category}
+              <select name="category" className={institutionField}>
+                <option value="">{t.allCategories}</option>
+                {ambassadorCategories.map((category) => <option key={category} value={category}>{t.categories[category]}</option>)}
+              </select>
+            </label>
+          </FilterPanel>
+          <button className={institutionAction + " justify-self-start"}>{t.search}</button>
         </form>
         {error !== null && <ApiErrorNotice error={error} retry={retry} signIn={signedIn} />}
         {!page && error === null && <p role="status">{authMessages[locale].working}</p>}

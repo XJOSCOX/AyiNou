@@ -26,17 +26,15 @@ export function PublicGroups({ signedIn }: { signedIn: boolean }) {
   const [search, setSearch] = useState("");
   return <PublicShell signedIn={signedIn}>
     <PageHeader title={t.directory} />
-    <div className="grid gap-3 sm:grid-cols-2">
-      <label className="text-sm font-semibold">{t.searchGroups}
+    <GroupsDirectory kind={kind || undefined} search={search} guest
+      searchControl={<label className="block text-sm font-semibold">{t.searchGroups}
         <input type="search" className={institutionField} maxLength={80} value={search} onChange={(event) => setSearch(event.target.value)} />
-      </label>
-      <label className="min-w-0 text-sm font-semibold">{t.category}
-        <select className={institutionField} value={kind} onChange={(event) => setKind(event.target.value as GroupKind | "")}>
-          <option value="">{t.all}</option>{groupKinds.map((value) => <option key={value} value={value}>{t[value]}</option>)}
-        </select>
-      </label>
-    </div>
-    <GroupsDirectory key={kind} kind={kind || undefined} search={search} guest />
+      </label>}
+      categoryFilter={<label className="block min-w-0 text-sm font-semibold">{t.category}
+          <select className={institutionField} value={kind} onChange={(event) => setKind(event.target.value as GroupKind | "")}>
+            <option value="">{t.all}</option>{groupKinds.map((value) => <option key={value} value={value}>{t[value]}</option>)}
+          </select>
+      </label>} />
   </PublicShell>;
 }
 

@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { eventCategories, eventFormats, eventResponses, eventScopes, eventVisibilities, type CommunityEvent, type EventPreview, type EventScope } from "@ayinou/shared";
 import { loadEventOptions, loadEvents, writeEvent, type EventOptions } from "@/lib/events-api";
+import { discoveryMessages } from "@/lib/discovery-i18n";
 import { eventMessages } from "@/lib/events-i18n";
 import { eventInstant, eventWallTime } from "@/lib/event-time";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { FilterPanel } from "./filter-panel";
 import { PageHeader } from "./page-header";
 
 const languageNames = { ht: "Kreyòl ayisyen", fr: "Français", en: "English", es: "Español" };
@@ -89,14 +91,20 @@ export function EventDirectory() {
         className={scope === option ? institutionAction : eventSecondary}>{t[option]}</button>)}</nav>
     {!["mine", "organizing"].includes(scope) && config.data && (!config.data.enabled || !config.data.discovery)
       ? <p role="status" className={institutionCard}>{t.disabled}</p> : <>
-      <form className={institutionCard + " grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-4"} onSubmit={search}>
-        <Field name="q" label={t.search} maxLength={120} />
-        <Field name="format" label={t.format}><select name="format" className={institutionField}><option value="">{t.all}</option>{optionsFrom(eventFormats,t)}</select></Field>
-        <Field name="category" label={t.category}><select name="category" className={institutionField}><option value="">{t.all}</option>{optionsFrom(eventCategories,t)}</select></Field>
-        <Field name="country" label={t.country}><input name="country" className={institutionField} maxLength={2} pattern="[A-Z]{2}" placeholder="HT" /></Field>
-        <Field name="department" label={t.department}><select name="department" className={institutionField}><option value="">{t.all}</option>{optionsFrom(Object.keys(departments),departments)}</select></Field>
-        <Field name="from" type="date" label={t.from} /><Field name="until" type="date" label={t.until} />
-        <button className={eventSecondary}>{t.filters}</button>
+      <form className="grid gap-3" role="search" onSubmit={search}>
+        <FilterPanel active={[...new URLSearchParams(filters).keys()].filter((key) => key !== "q").length} search={<div className="flex items-end gap-2">
+          <div className="min-w-0 grow"><Field name="q" type="search" label={t.search} maxLength={120} /></div>
+          <button className={institutionAction}>{discoveryMessages[locale].search}</button>
+        </div>}>
+          <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <Field name="format" label={t.format}><select name="format" className={institutionField}><option value="">{t.all}</option>{optionsFrom(eventFormats,t)}</select></Field>
+            <Field name="category" label={t.category}><select name="category" className={institutionField}><option value="">{t.all}</option>{optionsFrom(eventCategories,t)}</select></Field>
+            <Field name="country" label={t.country}><input name="country" className={institutionField} maxLength={2} pattern="[A-Z]{2}" placeholder="HT" /></Field>
+            <Field name="department" label={t.department}><select name="department" className={institutionField}><option value="">{t.all}</option>{optionsFrom(Object.keys(departments),departments)}</select></Field>
+            <Field name="from" type="date" label={t.from} /><Field name="until" type="date" label={t.until} />
+            <button className={eventSecondary + " justify-self-start"}>{t.filters}</button>
+          </div>
+        </FilterPanel>
       </form>
       {results.error !== null && <ApiErrorNotice error={results.error} retry={results.retry} />}
       {!results.page && !results.error && <p role="status">{t.loading}</p>}

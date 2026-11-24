@@ -6,6 +6,7 @@ import { useCursorPage } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { socialMessages } from "@/lib/social-i18n";
 import { feedMessages } from "@/lib/feed-i18n";
+import { FilterPanel } from "./filter-panel";
 import { ApiErrorNotice } from "./api-error-notice";
 import { PostCard } from "./feed-screen";
 import { institutionAction, institutionCard, institutionField } from "./institution-ui";
@@ -26,13 +27,13 @@ export function OrganizationTimeline({ handle, signedIn }: { handle: string; sig
 
   return <section className="grid min-w-0 gap-3" aria-label={labels.organizationPosts}>
     <div className={institutionCard}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="grid gap-3">
         <h2 className="text-xl font-semibold">{labels.organizationPosts}</h2>
-        {(filter !== "all" || Boolean(result.page?.rows.length)) && <select className={institutionField + " mt-0 w-auto max-w-full text-sm"} aria-label={labels.filterPosts} value={filter}
+        {(filter !== "all" || Boolean(result.page?.rows.length)) && <FilterPanel summary={filter === "announcements" ? labels.announcements : undefined}><select className={institutionField + " mt-0 w-auto max-w-full text-sm"} aria-label={labels.filterPosts} value={filter}
           onChange={(event) => setFilter(event.target.value)}>
           <option value="all">{labels.allPosts}</option>
           <option value="announcements">{labels.announcements}</option>
-        </select>}
+        </select></FilterPanel>}
       </div>
       {signedIn && <OrganizationPublisher handle={handle} onPublished={refresh} />}
       {result.page?.rows.length === 0 && <p className="mt-4 rounded-lg border border-dashed border-[var(--theme-border)] bg-[var(--theme-control)] px-4 py-6 text-sm text-[var(--theme-body)]">

@@ -1,4 +1,6 @@
 {
+  "filters": "Filtres",
+  "activeFilters": "{count} actifs",
   "pageTitle": "AYINOU — Ensemble pour Haïti",
   "pageDescription": "Ayinou rassemble les Haïtiens autour du dialogue pacifique, de la collaboration et de l’action communautaire.",
   "notFound": "Page introuvable",
