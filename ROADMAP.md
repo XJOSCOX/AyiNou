@@ -16,6 +16,8 @@
 
 - [x] M2.5 adds Founder moderation policy limits, approved categories and delegations, and audited version restoration. Hosted database rollout and the connected local application were verified. [M2.5 implementation](docs/moderation/M2_5_IMPLEMENTATION_REPORT.md)
 
+- [ ] M3 audits moderation integration, authority, and lifecycle. The project guard update requires verified hosted rollout. [M3 audit](docs/moderation/M3_AUDIT_SUMMARY.md)
+
 [M1 audit](docs/moderation/M1_AUDIT_SUMMARY.md) · [M2.1 implementation](docs/moderation/M2_1_IMPLEMENTATION_REPORT.md) · [M2.2 implementation](docs/moderation/M2_2_IMPLEMENTATION_REPORT.md) · [M2.3 implementation](docs/moderation/M2_3_IMPLEMENTATION_REPORT.md) · [M2.4 implementation](docs/moderation/M2_4_IMPLEMENTATION_REPORT.md) · [Approved policy baseline](docs/moderation/M2_APPROVED_POLICY_BASELINE.md)
 
 ## Phase 0 — Foundation (COMPLETE)

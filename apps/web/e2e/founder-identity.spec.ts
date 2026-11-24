@@ -1356,6 +1356,16 @@ founderTest("Founder grants gold after account confirmation with or without memb
           await expect(managedRevision.getByText(labels.previousVersionPublished, { exact: true })).toBeVisible();
           expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({ title: proposal.title, status: "approved" });
           await apiCall(snapshot, draftPath + "/publication", 409, "PATCH", { version: revised.version, publish: true });
+          const projectId = draftPath.split("/").at(-1);
+          const scopedRestriction = sql(`insert into private.m23_restrictions(subject_id,capability,scope_kind,scope_id,
+              issuer_id,authority,max_minutes,category,starts_at,expires_at)
+            values('${snapshot.id}','project_create','project','${projectId}','${founder.id}','founder',60,'safety',
+              now(),now()+interval '1 hour') returning id;`).split("\n")[0];
+          await expect(apiCall(snapshot, draftPath + "/submit", 403, "POST", { version: revised.version }))
+            .resolves.toMatchObject({ error: { code: "FEATURE_RESTRICTED" } });
+          expect(await apiCall(snapshot, draftPath, 200)).toMatchObject({ version: revised.version, status: "draft" });
+          expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({ title: proposal.title, status: "approved" });
+          sql(`update private.m23_restrictions set revoked_at=clock_timestamp() where id='${scopedRestriction}';`);
           const submittedRevision = await apiCall(snapshot, draftPath + "/submit", 200, "POST", { version: revised.version });
           expect((await apiCall(founder, projectRoot + "/review", 200)).items).toContainEqual(
             expect.objectContaining({ title: revisedTitle, version: submittedRevision.version }),
@@ -1399,6 +1409,16 @@ founderTest("Founder grants gold after account confirmation with or without memb
           expect(await apiCall(snapshot, draftPath, 200)).toMatchObject({
             title: revisedTitle, status: "approved", revisionPending: false, canOpenWork: true, canPublish: true,
           });
+          const publicationRestriction = sql(`insert into private.m23_restrictions(subject_id,capability,scope_kind,
+              issuer_id,authority,max_minutes,category,starts_at,expires_at)
+            values('${snapshot.id}','project_create','platform','${founder.id}','founder',60,'safety',now(),now()+interval '1 hour')
+            returning id;`).split("\n")[0];
+          await expect(apiCall(snapshot, draftPath + "/publication", 403, "PATCH", { version: approvedRevision.version, publish: true }))
+            .resolves.toMatchObject({ error: { code: "FEATURE_RESTRICTED" } });
+          await apiCall(ordinaryAdmin, draftPath, 404);
+          expect(sql(`select count(*) from private.project_events where project_id='${projectId}'
+            and action='publish' and version>${approvedRevision.version};`)).toBe("0");
+          sql(`update private.m23_restrictions set revoked_at=clock_timestamp() where id='${publicationRestriction}';`);
           await apiCall(snapshot, draftPath + "/publication", 200, "PATCH", { version: approvedRevision.version, publish: true });
           expect(await apiCall(ordinaryAdmin, draftPath, 200)).toMatchObject({ title: revisedTitle, status: "approved" });
           expect(sql(`select private.project_executable(p) from private.community_projects p where p.id='${draftPath.split("/").at(-1)}';`)).toBe("t");

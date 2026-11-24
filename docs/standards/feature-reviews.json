@@ -2612,6 +2612,21 @@
           "rolloutAndRollback": "Verify exact hosted history, approve the sole migration and compare preservation evidence. Restore values with an audited revision or correct the schema with a forward migration."
         }
       ]
+    },
+    {
+      "id": "m3-moderation-integration-audit",
+      "report": "docs/moderation/M3_AUDIT_SUMMARY.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124153000_m3_project_enforcement.sql",
+          "rlsAndGrants": "The trigger function remains private with execution revoked from client and service roles. Existing project table policies and RPC grants are unchanged.",
+          "authorization": "Apply the existing project-creation restriction to project submission and publication at the native event boundary, after existing authorizations and in the same transaction.",
+          "compatibility": "The trigger preserves existing rows, past decisions, owner and review authority, privacy choices and native audit semantics.",
+          "validation": "Disposable Founder identity and project tests cover allowed submissions and publication, action denial under a relevant restriction, prior visibility and zero new publication audit entries on denial.",
+          "rolloutAndRollback": "Deploy only the separately approved version after verifying the linked database and release. Use a forward trigger correction if needed and preserve existing history."
+        }
+      ]
     }
   ]
 }

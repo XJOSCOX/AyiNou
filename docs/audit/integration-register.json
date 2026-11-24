@@ -2,6 +2,25 @@
   "version": 1,
   "modules": [
     {
+      "module": "moderation_policies",
+      "status": "covered",
+      "requiredEvents": "Founder moderation policy changes and historical restorations with current and requested values, actor, revision, reason and time.",
+      "sources": [
+        "private.m25_policy_events",
+        "private.m22_account_events",
+        "private.m23_events"
+      ],
+      "observed": "The policy change commits atomically with its history. New native decisions carry the applicable policy revision. Existing cases and their records keep their original state.",
+      "missing": [],
+      "viewers": "The recognized Founder reads policy history in an original administration workspace with recent MFA. Eligible enforcement staff receive effective form settings.",
+      "excluded": "Reporter identities, private evidence, appeal narratives and credentials.",
+      "tests": [
+        "apps/web/e2e/moderation-policy.spec.ts",
+        "apps/web/e2e/feature-enforcement.spec.ts"
+      ],
+      "remediation": "Maintain the existing private ledger and verify future policy changes against affected writes in disposable environments."
+    },
+    {
       "module": "enforcement_appeals",
       "status": "covered",
       "requiredEvents": "Independent appeal intake, assignments, reviewer conflicts, findings, dispositions, native restoration and event moderation report linkage.",
@@ -417,7 +436,7 @@
         "private.project_progress_entries",
         "private.project_metric_observations"
       ],
-      "observed": "Project proposal, operations and progress commands preserve their own state and events. Account, project and institutional grant rules determine access. No cross-project adapter in A1A.",
+      "observed": "Project proposal, operations and progress commands preserve their own state and events. Submission and publication validate the existing project restriction in the same transaction as the native event. Account, project and institutional grant rules determine access. No cross-project adapter in A1A.",
       "missing": [
         "audit full progress and final-report redaction and role matrix"
       ],
@@ -425,7 +444,8 @@
       "excluded": "Progress evidence and private contact",
       "tests": [
         "apps/web/e2e/project-work.spec.ts",
-        "apps/web/e2e/project-progress.spec.ts"
+        "apps/web/e2e/project-progress.spec.ts",
+        "apps/web/e2e/founder-identity.spec.ts"
       ],
       "remediation": "Project activity integration"
     },

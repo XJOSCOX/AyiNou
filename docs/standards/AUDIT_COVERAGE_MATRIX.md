@@ -116,3 +116,7 @@ The appeal ledger records submissions, assignments, revisions, findings, protect
 ## M2.5 Founder moderation policy
 
 Founder-only updates and restorations append the actor, reason, previous and requested values, request, revision, and timestamp in the same transaction. Platform Policy History reads the revision ledger. M2.2 and M2.3 decision ledgers record the applicable revision without exporting reasons or evidence to new audiences. [Implementation report](../moderation/M2_5_IMPLEMENTATION_REPORT.md)
+
+## M3 moderation integration audit
+
+The project event writer enforces the existing project-creation restriction before recording submissions and publication. The audited command, publication and member notification commit together or roll back together. Historical audit rows retain their original content. [Coverage and findings](../moderation/M3_AUDIT_SUMMARY.md)
