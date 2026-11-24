@@ -1,0 +1,30 @@
+# M1 · Account restriction matrix
+
+## Effective account states
+
+| State | Product access | Duration and restoration |
+| --- | --- | --- |
+| Active or no row | Clears the account-status gate. Confirmed, non-anonymous, undeleted identity, session validity, onboarding, MFA and resource policies still apply where required. | An elapsed provider ban ceases to gate this predicate. Other eligibility rules continue to apply. |
+| Suspended | `institution_actor` denies the member. The same denial propagates to member operations and privileged capability checks that depend on it. | Indefinite currently. There is no start/end window, automatic expiration, or a distinct temporary suspension contract. |
+| Banned | Same application eligibility effect as Suspended. The admin record and event use a distinct status and event type. | Indefinite currently. An authorized operator must explicitly reinstate the account. |
+| Provider ban | A future `auth.users.banned_until` is an additional denial with separate storage. | Checked by time. An AyiNou reinstatement writes the local row and leaves provider state independent. |
+
+The effective public RPC serializes actions with an advisory lock and delegates to the original admin writer. It prohibits self-targeting and protects Founder and assigned Administrator accounts from routine status changes. It also protects Founder/Administrator role grants and revocations. The ordinary status write validates a 10–500 character reason and writes the latest status plus an admin audit event. The legacy admin API verifies live platform Admin access and an elevated session before writing. The web admin workspace is private. The legacy write takes no workspace identifier. [Base states and writer](../../supabase/migrations/20261120030000_phase2e_administration.sql#L1) · [Protected wrapper](../../supabase/migrations/20261121100000_platform_founder_role.sql#L50) · [Admin routes](../../apps/api/src/routes/admin.ts)
+
+## Lifecycle and impact on existing data
+
+| Surface | Effect of account restriction |
+| --- | --- |
+| API and SQL sessions | The status writer updates the app table and audit ledger. It does not delete provider sessions, revoke refresh tokens, or write S2A revocation events. Entry points using live member eligibility deny restricted use even with an existing token. Private session RLS and S2A timeout/revocation are separate controls. A still-valid session may regain access after reinstatement. Existing asset links may have their own validity window. |
+| Member profile and personal social content | Public profile and social visibility are checked at read time, including actor eligibility. Personal posts/comments depend on active authors and applicable visibility predicates. Stored authored content and relationships are not bulk-deleted by the account action. Independent content or profile restrictions may still apply after reinstatement. |
+| Organization and organization publishing | The member loses eligibility to act as representative or manager through actor-gated routes. The organization has separate status, ownership, role, membership and publication records. A member ban does not transfer ownership or mark the organization restricted. Existing organization content has its own organization and content visibility rules. |
+| Events and RSVPs | Personally organized event discovery/visibility checks organizer eligibility. Organization-hosted event scope keys off the organization and audience; eligible managers can continue to act. A restriction doesn't cancel events, remove RSVP rows, or generate event changes. Recheck active viewer and participant predicates when projecting data. |
+| Projects, teams and volunteering | Restricted actors fail live member guards for work and applications. Approved-project visibility depends on project state and its own restriction marker. Project roster, ownership and volunteer application records are not implicitly changed by the account write. |
+| Communities, groups and institution memberships | Existing memberships and scoped roles remain stored. Actor/session gates deny their use. An eligible platform Admin or Founder can recover qualifying groups whose owner is missing or inactive through the separate audited recovery path. Recovery does not mass-reassign organizations or other resources. |
+| Polls and nominations | Casting and writes recheck eligibility. A platform restriction is not a ballot deletion, poll cancellation, or rewrite of an electorate snapshot. Poll access rules govern existing polls independently. |
+
+[Live session policies](../../supabase/migrations/20261121142000_s2a_session_policy.sql#L38) · [Live member gate](../../supabase/migrations/20261122190000_r23_member_experience.sql#L122) · [F2.4 profile privacy](../../supabase/migrations/20261123125000_f24_profile_privacy.sql) · [Event visibility and manage](../../supabase/migrations/20261123130000_f25_community_events.sql#L100) · [Project visibility](../../supabase/migrations/20261120203000_phase6a1_verified_project_eligibility.sql#L43) · [Group recovery](../../supabase/migrations/20261120141000_phase4b_group_membership.sql#L86) · [Poll workflow](../../supabase/migrations/20261120211000_phase6d_poll_workflow.sql)
+
+## Member communication and review
+
+The account-access page provides an access-state/support surface. The ordinary status writer has no member notice or dedicated suspension/ban appeal. Feed appeals cover specific content hides. Trust appeals cover verification decisions. Both have their own eligibility rules and neither offers a sanctioned member a path to challenge a platform account status. Reinstatement is a new privileged account action with a fresh reason and event. It does not resolve separate holds, group removal, hidden content or a provider ban. [Account access page](../../apps/web/src/app/account-access/page.tsx) · [Feed appeals](../../supabase/migrations/20261120121000_phase3f_appeals.sql) · [Trust cases](../../supabase/migrations/20261120161000_phase5a_identity_cases.sql)
