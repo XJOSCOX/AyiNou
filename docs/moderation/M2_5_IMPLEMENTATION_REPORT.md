@@ -45,6 +45,12 @@ Disposable coverage is in [the M2.5 integration spec](../../apps/web/e2e/moderat
 
 The rollout adds only `20261124152000_m25_founder_moderation_policies.sql`. Review exact hosted history, the single pending migration, the initial effective values, approved grants and preserved case data before and after applying it. Use an audited restoration for an unwanted policy value. Any schema correction uses a forward migration and retains the ledger. [Hosted development workflow](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md)
 
+### Hosted rollout verification
+
+On November 24, 2026, the owner authorized the single M2.5 migration for project `hcbxulyfmdmuyccgrujs`. The tested migration from release `afbe7e36ff206d99f0a78937fc73c61b413dd1a3` applied successfully. The follow-up dry run found no pending migrations. Read-only postflight matched the previous account and feature sanction terms, moderator delegations, appeal records, native audit event counts, and Founder and Administrator counts. The policy began at revision 1 with the defaults above. Both decision triggers were active, RLS was enabled, and client policy execution and direct service audit writes were denied.
+
+The rebuilt local API and signed-in Founder browser displayed the hosted revision 1 and the expected effective values. An unauthenticated policy read returned 401. Policy writes were verified on disposable infrastructure.
+
 ## Remaining blockers
 
-Hosted rollout requires separate exact-project migration authorization and successful preflight and postflight checks. The phase stays open until those steps are complete.
+The hosted database and connected local application passed verification. The production web and API hosting deployment remains a separate release operation.
