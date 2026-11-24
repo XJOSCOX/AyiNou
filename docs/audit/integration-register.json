@@ -2,6 +2,27 @@
   "version": 1,
   "modules": [
     {
+      "module": "enforcement_appeals",
+      "status": "covered",
+      "requiredEvents": "Independent appeal intake, assignments, reviewer conflicts, findings, dispositions, native restoration and event moderation report linkage.",
+      "sources": [
+        "private.m24_cases",
+        "private.m24_events",
+        "private.m24_notices",
+        "private.m22_account_events",
+        "private.m23_events",
+        "feed_data.event_audit"
+      ],
+      "observed": "The appeal event, any ordinary or protected reversal and the member notice commit together. A1A and the Moderation Center project safe references.",
+      "missing": [],
+      "viewers": "The appellant, assigned independent reviewer, and eligible private administration workspace users have distinct scoped reads.",
+      "excluded": "Reporter identities, attendee lists, private event data, narratives in general audit and notifications.",
+      "tests": [
+        "apps/web/e2e/enforcement-appeals.spec.ts"
+      ],
+      "remediation": "Preserve historical source rows without inferring missing report links. Retention and export policy for private narratives requires a separate review."
+    },
+    {
       "module": "member_experience_policy",
       "status": "covered",
       "requiredEvents": "Member onboarding and profile policy revisions",

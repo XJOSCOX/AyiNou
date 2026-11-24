@@ -6,7 +6,9 @@ export const moderationHistoryActions = ["hide", "restore", "remove", "dismiss",
   "account_suspended", "account_banned", "account_reinstated", "institution_restricted",
   "suspension_created", "suspension_extended", "restriction_expired", "restriction_revoked", "ban_issued", "ban_lifted",
   "feature_restrict", "feature_extend", "feature_revoke", "feature_expired", "feature_delegate",
-  "feature_update_delegation", "feature_revoke_delegation", "feature_delegation_expired"] as const;
+  "feature_update_delegation", "feature_revoke_delegation", "feature_delegation_expired",
+  "appeal_submit", "appeal_assign", "appeal_correct", "appeal_return", "appeal_uphold", "appeal_overturn",
+  "appeal_release", "appeal_decline_release", "appeal_withdraw", "appeal_close", "appeal_conflict_denied"] as const;
 
 export type ModerationCenterView = (typeof moderationCenterViews)[number];
 export type ModerationDomain = (typeof moderationDomains)[number];

@@ -7,6 +7,7 @@ import {
   type ModerationCenterMetrics, type ModerationCenterPage, type ModerationCenterView, type ModerationSummary,
 } from "@ayinou/shared";
 import { accountEnforcementMessages } from "@/lib/account-enforcement-i18n";
+import { appealHistoryLabels } from "@/lib/enforcement-appeal-i18n";
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { adminMessages } from "@/lib/admin-i18n";
 import type { AdminTab } from "@/lib/admin-navigation";
@@ -100,7 +101,7 @@ export function ModerationList({ workspace, view, onNavigate, target }: {
   const [locale] = useLocale();
   const t = moderationCenterMessages[locale];
   const common = adminMessages[locale];
-  const actions: Record<string, string> = { ...t, ...accountEnforcementMessages[locale], ...featureMessages[locale] };
+  const actions: Record<string, string> = { ...t, ...accountEnforcementMessages[locale], ...featureMessages[locale], ...appealHistoryLabels(locale) };
   const [filters, setFilters] = useState(view === "reports" ? "status=pending" : "");
   const dated = view === "reports" || view === "history";
   const load = useCallback(async (cursor: string | null, signal: AbortSignal) => {
@@ -185,7 +186,7 @@ function ModerationRow({ row, view, onNavigate, format }: {
 }) {
   const [locale] = useLocale();
   const t = moderationCenterMessages[locale];
-  const labels: Record<string, string> = { ...accountEnforcementMessages[locale], ...t, ...featureMessages[locale] };
+  const labels: Record<string, string> = { ...accountEnforcementMessages[locale], ...t, ...featureMessages[locale], ...appealHistoryLabels(locale) };
   const feed = feedMessages[locale];
   const categories: Record<string, string> = { harassment: feed.harassment, hate: feed.hate, spam: feed.spam, privacy: feed.privacy, other: feed.other };
   const contentTool = row.scopeKey ? "/communities/" + encodeURIComponent(row.scopeKey) + "/moderation" : "/feed/moderation";
@@ -211,7 +212,8 @@ function ModerationRow({ row, view, onNavigate, format }: {
         ? <time dateTime={row.expiresAt}>{format.format(new Date(row.expiresAt))}</time> : t.indefinite}</dd></div>}
       {view === "history" && row.actorRef && <div className="min-w-0"><dt className="font-semibold">{t.actor}</dt><dd className="break-all">{row.actorRef}</dd></div>}
     </dl>
-    {href ? <Link className={`${institutionLink} justify-self-start`} href={href}>{t.openTool}</Link>
+    {row.source === "enforcement_appeal" ? <button type="button" className={`${institutionLink} justify-self-start`}
+      onClick={() => onNavigate("moderationAppeals")}>{t.openTool}</button> : href ? <Link className={`${institutionLink} justify-self-start`} href={href}>{t.openTool}</Link>
       : <button type="button" className={`${institutionLink} justify-self-start`}
         onClick={() => row.domain === "accounts" ? onNavigate("accounts", row.targetId ?? undefined) : onNavigate(row.domain === "features" ? "featureRestrictions" : "trust")}>{t.openTool}</button>}
   </li>;

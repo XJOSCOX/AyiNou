@@ -3,7 +3,7 @@ import type { MemberExperienceFlag } from "./accounts.js";
 
 export const auditCategories = ["platform", "governance", "security", "identity", "organization", "verification", "moderation"] as const;
 export const auditResourceTypes = ["account", "proposal", "session_policy", "private_workflow", "username", "organization_role",
-  "verification_case", "post", "comment"] as const;
+  "verification_case", "post", "comment", "appeal", "event"] as const;
 export const auditOutcomes = ["recorded", "approved", "rejected", "revoked", "expired", "cancelled"] as const;
 
 export type AuditCategory = typeof auditCategories[number];

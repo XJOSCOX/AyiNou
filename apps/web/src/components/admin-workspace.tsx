@@ -21,6 +21,7 @@ import { SafetyOverviewPanel } from "./moderation-appeals";
 import { ModerationAppeals, ModerationList, ModerationOverview } from "./moderation-center";
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { FeatureEnforcementPanel } from "./feature-enforcement";
+import { StaffAppeals } from "./enforcement-appeals";
 import { AdminAccountEnforcement } from "./admin-account-enforcement";
 import { EnforcementDetails } from "./account-enforcement-details";
 import { accountEnforcementMessages } from "@/lib/account-enforcement-i18n";
@@ -122,7 +123,10 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {tab === "moderationContent" && <ModerationList key="content" view="content" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationRestrictions" && <ModerationList key="restrictions" view="restrictions" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationHistory" && <ModerationList key={accountFilter ?? "history"} view="history" workspace={workspaceId} target={accountFilter} onNavigate={navigate} />}
-              {tab === "moderationAppeals" && <ModerationAppeals reviewer={access.data?.reviewer === true} onNavigate={navigate} />}
+              {tab === "moderationAppeals" && <>
+                <StaffAppeals workspace={workspaceId} lane="admin" />
+                <ModerationAppeals reviewer={access.data?.reviewer === true} onNavigate={navigate} />
+              </>}
               {tab === "featureRestrictions" && <FeatureEnforcementPanel key="features" workspace={workspaceId} />}
               {tab === "moderatorDelegation" && <FeatureEnforcementPanel key="delegation" workspace={workspaceId} delegate />}
               {tab === "accounts" && <AccountManagement key={accountFilter ?? "accounts"} initialQuery={accountFilter}

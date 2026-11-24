@@ -12,6 +12,7 @@ import { useLocale } from "@/lib/locale-store";
 import { browserSupabase } from "@/lib/supabase/browser";
 import { AuthShell } from "./auth-shell";
 import { institutionAction, institutionErrorBox, institutionLink, useInstitutionResource } from "./institution-ui";
+import { MemberAppeals } from "./enforcement-appeals";
 import { EnforcementDetails } from "./account-enforcement-details";
 
 async function readEnforcement(signal: AbortSignal): Promise<MemberAccountEnforcement | null> {
@@ -80,8 +81,9 @@ export function RestrictedSession() {
     <div className="mt-4 grid gap-2 text-sm">
       <Link className={institutionLink} href="/forgot-password">{copy.security}</Link>
       <a className={institutionLink} href="mailto:contact@ayinou.com">{copy.support}</a>
-      <p>{copy.noAppeal}</p>
+
     </div>
+    <div className="mt-5"><MemberAppeals /></div>
     {failed && <p role="alert" className={institutionErrorBox}>{authMessages[locale].loadError}</p>}
     <button type="button" disabled={busy} onClick={() => { void signOut(); }} className={`${institutionAction} mt-4`}>{authMessages[locale].logout}</button>
   </AuthShell>;

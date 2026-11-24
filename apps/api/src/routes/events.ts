@@ -157,7 +157,9 @@ export function registerEventRoutes(app: FastifyInstance, { viewer, repo, read, 
     const { action, reason } = z.strictObject({
       action: z.enum(["restricted", "restored", "dismissed"]), reason: z.string().trim().min(10).max(500),
     }).parse(request.body);
-    return { resolved: await repo().rpc<boolean>(token, "moderate_event_for_client", { p_report: id, p_action: action, p_reason: reason }) };
+    const resolved = await repo().rpc<boolean>(token, "moderate_event_for_client", { p_report: id, p_action: action, p_reason: reason });
+    if (!resolved) throw new ApiError(403, "APPEAL_REVIEW_CONFLICT", "An independent moderator is required");
+    return { resolved };
   });
 
   app.get("/api/v1/events/notification-preference", async (request) => {

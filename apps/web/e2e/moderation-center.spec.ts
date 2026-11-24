@@ -126,8 +126,9 @@ test("M2.1 aggregates safe records, rechecks workspace and roles, and keeps nati
       delete from feed_data.posts where id in ('${post}','${scopedPost}');
       delete from private.impersonation_reports where id='${trustReport}';
       delete from private.community_projects where id='${project}';
-      delete from feed_data.event_reports where id='${eventReport}';
+      update feed_data.events set moderation_decision_id=null where id='${event}';
       delete from feed_data.event_audit where event_id='${event}';
+      delete from feed_data.event_reports where id='${eventReport}';
       delete from feed_data.events where id='${event}';`);
   }
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { MemberAppeals } from "./enforcement-appeals";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 import type { CommunityEvent, EventResponse } from "@ayinou/shared";
 import { ApiRequestError } from "@/lib/api-errors";
@@ -106,6 +107,7 @@ export function EventDetail({ initial, signedIn }: { initial: CommunityEvent; si
     </header>
     {mutation.error !== null && (mutation.error instanceof ApiRequestError && mutation.error.code === "EVENT_FULL"
       ? <p className={institutionCard} role="alert">{t.full}</p> : <ApiErrorNotice error={mutation.error} />)}
+    {event.canManage && <MemberAppeals eventId={event.id} />}
     {editing && <EditEvent event={event} done={(changed) => { setEvent(changed); setEditing(false); }} />}
     <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
       <div className="grid min-w-0 gap-4">

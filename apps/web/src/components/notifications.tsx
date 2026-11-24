@@ -22,6 +22,7 @@ import { eventMessages } from "@/lib/events-i18n";
 import { EventNoticePreference } from "./event-settings";
 import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, institutionLink, useInstitutionResource } from "./institution-ui";
+import { MemberAppeals } from "./enforcement-appeals";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 
@@ -66,6 +67,7 @@ export function NotificationCenter() {
   return <MemberShell><section className="grid gap-4" aria-label={t.notifications}>
     <PageHeader title={t.notifications}
       actions={!!rows?.length && <button type="button" className={institutionAction} disabled={mutation.busy} onClick={() => { void mark(); }}>{t.markAll}</button>} />
+    <MemberAppeals noticesOnly />
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} />}
     {!rows && resource.error === null && <p role="status">{t.working}</p>}

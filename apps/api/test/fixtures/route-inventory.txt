@@ -90,6 +90,7 @@ GET /api/v1/me/communities - -
 GET /api/v1/me/community-activity - -
 GET /api/v1/me/community-invitations - -
 GET /api/v1/me/community-recommendation-settings - -
+GET /api/v1/me/enforcement-appeals - -
 GET /api/v1/me/feed-languages - -
 GET /api/v1/me/feed-moderation - -
 GET /api/v1/me/follow-reposts/:kind/:key 1024 -
@@ -143,6 +144,7 @@ GET /api/v1/members/:username/mute - -
 GET /api/v1/members/:username/timeline - -
 GET /api/v1/moderation/:kind/:id/activity - -
 GET /api/v1/moderation/appeals - -
+GET /api/v1/moderation/enforcement-appeals - -
 GET /api/v1/moderation/feature-enforcement - -
 GET /api/v1/moderation/feature-enforcement/access - -
 GET /api/v1/moderation/feed - -
@@ -254,6 +256,7 @@ HEAD /api/v1/me/communities - onSend
 HEAD /api/v1/me/community-activity - onSend
 HEAD /api/v1/me/community-invitations - onSend
 HEAD /api/v1/me/community-recommendation-settings - onSend
+HEAD /api/v1/me/enforcement-appeals - onSend
 HEAD /api/v1/me/feed-languages - onSend
 HEAD /api/v1/me/feed-moderation - onSend
 HEAD /api/v1/me/follow-reposts/:kind/:key 1024 onSend
@@ -306,6 +309,7 @@ HEAD /api/v1/members/:username/mute - onSend
 HEAD /api/v1/members/:username/timeline - onSend
 HEAD /api/v1/moderation/:kind/:id/activity - onSend
 HEAD /api/v1/moderation/appeals - onSend
+HEAD /api/v1/moderation/enforcement-appeals - onSend
 HEAD /api/v1/moderation/feature-enforcement - onSend
 HEAD /api/v1/moderation/feature-enforcement/access - onSend
 HEAD /api/v1/moderation/feed - onSend
@@ -421,6 +425,7 @@ POST /api/v1/institutions/:id/representatives/:member/revoke 256 -
 POST /api/v1/institutions/:id/roles 4096 -
 POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
+POST /api/v1/me/enforcement-appeals 12288 -
 POST /api/v1/me/founder-bootstrap 256 -
 POST /api/v1/me/founder-identity/:id/actions 1024 -
 POST /api/v1/me/governance-invitations/:id/accept 512 -
@@ -445,6 +450,7 @@ POST /api/v1/me/verification 4096 -
 POST /api/v1/me/verification/appeals 9000 -
 POST /api/v1/members/:username/impersonation-reports 9000 -
 POST /api/v1/moderation/actions/:id/appeals 8192 -
+POST /api/v1/moderation/enforcement-appeals 8192 -
 POST /api/v1/moderation/feature-enforcement 8192 -
 POST /api/v1/polls 10000 -
 POST /api/v1/polls/:id/ballot 512 -

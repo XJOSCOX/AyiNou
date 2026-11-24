@@ -12,6 +12,7 @@ import { createInstitutionRepository, type InstitutionRepository } from "./servi
 import { registerPrivilegedSetup } from "./routes/privileged-setup.js";
 import { registerSessionSecurity } from "./routes/session-security.js";
 import { registerAuditRoutes } from "./routes/audit.js";
+import { registerEnforcementAppeals } from "./routes/enforcement-appeals.js";
 import { registerFeatureEnforcement } from "./routes/feature-enforcement.js";
 import { registerAdminRoutes } from "./routes/admin.js";
 import { registerAdministrationGovernance } from "./routes/administration-governance.js";
@@ -80,6 +81,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerOrganizationOnboarding(instance, auth, institutions, readBudget));
   app.register((instance) => registerSessionSecurity(instance, auth, institutions));
   app.register((instance) => registerAuditRoutes(instance, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
+  app.register((instance) => registerEnforcementAppeals(instance, auth, feed, institutions, readBudget, config.SUPABASE_SECRET_KEY));
   app.register((instance) => registerFeatureEnforcement(instance, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
   app.register((instance) => registerHomepagePolicyRoutes(instance, auth, institutions));

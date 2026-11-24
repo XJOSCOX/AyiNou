@@ -19,6 +19,9 @@ export interface FeedRepository {
 
 export function feedDatabaseError(code: string): ApiError {
   switch (code) {
+    case "O2002": return new ApiError(409, "IDEMPOTENCY_CONFLICT", "The request has changed");
+    case "O2004": return new ApiError(409, "STALE_VERSION", "The case has changed");
+    case "54000": return new ApiError(429, "LIMIT_REACHED", "Wait before trying again");
     case "M2301": return new ApiError(403, "FEATURE_RESTRICTED", "This feature is currently restricted");
     case "42501": return new ApiError(403, "FORBIDDEN", "This action is not permitted");
     case "PEV03": return new ApiError(403, "EVENT_UNAVAILABLE", "This event action is unavailable");

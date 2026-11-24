@@ -38,6 +38,8 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
       if (error.code === "PGRST202" && ["founder_identity_read_for_api", "founder_identity_workspace_for_api"].includes(name)) {
         throw new InstitutionError("FOUNDER_IDENTITY_NOT_DEPLOYED", 503);
       }
+      if (["PSF04", "PSF14", "22023"].includes(error.code) && name.startsWith("m24_"))
+        throw new InstitutionError(error.code === "22023" ? "INVALID_INPUT" : "APPEAL_INELIGIBLE", error.code === "22023" ? 400 : 404);
       if (error.code === "O2001") throw new InstitutionError("UNAUTHORIZED", 401);
       if (error.code === "O2002") throw new InstitutionError("IDEMPOTENCY_CONFLICT", 409);
       if (error.code === "O2003") throw new InstitutionError("NOT_FOUND", 404);

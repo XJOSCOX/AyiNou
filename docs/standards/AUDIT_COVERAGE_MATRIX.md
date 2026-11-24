@@ -99,3 +99,6 @@ Member account-control confirmation and Founder attestation use the existing Fou
 ## M2.3 Feature restrictions and moderator delegation
 
 Restriction and delegation commands atomically record the decision, scope, subject, authority, reason, and case reference. Stable expiration references enter the existing Moderation Center and A1A projections once the effective term ends. Member notices expose a caller-bound category and public-safe case details. [M2.3 details](../moderation/M2_3_IMPLEMENTATION_REPORT.md)
+## M2.4 Independent enforcement appeals
+
+The appeal ledger records submissions, assignments, revisions, findings, protected dispositions, conflict denials and exact native enforcement reversals. Report-linked event moderation records the originating report and actor. The Moderation Center and A1A expose safe references through the existing private access controls. [M2.4 details](../moderation/M2_4_IMPLEMENTATION_REPORT.md)

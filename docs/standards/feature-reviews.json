@@ -1,6 +1,87 @@
 {
   "features": [
     {
+      "id": "m24-independent-appeals",
+      "report": "docs/moderation/M2_4_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/enforcement-appeals",
+          "contract": "GET /api/v1/me/enforcement-appeals - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Owner-scoped decision, case and notice projections."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/enforcement-appeals.spec.ts",
+            "denialScenario": "An organizer must currently manage the requested event."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/enforcement-appeals",
+          "contract": "POST /api/v1/me/enforcement-appeals 12288 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The actor-bound intake commits a revision and member notice with its event."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/enforcement-appeals.spec.ts",
+            "denialScenario": "Other members cannot appeal the decision. Duplicates, invalid deadlines and stale corrections are denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/moderation/enforcement-appeals",
+          "contract": "GET /api/v1/moderation/enforcement-appeals - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Original session-bound workspace reads return scoped safe summaries or assigned reviewer material."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/enforcement-appeals.spec.ts",
+            "denialScenario": "A foreign workspace or unassigned reviewer cannot access case material."
+          }
+        },
+        {
+          "route": "POST /api/v1/moderation/enforcement-appeals",
+          "contract": "POST /api/v1/moderation/enforcement-appeals 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Findings, decisions, native releases and notices commit atomically."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/enforcement-appeals.spec.ts",
+            "denialScenario": "An issuer or reporter cannot review the same case. Administrators cannot approve protected releases."
+          }
+        },
+        {
+          "route": "POST /api/v1/events/moderation/reports/:id",
+          "contract": "POST /api/v1/events/moderation/reports/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The moderator decision references the originating event report. Conflict denials record minimized facts."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/enforcement-appeals.spec.ts",
+            "denialScenario": "An organizer or reporter cannot decide the original report."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261123134000_m24_independent_appeals.sql",
+          "rlsAndGrants": "No client table grants. Intake and notices are authenticated caller-bound RPCs. Staff RPCs require service-role execution and a bound MFA workspace.",
+          "authorization": "PostgreSQL rechecks appellant identity, scope, live reviewer assignment, issuer and material conflicts, and recognizes only the Founder for protected release.",
+          "compatibility": "Keeps M2.2 and M2.3 case lifecycle rules, preexisting Feed and Trust appeals, legacy audit, and event session and participant visibility rules.",
+          "validation": "Disposable tests verify assignment, denial, release, original event report linkage, replay, protected dispositions, and localized notices.",
+          "rolloutAndRollback": "Apply the exact approved migration after local tests and hosted preflight. Preserve native and appeal evidence while rolling back UI entry points or applying forward fixes."
+        }
+      ]
+    },
+    {
       "id": "m23-feature-enforcement",
       "report": "docs/moderation/M2_3_IMPLEMENTATION_REPORT.md",
       "routes": [
@@ -2208,19 +2289,6 @@
         {
           "route": "POST /api/v1/events/:id/updates",
           "contract": "POST /api/v1/events/:id/updates - -",
-          "access": "restricted",
-          "audit": {
-            "kind": "durable",
-            "detail": "Lifecycle decisions are retained in feed_data.event_audit."
-          },
-          "authorization": {
-            "file": "apps/web/e2e/events.spec.ts",
-            "denialScenario": "An outsider cannot publish or manage an organization's event, list its attendees, or enter event moderation."
-          }
-        },
-        {
-          "route": "POST /api/v1/events/moderation/reports/:id",
-          "contract": "POST /api/v1/events/moderation/reports/:id - -",
           "access": "restricted",
           "audit": {
             "kind": "durable",

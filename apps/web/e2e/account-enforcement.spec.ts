@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { AdminAccount, MemberAccountEnforcement, ModerationCenterPage } from "@ayinou/shared";
 import { suspensionMinutes } from "@ayinou/shared";
 import { api, apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, localClient, login, sql, test, totp, type Member } from "./fixtures";
-import { accountEnforcementMessages } from "../src/lib/account-enforcement-i18n";
+import { enforcementAppealMessages } from "../src/lib/enforcement-appeal-i18n";
 
 const reason = "Synthetic private narrative for account enforcement";
 const commands = "/api/v1/admin/accounts/";
@@ -150,11 +150,11 @@ test("M2.2 protects account authority, sessions, legacy history, and limits epis
     await inEnglish(context);
     await login(page, banned);
     await expect(page).toHaveURL(/\/account-access$/);
-    await expect(page.getByText(permanent.reference, { exact: true })).toBeVisible();
+    await expect(page.getByRole("listitem").getByText(permanent.reference, { exact: true })).toBeVisible();
     const select = page.getByRole("combobox").last();
     for (const locale of ["en", "ht", "fr", "es"] as const) {
       await select.selectOption(locale);
-      await expect(page.getByText(accountEnforcementMessages[locale].noAppeal, { exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { name: enforcementAppealMessages[locale].title, exact: true })).toBeVisible();
     }
     await request(founder, path, 200, f, liftBan);
     await request(founder, commands + legacy.id, 200, f, command({ action: "lift_legacy", reference: legacy.id }));
