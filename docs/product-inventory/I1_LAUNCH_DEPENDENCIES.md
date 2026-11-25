@@ -21,3 +21,7 @@
 - Prior moderation findings remain in the M3 risk register. Code changes and hosted migration receipt do not close staffing, policy or launch decisions. [M3 remaining risks](../moderation/M3_REMAINING_RISKS.md)
 
 [P1 deployment status and environment checks](../production-readiness/P1_DEPLOYMENT_READINESS.md) · [Owner decisions](../production-readiness/P1_OWNER_DECISIONS.md) · [Hosted operating workflow](../deployment/HOSTED_DEVELOPMENT_WORKFLOW.md)
+
+## Community Needs pilot
+
+C1.5 records the integrated workflow and a proposed Ouest scope. Live intake, evidence review, publication and association remain closed. Production activation, reviewer staffing, privacy and records policy, support and restore procedures require separate decisions. [Pilot readiness](../community-needs/C1_5_PILOT_READINESS.md) · [Owner decisions](../community-needs/C1_5_OWNER_DECISIONS.md)

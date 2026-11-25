@@ -140,3 +140,7 @@ The private publication ledger retains versioned proposals, confirmed audience a
 ## C1.4 Community Needs and project associations
 
 The private association ledger records the organizer and authority, exact need snapshot and project revision, consent, independent assignment and decision, activation, withdrawal and native visibility invalidation. Private recipient notices commit with events. The linked-resource views require native access to both resources and omit protected evidence and rationale. [Implementation report](../community-needs/C1_4_IMPLEMENTATION_REPORT.md)
+
+## C1.5 Community Needs integration
+
+The disposable integrated journey follows one case from private draft and submission through evidence review and clarification, exact publication approval, community discussion, and separate project association. It checks existing transactional ledgers across all four boundaries, recipient-only notices, consent and invalidation. The read-only cursor correction adds no audit event or grant. [Integration report](../community-needs/C1_5_INTEGRATION_REPORT.md) · [Security findings](../community-needs/C1_5_SECURITY_FINDINGS.md)

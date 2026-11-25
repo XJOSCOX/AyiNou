@@ -296,7 +296,8 @@ Feature development pauses here for owner review of the engineering results and 
 - [x] C1.2 private triage, independent evidence review, author corrections, challenges, and scoped intake restriction. The hosted C1.2 database migration was applied and verified on November 24, 2026, with 132 applied migrations and zero pending. Live intake and review remain disabled. [Implementation report](docs/community-needs/C1_2_IMPLEMENTATION_REPORT.md)
 - [x] C1.3 community-only publication snapshots, independent approval, attribution consent, participation and publication challenges. The hosted C1.3 database migration was applied and verified on November 24, 2026, with 133 applied migrations and zero pending. Live intake, review and publication remain disabled. [Implementation report](docs/community-needs/C1_3_IMPLEMENTATION_REPORT.md)
 - [x] C1.4 consent-based associations between reviewed Community Needs and project proposals. The scoped hosted database migration was verified on November 24, 2026, with 134 migrations applied, zero pending, and all four gates closed. Hosted application release remains separate. [Implementation report](docs/community-needs/C1_4_IMPLEMENTATION_REPORT.md)
-- [ ] C1.5 authorized pilot activation.
+- [x] C1.5 Community Needs integration and controlled Ouest pilot readiness review. The native lifecycle and authorization were tested in disposable Supabase, and the proposed pilot remains gated. [Integration report](docs/community-needs/C1_5_INTEGRATION_REPORT.md)
+- [ ] Authorize and activate a real Ouest pilot after production activation, reviewer staffing, privacy and recovery approvals. [Owner decisions](docs/community-needs/C1_5_OWNER_DECISIONS.md)
 - [ ] Extend structured reporting to local events and general public claims.
 - [ ] Support confirmations, challenges, credible sources, and safe evidence submission.
 - [ ] Review statuses: unverified, under review, verified, misleading, false, inconclusive.

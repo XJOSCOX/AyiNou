@@ -7172,7 +7172,8 @@
           "supabase/migrations/20261124155000_c11_community_needs.sql",
           "supabase/migrations/20261124155100_c12_community_needs_review.sql",
           "supabase/migrations/20261124155200_c13_community_need_publication.sql",
-          "supabase/migrations/20261124155300_c14_need_project_links.sql"
+          "supabase/migrations/20261124155300_c14_need_project_links.sql",
+          "supabase/migrations/20261124155400_c15_link_directory_cursor.sql"
         ],
         "postgresObjects": [
           "public.c11_needs_for_api",
@@ -7198,23 +7199,31 @@
             "apps/web/e2e/need-project-links.spec.ts"
           ],
           "database": [
-            "supabase/tests/database/c11_community_needs_test.sql"
+            "supabase/tests/database/c11_community_needs_test.sql",
+            "supabase/tests/database/c15_community_needs_integration_test.sql"
           ]
         },
         "reports": [
           "docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md",
           "docs/community-needs/C1_2_IMPLEMENTATION_REPORT.md",
           "docs/community-needs/C1_3_IMPLEMENTATION_REPORT.md",
-          "docs/community-needs/C1_4_IMPLEMENTATION_REPORT.md"
+          "docs/community-needs/C1_4_IMPLEMENTATION_REPORT.md",
+          "docs/community-needs/C1_5_INTEGRATION_REPORT.md",
+          "docs/community-needs/C1_5_SECURITY_FINDINGS.md",
+          "docs/community-needs/C1_5_PILOT_READINESS.md",
+          "docs/community-needs/C1_5_REVIEWER_OPERATIONS.md",
+          "docs/community-needs/C1_5_PRIVACY_AND_RETENTION_GAPS.md",
+          "docs/community-needs/C1_5_TEST_RESULTS.md",
+          "docs/community-needs/C1_5_OWNER_DECISIONS.md"
         ]
       },
       "verification": {
-        "local": "See C1.4 report for local authorization and regression evidence.",
+        "local": "C1.5 integration test and readiness evidence cover the end-to-end workflow.",
         "disposableSupabase": "See C1.4 association consent, authorization, and invalidation exercises.",
         "hostedDatabase": "C1.1–C1.4 applied with all four fixture gates closed, zero pending migrations, and 51 preservation checks matched.",
-        "connectedApplication": "The matching local application passed C1.4 health, access and compatibility checks with Test02 and J0SC0X. Mutation authorization and lifecycle tests used disposable Supabase.",
+        "connectedApplication": "C1.5 confirmed closed features with Test02 and J0SC0X in the connected local browser.",
         "hostedApplication": "Hosted application release unverified.",
-        "operationalApproval": "Real intake, review and publication remain disabled. Separate pilot approval required."
+        "operationalApproval": "Intake, review, publication and link gates remain closed. A separate Ouest cohort, activation release, staffing and privacy approvals are required."
       }
     },
     {
@@ -7711,5 +7720,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C1.4 Connect Reviewed Community Needs to Projects"
+  "lastScopeUpdate": "C1.5 Community Needs Integration and Controlled Pilot Readiness"
 }

@@ -3018,6 +3018,21 @@
           "rolloutAndRollback": "Apply only an approved tested checksum after read-only baseline and exact dry run. Leave every hosted gate empty. Prefer additive forward repair preserving the ledger."
         }
       ]
+    },
+    {
+      "id": "c1-5-community-needs-integration",
+      "report": "docs/community-needs/C1_5_INTEGRATION_REPORT.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124155400_c15_link_directory_cursor.sql",
+          "rlsAndGrants": "Replaces only one service-only RPC definition. Keeps its signature, owner, definer settings and ACL; makes no table or policy changes.",
+          "authorization": "Existing caller, community, project, snapshot and assignment checks are preserved. The directory cursor reuses the already visible project identifier.",
+          "compatibility": "Only the publication-side project ordering and cursor predicate change. Existing workflow gates remain closed. No records, history or privileges are modified.",
+          "validation": "Disposable C1.5 integration exercises the native lifecycle and 22 linked projects across two pages. Dedicated PostgreSQL assertions cover all four closed gates and their grants.",
+          "rolloutAndRollback": "Use the exact tested checksum, read-only preservation baseline and dry run. Verify all four gates remain closed. Prefer scoped forward repair while keeping the association ledger."
+        }
+      ]
     }
   ]
 }
