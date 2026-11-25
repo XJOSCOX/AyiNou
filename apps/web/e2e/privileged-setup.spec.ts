@@ -63,6 +63,7 @@ async function authenticateAgain(member: Member & { mfaSecret: string }): Promis
 test("F1.1 clean installation appoints the first Administrator through the Founder and the named member @smoke",
   async ({ page, context, makeMember }) => {
     test.setTimeout(100_000);
+    const existingAdministrators = new Set(sql("select user_id from public.role_assignments where role='administrator';").split("\n"));
     const handle = "private_" + randomUUID().slice(0, 8);
     const email = handle + "@example.com";
     const password = "Disposable-founder!92";
@@ -131,7 +132,9 @@ test("F1.1 clean installation appoints the first Administrator through the Found
           values ('${candidate.id}','identity','verified','review','${reviewer.id}',now()),
                  ('${secondTarget.id}','identity','verified','review','${reviewer.id}',now());`);
       const { version, administrators } = await apiCall(leader, governance, 200);
-      expect(administrators).toEqual([expect.objectContaining({ id: leader.id, founding: true })]);
+      // The smoke suite shares one disposable database across files. Only this setup's new authority should appear here.
+      const newAdministrators = administrators.filter(({ id }: { id: string }) => !existingAdministrators.has(id));
+      expect(newAdministrators).toEqual([expect.objectContaining({ id: leader.id, founding: true })]);
       const propose = (target: string) => apiCall(leader, governance + "/proposals", 200, "POST",
         { ...revise(version), kind: "appoint", target, reason });
       const proposal = await propose(candidate.id);
