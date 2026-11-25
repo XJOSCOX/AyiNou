@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { interestCodes, projectReportCategories, type ProjectCard, type ProjectDetail } from "@ayinou/shared";
+import { interestCodes, type ProjectCard, type ProjectDetail } from "@ayinou/shared";
 import { fetchDepartments, fetchMyProfile } from "@/lib/api";
 import { apiErrorCode } from "@/lib/api-errors";
 import { authMessages } from "@/lib/auth-i18n";
@@ -11,6 +11,7 @@ import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { useMemberIdentity } from "@/lib/member-display-name";
 import { membershipMessages } from "@/lib/membership-i18n";
+import { ProjectReportForm } from "./project-report-form";
 import { loadMyProjects, loadProject, loadProjectImage, loadProjectOptions, loadProjects, reportProject, setProjectPublication, submitProject, uploadProjectImage } from "@/lib/project-api";
 import { projectMessages } from "@/lib/project-i18n";
 import { projectWorkMessages } from "@/lib/project-work-i18n";
@@ -425,7 +426,7 @@ function ProjectDetailContent({ data, signedIn, reviewPreview, initialNeedLink, 
           </ul>
         </section>}
         {signedIn&&!reviewPreview&&<ProjectNeedLinks project={data.id} version={data.version} initial={initialNeedLink} />}
-        {data.canReport && <ReportProjectForm id={data.id} />}
+        {data.canReport && <ProjectReportForm submitReport={(category, explanation) => reportProject(data.id, category, explanation)} />}
       </div>
     </div>}
     {reviewPreview && data.approval && <ProjectPreviewApproval key={data.approval.version}
@@ -519,31 +520,4 @@ function ProjectOwnerControls({ data, dirty, refresh }: { data: ProjectDetail; d
     </ProjectDisclosure>}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} retry={refresh} signIn />}
   </section>;
-}
-
-function ReportProjectForm({ id }: { id: string }) {
-  const [locale] = useLocale();
-  const t = projectMessages[locale];
-  const mutation = useFeedMutation();
-  const [saved, setSaved] = useState(false);
-  return <ProjectDisclosure title={t.report}>
-    {saved ? <p role="status" className="text-sm">{t.reported}</p> : <form className="grid min-w-0 gap-3" onSubmit={(event) => {
-      event.preventDefault();
-      const fields = new FormData(event.currentTarget);
-      const category = projectReportCategories.find((value) => value === fields.get("category"));
-      if (category) void mutation.run(async () => {
-        await reportProject(id, category, String(fields.get("explanation") ?? "").trim());
-        setSaved(true);
-      });
-    }}>
-      <label className="text-sm font-semibold">{t.reportCategory}
-        <select className={institutionField} name="category">
-          {projectReportCategories.map((value) => <option key={value} value={value}>{t.reports[value]}</option>)}
-        </select>
-      </label>
-      <label className="text-sm font-semibold">{t.reason}<textarea name="explanation" className={institutionField} rows={3} minLength={10} maxLength={500} required /></label>
-      {mutation.error !== null && <ApiErrorNotice error={mutation.error} signIn />}
-      <button className={`${institutionAction} justify-self-start`} disabled={mutation.busy}>{t.report}</button>
-    </form>}
-  </ProjectDisclosure>;
 }

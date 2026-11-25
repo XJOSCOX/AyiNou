@@ -66,7 +66,7 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
       if (name === "c23_publication_for_api" && ["C2301", "PGRST202"].includes(error.code)) {
         throw new InstitutionError("PROJECT_OUTCOME_PUBLICATION_DISABLED", 404);
       }
-      if (["c22_reviews_for_api", "c23_publication_for_api", "c24_manage_for_api"].includes(name) && error.code === "PFR29") throw new InstitutionError("LIMIT_REACHED", 429);
+      if (["c22_reviews_for_api", "c23_publication_for_api", "c24_manage_for_api", "c34_recruitment_for_api"].includes(name) && error.code === "PFR29") throw new InstitutionError("LIMIT_REACHED", 429);
       if (name === "c22_reviews_for_api" && ["C2201", "PGRST202"].includes(error.code)) {
         throw new InstitutionError("PROJECT_OUTCOME_REVIEW_DISABLED", 404);
       }

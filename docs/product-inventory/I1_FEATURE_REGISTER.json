@@ -8138,7 +8138,65 @@
         "hostedApplication": "Database-only rollout, with web and API local.",
         "operationalApproval": "All real matching and organizer discovery remain closed."
       }
+    },
+    {
+      "id": "volunteer-recruitment",
+      "domain": "Projects",
+      "name": "Opportunity-specific volunteer recruitment invitations",
+      "status": "partial",
+      "currentAndLimits": "Manual invitation to apply, independent contact consent, native application provenance and protected Founder preparation. Live recruitment and public skills are closed.",
+      "dependencies": "C3.1 consent and profiles, C3.2 published opportunity revisions, C3.3 discovery, native Project Work, member privacy and safety, and operational safeguarding approval.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/volunteering/recruitment.tsx",
+          "apps/web/src/features/volunteering/recruitment-settings.tsx",
+          "apps/web/src/features/projects/work/opportunity-candidates.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/volunteer-recruitment.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/notifications.ts",
+          "packages/shared/src/volunteer-matching.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125133000_c34_volunteer_recruitment.sql"
+        ],
+        "postgresObjects": [
+          "private.c34_contact",
+          "private.c34_configuration",
+          "private.c34_invitations",
+          "private.c34_events",
+          "public.c34_recruitment_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/volunteer-recruitment.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/volunteer-recruitment.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/volunteer-recruitment.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/volunteering/C3_4_IMPLEMENTATION_REPORT.md",
+          "docs/volunteering/C3_4_RECRUITMENT_POLICY.md",
+          "docs/volunteering/C3_4_PRIVACY_AND_SAFEGUARDING.md",
+          "docs/volunteering/C3_4_ACTIVATION_DESIGN.md",
+          "docs/volunteering/C3_4_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See the C3.4 implementation report.",
+        "disposableSupabase": "All enabled workflows use isolated profiles, projects and invitations.",
+        "hostedDatabase": "Pending exact approval and verification.",
+        "connectedApplication": "See the C3.4 implementation report.",
+        "hostedApplication": "Database-only rollout, with Next.js and Fastify local.",
+        "operationalApproval": "Live participation stays closed and needs separate approval."
+      }
     }
   ],
-  "lastScopeUpdate": "C3.3 Intelligent Volunteer Matching"
+  "lastScopeUpdate": "C3.4 Volunteer Coordination and Recruitment Integration"
 }

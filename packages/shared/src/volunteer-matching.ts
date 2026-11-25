@@ -28,4 +28,4 @@ export type VolunteerRecommendation = {
   reasons: MatchingReason[];
 };
 export type MatchingPage<T> = { state: "closed" | "unavailable" | "ready"; items: T[]; nextCursor: string | null };
-export type OpportunityCandidate = { handle: string; name: string; classification: MatchingClass };
+export type OpportunityCandidate = { handle: string; name: string; classification: MatchingClass; selection?: string };

@@ -9,7 +9,8 @@ import { useLocale } from "@/lib/locale-store";
 import { loadVolunteerSettings, saveVolunteerSettings } from "@/lib/volunteer-api";
 import { volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
-import { departmentNames } from "./member";
+import { departmentNames } from "@/lib/volunteer-i18n";
+import { FounderRecruitmentSettings } from "./recruitment-settings";
 import { FounderMatchingSettings } from "./matching-settings";
 import { FounderRequirementSettings } from "./requirement-settings";
 
@@ -103,5 +104,6 @@ export function FounderVolunteer({ workspace }: { workspace: string }) {
     </>}
     <FounderRequirementSettings workspace={workspace} />
     <FounderMatchingSettings workspace={workspace} />
+    <FounderRecruitmentSettings workspace={workspace} />
   </section>;
 }

@@ -85,7 +85,7 @@ test("matching reads current consent and returns only scoped native opportunitie
     expect((await personal("HT-AR")).items[0]).toMatchObject({opportunityId:screened.id,classification:"additional",reasons:expect.arrayContaining(["screening"])});
     expect((await request(screened.path+"/candidates",200,organizer)).items).toEqual([]);
     expect((await request(ownerPath,200,candidate)).state).toBe("unavailable");
-    expect((await discover()).items).toEqual([{handle:candidate.handle,name:expect.any(String),classification:"strong"}]);
+    expect((await discover()).items).toEqual([expect.objectContaining({handle:candidate.handle,name:expect.any(String),classification:"strong"})]);
     await request(target.path+"/candidates",403,member);
     await request(opportunityPath(physical.project,target.id)+"/candidates",403,organizer);
     await request(ownerPath+"?minimumAge=18",400,member);

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { recruitmentPath } from "@/lib/recruitment-api";
+import { recruitmentCopy } from "@/lib/recruitment-i18n";
 import { recommendationsPath } from "@/lib/matching-api";
 import { matchingCopy } from "@/lib/matching-i18n";
 import { useWorkMessages } from "./work-controls";
@@ -26,7 +28,10 @@ export function ProjectWorkIndexScreen() {
         </li>)}</ul> : <p className="text-sm text-[var(--theme-body)]">{t.emptyWorkspace}</p>}
       </ProjectSection>
       <ProjectSection title={t.volunteers} count={resource.data.opportunities.length}>
-        <Link href={recommendationsPath} className={titleLink}>{matchingCopy(locale)("title")}</Link>
+        <div className="flex flex-wrap gap-3">
+          <Link href={recommendationsPath} className={titleLink}>{matchingCopy(locale)("title")}</Link>
+          <Link href={recruitmentPath} className={titleLink}>{recruitmentCopy(locale)("title")}</Link>
+        </div>
         {resource.data.opportunities.length ? <ul className="grid gap-2">{resource.data.opportunities.map((item) => <li className={row} key={item.id}>
           <Link href={`/projects/${item.projectId}/work?section=volunteers`} className={titleLink} dir="auto">{item.title}</Link>
           {item.remote && <span className={projectBadge}>{t.remote}</span>}

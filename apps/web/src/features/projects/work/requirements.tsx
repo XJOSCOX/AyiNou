@@ -7,12 +7,12 @@ import { requirementPriorities, volunteerLanguages, volunteerLevels, volunteerMo
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { institutionAction, institutionField, institutionLink, useInstitutionResource } from "@/components/institution-ui";
 import { ProjectDisclosure } from "@/components/project-ui";
-import { departmentNames } from "@/features/volunteering/member";
+
 import { volunteerDepartments } from "@ayinou/shared";
 import { useFeedMutation } from "@/lib/feed-state";
 import { changeOpportunityRequirements, loadOpportunityRequirements } from "@/lib/requirement-api";
 import { requirementCopy } from "@/lib/requirement-i18n";
-import { volunteerCopy } from "@/lib/volunteer-i18n";
+import { departmentNames, volunteerCopy } from "@/lib/volunteer-i18n";
 import { useWorkMessages } from "./work-controls";
 
 type View = Extract<OpportunityRequirementsView,{ state:"fixture" }>;

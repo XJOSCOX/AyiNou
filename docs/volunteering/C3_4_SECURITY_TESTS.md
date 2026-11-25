@@ -1,0 +1,7 @@
+# C3.4 Security tests
+
+The isolated lifecycle suite exercises default-off consent, encrypted opportunity selection, scoped invitation preview and sending, exact revision binding, idempotent commands, concurrent decisions, and a native application, offer and confirmed team membership. It exercises all ten department scopes, three ownership models, all participation modes and eligible international support. It checks withdrawal of contact and discovery permission, blocking on either side, standing and organizer authority, closed and filled opportunities, changed revisions, elapsed invitations, bounded reports, cooldowns and safe notification projection.
+
+Disposable Founder tests use MFA and the original administrative workspace. They verify closed member access during settings preparation and denial for ordinary members, wrong workspaces, unexpected activation inputs and unbounded limits. RLS and direct execution grants are inspected independently of Fastify. The HTTP layer uses strict request shapes and private no-store responses. Hosted checks compare existing records and permissions read-only.
+
+Performance is measured using bounded invitation reads, sends and concurrent retries against an isolated seeded database. Recruitment preview evaluates compatibility for a selected volunteer, and does not repeat the full C3.3 discovery scan. Changes to native eligibility are recorded by targeted invalidation and rechecked when opening or acting on an invitation. The local benchmark is not a production capacity test.

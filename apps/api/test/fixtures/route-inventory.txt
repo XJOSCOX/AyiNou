@@ -43,6 +43,7 @@ GET /api/v1/admin/safety - -
 GET /api/v1/admin/verification-policy - -
 GET /api/v1/admin/volunteer-settings - -
 GET /api/v1/admin/volunteer-settings/matching - -
+GET /api/v1/admin/volunteer-settings/recruitment - -
 GET /api/v1/admin/volunteer-settings/requirements - -
 GET /api/v1/administrator-activation/:id - -
 GET /api/v1/ambassadors - -
@@ -151,6 +152,9 @@ GET /api/v1/me/verification-badge - -
 GET /api/v1/me/verification/appeals - -
 GET /api/v1/me/volunteer-matches - -
 GET /api/v1/me/volunteer-profile - -
+GET /api/v1/me/volunteer-recruitment - -
+GET /api/v1/me/volunteer-recruitment/:invitation - -
+GET /api/v1/me/volunteer-recruitment/preferences - -
 GET /api/v1/members/:key/follow - -
 GET /api/v1/members/:key/followers - -
 GET /api/v1/members/:key/following - -
@@ -213,6 +217,7 @@ GET /api/v1/projects/:project/outcome-validation/:caseId/review - -
 GET /api/v1/projects/:project/outcome-validation/:id - -
 GET /api/v1/projects/:project/outcome-validation/sources - -
 GET /api/v1/projects/:project/validated-results - -
+GET /api/v1/projects/:project/work/requirements/:opportunity/recruitment - -
 GET /api/v1/projects/reports - -
 GET /api/v1/projects/review - -
 GET /api/v1/recommendations/settings - -
@@ -257,6 +262,7 @@ HEAD /api/v1/admin/safety - onSend
 HEAD /api/v1/admin/verification-policy - onSend
 HEAD /api/v1/admin/volunteer-settings - onSend
 HEAD /api/v1/admin/volunteer-settings/matching - onSend
+HEAD /api/v1/admin/volunteer-settings/recruitment - onSend
 HEAD /api/v1/admin/volunteer-settings/requirements - onSend
 HEAD /api/v1/administrator-activation/:id - onSend
 HEAD /api/v1/ambassadors - onSend
@@ -364,6 +370,9 @@ HEAD /api/v1/me/verification-badge - onSend
 HEAD /api/v1/me/verification/appeals - onSend
 HEAD /api/v1/me/volunteer-matches - onSend
 HEAD /api/v1/me/volunteer-profile - onSend
+HEAD /api/v1/me/volunteer-recruitment - onSend
+HEAD /api/v1/me/volunteer-recruitment/:invitation - onSend
+HEAD /api/v1/me/volunteer-recruitment/preferences - onSend
 HEAD /api/v1/members/:key/follow - onSend
 HEAD /api/v1/members/:key/followers - onSend
 HEAD /api/v1/members/:key/following - onSend
@@ -426,6 +435,7 @@ HEAD /api/v1/projects/:project/outcome-validation/:caseId/review - onSend
 HEAD /api/v1/projects/:project/outcome-validation/:id - onSend
 HEAD /api/v1/projects/:project/outcome-validation/sources - onSend
 HEAD /api/v1/projects/:project/validated-results - onSend
+HEAD /api/v1/projects/:project/work/requirements/:opportunity/recruitment - onSend
 HEAD /api/v1/projects/reports - onSend
 HEAD /api/v1/projects/review - onSend
 HEAD /api/v1/recommendations/settings - onSend
@@ -454,6 +464,7 @@ PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/admin/verification-policy 4096 -
 PATCH /api/v1/admin/volunteer-settings 8192 -
 PATCH /api/v1/admin/volunteer-settings/matching 4096 -
+PATCH /api/v1/admin/volunteer-settings/recruitment 4096 -
 PATCH /api/v1/admin/volunteer-settings/requirements 4096 -
 PATCH /api/v1/comments/:id 12288 -
 PATCH /api/v1/communities/:key/membership 1024 -
@@ -481,6 +492,8 @@ PATCH /api/v1/me/profile - -
 PATCH /api/v1/me/profile/details - -
 PATCH /api/v1/me/volunteer-matches 512 -
 PATCH /api/v1/me/volunteer-profile 8192 -
+PATCH /api/v1/me/volunteer-recruitment/:invitation 4096 -
+PATCH /api/v1/me/volunteer-recruitment/preferences 512 -
 PATCH /api/v1/moderation/appeals/:id 4096 -
 PATCH /api/v1/moderation/comments/:id 4096 -
 PATCH /api/v1/moderation/posts/:id 4096 -
@@ -599,6 +612,8 @@ POST /api/v1/projects/:id/submit 512 -
 POST /api/v1/projects/:id/work 16000 -
 POST /api/v1/projects/:id/work/requirements/:opportunity/dismiss 512 -
 POST /api/v1/projects/:project/outcome-validation 4096 -
+POST /api/v1/projects/:project/work/requirements/:opportunity/recruitment 2048 -
+POST /api/v1/projects/:project/work/requirements/:opportunity/recruitment/preview 256 -
 POST /api/v1/referrals/validate 512 -
 POST /api/v1/setup/founder/:id 512 -
 POST /api/v1/verification/founder-appeals/:id 512 -

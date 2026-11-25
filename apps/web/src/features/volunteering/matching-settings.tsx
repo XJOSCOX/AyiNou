@@ -10,7 +10,7 @@ import { changeMatchingSettings, loadMatchingSettings } from "@/lib/matching-api
 import { matchingCopy } from "@/lib/matching-i18n";
 import { volunteerCopy } from "@/lib/volunteer-i18n";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
-import { departmentNames } from "./member";
+import { departmentNames } from "@/lib/volunteer-i18n";
 
 const numberFields = [
   { key:"requiredWeight",min:3,max:9 },{ key:"preferredWeight",min:1,max:2 },

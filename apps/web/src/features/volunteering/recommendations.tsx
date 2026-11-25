@@ -13,7 +13,7 @@ import { changeMatchingPause, dismissRecommendation, loadRecommendations } from 
 import { matchingCopy } from "@/lib/matching-i18n";
 import { loadVolunteer, saveVolunteer } from "@/lib/volunteer-api";
 import { volunteerCopy } from "@/lib/volunteer-i18n";
-import { departmentNames } from "./member";
+import { departmentNames } from "@/lib/volunteer-i18n";
 
 const profilePath = "/settings/volunteering";
 const button = institutionLink + " min-h-10 w-fit";

@@ -3903,6 +3903,152 @@
           "rolloutAndRollback": "Apply only the independently approved checksum after current main, history and fingerprints match. Verify all gate records empty. Use a forward correction for release defects."
         }
       ]
+    },
+    {
+      "id": "volunteer-recruitment",
+      "report": "docs/volunteering/C3_4_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/volunteer-settings/recruitment",
+          "contract": "GET /api/v1/admin/volunteer-settings/recruitment - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Reads bounded Founder preparation history."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "An ordinary member and a Founder without the original workspace are denied."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/volunteer-settings/recruitment",
+          "contract": "PATCH /api/v1/admin/volunteer-settings/recruitment 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Explicit confirmation and immutable reason, workspace, version and receipt commit together."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "An ordinary member, unrelated workspace and unsupported activation fields are denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/volunteer-recruitment",
+          "contract": "GET /api/v1/me/volunteer-recruitment - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Returns a bounded owner page and records automatic expiry and invalidation in the invitation event ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "An unauthorized caller cannot read another member’s invitation state."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/volunteer-recruitment/:invitation",
+          "contract": "GET /api/v1/me/volunteer-recruitment/:invitation - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Reads one scoped invitation and records lifecycle invalidation before displaying content."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "An unrelated member cannot open a known invitation."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/volunteer-recruitment/:invitation",
+          "contract": "PATCH /api/v1/me/volunteer-recruitment/:invitation 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Versioned decline, withdrawal, dismissal and native moderation report receipts commit with the action."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "A member outside the invitation cannot decline, withdraw or report it."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/volunteer-recruitment/preferences",
+          "contract": "GET /api/v1/me/volunteer-recruitment/preferences - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Only the current member’s contact preference is returned."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "No preference data is returned to an unauthorized caller."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/volunteer-recruitment/preferences",
+          "contract": "PATCH /api/v1/me/volunteer-recruitment/preferences 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The versioned owner opt-in and receipt are stored with scope-bound pending invalidation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "Contact defaults off and cannot substitute for discovery consent."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:project/work/requirements/:opportunity/recruitment",
+          "contract": "GET /api/v1/projects/:project/work/requirements/:opportunity/recruitment - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Returns the sender’s bounded list and records any lifecycle transition in the private ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "A listing cursor cannot be opened in another session or route scope."
+          }
+        },
+        {
+          "route": "POST /api/v1/projects/:project/work/requirements/:opportunity/recruitment",
+          "contract": "POST /api/v1/projects/:project/work/requirements/:opportunity/recruitment 2048 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The exact opportunity invitation and native in-app notice commit with its versioned event and receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "Consent, revision, limits and bound selections reject unsolicited or duplicate sends."
+          }
+        },
+        {
+          "route": "POST /api/v1/projects/:project/work/requirements/:opportunity/recruitment/preview",
+          "contract": "POST /api/v1/projects/:project/work/requirements/:opportunity/recruitment/preview 256 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A preview returns only exact eligible opportunity terms and does not retain a private profile projection."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-recruitment.spec.ts",
+            "denialScenario": "An arbitrary handle, cross-project token, stale revision or non-consenting recipient is denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125133000_c34_volunteer_recruitment.sql",
+          "rlsAndGrants": "Five private RLS relations with no direct app grants, private eligibility and lifecycle helpers, and one service-only command. Existing notification grants are unchanged.",
+          "authorization": "Session-bound service call, restricted administrative workspace, independent discovery and outreach consent, exact published revision, native recruitment, account standing, compatible privacy and safety. All live gates are closed.",
+          "compatibility": "Adds a nullable scoped notification reference and narrowly extends the existing notice functions. Native applications, role invitations, roles and moderation tables retain their existing behavior. Seeds no data.",
+          "validation": "Disposable coverage for authorization, concurrency, native workflows, reporting, limits and performance. Read-only hosted preservation and runtime checks follow authorized deployment.",
+          "rolloutAndRollback": "Verify current main, exact hash, pending history and baseline authorization, then apply only with exact owner approval. Leave gates closed and use a forward correction if needed."
+        }
+      ]
     }
   ]
 }

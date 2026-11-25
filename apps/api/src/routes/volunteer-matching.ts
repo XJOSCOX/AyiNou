@@ -1,10 +1,11 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { matchingCriteria, volunteerDepartments, volunteerModes } from "@ayinou/shared";
+import { matchingCriteria, volunteerDepartments, volunteerModes, type OpportunityCandidate } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
 import { createPrivateCursor } from "../services/private-cursor.js";
+import { createRecruitmentSelection } from "../services/recruitment-selection.js";
 import type { ReadBudget } from "../services/read-budget.js";
 
 const integer = (minimum: number, maximum: number) => z.number().int().min(minimum).max(maximum);
@@ -32,7 +33,8 @@ type DatabasePage = { state: "closed" | "unavailable" | "ready"; items: unknown[
   requirementVersion?: number; pauseVersion?: number; paused?: boolean; hasProfile?: boolean };
 
 export function registerVolunteerMatching(app: FastifyInstance, enabled: boolean, auth: AuthVerifier | null,
-  repository: InstitutionRepository | null, budget: ReadBudget, secret?: string) {
+  repository: InstitutionRepository | null, budget: ReadBudget, secret?: string, recruitment = false) {
+  const selections = recruitment && secret ? createRecruitmentSelection(secret) : null;
   const cursors = secret ? createPrivateCursor(secret,"ayinou-volunteer-matching-v1",cursorShape,"Invalid matching cursor") : null;
   app.addHook("onRequest", async (_request,reply) => {
     reply.header("Cache-Control","private, no-store").header("X-Robots-Tag","noindex, nofollow").header("Referrer-Policy","no-referrer");
@@ -75,6 +77,13 @@ export function registerVolunteerMatching(app: FastifyInstance, enabled: boolean
       const nextCursor = nextKey && pages<(action==="discover" ? 3 : 500) ? cursors!.seal({
         id:nextKey,revision:requirementVersion??null,expires:Date.now()+5*60_000,pages,
       },binding) : null;
+      if (action === "discover" && selections && requirementVersion && page.state === "ready") {
+        const items = (page.items as OpportunityCandidate[]).map(item => ({
+          ...item, selection: selections.seal({ handle: item.handle, revision: requirementVersion, expires: Date.now() + 5 * 60_000 },
+            [session.actor, session.session, project, opportunity]),
+        }));
+        return { ...page, items, nextCursor };
+      }
       return { ...page,nextCursor };
     } catch (error) {
       if (error instanceof InstitutionError) throw new ApiError(error.statusCode,error.code,"Volunteer matching unavailable");

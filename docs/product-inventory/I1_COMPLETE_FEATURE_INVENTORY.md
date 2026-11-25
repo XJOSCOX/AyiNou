@@ -772,6 +772,8 @@ Feature-specific local execution unverified. Feature-specific run outcome unveri
 
 ### Volunteer skills and matching
 
+C3.4 adds opportunity invitations to apply, separate recruitment-contact consent, and staged Founder preparation under Platform Settings → Volunteer settings. Live recruitment stays closed. [Implementation report](../volunteering/C3_4_IMPLEMENTATION_REPORT.md)
+
 C3.3 adds private recommendations in volunteer settings, scoped candidate discovery per native opportunity, and Founder preparation for all ten departments under Platform Settings → Volunteer settings. The hosted schema and protected administration access were verified. Live intake, matching, and discovery stay closed. [C3.3 implementation report](../volunteering/C3_3_IMPLEMENTATION_REPORT.md)
 
 C3.2 adds scoped opportunity requirements and revision history in Project Work, plus Founder preparation in Volunteer settings. The hosted operational gate remains closed. [C3.2 implementation report](../volunteering/C3_2_IMPLEMENTATION_REPORT.md)

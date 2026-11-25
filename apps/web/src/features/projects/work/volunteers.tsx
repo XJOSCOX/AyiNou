@@ -48,8 +48,9 @@ export function Volunteers(props: WorkProps) {
         </dl>
         <p className="text-sm">{copy("unpaid")} · {item.remote ? t.remote : t.projectRegion}</p>
         {fixture && <RequirementCard project={work.projectId} view={fixture} opportunity={item} refresh={requirements.refresh} />}
-        {manager && item.open && fixture?.items.some((entry) => entry.opportunityId===item.id && entry.published && !entry.published.screening)
-          && <OpportunityCandidates project={work.projectId} opportunity={item.id} />}
+        {manager && fixture?.items.some((entry) => entry.opportunityId===item.id && entry.published)
+          && <OpportunityCandidates project={work.projectId} opportunity={item.id}
+            discover={item.open && fixture.items.some(entry => entry.opportunityId===item.id && entry.published && !entry.published.screening)} />}
         <div className={actionsClass}>
           {item.open && work.canApply && !work.applications.some((row) => row.mine && row.opportunityId === item.id) &&
             <Operation {...operationProps} action="volunteer_apply" input={{ id: item.id }} />}

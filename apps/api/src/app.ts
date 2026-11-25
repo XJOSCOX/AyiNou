@@ -11,6 +11,7 @@ import { registerCommunityNeedPublication } from "./routes/community-need-public
 import { registerCommunityNeedsReview } from "./routes/community-needs-review.js";
 import { registerCommunityNeedsPilot } from "./routes/community-needs-pilot.js";
 import { registerOpportunityRequirements } from "./routes/opportunity-requirements.js";
+import { registerVolunteerRecruitment } from "./routes/volunteer-recruitment.js";
 import { registerVolunteerMatching } from "./routes/volunteer-matching.js";
 import { registerVolunteering } from "./routes/volunteering.js";
 import { registerImpact } from "./routes/impact.js";
@@ -111,7 +112,9 @@ export function createApp(config: ApiConfig, overrides?: {
     config.SUPABASE_URL === "http://127.0.0.1:55321" && process.env.NODE_ENV !== "production";
   app.register((instance) => registerOpportunityRequirements(instance, syntheticRequirements, auth, institutions, readBudget));
   const syntheticMatching = syntheticVolunteering && syntheticRequirements && config.AYINOU_VOLUNTEER_MATCHING === "synthetic";
-  app.register((instance) => registerVolunteerMatching(instance, syntheticMatching, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
+  const syntheticRecruitment = syntheticMatching && config.AYINOU_VOLUNTEER_RECRUITMENT === "synthetic";
+  app.register((instance) => registerVolunteerMatching(instance, syntheticMatching, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY, syntheticRecruitment));
+  app.register((instance) => registerVolunteerRecruitment(instance, syntheticRecruitment, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
   const syntheticImpact = syntheticOutcomePublication && config.AYINOU_IMPACT_REPORTING === "synthetic";
   app.register((instance) => registerImpact(instance, syntheticImpact, auth, institutions, readBudget));
   app.register((instance) => registerCommunityNeedsReview(instance, needs));

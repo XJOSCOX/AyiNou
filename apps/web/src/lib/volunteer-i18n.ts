@@ -91,3 +91,5 @@ const index = { en: 0, ht: 1, fr: 2, es: 3 } as const;
 export const volunteerCopy = (locale: Locale) => (key: keyof typeof labels) => labels[key][index[locale]];
 export const volunteerCategory = (category: VolunteerCategory, locale: Locale) =>
   volunteerCopy(locale)(category === "languages" ? "translations" : category);
+
+export const departmentNames = ["Artibonite","Centre","Grand’Anse","Nippes","Nord","Nord-Est","Nord-Ouest","Ouest","Sud","Sud-Est"];

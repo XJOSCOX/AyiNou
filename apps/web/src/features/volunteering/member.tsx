@@ -13,9 +13,11 @@ import { useLocale } from "@/lib/locale-store";
 import { loadVolunteer, saveVolunteer } from "@/lib/volunteer-api";
 import { recommendationsPath } from "@/lib/matching-api";
 import { matchingCopy } from "@/lib/matching-i18n";
-import { volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
+import { RecruitmentContact } from "./recruitment";
+import { recruitmentPath } from "@/lib/recruitment-api";
+import { recruitmentCopy } from "@/lib/recruitment-i18n";
+import { departmentNames, volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
 
-export const departmentNames = ["Artibonite","Centre","Grand’Anse","Nippes","Nord","Nord-Est","Nord-Ouest","Ouest","Sud","Sud-Est"];
 const consentKeys = ["matching","discovery","profileDisplay"] as const;
 const blank: VolunteerProfile = {
   version: 0, summary: "", skills: [], languages: [], mode: "remote", commitment: "occasional",
@@ -176,6 +178,7 @@ export function MemberVolunteer() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="text-3xl font-bold">{t("title")}</h1><p className="mt-2 max-w-3xl">{t("intro")}</p></div>
         <div className="flex flex-wrap gap-3"><Link href={recommendationsPath} className={button}>{matchingCopy(locale)("title")}</Link>
+          <Link href={recruitmentPath} className={button}>{recruitmentCopy(locale)("title")}</Link>
           <Link href="/settings" className={button}>{t("settings")}</Link></div>
       </div>
       {!resource.data && resource.error === null && <ProjectLoading />}
@@ -187,6 +190,7 @@ export function MemberVolunteer() {
           reload={() => { setSaved(true); resource.refresh(); }} />
         {saved && <p role="status">{t("saved")}</p>}
       </>}
+      <RecruitmentContact />
     </div>
   </MemberShell>;
 }

@@ -9,6 +9,8 @@ import { projectProgressMessages } from "@/lib/project-progress-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import Image from "next/image";
 import Link from "next/link";
+import { recruitmentPath } from "@/lib/recruitment-api";
+import { recruitmentCopy } from "@/lib/recruitment-i18n";
 import { loadSocialPreferences, saveSocialPreferences, type SocialNoticePreferences } from "@/lib/social-api";
 import { f24Messages } from "@/lib/f24-i18n";
 import { socialMessages } from "@/lib/social-i18n";
@@ -33,8 +35,9 @@ import { OutcomeReviewNotices } from "@/features/projects/outcome-review/member-
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 
-function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent, communityNeed }: MemberNotification) {
+function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent, communityNeed, recruitment }: MemberNotification) {
   if (!available) return null;
+  if (kind === "volunteer_recruitment") return recruitment ? recruitmentPath + "/" + recruitment.id : null;
   if (kind === "need_project_notice") return needLinkWorkspace;
   if (kind === "community_need_notice") return communityNeed ? "/communities/intake/needs/" + communityNeed.needId : null;
   if (kind === "event_notice") return communityEvent ? "/events/" + communityEvent.eventId : null;
@@ -99,6 +102,7 @@ function notificationMessage(locale: Locale, item: MemberNotification) {
   const t = mediaNotificationMessages[locale];
   if (!item.available || !item.kind) return t.unavailable;
   switch (item.kind) {
+    case "volunteer_recruitment": return item.recruitment ? recruitmentCopy(locale)("notice") + " · " + recruitmentCopy(locale)(item.recruitment.status) : t.unavailable;
     case "need_project_notice": return needProjectLabel(locale,"notice");
     case "community_need_notice": return item.communityNeed?.action.startsWith("publication_")
       ? publicationLabel(locale,item.communityNeed.action) : needReviewLabel(locale, item.communityNeed?.action ?? "reviewStatus");
