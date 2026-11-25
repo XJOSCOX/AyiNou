@@ -26,7 +26,7 @@ Intake uses database time and serializes the seven-day capacity check with the n
 
 ## Validation and CI
 
-Validation covers exact migration startup on disposable Supabase, current API and UI contracts, separate allow/deny paths, concurrency, closed hosted state and local application compatibility. Routine verification runs locally. [Security and tests](C1_6_SECURITY_TESTS.md)
+Validation covers exact migration startup on disposable Supabase, current API and UI contracts, separate allow/deny paths, concurrency, closed hosted state and local application compatibility. The approved hosted migration was verified with 136 applied migrations, zero pending, all 51 preservation checks matched and all pilot/fixture gates closed. Hosted application release remains separate. [Security, tests and rollout](C1_6_SECURITY_TESTS.md)
 
 ## Documentation and operations
 

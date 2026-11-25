@@ -9,9 +9,9 @@
     "gated": 11
   },
   "hostedDevelopment": {
-    "migrationCount": 135,
+    "migrationCount": 136,
     "pending": 0,
-    "lastMigration": "20261124155400",
+    "lastMigration": "20261124155500",
     "preservationChecksMatched": 51,
     "applicationRelease": "unverified",
     "providerRecovery": "unverified"
@@ -7237,8 +7237,8 @@
       "verification": {
         "local": "C1.5 integration test and readiness evidence cover the end-to-end workflow.",
         "disposableSupabase": "See C1.4 association consent, authorization, and invalidation exercises.",
-        "hostedDatabase": "The C1.5 cursor migration is applied. All four fixture gates are closed, zero migrations are pending, and 51 record preservation checks matched.",
-        "connectedApplication": "C1.5 confirmed closed features with Test02 and J0SC0X in the connected local browser.",
+        "hostedDatabase": "C1.6 preparation is applied. All five pilot tables and four fixture gates are empty, zero migrations are pending, and 51 existing record fingerprints matched.",
+        "connectedApplication": "C1.6 verified Founder Pilot settings are disabled, Test02 is denied Pilot administration, and existing navigation works on the connected local application.",
         "hostedApplication": "Hosted application release unverified.",
         "operationalApproval": "C1.6 prepares a Founder-controlled Ouest pilot. Real processing remains closed pending external sign-offs, setup of an authorized cohort and independent reviewers, and a separate launch decision."
       }
