@@ -30,6 +30,7 @@ const policyCommand = z.strictObject({
 
 export type NeedRouteOptions = {
   enabled: boolean | (() => Promise<boolean>); auth: AuthVerifier | null; repo: InstitutionRepository | null; read: ReadBudget;
+  release?: string | null;
 };
 
 export async function needRequestContext(request: FastifyRequest, { auth, repo, read }: NeedRouteOptions, staff: boolean) {
@@ -61,7 +62,8 @@ export function registerCommunityNeedsReview(app: FastifyInstance, options: Need
     const { session, workspace, repo } = await needRequestContext(request, options, lane !== "member" && lane !== "access");
     if (!await needsEnabled(enabled)) throw new ApiError(404, "COMMUNITY_NEEDS_REVIEW_DISABLED", "Community needs review unavailable");
     try {
-      const result = await repo.rpc<T & { denied?: boolean }>("c12_needs_for_api", {
+      const result = await repo.rpc<T & { denied?: boolean }>(options.release ? "c18_review_for_api" : "c12_needs_for_api", {
+        ...(options.release ? { p_application_release: options.release } : {}),
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2,
         p_totp: session.totpAt ?? null, p_workspace: workspace, p_lane: lane,
         p_id: caseId, p_command: command, p_after: after,

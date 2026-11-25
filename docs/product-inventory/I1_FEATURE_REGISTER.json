@@ -7178,7 +7178,8 @@
           "supabase/migrations/20261124155300_c14_need_project_links.sql",
           "supabase/migrations/20261124155400_c15_link_directory_cursor.sql",
           "supabase/migrations/20261124155500_c16_pilot_preparation.sql",
-          "supabase/migrations/20261124155600_c17_pilot_operational_readiness.sql"
+          "supabase/migrations/20261124155600_c17_pilot_operational_readiness.sql",
+          "supabase/migrations/20261125120000_c1_nationwide_department_configuration.sql"
         ],
         "postgresObjects": [
           "public.c11_needs_for_api",
@@ -7246,7 +7247,11 @@
           "docs/community-needs/C1_FINAL_EXECUTIVE_SUMMARY.md",
           "docs/community-needs/C1_FINAL_FEATURE_MATRIX.md",
           "docs/community-needs/C1_FINAL_LAUNCH_DEPENDENCIES.md",
-          "docs/community-needs/C1_FINAL_SECURITY_REVIEW.md"
+          "docs/community-needs/C1_FINAL_SECURITY_REVIEW.md",
+          "docs/community-needs/C1_NATIONWIDE_IMPLEMENTATION_REPORT.md",
+          "docs/community-needs/C1_NATIONWIDE_POLICY.md",
+          "docs/community-needs/C1_NATIONWIDE_ROLLOUT_READINESS.md",
+          "docs/community-needs/C1_NATIONWIDE_SECURITY_TESTS.md"
         ]
       },
       "verification": {
@@ -7255,7 +7260,7 @@
         "hostedDatabase": "C1 final read-only check confirmed 137 applied, zero pending and 51 matched record fingerprints. Four fixture gates and five pilot tables remained empty. No migration was needed.",
         "connectedApplication": "C1 final connected local read, denial and four-language checks passed. J0SC0X saw blocked Pilot readiness and effective policy values. Test02 saw closed intake and could not enter Pilot or triage administration. Disposable lifecycle validation passed in all ten departments.",
         "hostedApplication": "Hosted application release unverified.",
-        "operationalApproval": "Ouest remains the sole protected pilot scope and all live Community Needs stages are closed. Launch requires verified staffing, qualified privacy/legal approval, hosted storage and database recovery, an authorized matching release and six independently recorded attestations."
+        "operationalApproval": "Nationwide department preparation uses the same ten existing communities and remains closed in every department. Live launch requires approved staffing, legal, recovery, hosting and independent evidence for each scope."
       }
     },
     {
@@ -7752,5 +7757,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C1 Community Needs Development Closure"
+  "lastScopeUpdate": "C1 Nationwide Community Needs Department Configuration"
 }

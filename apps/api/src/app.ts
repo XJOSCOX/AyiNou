@@ -86,7 +86,7 @@ export function createApp(config: ApiConfig, overrides?: {
   const needs = {
     enabled: pilotRelease && institutions ? async () => syntheticNeeds ||
       await institutions.rpc<boolean>("c16_runtime_for_api", { p_release: pilotRelease }) === true : syntheticNeeds,
-    auth, repo: institutions, read: readBudget,
+    auth, repo: institutions, read: readBudget, release: pilotRelease,
   };
   app.register((instance) => registerCommunityNeedsPilot(instance, needs, pilotRelease));
   app.register((instance) => registerCommunityNeeds(instance, needs));

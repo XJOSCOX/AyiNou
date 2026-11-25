@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { pilotMetrics, pilotRequirements, pilotStages, type PilotDecision, type PilotWorkspace } from "@ayinou/shared";
+import { pilotDepartments, pilotMetrics, pilotRequirements, pilotStages, type PilotDecision, type PilotDepartment, type PilotWorkspace } from "@ayinou/shared";
 import { adminEntryPath } from "@/lib/admin-navigation";
 import { authorizedRequest } from "@/lib/api";
 import { apiErrorCode } from "@/lib/api-errors";
@@ -14,7 +14,13 @@ import { adminCompactCard, adminSecondaryAction } from "./admin-controls";
 import { institutionAction, institutionErrorBox, institutionField, useInstitutionResource } from "./institution-ui";
 
 const path = "/api/v1/admin/community-needs-pilot";
-type PendingDecision = { action: PilotDecision; target?: string; handle?: string };
+type EmergencyDecision = "pause_selected" | "pause_nationwide";
+type PilotAction = PilotDecision | EmergencyDecision;
+const departmentNames: Record<PilotDepartment, string> = {
+  artibonite: "Artibonite", centre: "Centre", "grand-anse": "Grand’Anse", nippes: "Nippes",
+  nord: "Nord", "nord-est": "Nord-Est", "nord-ouest": "Nord-Ouest", ouest: "Ouest", sud: "Sud", "sud-est": "Sud-Est",
+};
+type PendingDecision = { action: PilotAction; target?: string; handle?: string };
 
 function PilotPanel({ title, children }: { title: string; children: ReactNode }) {
   return <section className={adminCompactCard + " grid min-w-0 gap-3"}>
@@ -23,6 +29,21 @@ function PilotPanel({ title, children }: { title: string; children: ReactNode })
 }
 
 export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
+  const [locale] = useLocale();
+  const [department, setDepartment] = useState<PilotDepartment>("ouest");
+  return <div className="grid min-w-0 gap-4">
+    <label className={adminCompactCard + " block text-sm font-semibold"}>
+      {pilotLabel(locale, "department")}
+      <select className={institutionField + " max-w-sm"} value={department}
+        onChange={(event) => setDepartment(event.target.value as PilotDepartment)}>
+        {pilotDepartments.map((scope) => <option key={scope} value={scope}>{departmentNames[scope]}</option>)}
+      </select>
+    </label>
+    <DepartmentPilot key={department} workspace={workspace} department={department} />
+  </div>;
+}
+
+function DepartmentPilot({ workspace, department }: { workspace: string; department: PilotDepartment }) {
   const [locale] = useLocale();
   const t = (key: PilotLabel) => pilotLabel(locale, key);
   const [query, setQuery] = useState("");
@@ -35,13 +56,13 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
   const lastReceipt = useRef<{ digest: string; id: string } | null>(null);
   const headers = { "X-Ayinou-Workspace": workspace };
   const load = useCallback((signal: AbortSignal): Promise<PilotWorkspace> => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams({ department });
     if (search) params.set("search", search);
     if (before !== undefined) params.set("before", String(before));
     return authorizedRequest(path + (params.size ? "?" + params : ""), {
       signal, cache: "no-store", headers: { "X-Ayinou-Workspace": workspace },
     });
-  }, [workspace, search, before]);
+  }, [workspace, department, search, before]);
   const resource = useInstitutionResource(load);
   const pilot = resource.data;
   const number = new Intl.NumberFormat(locale);
@@ -49,7 +70,7 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
   const feedback = (cause: unknown) => apiErrorCode(cause) === "COMMUNITY_NEEDS_PILOT_CLOSED" ? t("blocked")
     : apiErrorCode(cause) === "COMMUNITY_NEEDS_PILOT_CAPACITY" ? t("intakeCapacity") : localizedApiError(locale, cause);
 
-  async function submit(event: FormEvent<HTMLFormElement>, action: PilotDecision, fields: Record<string, unknown> = {}) {
+  async function submit(event: FormEvent<HTMLFormElement>, action: PilotAction, fields: Record<string, unknown> = {}) {
     event.preventDefault();
     if (!pilot || busy) return;
     const form = new FormData(event.currentTarget);
@@ -61,7 +82,7 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
     setError(undefined);
     setMessage(false);
     try {
-      await authorizedRequest(path, {
+      await authorizedRequest(path + "?" + new URLSearchParams({ department }), {
         method: "PATCH", cache: "no-store", headers, body: JSON.stringify({ ...command, requestId: lastReceipt.current.id }),
       });
       lastReceipt.current = null;
@@ -76,12 +97,12 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
       setBusy(false);
     }
   }
-  function select(action: PilotDecision, target?: string, handle?: string) {
+  function select(action: PilotAction, target?: string, handle?: string) {
     setDecision({ action, target, handle });
     setMessage(false);
     setError(undefined);
   }
-  const confirmation = (action: PilotDecision, disabled = false) => <>
+  const confirmation = (action: PilotAction, disabled = false) => <>
     <label className="grid gap-1 text-sm">
       {t("reason")}
       <textarea name="reason" minLength={10} maxLength={500} rows={2} required className={institutionField} />
@@ -98,12 +119,13 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
   const active = state === "active" || state === "blocked";
   const hasStarted = !!pilot.endsAt;
   const eligibleState = pilot.revision > 0 && state !== "expired";
+  const pausable = pilot.departments?.filter((scope) => scope.pausable) ?? [];
   const action = active ? "pause" : state === "paused" ? "resume" : "activate";
 
   return <div className="grid min-w-0 gap-4">
     <PilotPanel title={t("title")}>
       <dl className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        {[[t("status"), t(state)], [t("scope"), pilot.scopeAvailable ? "Ouest" : t("unavailable")],
+        {[[t("status"), t(state)], [t("scope"), pilot.scopeAvailable ? departmentNames[department] : t("unavailable")],
           [t("revision"), number.format(pilot.revision)], [t("expires"), pilot.endsAt ? date.format(new Date(pilot.endsAt)) : t("unavailable")]]
           .map(([label, value]) => <div key={label} className="rounded-md bg-[var(--theme-control)] p-3"><dt className="text-sm">{label}</dt><dd className="font-semibold">{value}</dd></div>)}
       </dl>
@@ -121,6 +143,7 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
         <ul className="grid gap-1 text-sm">
           {pilot.releaseMatches !== true && <li>{t("releaseMismatch")}</li>}
           {(!pilot.revision || !Object.values(pilot.stages).some(Boolean)) && <li>{t("preparePolicy")}</li>}
+          {!pilot.eligible && <li>{t("departmentBlocked")}</li>}
           {!pilot.activeParticipants && <li>{t("needParticipants")}</li>}
           {(pilot.triagers < 1 || pilot.reviewers < 4) && <li>{t("coverageGap")}</li>}
         </ul>
@@ -156,7 +179,9 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
         <form key={pilot.revision} className="grid gap-3" onSubmit={(event) => {
           const form = new FormData(event.currentTarget);
           const stages = Object.fromEntries(pilotStages.map((key) => [key, active ? pilot.stages[key] : form.has(key)]));
-          void submit(event, "configure", { stages, durationDays: hasStarted ? pilot.durationDays : Number(form.get("durationDays")), capacity: Number(form.get("capacity")) });
+          void submit(event, "configure", { stages, durationDays: hasStarted ? pilot.durationDays : Number(form.get("durationDays")), capacity: Number(form.get("capacity")),
+            eligible: active ? pilot.eligible : form.has("eligible"), verifiedIdentity: active ? pilot.verifiedIdentity : form.has("verifiedIdentity"),
+            maxParticipants: active ? pilot.maxParticipants : Number(form.get("maxParticipants")) });
         }}>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="grid gap-1 text-sm">{t("capacity")}
@@ -166,6 +191,15 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
               <input name="durationDays" type="number" className={institutionField} min={1} max={30}
                 defaultValue={pilot.durationDays} disabled={hasStarted} required /></label>
           </div>
+          <fieldset className="grid gap-2" disabled={active}>
+            <legend className="sr-only">{t("cohort")}</legend>
+            <label className="grid gap-1 text-sm">{t("participantLimit")}
+              <input name="maxParticipants" type="number" className={institutionField} min={1} max={20}
+                defaultValue={pilot.maxParticipants ?? 20} required />
+            </label>
+            <label className="flex items-center gap-2"><input name="eligible" type="checkbox" defaultChecked={pilot.eligible} />{t("eligibleDepartment")}</label>
+            <label className="flex items-center gap-2"><input name="verifiedIdentity" type="checkbox" defaultChecked={pilot.verifiedIdentity} />{t("verifiedIdentity")}</label>
+          </fieldset>
           <fieldset className="grid gap-2" disabled={active}>
             <legend className="sr-only">{t("controls")}</legend>
             {pilotStages.map((key) => <label key={key} className="flex items-center gap-2">
@@ -177,10 +211,38 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
       </PilotPanel>
     </div>
     <div className="grid min-w-0 items-start gap-4 xl:grid-cols-2">
+      {pausable.length > 0 && <PilotPanel title={t("emergency")}>
+        <p className="text-sm">{t("emergencyHelp")}</p>
+        <div className="flex flex-wrap gap-2">
+          {pausable.length >= 2 && <button type="button" className={adminSecondaryAction} onClick={() => select("pause_selected")}>{t("pause_selected")}</button>}
+          <button type="button" className={adminSecondaryAction} onClick={() => select("pause_nationwide")}>{t("pause_nationwide")}</button>
+        </div>
+        {decision && (decision.action === "pause_selected" || decision.action === "pause_nationwide") &&
+          <form key={decision.action} className="grid gap-2" onSubmit={(event) => {
+            const scopes = new FormData(event.currentTarget).getAll("scopes");
+            if (decision.action === "pause_selected" && scopes.length < 2) {
+              event.preventDefault();
+              const first = event.currentTarget.querySelector<HTMLInputElement>('input[name="scopes"]');
+              first?.setCustomValidity(t("pauseSelectHelp"));
+              first?.reportValidity();
+              return;
+            }
+            void submit(event, decision.action, decision.action === "pause_selected" ? { departments: scopes } : {});
+          }}>
+            {decision.action === "pause_selected" && <fieldset className="grid gap-2" onChange={(event) =>
+              event.currentTarget.querySelector<HTMLInputElement>('input[name="scopes"]')?.setCustomValidity("")}>
+              <legend>{t("pauseSelectHelp")}</legend>
+              {pausable.map((scope) => <label key={scope.slug} className="flex items-center gap-2">
+                <input type="checkbox" name="scopes" value={scope.slug} />{departmentNames[scope.slug]}
+              </label>)}
+            </fieldset>}
+            {confirmation(decision.action)}
+          </form>}
+      </PilotPanel>}
       <PilotPanel title={t("cohort")}>
         <p className="text-sm">{t("cohortHelp")}</p>
-        <p className="text-sm">{t("members")} <strong>{number.format(pilot.activeParticipants)} / 20</strong></p>
-        {eligibleState && <form className="flex flex-wrap items-end gap-2" onSubmit={(event) => {
+        <p className="text-sm">{t("members")} <strong>{number.format(pilot.activeParticipants)} / {pilot.maxParticipants ?? 20}</strong></p>
+        {eligibleState && pilot.eligible && <form className="flex flex-wrap items-end gap-2" onSubmit={(event) => {
           event.preventDefault();
           setSearch(query.trim().replace(/^@/, ""));
           setDecision(undefined);
@@ -245,7 +307,7 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
       {!pilot.history.length && <p>{t("noHistory")}</p>}
       <ol className="grid gap-2">{pilot.history.map((entry) => <li key={entry.revision}
         className="grid gap-1 rounded-md border border-[var(--theme-border)] p-3">
-        <strong>{number.format(entry.revision)} · {t(entry.action)}</strong>
+        <strong>{number.format(entry.revision)} · {t(entry.action)}{entry.decisionScope && entry.decisionScope !== "department" ? " · " + t(entry.decisionScope) : ""}</strong>
         <span className="text-sm" dir="auto">{[entry.actor, entry.subject].filter(Boolean).join(" · ")} · <time dateTime={entry.occurredAt}>{date.format(new Date(entry.occurredAt))}</time></span>
         <p className="break-words text-sm" dir="auto">{entry.reason}</p>
       </li>)}</ol>

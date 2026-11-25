@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { FeatureEnforcementCase, NeedPublication, NeedProjectLink, PilotWorkspace } from "@ayinou/shared";
 import { needsMessages } from "../src/lib/community-needs-i18n";
+import { pilotDepartments } from "@ayinou/shared";
 import { pilotLabel } from "../src/lib/community-needs-pilot-i18n";
 import { api, apiCall, enroll, expect, finishPersonalOnboarding, localClient, inEnglish, login, logout, solveMfa, sql, test, totp, type Member } from "./fixtures";
 
@@ -260,11 +261,126 @@ test("C1.6 Founder preparation, attested activation, atomic capacity, and pause 
       await page.setViewportSize({ width: locale === "en" ? 1300 : 390, height: 844 });
       await page.getByRole("banner").locator("select").selectOption(locale);
       await expect(page.getByRole("heading", { name: pilotLabel(locale, "title"), exact: true })).toBeVisible();
+      await expect(page.getByLabel(pilotLabel(locale, "department"), { exact: true }).locator("option")).toHaveCount(10);
       await expect(page.getByRole("heading", { name: pilotLabel(locale, "staff"), exact: true })).toBeVisible();
       await expect(page.getByText(pilotLabel(locale, "decisionBlocked"), { exact: true })).toBeVisible();
       await expect(page.getByText(pilotLabel(locale, "privacyEvidence"), { exact: true })).toBeVisible();
       expect(await page.locator("body").evaluate((body) => body.scrollWidth)).toBeLessThanOrEqual(locale === "en" ? 1300 : 390);
     }
+  } finally {
+    sql("delete from private.c16_cases; delete from private.c16_evidence; delete from private.c16_enrollment; delete from private.c16_history; delete from private.c16_policy; delete from private.platform_bootstrap;");
+  }
+});
+
+test("nationwide department policies isolate cohorts, live quotas and emergency decisions", async ({ makeMember, page, context }) => {
+  test.setTimeout(150000);
+  const [owner, triageAccount, ...rest] = await Promise.all(Array.from({ length: 9 }, () => makeMember({ visible: true })));
+  const reviewers = rest.slice(0, 4);
+  const [first, second, outsider] = rest.slice(4);
+  for (const person of [owner, triageAccount, ...rest]) finishPersonalOnboarding(person);
+  const founder = await elevate(owner);
+  await Promise.all([triageAccount, ...reviewers].map(enroll));
+  const departments = ["ouest", "centre", "nord"] as const;
+  const rooms = departments.map((slug) => sql(`select id from feed_data.communities where slug='${slug}';`));
+  const [ouest, centre, nord] = rooms;
+  sql(`insert into private.platform_bootstrap(user_id) values ('${founder.id}');
+    insert into private.platform_admin_audit(actor_id,subject_id,event,reason)
+    values ('${founder.id}','${founder.id}','first_account_bootstrapped','Disposable nationwide Founder provenance');
+    insert into private.verification_reviewers(user_id)
+    select id from unnest(array[${reviewers.map((p) => "'" + p.id + "'::uuid").join(",")}]) id;
+    insert into feed_data.community_memberships(community_id,user_id)
+    select room, actor from unnest(array['${ouest}'::uuid,'${centre}'::uuid,'${nord}'::uuid]) room
+    cross join unnest(array['${first.id}'::uuid,'${triageAccount.id}'::uuid]) actor;
+    insert into feed_data.community_memberships(community_id,user_id) values ('${centre}','${second.id}');
+    insert into feed_data.community_staff(community_id,user_id,role)
+    select room,'${triageAccount.id}','moderator'
+    from unnest(array['${ouest}'::uuid,'${centre}'::uuid,'${nord}'::uuid]) room;`);
+  try {
+    const workspace = String((await apiCall(founder, "/api/v1/me/private-workflows", 200, "POST", { kind: "admin_workspace" })).id);
+    const pathFor = (scope: string) => pilot + "?department=" + scope;
+    const command = (scope: string, body: object, status = 200) =>
+      expectStatus(request<PilotWorkspace>(founder, pathFor(scope), "PATCH", body, workspace), status);
+    const draft = (actor: Member, communityId: string, status = 201) =>
+      expectStatus(request<{ id: string }>(actor, intake, "POST", { communityId, content: need }), status);
+    const submit = (actor: Member, id: string, status: number) =>
+      expectStatus(request(actor, intake + "/" + id, "PATCH", { action: "submit", expectedRevision: 1, confirmed: true }), status);
+    const baseline = await expectStatus(request<PilotWorkspace>(founder, pathFor("ouest"), "GET", undefined, workspace), 200);
+    expect(baseline.departments?.map(({ slug }) => slug).sort()).toEqual([...pilotDepartments].sort());
+    expect(baseline.departments?.every(({ pausable }) => !pausable)).toBe(true);
+    await expectStatus(request(first, pathFor("centre"), "GET", undefined, workspace), 403);
+    await expectStatus(request(first, pathFor("centre"), "PATCH", receipt("pause_nationwide", 0), workspace), 403);
+    const configuration = receipt("configure", 0, { stages, eligible: true, verifiedIdentity: false, maxParticipants: 1,
+      capacity: 1, durationDays: 7 });
+    for (const [index, scope] of departments.entries()) {
+      const configured = await command(scope, { ...configuration, requestId: randomUUID(), capacity: index + 1 });
+      expect(configured).toMatchObject({ revision: 1, status: "prepared", scope, capacity: index + 1, maxParticipants: 1 });
+      await command(scope, receipt("enroll", 1, { target: first.id, days: 5 }));
+    }
+    await command("centre", receipt("enroll", 2, { target: second.id, days: 5 }), 409);
+    await command("centre", receipt("activate", 2), 409);
+
+    // Staff and operational-evidence seeds are confined to the isolated database.
+    // Give one reviewer no Centre grant and prove the partial roster cannot activate it.
+    sql(`insert into private.c12_authority(community_id,actor_id,lane,granted_by,until_at)
+      select c.id,a.actor,'review','${founder.id}',now()+interval '10 days'
+      from feed_data.communities c
+      cross join unnest(array[${reviewers.map((p) => "'" + p.id + "'::uuid").join(",")}]) with ordinality a(actor,idx)
+      where c.id in ('${ouest}','${centre}','${nord}') and (c.id<>'${centre}' or a.idx<4);
+      insert into private.c12_authority(community_id,actor_id,lane,granted_by,until_at)
+      select id,'${triageAccount.id}','triage','${founder.id}',now()+interval '10 days'
+      from feed_data.communities where id in ('${ouest}','${centre}','${nord}');
+      insert into private.c16_evidence(requirement,community_id,release,evidence_reference,attested_by,verified_at,valid_until)
+      select k,c.id,'${release}','synthetic-department-evidence-'||k,'${outsider.id}',now(),now()+interval '2 days'
+      from feed_data.communities c cross join unnest(array['privacy','support','databaseRecovery','storageRecovery','release','launchBlockers']) k
+      where c.id in ('${ouest}','${centre}','${nord}');`);
+    await command("centre", receipt("activate", 2), 409);
+    await expectStatus(request(founder, staff, "POST", {
+      action: "grant", role: "review", target: reviewers[3].id, communityId: centre,
+      confirmed: true, note: reason, requestId: randomUUID(),
+    }, workspace), 200);
+    for (const scope of departments) {
+      expect(await command(scope, receipt("activate", 2))).toMatchObject({ revision: 3, status: "active", activeParticipants: 1 });
+    }
+    expect(sql(`select private.c18_live('${centre}','intake','${release}')
+      and not private.c18_live('${centre}','intake',repeat('f',40))
+      and not private.c18_live('${centre}','intake',null);`)).toBe("t");
+    await draft(second, ouest, 403);
+    const [westDraft, centreDraft, northDraft] = await Promise.all(rooms.map((room) => draft(first, room)));
+    await submit(first, westDraft.id, 200);
+    await draft(first, ouest, 409);
+    await submit(first, centreDraft.id, 200);
+    await submit(first, northDraft.id, 200);
+
+    const batch = receipt("pause_selected", 3, { departments: ["ouest", "centre"] });
+    await command("ouest", batch);
+    await command("ouest", batch);
+    await command("nord", batch, 409);
+    await draft(first, centre, 409);
+    await draft(first, nord);
+    await expectStatus(request(first, intake + "/" + centreDraft.id), 200);
+    await expectStatus(request(second, intake + "/" + centreDraft.id), 404);
+    const north = await expectStatus(request<PilotWorkspace>(founder, pathFor("nord"), "GET", undefined, workspace), 200);
+    expect(north).toMatchObject({ revision: 3, status: "active", metrics: { weekly: 1 } });
+    expect(north.history.every((event) => event.decisionScope !== "selected")).toBe(true);
+    await command("ouest", receipt("resume", 4));
+    await command("centre", receipt("pause_nationwide", 4));
+    expect(sql(`select count(*)=2 from private.c16_history where decision_scope='nationwide';`)).toBe("t");
+    await draft(first, nord, 409);
+    sql(`update private.c16_evidence set revoked_at=now()
+      where requirement='storageRecovery' and community_id='${centre}';`);
+    await command("centre", receipt("resume", 4), 409);
+    await command("nord", receipt("resume", 4));
+    expect(sql(`select count(*)=2 from private.c16_history where decision_scope='selected';`)).toBe("t");
+    await draft(first, nord);
+
+    await inEnglish(context);
+    await login(page, owner);
+    await solveMfa(page, founder.secret);
+    await page.goto("/admin?section=communityNeedsPilot");
+    await page.getByRole("button", { name: "Open administration", exact: true }).click();
+    await expect(page.getByRole("heading", { name: pilotLabel("en", "title"), exact: true })).toBeVisible();
+    await page.getByLabel(pilotLabel("en", "department"), { exact: true }).selectOption("sud-est");
+    await expect(page.getByText(pilotLabel("en", "unconfigured"), { exact: true })).toBeVisible();
   } finally {
     sql("delete from private.c16_cases; delete from private.c16_evidence; delete from private.c16_enrollment; delete from private.c16_history; delete from private.c16_policy; delete from private.platform_bootstrap;");
   }

@@ -1,3 +1,6 @@
+export const pilotDepartments = ["artibonite", "centre", "grand-anse", "nippes", "nord", "nord-est", "nord-ouest", "ouest", "sud", "sud-est"] as const;
+export type PilotDepartment = typeof pilotDepartments[number];
+
 export const pilotStages = ["intake", "review", "publication", "association"] as const;
 export const pilotRequirements = ["privacy", "support", "databaseRecovery", "storageRecovery", "release", "launchBlockers"] as const;
 export const pilotMetrics = ["weekly", "pending", "awaitingReview", "challenges", "publications", "associations", "conflicts"] as const;
@@ -17,7 +20,11 @@ export interface PilotEvidence {
 export interface PilotWorkspace {
   revision: number;
   status: PilotStatus;
-  scope: "ouest";
+  scope: PilotDepartment;
+  departments?: { slug: PilotDepartment; name: string; pausable: boolean }[];
+  eligible?: boolean;
+  verifiedIdentity?: boolean;
+  maxParticipants?: number;
   scopeAvailable: boolean;
   capacity: number;
   durationDays: number;
@@ -37,6 +44,6 @@ export interface PilotWorkspace {
   staff: { id: string; handle: string | null; lane: "review" | "triage"; eligible: boolean; expiresAt: string; revoked: boolean; grantStatus?: "revoked" | "expired" | "eligible" | "recertify"; assigned: number; challenges: number }[];
   metrics: Record<typeof pilotMetrics[number], number> | null;
   candidates: { id: string; handle: string }[];
-  history: { revision: number; action: PilotDecision; reason: string; occurredAt: string; actor: string | null; subject: string | null }[];
+  history: { revision: number; action: PilotDecision; decisionScope?: "department" | "selected" | "nationwide"; reason: string; occurredAt: string; actor: string | null; subject: string | null }[];
   hasMore: boolean;
 }

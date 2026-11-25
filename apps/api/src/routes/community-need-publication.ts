@@ -46,7 +46,8 @@ export function registerCommunityNeedPublication(app: FastifyInstance, options: 
     if (!await needsEnabled(options.enabled)) throw new ApiError(404, "COMMUNITY_NEED_PUBLICATION_DISABLED", "Community need publication unavailable");
     const { caseId, roomId, command, after, category } = optionsForCall;
     try {
-      return await repo.rpc<T>("c13_publication_for_api", {
+      return await repo.rpc<T>(options.release ? "c18_publication_for_api" : "c13_publication_for_api", {
+        ...(options.release ? { p_application_release: options.release } : {}),
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp: session.totpAt ?? null,
         p_workspace: workspace, p_lane: lane, p_id: caseId ?? null, p_room: roomId ?? null,
         p_category: category ?? null, p_after: after ?? null, p_command: command ?? null,

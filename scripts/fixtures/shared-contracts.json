@@ -295,13 +295,15 @@
     "personalClaims": "value:5d06744b14e09be6ba7f284580b31d0d9cf67f5f3ed4e04f69e8a66faf6bc73e",
     "PersonalVerificationRequestState": "type:8df2fb982a00150df1eb93fa0f0e65dd43e022941567774b147a0ce2c3667666",
     "PilotDecision": "type:9adee1e579792c381c89114af90afa6d8eb28146a8e37d579807b7faa2faacd2",
+    "PilotDepartment": "type:023aaf277316b70754dd991427a32d29fdbd1f30b9a3b386e182225e06e11e6a",
+    "pilotDepartments": "value:9aea1cef9b1ec00afe721ff012e02646281919d6ff901c0ae4a5ebe684c2b509",
     "PilotEvidence": "type:4c68a53970c37307f1f0736bb28acc8b301b889de0e501fec383bbf118b7d6c9",
     "pilotMetrics": "value:99cb5330b69df7b66f9695565471017e6381638c98e121a74bac51c567a107ae",
     "pilotRequirements": "value:5719dccf40e4c43a37c5ccb3141048887e4f03b6cd273bac02c890aa84c2cf96",
     "pilotStages": "value:9795439cb877de41583d5a3c03abd517fd09575eb8fa36c3398da368281a97d4",
     "PilotStages": "type:d6a9a9735bb6345ef644a1b5c8fdcab4bc5a74f0d47d1a1b07d00ff6ae97e9ff",
     "PilotStatus": "type:d2d2c7757d05471d142cb33b4364da0ddce6a7c17667f9d59dd0c238fae623a6",
-    "PilotWorkspace": "type:4cb6a94a7679a570a270edd29f161433ff80989e155655976168fec18c27cb48",
+    "PilotWorkspace": "type:13578e272d8b769387ba51569037173525ba1cf3a5bd4fc4d35d0f1dd16102a6",
     "PlatformAccess": "type:3e8f425bff0b315a9a4238d00b463eb57b71620115d01c44edc3584b0c3e531a",
     "PlatformRole": "type:2473d46104c7b706217bd0b192fd22cde8c8f24d8bc7440bf9bf979aab8d0ffc",
     "platformRoles": "value:fb60ac1a18d4c44cc55ed616a10f6a001967bf074380ac189da46ea0f7ff037f",
@@ -1126,6 +1128,18 @@
     "personalClaims": [
       "identity",
       "notable_person"
+    ],
+    "pilotDepartments": [
+      "artibonite",
+      "centre",
+      "grand-anse",
+      "nippes",
+      "nord",
+      "nord-est",
+      "nord-ouest",
+      "ouest",
+      "sud",
+      "sud-est"
     ],
     "pilotMetrics": [
       "weekly",

@@ -84,7 +84,8 @@ test("pilot traffic requires an exact server release and preserves the native au
   const result = await app.inject({ url: path, headers });
   assert.equal(result.statusCode, 200);
   assert.equal(result.json().intakeStatus, "closed");
-  assert.equal(calls.at(-1)?.name, "c11_needs_for_api");
+  assert.equal(calls.at(-1)?.name, "c18_intake_for_api");
+  assert.equal(calls.at(-1)?.input.p_application_release, release);
   assert.equal(calls.at(-1)?.input.p_actor, id);
   assert.equal(calls.at(-1)?.input.p_session, session);
 });

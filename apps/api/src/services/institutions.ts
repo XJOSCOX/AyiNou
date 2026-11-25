@@ -43,20 +43,20 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
         throw new InstitutionError(error.code === "22023" ? "INVALID_INPUT" : "APPEAL_INELIGIBLE", error.code === "22023" ? 400 : 404);
       if (error.code === "C1602") throw new InstitutionError("COMMUNITY_NEEDS_PILOT_CLOSED", 409);
       if (error.code === "C1603") throw new InstitutionError("COMMUNITY_NEEDS_PILOT_CAPACITY", 409);
-      if (name === "c14_links_for_api") {
+      if (["c14_links_for_api", "c18_links_for_api"].includes(name)) {
         if (["C1401", "PGRST202"].includes(error.code)) throw new InstitutionError("NEED_PROJECT_LINKS_DISABLED",404);
         if (error.code === "C1402") throw new InstitutionError("NOT_FOUND",404);
         if (error.code === "C1403") throw new InstitutionError("STALE_VERSION",409);
       }
-      if (name === "c13_publication_for_api") {
+      if (["c13_publication_for_api", "c18_publication_for_api"].includes(name)) {
         if (["C1301", "PGRST202"].includes(error.code)) throw new InstitutionError("COMMUNITY_NEED_PUBLICATION_DISABLED", 404);
         if (error.code === "C1302") throw new InstitutionError("NOT_FOUND", 404);
         if (error.code === "C1303") throw new InstitutionError("STALE_VERSION", 409);
       }
-      if (name === "c12_needs_for_api" && ["C1201", "PGRST202"].includes(error.code)) {
+      if (["c12_needs_for_api", "c18_review_for_api"].includes(name) && ["C1201", "PGRST202"].includes(error.code)) {
         throw new InstitutionError("COMMUNITY_NEEDS_REVIEW_DISABLED", 404);
       }
-      if (name === "c11_needs_for_api") {
+      if (["c11_needs_for_api", "c18_intake_for_api"].includes(name)) {
         if (["C1101", "PGRST202"].includes(error.code)) throw new InstitutionError("COMMUNITY_NEEDS_DISABLED", 404);
         if (error.code === "C1102") throw new InstitutionError("COMMUNITY_MEMBERSHIP_REQUIRED", 403);
       }

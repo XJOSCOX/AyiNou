@@ -29,7 +29,8 @@ export function registerNeedProjectLinks(app: FastifyInstance, options: NeedRout
     const { session, workspace, repo } = await needRequestContext(request,options,audience==="admin" || audience==="review");
     if (!await needsEnabled(options.enabled)) throw new ApiError(404,"NEED_PROJECT_LINKS_DISABLED","Community need associations unavailable");
     try {
-      return await repo.rpc<T>("c14_links_for_api", {
+      return await repo.rpc<T>(options.release ? "c18_links_for_api" : "c14_links_for_api", {
+        ...(options.release ? { p_application_release: options.release } : {}),
         p_actor:session.actor, p_session:session.session, p_aal2:session.aal2, p_totp:session.totpAt ?? null,
         p_workspace:workspace, p_lane:audience, p_id:resource, p_after:after ?? null, p_command:command ?? null,
       });

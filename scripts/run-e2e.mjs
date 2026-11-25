@@ -18,11 +18,14 @@ const cli = fromRoot("node_modules", "supabase", "dist", "supabase.js");
 const playwright = fromRoot("node_modules", "@playwright", "test", "cli.js");
 const immediateSignup = process.argv.includes("--without-signup-confirmation");
 const deploymentRehearsal = process.argv.includes("--deployment-rehearsal");
+const communityNeedsRollout = process.argv.includes("--community-needs-rollout");
 const recoveryRehearsal = process.argv.includes("--recovery-rehearsal");
 const organizationRollout = recoveryRehearsal || deploymentRehearsal || process.argv.includes("--organization-rollout");
-const runnerFlags = new Set(["--organization-rollout", "--deployment-rehearsal", "--recovery-rehearsal", "--without-signup-confirmation"]);
+const runnerFlags = new Set(["--community-needs-rollout", "--organization-rollout", "--deployment-rehearsal", "--recovery-rehearsal", "--without-signup-confirmation"]);
 const args = process.argv.slice(2).filter((argument) => !runnerFlags.has(argument));
 const organizationBaseline = "20261121010000";
+const communityNeedsBaseline = "20261124155600";
+const migrationBaseline = communityNeedsRollout ? communityNeedsBaseline : organizationRollout ? organizationBaseline : null;
 // Source configuration comes from the newly started stack, never from development credentials.
 const env = Object.fromEntries(Object.entries(process.env).filter(([name]) =>
   !/^(SUPABASE_|NEXT_PUBLIC_|AYINOU_|WEB_ORIGINS$|API_(HOST|PORT)$|NODE_ENV$|NODE_OPTIONS$|DOCKER_HOST$|DOCKER_CONTEXT$)/i.test(name)));
@@ -96,7 +99,7 @@ async function prepare(directory) {
     writeFile(join(supabase, "config.toml"), config),
     cp(fromRoot("supabase", "migrations"), join(supabase, "migrations"), {
       recursive: true,
-      filter: (path) => !organizationRollout || !/^\d{14}_/.test(basename(path)) || basename(path).slice(0, 14) <= organizationBaseline,
+      filter: (path) => !migrationBaseline || !/^\d{14}_/.test(basename(path)) || basename(path).slice(0, 14) <= migrationBaseline,
     }),
     ...["src", "public", "next.config.ts", "web-environment.mjs", "postcss.config.mjs", "tsconfig.json", "package.json"].map((name) =>
       cp(fromRoot("apps", "web", name), join(web, name), { recursive: true })),
@@ -126,6 +129,14 @@ async function main() {
     await run(cli, ["start", "--workdir", directory, "--output", "json",
       "--exclude", "studio,postgres-meta,edge-runtime,logflare,vector,realtime"],
       { capture: true, timeout: 240_000 });
+    if (communityNeedsRollout) {
+      await rehearsalSql("c1-nationwide-upgrade-fixture.sql");
+      await cp(fromRoot("supabase", "migrations"), join(directory, "supabase", "migrations"), { recursive: true });
+      await run(cli, ["migration", "up", "--workdir", directory], { timeout: 120_000 });
+      await rehearsalSql("c1-nationwide-upgrade-assertions.sql");
+      console.log("C1 nationwide upgrade preserved the Ouest policy, enrollment and receipt without activating any department");
+      return;
+    }
     if (organizationRollout) {
       const oldCatalog = execFileSync("docker", ["exec", "supabase_db_" + project, "psql", "-U", "postgres",
         "-d", "postgres", "-v", "ON_ERROR_STOP=1", "-Atc",

@@ -156,3 +156,7 @@ The existing Founder read projects current attestation validity, safe operator a
 ## C1 final integrated audit verification
 
 The same disposable need and project lifecycle passed in all ten departments, with independent decisions, cross-department denial, audited association revocation, redacted notices and retained decision history. The Pilot test applies a real scoped administrator command to a disposable member and checks the denial, stored event and audited revocation. Hosted catalog and record fingerprints were preserved. [C1 security and role verification](../community-needs/C1_FINAL_SECURITY_REVIEW.md)
+
+## C1 nationwide Pilot decisions
+
+Each department has its own policy revision and reasoned audit history. Atomic bulk emergency decisions share an idempotent receipt across their affected departments. Each affected scope records actor, originating workspace, timestamp, reason, and before/after policy. Existing Ouest decisions retain their original payload, actor and timing. [Nationwide implementation](../community-needs/C1_NATIONWIDE_IMPLEMENTATION_REPORT.md)

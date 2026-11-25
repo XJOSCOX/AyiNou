@@ -33,7 +33,7 @@ const update = z.discriminatedUnion("action", [
 ]);
 
 export function registerCommunityNeeds(app: FastifyInstance, options: NeedRouteOptions) {
-  const { enabled, auth, repo, read } = options;
+  const { enabled, auth, repo, read, release } = options;
   app.addHook("onRequest", async (_request, reply) => {
     reply.header("Cache-Control", "private, no-store").header("Referrer-Policy", "no-referrer")
       .header("X-Robots-Tag", "noindex, nofollow");
@@ -52,7 +52,8 @@ export function registerCommunityNeeds(app: FastifyInstance, options: NeedRouteO
     await read("profile", session.actor, request.ip);
     if (!await needsEnabled(enabled)) throw new ApiError(404, "COMMUNITY_NEEDS_DISABLED", "Community needs intake is unavailable");
     try {
-      return await repo.rpc<T>("c11_needs_for_api", {
+      return await repo.rpc<T>(release ? "c18_intake_for_api" : "c11_needs_for_api", {
+        ...(release ? { p_application_release: release } : {}),
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_action: action,
         p_id: null, p_community: null, p_request: null, p_expected: null, p_content: null, p_confirmed: null, ...input,
       });
