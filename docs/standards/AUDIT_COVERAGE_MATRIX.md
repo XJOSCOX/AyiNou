@@ -175,4 +175,4 @@ The restricted publication ledger retains the exact disclosure fingerprint, revi
 
 ## C2.4 community and national Impact reporting
 
-The Impact ledger records versioned settings, reviewer appointments, definition and mapping decisions, explicit consent, report approvals and permanent suppression. Protected commands bind to actors and current workspaces. The public report exposes the approved cell and no audit or evidence fields. [Implementation report](../project-outcomes/C2_4_IMPLEMENTATION_REPORT.md)
+The Impact ledger records versioned settings, reviewer appointments, definition and mapping decisions, explicit consent, report approvals and permanent suppression. Protected commands bind to actors and current workspaces. The public report exposes the approved cell and no audit or evidence fields. [Implementation report](../project-outcomes/C2_4_IMPLEMENTATION_REPORT.md) · [C2 final security review](../project-outcomes/C2_FINAL_SECURITY_REVIEW.md)

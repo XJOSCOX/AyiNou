@@ -7960,18 +7960,20 @@
           "docs/project-outcomes/C2_4_MEASUREMENT_CATALOG.md",
           "docs/project-outcomes/C2_4_AGGREGATION_POLICY.md",
           "docs/project-outcomes/C2_4_PRIVACY_ANALYSIS.md",
-          "docs/project-outcomes/C2_4_SECURITY_TESTS.md"
+          "docs/project-outcomes/C2_4_SECURITY_TESTS.md",
+          "docs/project-outcomes/C2_FINAL_COMPLETION_DECISION.md",
+          "docs/project-outcomes/C2_FINAL_IMPLEMENTATION_AUDIT.md"
         ]
       },
       "verification": {
         "local": "See the implementation report for checks.",
         "disposableSupabase": "Uses only synthetic projects, observations, consent and role appointments.",
-        "hostedDatabase": "Pending approval and verified deployment.",
-        "connectedApplication": "See the Impact implementation report.",
+        "hostedDatabase": "C2.4 is applied and verified. See the C2 final implementation audit for correction status.",
+        "connectedApplication": "See the Impact implementation report and C2 final end-to-end tests.",
         "hostedApplication": "Deployment scope is the database.",
         "operationalApproval": "All live C2 workflows and Impact reporting are disabled."
       }
     }
   ],
-  "lastScopeUpdate": "C1 Nationwide Community Needs Department Configuration"
+  "lastScopeUpdate": "C2.5 Final Integration, Security and Development Closure"
 }

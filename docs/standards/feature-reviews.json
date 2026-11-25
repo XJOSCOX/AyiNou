@@ -3655,6 +3655,14 @@
           "compatibility": "Adds tables, scoped functions and invalidation triggers. The only initial records are implementation-reviewed conservative catalog drafts with no aggregation approval.",
           "validation": "Use disposable Supabase and Chromium for protected decisions, live projection policy, native work regressions and representative query performance.",
           "rolloutAndRollback": "Apply only the separately approved exact database checksum on the verified linked project. Verify preserved data and catalog fingerprints and keep all operation gates closed. Forward repairs preserve previous private decisions."
+        },
+        {
+          "file": "supabase/migrations/20261125125000_c25_impact_invalidation.sql",
+          "rlsAndGrants": "Existing private RLS and protected command grants are unchanged. The trigger function has no application role execute grant.",
+          "authorization": "Existing C1 membership and blocking operations and native proposal transitions retain their authority. The trigger withholds sealed reports on dependent eligibility changes.",
+          "compatibility": "Preserves historical disclosures, existing settings and every existing record during installation. Two new triggers observe eligibility transitions. Two partial indexes support the unchanged latest-completion reporting-year rule.",
+          "validation": "Exercise an ordinary relationship change against the disposable sealed Impact report and verify one withholding event.",
+          "rolloutAndRollback": "Apply the exact migration only after approval. Verify the replaced function, two triggers, unchanged authorization, preservation fingerprints and disabled gates. Correct defects by a forward migration."
         }
       ]
     }
