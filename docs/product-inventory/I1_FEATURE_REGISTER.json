@@ -7905,8 +7905,8 @@
       "verification": {
         "local": "Tracked in the C2.3 implementation report.",
         "disposableSupabase": "Synthetic records only.",
-        "hostedDatabase": "Pending exact migration approval and verified deployment.",
-        "connectedApplication": "Use the existing local application with the hosted database for closed-state verification.",
+        "hostedDatabase": "The approved C2.3 migration applied. Postflight verified 141 applied, zero pending, 71 matching data fingerprints, seven private empty RLS tables and the expected RPC grants.",
+        "connectedApplication": "The local application connected to hosted Supabase passed 34 read-only checks after rollout. The connected Founder browser showed a closed publication workspace before rollout.",
         "hostedApplication": "Outside this phase.",
         "operationalApproval": "Live validation, review and publication remain disabled."
       }

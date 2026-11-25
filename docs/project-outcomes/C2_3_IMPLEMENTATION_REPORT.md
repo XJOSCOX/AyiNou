@@ -1,5 +1,7 @@
 # C2.3 Controlled project outcome publication
 
+**Status: COMPLETE AND DEPLOYED to the hosted development database. Live intake, evidence review, and publication remain disabled.**
+
 ## Scope
 
 C2.3 builds on the C2.2 release at `65e5386a40ea0f5c308768873d81cee0287450a4`. A current independent finding can be proposed for disclosure by its authorized organizer. The proposal must relate to an eligible public project in exactly one of Haiti’s ten departments. C2.3 reuses native individual, organization, and community ownership and geography. Earlier project approval and Community Needs association records keep their existing meaning and privacy.
@@ -26,7 +28,7 @@ Publication commands serialize with C2.2 decisions, lock the relevant project an
 
 ## Validation and CI
 
-The C2.3 disposable suite covers closed gates, consent matching, recent MFA and original workspace checks, departmental scope, evidence-review conflicts, current preview requirements, result redaction, zero quantity, withdrawal, corrected republication, project visibility invalidation, appeal independence, and revoked evidence. Workspace type checks, lint, standards, shared contracts, 57 API tests, web unit tests, the HTTPS-origin production build, and the localhost build passed. The final disposable regression ran seven tests spanning C2.1, C2.2, C2.3, Project Progress and Project Work, all passing. A separate regression run passed the C1 publication and project association scenarios for all ten departments. The package audit reported zero vulnerabilities. The first full CI run reproduced the C2.2 baseline Founder setup smoke failure caused by unrelated synthetic administrators in the shared test database. The test now verifies the exact new administrator identities against its starting roster. The change is limited to the disposable test assertion.
+The C2.3 disposable suite covers closed gates, consent matching, recent MFA and original workspace checks, departmental scope, evidence-review conflicts, current preview requirements, result redaction, zero quantity, withdrawal, corrected republication, project visibility invalidation, appeal independence, and revoked evidence. Workspace type checks, lint, standards, shared contracts, 57 API tests, web unit tests, the HTTPS-origin production build, and the localhost build passed. The final disposable regression ran seven tests spanning C2.1, C2.2, C2.3, Project Progress and Project Work, all passing. A separate regression run passed the C1 publication and project association scenarios for all ten departments. The package audit reported zero vulnerabilities. The first full CI run reproduced the C2.2 baseline Founder setup smoke failure caused by unrelated synthetic administrators in the shared test database. The test now verifies the exact new administrator identities against its starting roster. The change is limited to the disposable test assertion. The three focused Founder and ambassador tests passed locally. The subsequent Main checks run passed all three jobs on release `430a5fd2a6c140aba0ee4967b89973e3315cf033`. [GitHub Actions run](https://github.com/XJOSCOX/AyiNou/actions/runs/45652009630)
 
 ## Documentation and operations
 
@@ -34,8 +36,10 @@ The rollout applies only the separately approved SQL file after the target, chec
 
 The read-only baseline on AyiNou `hcbxulyfmdmuyccgrujs` found 140 applied migrations and only `20261125123000_c23_controlled_outcome_publication.sql` pending. The file SHA-256 was `70f9f00669ae0e41bc556fb51ad071d79a54748badcf5da93c8cf3746ba656c7`. The baseline captured 71 record fingerprints, 275 existing relations, 792 existing routines, 29 RLS policies, and 132 existing triggers. C2.1 and C2.2 fixture gates and the Community Needs fixture gates were empty.
 
-The rebuilt connected local API and web passed 34 checks covering health, public Projects and Community reads, restricted routes, and all three closed C2 states. An authenticated browser check as J0SC0X reached Outcome publication through Outcome evidence review and showed the unavailable state without case or reviewer controls.
+The Founder approved that exact checksum and target. The CLI applied the single file with an empty seed and role plan. The read-only postflight recorded 141 applied versions and zero pending. The 71 record fingerprints, all 275 existing relation fingerprints, 792 existing routine fingerprints, 29 RLS policies, 132 existing triggers, prior migration receipts, and existing C1 authorization fingerprints matched. The new footprint comprises 27 invalidation triggers, seven private RLS tables with no direct app privileges, and 11 functions whose bodies and permissions match the migration. The commands RPC is service-only. The narrow public RPC returned an empty result to the anonymous hosted client. All seven new tables and the C2.1 and C2.2 fixture gates were empty, along with the existing C1 fixture gates.
+
+The rebuilt connected local API and web passed 34 checks again after the migration covering health, public Projects and Community reads, restricted routes, and all three closed C2 states. An authenticated browser check before rollout as J0SC0X reached Outcome publication through Outcome evidence review and showed the unavailable state without case or reviewer controls. The application builds were validated locally.
 
 ## Remaining blockers
 
-Exact hosted migration approval and verified deployment are required by the repository workflow. Live review, intake, and publication remain disabled. Operational owners must establish staffing, privacy and support readiness before a separately authorized launch.
+Live review, intake, and publication are disabled. Operational owners must establish staffing, privacy, retention and support readiness before a separately authorized launch.
