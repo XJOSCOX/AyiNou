@@ -32,6 +32,12 @@ See [security tests](C1_NATIONWIDE_SECURITY_TESTS.md) for disposable and connect
 
 See the [nationwide policy](C1_NATIONWIDE_POLICY.md) and [rollout readiness](C1_NATIONWIDE_ROLLOUT_READINESS.md). Keep deployed app routing disabled. Operational attestations are read-only in the Founder interface.
 
+## Verified rollout
+
+The hosted Supabase project `hcbxulyfmdmuyccgrujs` received the single approved migration from main revision `938c0faa89c3416d6ce5088188c1c65737039bc5`. The SQL file and approval matched SHA-256 `f5695c7a9daad99151bc9a07a20eecdaac919d66e7a3768cdeaaa1001566a0d5`. The fresh remote dry run listed one pending file and no seeds or roles. Postflight confirmed 138 applied, zero pending and 51 matching data fingerprints.
+
+Hosted Ouest had no pilot policy, enrollment or decision rows before the rollout. The disposable upgrade separately proved preservation for an existing Ouest policy at revision 2, its seven-person cap, 22-day term, enrollment and audit receipt. Both environments kept their departments closed. See the [verification evidence](C1_NATIONWIDE_SECURITY_TESTS.md) for authorization, browser and regression results.
+
 ## Remaining blockers
 
 Public processing still requires authorized matching web and API hosting, qualified privacy and retention approval, verified database and private Storage recovery, a named staff roster and cohort, six independently verified operational attestations per activated department, and a separate Founder decision.

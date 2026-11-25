@@ -7255,10 +7255,10 @@
         ]
       },
       "verification": {
-        "local": "C1.5 integration test and readiness evidence cover the end-to-end workflow.",
-        "disposableSupabase": "See C1.4 association consent, authorization, and invalidation exercises.",
-        "hostedDatabase": "C1 final read-only check confirmed 137 applied, zero pending and 51 matched record fingerprints. Four fixture gates and five pilot tables remained empty. No migration was needed.",
-        "connectedApplication": "C1 final connected local read, denial and four-language checks passed. J0SC0X saw blocked Pilot readiness and effective policy values. Test02 saw closed intake and could not enter Pilot or triage administration. Disposable lifecycle validation passed in all ten departments.",
+        "local": "Nationwide validation passed unit, shared-contract, translation, static, engineering-standard and build checks.",
+        "disposableSupabase": "The exact Ouest upgrade rehearsal and all 25 integrated browser and API scenarios passed, including all ten native lifecycles and scoped quota, reviewer, pause and resumption checks.",
+        "hostedDatabase": "The approved nationwide migration was the only change. Hosted postflight confirmed 138 applied, zero pending, 51 matched record fingerprints, four empty fixture gates and five empty pilot tables.",
+        "connectedApplication": "All 27 connected localhost checks passed. J0SC0X verified blocked activation in all ten department settings. Test02 verified Ouest discussion, listed members, closed intake and denial from Pilot administration.",
         "hostedApplication": "Hosted application release unverified.",
         "operationalApproval": "Nationwide department preparation uses the same ten existing communities and remains closed in every department. Live launch requires approved staffing, legal, recovery, hosting and independent evidence for each scope."
       }
