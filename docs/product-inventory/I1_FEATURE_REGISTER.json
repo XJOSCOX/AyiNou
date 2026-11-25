@@ -7804,6 +7804,59 @@
         "hostedApplication": "Hosted web and API outside the C2.1 deployment.",
         "operationalApproval": "Live intake is disabled and requires separately approved privacy, authorization and reviewer policies."
       }
+    },
+    {
+      "id": "projects.independent-outcome-review",
+      "domain": "Projects",
+      "name": "Independent project outcome evidence review",
+      "status": "partial",
+      "currentAndLimits": "Private scoped appointments, review, released evidence, findings, corrections and independent challenges. Real operations are disabled.",
+      "dependencies": "C2.1, native Project Work, verified identity, protected sessions, independent reviewers and completed operational approvals.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/projects/outcome-review/review-workspace.tsx",
+          "apps/web/src/features/projects/outcome-review/member-review.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/project-outcome-review.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/project-outcome-review.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125122000_c22_outcome_evidence_review.sql"
+        ],
+        "postgresObjects": [
+          "private.c22_authority",
+          "private.c22_findings",
+          "private.c22_events",
+          "public.c22_reviews_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/project-outcome-review.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/project-outcome-review.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/project-outcome-review.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/project-outcomes/C2_2_IMPLEMENTATION_REPORT.md",
+          "docs/project-outcomes/C2_2_REVIEWER_POLICY.md",
+          "docs/project-outcomes/C2_2_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See C2.2 security and implementation reports.",
+        "disposableSupabase": "Enabled workflows use synthetic records only.",
+        "hostedDatabase": "Pending exact migration approval and verification.",
+        "connectedApplication": "Pending connected localhost verification.",
+        "hostedApplication": "Hosted web and API are outside this release.",
+        "operationalApproval": "Real intake, review and disclosure remain closed."
+      }
     }
   ],
   "lastScopeUpdate": "C1 Nationwide Community Needs Department Configuration"

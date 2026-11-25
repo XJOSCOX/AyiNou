@@ -23,6 +23,7 @@ export * from "./feed";
 export * from "./projects";
 export * from "./project-work";
 export * from "./project-outcomes";
+export * from "./project-outcome-review";
 export * from "./voting";
 export * from "./notifications";
 export * from "./privacy";

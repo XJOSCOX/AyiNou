@@ -3186,6 +3186,165 @@
           "rolloutAndRollback": "Apply the exact independently approved checksum after a fresh one-file dry run and new preservation baseline. Leave the fixture gate empty and prefer a scoped forward repair."
         }
       ]
+    },
+    {
+      "id": "c2-2-outcome-evidence-review",
+      "report": "docs/project-outcomes/C2_2_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/private/project-outcome-review",
+          "contract": "GET /api/v1/private/project-outcome-review - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection exposes only the caller's currently authorized queue, case, directory or notice metadata."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-review/notices",
+          "contract": "GET /api/v1/private/project-outcome-review/notices - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection exposes only the caller's currently authorized queue, case, directory or notice metadata."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "POST /api/v1/private/project-outcome-review/workspace",
+          "contract": "POST /api/v1/private/project-outcome-review/workspace 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace, review transition or evidence access has an actor bound durable event in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-review/roster",
+          "contract": "GET /api/v1/private/project-outcome-review/roster - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection exposes only the caller's currently authorized queue, case, directory or notice metadata."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "POST /api/v1/private/project-outcome-review/roster",
+          "contract": "POST /api/v1/private/project-outcome-review/roster 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace, review transition or evidence access has an actor bound durable event in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-review/:caseId",
+          "contract": "GET /api/v1/private/project-outcome-review/:caseId - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection exposes only the caller's currently authorized queue, case, directory or notice metadata."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/private/project-outcome-review/:caseId",
+          "contract": "PATCH /api/v1/private/project-outcome-review/:caseId 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace, review transition or evidence access has an actor bound durable event in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-review/:caseId/evidence",
+          "contract": "GET /api/v1/private/project-outcome-review/:caseId/evidence - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace, review transition or evidence access has an actor bound durable event in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-review/:caseId/evidence/:entry/image",
+          "contract": "GET /api/v1/private/project-outcome-review/:caseId/evidence/:entry/image - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace, review transition or evidence access has an actor bound durable event in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:project/outcome-validation/:caseId/review",
+          "contract": "GET /api/v1/projects/:project/outcome-validation/:caseId/review - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only projection exposes only the caller's currently authorized queue, case, directory or notice metadata."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/projects/:project/outcome-validation/:caseId/review",
+          "contract": "PATCH /api/v1/projects/:project/outcome-validation/:caseId/review 16384 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace, review transition or evidence access has an actor bound durable event in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-review.spec.ts",
+            "denialScenario": "Disabled gates, stale or cross-session workspace, out-of-scope grants, current conflicts, missing accepted assignment, revoked evidence and duplicate decisions fail closed."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125122000_c22_outcome_evidence_review.sql",
+          "rlsAndGrants": "Eleven private RLS tables, no direct role grants, and a single app service-only entry point with non-granted helpers.",
+          "authorization": "Existing verified identity and protected sessions plus distinct department-scoped review, challenge and coordination grants. Live assignment and exact evidence checked per protected operation.",
+          "compatibility": "New private tables and functions, and an additive receipt trigger on C2.1. No old function or policy is replaced. Evidence and all prior source records remain in their original systems.",
+          "validation": "Use disposable SQL, browser and API tests for scopes, stale revisions, media, moderation and native project interactions.",
+          "rolloutAndRollback": "Apply only the approved checksum on the expected project. Preserve existing catalog and row fingerprints. Keep both C2 gates empty. Prefer scoped forward remediation."
+        }
+      ]
     }
   ]
 }

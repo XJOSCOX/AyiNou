@@ -164,3 +164,7 @@ Each department has its own policy revision and reasoned audit history. Atomic b
 ## C2.1 private project outcome requests
 
 An accepted create, edit, submit or withdraw command appends a private actor-bound revision with the exact case, time, status and idempotent receipt in its transaction. Sources and evidence remain in the existing project workflow. Authorized reads add no audit event. No new Founder authority, reviewer access or outcome certification is recorded. [Implementation report](../project-outcomes/C2_1_IMPLEMENTATION_REPORT.md)
+
+## C2.2 independent outcome review
+
+Appointments, suspension, revocation, case assignment, release, recusal, clarification, correction, evidence reads, findings and challenge decisions have durable scoped events. Each protected mutation records the actor, department and workspace where applicable and binds to the case revision. Reviewer identity and conflict details stay out of the member projection. Notifications are recipient-filtered and link to an authorized workspace. [Implementation report](../project-outcomes/C2_2_IMPLEMENTATION_REPORT.md)

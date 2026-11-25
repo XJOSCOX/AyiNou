@@ -29,6 +29,7 @@ import { ApiErrorNotice } from "./api-error-notice";
 import { institutionAction, institutionCard, PersonalClaimChecks, useInstitutionResource } from "./institution-ui";
 import { FounderVerifiedMark } from "./founder-verified-badge";
 import { MemberAppeals } from "./enforcement-appeals";
+import { OutcomeReviewNotices } from "@/features/projects/outcome-review/member-review";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 
@@ -170,6 +171,7 @@ export function NotificationCenter() {
         </button>
       </>} />
     <MemberAppeals noticesOnly />
+    <OutcomeReviewNotices />
     <div className="min-w-0 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
       {resource.error !== null && <div className="p-4"><ApiErrorNotice error={resource.error} retry={resource.retry} /></div>}
       {mutation.error !== null && <div className="p-4"><ApiErrorNotice error={mutation.error} /></div>}

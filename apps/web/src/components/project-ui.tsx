@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { outcomeReviewPath } from "@/lib/project-outcome-review-api";
+import { outcomeReviewMessages } from "@/lib/project-outcome-review-i18n";
 import type { ReactNode } from "react";
 import type { ProjectStatus } from "@ayinou/shared";
 import { authMessages } from "@/lib/auth-i18n";
@@ -110,6 +112,7 @@ export function ProjectsHeader({ title, description, meta, current, showNavigati
       {canReview === undefined ? <ReviewNavigationLink current={current} label={t.reviewQueue} />
         : canReview && <Link href="/projects/review" aria-current={current === "review" ? "page" : undefined}
           className={navigationLink}>{t.reviewQueue}</Link>}
+      <Link href={outcomeReviewPath} className={navigationLink}>{outcomeReviewMessages[locale].title}</Link>
     </nav>}
     {children}
   </header>;

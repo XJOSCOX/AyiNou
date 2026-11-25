@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { outcomeReviewPath } from "@/lib/project-outcome-review-api";
+import { outcomeReviewMessages } from "@/lib/project-outcome-review-i18n";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { f25FeaturePolicyKeys, platformRoles, type AdminAccount, type AdminAccountAction, type AdminOverview, type PlatformRole } from "@ayinou/shared";
 import { changeAdminAccount, loadAdminAccounts, loadAdminOverview, loadPlatformAccess } from "@/lib/admin-api";
@@ -218,6 +220,9 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {tab === "corrections" && <AdminOnboardingCorrections />}
               {tab === "governance" && <PlatformGovernance />}
               {tab === "partners" && <AdminEarlyPartners />}
+              {(tab === "overview" || tab === "rolesAssignments") && access.data?.administrator && <div>
+                <Link className={adminSecondaryAction} href={outcomeReviewPath + "?lane=admin"}>{outcomeReviewMessages[locale].coordinator}</Link>
+              </div>}
               {access.data?.founder && (tab === "verificationSettings" || tab === "rolesAssignments" || tab === "officialBadges") &&
                 <VerificationSettings key={tab} section={tab} workspaceId={workspaceId} />}
               {access.data?.founder && (tab === "recognitionBadges" || tab === "recognitionHistory") &&

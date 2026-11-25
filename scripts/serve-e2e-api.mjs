@@ -16,6 +16,7 @@ const config = readConfig({
   LOG_LEVEL: "error",
   AYINOU_FOUNDER_BOOTSTRAP_ENABLED: "true",
   AYINOU_COMMUNITY_NEEDS: "synthetic",
+  AYINOU_PROJECT_OUTCOME_REVIEW: "synthetic",
   AYINOU_PROJECT_OUTCOMES: process.argv.includes("--secondary") ? "disabled" : "synthetic",
   AYINOU_COMMUNITY_NEEDS_RELEASE: "0000000000000000000000000000000000000016",
   AYINOU_PRIVACY_INTAKE: "synthetic",

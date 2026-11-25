@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { outcomeReviewMessages } from "../src/lib/project-outcome-review-i18n";
 import type { ProjectWork, ProjectWorkIndex } from "@ayinou/shared";
 import { api, expect, test } from "./fixtures";
 import { membershipMessages } from "../src/lib/membership-i18n";
@@ -32,7 +33,7 @@ test("project team and volunteer tabs use one work read and preserve contributor
   await page.goto("/projects/team");
   const navigation = page.getByRole("navigation", { name: projectMessages.en.title, exact: true });
   const navigationLinks = navigation.getByRole("link");
-  const expectedLinks = [projectMessages.en.title, projectMessages.en.manage, t.workspace];
+  const expectedLinks = [projectMessages.en.title, projectMessages.en.manage, t.workspace, outcomeReviewMessages.en.title];
   await expect(navigationLinks).toHaveText(expectedLinks);
   await page.getByRole("link", { name: work.title, exact: true }).click();
   await expect(page.getByRole("heading", { name: work.title, level: 1, exact: true })).toBeVisible();

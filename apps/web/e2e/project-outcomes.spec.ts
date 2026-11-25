@@ -136,11 +136,11 @@ test("C2.1 preserves native results and confines requests to the owning organize
     await page.reload();
     const panel = page.getByRole("region", { name: copy.heading });
     await panel.getByRole("button", { name: /Open the reading space/ }).click();
-    await expect(panel.getByRole("status")).toHaveText(copy.submitted);
+    await expect(panel.getByText(copy.submitted, { exact: true })).toBeVisible();
     await panel.locator("summary").filter({ hasText: copy.withdraw }).click();
     await panel.getByLabel(copy.confirmWithdraw).check();
     await panel.getByRole("button", { name: copy.withdraw, exact: true }).click();
-    await expect(panel.getByRole("status")).toHaveText(copy.withdrawn);
+    await expect(panel.getByText(copy.withdrawn, { exact: true })).toBeVisible();
     await panel.locator("summary").filter({ hasText: copy.choose }).click();
     await panel.getByLabel(copy.kind).selectOption("observation");
     await panel.getByLabel(copy.source).selectOption(observation);
