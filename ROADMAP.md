@@ -294,7 +294,7 @@ Feature development pauses here for owner review of the engineering results and 
 
 - [x] C1.1 private Community Needs foundation in Communities. Drafts, confirmed submissions, withdrawal, revision receipts and owner-only access are implemented. The hosted database migration was applied and verified on November 24, 2026. Real intake remains disabled. [Implementation report](docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md)
 - [x] C1.2 private triage, independent evidence review, author corrections, challenges, and scoped intake restriction. The hosted C1.2 database migration was applied and verified on November 24, 2026, with 132 applied migrations and zero pending. Live intake and review remain disabled. [Implementation report](docs/community-needs/C1_2_IMPLEMENTATION_REPORT.md)
-- [x] C1.3 community-only publication snapshots, independent approval, attribution consent, participation and publication challenges. Hosted schema and live activation remain separately gated. [Implementation report](docs/community-needs/C1_3_IMPLEMENTATION_REPORT.md)
+- [x] C1.3 community-only publication snapshots, independent approval, attribution consent, participation and publication challenges. The hosted C1.3 database migration was applied and verified on November 24, 2026, with 133 applied migrations and zero pending. Live intake, review and publication remain disabled. [Implementation report](docs/community-needs/C1_3_IMPLEMENTATION_REPORT.md)
 - [ ] C1.4 project linking and C1.5 authorized pilot activation.
 - [ ] Extend structured reporting to local events and general public claims.
 - [ ] Support confirmations, challenges, credible sources, and safe evidence submission.

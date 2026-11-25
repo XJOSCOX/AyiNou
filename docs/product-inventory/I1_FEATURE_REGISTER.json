@@ -9,13 +9,13 @@
     "gated": 11
   },
   "hostedDevelopment": {
-    "migrationCount": 132,
-    "pending": 1,
-    "lastMigration": "20261124155100",
-    "preservationChecksMatched": 40,
+    "migrationCount": 133,
+    "pending": 0,
+    "lastMigration": "20261124155200",
+    "preservationChecksMatched": 47,
     "applicationRelease": "unverified",
     "providerRecovery": "unverified",
-    "pendingMigration": "20261124155200"
+    "pendingMigration": null
   },
   "webPages": [
     {
@@ -7060,7 +7060,7 @@
       "name": "Community Needs intake, review and scoped publication",
       "status": "gated",
       "currentAndLimits": "Private intake and evidence review, independent approval of a scoped publication snapshot, community-only directory and existing discussion integration. Real intake, review, and publication remain closed. Need-to-project links remain future work.",
-      "dependencies": "Scoped community staff, independent review and challenge roster, recent MFA, approved privacy and retention lifecycle, separately approved migration and later pilot activation.",
+      "dependencies": "Scoped community staff, independent review and challenge roster, recent MFA, approved privacy and retention lifecycle, and separate pilot approval.",
       "evidence": {
         "web": [
           "apps/web/src/app/(protected)/communities/intake/needs/page.tsx",
@@ -7117,8 +7117,8 @@
       "verification": {
         "local": "See C1.3 report for local validation and regressions.",
         "disposableSupabase": "See C1.3 approval, conflict, audience, and challenge evidence.",
-        "hostedDatabase": "C1.1 and C1.2 applied and verified with closed gates. C1.3 awaits exact-version approval.",
-        "connectedApplication": "C1.1 and C1.2 connected checks passed. C1.3 implementation validation uses disposable Supabase.",
+        "hostedDatabase": "C1.1, C1.2, and C1.3 applied and verified. All three fixture gates are closed.",
+        "connectedApplication": "Connected localhost checks passed after C1.3. Mutation authorization and lifecycle tests used disposable Supabase.",
         "hostedApplication": "Hosted application release unverified.",
         "operationalApproval": "Real intake, review and publication remain disabled. Separate pilot approval required."
       }
