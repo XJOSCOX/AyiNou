@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { pilotDepartments, pilotMetrics, pilotRequirements, pilotStages, type PilotDecision, type PilotDepartment, type PilotWorkspace } from "@ayinou/shared";
 import { adminEntryPath } from "@/lib/admin-navigation";
 import { authorizedRequest } from "@/lib/api";
@@ -31,14 +31,15 @@ function PilotPanel({ title, children }: { title: string; children: ReactNode })
 export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
   const [locale] = useLocale();
   const [department, setDepartment] = useState<PilotDepartment>("ouest");
+  const departmentId = useId();
   return <div className="grid min-w-0 gap-4">
-    <label className={adminCompactCard + " block text-sm font-semibold"}>
-      {pilotLabel(locale, "department")}
-      <select className={institutionField + " max-w-sm"} value={department}
+    <div className={adminCompactCard + " text-sm font-semibold"}>
+      <label htmlFor={departmentId}>{pilotLabel(locale, "department")}</label>
+      <select id={departmentId} className={institutionField + " max-w-sm"} value={department}
         onChange={(event) => setDepartment(event.target.value as PilotDepartment)}>
         {pilotDepartments.map((scope) => <option key={scope} value={scope}>{departmentNames[scope]}</option>)}
       </select>
-    </label>
+    </div>
     <DepartmentPilot key={department} workspace={workspace} department={department} />
   </div>;
 }

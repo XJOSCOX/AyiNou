@@ -320,7 +320,7 @@ test("nationwide department policies isolate cohorts, live quotas and emergency 
     await command("centre", receipt("activate", 2), 409);
 
     // Staff and operational-evidence seeds are confined to the isolated database.
-    // Give one reviewer no Centre grant and prove the partial roster cannot activate it.
+    // Omit one Centre grant and Centre’s storage evidence to exercise both scoped requirements.
     sql(`insert into private.c12_authority(community_id,actor_id,lane,granted_by,until_at)
       select c.id,a.actor,'review','${founder.id}',now()+interval '10 days'
       from feed_data.communities c
@@ -332,12 +332,16 @@ test("nationwide department policies isolate cohorts, live quotas and emergency 
       insert into private.c16_evidence(requirement,community_id,release,evidence_reference,attested_by,verified_at,valid_until)
       select k,c.id,'${release}','synthetic-department-evidence-'||k,'${outsider.id}',now(),now()+interval '2 days'
       from feed_data.communities c cross join unnest(array['privacy','support','databaseRecovery','storageRecovery','release','launchBlockers']) k
-      where c.id in ('${ouest}','${centre}','${nord}');`);
+      where c.id in ('${ouest}','${centre}','${nord}') and (c.id<>'${centre}' or k<>'storageRecovery');`);
+    expect(sql(`select private.c16_roster('${reviewers[3].id}','${ouest}','review')
+      and not private.c16_roster('${reviewers[3].id}','${centre}','review');`)).toBe("t");
     await command("centre", receipt("activate", 2), 409);
     await expectStatus(request(founder, staff, "POST", {
       action: "grant", role: "review", target: reviewers[3].id, communityId: centre,
       confirmed: true, note: reason, requestId: randomUUID(),
     }, workspace), 200);
+    sql(`insert into private.c16_evidence(requirement,community_id,release,evidence_reference,attested_by,verified_at,valid_until)
+      values('storageRecovery','${centre}','${release}','synthetic-centre-storage','${outsider.id}',now(),now()+interval '2 days');`);
     for (const scope of departments) {
       expect(await command(scope, receipt("activate", 2))).toMatchObject({ revision: 3, status: "active", activeParticipants: 1 });
     }
