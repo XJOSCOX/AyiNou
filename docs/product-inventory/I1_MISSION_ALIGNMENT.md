@@ -1,0 +1,11 @@
+# I1 mission alignment
+
+| Mission purpose | Current contribution | Evidence of a complete member outcome |
+| --- | --- | --- |
+| Unite Haitians in Haiti and the diaspora | Department and interest communities, profiles, follows, multilingual controls and events make participation possible across locations. | Member can find and join a suitable community with a clear audience and usable access on common mobile connections. Track completion by locale and broad region with privacy thresholds. [Member journey](I1_MEMBER_JOURNEY.md) |
+| Peaceful dialogue | Community roles, audience controls, reporting, restrictions and independent appeals supply enforcement tools. | Residents can participate and contest restrictions with an operating moderation team. Measure queue age and resolution time with access controls. [M3 findings](../moderation/M3_SECURITY_FINDINGS.md) |
+| Trusted information | Identity and institutional verification identify the account or institution. Moderation and project review address their own scopes. | Claims about local conditions or outcomes have sources, a review decision, correction history and a clear audience. Measure review coverage and corrections without exposing sensitive material. [Trust and project evidence](I1_COMPLETE_FEATURE_INVENTORY.md) |
+| Community collaboration | Organizers can propose projects, schedule events, form teams and recruit volunteers. | A reviewed need can be traced to a proposal, team contribution and a delivered activity. Track links and participation at a granularity authorized by the underlying records. [Project coverage](I1_DATABASE_AND_API_COVERAGE.md) |
+| Measurable improvements | Milestones and project scope metrics already exist. Homepage totals describe community participation. | Publish independently validated measures with a definition, period, source and review scope. Apply privacy thresholds to disaggregated results. [Recommended sequence](I1_RECOMMENDED_DEVELOPMENT_SEQUENCE.md) |
+
+A first needs pilot can measure submissions resolved with a documented review, review latency and eligible proposal links. Treat measures as proposed until definitions, disclosure and operating responsibilities are agreed. Wider impact measures depend on independently reviewed outcomes and usable comparison periods.
