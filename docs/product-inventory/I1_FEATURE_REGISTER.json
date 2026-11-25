@@ -7852,8 +7852,8 @@
       "verification": {
         "local": "See C2.2 security and implementation reports.",
         "disposableSupabase": "Enabled workflows use synthetic records only.",
-        "hostedDatabase": "Pending exact migration approval and verification.",
-        "connectedApplication": "Pending connected localhost verification.",
+        "hostedDatabase": "The exact approved C2.2 migration was applied. Postflight confirmed 140 applied, zero pending, 60 matching data fingerprints, 11 empty RLS tables and one service-only entry point.",
+        "connectedApplication": "All 37 connected localhost checks passed. J0SC0X and Test02 both saw a closed Outcome Review workspace with no protected controls.",
         "hostedApplication": "Hosted web and API are outside this release.",
         "operationalApproval": "Real intake, review and disclosure remain closed."
       }
