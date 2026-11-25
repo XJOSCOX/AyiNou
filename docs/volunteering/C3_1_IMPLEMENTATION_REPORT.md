@@ -35,7 +35,21 @@ Protected writes use revision checks and idempotency receipts. Related records c
 
 ## Validation and CI
 
-Run the workspace suite, shared contracts, engineering standards, lint, typecheck, browser regressions and builds locally. Routine GitHub Actions are skipped for this release. Hosted verification consists of read-only preservation and catalog comparisons after the exact approved migration.
+The runtime-guard and route tests passed alongside all 59 API tests, both web environment tests, seven client-error tests, the shared contract baseline and the translation checks. Local typecheck, lint, engineering standards, and both localhost and hosted-mode builds passed. The 19 distinct disposable end-to-end cases covered the two C3.1 volunteer flows, Project Work, all ten C1 department flows and six C2 cases. Established C1 and C2 suites were isolated when their shared fixture data interfered with exact-count and empty-list assertions in the combined run. The final C3.1 run also verified blocks, restrictions, stale revisions and consent withdrawal. An additional disposable test exercised the current Project Work API for opportunity publication, application, offer, confirmation, withdrawal, invitation and accepted contribution. The historical rollback script stopped at its legacy direct proposal-creation call with access denied. The current API flow and the Project Work browser regression both passed. The implementation reused the native onboarding policy rather than imposing completion when the platform policy makes it optional.
+
+## Hosted database rollout
+
+- Target: AyiNou `hcbxulyfmdmuyccgrujs`, identified by the CLI as production.
+- Implementation revision: `baa1dffc5c1a23d9a68fabad88ec60d07be07837`.
+- Exact approved migration: `20261125130000_c31_volunteer_profiles.sql`.
+- Verified SHA-256: `a92ae66aabcae15d1324d8eae2aa9e7eb4e89ac068fdb48612293fc928447a86`.
+- Fresh preflight: 144 applied, only C3.1 pending. The apply receipt listed one migration with zero external seed or role operations. A fresh postflight found 145 applied and zero pending.
+- Data preservation: 89 existing record fingerprints matched. The pre-existing relations, routines, policies and triggers matched. C3.1 added nine private RLS tables and three functions. Read-only checks confirmed no direct table privileges for anonymous, authenticated, authenticator or service roles. The command is service-only, and the helpers have no app-role grants. All three installed function bodies matched the approved file.
+- Catalog and activation: 15 version-one skills and 75 reserved search terms. Settings, fixture, profiles, selections, consent, owner receipts and administrative history were empty. The four C1 and four C2 fixture gates stayed closed.
+
+## Connected local application
+
+45 read-only API and web compatibility checks passed, including guest denials, Community Needs, Project Outcomes and Impact closed states, and public community and project reads. J0SC0X opened Platform Administration using owner-entered MFA. The Founder saw Configuration available, version zero, all 15 skills, all ten department names, empty history and closed intake. No hosted settings or profiles were saved. Test02 followed the link from Account settings and saw Incomplete profile with intake closed and no editor. Its Founder settings URL returned Page not found. The hosted rollout covered the database. Next.js and Fastify ran locally.
 
 ## Documentation and operations
 
@@ -45,4 +59,4 @@ Run the workspace suite, shared contracts, engineering standards, lint, typechec
 
 ## Remaining blockers
 
-Rollout and verification results will be added after the independent checksum approval and hosted postflight. Operational use remains gated on approved safeguarding, member notices, and tested lifecycle processing. C3.2 would need separately scoped project skill requirements, privacy-aware matching eligibility, consent and block rechecks, role limits, and an explicit staged activation and pause design.
+Operational use remains gated on approved safeguarding, member notices, and tested lifecycle processing. C3.2 would need separately scoped project skill requirements, privacy-aware matching eligibility, consent and block rechecks, role limits, and an explicit staged activation and pause design.

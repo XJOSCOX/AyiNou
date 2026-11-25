@@ -7425,8 +7425,8 @@
       "id": "mission-gaps.volunteer-matching",
       "domain": "Mission gaps",
       "name": "Volunteer skills and matching",
-      "status": "missing",
-      "currentAndLimits": "Project opportunity discovery and applications exist. A structured skills profile and cross-project matching were not identified.",
+      "status": "partial",
+      "currentAndLimits": "Existing project opportunity discovery and applications remain available. C3.1 adds a private structured skills profile foundation. Live intake, organizer discovery and cross-project matching remain closed.",
       "dependencies": "See the mission alignment and recommended sequence for dependencies.",
       "evidence": {
         "web": [
@@ -8023,8 +8023,8 @@
       "verification": {
         "local": "See the implementation report.",
         "disposableSupabase": "Tested with isolated member and Founder fixtures.",
-        "hostedDatabase": "Pending exact checksum authorization and postflight.",
-        "connectedApplication": "See the implementation report.",
+        "hostedDatabase": "C3.1 verified on hosted AyiNou with 145 applied migrations, zero pending, 15 catalog definitions and empty volunteer intake and profile tables.",
+        "connectedApplication": "J0SC0X verified Founder preparation and Test02 verified closed intake and denied Founder access. 45 connected checks passed.",
         "hostedApplication": "Hosted deployment scope is the database only.",
         "operationalApproval": "Participation and matching are disabled."
       }
