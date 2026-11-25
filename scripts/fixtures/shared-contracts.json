@@ -134,7 +134,7 @@
     "f25FeaturePolicyKeys": "value:e2ee4fb342be87f4092f3adb5fd8190308bbc4f8814e4284764da329d2f5c6b6",
     "F25PolicyKey": "type:95d6ad7a9452e40b0b4556d51b63259cc01179545ee5c96562f1af085aae8ea7",
     "FeatureAuthority": "type:abfd7beb585efd5deb8246792801582a26d971e7c9c54435af21faf9688f7f7f",
-    "featureCapabilities": "value:f9b85b5a1780b97da9ef8bd800f12f056458b06f4eb80b475e89e251a215fbd1",
+    "featureCapabilities": "value:cff3d6e05031e240bd4398fc4044c34d77d7911ed0fdcd86b8e61939d4b786af",
     "FeatureCapability": "type:9c20cce15fbcf4b1e22489bb140b14ee170979185c9af351cf8a70bce9fb9f51",
     "FeatureCommand": "type:49627124805ba83c8b37b67d23cdf7071a5efa8d822b9d4472e55b2726c29c86",
     "featureCommands": "value:a775b600bd8cb7fa10e72a85d87b51e04f0189d70c22ee0b3aed72bd1b12cded",
@@ -211,7 +211,7 @@
     "memberExperienceFlags": "value:02a7687709e3503988502719bbe78abbf3875ab0d0dff572218405c618fd92f6",
     "MemberExperiencePolicy": "type:0c0df4a0db6c24359b943fa702dee911c086f3d57853351a91983ddf6e920331",
     "MemberGroup": "type:237fc2e570d41cefad3bbb9ec69b01d8b091487088c127ea069aaab29a843a76",
-    "MemberNotification": "type:56afbc720230b00d9585f5091a797a58cead705723edf902a486ddbee40b9992",
+    "MemberNotification": "type:ebf30ed0cc7d773b202ed84ecfee0431f793f5b9a06a0d2a369b584f8abcbd19",
     "MemberProfile": "type:97a2677e28cc4f1404f47731b87afd08260b9c2655ef65148fb9d54ca3cd0e40",
     "MemberSafetyEntry": "type:5008e6ae013e295ea930d305a4fc46830b51993b62f31870ae384c1be8262527",
     "MemberSafetyPage": "type:7d1158d3a5117e6ba989afa2c0c58eb5f1cd9fa07ac79181be8e7547b126c1e6",
@@ -236,6 +236,16 @@
     "moderationStatuses": "value:11698789f03624aa4e2001e0ffb3114762e02a24995bc5bd72bd7188bb71a0f0",
     "ModerationSummary": "type:5864eb40403f386186e25ffda8d30d1dd7be37ff5310bb79d1b63a3656589f91",
     "MyAffiliations": "type:e9d1a45bb46bfe782eb839867579b3bdccb797ba664a28e17395f98ecd71c801",
+    "needClarifications": "value:810778c739c96c86d0f50d25c183f4ab51c22a9c1f8f738cbcbd0d782437e1ec",
+    "needFindingSummaries": "value:d2b7c7586a25e449b716fc9d4731d43e40ed004d5ff9600d5bf1f0fc305ca269",
+    "NeedReviewAction": "type:33b2ff0f35856e1f848ba84fdbb8f02fdbce07553446237d6708c4dd946559fa",
+    "needReviewActions": "value:750ea34f104429f7b0e49a78a207f7ebe3de6c3e1a043d19d1378bfa6b88e6f0",
+    "NeedReviewCase": "type:87bed023b654e5c0b1927d698ce27503712fcc39036e634a9cef94e16fd08bd0",
+    "NeedReviewLane": "type:82ced95064d8d2a553b9b32d331adbf6c7c5382efb19472f7e935b18fb58d6d1",
+    "needReviewLanes": "value:7307a935c4cf13b2cf6a56fb5ebd1b100b2f84e18082bf4676d6781c2af9a84b",
+    "NeedReviewQueue": "type:40eaf08c579479ae726f50049abd152bba96648d7191629fb6341616ed0afeb8",
+    "NeedReviewRow": "type:c7f156888924ba838ef4ca7ff18d7821c8b49c795d18f49a755a3399c49635c1",
+    "NeedReviewState": "type:1bc705bd6af6af8e47e955c1c30d1a0e1bd066ad8ca2e3e65aa699fb8782d69e",
     "normalizePublicUsername": "value:d70dc898ce23c7f6ddfca81993530ce528d90978a448d1b953dc2f56d4c6cf51",
     "NotificationPage": "type:c5f0a7c9792b4f9a5c960ca07de7025fe40127c8a6278197514bdab5e617ae5c",
     "notificationPreferenceKeys": "value:d83761769909fe78d92c1747d6fcc55b02f9fe31673e6433a15716964c0026db",
@@ -664,6 +674,7 @@
       "event_rsvp",
       "community_create",
       "community_publish",
+      "community_need_submit",
       "group_manage",
       "project_create",
       "project_update",
@@ -921,6 +932,55 @@
       "hidden",
       "removed"
     ],
+    "needClarifications": [
+      "clarify_scope",
+      "clarify_beneficiaries",
+      "clarify_references",
+      "remove_personal_information"
+    ],
+    "needFindingSummaries": {
+      "supported": [
+        "evidence_matches"
+      ],
+      "insufficient_evidence": [
+        "missing_independent_sources",
+        "scope_unconfirmed"
+      ],
+      "not_supported": [
+        "conflicting_evidence"
+      ]
+    },
+    "needReviewActions": [
+      "grant",
+      "revoke",
+      "assign_triage",
+      "assign_review",
+      "assign_challenge",
+      "flag_conflict",
+      "declare_conflict",
+      "triage",
+      "refer",
+      "escalate",
+      "flag_unsafe",
+      "duplicate",
+      "accept",
+      "request_information",
+      "correct",
+      "observe",
+      "supported",
+      "insufficient_evidence",
+      "not_supported",
+      "close",
+      "return",
+      "challenge",
+      "uphold_challenge",
+      "return_challenge"
+    ],
+    "needReviewLanes": [
+      "admin",
+      "triage",
+      "review"
+    ],
     "normalizePublicUsername": {
       "  Marie_Pierre  ": "marie_pierre",
       "mаrie": "mаrie",
@@ -950,6 +1010,7 @@
       "event_rsvp",
       "community_create",
       "community_publish",
+      "community_need_submit",
       "project_create",
       "project_update",
       "volunteer_apply",

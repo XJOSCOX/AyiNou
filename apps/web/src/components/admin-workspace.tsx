@@ -46,6 +46,9 @@ import { VerificationSettings } from "./verification-settings";
 import { RecognitionAdmin } from "./recognition-admin";
 import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { MemberExperienceSettings } from "./member-experience-settings";
+import { authorizedRequest } from "@/lib/api";
+import { needReviewLabel } from "@/lib/community-needs-review-i18n";
+import { StaffNeeds } from "./community-needs-review";
 import { AdminAuditWorkspace } from "./admin-audit-workspace";
 import { AdminSectionContext, useAdminRenewalPath } from "./admin-section-context";
 
@@ -59,6 +62,9 @@ const metrics = [
 ] as const satisfies readonly { key: keyof AdminOverview; destination?: AdminTab }[];
 type AdminSectionGroup = typeof adminSections[number]["label"];
 const adminNavigationButton = "inline-flex min-h-10 max-w-full items-center rounded-md px-3 py-1.5 text-start text-sm font-semibold leading-snug focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--theme-link)]";
+const loadNeedsOversight = (signal: AbortSignal): Promise<{ oversight: boolean }> =>
+  authorizedRequest("/api/v1/private/community-needs-review/triage-access", { signal });
+
 const adminCategoryButton = `${adminNavigationButton} border border-transparent hover:bg-[var(--theme-control)] aria-pressed:bg-[var(--theme-primary)] aria-pressed:text-[var(--theme-on-primary)]`;
 const adminSectionButton = `${adminNavigationButton} border border-[var(--theme-border)] hover:bg-[var(--theme-control)] aria-pressed:border-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]`;
 
@@ -80,12 +86,16 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     partners: earlyPartnerMessages[locale].title,
     moderationOverview: moderation.overview, moderationReports: moderation.reports, moderationContent: moderation.content,
     moderationRestrictions: moderation.restrictions, moderationAppeals: moderation.appeals, moderationHistory: moderation.history,
+    communityNeeds: needReviewLabel(locale,"queue"),
     featureRestrictions: featureMessages[locale].features, moderatorDelegation: featureMessages[locale].delegations,
     moderationPolicies: moderationPolicyMessages[locale].title,
     ...verificationCopy[locale].sections,
   };
   const access = useInstitutionResource(loadPlatformAccess);
-  const visibleSections = adminSections.filter(({ label }) => label !== "navigationSettings" || access.data?.founder);
+  const needs = useInstitutionResource(loadNeedsOversight);
+  const visibleSections = adminSections.filter(({ label }) => label !== "navigationSettings" || access.data?.founder)
+    .map(({ label, pages }) => ({ label, pages: (pages as readonly AdminTab[])
+      .filter((page) => page !== "communityNeeds" || needs.data?.oversight) }));
   const tab = visibleSections.some(({ pages }) => pages.some((page) => page === section)) ? section : "overview";
   const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase(locale);
   const query = normalize(navigationQuery.trim());
@@ -181,6 +191,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                 </section>
                 <SafetyOverviewPanel />
               </>}
+              {tab === "communityNeeds" && <StaffNeeds workspace={workspaceId} lane="admin" />}
               {tab === "moderationOverview" && <ModerationOverview workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationReports" && <ModerationList key="reports" view="reports" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationContent" && <ModerationList key="content" view="content" workspace={workspaceId} onNavigate={navigate} />}

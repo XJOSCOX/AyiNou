@@ -128,3 +128,7 @@ Account moderation projections reuse proven policy revisions from native events.
 ## C1.1 Community Needs
 
 Private draft creation, edits, submission and withdrawal append an actor-bound case revision and receipt in the same SQL transaction. Reads expose authorized revision metadata to the author. Snapshots, reference URLs and attribution stay in the private domain. [Implementation report](../community-needs/C1_1_IMPLEMENTATION_REPORT.md)
+
+## C1.2 Community Needs review
+
+Scoped assignments, private evidence access, triage, corrections, conflicts, findings, challenges, and closure are recorded in the private case ledger. Member feedback and recipient-only inbox projections expose coded summaries. No narrative, private reviewer note or reference enters a general audit projection. [Implementation report](../community-needs/C1_2_IMPLEMENTATION_REPORT.md)

@@ -1,5 +1,5 @@
 {
-  "inventoryVersion": 2,
+  "inventoryVersion": 3,
   "baseline": "4cf93b4630db037cea0d6be770e25f97e9e2e4ba",
   "count": 70,
   "counts": {
@@ -9,13 +9,13 @@
     "gated": 11
   },
   "hostedDevelopment": {
-    "migrationCount": 130,
+    "migrationCount": 131,
     "pending": 1,
-    "lastMigration": "20261124154000",
+    "lastMigration": "20261124155000",
     "preservationChecksMatched": 37,
     "applicationRelease": "unverified",
     "providerRecovery": "unverified",
-    "pendingMigration": "20261124155000"
+    "pendingMigration": "20261124155100"
   },
   "webPages": [
     {
@@ -37,6 +37,10 @@
     {
       "path": "apps/web/src/app/(protected)/communities/intake/needs/page.tsx",
       "url": "/communities/intake/needs"
+    },
+    {
+      "path": "apps/web/src/app/(protected)/communities/intake/triage/page.tsx",
+      "url": "/communities/intake/triage"
     },
     {
       "path": "apps/web/src/app/(protected)/communities/invitations/page.tsx",
@@ -1050,6 +1054,14 @@
     },
     {
       "method": "GET",
+      "path": "/api/v1/me/community-needs/:id/review",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/me/community-recommendation-settings",
       "fixtureMetadata": [
         "-",
@@ -1595,6 +1607,30 @@
     {
       "method": "GET",
       "path": "/api/v1/posts/:id/reaction",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/private/community-needs-review",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/private/community-needs-review/:id",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/private/community-needs-review/triage-access",
       "fixtureMetadata": [
         "-",
         "-"
@@ -2410,6 +2446,14 @@
     },
     {
       "method": "HEAD",
+      "path": "/api/v1/me/community-needs/:id/review",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
       "path": "/api/v1/me/community-recommendation-settings",
       "fixtureMetadata": [
         "-",
@@ -2954,6 +2998,30 @@
     },
     {
       "method": "HEAD",
+      "path": "/api/v1/private/community-needs-review",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/private/community-needs-review/:id",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/private/community-needs-review/triage-access",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
       "path": "/api/v1/profiles/:username",
       "fixtureMetadata": [
         "-",
@@ -3338,6 +3406,14 @@
     },
     {
       "method": "PATCH",
+      "path": "/api/v1/me/community-needs/:id/review",
+      "fixtureMetadata": [
+        "32000",
+        "-"
+      ]
+    },
+    {
+      "method": "PATCH",
       "path": "/api/v1/me/follow-requests/:id",
       "fixtureMetadata": [
         "512",
@@ -3405,6 +3481,14 @@
       "path": "/api/v1/posts/:id",
       "fixtureMetadata": [
         "16384",
+        "-"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/private/community-needs-review/:id",
+      "fixtureMetadata": [
+        "8192",
         "-"
       ]
     },
@@ -4098,6 +4182,14 @@
     },
     {
       "method": "POST",
+      "path": "/api/v1/private/community-needs-review",
+      "fixtureMetadata": [
+        "8192",
+        "-"
+      ]
+    },
+    {
+      "method": "POST",
       "path": "/api/v1/projects",
       "fixtureMetadata": [
         "28000",
@@ -4376,6 +4468,7 @@
     "packages/shared/src/ambassadors.ts",
     "packages/shared/src/audit.ts",
     "packages/shared/src/communities.ts",
+    "packages/shared/src/community-needs-review.ts",
     "packages/shared/src/community-needs.ts",
     "packages/shared/src/core.ts",
     "packages/shared/src/department-community-content.ts",
@@ -6869,49 +6962,57 @@
       "domain": "Mission gaps",
       "name": "Private community needs intake",
       "status": "gated",
-      "currentAndLimits": "C1.1 adds owner-only drafts, submission, withdrawal, references and revision receipts. Real intake remains disabled. Triage, independent evidence review, publication and need-to-project links remain later work.",
-      "dependencies": "Live member session, onboarding, current membership for intake, explicit M2.3 enforcement decision, privacy lifecycle approval and authorized pilot.",
+      "currentAndLimits": "Private drafts, submission, triage, independent evidence review, corrections, challenges and scoped restrictions. Both real intake and live review remain closed. Publication and need-to-project links remain future work.",
+      "dependencies": "Scoped community staff, independent reviewer roster, recent MFA, approved restriction delegation and privacy lifecycle, and separately authorized pilot.",
       "evidence": {
         "web": [
           "apps/web/src/app/(protected)/communities/intake/needs/page.tsx",
           "apps/web/src/app/(protected)/communities/intake/needs/new/page.tsx",
-          "apps/web/src/app/(protected)/communities/intake/needs/[id]/page.tsx"
+          "apps/web/src/app/(protected)/communities/intake/needs/[id]/page.tsx",
+          "apps/web/src/app/(protected)/communities/intake/triage/page.tsx"
         ],
         "api": [
-          "apps/api/src/routes/community-needs.ts"
+          "apps/api/src/routes/community-needs.ts",
+          "apps/api/src/routes/community-needs-review.ts"
         ],
         "contracts": [
-          "packages/shared/src/community-needs.ts"
+          "packages/shared/src/community-needs.ts",
+          "packages/shared/src/community-needs-review.ts"
         ],
         "migrations": [
-          "supabase/migrations/20261124155000_c11_community_needs.sql"
+          "supabase/migrations/20261124155000_c11_community_needs.sql",
+          "supabase/migrations/20261124155100_c12_community_needs_review.sql"
         ],
         "postgresObjects": [
           "public.c11_needs_for_api",
-          "private.c11_need_revisions"
+          "private.c11_need_revisions",
+          "public.c12_needs_for_api",
+          "private.c12_events"
         ],
         "tests": {
           "api": [
             "apps/api/test/community-needs.test.ts"
           ],
           "browser": [
-            "apps/web/e2e/community-needs.spec.ts"
+            "apps/web/e2e/community-needs.spec.ts",
+            "apps/web/e2e/community-needs-review.spec.ts"
           ],
           "database": [
             "supabase/tests/database/c11_community_needs_test.sql"
           ]
         },
         "reports": [
-          "docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md"
+          "docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md",
+          "docs/community-needs/C1_2_IMPLEMENTATION_REPORT.md"
         ]
       },
       "verification": {
-        "local": "API test and typed contracts. See implementation report.",
-        "disposableSupabase": "See C1.1 validation in the implementation report.",
-        "hostedDatabase": "Migration unapplied at C1.1 delivery.",
-        "connectedApplication": "Disposable browser/API coverage only.",
+        "local": "See C1.2 report for the local regression results.",
+        "disposableSupabase": "See restricted review workflow coverage in the C1.2 implementation report.",
+        "hostedDatabase": "C1.1 applied and verified. C1.2 pending separate approval.",
+        "connectedApplication": "C1.1 connected checks passed. C1.2 uses disposable validation.",
         "hostedApplication": "Hosted application release unverified.",
-        "operationalApproval": "Real intake disabled. Separate C1.5 approval required."
+        "operationalApproval": "Real intake and review remain disabled. Separate pilot approval required."
       }
     },
     {
@@ -7408,5 +7509,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C1.1 Community Needs Foundation"
+  "lastScopeUpdate": "C1.2 Community Needs Triage and Independent Evidence Review"
 }

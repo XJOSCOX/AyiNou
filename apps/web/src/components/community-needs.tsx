@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
-import { communityNeedCategories, type CommunityNeed, type CommunityNeedContent, type CommunityNeedList } from "@ayinou/shared";
+import { communityNeedCategories, type CommunityNeed, type CommunityNeedContent, type CommunityNeedList, type NeedReviewCase } from "@ayinou/shared";
 import { authorizedRequest } from "@/lib/api";
 import { ApiRequestError } from "@/lib/api-errors";
+import { needReviewLabel } from "@/lib/community-needs-review-i18n";
+import { MemberReviewStatus, memberNeedReviewPath } from "./community-needs-review";
 import { needsMessages } from "@/lib/community-needs-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
@@ -33,6 +35,9 @@ function message(error: unknown, copy: (typeof needsMessages)["en"]) {
 export function CommunityNeeds({ id, creating = false, initialCommunity }: { id?: string; creating?: boolean; initialCommunity?: string }) {
   const [locale] = useLocale();
   const copy = needsMessages[locale];
+  const triage = useCallback((signal: AbortSignal): Promise<{ allowed: boolean }> =>
+    authorizedRequest("/api/v1/private/community-needs-review/triage-access", { signal }), []);
+  const triageAccess = useInstitutionResource(triage);
   const [extra, setExtra] = useState<CommunityNeedList | null>(null);
   const [paging, setPaging] = useState(false);
   const [pageError, setPageError] = useState<unknown>(null);
@@ -64,6 +69,7 @@ export function CommunityNeeds({ id, creating = false, initialCommunity }: { id?
       <h1 className="text-3xl font-bold">{creating ? copy.newNeed : copy.title}</h1>
       <div className="flex flex-wrap gap-2">
         <Link href={id || creating ? home : "/communities"} className={quietButton}>← {copy.back}</Link>
+        {!creating && !id && triageAccess.data?.allowed && <Link href="/communities/intake/triage" className={quietButton}>{needReviewLabel(locale,"access")}</Link>}
         {!creating && !id && !!communities.length && <Link href={home + "/new"} className={institutionAction}>{copy.newNeed}</Link>}
       </div>
     </header>
@@ -95,6 +101,15 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
   const [record, setRecord] = useState(item);
   const [content, setContent] = useState(item?.content ?? emptyContent);
   const [community, setCommunity] = useState(initialCommunity ?? communities[0]?.id ?? "");
+  const reviewId = record && record.status !== "draft" ? record.id : null;
+  const loadReview = useCallback((signal: AbortSignal): Promise<NeedReviewCase | null> =>
+    reviewId ? authorizedRequest(memberNeedReviewPath(reviewId), { signal }) : Promise.resolve(null), [reviewId]);
+  const reviewSource = useInstitutionResource(loadReview);
+  const [updatedReview, setUpdatedReview] = useState<NeedReviewCase | null>(null);
+  const review = updatedReview ?? reviewSource.data;
+  const correcting = review?.state === "needs_information";
+  const canWithdraw = !review || ["submitted","under_review","needs_information"].includes(review.state);
+  const [correctionConfirmed, confirmCorrection] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -107,6 +122,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
     setContent((previous) => ({ ...previous, [key]: value }));
     setConfirmed(false);
     setSaved(false);
+    confirmCorrection(false);
   };
 
   async function mutate(action: "save" | "submit" | "withdraw") {
@@ -129,6 +145,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
       }
       receipt.current = null;
       setRecord(next);
+      if (action !== "save") { setUpdatedReview(null); reviewSource.refresh(); }
       setContent(next.content);
       setConfirmed(false);
       setSaved(action === "save");
@@ -141,7 +158,23 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
 
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    void mutate("save");
+    if (!correcting || !record || !review) { void mutate("save"); return; }
+    if (busy || !correctionConfirmed || !dirty) return;
+    const command = { action: "correct", confirmed: true, expectedRevision: review.revision,
+      expectedEvidenceRevision: record.revision, content };
+    const body = JSON.stringify(command);
+    if (receipt.current?.body !== body) receipt.current = { body, key: crypto.randomUUID() };
+    const key = receipt.current.key;
+    setBusy(true); setError(null);
+    void authorizedRequest(memberNeedReviewPath(record.id), {
+      method: "PATCH", body: JSON.stringify({ ...command, requestId: key }),
+    }).then((next: NeedReviewCase) => {
+      setUpdatedReview(next);
+      setRecord((old) => old ? { ...old, title: content.title, content, revision: next.evidenceRevision } : old);
+      confirmCorrection(false);
+      receipt.current = null;
+      onRefresh?.();
+    }).catch(setError).finally(() => setBusy(false));
   }
 
   return <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
@@ -150,7 +183,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
         <h2 className="break-words text-2xl font-bold">{record.title}</h2>
         <p className="text-sm text-[var(--theme-body)]">{copy[record.status]} · {copy.community} · {record.communitySlug}</p>
       </>}
-      {draft ? <form onSubmit={save} className="grid gap-4">
+      {draft || correcting ? <form onSubmit={save} className="grid gap-4">
         <p className="text-sm text-[var(--theme-body)]">{copy.privacy}</p>
         <fieldset disabled={busy} className="grid min-w-0 gap-4">
           {!record && <label>{copy.community}
@@ -180,7 +213,13 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
             {content.references.length < 4 && <button type="button" className={quietButton + " justify-self-start"}
               onClick={() => set("references", [...content.references, { url: "", description: "" }])}>{copy.add}</button>}
           </fieldset>
-          <button className={institutionAction + " justify-self-start"} disabled={!!record && !dirty}>{copy.save}</button>
+          {correcting && <label className="flex gap-2">
+            <input type="checkbox" checked={correctionConfirmed} onChange={(e) => confirmCorrection(e.target.checked)} />
+            {needReviewLabel(locale,"confirm")}
+          </label>}
+          <button className={institutionAction + " justify-self-start"} disabled={!!record && !dirty || correcting && !correctionConfirmed}>
+            {correcting ? needReviewLabel(locale,"correct") : copy.save}
+          </button>
         </fieldset>
       </form> : <>
         <h3 className="font-semibold">{copy.problem}</h3>
@@ -203,8 +242,9 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
     </section>
     {record && <aside className={institutionCard + " grid content-start gap-4"}>
       <div><p className="text-sm font-semibold">{copy.ref}</p><p className="break-all font-mono text-xs">{record.id}</p></div>
-      {record.status !== "draft" && <p className="text-sm text-[var(--theme-body)]">{copy.unreviewed}</p>}
-      {record.status !== "withdrawn" && <div className="grid gap-3 border-y border-[var(--theme-border)] py-4">
+      {record.status !== "draft" && review && <MemberReviewStatus data={review} onUpdate={setUpdatedReview} />}
+      {record.status !== "draft" && !review && <p className="text-sm text-[var(--theme-body)]">{copy.unreviewed}</p>}
+      {record.status !== "withdrawn" && canWithdraw && <div className="grid gap-3 border-y border-[var(--theme-border)] py-4">
         <label className="flex items-start gap-2 text-sm">
           <input className="mt-0.5 size-4 shrink-0" type="checkbox" checked={confirmed} disabled={busy || dirty}
             onChange={(event) => setConfirmed(event.target.checked)} />{draft ? copy.confirmation : copy.withdrawConfirm}

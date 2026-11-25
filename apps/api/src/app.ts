@@ -6,6 +6,7 @@ import { registerMemberRoutes } from "./routes/members.js";
 import { createAuthVerifier, type AuthVerifier } from "./services/auth.js";
 import { createMemberRepository, type MemberRepository } from "./services/members.js";
 import { createCommunityRepository, type CommunityRepository } from "./services/community.js";
+import { registerCommunityNeedsReview } from "./routes/community-needs-review.js";
 import { registerCommunityNeeds } from "./routes/community-needs.js";
 import { registerCommunityRoutes } from "./routes/community.js";
 import { registerInstitutionRoutes } from "./routes/institutions.js";
@@ -75,11 +76,13 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register(statusRoutes);
   app.register((instance) => registerMemberRoutes(instance, auth, members, readBudget));
   app.register((instance) => registerCommunityRoutes(instance, community, institutions));
-  app.register((instance) => registerCommunityNeeds(instance, {
+  const needs = {
     enabled: config.AYINOU_COMMUNITY_NEEDS === "synthetic" && config.SUPABASE_URL === "http://127.0.0.1:55321"
       && process.env.NODE_ENV !== "production",
     auth, repo: institutions, read: readBudget,
-  }));
+  };
+  app.register((instance) => registerCommunityNeeds(instance, needs));
+  app.register((instance) => registerCommunityNeedsReview(instance, needs));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions, config.AYINOU_FOUNDER_BOOTSTRAP_ENABLED === "true"));
   app.register((instance) => registerPrivilegedSetup(instance, auth, institutions, config.AYINOU_FOUNDER_BOOTSTRAP_ENABLED === "true"));

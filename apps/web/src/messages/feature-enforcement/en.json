@@ -63,6 +63,7 @@
   "event_announce": "Publish event announcements",
   "event_rsvp": "RSVP to events",
   "community_create": "Create communities or groups",
+  "community_need_submit": "Submit community needs",
   "community_publish": "Post in communities",
   "group_manage": "Manage groups",
   "project_create": "Create or submit projects",

@@ -11,7 +11,7 @@ const idParam = z.strictObject({ id: z.uuid() });
 const line = (min: number, max: number) => z.string().trim().min(min).max(max).refine((value) => !/\p{Cc}/u.test(value));
 const publicReference = /^https:\/\/([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}(\/[a-zA-Z0-9/_.~%-]*)?$/;
 const privateHost = /^https:\/\/(?:[^/]+\.)?(?:localhost|local|internal|test|invalid|example|onion|lan|home|corp|arpa)(\/|$)/;
-const content = z.strictObject({
+export const needContent = z.strictObject({
   title: line(1, 100),
   description: z.string().trim().max(3000).refine((value) => !/\p{Cc}/u.test(value.replace(/[\t\r\n]/g, ""))),
   category: z.enum(communityNeedCategories),
@@ -23,10 +23,10 @@ const content = z.strictObject({
     description: line(0, 160),
   })).max(4).refine((value) => new Set(value.map(({ url }) => url)).size === value.length),
 });
-const create = z.strictObject({ communityId: z.uuid(), content });
+const create = z.strictObject({ communityId: z.uuid(), content: needContent });
 const expected = z.number().int().min(1).max(2147483646);
 const update = z.discriminatedUnion("action", [
-  z.strictObject({ action: z.literal("edit"), expectedRevision: expected, content }),
+  z.strictObject({ action: z.literal("edit"), expectedRevision: expected, content: needContent }),
   z.strictObject({ action: z.literal("submit"), expectedRevision: expected, confirmed: z.literal(true) }),
   z.strictObject({ action: z.literal("withdraw"), expectedRevision: expected, confirmed: z.literal(true) }),
 ]);

@@ -6,7 +6,7 @@ import { serverSupabase } from "@/lib/supabase/server";
 import { WorkspaceEntry } from "./workspace-entry";
 
 export async function PrivateWorkspaceEntry({ kind, verify, section = "overview" }: {
-  kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace">;
+  kind: Extract<PrivateFlow["kind"], "admin_workspace" | "verification_workspace" | "moderation_workspace">;
   verify: boolean;
   section?: AdminTab;
 }) {
@@ -20,7 +20,10 @@ export async function PrivateWorkspaceEntry({ kind, verify, section = "overview"
   if (!access) notFound();
   const features = kind === "admin_workspace" && section === "featureRestrictions" && !access.administrator
     ? await workflowRequest<{ allowed: boolean }>("/api/v1/moderation/feature-enforcement/access", undefined, true) : null;
-  if (!(kind === "admin_workspace" ? access.administrator || features?.allowed : access.reviewer)) notFound();
+  const triage = kind === "moderation_workspace"
+    ? await workflowRequest<{ allowed: boolean }>("/api/v1/private/community-needs-review/triage-access", undefined, true) : null;
+  if (!(kind === "admin_workspace" ? access.administrator || features?.allowed
+    : kind === "moderation_workspace" ? triage?.allowed : access.reviewer)) notFound();
   const entryKind = features?.allowed ? "moderation_workspace" : kind;
   const user = access.totp ? await supabase.auth.getUser() : null;
   const factorIds = user?.data.user?.id === subject

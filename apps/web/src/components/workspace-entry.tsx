@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PrivateFlow } from "@ayinou/shared";
+import { needReviewLabel } from "@/lib/community-needs-review-i18n";
 import { adminEntryPath, type AdminTab } from "@/lib/admin-navigation";
 import { adminMessages } from "@/lib/admin-i18n";
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
@@ -31,7 +32,8 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
   const t = sessionSecurityMessages[locale];
   const delegated = kind === "moderation_workspace";
   const admin = kind !== "verification_workspace";
-  const entry = admin ? adminEntryPath(section) : "/verification/review";
+  const triage = delegated && section === "communityNeeds";
+  const entry = triage ? "/communities/intake/triage" : admin ? adminEntryPath(section) : "/verification/review";
 
   async function open(afterVerification = false) {
     if (busy) return;
@@ -69,7 +71,7 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
 
   return <MemberShell>
     <div className="grid gap-4">
-      <PageHeader title={delegated ? featureMessages[locale].features : admin ? adminMessages[locale].administration : institutionMessages[locale].review} />
+      <PageHeader title={triage ? needReviewLabel(locale,"triageQueue") : delegated ? featureMessages[locale].features : admin ? adminMessages[locale].administration : institutionMessages[locale].review} />
       {verifying ? <div className={`${institutionCard} mx-auto w-full max-w-md py-6 sm:py-8`}>
         <MfaChallenge factorIds={factorIds} subject={subject} sessionId={sessionId}
           workspace={{ onVerified: () => open(true), onCancel: cancelVerification, onSessionEnded: endVerificationSession }} />
@@ -84,7 +86,7 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
               restoreFocus.current = false;
               button.focus();
             }
-          }}>{delegated ? featureMessages[locale].moderationEntry : admin ? t.openAdmin : t.openReview}</button>
+          }}>{triage ? needReviewLabel(locale,"access") : delegated ? featureMessages[locale].moderationEntry : admin ? t.openAdmin : t.openReview}</button>
       </section>}
     </div>
   </MemberShell>;

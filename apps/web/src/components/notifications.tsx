@@ -14,6 +14,7 @@ import { f24Messages } from "@/lib/f24-i18n";
 import { socialMessages } from "@/lib/social-i18n";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
+import { needReviewLabel } from "@/lib/community-needs-review-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { safetyMessages } from "@/lib/safety-i18n";
@@ -28,8 +29,9 @@ import { MemberAppeals } from "./enforcement-appeals";
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 
-function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent }: MemberNotification) {
+function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent, communityNeed }: MemberNotification) {
   if (!available) return null;
+  if (kind === "community_need_notice") return communityNeed ? "/communities/intake/needs/" + communityNeed.needId : null;
   if (kind === "event_notice") return communityEvent ? "/events/" + communityEvent.eventId : null;
   if (kind === "poll_event") return pollEvent ? pollEvent.action === "nomination_requested" ? "/polls/nominations" : "/polls/" + pollEvent.pollId : null;
   if (kind === "follow_requested") return "/settings#follow-requests";
@@ -92,6 +94,7 @@ function notificationMessage(locale: Locale, item: MemberNotification) {
   const t = mediaNotificationMessages[locale];
   if (!item.available || !item.kind) return t.unavailable;
   switch (item.kind) {
+    case "community_need_notice": return needReviewLabel(locale, item.communityNeed?.action ?? "reviewStatus");
     case "appeal_decided": return safetyMessages[locale].appeal_decided;
     case "verification_decided": return trustMessages[locale].verifyApplicationAlert;
     case "verification_appeal_decided": return trustMessages[locale].verifyAppealAlert;

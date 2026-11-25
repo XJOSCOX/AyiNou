@@ -12,7 +12,8 @@ export interface MemberNotification {
   kind: "post_reaction" | "post_comment" | "comment_reply" | "new_follower" | "follow_requested" | "follow_approved" | "appeal_decided" |
     "verification_decided" | "verification_appeal_decided" | "representative_access_changed" |
     "ambassador_invited" | "ambassador_updated" | "organization_access_changed" |
-    "project_submitted" | "project_assigned" | "project_changes" | "project_approved" | "project_rejected" | "project_operation" | "poll_event" | "post_mention" | "post_repost" | "post_quote" | "event_notice" | null;
+    "project_submitted" | "project_assigned" | "project_changes" | "project_approved" | "project_rejected" | "project_operation" | "poll_event" | "post_mention" | "post_repost" | "post_quote" | "event_notice" | "community_need_notice" | null;
+  communityNeed?: { needId: string; action: string } | null;
   communityEvent?: { eventId: string; action: "rsvp" | "changed" | "canceled" | "announcement" } | null;
   pollEvent?: { pollId: string; action: PollNotice } | null;
   projectOperation?: { projectId: string; action: ProjectOperationEvent | ProjectProgressEvent } | null;

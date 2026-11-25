@@ -293,7 +293,8 @@ Feature development pauses here for owner review of the engineering results and 
 ## Phase 7 — Community reports and evidence-based verification
 
 - [x] C1.1 private Community Needs foundation in Communities. Drafts, confirmed submissions, withdrawal, revision receipts and owner-only access are implemented. The hosted database migration was applied and verified on November 24, 2026. Real intake remains disabled. [Implementation report](docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md)
-- [ ] C1.2 independent evidence review, C1.3 publication, C1.4 project linking, and C1.5 authorized pilot activation.
+- [x] C1.2 private triage, independent evidence review, author corrections, challenges, and scoped intake restriction. Hosted schema approval and real review activation remain open. [Implementation report](docs/community-needs/C1_2_IMPLEMENTATION_REPORT.md)
+- [ ] C1.3 publication, C1.4 project linking, and C1.5 authorized pilot activation.
 - [ ] Extend structured reporting to local events and general public claims.
 - [ ] Support confirmations, challenges, credible sources, and safe evidence submission.
 - [ ] Review statuses: unverified, under review, verified, misleading, false, inconclusive.

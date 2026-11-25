@@ -2710,6 +2710,113 @@
           "rolloutAndRollback": "Apply the exact version only after separate approval and preflight. Leave both intake gates closed and preserve all history in any reviewed forward correction."
         }
       ]
+    },
+    {
+      "id": "c1-2-community-needs-review",
+      "report": "docs/community-needs/C1_2_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/community-needs/:id/review",
+          "contract": "GET /api/v1/me/community-needs/:id/review - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "This scoped projection does not expose evidence or mutate case state."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs-review.spec.ts",
+            "denialScenario": "The disabled gate, another author, cross-community assignments, or an invalid MFA workspace denies access as applicable."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/community-needs-review",
+          "contract": "GET /api/v1/private/community-needs-review - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "This scoped projection does not expose evidence or mutate case state."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs-review.spec.ts",
+            "denialScenario": "The disabled gate, another author, cross-community assignments, or an invalid MFA workspace denies access as applicable."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/community-needs-review/:id",
+          "contract": "GET /api/v1/private/community-needs-review/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Case commands and assigned evidence access add private receipts in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs-review.spec.ts",
+            "denialScenario": "The disabled gate, another author, cross-community assignments, or an invalid MFA workspace denies access as applicable."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/community-needs-review/triage-access",
+          "contract": "GET /api/v1/private/community-needs-review/triage-access - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "This scoped projection does not expose evidence or mutate case state."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs-review.spec.ts",
+            "denialScenario": "The disabled gate, another author, cross-community assignments, or an invalid MFA workspace denies access as applicable."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/community-needs/:id/review",
+          "contract": "PATCH /api/v1/me/community-needs/:id/review 32000 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Case commands and assigned evidence access add private receipts in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs-review.spec.ts",
+            "denialScenario": "The disabled gate, another author, cross-community assignments, or an invalid MFA workspace denies access as applicable."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/private/community-needs-review/:id",
+          "contract": "PATCH /api/v1/private/community-needs-review/:id 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Case commands and assigned evidence access add private receipts in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs-review.spec.ts",
+            "denialScenario": "The disabled gate, another author, cross-community assignments, or an invalid MFA workspace denies access as applicable."
+          }
+        },
+        {
+          "route": "POST /api/v1/private/community-needs-review",
+          "contract": "POST /api/v1/private/community-needs-review 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Case commands and assigned evidence access add private receipts in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs-review.spec.ts",
+            "denialScenario": "The disabled gate, another author, cross-community assignments, or an invalid MFA workspace denies access as applicable."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124155100_c12_community_needs_review.sql",
+          "rlsAndGrants": "New review tables have RLS and explicit client and service table revocations. The bound review RPC is executable by the backend service role.",
+          "authorization": "Current account, explicit community assignment and grant, recent MFA, original session, author isolation and project, organization and reviewer conflict checks.",
+          "compatibility": "C1.1 revisions, moderation state and notification grants are preserved. A new intake guard and notice source extend existing boundaries without opening a gate.",
+          "validation": "Disposable role, scope, idempotency, evidence isolation, challenge deadline and recipient-notice checks.",
+          "rolloutAndRollback": "Apply only after exact approval, read-only preflight preservation and a fresh dry run. Leave pilot gates empty and prefer additive forward corrections."
+        }
+      ]
     }
   ]
 }
