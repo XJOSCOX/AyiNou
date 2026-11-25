@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, type FormEvent } from "react";
+import { pilotLabel } from "@/lib/community-needs-pilot-i18n";
 import { communityNeedCategories, type CommunityNeed, type CommunityNeedContent, type CommunityNeedList, type NeedReviewCase } from "@ayinou/shared";
 import { authorizedRequest } from "@/lib/api";
 import { ApiRequestError } from "@/lib/api-errors";
@@ -78,8 +79,10 @@ export function CommunityNeeds({ id, creating = false, initialCommunity }: { id?
     </header>
     {error != null && <p role="alert" className={institutionErrorBox}>{message(error, copy)}</p>}
     {!data && error == null && <p role="status">{copy.loading}</p>}
-    {creating && list && (!communities.length ? <p className={institutionCard}>{copy.noMemberships}</p>
+    {list?.intakeStatus && list.intakeStatus !== "open" && <p role="status" className={institutionCard}>{pilotLabel(locale, list.intakeStatus === "capacity" ? "intakeCapacity" : "intakeClosed")}</p>}
+    {creating && list && (!communities.length ? (list.intakeStatus ? null : <p className={institutionCard}>{copy.noMemberships}</p>)
       : <NeedEditor communities={communities} initialCommunity={selected} />)}
+    {item?.intakeStatus && item.intakeStatus !== "open" && <p role="status" className={institutionCard}>{pilotLabel(locale, item.intakeStatus === "capacity" ? "intakeCapacity" : "intakeClosed")}</p>}
     {item && <NeedEditor key={item.id + ":" + item.revision} item={item} onRefresh={refresh} />}
     {!creating && !id && list && <section className={institutionCard}>
       {!list.needs.length && <p>{communities.length ? copy.empty : copy.noMemberships}</p>}
@@ -119,6 +122,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
   const [error, setError] = useState<unknown>(null);
   const receipt = useRef<{ body: string; key: string } | null>(null);
   const draft = !record || record.status === "draft";
+  const intakeBlocked = record?.intakeStatus === "closed" || record?.intakeStatus === "capacity";
   const dirty = !!record && JSON.stringify(content) !== JSON.stringify(record.content);
   const dates = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
   const set = <Key extends keyof CommunityNeedContent>(key: Key, value: CommunityNeedContent[Key]) => {
@@ -129,7 +133,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
   };
 
   async function mutate(action: "save" | "submit" | "withdraw") {
-    if (busy || (action !== "save" && (!confirmed || dirty))) return;
+    if (busy || (action === "submit" && intakeBlocked) || (action === "save" && record?.intakeStatus === "closed") || (action !== "save" && (!confirmed || dirty))) return;
     const body = JSON.stringify(!record ? { communityId: community, content } :
       action === "save" ? { action: "edit", expectedRevision: record.revision, content } :
         { action, expectedRevision: record.revision, confirmed });
@@ -220,7 +224,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
             <input type="checkbox" checked={correctionConfirmed} onChange={(e) => confirmCorrection(e.target.checked)} />
             {needReviewLabel(locale,"confirm")}
           </label>}
-          <button className={institutionAction + " justify-self-start"} disabled={!!record && !dirty || correcting && !correctionConfirmed}>
+          <button className={institutionAction + " justify-self-start"} disabled={!!record && !dirty || correcting && !correctionConfirmed || (draft && record?.intakeStatus === "closed")}>
             {correcting ? needReviewLabel(locale,"correct") : copy.save}
           </button>
         </fieldset>
@@ -253,7 +257,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
           <input className="mt-0.5 size-4 shrink-0" type="checkbox" checked={confirmed} disabled={busy || dirty}
             onChange={(event) => setConfirmed(event.target.checked)} />{draft ? copy.confirmation : copy.withdrawConfirm}
         </label>
-        <button className={draft ? institutionAction : quietButton} type="button" disabled={!confirmed || busy || dirty}
+        <button className={draft ? institutionAction : quietButton} type="button" disabled={!confirmed || busy || dirty || (draft && intakeBlocked)}
           onClick={() => void mutate(draft ? "submit" : "withdraw")}>{draft ? copy.submit : copy.withdraw}</button>
       </div>}
       <details><summary className="cursor-pointer font-semibold">{copy.history}</summary>

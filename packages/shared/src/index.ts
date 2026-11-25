@@ -17,6 +17,7 @@ export * from "./early-partners";
 export * from "./ambassadors";
 export * from "./communities";
 export * from "./community-needs";
+export * from "./community-needs-pilot";
 export * from "./community-needs-review";
 export * from "./feed";
 export * from "./projects";

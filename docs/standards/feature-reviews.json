@@ -3033,6 +3033,48 @@
           "rolloutAndRollback": "Use the exact tested checksum, read-only preservation baseline and dry run. Verify all four gates remain closed. Prefer scoped forward repair while keeping the association ledger."
         }
       ]
+    },
+    {
+      "id": "c1-6-community-needs-pilot",
+      "report": "docs/community-needs/C1_6_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/community-needs-pilot",
+          "contract": "GET /api/v1/admin/community-needs-pilot - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only dashboard renders existing aggregates and bounded roster state without changing policy or cases."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/pilot-community-needs.spec.ts",
+            "denialScenario": "Guest, non-Founder, stale originating workspace, missing MFA and forged readiness are rejected. Closed pilot state cannot start native case processing."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/community-needs-pilot",
+          "contract": "PATCH /api/v1/admin/community-needs-pilot 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Configuration, cohort, pause and resumption commit with reasons, exact revisions and idempotent audit records."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/pilot-community-needs.spec.ts",
+            "denialScenario": "Guest, non-Founder, stale originating workspace, missing MFA and forged readiness are rejected. Closed pilot state cannot start native case processing."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124155500_c16_pilot_preparation.sql",
+          "rlsAndGrants": "Five new private RLS tables with no direct app grants. Only the existing backend service role can execute two new scoped RPCs. Helpers are internal to the database.",
+          "authorization": "Founder provenance, recent MFA, same private workspace, Ouest, explicit cohort, existing reviewer grants and independent attestations are enforced at SQL boundaries.",
+          "compatibility": "Native C1.1–C1.5 fixture paths remain confined to disposable infrastructure. No policy, readiness, enrollment or case rows are seeded.",
+          "validation": "Disposable C1.6 real SQL tests cover idempotency, concurrency, expiry, no direct grants, pause, cohort and Founder UI. Existing native regressions remain in the test set.",
+          "rolloutAndRollback": "Apply only exact owner-approved checksum to linked AyiNou after dry run and preservation checks. Keep pilot and fixture rows empty. Prefer forward remediation and keep external release routing closed after restoration."
+        }
+      ]
     }
   ]
 }

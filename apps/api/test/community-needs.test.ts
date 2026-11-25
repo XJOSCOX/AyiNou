@@ -55,3 +55,63 @@ test("needs reject unverified sessions, actor overrides, unsafe references and u
   assert.equal(args!["p_session"], session);
   assert.equal(args!["p_request"], id);
 });
+
+
+test("pilot traffic requires an exact server release and preserves the native authenticated RPC boundary", async (t) => {
+  const calls: { name: string; input: Record<string, unknown> }[] = [];
+  const release = "1234567890123456789012345678901234567890";
+  let matched = false;
+  const app = createApp(readConfig({ LOG_LEVEL: "silent", AYINOU_COMMUNITY_NEEDS: "pilot",
+    AYINOU_COMMUNITY_NEEDS_RELEASE: release }), {
+    institutions: { async rpc(name: string, input: Record<string, unknown>) {
+      calls.push({ name, input });
+      return name === "c16_runtime_for_api" ? matched : { needs: [], communities: [], intakeStatus: "closed" };
+    } } as InstitutionRepository,
+    auth: {
+      async verify() { return null; },
+      async verifySession(token) { return token === "member" ? { actor: id, session, aal2: false } : null; },
+    },
+  });
+  t.after(() => app.close());
+  assert.equal((await app.inject({ url: path })).statusCode, 401);
+  assert.equal(calls.length, 0);
+  const closed = await app.inject({ url: path, headers: { ...headers, "x-ayinou-release": "untrusted" } });
+  assert.equal(closed.statusCode, 404);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]?.name, "c16_runtime_for_api");
+  assert.equal(calls[0]?.input.p_release, release);
+  matched = true;
+  const result = await app.inject({ url: path, headers });
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.json().intakeStatus, "closed");
+  assert.equal(calls.at(-1)?.name, "c11_needs_for_api");
+  assert.equal(calls.at(-1)?.input.p_actor, id);
+  assert.equal(calls.at(-1)?.input.p_session, session);
+});
+
+test("pilot settings derive the actor, workspace and release from trusted bindings", async (t) => {
+  const release = "1234567890123456789012345678901234567890";
+  let input: Record<string, unknown> | undefined;
+  const app = createApp(readConfig({ LOG_LEVEL: "silent", AYINOU_COMMUNITY_NEEDS: "pilot",
+    AYINOU_COMMUNITY_NEEDS_RELEASE: release }), {
+    institutions: { async rpc(_name: string, args: Record<string, unknown>) { input = args; return { status: "unconfigured" }; } } as InstitutionRepository,
+    auth: {
+      async verify() { return null; },
+      async verifySession(token, staff) {
+        return token === "member" && !staff ? { actor: id, session, aal2: false }
+          : token === "staff" ? { actor: id, session, aal2: true, totpAt: 123 } : null;
+      },
+    },
+  });
+  t.after(() => app.close());
+  const url = "/api/v1/admin/community-needs-pilot";
+  assert.equal((await app.inject({ url, headers })).statusCode, 403);
+  const valid = { authorization: "Bearer staff", "x-ayinou-workspace": session };
+  const payload = { action: "activate", expectedRevision: 1, confirmed: true, reason: "A recorded test authorization", requestId: id };
+  assert.equal((await app.inject({ url, method: "PATCH", headers: valid, payload: { ...payload, p_release: "forged" } })).statusCode, 400);
+  assert.equal((await app.inject({ url, method: "PATCH", headers: valid, payload })).statusCode, 200);
+  assert.equal(input?.p_actor, id);
+  assert.equal(input?.p_workspace, session);
+  assert.equal(input?.p_release, release);
+  assert.deepEqual(input?.p_command, payload);
+});

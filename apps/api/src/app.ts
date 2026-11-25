@@ -9,6 +9,7 @@ import { createCommunityRepository, type CommunityRepository } from "./services/
 import { registerNeedProjectLinks } from "./routes/need-project-links.js";
 import { registerCommunityNeedPublication } from "./routes/community-need-publication.js";
 import { registerCommunityNeedsReview } from "./routes/community-needs-review.js";
+import { registerCommunityNeedsPilot } from "./routes/community-needs-pilot.js";
 import { registerCommunityNeeds } from "./routes/community-needs.js";
 import { registerCommunityRoutes } from "./routes/community.js";
 import { registerInstitutionRoutes } from "./routes/institutions.js";
@@ -78,11 +79,16 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register(statusRoutes);
   app.register((instance) => registerMemberRoutes(instance, auth, members, readBudget));
   app.register((instance) => registerCommunityRoutes(instance, community, institutions));
+  const syntheticNeeds = config.AYINOU_COMMUNITY_NEEDS === "synthetic" &&
+    config.SUPABASE_URL === "http://127.0.0.1:55321" && process.env.NODE_ENV !== "production";
+  const pilotRelease = (config.AYINOU_COMMUNITY_NEEDS === "pilot" || syntheticNeeds)
+    ? config.AYINOU_COMMUNITY_NEEDS_RELEASE ?? null : null;
   const needs = {
-    enabled: config.AYINOU_COMMUNITY_NEEDS === "synthetic" && config.SUPABASE_URL === "http://127.0.0.1:55321"
-      && process.env.NODE_ENV !== "production",
+    enabled: pilotRelease && institutions ? async () => syntheticNeeds ||
+      await institutions.rpc<boolean>("c16_runtime_for_api", { p_release: pilotRelease }) === true : syntheticNeeds,
     auth, repo: institutions, read: readBudget,
   };
+  app.register((instance) => registerCommunityNeedsPilot(instance, needs, pilotRelease));
   app.register((instance) => registerCommunityNeeds(instance, needs));
   app.register((instance) => registerCommunityNeedsReview(instance, needs));
   app.register((instance) => registerCommunityNeedPublication(instance, needs));

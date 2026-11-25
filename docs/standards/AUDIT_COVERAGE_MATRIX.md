@@ -144,3 +144,7 @@ The private association ledger records the organizer and authority, exact need s
 ## C1.5 Community Needs integration
 
 The disposable integrated journey follows one case from private draft and submission through evidence review and clarification, exact publication approval, community discussion, and separate project association. It checks existing transactional ledgers across all four boundaries, recipient-only notices, consent and invalidation. The read-only cursor correction adds no audit event or grant. [Integration report](../community-needs/C1_5_INTEGRATION_REPORT.md) · [Security findings](../community-needs/C1_5_SECURITY_FINDINGS.md)
+
+## C1.6 Founder-controlled Community Needs pilot
+
+Each policy revision, cohort enrollment or removal, activation, emergency pause and resumption appends a private reasoned decision to the pilot history in the same transaction. Existing case and publication ledgers remain authoritative. Launch attestations come from a separate protected process. The dashboard exposes status, bounded roster information and counts without need narratives or reviewer evidence. [Implementation report](../community-needs/C1_6_IMPLEMENTATION_REPORT.md)

@@ -5,6 +5,7 @@ import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
 import type { ReadBudget } from "../services/read-budget.js";
+import { needsEnabled } from "../modules/community-needs-access.js";
 import { needContent } from "./community-needs.js";
 
 const id = z.strictObject({ id: z.uuid() });
@@ -28,7 +29,7 @@ const policyCommand = z.strictObject({
 });
 
 export type NeedRouteOptions = {
-  enabled: boolean; auth: AuthVerifier | null; repo: InstitutionRepository | null; read: ReadBudget;
+  enabled: boolean | (() => Promise<boolean>); auth: AuthVerifier | null; repo: InstitutionRepository | null; read: ReadBudget;
 };
 
 export async function needRequestContext(request: FastifyRequest, { auth, repo, read }: NeedRouteOptions, staff: boolean) {
@@ -58,6 +59,7 @@ export function registerCommunityNeedsReview(app: FastifyInstance, options: Need
   async function execute<T>(request: FastifyRequest, lane: string, caseId: string | null, command: object | null, after: string | null = null) {
     if (!enabled) throw new ApiError(404, "COMMUNITY_NEEDS_REVIEW_DISABLED", "Community needs review unavailable");
     const { session, workspace, repo } = await needRequestContext(request, options, lane !== "member" && lane !== "access");
+    if (!await needsEnabled(enabled)) throw new ApiError(404, "COMMUNITY_NEEDS_REVIEW_DISABLED", "Community needs review unavailable");
     try {
       const result = await repo.rpc<T & { denied?: boolean }>("c12_needs_for_api", {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2,

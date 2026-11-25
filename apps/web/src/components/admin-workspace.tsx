@@ -39,6 +39,8 @@ import { governanceMessages } from "@/lib/governance-i18n";
 import { earlyPartnerMessages } from "@/lib/early-partner-i18n";
 import { AdminEarlyPartners } from "./early-partner-workspace";
 import { HomepageSettings } from "./homepage-settings";
+import { pilotLabel } from "@/lib/community-needs-pilot-i18n";
+import { CommunityNeedsPilot } from "./community-needs-pilot";
 import { ModerationPolicySettings } from "./moderation-policy-settings";
 import { moderationPolicyMessages } from "@/lib/moderation-policy-i18n";
 import { RegistrationSettings } from "./registration-settings";
@@ -88,7 +90,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     partners: earlyPartnerMessages[locale].title,
     moderationOverview: moderation.overview, moderationReports: moderation.reports, moderationContent: moderation.content,
     moderationRestrictions: moderation.restrictions, moderationAppeals: moderation.appeals, moderationHistory: moderation.history,
-    communityNeeds: needReviewLabel(locale,"queue"),
+    communityNeeds: needReviewLabel(locale,"queue"), communityNeedsPilot: pilotLabel(locale,"title"),
     featureRestrictions: featureMessages[locale].features, moderatorDelegation: featureMessages[locale].delegations,
     moderationPolicies: moderationPolicyMessages[locale].title,
     ...verificationCopy[locale].sections,
@@ -229,6 +231,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                     path={"/api/v1/admin/feature-policy/" + key} title={feedLanguageMessages[locale].features[key]} />)}
                 </section>)}
               </div>}
+              {tab === "communityNeedsPilot" && access.data?.founder && <CommunityNeedsPilot key={workspaceId} workspace={workspaceId} />}
               {tab === "moderationPolicies" && access.data?.founder && <ModerationPolicySettings key={workspaceId} workspace={workspaceId} />}
               {tab === "registration" && access.data?.founder && <RegistrationSettings key={workspaceId} workspaceId={workspaceId} />}
               {tab === "memberExperience" && access.data?.founder && <MemberExperienceSettings key={workspaceId} workspaceId={workspaceId} />}

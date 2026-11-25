@@ -2,9 +2,10 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { communityNeedCategories, type CommunityNeed, type CommunityNeedList } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
-import type { AuthVerifier } from "../services/auth.js";
-import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
-import type { ReadBudget } from "../services/read-budget.js";
+import { InstitutionError } from "../services/institutions.js";
+
+import { needsEnabled } from "../modules/community-needs-access.js";
+import type { NeedRouteOptions } from "./community-needs-review.js";
 
 const path = "/api/v1/me/community-needs";
 const idParam = z.strictObject({ id: z.uuid() });
@@ -31,9 +32,7 @@ const update = z.discriminatedUnion("action", [
   z.strictObject({ action: z.literal("withdraw"), expectedRevision: expected, confirmed: z.literal(true) }),
 ]);
 
-export function registerCommunityNeeds(app: FastifyInstance, options: {
-  enabled: boolean; auth: AuthVerifier | null; repo: InstitutionRepository | null; read: ReadBudget;
-}) {
+export function registerCommunityNeeds(app: FastifyInstance, options: NeedRouteOptions) {
   const { enabled, auth, repo, read } = options;
   app.addHook("onRequest", async (_request, reply) => {
     reply.header("Cache-Control", "private, no-store").header("Referrer-Policy", "no-referrer")
@@ -51,6 +50,7 @@ export function registerCommunityNeeds(app: FastifyInstance, options: {
       throw new ApiError(403, "ONBOARDING_REQUIRED", "Complete member onboarding first");
     }
     await read("profile", session.actor, request.ip);
+    if (!await needsEnabled(enabled)) throw new ApiError(404, "COMMUNITY_NEEDS_DISABLED", "Community needs intake is unavailable");
     try {
       return await repo.rpc<T>("c11_needs_for_api", {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_action: action,

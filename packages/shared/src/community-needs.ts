@@ -26,11 +26,13 @@ export interface CommunityNeedSummary {
 }
 
 export interface CommunityNeed extends CommunityNeedSummary {
+  intakeStatus?: "open" | "closed" | "capacity";
   content: CommunityNeedContent;
   history: { revision: number; status: CommunityNeedStatus; occurredAt: string }[];
 }
 
 export interface CommunityNeedList {
+  intakeStatus?: "open" | "closed" | "capacity";
   needs: CommunityNeedSummary[];
   communities: { id: string; slug: string; name: string }[];
   nextCursor: string | null;

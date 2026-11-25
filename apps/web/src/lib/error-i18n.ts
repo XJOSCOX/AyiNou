@@ -17,6 +17,7 @@ import { organizationRoleMessages } from "./organization-role-i18n";
 import { projectMessages } from "./project-i18n";
 import { projectWorkMessages } from "./project-work-i18n";
 import { projectProgressMessages } from "./project-progress-i18n";
+import { pilotLabel } from "./community-needs-pilot-i18n";
 import { featureMessages } from "./feature-enforcement-i18n";
 import { pollMessages } from "./poll-i18n";
 
@@ -35,6 +36,8 @@ export function localizedApiError(locale: Locale, cause: unknown) {
   const code = apiErrorCode(cause);
   const safety = safetyMessages[locale];
   switch (code) {
+    case "COMMUNITY_NEEDS_PILOT_CLOSED": return pilotLabel(locale, "intakeClosed");
+    case "COMMUNITY_NEEDS_PILOT_CAPACITY": return pilotLabel(locale, "intakeCapacity");
     case "FEATURE_RESTRICTED": return featureMessages[locale].blocked;
     case "FEATURE_RESTRICTION_LIMIT": return featureMessages[locale].limit;
     case "GOVERNANCE_REQUIRED": return governanceMessages[locale].protectedRole;

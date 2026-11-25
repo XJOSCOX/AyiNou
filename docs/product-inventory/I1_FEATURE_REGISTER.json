@@ -7154,26 +7154,30 @@
           "apps/web/src/app/(protected)/communities/[slug]/page.tsx",
           "apps/web/src/components/community-need-publication.tsx",
           "apps/web/src/app/(protected)/communities/intake/links/page.tsx",
-          "apps/web/src/components/need-project-links.tsx"
+          "apps/web/src/components/need-project-links.tsx",
+          "apps/web/src/components/community-needs-pilot.tsx"
         ],
         "api": [
           "apps/api/src/routes/community-needs.ts",
           "apps/api/src/routes/community-needs-review.ts",
           "apps/api/src/routes/community-need-publication.ts",
-          "apps/api/src/routes/need-project-links.ts"
+          "apps/api/src/routes/need-project-links.ts",
+          "apps/api/src/routes/community-needs-pilot.ts"
         ],
         "contracts": [
           "packages/shared/src/community-needs.ts",
           "packages/shared/src/community-needs-review.ts",
           "packages/shared/src/community-need-publication.ts",
-          "packages/shared/src/need-project-links.ts"
+          "packages/shared/src/need-project-links.ts",
+          "packages/shared/src/community-needs-pilot.ts"
         ],
         "migrations": [
           "supabase/migrations/20261124155000_c11_community_needs.sql",
           "supabase/migrations/20261124155100_c12_community_needs_review.sql",
           "supabase/migrations/20261124155200_c13_community_need_publication.sql",
           "supabase/migrations/20261124155300_c14_need_project_links.sql",
-          "supabase/migrations/20261124155400_c15_link_directory_cursor.sql"
+          "supabase/migrations/20261124155400_c15_link_directory_cursor.sql",
+          "supabase/migrations/20261124155500_c16_pilot_preparation.sql"
         ],
         "postgresObjects": [
           "public.c11_needs_for_api",
@@ -7186,7 +7190,14 @@
           "private.c13_challenges",
           "public.c14_links_for_api",
           "private.c14_links",
-          "private.c14_events"
+          "private.c14_events",
+          "public.c16_pilot_for_api",
+          "public.c16_runtime_for_api",
+          "private.c16_policy",
+          "private.c16_enrollment",
+          "private.c16_evidence",
+          "private.c16_cases",
+          "private.c16_history"
         ],
         "tests": {
           "api": [
@@ -7196,7 +7207,8 @@
             "apps/web/e2e/community-needs.spec.ts",
             "apps/web/e2e/community-needs-review.spec.ts",
             "apps/web/e2e/community-need-publication.spec.ts",
-            "apps/web/e2e/need-project-links.spec.ts"
+            "apps/web/e2e/need-project-links.spec.ts",
+            "apps/web/e2e/pilot-community-needs.spec.ts"
           ],
           "database": [
             "supabase/tests/database/c11_community_needs_test.sql",
@@ -7214,7 +7226,12 @@
           "docs/community-needs/C1_5_REVIEWER_OPERATIONS.md",
           "docs/community-needs/C1_5_PRIVACY_AND_RETENTION_GAPS.md",
           "docs/community-needs/C1_5_TEST_RESULTS.md",
-          "docs/community-needs/C1_5_OWNER_DECISIONS.md"
+          "docs/community-needs/C1_5_OWNER_DECISIONS.md",
+          "docs/community-needs/C1_6_IMPLEMENTATION_REPORT.md",
+          "docs/community-needs/C1_6_ACTIVATION_POLICY.md",
+          "docs/community-needs/C1_6_PILOT_OPERATIONS.md",
+          "docs/community-needs/C1_6_SECURITY_TESTS.md",
+          "docs/community-needs/C1_6_LAUNCH_READINESS.md"
         ]
       },
       "verification": {
@@ -7223,7 +7240,7 @@
         "hostedDatabase": "The C1.5 cursor migration is applied. All four fixture gates are closed, zero migrations are pending, and 51 record preservation checks matched.",
         "connectedApplication": "C1.5 confirmed closed features with Test02 and J0SC0X in the connected local browser.",
         "hostedApplication": "Hosted application release unverified.",
-        "operationalApproval": "Intake, review, publication and link gates remain closed. A separate Ouest cohort, activation release, staffing and privacy approvals are required."
+        "operationalApproval": "C1.6 prepares a Founder-controlled Ouest pilot. Real processing remains closed pending external sign-offs, setup of an authorized cohort and independent reviewers, and a separate launch decision."
       }
     },
     {
@@ -7720,5 +7737,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C1.5 Community Needs Integration and Controlled Pilot Readiness"
+  "lastScopeUpdate": "C1.6 Founder-Controlled Community Needs Pilot Preparation"
 }

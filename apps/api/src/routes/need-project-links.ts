@@ -1,3 +1,4 @@
+import { needsEnabled } from "../modules/community-needs-access.js";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { needProjectLinkCommands } from "@ayinou/shared";
 import { z } from "zod";
@@ -26,6 +27,7 @@ export function registerNeedProjectLinks(app: FastifyInstance, options: NeedRout
   async function execute<T>(request: FastifyRequest, audience: string, resource: string | null, after?: string, command?: object) {
     if (!options.enabled) throw new ApiError(404,"NEED_PROJECT_LINKS_DISABLED","Community need associations unavailable");
     const { session, workspace, repo } = await needRequestContext(request,options,audience==="admin" || audience==="review");
+    if (!await needsEnabled(options.enabled)) throw new ApiError(404,"NEED_PROJECT_LINKS_DISABLED","Community need associations unavailable");
     try {
       return await repo.rpc<T>("c14_links_for_api", {
         p_actor:session.actor, p_session:session.session, p_aal2:session.aal2, p_totp:session.totpAt ?? null,

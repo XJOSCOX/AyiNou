@@ -41,6 +41,8 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
       }
       if (["PSF04", "PSF14", "22023"].includes(error.code) && name.startsWith("m24_"))
         throw new InstitutionError(error.code === "22023" ? "INVALID_INPUT" : "APPEAL_INELIGIBLE", error.code === "22023" ? 400 : 404);
+      if (error.code === "C1602") throw new InstitutionError("COMMUNITY_NEEDS_PILOT_CLOSED", 409);
+      if (error.code === "C1603") throw new InstitutionError("COMMUNITY_NEEDS_PILOT_CAPACITY", 409);
       if (name === "c14_links_for_api") {
         if (["C1401", "PGRST202"].includes(error.code)) throw new InstitutionError("NEED_PROJECT_LINKS_DISABLED",404);
         if (error.code === "C1402") throw new InstitutionError("NOT_FOUND",404);

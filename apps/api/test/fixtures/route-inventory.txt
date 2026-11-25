@@ -19,6 +19,7 @@ GET /api/v1/admin/audit - -
 GET /api/v1/admin/audit/events - -
 GET /api/v1/admin/audit/events/:reference - -
 GET /api/v1/admin/audit/policies - -
+GET /api/v1/admin/community-needs-pilot - -
 GET /api/v1/admin/early-partners - -
 GET /api/v1/admin/feature-policy/:key - -
 GET /api/v1/admin/founder-blue-verification/:id - -
@@ -202,6 +203,7 @@ HEAD /api/v1/admin/audit - onSend
 HEAD /api/v1/admin/audit/events - onSend
 HEAD /api/v1/admin/audit/events/:reference - onSend
 HEAD /api/v1/admin/audit/policies - onSend
+HEAD /api/v1/admin/community-needs-pilot - onSend
 HEAD /api/v1/admin/early-partners - onSend
 HEAD /api/v1/admin/feature-policy/:key - onSend
 HEAD /api/v1/admin/founder-blue-verification/:id - onSend
@@ -381,6 +383,7 @@ HEAD /health - onSend
 OPTIONS * - -
 PATCH /api/v1/admin/accounts/:id 4096 -
 PATCH /api/v1/admin/ambassadors/:id 6000 -
+PATCH /api/v1/admin/community-needs-pilot 4096 -
 PATCH /api/v1/admin/feature-policy/:key 4096 -
 PATCH /api/v1/admin/homepage/community-statistics 4096 -
 PATCH /api/v1/admin/member-experience 4096 -

@@ -1,3 +1,4 @@
+import { needsEnabled } from "../modules/community-needs-access.js";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { communityNeedCategories, needPublicationReasons, needPublicationStaffActions } from "@ayinou/shared";
 import { z } from "zod";
@@ -42,6 +43,7 @@ export function registerCommunityNeedPublication(app: FastifyInstance, options: 
   } = {}): Promise<T> {
     if (!options.enabled) throw new ApiError(404, "COMMUNITY_NEED_PUBLICATION_DISABLED", "Community need publication unavailable");
     const { session, workspace, repo } = await needRequestContext(request, options, lane !== "member" && lane !== "directory");
+    if (!await needsEnabled(options.enabled)) throw new ApiError(404, "COMMUNITY_NEED_PUBLICATION_DISABLED", "Community need publication unavailable");
     const { caseId, roomId, command, after, category } = optionsForCall;
     try {
       return await repo.rpc<T>("c13_publication_for_api", {

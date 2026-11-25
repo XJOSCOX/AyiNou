@@ -1,0 +1,230 @@
+import { randomUUID } from "node:crypto";
+import type { NeedPublication, NeedProjectLink, PilotWorkspace } from "@ayinou/shared";
+import { pilotLabel } from "../src/lib/community-needs-pilot-i18n";
+import { api, apiCall, enroll, expect, finishPersonalOnboarding, localClient, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+
+const pilot = "/api/v1/admin/community-needs-pilot";
+const intake = "/api/v1/me/community-needs";
+const staff = "/api/v1/private/community-needs-review";
+const release = "0000000000000000000000000000000000000016";
+const reason = "Synthetic Founder pilot decision and operational check";
+const stages = { intake: true, review: true, publication: true, association: true };
+const need = {
+  title: "Shared reading room access", description: "Residents need access to quiet local study materials.",
+  category: "education", area: "Ouest", beneficiaries: "Local learners", references: [],
+};
+
+async function elevate(person: Member) {
+  const secret = await enroll(person);
+  const client = localClient("AYINOU_E2E_SUPABASE_PUBLIC");
+  expect((await client.auth.signInWithPassword({ email: person.email, password: person.password })).error).toBeNull();
+  const factor = (await client.auth.mfa.listFactors()).data?.totp[0];
+  if (!factor) throw new Error("Missing disposable factor");
+  const result = await client.auth.mfa.challengeAndVerify({ factorId: factor.id, code: totp(secret) });
+  if (result.error) throw result.error;
+  return { ...person, token: result.data.access_token, secret };
+}
+
+async function request<T>(person: Member | null, path: string, method = "GET", value?: object, workspace?: string, key = randomUUID()) {
+  const response = await fetch(api + path, {
+    method, signal: AbortSignal.timeout(12000), body: value ? JSON.stringify(value) : undefined,
+    headers: {
+      ...(person && { Authorization: "Bearer " + person.token }),
+      ...(value && { "Content-Type": "application/json" }),
+      ...(workspace && { "X-Ayinou-Workspace": workspace }), "Idempotency-Key": key,
+    },
+  });
+  if (path.startsWith(pilot)) expect(response.headers.get("cache-control")).toBe("private, no-store");
+  return { status: response.status, body: await response.json() as T };
+}
+
+async function expectStatus<T>(result: Promise<{ status: number; body: T }>, status: number) {
+  const response = await result;
+  expect(response.status, JSON.stringify(response.body)).toBe(status);
+  return response.body;
+}
+
+const receipt = (action: string, expectedRevision: number, fields = {}) =>
+  ({ action, expectedRevision, confirmed: true, reason, requestId: randomUUID(), ...fields });
+
+test("C1.6 Founder preparation, attested activation, atomic capacity, and pause remain independent @smoke", async ({ makeMember, page, context }) => {
+  test.setTimeout(185000);
+  const [owner, adminUser, first, second, outsider, triageUser, evidenceUser, publicationUser, linkUser, challengeUser] =
+    await Promise.all(Array.from({ length: 10 }, () => makeMember({ visible: true })));
+  for (const person of [owner, adminUser, first, second, outsider, triageUser, evidenceUser, publicationUser, linkUser, challengeUser]) {
+    finishPersonalOnboarding(person);
+  }
+  const [founder, admin, triager, reviewer, publisher] = await Promise.all([owner, adminUser, triageUser, evidenceUser, publicationUser].map(elevate));
+  await Promise.all([linkUser, challengeUser].map(enroll));
+  const room = sql("select id from feed_data.communities where slug='ouest';");
+  const otherRoom = sql("select id from feed_data.communities where slug='centre';");
+  expect(sql(`select count(*)=5 and bool_and(c.relrowsecurity)
+    and not bool_or(has_table_privilege('authenticated',c.oid,'SELECT') or has_table_privilege('service_role',c.oid,'INSERT'))
+    from pg_class c where c.relnamespace='private'::regnamespace and c.relkind='r' and c.relname like 'c16_%';`)).toBe("t");
+  expect(sql(`select not has_function_privilege('authenticated','public.c16_pilot_for_api(uuid,uuid,boolean,bigint,uuid,text,jsonb,integer,text)','EXECUTE')
+    and not has_function_privilege('anon','public.c16_runtime_for_api(text)','EXECUTE')
+    and not public.c16_runtime_for_api('${release}');`)).toBe("t");
+
+  sql(`insert into private.platform_bootstrap(user_id) values('${founder.id}');
+    insert into private.platform_admin_audit(actor_id,subject_id,event,reason)
+      values('${founder.id}','${founder.id}','first_account_bootstrapped','Disposable pilot Founder provenance');
+    insert into public.role_assignments(user_id,role) values('${admin.id}','administrator');
+    insert into private.verification_reviewers(user_id) values('${reviewer.id}'),('${publicationUser.id}'),('${linkUser.id}'),('${challengeUser.id}');
+    insert into feed_data.community_memberships(community_id,user_id)
+      values('${room}','${first.id}'),('${room}','${second.id}'),('${room}','${triager.id}'),('${otherRoom}','${outsider.id}');
+    insert into feed_data.community_staff(community_id,user_id,role) values('${room}','${triager.id}','moderator');`);
+  try {
+    const f = String((await apiCall(founder, "/api/v1/me/private-workflows", 200, "POST", { kind: "admin_workspace" })).id);
+    const a = String((await apiCall(admin, "/api/v1/me/private-workflows", 200, "POST", { kind: "admin_workspace" })).id);
+    const rw = String((await apiCall(reviewer, "/api/v1/me/private-workflows", 200, "POST", { kind: "verification_workspace" })).id);
+    const command = (body: object, status = 200) => expectStatus(request<PilotWorkspace>(founder, pilot, "PATCH", body, f), status);
+    const read = () => expectStatus(request<PilotWorkspace>(founder, pilot, "GET", undefined, f), 200);
+    const config = receipt("configure", 0, { durationDays: 7, capacity: 10, stages });
+    const firstDashboard = await read();
+    expect(firstDashboard).toMatchObject({ status: "unconfigured", ready: false, activeParticipants: 0 });
+    expect(firstDashboard.requirements.privacy).toBe("pending");
+    await expectStatus(request(null, pilot), 401);
+    await expectStatus(request(admin, pilot, "GET", undefined, a), 403);
+    await expectStatus(request(founder, pilot, "GET", undefined, a), 403);
+    expect([401, 403]).toContain((await request(owner, pilot, "PATCH", config, f)).status);
+    const direct = await localClient("AYINOU_E2E_SUPABASE_PUBLIC").rpc("c16_pilot_for_api", {
+      p_actor: founder.id, p_session: randomUUID(), p_aal2: true, p_totp: Math.floor(Date.now() / 1000),
+      p_workspace: f, p_release: release, p_command: config, p_before: null, p_query: null,
+    });
+    expect(direct.error).not.toBeNull();
+    await expectStatus(request(first, intake), 404);
+    expect(await command(config)).toMatchObject({ revision: 1, status: "prepared", ready: false });
+    expect(await command(config)).toMatchObject({ revision: 1 });
+    await command(receipt("configure", 0, { durationDays: 7, capacity: 2, stages }), 409);
+    await command(receipt("configure", 1, { durationDays: 7, capacity: 11, stages }), 400);
+    await command(receipt("configure", 1, { durationDays: 7, capacity: 1, stages, communityId: otherRoom }), 400);
+    const competing = await Promise.all([1, 2].map(() =>
+      request(founder, pilot, "PATCH", receipt("configure", 1, { durationDays: 7, capacity: 1, stages }), f)));
+    expect(competing.map((result) => result.status).sort()).toEqual([200, 409]);
+    await command(receipt("enroll", 2, { target: outsider.id, days: 5 }), 403);
+    await expectStatus(request(first, pilot, "PATCH", receipt("enroll", 2, { target: first.id, days: 5 }), f), 403);
+    await command(receipt("enroll", 2, { target: first.id, days: 6 }));
+    await command(receipt("enroll", 3, { target: second.id, days: 6 }));
+    await command(receipt("activate", 4, { requirements: { privacy: "verified" } }), 400);
+    await command(receipt("activate", 4), 409);
+    expect(sql(`select public.c16_runtime_for_api('${release}') and not public.c16_runtime_for_api(repeat('f',40));`)).toBe("t");
+
+    for (const [person, role] of [[triager, "triage"], [reviewer, "review"], [publicationUser, "review"], [linkUser, "review"], [challengeUser, "review"]] as const) {
+      await expectStatus(request(founder, staff, "POST", {
+        action: "grant", target: person.id, communityId: room, role, confirmed: true, note: reason, requestId: randomUUID(),
+      }, f), 200);
+    }
+    await command(receipt("activate", 4), 409);
+    // Simulate independent operational attestations only in the disposable database.
+    sql(`insert into private.c16_evidence(requirement,community_id,release,evidence_reference,attested_by,verified_at,valid_until)
+      select k,'${room}','${release}','disposable-attestation-'||k,'${admin.id}',now(),now()+interval '2 days'
+      from unnest(array['privacy','support','databaseRecovery','storageRecovery','release','launchBlockers']) k;`);
+    expect(await read()).toMatchObject({ ready: true, reviewers: firstDashboard.reviewers + 4, triagers: firstDashboard.triagers + 1, activeParticipants: 2 });
+    const active = await command(receipt("activate", 4));
+    expect(active.status).toBe("active");
+    const tw = String((await apiCall(triager, "/api/v1/me/private-workflows", 200, "POST", { kind: "moderation_workspace" })).id);
+    await expectStatus(request(outsider, intake, "POST", { communityId: otherRoom, content: need }), 409);
+    await expectStatus(request(first, intake, "POST", { communityId: otherRoom, content: need }), 403);
+    await expectStatus(request(triager, intake, "POST", { communityId: room, content: need }), 403);
+    const candidates = await Promise.all([first, second].map(async (person) => ({
+      person, id: (await expectStatus(request<{ id: string }>(person, intake, "POST", { communityId: room, content: need }), 201)).id,
+    })));
+    const submissions = await Promise.all(candidates.map(({ person, id }) =>
+      request(person, intake + "/" + id, "PATCH", { action: "submit", expectedRevision: 1, confirmed: true })));
+    expect(submissions.map(({ status }) => status).sort()).toEqual([200, 409]);
+    const won = candidates[submissions.findIndex(({ status }) => status === 200)];
+    const waiting = candidates.find((entry) => entry.id !== won.id)!;
+    expect((await read()).metrics?.weekly).toBe(1);
+    const action = (person: Member, lane: string, workspace: string, actionName: string, version: number, status: number, more = {}) =>
+      expectStatus(request(person, staff + "/" + won.id + "?lane=" + lane, "PATCH",
+        { action: actionName, expectedRevision: version, requestId: randomUUID(), confirmed: true, note: reason, ...more }, workspace), status);
+    await action(admin, "admin", a, "assign_triage", 0, 200, { target: triager.id });
+    await action(triager, "triage", tw, "refer", 1, 200);
+    await action(admin, "admin", a, "assign_review", 2, 200, { target: reviewer.id });
+    await action(reviewer, "review", rw, "accept", 3, 200, { conflictFree: true });
+    await action(reviewer, "review", rw, "request_information", 4, 200, { summary: "clarify_scope" });
+    const paused = await command(receipt("pause", 5));
+    expect(paused).toMatchObject({ status: "paused", endsAt: active.endsAt });
+    await expectStatus(request(first, intake, "POST", { communityId: room, content: need }), 409);
+    await expectStatus(request(waiting.person, intake + "/" + waiting.id, "PATCH", { action: "submit", expectedRevision: 1, confirmed: true }), 409);
+    expect(await expectStatus(request<{ intakeStatus: string }>(won.person, intake + "/" + won.id), 200)).toMatchObject({ intakeStatus: "closed" });
+    await action(admin, "admin", a, "assign_review", 5, 409, { target: publicationUser.id });
+    await expectStatus(request(won.person, intake + "/" + won.id + "/review", "PATCH", {
+      action: "correct", expectedRevision: 5, expectedEvidenceRevision: 2, requestId: randomUUID(), confirmed: true,
+      content: { ...need, beneficiaries: "Learners seeking access to study material" },
+    }), 200);
+    await expectStatus(request(won.person, intake + "/" + won.id + "/publication", "PATCH",
+      { action: "request", requestId: randomUUID(), expectedRevision: 0, expectedEvidenceRevision: 3, finding: randomUUID(),
+        audience: "community", attribution: false, confirmed: true, content: { ...need, references: undefined } }), 409);
+    sql(`update private.c16_evidence set revoked_at=now() where requirement='storageRecovery';`);
+    await command(receipt("resume", 6), 409);
+    sql(`insert into private.c16_evidence(requirement,community_id,release,evidence_reference,attested_by,verified_at,valid_until)
+      values('storageRecovery','${room}','${release}','replacement-disposable-recovery','${admin.id}',now(),now()+interval '2 days');`);
+    expect(await command(receipt("resume", 6))).toMatchObject({ status: "active", endsAt: active.endsAt });
+    await action(reviewer, "review", rw, "supported", 6, 200, { summary: "evidence_matches" });
+    const article = intake + "/" + won.id + "/publication";
+    const readyToPublish = await expectStatus(request<NeedPublication>(won.person, article), 200);
+    const publication = await expectStatus(request<NeedPublication>(won.person, article, "PATCH", {
+      action: "request", requestId: randomUUID(), expectedRevision: 0, expectedEvidenceRevision: readyToPublish.evidenceRevision,
+      finding: readyToPublish.finding, confirmed: true, audience: "community", attribution: false,
+      content: { ...need, references: undefined },
+    }), 200);
+    const publicationPath = "/api/v1/private/community-need-publications/" + publication.id;
+    await expectStatus(request(admin, publicationPath + "?lane=admin", "PATCH", {
+      action: "assign", requestId: randomUUID(), expectedRevision: 1, confirmed: true, target: publisher.id, note: reason,
+    }, a), 200);
+    const pw = String((await apiCall(publisher, "/api/v1/me/private-workflows", 200, "POST", { kind: "verification_workspace" })).id);
+    const approve = { action: "approve", requestId: randomUUID(), expectedRevision: 2, confirmed: true, note: reason };
+    expect(await command(receipt("pause", 7))).toMatchObject({ status: "paused" });
+    await expectStatus(request(publisher, publicationPath + "?lane=review", "PATCH", approve, pw), 409);
+    expect(await command(receipt("resume", 8))).toMatchObject({ status: "active" });
+    await expectStatus(request(publisher, publicationPath + "?lane=review", "PATCH", approve, pw), 200);
+
+    const directory = "/api/v1/private/communities/" + room + "/needs/" + publication.id;
+    await expectStatus(request(waiting.person, directory), 200);
+    const project = randomUUID();
+    sql(`insert into public.verification_records(user_id,verification_type,status,source,reviewed_by,verified_at)
+      values('${waiting.person.id}','identity','verified','review','${founder.id}',now());
+      insert into private.community_projects(id,creator_id,owner_user_id,association_id,submission_key,request_digest)
+      values('${project}','${waiting.person.id}','${waiting.person.id}','${room}',gen_random_uuid(),decode('00','hex'));
+      insert into private.project_revisions(project_id,revision,author_id,proposal)
+      values('${project}',1,'${waiting.person.id}','{"title":"An Ouest reading space","category":"education","objectives":"Provide quiet space for studying."}');`);
+    const links = "/api/v1/private/need-project-links";
+    const requestLink = { project, publication: publication.id, projectVersion: 1, confirmed: true, requestId: randomUUID(), reason };
+    const link = await expectStatus(request<NeedProjectLink>(waiting.person, links, "POST", requestLink), 200);
+    await command(receipt("pause", 9));
+    await expectStatus(request(waiting.person, directory), 404);
+    await expectStatus(request(won.person, links + "/" + link.id, "PATCH", {
+      action: "consent", expectedRevision: 1, confirmed: true, requestId: randomUUID(),
+    }), 409);
+    await expectStatus(request(won.person, links + "/" + link.id, "PATCH", {
+      action: "decline", expectedRevision: 1, confirmed: true, requestId: randomUUID(),
+    }), 200);
+    await command(receipt("configure", 10, { capacity: 1, durationDays: 7, stages: { ...stages, association: false } }));
+    await command(receipt("resume", 11));
+    await expectStatus(request(waiting.person, directory), 200);
+    await expectStatus(request(waiting.person, links, "POST", { ...requestLink, requestId: randomUUID() }), 409);
+    sql(`update private.c16_enrollment set until_at=now()-interval '1 second' where user_id='${waiting.person.id}';`);
+    await expectStatus(request(waiting.person, intake, "POST", { communityId: room, content: need }), 403);
+    await expectStatus(request(waiting.person, intake + "/" + waiting.id), 200);
+    expect(sql(`select count(*)=12 and (select count(*) from private.c16_cases where submitted_at is not null)=1 from private.c16_history;`)).toBe("t");
+    expect(sql("select not (exists(select from private.c11_intake_fixture) or exists(select from private.c12_fixture) or exists(select from private.c13_fixture) or exists(select from private.c14_fixture));")).toBe("t");
+
+    await inEnglish(context);
+    await login(page, owner);
+    await solveMfa(page, founder.secret);
+    await page.goto("/admin?section=communityNeedsPilot");
+    const open = page.getByRole("button", { name: "Open administration", exact: true });
+    await open.click();
+    await expect(page).toHaveURL(/\/s\/[^/]+\/admin\?section=communityNeedsPilot$/);
+    for (const locale of ["en", "ht", "fr", "es"] as const) {
+      await page.setViewportSize({ width: locale === "en" ? 1300 : 390, height: 844 });
+      await page.getByRole("banner").locator("select").selectOption(locale);
+      await expect(page.getByRole("heading", { name: pilotLabel(locale, "title"), exact: true })).toBeVisible();
+      await expect(page.getByRole("heading", { name: pilotLabel(locale, "staff"), exact: true })).toBeVisible();
+      expect(await page.locator("body").evaluate((body) => body.scrollWidth)).toBeLessThanOrEqual(locale === "en" ? 1300 : 390);
+    }
+  } finally {
+    sql("delete from private.c16_cases; delete from private.c16_evidence; delete from private.c16_enrollment; delete from private.c16_history; delete from private.c16_policy; delete from private.platform_bootstrap;");
+  }
+});
