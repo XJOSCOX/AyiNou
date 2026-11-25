@@ -1,5 +1,7 @@
 "use client";
 
+import { FounderPreparationLink } from "@/features/impact/preparation";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -184,7 +186,7 @@ export function OutcomeReviewWorkspace({ requestedLane, challenge }: { requested
     <ProjectsHeader title={t.title} description={t.intro} backHref="/projects/review" actions={
       <Link className={institutionAction} href={outcomePublicationPath + (lane === "admin" ? "?lane=admin" : "")}>{publication.title}</Link>
     } />
-    {disabled ? <ProjectSection title={t.title}><p role="status">{t.closed}</p></ProjectSection> :
+    {disabled ? <ProjectSection title={t.title}><p role="status">{t.closed}</p><FounderPreparationLink focus="evidence" /></ProjectSection> :
       availability.error !== null ? <ApiErrorNotice error={availability.error} retry={availability.refresh} signIn /> :
       !availability.data ? <ProjectLoading cards={1} className="grid" /> :
       workspace ? <ActiveReviewWorkspace key={workspace.id} workspace={workspace} lane={lane} onClose={() => setWorkspace(null)} /> :

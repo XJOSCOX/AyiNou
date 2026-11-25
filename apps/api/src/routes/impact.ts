@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
-import { impactSectors, impactDepartments, type ImpactMappingSummary } from "@ayinou/shared";
+import { impactSectors, impactDepartments, impactStaffingRoles, type ImpactMappingSummary, type ImpactOverview } from "@ayinou/shared";
 import { z } from "zod";
 import { ApiError } from "../services/api-error.js";
 import type { AuthVerifier } from "../services/auth.js";
@@ -18,13 +18,16 @@ const localizedText = z.string().trim().min(1).max(500).refine((value) => !/\p{C
 const localized = z.strictObject({ en: localizedText, ht: localizedText, fr: localizedText, es: localizedText });
 const report = { ...receipt, year, scope: sector };
 const founderCommand = z.discriminatedUnion("action", [
-  z.strictObject({ ...receipt, action: z.literal("configure"), enabled: z.boolean(), links: z.boolean(),
+  z.strictObject({ ...receipt, action: z.literal("configure"), links: z.boolean(),
     measurements: z.boolean(), needs: z.boolean(), years: z.array(year).min(1).max(5),
     sectors: z.array(sector).min(1).max(7), departments: z.array(department).min(1).max(10) }),
   z.strictObject({ ...receipt, action: z.literal("define"), code, sector, names: localized, descriptions: localized,
     methods: localized, units: localized, unit: z.string().regex(/^[a-z][a-z_]{1,23}$/),
     methodologyCode: z.string().regex(/^[A-Z][A-Z0-9_]{4,63}$/), classification: z.enum(["output", "outcome"]),
     privacy: z.enum(["public_nonsensitive", "restricted"]), aggregatable: z.boolean() }),
+  z.strictObject({ ...receipt, action: z.literal("plan_reviewer"), scope: z.union([department,z.literal("national")]),
+    role: z.enum(impactStaffingRoles), slots: z.number().int().min(0).max(10) })
+    .refine(({ role, scope }) => (role === "governance") === (scope === "national")),
   z.strictObject({ ...receipt, action: z.literal("grant"), target: z.uuid(), expiresAt: z.iso.datetime({ offset: true }) }),
   z.strictObject({ ...receipt, action: z.literal("revoke"), target: z.uuid() }),
   z.strictObject({ ...receipt, action: z.literal("retire_definition"), code }),
@@ -53,7 +56,8 @@ export function registerImpact(app: FastifyInstance, enabled: boolean, auth: Aut
   });
 
   async function execute<T>(request: FastifyRequest, lane: "founder" | "review" | "member", action: string, input: object = {}) {
-    if (!enabled) throw new ApiError(404, "IMPACT_DISABLED", "Impact reporting unavailable");
+    const preparation = lane === "founder" && ["overview","configure","define","plan_reviewer"].includes(action);
+    if (!enabled && !preparation) throw new ApiError(404, "IMPACT_DISABLED", "Impact reporting unavailable");
     const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
     if (!token) throw new ApiError(401, "UNAUTHORIZED", "Sign in required");
     if (!auth?.verifySession || !repository) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Impact reporting unavailable");
@@ -67,6 +71,10 @@ export function registerImpact(app: FastifyInstance, enabled: boolean, auth: Aut
     if (workspace?.success === false) throw new ApiError(403, "FORBIDDEN", "Private workspace required");
     await budget(staff ? "audit" : "profile", session.actor, request.ip);
     try {
+      if (lane === "founder") {
+        const access = await repository.rpc<{ founder?: boolean; administrator?: boolean }>("platform_access_for_api", { p_actor: session.actor });
+        if (access?.founder !== true || access.administrator !== true) throw new ApiError(403, "FORBIDDEN", "Founder authority required");
+      }
       return await repository.rpc<T>("c24_manage_for_api", {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp: session.totpAt ?? null,
         p_workspace: workspace?.data ?? null, p_lane: lane, p_action: action, p_input: input,
@@ -94,8 +102,12 @@ export function registerImpact(app: FastifyInstance, enabled: boolean, auth: Aut
   const founder = "/api/v1/admin/impact";
   const reviewers = "/api/v1/private/impact-review";
   const member = "/api/v1/me/impact";
-  app.get(founder, (request) => execute(request, "founder", "overview",
-    z.strictObject({ search: z.string().trim().min(2).max(60).optional() }).parse(request.query)));
+  app.get(founder, async (request) => {
+    const query = z.strictObject({ search: z.string().trim().min(2).max(60).optional() }).parse(request.query);
+    const overview = await execute<ImpactOverview>(request, "founder", "overview", enabled ? query : {});
+    if (!enabled && overview.preparation) overview.preparation.fixtureOperations = false;
+    return overview;
+  });
   app.patch(founder, { bodyLimit: 12_288 }, (request) => {
     const { action, ...input } = founderCommand.parse(request.body);
     return execute(request, "founder", action, input);

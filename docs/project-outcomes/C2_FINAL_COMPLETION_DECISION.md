@@ -10,6 +10,8 @@
 
 ## Evidence
 
+The Founder can prepare Impact configuration and inspect reviewer readiness while live processing stays disabled. [C2.6 configuration and activation separation](C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md)
+
 - [Implementation audit](C2_FINAL_IMPLEMENTATION_AUDIT.md)
 - [End-to-end tests](C2_FINAL_END_TO_END_TESTS.md)
 - [Security review](C2_FINAL_SECURITY_REVIEW.md)

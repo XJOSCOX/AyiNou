@@ -354,11 +354,13 @@ test("C2.4 seals safe impact slices across all departments and permanently suppr
     await request(founderPath, 200, founder, founderWorkspace, receipt("grant", 0, { target: governor.id, expiresAt: expiry }));
     await request(reviewerPath, 200, governor, governorWorkspace, receipt("approve_definition", 1, { code: "school_desks", methodReviewed: true }));
     const configure = { years: [year], sectors: ["education", "environment"], departments: impactDepartments,
-      enabled: true, links: true, measurements: true, needs: true };
+      links: true, measurements: true, needs: true };
     const command = receipt("configure", 0, configure);
     expect(await request(founderPath, 200, founder, founderWorkspace, command)).toEqual({ version: 1 });
     expect(await request(founderPath, 200, founder, founderWorkspace, command)).toEqual({ version: 1 });
     await request(founderPath, 409, founder, founderWorkspace, { ...command, links: false });
+    expect((await request<ImpactResponse>(publicPath, 200)).state).toBe("disabled");
+    sql("update private.c24_settings set enabled=true;");
     expect(await request(publicPath, 200)).toMatchObject({ state: "unavailable", filters: { departments: expect.arrayContaining([...impactDepartments]) } });
     await request(publicPath + "?sector=education&year=" + year + "&department=HT-unknown", 400);
     await request(publicPath + "?sector=education&year=" + year + "&startsOn=2025-06-01", 400);

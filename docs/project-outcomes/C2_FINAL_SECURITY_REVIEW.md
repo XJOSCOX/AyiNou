@@ -20,6 +20,10 @@ The audit read service-only command ACLs and private table RLS, exact source and
 
 C25-01 adds permanent withholding on relationship and consented association dependencies. Existing account, authentication, project and publication checks remain in force. Direct media is checked again under the specific case and evidence revision before decoding data. Direct table privileges remain closed to application roles.
 
+## Closed-gate administrative preparation
+
+Recognized Founders can prepare Impact display preferences, staffing slots and draft measurements under recent MFA and the original administrator workspace. These commands have no activation field and grant no evidence, publication, reporting or reviewer authority. [C2.6 configuration security](C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md)
+
 ## Statistical security
 
 Reports use disjoint calendar-year sector cohorts, exact source identity and independent mapping, distinct owner thresholds, suppression of small contributing partitions, and conservative national suppression. Fixed dimensions and permanent report withdrawal limit comparison with later versions. See [privacy review](C2_FINAL_PRIVACY_REVIEW.md).

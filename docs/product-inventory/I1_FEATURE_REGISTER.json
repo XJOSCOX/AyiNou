@@ -7962,7 +7962,8 @@
           "docs/project-outcomes/C2_4_PRIVACY_ANALYSIS.md",
           "docs/project-outcomes/C2_4_SECURITY_TESTS.md",
           "docs/project-outcomes/C2_FINAL_COMPLETION_DECISION.md",
-          "docs/project-outcomes/C2_FINAL_IMPLEMENTATION_AUDIT.md"
+          "docs/project-outcomes/C2_FINAL_IMPLEMENTATION_AUDIT.md",
+          "docs/project-outcomes/C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md"
         ]
       },
       "verification": {
@@ -7975,5 +7976,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C2.5 Final Integration, Security and Development Closure"
+  "lastScopeUpdate": "C2.6 Founder Configuration and Activation Separation"
 }

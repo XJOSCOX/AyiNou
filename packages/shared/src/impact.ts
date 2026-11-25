@@ -24,8 +24,19 @@ export type ImpactResponse = { state: "disabled"; operations?: true } |
 export type ImpactSettings = ImpactFilters & {
   version: number; enabled: boolean; links: boolean; measurements: boolean; needs: boolean;
 };
+export const impactStaffingRoles = ["initial", "challenge", "assign", "publication", "mapping", "governance"] as const;
+export type ImpactStaffingRole = (typeof impactStaffingRoles)[number];
+export type ImpactPreparation = {
+  fixtureOperations: boolean;
+  appointments: { id: string; label: string | null; scope: string; role: ImpactStaffingRole; expiresAt: string;
+    status: "active" | "expired" | "revoked" | "suspended" | "ineligible" }[];
+  rosterHistory: { id: string; scope: string; track: "evidence" | "publication"; action: string;
+    at: string; reason: string | null }[];
+  plans: { scope: string; role: ImpactStaffingRole; slots: number; version: number }[];
+};
 export type ImpactOverview = {
   settings: ImpactSettings | null; globalReviewer: boolean; catalog: ImpactDefinition[];
+  preparation?: ImpactPreparation | null;
   releases: { year: number; sector: ImpactSector; version: number; state: "proposed" | "sealed" | "suppressed" | "rejected";
     fingerprint: string; preview: Record<string, ImpactReport> | null }[];
   grants: { id: string; label: string; version: number; expiresAt: string; revoked: boolean }[];

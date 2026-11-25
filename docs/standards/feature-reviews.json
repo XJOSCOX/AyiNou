@@ -3663,6 +3663,14 @@
           "compatibility": "Preserves historical disclosures, existing settings and every existing record during installation. Two new triggers observe eligibility transitions. Two partial indexes support the unchanged latest-completion reporting-year rule.",
           "validation": "Exercise an ordinary relationship change against the disposable sealed Impact report and verify one withholding event.",
           "rolloutAndRollback": "Apply the exact migration only after approval. Verify the replaced function, two triggers, unchanged authorization, preservation fingerprints and disabled gates. Correct defects by a forward migration."
+        },
+        {
+          "file": "supabase/migrations/20261125126000_c26_founder_preparation.sql",
+          "rlsAndGrants": "Existing RLS and service-only Impact command permissions remain. The preparation summary has no direct app-role grants.",
+          "authorization": "Recognized Founder, recent MFA and original-session administrator workspace are required. Closed gates admit only preparation actions.",
+          "compatibility": "Existing reporting settings and catalog are reused. Configuration preserves the activation value and stores staffing plans only as audit events.",
+          "validation": "Disposable tests cover ordinary member and stale workspace denials, receipts, version conflicts and closed downstream routes.",
+          "rolloutAndRollback": "Apply only the approved checksum. Compare existing records, routine authorization and activation state. Use a forward repair if needed."
         }
       ]
     }

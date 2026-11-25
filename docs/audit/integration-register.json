@@ -600,7 +600,7 @@
     },
     {
       "module": "project_impact",
-      "requiredEvents": "Record configuration, grant, catalog, mapping, consent, report and suppression decisions.",
+      "requiredEvents": "Record configuration, draft staffing plans, grant, catalog, mapping, consent, report and suppression decisions.",
       "observed": "Protected changes retain the current actor, workspace, request fingerprint, reason, before and after state, and version. Automatic suppression records the affected release privately, including dependent consented Community Needs eligibility changes.",
       "viewers": "The Founder can inspect redacted settings history, and qualified independent reviewers and members receive scoped records.",
       "excluded": "Public reports omit private cases, identities, receipts, source evidence and consent details.",

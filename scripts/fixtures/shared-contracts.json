@@ -190,12 +190,15 @@
     "impactIndicators": "value:2cf4f2244f0cbdfe3a2a316440c82b5b72c329e53ff4c03cc6291b2fa7e17601",
     "ImpactMapping": "type:b426aa75768ee426a3176900953142e2961d00fc9796b313296810b893aaff33",
     "ImpactMappingSummary": "type:bc4547177772971d113d9e10caf1cfc36fecc30067e5673ae1375a83a084b021",
-    "ImpactOverview": "type:aa38d4aee829f201161b286bb73a2d6406bd9f3115badd23cea3c058340e9364",
+    "ImpactOverview": "type:f75cae8cdf48d32ca0c84906bd95be20b86515b7700e9afba65e17042c6ef02e",
+    "ImpactPreparation": "type:6758b8b4705d19368b287c06fd4f2a4aafb3b563406b1ac356f89514622c36d4",
     "ImpactReport": "type:e87b5c4bdd7c7088a22cd8715b581a456caccffca31e1c70d037e28bf87973d2",
     "ImpactResponse": "type:c2edb89773e7e594c4349cefb2c165158a1b7eb50ca06ddebdf76aff1565879f",
     "ImpactSector": "type:af44899d36a0de071e4ab13ace44e9511187f7b41d480a1c9a0c90d06efcc512",
     "impactSectors": "value:4e73f23afb4f706c6dda237fc4d053d56a479c5407ca875c98434b5fc74c2710",
     "ImpactSettings": "type:eabc708a6e3a1e24ac3b45b8b9067a056705b84cb6db14e5095947fc97b5293c",
+    "ImpactStaffingRole": "type:c988ef4f61b4e6fc0d99dc45926b19c6b205fd4ec2d9924134dc15a9636716f2",
+    "impactStaffingRoles": "value:c06318928428c5da12e450947a3b26524a4ecad0909fb12592003a3788d5f38a",
     "ImpactValue": "type:b4eef64c0a5a39444a655aa9daebadc988e3b1c3144a8be3d6fc0a6f1b2edec4",
     "ImpersonationKind": "type:74f7746ae45667643293509d68094b47d561fbab2268526a6eea64ad7a152e2e",
     "impersonationKinds": "value:f22c5a45538b89d6eac001e35e6e52a9179664816cf87e4bbc63fa261c3b18d9",
@@ -877,6 +880,14 @@
       "infrastructure",
       "economic_development",
       "community_development"
+    ],
+    "impactStaffingRoles": [
+      "initial",
+      "challenge",
+      "assign",
+      "publication",
+      "mapping",
+      "governance"
     ],
     "impersonationKinds": [
       "profile",

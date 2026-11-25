@@ -1,5 +1,7 @@
 "use client";
 
+import { FounderPreparationLink } from "./preparation";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -150,7 +152,7 @@ export function ImpactReviewer({ challenge }: { challenge?: { subject: string; s
     <ProjectsHeader title={t("reviews")} description={t("dedupHelp")} backHref={outcomePublicationPath} />
     {availability.error !== null && <ApiErrorNotice error={availability.error} retry={availability.refresh} />}
     {!availability.data && availability.error === null && <ProjectLoading cards={1} className="grid" />}
-    {availability.data && !available && <ProjectSection title={t("reviews")}><p role="status">{t("closed")}</p></ProjectSection>}
+    {availability.data && !available && <ProjectSection title={t("reviews")}><p role="status">{t("closed")}</p><FounderPreparationLink focus="governance" /></ProjectSection>}
     {available && (workspace ? <Oversight workspace={workspace.id} /> : showMfa && challenge ?
       <MfaChallenge {...challenge} workspace={{
         help: t("reviews"), onVerified: () => { setShowMfa(false); open(); },
