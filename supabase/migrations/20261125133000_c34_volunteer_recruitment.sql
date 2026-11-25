@@ -452,15 +452,21 @@ begin
   target_ref:=(row_data->>nullif(tg_argv[1],''))::uuid;
   project_ref:=(row_data->>nullif(tg_argv[2],''))::uuid;
   opportunity_ref:=(row_data->>nullif(tg_argv[3],''))::uuid;
-  for item in select i.id from private.c34_invitations i where i.status='pending'
-    and (actor_ref is null or actor_ref in (i.organizer,i.recipient))
-    and (target_ref is null or target_ref in (i.organizer,i.recipient))
-    and (project_ref is null or i.project=project_ref)
-    and (opportunity_ref is null or i.opportunity=opportunity_ref)
-    and (tg_table_name<>'organization_memberships' or exists(select from private.community_projects p
-      where p.id=i.project and p.organization_id=(row_data->>'organization_id')::uuid))
-    and (tg_table_name not in ('community_staff','community_memberships') or exists(select from private.community_projects p
-      where p.id=i.project and p.community_id=(row_data->>'community_id')::uuid))
+  for item in
+    select i.id from private.c34_invitations i
+    join private.community_projects p on p.id=i.project
+    join private.project_opportunities o on o.id=i.opportunity
+    left join private.project_team recruiter on recruiter.project_id=p.id and recruiter.user_id=i.organizer
+    where i.status='pending'
+      and (actor_ref is null or actor_ref in (i.organizer,i.recipient,p.submitted_by,o.manager_id,recruiter.sponsor_id))
+      and (target_ref is null or target_ref in (i.organizer,i.recipient,p.submitted_by,o.manager_id,recruiter.sponsor_id))
+      and (project_ref is null or i.project=project_ref)
+      and (opportunity_ref is null or i.opportunity=opportunity_ref)
+      and (tg_table_name not in ('organization_memberships','verification_applications')
+        or p.organization_id=(row_data->>'organization_id')::uuid)
+      and (tg_table_name<>'organizations' or p.organization_id=(row_data->>'id')::uuid)
+      and (tg_table_name not in ('community_staff','community_memberships')
+        or (row_data->>'community_id')::uuid in (p.community_id,p.association_id))
     order by i.id
   loop
     perform private.c34_refresh(item.id);
@@ -490,6 +496,10 @@ create trigger c34_team_change after update or delete on private.project_team
   for each row execute function private.c34_invalidate('user_id','','project_id','');
 create trigger c34_org_change after update or delete on private.organization_memberships
   for each row execute function private.c34_invalidate('user_id','','','');
+create trigger c34_org_verification_change after update or delete on private.verification_applications
+  for each row when (old.kind='organization') execute function private.c34_invalidate('','','','');
+create trigger c34_org_status_change after update on private.organizations
+  for each row execute function private.c34_invalidate('','','','');
 create trigger c34_community_staff_change after update or delete on feed_data.community_staff
   for each row execute function private.c34_invalidate('user_id','','','');
 create trigger c34_community_member_change after delete on feed_data.community_memberships
@@ -498,6 +508,10 @@ create trigger c34_project_change after update of status,revision,restricted_at,
   for each row execute function private.c34_invalidate('','','id','');
 create trigger c34_verification_change after insert or update or delete on public.verification_records
   for each row execute function private.c34_invalidate('user_id','','','');
+create trigger c34_founder_identity_change after update of state on private.founder_identity_cases
+  for each row execute function private.c34_invalidate('subject_id','','','');
+create trigger c34_founder_identity_policy after insert or update or delete on private.fv_development_policies
+  for each row execute function private.c34_invalidate('','','','');
 create trigger c34_identity_visibility after update of is_visible,username,display_name on public.profiles
   for each row execute function private.c34_invalidate('user_id','','','');
 create trigger c34_discoverable_change after insert or update of discoverable or delete on public.user_settings

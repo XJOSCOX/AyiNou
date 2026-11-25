@@ -278,6 +278,16 @@ test("invalidation is durable across consent, blocks, capacity, revision and del
     expect(await open(discoveryId)).toMatchObject({ status: "invalidated", terms: null });
     pauseCooldown();
 
+    const associated = seedOpportunity(organizer, { department: "HT-CE" });
+    sql(`update private.community_projects set association_id=(select id from feed_data.communities where department_code='HT-CE')
+      where id='${associated.project}';`);
+    const associatedChoice = await send(associated);
+    sql(`delete from feed_data.community_memberships where community_id=(select id from feed_data.communities where department_code='HT-CE')
+      and user_id='${volunteer.id}';
+      insert into feed_data.community_memberships(community_id,user_id) select id,'${volunteer.id}' from feed_data.communities where department_code='HT-CE';`);
+    expect(await open(associatedChoice)).toMatchObject({ status: "invalidated", terms: null });
+    pauseCooldown();
+
     const restrictionsId = await send(regional[9]);
     sql(`insert into private.account_restrictions(user_id,status,reason) values('${organizer.id}','suspended','Disposable standing scenario');
       delete from private.account_restrictions where user_id='${organizer.id}';`);

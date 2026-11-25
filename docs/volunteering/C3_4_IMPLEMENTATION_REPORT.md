@@ -26,7 +26,7 @@ Native application creation, invitation attribution, and the resulting notice ar
 
 ## Validation and CI
 
-Enabled workflows use disposable Supabase and test-only accounts. Hosted verification uses the connected local app, the existing Test02 and Founder sessions, and read-only database checks. Routine GitHub Actions are skipped. See the [security tests](C3_4_SECURITY_TESTS.md).
+Enabled workflows use disposable Supabase and test-only accounts. Hosted verification uses the connected local app, the existing Test02 and Founder sessions, and read-only database checks. Routine GitHub Actions are skipped. Local type checking, lint, unit tests, shared contracts, translation validation, engineering standards, and both local and production-mode builds passed. A disposable test caught a SQL argument collision. Final review also identified an invalidation gap for membership in a project’s associated community and indirect organizer authority changes. The corrected migration covers those dependencies, and the leave-and-rejoin regression passed. See the [security tests](C3_4_SECURITY_TESTS.md).
 
 ## Documentation and operations
 
@@ -34,7 +34,7 @@ Next.js and Fastify are local. The [recruitment policy](C3_4_RECRUITMENT_POLICY.
 
 ## Disposable performance
 
-A 1,000-row invitation history returned 20 items and one continuation. Three loopback inbox reads took 18, 16 and 16 ms, with 4,093-byte responses. Three creation requests took 65, 62 and 64 ms. A simultaneous retry through the second API instance took 72 ms and returned the same invitation ID. The recipient index read 21 keys with a 0.074 ms PostgreSQL plan execution time. These samples cover short, warm, isolated runs with terminal invitation history. They do not establish production throughput or concurrent performance for large active populations.
+A 1,000-row invitation history returned 20 items and one continuation. Three loopback inbox reads took 18, 15 and 14 ms, with 4,093-byte responses. Three creation requests took 65, 66 and 82 ms. A simultaneous retry through the second API instance took 71 ms and returned the same invitation ID. The recipient index read 21 keys with a 0.093 ms PostgreSQL plan execution time. These samples cover short, warm, isolated runs with terminal invitation history. They do not establish production throughput or concurrent performance for large active populations.
 
 Recruitment preview checks only the selected candidate. It avoids running the broader C3.3 discovery cohort query again. C3.3 discovery remains the slower step and preserves its bounded cohort. Before live recruitment, replace or validate the short global quota and invalidation lock with wider concurrent load, and measure pending-heavy reads and policy invalidation on a representative workload.
 
