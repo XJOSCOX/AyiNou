@@ -2,11 +2,11 @@
 
 ## Development readiness
 
-**INCOMPLETE pending final C2.5 verification.** The four foundation releases are on the hosted schema with live gates closed. The C2.5 audit found a cross-module invalidation defect in sealed Impact reporting. The forward correction requires passing disposable verification and the exact hosted rollout with a preservation check. The final release decision must follow the observed evidence.
+**COMPLETE for the gated C2 development scope.** The same-project Centre lifecycle, independent decisions, corrected release invalidation, bounded reporting, and isolated recovery passed on disposable Supabase. All ten departmental C1 association regressions and the existing C2 and Project Work regressions passed. The authorized hosted repair and read-only preservation and authorization postflight are verified. There are no remaining confirmed Critical or High development defects in the audited scope.
 
 ## Public launch readiness
 
-**NO-GO.** C1 and C2 live processing remain closed. Separate approval, authorized staff, retention and privacy decisions, hosted backup and Media Storage recovery rehearsal, and operational monitoring are required. See the [launch dependencies](C2_FINAL_LAUNCH_DEPENDENCIES.md).
+**NO-GO.** C1 and C2 live processing remain closed. Separate approval, authorized staff, retention and privacy decisions, hosted backup and private Storage recovery rehearsal, and operational monitoring are required. See the [launch dependencies](C2_FINAL_LAUNCH_DEPENDENCIES.md).
 
 ## Evidence
 

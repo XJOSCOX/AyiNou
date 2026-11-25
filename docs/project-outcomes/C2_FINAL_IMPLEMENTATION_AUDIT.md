@@ -12,7 +12,7 @@ Reviewed C2.1 intake, C2.2 evidence review and challenge, C2.3 disclosure, and C
 | Independent outcome evidence and challenge | C2.2 binds assignments, evidence releases, inspections and findings to their versions. Challenge approval applies separate purpose-scoped authorization. | Hosted foundation applied. Review gated. |
 | Independent disclosure | C2.3 publishes only a current eligible finding with exact organizer consent and separate review. Public Project Progress receives the disclosure projection. | Hosted foundation applied. Disclosure gated. |
 | Measurement mappings and Impact | C2.4 governs versioned definitions, fixed report cohorts, scoped review, and national and departmental disclosure. | Hosted foundation applied. Reporting gated. |
-| Permanent association invalidation | C2.5 adds dependency coverage to the sealed release trigger, with existing private receipts and forward-only remediation. | Pending final verification in this report. |
+| Permanent association invalidation | C2.5 adds dependency coverage to the sealed release trigger, with existing private receipts and forward-only remediation. | Hosted repair applied and verified. Reporting gated. |
 | Automated legal retention, export and erasure for C2 | Operational and legal decisions required. Existing generic privacy cases and holds are reviewed separately. | Deferred from live launch. |
 
 ## Confirmed finding
@@ -24,6 +24,14 @@ Reviewed C2.1 intake, C2.2 evidence review and challenge, C2.3 disclosure, and C
 ## Effective authorization and integration
 
 Service-only command RPCs retain their existing grants and explicit session, standing, workspace and permission conditions. The guest C2.3 projection exposes current approved disclosure fields only. The API constructs the actor and authentication context server-side. SQL evaluates scoped permission and conflict predicates at protected operations. Report release approval and archival withholding use private records. Foundation configuration modes continue to gate all enabled-state tests to disposable Supabase.
+
+## Hosted database verification
+
+On 2026-11-25, the fresh preflight at `038fb0e1125f9ca096ae2156a56b55de891544d9` identified AyiNou project `hcbxulyfmdmuyccgrujs` and only `20261125125000_c25_impact_invalidation.sql`, SHA-256 `a60ffe34dc4ac565041a0922852b09527a919ebb4760820671d862d42c44f357`, pending. The Founder approved this revised checksum after the performance correction. The CLI applied exactly that file, with zero seeds or roles.
+
+Postflight recorded 143 applied migrations and zero pending. All 86 existing record fingerprints, 290 existing relations, 29 RLS policies, previous migration entries and 183 existing triggers matched the preflight. The two reviewed routines matched the tested bodies with unchanged authorization metadata. The other routines matched preflight. Both added triggers and both partial indexes matched. All eight Impact tables retained private RLS and direct app-role denial. C1 and C2 fixture and activation gates remained closed. No real C2 data or Impact releases were created by the deployment.
+
+The connected local API and web passed 42 read-only checks before and after rollout, including login, project and community reads, private denial and disabled C1 and C2 states. Hosted Next.js and Fastify were outside the deployment.
 
 ## Validation
 
