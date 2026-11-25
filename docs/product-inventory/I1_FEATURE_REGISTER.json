@@ -8082,7 +8082,63 @@
         "hostedApplication": "Hosted rollout scope is database only.",
         "operationalApproval": "Real structured recruitment and matching stay closed."
       }
+    },
+    {
+      "id": "volunteer-matching",
+      "domain": "Projects",
+      "name": "Privacy-aware volunteer matching and scoped discovery",
+      "status": "partial",
+      "currentAndLimits": "Private recommendations, scoped organizer discovery and Founder configuration developed under disposable gates. Hosted matching and discovery stay closed.",
+      "dependencies": "C3.1 consent and profile controls, C3.2 requirements, native Project Work eligibility and safeguarding approval.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/volunteering/recommendations.tsx",
+          "apps/web/src/features/volunteering/matching-settings.tsx",
+          "apps/web/src/features/projects/work/opportunity-candidates.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/volunteer-matching.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/volunteer-matching.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125132000_c33_volunteer_matching.sql"
+        ],
+        "postgresObjects": [
+          "private.c33_configuration",
+          "private.c33_pause",
+          "private.c33_dismissed",
+          "public.c33_matching_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/volunteer-matching.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/volunteer-matching.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/volunteer-matching.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/volunteering/C3_3_IMPLEMENTATION_REPORT.md",
+          "docs/volunteering/C3_3_MATCHING_POLICY.md",
+          "docs/volunteering/C3_3_PRIVACY_AND_FAIRNESS.md",
+          "docs/volunteering/C3_3_PERFORMANCE_REPORT.md",
+          "docs/volunteering/C3_3_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See the C3.3 implementation report.",
+        "disposableSupabase": "Enabled only for disposable browser, SQL and performance scenarios.",
+        "hostedDatabase": "Pending exact approval and verification.",
+        "connectedApplication": "See the C3.3 implementation report.",
+        "hostedApplication": "Database-only rollout, with web and API local.",
+        "operationalApproval": "All real matching and organizer discovery remain closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C3.2 Structured Project Skill Requirements"
+  "lastScopeUpdate": "C3.3 Intelligent Volunteer Matching"
 }

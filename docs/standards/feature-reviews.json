@@ -3809,6 +3809,100 @@
           "rolloutAndRollback": "Apply only checksum approved by the Founder after fresh remote dry run and preservation snapshot. Verify all fixture gates closed and use a forward migration for corrections."
         }
       ]
+    },
+    {
+      "id": "volunteer-matching",
+      "report": "docs/volunteering/C3_3_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/volunteer-settings/matching",
+          "contract": "GET /api/v1/admin/volunteer-settings/matching - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only individual preferences, scoped eligible candidate projection, or administrative configuration. No disclosure log stores volunteer data."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-matching.spec.ts",
+            "denialScenario": "Ordinary members and sessions with an unrelated workspace cannot open matching configuration or activate the feature."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/volunteer-settings/matching",
+          "contract": "PATCH /api/v1/admin/volunteer-settings/matching 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Versioned matching preparation stores the actor, reason, workspace and protected command receipt together."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-matching.spec.ts",
+            "denialScenario": "Ordinary members and sessions with an unrelated workspace cannot open matching configuration or activate the feature."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/volunteer-matches",
+          "contract": "GET /api/v1/me/volunteer-matches - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only individual preferences, scoped eligible candidate projection, or administrative configuration. No disclosure log stores volunteer data."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-matching.spec.ts",
+            "denialScenario": "Closed gates, unrelated scopes, missing purpose-specific consent, blocking and revoked availability cannot expose matching data."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/volunteer-matches",
+          "contract": "PATCH /api/v1/me/volunteer-matches 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The owner preference or bounded version-specific dismissal commits transactionally. No opportunities or applications are modified."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-matching.spec.ts",
+            "denialScenario": "Closed gates, unrelated scopes, missing purpose-specific consent, blocking and revoked availability cannot expose matching data."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:id/work/requirements/:opportunity/candidates",
+          "contract": "GET /api/v1/projects/:id/work/requirements/:opportunity/candidates - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only individual preferences, scoped eligible candidate projection, or administrative configuration. No disclosure log stores volunteer data."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-matching.spec.ts",
+            "denialScenario": "Closed gates, unrelated scopes, missing purpose-specific consent, blocking and revoked availability cannot expose matching data."
+          }
+        },
+        {
+          "route": "POST /api/v1/projects/:id/work/requirements/:opportunity/dismiss",
+          "contract": "POST /api/v1/projects/:id/work/requirements/:opportunity/dismiss 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "The owner preference or bounded version-specific dismissal commits transactionally. No opportunities or applications are modified."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-matching.spec.ts",
+            "denialScenario": "Closed gates, unrelated scopes, missing purpose-specific consent, blocking and revoked availability cannot expose matching data."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125132000_c33_volunteer_matching.sql",
+          "rlsAndGrants": "Four private RLS relations, six private helper functions, and one service-only RPC. Existing application and consent indexes are additive.",
+          "authorization": "Session and onboarding checks, independent purpose-specific consent, approved project geography, availability, blocks, native account and project authority, capacity, safeguarding and a dead hosted gate. Founder preparation requires recognized authority, recent MFA and original workspace.",
+          "compatibility": "No living profiles, opportunities, applicants, decisions or earlier authorization objects are changed. No hosted synthetic data is seeded.",
+          "validation": "Disposable data, scoped browser and API tests, fixed cohort measurements and consecutive eligibility rechecks. Audited connected read-only checks for hosted verification.",
+          "rolloutAndRollback": "Apply only the independently approved checksum after current main, history and fingerprints match. Verify all gate records empty. Use a forward correction for release defects."
+        }
+      ]
     }
   ]
 }

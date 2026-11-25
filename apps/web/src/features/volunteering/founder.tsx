@@ -10,6 +10,7 @@ import { loadVolunteerSettings, saveVolunteerSettings } from "@/lib/volunteer-ap
 import { volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
 import { departmentNames } from "./member";
+import { FounderMatchingSettings } from "./matching-settings";
 import { FounderRequirementSettings } from "./requirement-settings";
 
 const fieldset = "grid min-w-0 gap-2 rounded-lg border border-[var(--theme-border)] p-3";
@@ -101,5 +102,6 @@ export function FounderVolunteer({ workspace }: { workspace: string }) {
       </section>
     </>}
     <FounderRequirementSettings workspace={workspace} />
+    <FounderMatchingSettings workspace={workspace} />
   </section>;
 }

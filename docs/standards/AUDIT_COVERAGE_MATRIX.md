@@ -173,6 +173,10 @@ Appointments, suspension, revocation, case assignment, release, recusal, clarifi
 
 The restricted publication ledger retains the exact disclosure fingerprint, revision, organizer consent, scoped grant and assignment, reviewer inspection, decision, challenge, withdrawal, and automatic invalidation. Receipts record the actor and originating workspace for protected commands. Public Project Progress exposes only the approved current disclosure. [Implementation report](../project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)
 
+## C3.3 volunteer matching
+
+Founder configuration commits an immutable version, reason, actor, original workspace and receipt. Owner pause and scoped dismissals are private preferences. Recommendation and discovery reads are evaluated against current authorization and retain no private profile projections. [C3.3 security tests](../volunteering/C3_3_SECURITY_TESTS.md)
+
 ## C3.2 structured opportunity requirements
 
 Each saved draft and publication records actor, request, version and exact opportunity snapshot in its transaction. Confirmed Founder configuration also records original workspace and reason. The first native application freezes the published criteria. [C3.2 security checks](../volunteering/C3_2_SECURITY_TESTS.md)

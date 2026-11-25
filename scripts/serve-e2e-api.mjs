@@ -18,6 +18,7 @@ const config = readConfig({
   AYINOU_COMMUNITY_NEEDS: "synthetic",
   AYINOU_PROJECT_OUTCOME_REVIEW: "synthetic",
   AYINOU_PROJECT_OUTCOME_PUBLICATION: "synthetic",
+  AYINOU_VOLUNTEER_MATCHING: "synthetic",
   AYINOU_OPPORTUNITY_REQUIREMENTS: "synthetic",
   AYINOU_VOLUNTEER_PROFILES: "synthetic",
   AYINOU_IMPACT_REPORTING: "synthetic",

@@ -2,6 +2,7 @@ import { type WorkProps, useWorkMessages, Operation, field, actionsClass, Reason
 import { institutionField } from "@/components/institution-ui";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { requirementCopy } from "@/lib/requirement-i18n";
+import { OpportunityCandidates } from "./opportunity-candidates";
 import { RequirementCard, RequirementPreview, useRequirements } from "./requirements";
 import { ProjectDisclosure, ProjectSection } from "@/components/project-ui";
 
@@ -36,7 +37,7 @@ export function Volunteers(props: WorkProps) {
         </Operation>
       </ProjectDisclosure>}
       {!work.opportunities.length && <p className="mt-3">{t.empty}</p>}
-      <ul className="mt-3 grid gap-3">{work.opportunities.map((item) => <li className="grid gap-2 border-t border-[var(--theme-border)] pt-3" key={item.id}>
+      <ul className="mt-3 grid gap-3">{work.opportunities.map((item) => <li className="grid gap-2 border-t border-[var(--theme-border)] pt-3" key={item.id} id={"opportunity-"+item.id}>
         <h3 className="break-words font-semibold">{item.title}</h3>
         <p className="whitespace-pre-line break-words" dir="auto">{item.description}</p>
         <dl className="grid gap-1 break-words text-sm">
@@ -47,6 +48,8 @@ export function Volunteers(props: WorkProps) {
         </dl>
         <p className="text-sm">{copy("unpaid")} · {item.remote ? t.remote : t.projectRegion}</p>
         {fixture && <RequirementCard project={work.projectId} view={fixture} opportunity={item} refresh={requirements.refresh} />}
+        {manager && item.open && fixture?.items.some((entry) => entry.opportunityId===item.id && entry.published && !entry.published.screening)
+          && <OpportunityCandidates project={work.projectId} opportunity={item.id} />}
         <div className={actionsClass}>
           {item.open && work.canApply && !work.applications.some((row) => row.mine && row.opportunityId === item.id) &&
             <Operation {...operationProps} action="volunteer_apply" input={{ id: item.id }} />}
