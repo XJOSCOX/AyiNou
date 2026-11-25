@@ -55,7 +55,19 @@ API injection exercises disabled environments, caller-derived identity, stale se
 
 ## Documentation and operations
 
-The intended hosted development target is `hcbxulyfmdmuyccgrujs`. Hosted migration history had 130 applied versions through P1. A read-only dry run selected only `20261124155000_c11_community_needs.sql`, with no seeds or roles. It remains unapplied. The migration SHA-256 is `c4c023c05054707615378bd55e2ab3ddf9e19eaeb27ed723fddebb45b5da0de9`. A separate exact-version approval, dry run, release verification, preservation baseline and postflight are required for hosted rollout. Hosting the schema would leave intake disabled. The API allows synthetic mode only on the designated disposable loopback backend outside production, and the SQL fixture table has no rows after normal migrations. C1.1 has no operator activation endpoint. Application release is unverified.
+The founder-approved C1.1 database migration was applied on November 24, 2026 to AyiNou project `hcbxulyfmdmuyccgrujs`, which the CLI labels production. The tested code was `7b72935bcd05585394afd6ee94ac0fee81e433ff`. The approved file was `20261124155000_c11_community_needs.sql` with SHA-256 `c4c023c05054707615378bd55e2ab3ddf9e19eaeb27ed723fddebb45b5da0de9`.
+
+| Check | Verified result |
+| --- | --- |
+| Preflight and scope | Remote main matched the tested code and the file hash matched approval. Hosted history had 130 matching versions through P1. A fresh dry run selected only the C1.1 migration, with zero seeds or roles. Hosted SQL had read-only transactions and found no C1.1 tables or RPCs before rollout. The connected application reported intake disabled. |
+| Migration history | The CLI applied exactly the approved version. Hosted history showed 131 matching versions. The postflight dry run selected zero migrations. |
+| Existing records | All 31 table count and fingerprint pairs matched, covering account and authorization records, communities and memberships, moderation and enforcement, appeals and audit, projects, and Storage bucket configuration. Auth account fingerprints used IDs and eligibility fields. No private row contents were returned by the probes. |
+| Existing authorization and schema | All seven fingerprints matched for relation definitions and ACLs, columns, RLS policies, routine definitions and grants, triggers, schema grants, and prior migration history. |
+| New case access | RLS is enabled on all three new private tables. They have no non-owner direct grants, and anon, authenticated, service and authenticator roles have no effective direct table privileges. The two private helper routines have no client or service execution grants. The public RPC grants execution only to the backend service role among non-owners. Hosted metadata confirmed security-definer execution with an empty search path and guards for live session, onboarding, authorship, current membership on intake and the closed fixture gate. |
+| Activation and data | The fixture gate is empty. Needs and need revisions both contain zero records. Real intake remains disabled. |
+| Connected local application | The tested API, using the hosted connection, returned HTTP 200 for health, departments, community statistics and project reads. The unsigned moderation policy request returned 401. Anonymous needs list and detail both returned 404 with the disabled-intake code and private no-store headers. Local web community directory and Projects returned 200. The private needs page redirected guests to sign-in and sent the no-index header. The ten probe outcomes matched preflight. |
+
+The rollout was database-only. The hosted web and API were not redeployed. Hosted verification used reads and created no synthetic cases or accounts. The exact release's disposable validation and legacy Phase 1A SQL fixture limitation are recorded above.
 
 ## Remaining blockers
 
