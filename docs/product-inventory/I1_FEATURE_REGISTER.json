@@ -8133,8 +8133,8 @@
       "verification": {
         "local": "See the C3.3 implementation report.",
         "disposableSupabase": "Enabled only for disposable browser, SQL and performance scenarios.",
-        "hostedDatabase": "Pending exact approval and verification.",
-        "connectedApplication": "See the C3.3 implementation report.",
+        "hostedDatabase": "C3.3 applied and verified with 147 migrations, zero pending, 105 preserved data fingerprints, and all gates closed.",
+        "connectedApplication": "Test02 saw closed recommendations and was denied Founder settings. J0SC0X inspected closed preparation and all ten departments. All 51 read-only connected checks passed.",
         "hostedApplication": "Database-only rollout, with web and API local.",
         "operationalApproval": "All real matching and organizer discovery remain closed."
       }

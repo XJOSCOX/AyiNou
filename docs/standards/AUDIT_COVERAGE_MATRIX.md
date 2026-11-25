@@ -175,7 +175,7 @@ The restricted publication ledger retains the exact disclosure fingerprint, revi
 
 ## C3.3 volunteer matching
 
-Founder configuration commits an immutable version, reason, actor, original workspace and receipt. Owner pause and scoped dismissals are private preferences. Recommendation and discovery reads are evaluated against current authorization and retain no private profile projections. [C3.3 security tests](../volunteering/C3_3_SECURITY_TESTS.md)
+Founder configuration commits an immutable version, reason, actor, original workspace and receipt. Owner pause and scoped dismissals are private preferences. Recommendation and discovery reads are evaluated against current authorization and retain no private profile projections. Hosted postflight verified four private RLS tables with no direct app-role grants, service-only command execution, and empty matching records. [C3.3 security tests](../volunteering/C3_3_SECURITY_TESTS.md)
 
 ## C3.2 structured opportunity requirements
 

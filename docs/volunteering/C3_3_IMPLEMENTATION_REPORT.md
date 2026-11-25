@@ -26,11 +26,30 @@ Bounded indexed cohorts, encrypted session-bound cursors and live eligibility ch
 
 ## Validation and CI
 
-Use disposable profiles, projects and opportunities for all enabled operations and population measurements. Use authenticated browser sessions and read-only database comparisons for hosted verification. Routine GitHub Actions are skipped. See [security tests](C3_3_SECURITY_TESTS.md).
+All 25 disposable browser and integration scenarios passed, covering C3.3 matching and Founder configuration, C3.1 and C3.2, native Project Work, C2 outcome review and publication, Impact, and C1 association flows across all ten departments. Enabled matching used synthetic data only. The suite exercised independent consent, scoped output, privacy and blocks, account restrictions, eligibility changes, full opportunities, cursor binding, and the 50,000-profile benchmark. Responsive checks used English at desktop width and Haitian Creole, French, and Spanish at narrow width, with a separate dark-theme check.
+
+Initial runs caught an ambiguous SQL column and incomplete visibility in disposable seed profiles. Both were corrected. The result-producing statements now recheck the live publication and eligibility before disclosure to prevent authorization from relying on an earlier query. The affected groups passed on the tested release.
+
+All 59 API tests, seven client tests, two web tests, shared contracts, localization audit, type checking, lint, engineering standards and local and production-mode builds passed. No routine GitHub Actions ran. See [security tests](C3_3_SECURITY_TESTS.md).
+
+## Hosted database rollout
+
+- Target AyiNou `hcbxulyfmdmuyccgrujs`, identified by the CLI as production.
+- Tested implementation `34e181c50b6e20b0f9388beb610676eb6fe2a57f`.
+- Approved migration `20261125132000_c33_volunteer_matching.sql`.
+- Verified SHA-256 `cbfecbe9df8d81874e3d06f1616219ca91ed0b38a89d3718ac3534cdc10dee13`.
+- A fresh preflight found 146 applied migrations and one pending migration. The apply receipt listed C3.3 alone, with no seeds or role changes. Postflight found 147 applied and zero pending.
+- Read-only postflight preserved all 105 data fingerprints, including member accounts, projects, opportunities, native applications, C3.1 profiles and consent, and C3.2 requirements. Previously installed relation, routine, RLS policy and trigger fingerprints matched. The verified additions were four relations, seven routines and three indexes.
+- All four new tables have RLS and deny direct table and column access to anonymous, authenticated, authenticator and service roles. The seven installed function bodies matched the migration. The only app-executable command is the service-only, session-bound matching RPC.
+- C1, C2 and C3 fixture gates stayed closed. No hosted matching settings, pauses, dismissals, or operational records were created.
+
+## Connected local application
+
+All 51 connected read-only HTTP checks passed after migration. They covered public reads, protected access and no-store responses, and the closed C1 and C2 routes. Test02’s connected browser opened Volunteer profile → Recommended opportunities, saw the closed notice, opened Project Work, and was denied the Founder settings URL. J0SC0X opened the private Platform Administration workspace and expanded the matching configuration. It showed readiness at version zero, all ten departments, recorded-reason and explicit-confirmation controls, and a closed matching and discovery notice. No hosted member, project, or configuration records were changed in the browser. Next.js and Fastify ran on localhost against hosted Supabase.
 
 ## Documentation and operations
 
-The hosted rollout evidence records the approved checksum, release, catalog and grant preservation and closed state. Next.js and Fastify run locally.
+The [performance report](C3_3_PERFORMANCE_REPORT.md) records exact local timings and their limits. Matching preparation uses the existing Volunteer settings workspace and requires independent authorization before any live launch.
 
 ## Remaining blockers
 
