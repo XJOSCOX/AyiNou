@@ -7177,7 +7177,8 @@
           "supabase/migrations/20261124155200_c13_community_need_publication.sql",
           "supabase/migrations/20261124155300_c14_need_project_links.sql",
           "supabase/migrations/20261124155400_c15_link_directory_cursor.sql",
-          "supabase/migrations/20261124155500_c16_pilot_preparation.sql"
+          "supabase/migrations/20261124155500_c16_pilot_preparation.sql",
+          "supabase/migrations/20261124155600_c17_pilot_operational_readiness.sql"
         ],
         "postgresObjects": [
           "public.c11_needs_for_api",
@@ -7231,7 +7232,14 @@
           "docs/community-needs/C1_6_ACTIVATION_POLICY.md",
           "docs/community-needs/C1_6_PILOT_OPERATIONS.md",
           "docs/community-needs/C1_6_SECURITY_TESTS.md",
-          "docs/community-needs/C1_6_LAUNCH_READINESS.md"
+          "docs/community-needs/C1_6_LAUNCH_READINESS.md",
+          "docs/community-needs/C1_7_FINAL_GO_NO_GO.md",
+          "docs/community-needs/C1_7_HOSTING_READINESS.md",
+          "docs/community-needs/C1_7_OPERATIONAL_READINESS.md",
+          "docs/community-needs/C1_7_PRIVACY_OPERATIONS.md",
+          "docs/community-needs/C1_7_RECOVERY_VERIFICATION.md",
+          "docs/community-needs/C1_7_REVIEWER_STAFFING.md",
+          "docs/community-needs/C1_7_SECURITY_TEST_RESULTS.md"
         ]
       },
       "verification": {
@@ -7240,7 +7248,7 @@
         "hostedDatabase": "C1.6 preparation is applied. All five pilot tables and four fixture gates are empty, zero migrations are pending, and 51 existing record fingerprints matched.",
         "connectedApplication": "C1.6 verified Founder Pilot settings are disabled, Test02 is denied Pilot administration, and existing navigation works on the connected local application.",
         "hostedApplication": "Hosted application release unverified.",
-        "operationalApproval": "C1.6 prepares a Founder-controlled Ouest pilot. Real processing remains closed pending external sign-offs, setup of an authorized cohort and independent reviewers, and a separate launch decision."
+        "operationalApproval": "C1.7 operations cover all ten departments. Ouest remains the proposed first pilot. Launch is no-go pending independently verified staffing, privacy, recovery and hosted release."
       }
     },
     {
@@ -7737,5 +7745,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C1.6 Founder-Controlled Community Needs Pilot Preparation"
+  "lastScopeUpdate": "C1.7 Community Needs Operational Readiness"
 }

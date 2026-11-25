@@ -113,15 +113,37 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
     <div className="grid min-w-0 items-start gap-4 xl:grid-cols-2">
       <PilotPanel title={t("readiness")}>
         <p className="text-sm text-[var(--theme-body)]">{t("readinessHelp")}</p>
-        <dl className="grid gap-2">
-          <div className="flex flex-wrap justify-between gap-x-3 border-b border-[var(--theme-border)] py-2">
-            <dt>{t("configuredRelease")}</dt><dd className="font-semibold">{t(pilot.releaseConfigured ? "verified" : "unavailable")}</dd>
-          </div>
-          {pilotRequirements.map((item) => <div key={item} className="flex flex-wrap justify-between gap-x-3 border-b border-[var(--theme-border)] py-2">
-            <dt>{t(item)}</dt><dd className="font-semibold">{t(pilot.requirements[item])}</dd>
-          </div>)}
+        <p role="status" className="font-semibold">{t(pilot.ready && state !== "expired" && state !== "blocked" ? "decisionReady" : "decisionBlocked")}</p>
+        <dl className="grid gap-2 rounded-md bg-[var(--theme-control)] p-3 text-sm">
+          {([["runtimeRelease", pilot.runtimeRelease], ["policyRelease", pilot.policyRelease]] as const).map(([key, release]) =>
+            <div key={key}><dt>{t(key)}</dt><dd><code className="break-all">{release ?? t("unavailable")}</code></dd></div>)}
         </dl>
+        <ul className="grid gap-1 text-sm">
+          {pilot.releaseMatches !== true && <li>{t("releaseMismatch")}</li>}
+          {(!pilot.revision || !Object.values(pilot.stages).some(Boolean)) && <li>{t("preparePolicy")}</li>}
+          {!pilot.activeParticipants && <li>{t("needParticipants")}</li>}
+          {(pilot.triagers < 1 || pilot.reviewers < 4) && <li>{t("coverageGap")}</li>}
+        </ul>
+        <ul className="grid gap-2">
+          {pilotRequirements.map((item) => {
+            const evidence = pilot.operationalEvidence?.[item];
+            return <li key={item} className="grid gap-1 border-b border-[var(--theme-border)] py-2">
+              <div className="flex flex-wrap justify-between gap-x-3">
+                <strong>{t(item)}</strong><span>{t(evidence?.status ?? pilot.requirements[item])}</span>
+              </div>
+              <p className="text-sm text-[var(--theme-body)]">{t(`${item}Evidence`)}</p>
+              {evidence?.verifiedAt && <dl className="grid gap-1 text-sm sm:grid-cols-2">
+                <div><dt>{t("operator")}</dt><dd>{evidence.operator ? "@" + evidence.operator : t("unavailable")}</dd></div>
+                {([["verifiedAt", evidence.verifiedAt], ["expires", evidence.expiresAt], ["revoked", evidence.revokedAt]] as const)
+                  .map(([key, timestamp]) => timestamp && <div key={key}>
+                    <dt>{t(key)}</dt><dd><time dateTime={timestamp}>{date.format(new Date(timestamp))}</time></dd>
+                  </div>)}
+              </dl>}
+            </li>;
+          })}
+        </ul>
         <div className="grid gap-2">
+          {!active && <p className="text-sm">{t("pauseUnavailable")}</p>}
           {(state !== "expired" && state !== "unconfigured") && <button type="button" className={adminSecondaryAction}
             disabled={busy || (!active && !pilot.ready)} onClick={() => select(action)}>{t(action)}</button>}
           {decision && ["activate", "resume", "pause"].includes(decision.action) &&
@@ -156,6 +178,7 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
     </div>
     <div className="grid min-w-0 items-start gap-4 xl:grid-cols-2">
       <PilotPanel title={t("cohort")}>
+        <p className="text-sm">{t("cohortHelp")}</p>
         <p className="text-sm">{t("members")} <strong>{number.format(pilot.activeParticipants)} / 20</strong></p>
         {eligibleState && <form className="flex flex-wrap items-end gap-2" onSubmit={(event) => {
           event.preventDefault();
@@ -198,11 +221,11 @@ export function CommunityNeedsPilot({ workspace }: { workspace: string }) {
           <div><dt>{t("triagers")}</dt><dd className="font-semibold">{number.format(pilot.triagers)}</dd></div>
           <div><dt>{t("reviewers")}</dt><dd className="font-semibold">{number.format(pilot.reviewers)}</dd></div>
         </dl>
-        {(pilot.triagers < 1 || pilot.reviewers < 4) && <p role="status" className="font-semibold">{t("coverageGap")}</p>}
+        {(pilot.triagers < 1 || pilot.reviewers < 4) && <p className="text-sm">{t("missingStaff")}</p>}
         <ul className="grid gap-2">{pilot.staff.map((member) => <li key={member.id + member.lane}
           className="grid gap-1 rounded-md bg-[var(--theme-control)] p-3 text-sm">
           <strong dir="auto">{member.handle ? "@" + member.handle : t("unavailable")}</strong>
-          <span>{t(member.lane)} · {t(member.revoked ? "removed" : member.eligible ? "eligible" : "recertify")}</span>
+          <span>{t(member.lane)} · {t(member.grantStatus ?? (member.revoked ? "revoked" : member.eligible ? "eligible" : "recertify"))}</span>
           <span>{t("expires")} <time dateTime={member.expiresAt}>{date.format(new Date(member.expiresAt))}</time></span>
           <span>{t("assigned")} {number.format(member.assigned)} · {t("challenges")} {number.format(member.challenges)}</span>
         </li>)}</ul>

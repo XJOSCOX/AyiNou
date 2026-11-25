@@ -6,6 +6,14 @@ export type PilotStages = Record<typeof pilotStages[number], boolean>;
 export type PilotDecision = "configure" | "enroll" | "remove" | "activate" | "pause" | "resume";
 export type PilotStatus = "unconfigured" | "prepared" | "active" | "paused" | "expired" | "blocked";
 
+export interface PilotEvidence {
+  status: "missing" | "verified" | "expired" | "revoked";
+  operator: string | null;
+  verifiedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
+}
+
 export interface PilotWorkspace {
   revision: number;
   status: PilotStatus;
@@ -17,12 +25,16 @@ export interface PilotWorkspace {
   stages: PilotStages;
   requirements: Record<typeof pilotRequirements[number], "pending" | "verified">;
   releaseConfigured: boolean;
+  operationalEvidence?: Record<typeof pilotRequirements[number], PilotEvidence>;
+  runtimeRelease?: string | null;
+  policyRelease?: string | null;
+  releaseMatches?: boolean;
   ready: boolean;
   activeParticipants: number;
   triagers: number;
   reviewers: number;
   enrollments: { id: string; handle: string | null; expiresAt: string; status: "removed" | "expired" | "eligible" | "blocked" }[];
-  staff: { id: string; handle: string | null; lane: "review" | "triage"; eligible: boolean; expiresAt: string; revoked: boolean; assigned: number; challenges: number }[];
+  staff: { id: string; handle: string | null; lane: "review" | "triage"; eligible: boolean; expiresAt: string; revoked: boolean; grantStatus?: "revoked" | "expired" | "eligible" | "recertify"; assigned: number; challenges: number }[];
   metrics: Record<typeof pilotMetrics[number], number> | null;
   candidates: { id: string; handle: string }[];
   history: { revision: number; action: PilotDecision; reason: string; occurredAt: string; actor: string | null; subject: string | null }[];

@@ -1,0 +1,15 @@
+# C1.7 recovery verification
+
+## Hosted evidence
+
+The read-only Supabase backup inventory for `hcbxulyfmdmuyccgrujs` reported `us-east-2`, WAL-G enabled, PITR disabled, and zero available backups on November 24, 2026. Physical backup metadata did not identify a usable recovery point. A provider restore target, recovery window, recovery objectives and owner approving real-data recovery are still unverified. Existing repository material documents a proposed private Storage backup approach and a synthetic recovery rehearsal. There is no verified hosted private-object backup inventory, tested restore, or object recovery commitment for this release. No hosted restore, physical backup enablement or Storage object change was performed.
+
+## Recovery procedure for all ten departments
+
+1. Name the provider recovery operator and independent verifier. Agree on RPO and RTO, duty coverage, escalation and permitted data location. Inventory database and private object recovery points, key custody, object digests, backup ownership, encryption, access logging and lifecycle. Approve an isolated destination before reading real backup material.
+2. Pause at the smallest safe affected scope, or nationally when authorization or provider integrity is uncertain. Preserve the incident timeline and an authorized source-side record of changes newer than the backup without exposing case data.
+3. Restore database and private object bytes separately into an isolated approved environment with email, webhooks, workers and public routing off. Verify cryptographic object integrity, migration history and checksums, RLS and grants, access denial for members and reviewers outside scope, and direct table restrictions. Validate empty fixture gates, revision relationships, consent/revocation, challenges and audit continuity.
+4. From an independently protected post-backup record, reconcile sessions and rotate or invalidate credentials as required. Reapply staff expiry, revocations, closures, deletion and legal-hold dispositions, evidence withdrawals and attribution suppression. Verify each of the ten department scope boundaries. Never restore independent attestations into a position of unintended authority without reconciliation.
+5. Verify no unauthorized notices or projections have reappeared. Record actual recovery time and data gap, exceptions and rollback. Independent sign-off is required before a staged cutover or resumption. Retire the isolated copy under approved custody and retention procedures.
+
+The earlier disposable rehearsal demonstrated logical archive and private-object byte recovery for synthetic data at its then-current schema. It does not prove hosted recoverability or C1.7 production-scale objectives. [D2 rehearsal](../deployment/D2_RECOVERY_REHEARSAL_REPORT.md) · [Private Storage recovery plan](../deployment/D2_STORAGE_RECOVERY_PLAN.md)

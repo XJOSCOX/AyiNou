@@ -3075,6 +3075,21 @@
           "rolloutAndRollback": "Apply only exact owner-approved checksum to linked AyiNou after dry run and preservation checks. Keep pilot and fixture rows empty. Prefer forward remediation and keep external release routing closed after restoration."
         }
       ]
+    },
+    {
+      "id": "c1-7-community-needs-operational-readiness",
+      "report": "docs/community-needs/C1_7_OPERATIONAL_READINESS.md",
+      "routes": [],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124155600_c17_pilot_operational_readiness.sql",
+          "rlsAndGrants": "Preserves existing privileges, owner, security attributes, table RLS and grants.",
+          "authorization": "Only the existing Founder workspace service RPC reaches this internal read model. No attestation write or new power.",
+          "compatibility": "Adds status, release and safe provenance fields without removing legacy response fields or changing live activation.",
+          "validation": "Disposable SQL and browser checks for evidence validity and privacy. Compare hosted data, ACLs, and exact function body after applying.",
+          "rolloutAndRollback": "Apply only the exact independently approved file. Preserve all existing records and keep all live stages disabled. Use a scoped forward repair if needed."
+        }
+      ]
     }
   ]
 }

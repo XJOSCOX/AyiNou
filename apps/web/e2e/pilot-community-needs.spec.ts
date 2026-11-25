@@ -83,6 +83,10 @@ test("C1.6 Founder preparation, attested activation, atomic capacity, and pause 
     const firstDashboard = await read();
     expect(firstDashboard).toMatchObject({ status: "unconfigured", ready: false, activeParticipants: 0 });
     expect(firstDashboard.requirements.privacy).toBe("pending");
+    expect(firstDashboard).toMatchObject({ runtimeRelease: release, policyRelease: null, releaseMatches: false });
+    expect(Object.values(firstDashboard.operationalEvidence ?? {})).toEqual(Array(6).fill({
+      status: "missing", operator: null, verifiedAt: null, expiresAt: null, revokedAt: null,
+    }));
     await expectStatus(request(null, pilot), 401);
     await expectStatus(request(admin, pilot, "GET", undefined, a), 403);
     await expectStatus(request(founder, pilot, "GET", undefined, a), 403);
@@ -119,7 +123,13 @@ test("C1.6 Founder preparation, attested activation, atomic capacity, and pause 
     sql(`insert into private.c16_evidence(requirement,community_id,release,evidence_reference,attested_by,verified_at,valid_until)
       select k,'${room}','${release}','disposable-attestation-'||k,'${admin.id}',now(),now()+interval '2 days'
       from unnest(array['privacy','support','databaseRecovery','storageRecovery','release','launchBlockers']) k;`);
-    expect(await read()).toMatchObject({ ready: true, reviewers: firstDashboard.reviewers + 4, triagers: firstDashboard.triagers + 1, activeParticipants: 2 });
+    const verified = await read();
+    expect(verified.operationalEvidence?.privacy).toMatchObject({
+      status: "verified", operator: expect.any(String), verifiedAt: expect.any(String), expiresAt: expect.any(String), revokedAt: null,
+    });
+    expect(JSON.stringify(verified)).not.toContain("disposable-attestation");
+    expect(verified).toMatchObject({ runtimeRelease: release, policyRelease: release, releaseMatches: true });
+    expect(verified).toMatchObject({ ready: true, reviewers: firstDashboard.reviewers + 4, triagers: firstDashboard.triagers + 1, activeParticipants: 2 });
     const active = await command(receipt("activate", 4));
     expect(active.status).toBe("active");
     const tw = String((await apiCall(triager, "/api/v1/me/private-workflows", 200, "POST", { kind: "moderation_workspace" })).id);
@@ -158,6 +168,7 @@ test("C1.6 Founder preparation, attested activation, atomic capacity, and pause 
         audience: "community", attribution: false, confirmed: true, content: { ...need, references: undefined } }), 409);
     sql(`update private.c16_evidence set revoked_at=now() where requirement='storageRecovery';`);
     await command(receipt("resume", 6), 409);
+    expect(sql("select private.c16_dashboard(release,null,null)->'operationalEvidence'->'storageRecovery'->>'status' from private.c16_policy;")).toBe("revoked");
     sql(`insert into private.c16_evidence(requirement,community_id,release,evidence_reference,attested_by,verified_at,valid_until)
       values('storageRecovery','${room}','${release}','replacement-disposable-recovery','${admin.id}',now(),now()+interval '2 days');`);
     expect(await command(receipt("resume", 6))).toMatchObject({ status: "active", endsAt: active.endsAt });
@@ -210,6 +221,8 @@ test("C1.6 Founder preparation, attested activation, atomic capacity, and pause 
     expect(sql(`select count(*)=12 and (select count(*) from private.c16_cases where submitted_at is not null)=1 from private.c16_history;`)).toBe("t");
     expect(sql("select not (exists(select from private.c11_intake_fixture) or exists(select from private.c12_fixture) or exists(select from private.c13_fixture) or exists(select from private.c14_fixture));")).toBe("t");
 
+    sql("update private.c16_evidence set verified_at=now()-interval '2 days', valid_until=now()-interval '1 day' where requirement='privacy';");
+    expect(sql("select private.c16_dashboard(release,null,null)->'operationalEvidence'->'privacy'->>'status' from private.c16_policy;")).toBe("expired");
     await inEnglish(context);
     await login(page, owner);
     await solveMfa(page, founder.secret);
@@ -222,6 +235,8 @@ test("C1.6 Founder preparation, attested activation, atomic capacity, and pause 
       await page.getByRole("banner").locator("select").selectOption(locale);
       await expect(page.getByRole("heading", { name: pilotLabel(locale, "title"), exact: true })).toBeVisible();
       await expect(page.getByRole("heading", { name: pilotLabel(locale, "staff"), exact: true })).toBeVisible();
+      await expect(page.getByText(pilotLabel(locale, "decisionBlocked"), { exact: true })).toBeVisible();
+      await expect(page.getByText(pilotLabel(locale, "privacyEvidence"), { exact: true })).toBeVisible();
       expect(await page.locator("body").evaluate((body) => body.scrollWidth)).toBeLessThanOrEqual(locale === "en" ? 1300 : 390);
     }
   } finally {

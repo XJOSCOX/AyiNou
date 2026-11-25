@@ -148,3 +148,7 @@ The disposable integrated journey follows one case from private draft and submis
 ## C1.6 Founder-controlled Community Needs pilot
 
 Each policy revision, cohort enrollment or removal, activation, emergency pause and resumption appends a private reasoned decision to the pilot history in the same transaction. Existing case and publication ledgers remain authoritative. Launch attestations come from a separate protected process. The dashboard exposes status, bounded roster information and counts without need narratives or reviewer evidence. [Implementation report](../community-needs/C1_6_IMPLEMENTATION_REPORT.md)
+
+## C1.7 Pilot readiness projection
+
+The existing Founder read projects current attestation validity, safe operator attribution, timestamps, exact release identity and recorded grant state. The read does not add an audit mutation. The C1.6 command ledger and independent evidence custody remain authoritative. Future department policy changes will require department-scoped reasoned history under the same protected authority. [Operational readiness](../community-needs/C1_7_OPERATIONAL_READINESS.md)
