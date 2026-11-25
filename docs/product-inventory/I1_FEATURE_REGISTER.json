@@ -8077,8 +8077,8 @@
       "verification": {
         "local": "See the C3.2 implementation report.",
         "disposableSupabase": "Uses only disposable accounts and projects for structured requirements and native lifecycle.",
-        "hostedDatabase": "Pending exact approval and verification.",
-        "connectedApplication": "See the C3.2 implementation report.",
+        "hostedDatabase": "C3.2 applied and verified with 146 migrations, zero pending and empty structured requirement, configuration and fixture tables.",
+        "connectedApplication": "Test02 verified native Project Work and denied Founder access. J0SC0X verified closed structured preparation with 15 skills. All 47 connected checks passed.",
         "hostedApplication": "Hosted rollout scope is database only.",
         "operationalApproval": "Real structured recruitment and matching stay closed."
       }
