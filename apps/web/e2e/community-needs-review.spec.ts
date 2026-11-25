@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type { NeedReviewCase, NeedReviewQueue } from "@ayinou/shared";
-import { api, apiCall, enroll, expect, finishPersonalOnboarding, localClient, sql, test, totp, web, type Member } from "./fixtures";
+import { api, apiCall, enroll, expect, finishPersonalOnboarding, inEnglish, localClient, login, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 import { needReviewLabel } from "../src/lib/community-needs-review-i18n";
+import { sessionSecurityMessages } from "../src/lib/session-security-i18n";
 
 const base = "/api/v1/me/community-needs";
 const staff = "/api/v1/private/community-needs-review";
@@ -20,7 +21,7 @@ async function authenticate(member: Member) {
   if (!factor) throw new Error("Missing authenticator fixture");
   const result = await client.auth.mfa.challengeAndVerify({ factorId: factor.id, code: totp(secret) });
   if (result.error) throw result.error;
-  return { ...member, token: result.data.access_token };
+  return { ...member, token: result.data.access_token, secret };
 }
 
 async function request<T>(member: Member, path: string, expected: number | number[], method = "GET", body?: object, workspace?: string): Promise<T> {
@@ -33,7 +34,7 @@ async function request<T>(member: Member, path: string, expected: number | numbe
   return result;
 }
 
-test("C1.2 reviews, corrections and independent challenges stay scoped and private", async ({ page, context, signedIn, makeMember }) => {
+test("C1.2 reviews, corrections and independent challenges stay scoped and private", async ({ browser, page, context, signedIn, makeMember }) => {
   test.setTimeout(120000);
   const [owner, moderator, reviewerAccount, appealAccount, peer] = await Promise.all(Array.from({length:5}, () => makeMember()));
   for (const person of [signedIn,owner,moderator,reviewerAccount,appealAccount,peer]) finishPersonalOnboarding(person);
@@ -108,6 +109,21 @@ test("C1.2 reviews, corrections and independent challenges stay scoped and priva
     await act(founder,a.id,"admin",f,"assign_review",5,{target:challenger.id},403);
     sql(`delete from private.community_projects where id='${conflictProject}';`);
     await act(founder,a.id,"admin",f,"assign_review",5,{target:reviewer.id});
+    const reviewerContext = await browser.newContext({ baseURL: web, viewport: { width: 390, height: 844 } });
+    try {
+      await inEnglish(reviewerContext);
+      const reviewPage = await reviewerContext.newPage();
+      await login(reviewPage, reviewer);
+      await solveMfa(reviewPage, reviewer.secret);
+      await reviewPage.goto("/verification/review");
+      await reviewPage.getByRole("button", { name: sessionSecurityMessages.en.openReview, exact: true }).click();
+      await expect(reviewPage.getByRole("heading", { name: needReviewLabel("en", "queue"), exact: true })).toBeVisible();
+      await expect(reviewPage.getByRole("button", { name: new RegExp(a.id) })).toBeVisible();
+      await expect(reviewPage.getByRole("button", { name: new RegExp(other.id) })).toHaveCount(0);
+      expect(await reviewPage.locator("body").evaluate((element) => element.scrollWidth)).toBeLessThanOrEqual(390);
+    } finally {
+      await reviewerContext.close();
+    }
     const evidence=await request<NeedReviewCase>(reviewer,staffCase(a.id,"review"),200,"GET",undefined,r);
     expect(evidence.versions?.map((v)=>v.content.title)).toEqual(["Updated study room access",proposal.title,proposal.title]);
     expect((await request<NeedReviewCase>(founder,staffCase(a.id,"admin"),200,"GET",undefined,f)).versions).toBeUndefined();

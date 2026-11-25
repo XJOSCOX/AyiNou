@@ -7239,16 +7239,23 @@
           "docs/community-needs/C1_7_PRIVACY_OPERATIONS.md",
           "docs/community-needs/C1_7_RECOVERY_VERIFICATION.md",
           "docs/community-needs/C1_7_REVIEWER_STAFFING.md",
-          "docs/community-needs/C1_7_SECURITY_TEST_RESULTS.md"
+          "docs/community-needs/C1_7_SECURITY_TEST_RESULTS.md",
+          "docs/community-needs/C1_FINAL_COMPLETION_DECISION.md",
+          "docs/community-needs/C1_FINAL_DEVELOPMENT_GAPS.md",
+          "docs/community-needs/C1_FINAL_END_TO_END_TESTS.md",
+          "docs/community-needs/C1_FINAL_EXECUTIVE_SUMMARY.md",
+          "docs/community-needs/C1_FINAL_FEATURE_MATRIX.md",
+          "docs/community-needs/C1_FINAL_LAUNCH_DEPENDENCIES.md",
+          "docs/community-needs/C1_FINAL_SECURITY_REVIEW.md"
         ]
       },
       "verification": {
         "local": "C1.5 integration test and readiness evidence cover the end-to-end workflow.",
         "disposableSupabase": "See C1.4 association consent, authorization, and invalidation exercises.",
-        "hostedDatabase": "C1.7 readiness projection applied. Hosted history is 137 applied, zero pending. All five pilot tables and four fixture gates stayed empty and 51 existing record fingerprints matched.",
-        "connectedApplication": "The connected local Founder dashboard showed Ouest-only disabled readiness, six missing attestations and no activation action. Test02 saw closed intake and could not enter Pilot administration. Local health, public reads and closed route probes passed.",
+        "hostedDatabase": "C1 final read-only check confirmed 137 applied, zero pending and 51 matched record fingerprints. Four fixture gates and five pilot tables remained empty. No migration was needed.",
+        "connectedApplication": "C1 final connected local read, denial and four-language checks passed. J0SC0X saw blocked Pilot readiness and effective policy values. Test02 saw closed intake and could not enter Pilot or triage administration. Disposable lifecycle validation passed in all ten departments.",
         "hostedApplication": "Hosted application release unverified.",
-        "operationalApproval": "C1.7 operations cover all ten departments. Ouest remains the proposed first pilot. Launch is no-go pending independently verified staffing, privacy, recovery and hosted release."
+        "operationalApproval": "Ouest remains the sole protected pilot scope and all live Community Needs stages are closed. Launch requires verified staffing, qualified privacy/legal approval, hosted storage and database recovery, an authorized matching release and six independently recorded attestations."
       }
     },
     {
@@ -7745,5 +7752,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C1.7 Community Needs Operational Readiness"
+  "lastScopeUpdate": "C1 Community Needs Development Closure"
 }

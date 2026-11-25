@@ -15,9 +15,7 @@ const projectTitle="A neighborhood reading room";
 const objective="Open a shared space offering quiet reading hours to local learners.";
 const purpose="The reading room would make shared learning materials available locally.";
 const notes="A private review reason for the directly related objectives.";
-const summary={title,description:"Provide access to local study materials for learners.",category:"education",area:"Ouest",beneficiaries:"Learners"};
-const evidence={...summary,title:"Private source case",description:"Private witness evidence",
-  references:[{url:"https://example.org/study",description:"Private evidence fixture"}]};
+const departments = ["artibonite", "centre", "grand-anse", "nippes", "nord", "nord-est", "nord-ouest", "ouest", "sud", "sud-est"] as const;
 const receipt=(extra:object)=>({requestId:randomUUID(),confirmed:true,...extra});
 
 async function mfa(member:Member):Promise<Member> {
@@ -41,9 +39,12 @@ async function call<T>(member:Member|null,url:string,status:number|number[],meth
   return result;
 }
 
-test("C1.5 carries a private need through independent review, publication, and a linked project",async({page,context,signedIn,makeMember})=>{
+for (const department of departments) test("C1 lifecycle through review, publication and project association in " + department, async({page,context,signedIn,makeMember})=>{
   test.setTimeout(120000);
-  for(const [file,assertions] of [["c11_community_needs_test.sql",9],["c15_community_needs_integration_test.sql",7]] as const) {
+  const summary = { title, description: "Provide access to local study materials for learners.", category: "education", area: department, beneficiaries: "Learners" };
+  const evidence = { ...summary, title: "Private source case", description: "Private witness evidence",
+    references: [{ url: "https://example.org/study", description: "Private evidence fixture" }] };
+  for(const [file,assertions] of department === "ouest" ? [["phase1a_schema_rls_test.sql",33],["c11_community_needs_test.sql",9],["c15_community_needs_integration_test.sql",7]] as const : []) {
     const statement=readFileSync(resolve(__dirname,"../../../supabase/tests/database",file),"utf8");
     const tap=sql(statement);
     expect(tap).not.toMatch(/^not ok/m);
@@ -56,7 +57,8 @@ test("C1.5 carries a private need through independent review, publication, and a
   }
   const [founder,reviewer,publisher,triager,evidenceReviewer]=
     await Promise.all([founderAccount,reviewerAccount,publisherAccount,triageAccount,evidenceAccount].map(mfa));
-  const room=sql("select id from feed_data.communities where slug='ouest';");
+  const room = sql(`select id from feed_data.communities where slug='${department}';`);
+  const otherRoom = sql(`select id from feed_data.communities where slug='${department === "ouest" ? "centre" : "ouest"}';`);
   const directory="/api/v1/private/communities/"+room+"/needs";
   const signature="public.c14_links_for_api(uuid,uuid,boolean,bigint,uuid,text,uuid,uuid,jsonb)";
   expect(sql(`select has_function_privilege('service_role','${signature}','execute')
@@ -75,7 +77,8 @@ test("C1.5 carries a private need through independent review, publication, and a
     insert into private.verification_reviewers(user_id)
       values('${reviewer.id}'),('${publisher.id}'),('${evidenceReviewer.id}'),('${triager.id}');
     insert into feed_data.community_memberships(community_id,user_id)
-      values('${room}','${signedIn.id}'),('${room}','${author.id}'),('${room}','${peer.id}'),('${room}','${triager.id}');
+      values('${room}','${signedIn.id}'),('${room}','${author.id}'),('${room}','${peer.id}'),('${room}','${triager.id}'),
+      ('${otherRoom}','${outsider.id}'),('${otherRoom}','${peer.id}');
     insert into feed_data.community_staff(community_id,user_id,role) values('${room}','${triager.id}','moderator');
     insert into private.c11_intake_fixture values(true,true);
     insert into private.c12_fixture values(true);
@@ -97,6 +100,7 @@ test("C1.5 carries a private need through independent review, publication, and a
     const {id:need}=await call<{id:string}>(author,intake,201,"POST",{communityId:room,content:evidence});
     const memberCase=intake+"/"+need;
     await call(peer,memberCase,404);
+    await call(outsider,intake,403,"POST",{communityId:room,content:evidence});
     await call(author,memberCase+"/publication",404);
     await call(author,memberCase,200,"PATCH",{action:"submit",expectedRevision:1,confirmed:true});
     const caseFor=(lane:string)=>reviews+"/"+need+"?lane="+lane;
@@ -131,10 +135,11 @@ test("C1.5 carries a private need through independent review, publication, and a
     expect(live.attribution).toBeNull();
     for(const secret of [need,evidence.title,evidence.description,evidence.references[0].url,notes])expect(JSON.stringify(live)).not.toContain(secret);
     await call(outsider,directory+"/"+publication,404);
+    await call(peer,"/api/v1/private/communities/"+otherRoom+"/needs/"+publication,404);
     expect((await call<NeedProjectLinkPage<{id:string}>>(outsider,root+"/options",200)).items).toEqual([]);
     expect((await call<NeedProjectLinkPage<{id:string}>>(signedIn,root+"/options",200)).items.map(item=>item.id)).toContain(publication);
 
-    const discussionUrl="/communities/ouest?need="+publication;
+    const discussionUrl="/communities/"+department+"?need="+publication;
     await page.goto(discussionUrl);
     await page.getByRole("button",{name:publicationLabel("en","discuss"),exact:true}).click();
     const discussion=page.getByRole("region",{name:"Discussion",exact:true});
@@ -148,7 +153,7 @@ test("C1.5 carries a private need through independent review, publication, and a
     await page.goto("/projects/new");
     await page.locator("input[name=title]").fill(projectTitle);
     const projectFields={
-      description:"A proposed shared study room for residents of Ouest.",
+      description:"A proposed shared study room for local residents.",
       problem:"Residents need a quiet place with shared study materials.",
       solution:"Organize a room and schedule weekly study hours.",
       objectives:objective,beneficiaries:"Residents seeking shared reading resources.",
@@ -230,10 +235,10 @@ test("C1.5 carries a private need through independent review, publication, and a
     expect(linkNotices.length).toBeGreaterThan(0);
     for(const secret of [notes,objective,need,projectTitle])expect(JSON.stringify(linkNotices)).not.toContain(secret);
 
-    for(const locale of ["en","ht","fr","es"] as const) {
+    for(const locale of department === "ouest" ? ["en","ht","fr","es"] as const : []) {
       await context.addCookies([{name:"ayinou-locale",value:locale,url:web}]);
       await page.setViewportSize({width:locale==="en"?1280:390,height:844});
-      await page.goto("/communities/ouest?need="+publication);
+      await page.goto(discussionUrl);
       await expect(page.getByRole("heading",{name:needProjectLabel(locale,"projects")})).toBeVisible();
       await expect(page.getByRole("link",{name:projectTitle,exact:true})).toBeVisible();
       expect(await page.locator("body").evaluate(el=>el.scrollWidth)).toBeLessThanOrEqual(locale==="en"?1280:390);

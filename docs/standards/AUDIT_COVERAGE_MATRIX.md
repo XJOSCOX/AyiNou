@@ -152,3 +152,7 @@ Each policy revision, cohort enrollment or removal, activation, emergency pause 
 ## C1.7 Pilot readiness projection
 
 The existing Founder read projects current attestation validity, safe operator attribution, timestamps, exact release identity and recorded grant state. The read does not add an audit mutation. The C1.6 command ledger and independent evidence custody remain authoritative. Future department policy changes will require department-scoped reasoned history under the same protected authority. [Operational readiness](../community-needs/C1_7_OPERATIONAL_READINESS.md)
+
+## C1 final integrated audit verification
+
+The same disposable need and project lifecycle passed in all ten departments, with independent decisions, cross-department denial, audited association revocation, redacted notices and retained decision history. The Pilot test applies a real scoped administrator command to a disposable member and checks the denial, stored event and audited revocation. Hosted catalog and record fingerprints were preserved. [C1 security and role verification](../community-needs/C1_FINAL_SECURITY_REVIEW.md)

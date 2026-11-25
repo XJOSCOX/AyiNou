@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { randomUUID } from "node:crypto";
 import type { NeedPublication, NeedPublicationPage, NeedReviewCase, PublishedNeed } from "@ayinou/shared";
 import { publicationLabel } from "../src/lib/community-need-publication-i18n";
@@ -243,5 +244,59 @@ test("C1.3 publishes an independently approved snapshot only to authorized commu
     expect(JSON.stringify(await call(peer,"/api/v1/me/notifications",200))).not.toContain(need.id);
   } finally {
     sql("delete from private.c13_fixture; delete from private.c12_fixture; delete from private.c11_intake_fixture; delete from private.platform_bootstrap;");
+  }
+});
+
+test("publication directory ignores an old page after a category change", async ({ page, context, signedIn }) => {
+  const room = sql("select id from feed_data.communities where slug='ouest';");
+  sql("insert into feed_data.community_memberships(community_id,user_id) values ('" + room + "','" + signedIn.id + "');");
+  const path = "/api/v1/private/communities/" + room + "/needs";
+  const entry = (title: string, category: "education" | "healthcare") => ({
+    id: randomUUID(), content: { ...summary, title, category }, publishedAt: new Date().toISOString(), attribution: null,
+  });
+  const oldPage = entry("Delayed education result", "education");
+  const categoryResult = entry("Current healthcare result", "healthcare");
+  const first = entry("Initial education result", "education");
+  const pending = Promise.withResolvers<void>();
+  const release = Promise.withResolvers<void>();
+  await context.addCookies([{ name: "ayinou-locale", value: "en", url: web }]);
+  await page.route((url) => url.pathname === path, async (route) => {
+    if (route.request().method() !== "GET") return route.continue();
+    const response = await route.fetch();
+    const params = new URL(route.request().url()).searchParams;
+    if (params.has("after")) {
+      pending.resolve();
+      await release.promise;
+      await route.fulfill({ response, status: 200, json: { items: [oldPage], nextCursor: null } });
+    } else {
+      const filtered = params.get("category") === "healthcare";
+      await route.fulfill({ response, status: 200, json: { items: [filtered ? categoryResult : first], nextCursor: filtered ? null : first.id } });
+    }
+  });
+
+  try {
+    await page.goto("/communities/ouest");
+    await page.getByRole("button", { name: publicationLabel("en", "title"), exact: true }).click();
+    const directory = page.getByRole("region", { name: publicationLabel("en", "title"), exact: true });
+    const firstResult = directory.getByRole("button", { name: /Initial education result/ });
+    await expect(firstResult).toBeVisible();
+    await directory.getByRole("combobox").focus();
+    await page.keyboard.press("Tab");
+    await expect(firstResult).toBeFocused();
+    const a11y = await new AxeBuilder({ page }).include('section[aria-label="' + publicationLabel("en", "title") + '"]')
+      .withTags(["wcag2a", "wcag2aa"]).analyze();
+    expect(a11y.violations).toEqual([]);
+    await directory.getByRole("button", { name: /load more/i }).click();
+    await pending.promise;
+    await directory.getByRole("combobox").selectOption("healthcare");
+    await expect(directory.getByRole("button", { name: /Current healthcare result/ })).toBeVisible();
+    const completed = page.waitForResponse((response) => response.url().includes("after="));
+    release.resolve();
+    await (await completed).finished();
+    await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
+    await expect(directory.getByText(oldPage.content.title, { exact: true })).toHaveCount(0);
+    await expect(directory.getByText(first.content.title, { exact: true })).toHaveCount(0);
+  } finally {
+    release.resolve();
   }
 });

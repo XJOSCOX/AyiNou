@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
-import type { NeedPublication, NeedProjectLink, PilotWorkspace } from "@ayinou/shared";
+import type { FeatureEnforcementCase, NeedPublication, NeedProjectLink, PilotWorkspace } from "@ayinou/shared";
+import { needsMessages } from "../src/lib/community-needs-i18n";
 import { pilotLabel } from "../src/lib/community-needs-pilot-i18n";
-import { api, apiCall, enroll, expect, finishPersonalOnboarding, localClient, inEnglish, login, solveMfa, sql, test, totp, type Member } from "./fixtures";
+import { api, apiCall, enroll, expect, finishPersonalOnboarding, localClient, inEnglish, login, logout, solveMfa, sql, test, totp, type Member } from "./fixtures";
 
 const pilot = "/api/v1/admin/community-needs-pilot";
 const intake = "/api/v1/me/community-needs";
@@ -136,6 +137,31 @@ test("C1.6 Founder preparation, attested activation, atomic capacity, and pause 
     await expectStatus(request(outsider, intake, "POST", { communityId: otherRoom, content: need }), 409);
     await expectStatus(request(first, intake, "POST", { communityId: otherRoom, content: need }), 403);
     await expectStatus(request(triager, intake, "POST", { communityId: room, content: need }), 403);
+    const restrictionPath = "/api/v1/moderation/feature-enforcement";
+    const restriction = {
+      action: "restrict", subject: first.id, capabilities: ["community_need_submit"], scope: "community",
+      scopeId: room, minutes: 60, category: "safety", reason, confirmed: true, requestId: randomUUID(),
+    };
+    const { records: [applied] } = await expectStatus(
+      request<{ records: FeatureEnforcementCase[] }>(admin, restrictionPath, "POST", restriction, a), 200);
+    expect(applied).toMatchObject({ capability: "community_need_submit", authority: "administrator", scopeId: room });
+    await expectStatus(request(first, intake, "POST", { communityId: room, content: need }), 403);
+    expect(sql(`select not private.c16_participant('${first.id}','${room}')
+      and not exists(select from private.c11_needs where author_id='${first.id}')
+      and (select count(*)=1 from private.m23_events where request_id='${restriction.requestId}'
+        and subject_id='${first.id}' and scope_id='${room}' and action='restrict');`)).toBe("t");
+    await inEnglish(context);
+    await login(page, first);
+    await expect(page).toHaveURL(/\/dashboard/);
+    await page.goto("/communities/intake/needs");
+    await expect(page.getByText(needsMessages.en.closed, { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: needsMessages.en.newNeed, exact: true })).toHaveCount(0);
+    await logout(page);
+    await expectStatus(request(admin, restrictionPath, "POST", {
+      ...restriction, action: "revoke", reference: applied.id, version: applied.version, minutes: null, requestId: randomUUID(),
+    }, a), 200);
+    expect(sql(`select private.c16_participant('${first.id}','${room}')
+      and (select count(*)=2 from private.m23_events where case_id='${applied.id}');`)).toBe("t");
     const candidates = await Promise.all([first, second].map(async (person) => ({
       person, id: (await expectStatus(request<{ id: string }>(person, intake, "POST", { communityId: room, content: need }), 201)).id,
     })));

@@ -52,33 +52,59 @@ function Snapshot({ content }: { content: NeedPublicationContent }) {
   </div>;
 }
 
-export function PublishedNeeds({ room, initialId, onDiscuss }: { room: string; initialId?: string; onDiscuss?: (id: string) => void }) {
+function PublishedNeedResults({ room, category, onSelect }: { room: string; category: string; onSelect: (id: string) => void }) {
   const [locale] = useLocale();
-  const t = (key: string) => publicationLabel(locale,key);
+  const t = (key: string) => publicationLabel(locale, key);
   const copy = needsMessages[locale];
-  const [category, setCategory] = useState("");
-  const [selected, select] = useState(initialId ?? "");
+  const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
   const [extra, setExtra] = useState<NeedPublicationPage<PublishedNeed> | null>(null);
   const [paging, setPaging] = useState(false);
   const [pageError, setPageError] = useState<unknown>(null);
-  const filter = category ? "?category=" + category : "";
+  const base = directoryPath(room) + (category ? "?category=" + category : "");
   const load = useCallback((signal: AbortSignal): Promise<NeedPublicationPage<PublishedNeed>> =>
-    authorizedRequest(directoryPath(room) + filter, readOptions(signal)), [room, filter]);
-  const detail = useCallback((signal: AbortSignal): Promise<PublishedNeed | null> =>
-    selected ? authorizedRequest(directoryPath(room) + "/" + selected, readOptions(signal)) : Promise.resolve(null), [room, selected]);
+    authorizedRequest(base, readOptions(signal)), [base]);
   const list = useInstitutionResource(load);
-  const item = useInstitutionResource(detail);
   const cursor = extra ? extra.nextCursor : list.data?.nextCursor;
+
   async function more() {
     if (!cursor || paging) return;
     setPageError(null);
     setPaging(true);
     try {
       const next: NeedPublicationPage<PublishedNeed> = await authorizedRequest(
-        directoryPath(room) + filter + (filter ? "&" : "?") + "after=" + cursor, { cache: "no-store" });
+        base + (category ? "&" : "?") + "after=" + encodeURIComponent(cursor), { cache: "no-store" });
       setExtra((current) => ({ ...next, items: [...(current?.items ?? []), ...next.items] }));
-    } catch (cause) { setPageError(cause); } finally { setPaging(false); }
+    } catch (cause) {
+      setPageError(cause);
+    } finally {
+      setPaging(false);
+    }
   }
+
+  return <>
+      <PublicationError error={list.error ?? pageError} retry={list.error ? list.refresh : () => void more()} />
+      {!list.data && !list.error && <p role="status">{copy.loading}</p>}
+      {list.data?.items.length === 0 && <p>{t("empty")}</p>}
+      <ul className="grid min-w-0 gap-2">{[...(list.data?.items ?? []), ...(extra?.items ?? [])].map((row) =>
+        <li key={row.id}>
+          <button type="button" onClick={() => onSelect(row.id)} className={institutionCard + " grid w-full min-w-0 gap-1 text-start hover:bg-[var(--theme-control)]"}>
+            <span dir="auto" className="break-words font-semibold">{row.content.title}</span>
+            <span className="text-sm">{copy[row.content.category]} · {date.format(new Date(row.publishedAt))} · {t("reviewed")}</span>
+          </button>
+        </li>)}</ul>
+      {cursor && <button className={institutionLink} disabled={paging} onClick={() => void more()}>{copy.more}</button>}
+  </>;
+}
+
+export function PublishedNeeds({ room, initialId, onDiscuss }: { room: string; initialId?: string; onDiscuss?: (id: string) => void }) {
+  const [locale] = useLocale();
+  const t = (key: string) => publicationLabel(locale,key);
+  const copy = needsMessages[locale];
+  const [category, setCategory] = useState("");
+  const [selected, select] = useState(initialId ?? "");
+  const detail = useCallback((signal: AbortSignal): Promise<PublishedNeed | null> =>
+    selected ? authorizedRequest(directoryPath(room) + "/" + selected, readOptions(signal)) : Promise.resolve(null), [room, selected]);
+  const item = useInstitutionResource(detail);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
   const entry = selected === item.data?.id ? item.data : null;
   return <section className={institutionCard + " grid min-w-0 gap-4"} aria-label={t("title")}>
@@ -104,24 +130,15 @@ export function PublishedNeeds({ room, initialId, onDiscuss }: { room: string; i
           <p className="text-sm">{t("discussHelp")}</p>
         </div>}
       </article>}
-    </> : <>
+    </> : null}
+    <div className={selected ? "hidden" : "grid gap-2"} hidden={Boolean(selected)}>
       <label className="max-w-xs">{copy.category}<select className={institutionField} value={category}
-        onChange={(event) => { setCategory(event.target.value); setExtra(null); setPageError(null); }}>
+        onChange={(event) => setCategory(event.target.value)}>
         <option value="">{t("all")}</option>
         {communityNeedCategories.map((entry) => <option key={entry} value={entry}>{copy[entry]}</option>)}
       </select></label>
-      <PublicationError error={list.error ?? pageError} retry={list.refresh} />
-      {!list.data && !list.error && <p role="status">{copy.loading}</p>}
-      {list.data?.items.length === 0 && <p>{t("empty")}</p>}
-      <ul className="grid min-w-0 gap-2">{[...(list.data?.items ?? []), ...(extra?.items ?? [])].map((row) =>
-        <li key={row.id}>
-          <button type="button" onClick={() => select(row.id)} className={institutionCard + " grid w-full min-w-0 gap-1 text-start hover:bg-[var(--theme-control)]"}>
-            <span dir="auto" className="break-words font-semibold">{row.content.title}</span>
-            <span className="text-sm">{copy[row.content.category]} · {date.format(new Date(row.publishedAt))} · {t("reviewed")}</span>
-          </button>
-        </li>)}</ul>
-      {cursor && <button className={institutionLink} disabled={paging} onClick={more}>{copy.more}</button>}
-    </>}
+      <PublishedNeedResults key={room + ":" + category} room={room} category={category} onSelect={select} />
+    </div>
   </section>;
 }
 

@@ -124,6 +124,8 @@ test("deletion plans surface ownership and shared data blockers without exposing
   const attachment = randomUUID();
   sql(`insert into feed_data.post_attachments(id,author_id,post_id,position,state,width,height,thumbnail_bytes,display_bytes,digest)
     values ('${attachment}','${owner.id}','${post.id}',1,'attached',1,1,1,1,decode(repeat('00',32),'hex'));`);
+  const isLastAdministrator = sql(`select not exists(select from public.role_assignments
+    where role='administrator' and user_id<>'${owner.id}' and private.platform_admin(user_id));`) === "t";
   const response = await request(owner, path + "plan", { caseVersion: 1 });
   expect(response.status).toBe(200);
   const plan = await response.json();
@@ -134,9 +136,10 @@ test("deletion plans surface ownership and shared data blockers without exposing
   expect(sql(`select count(*) from private.lifecycle_plans p cross join lateral jsonb_array_elements(snapshot->'resources') r
     where p.id='${plan.receipt}' and r->>'bucket'='post-media' and r->>'ref'='${attachment}';`)).toBe("2");
   expect(plan.warnings).toEqual(expect.arrayContaining([
-    "last_administrator", "institution_owner", "group_owner", "third_party_discussion", "personal_project",
+    "privileged_role", "institution_owner", "group_owner", "third_party_discussion", "personal_project",
     "shared_media", "voting_integrity", "project_commitment", "protected_evidence",
   ]));
+  expect(plan.warnings.includes("last_administrator")).toBe(isLastAdministrator);
   for (const excluded of [org, logo, group.community.id, rootId, replyId, proposal.id, poll.id, option, attachment, other.id,
     "Private organization name", "Do not disclose this reply", "Private project evidence fixture", "option_id"]) {
     if (excluded) expect(JSON.stringify(plan).includes(excluded)).toBe(false);
