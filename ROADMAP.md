@@ -289,7 +289,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] C2.3 adds controlled publication of current independent findings with exact organizer consent and a separate departmental decision. Hosted database rollout verified. Live publication remains disabled. [Implementation report](docs/project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)
 - [x] C2.4 adds department and national Impact reporting, an independently governed measurement catalog, exact source mappings, and complementary disclosure controls. Hosted database rollout verified. Real reporting remains disabled. [Implementation report](docs/project-outcomes/C2_4_IMPLEMENTATION_REPORT.md)
 - [x] C2.5 completed the gated C2 development audit, corrected report invalidation and verified the hosted database. Public launch remains gated. [Completion decision](docs/project-outcomes/C2_FINAL_COMPLETION_DECISION.md)
-- [ ] C2.6 separates Founder configuration and reviewer readiness from C2 live activation. [Implementation report](docs/project-outcomes/C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md)
+- [x] C2.6 separates Founder configuration and reviewer readiness from C2 live activation. The hosted database migration is verified with all live gates closed. [Implementation report](docs/project-outcomes/C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md)
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
 **Gate:** An initiative can be proposed, reviewed, organized, updated, completed and archived with transparent responsibility.

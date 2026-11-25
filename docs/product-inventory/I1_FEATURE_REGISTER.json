@@ -7969,7 +7969,7 @@
       "verification": {
         "local": "See the implementation report for checks.",
         "disposableSupabase": "Uses only synthetic projects, observations, consent and role appointments.",
-        "hostedDatabase": "C2.4 and the C2.5 correction are applied and verified. The hosted database has 143 applied migrations, zero pending, and closed C2 activation gates.",
+        "hostedDatabase": "C2.4, the C2.5 correction, and C2.6 Founder preparation are applied and verified. The hosted database has 144 applied migrations, zero pending, and closed C2 activation gates.",
         "connectedApplication": "See the Impact implementation report and C2 final end-to-end tests.",
         "hostedApplication": "Deployment scope is the database.",
         "operationalApproval": "All live C2 workflows and Impact reporting are disabled."
