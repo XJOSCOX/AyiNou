@@ -3741,6 +3741,74 @@
           "rolloutAndRollback": "Pin the exact independently approved migration, confirm no unrelated pending versions, compare existing preservation and authorization fingerprints. Close disposable intake and use a reviewed forward repair for any defect."
         }
       ]
+    },
+    {
+      "id": "structured-opportunity-requirements",
+      "report": "docs/volunteering/C3_2_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/volunteer-settings/requirements",
+          "contract": "GET /api/v1/admin/volunteer-settings/requirements - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only project or Founder data. No private volunteer profiles or intake events are added."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-requirements.spec.ts",
+            "denialScenario": "Ordinary members and sessions with wrong private workspaces cannot access protected configuration."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/volunteer-settings/requirements",
+          "contract": "PATCH /api/v1/admin/volunteer-settings/requirements 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Actor, expected revision, exact snapshot and idempotency receipt are recorded when the protected mutation commits."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-requirements.spec.ts",
+            "denialScenario": "Ordinary members and sessions with wrong private workspaces cannot access protected configuration."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:id/work/requirements",
+          "contract": "GET /api/v1/projects/:id/work/requirements - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only project or Founder data. No private volunteer profiles or intake events are added."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-requirements.spec.ts",
+            "denialScenario": "Closed fixture, unrelated projects, missing native roles, wrong opportunities and existing applications deny writes."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/projects/:id/work/requirements/:opportunity",
+          "contract": "PATCH /api/v1/projects/:id/work/requirements/:opportunity 6144 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Actor, expected revision, exact snapshot and idempotency receipt are recorded when the protected mutation commits."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-requirements.spec.ts",
+            "denialScenario": "Closed fixture, unrelated projects, missing native roles, wrong opportunities and existing applications deny writes."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125131000_c32_opportunity_requirements.sql",
+          "rlsAndGrants": "Three private RLS tables with no direct app roles, five ungranted helpers and one service-only command.",
+          "authorization": "Native verified project recruitment scope, current session, project moderation and closed synthetic fixture. Founder administration requires recognized authority, recent MFA and the original workspace.",
+          "compatibility": "Additive schema and bounded read. Native opportunities, applications, roles, invitations, capacity and dates remain authoritative. No historical rows changed and no volunteer profiles queried.",
+          "validation": "Disposable SQL/API/browser tests exercise native owner models, ten geography codes, catalog retirement, concurrent revisions, existing applications, and closed admin settings.",
+          "rolloutAndRollback": "Apply only checksum approved by the Founder after fresh remote dry run and preservation snapshot. Verify all fixture gates closed and use a forward migration for corrections."
+        }
+      ]
     }
   ]
 }

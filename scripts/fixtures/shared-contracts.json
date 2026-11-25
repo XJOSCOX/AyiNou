@@ -288,6 +288,9 @@
     "OnboardingCorrection": "type:65b03edd412d27be32645970e376f3c3df88dfd19d787452bbf7bcab412bb78f",
     "OnboardingCorrectionRequest": "type:3e7a703bb9fe9a3c6a7cff032277ae1d477c60a2a6b68ee6d7224263766d46e2",
     "OperationalOrganization": "type:36aae11e957f1068123d1fa7e7ee46c60adc9a45470e9947d47498f21c192506",
+    "OpportunityRequirementRevision": "type:cf49b22ddb242b94df99cfe7a2cbef7f2c0104e8da804f2387f62ddd55d3dddc",
+    "OpportunityRequirements": "type:ee06559b40a2f6b80382451b343e3e2b0f15d5413bb6d4fe3347ea073c8be261",
+    "OpportunityRequirementsView": "type:026cef3e861ca071e861c607c1d24ae9ec88e11d0b6254c6e3773f4a9eb74c22",
     "ordinaryModerationCapabilities": "value:aa91f16c39ddc7e0ca44107aeb7a911015e11fc49a412de15c3c30dd0c661a4c",
     "OrganizationCustomRole": "type:2e02c50812007acbf22f7c5166167811f7820bbef870f8d98d0e782489b11491",
     "OrganizationIntentReceipt": "type:0c59badbff381457d5fac18b95b3bdd03d57e35c3fcfed0ffbec8a9985315b32",
@@ -453,6 +456,15 @@
     "ReleasedOutcomeEvidence": "type:708c3b9cc71e8099189567413b480d39b7a256eacd753a144e323859c2bd07ed",
     "reportCategories": "value:570a996fda6721611bbf86711e71e99280b9f5b08512ba0699dfbfe119e76ea2",
     "ReportCategory": "type:f505c2ddd6dce47e3a6108421d771028c12c6698204d1d45f59a83068abd6c99",
+    "RequirementAdminView": "type:9704f8b249e34fe6ef73106c35bce4dbd05eb645703caba73d1f7d22c55b42e8",
+    "RequirementDepartment": "type:7feac581a5ca2929b617f4b3f8fde0c0718b5e678ae63c79b8f6d6ab16970c1b",
+    "RequirementField": "type:154f7b869197541812aaccbed7fd8689f5ef1255c3a71ee1f9615a2d0c7c2e0e",
+    "requirementFields": "value:a19e7e3c3adf3e4d3eb8cef12aa11f203962bc275a8d464cb03d9f90aa758c9b",
+    "RequirementLanguage": "type:1f030397391974e0601956a6a318325635b715da1c08ed90d4b5035ee9a0414f",
+    "RequirementMode": "type:eb4dd7aa31ec7d9f662a6a74b5dd6aaacc3bf794615c7e847134c0f66ee41c2a",
+    "requirementPriorities": "value:4cc1033377b85309c7591af078f4b7a42eab613026947e3f4dc64c6532d58cd0",
+    "RequirementPriority": "type:59e93e33408b4445bde2001eac27d26b070e9b259710a635b12d1134ffac2d21",
+    "RequirementSettings": "type:6de6f260ad6acf3a4df865edfc5e1aaa0b8ed0cc2b229a9767cf3c8dcdbdaabf",
     "ReviewApplication": "type:cffc93923a8bdcfd7381b8375ad88cc9b44cfc472ccd14db1703c95dfa8cde0c",
     "ReviewDecision": "type:5ca6e29158541858c39d8be8a957dfe33b084ca5da4b1b72e5a57606f8d8204b",
     "reviewDecisions": "value:4f6d5aad6b31fe1496a14de164416653068a88953e267a8e437cbd24e8f46d09",
@@ -1471,6 +1483,15 @@
       "spam",
       "privacy",
       "other"
+    ],
+    "requirementFields": [
+      "experience",
+      "languages",
+      "screening"
+    ],
+    "requirementPriorities": [
+      "required",
+      "preferred"
     ],
     "reviewDecisions": [
       "approve",

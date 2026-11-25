@@ -32,11 +32,11 @@ begin
       factor_id:=gen_random_uuid();
       insert into auth.mfa_factors(id,user_id,factor_type,status,secret,created_at,updated_at)
         values(factor_id,row_actor,'totp','verified','rollback-only',now(),now());
-      insert into auth.sessions(id,user_id,aal,factor_id) values(session_id,row_actor,'aal2',factor_id);
+      insert into auth.sessions(id,user_id,aal,factor_id,created_at,updated_at) values(session_id,row_actor,'aal2',factor_id,now(),now());
       role_jwt:=jsonb_build_object('sub',row_actor,'session_id',session_id,'aal','aal2','amr',
         jsonb_build_array(jsonb_build_object('method','totp','timestamp',extract(epoch from now())::bigint)))::text;
     else
-      insert into auth.sessions(id,user_id,aal) values(session_id,row_actor,'aal1');
+      insert into auth.sessions(id,user_id,aal,created_at,updated_at) values(session_id,row_actor,'aal1',now(),now());
       role_jwt:=jsonb_build_object('sub',row_actor,'session_id',session_id,'aal','aal1')::text;
     end if;
     case row_actor when owner then owner_jwt:=role_jwt; when manager then manager_jwt:=role_jwt;
@@ -203,8 +203,12 @@ begin
     or (select count(*) from private.project_operations_events where task_id=task)<6
     then raise exception 'project or task history missing'; end if;
 
-  org:=public.institution_save_for_api(owner,null,jsonb_build_object('handle','work-'||left(replace(owner::text,'-',''),8),
-    'name','Synthetic project institution','kind','nonprofit','countryCode','HT'));
+  -- Institution creation now requires the separate Organization Setup workflow.
+  -- Seed its resulting unverified organization and owner to exercise Project Work only.
+  insert into private.organizations(handle,name,kind,country_code,created_by)
+    values('work-'||left(replace(owner::text,'-',''),8),'Synthetic project institution','ngo','HT',owner)
+    returning id into org;
+  insert into private.organization_memberships(organization_id,user_id,role) values(org,owner,'owner');
   org_project:=public.project_create_for_client(gen_random_uuid(),'organization',org,null,proposal);
   update private.community_projects set status='approved',submitted_by=owner,submitted_at=now(),approved_at=now(),directory_published_at=now() where id=org_project;
   begin

@@ -42,6 +42,7 @@ GET /api/v1/admin/role-assignments - -
 GET /api/v1/admin/safety - -
 GET /api/v1/admin/verification-policy - -
 GET /api/v1/admin/volunteer-settings - -
+GET /api/v1/admin/volunteer-settings/requirements - -
 GET /api/v1/administrator-activation/:id - -
 GET /api/v1/ambassadors - -
 GET /api/v1/comments/:id/reaction - -
@@ -202,6 +203,7 @@ GET /api/v1/projects/:id/progress - -
 GET /api/v1/projects/:id/progress/entries/:entry/image - -
 GET /api/v1/projects/:id/progress/work - -
 GET /api/v1/projects/:id/work - -
+GET /api/v1/projects/:id/work/requirements - -
 GET /api/v1/projects/:project/outcome-validation - -
 GET /api/v1/projects/:project/outcome-validation/:caseId/publication - -
 GET /api/v1/projects/:project/outcome-validation/:caseId/review - -
@@ -251,6 +253,7 @@ HEAD /api/v1/admin/role-assignments - onSend
 HEAD /api/v1/admin/safety - onSend
 HEAD /api/v1/admin/verification-policy - onSend
 HEAD /api/v1/admin/volunteer-settings - onSend
+HEAD /api/v1/admin/volunteer-settings/requirements - onSend
 HEAD /api/v1/administrator-activation/:id - onSend
 HEAD /api/v1/ambassadors - onSend
 HEAD /api/v1/comments/:id/reaction - onSend
@@ -410,6 +413,7 @@ HEAD /api/v1/projects/:id/progress - onSend
 HEAD /api/v1/projects/:id/progress/entries/:entry/image - onSend
 HEAD /api/v1/projects/:id/progress/work - onSend
 HEAD /api/v1/projects/:id/work - onSend
+HEAD /api/v1/projects/:id/work/requirements - onSend
 HEAD /api/v1/projects/:project/outcome-validation - onSend
 HEAD /api/v1/projects/:project/outcome-validation/:caseId/publication - onSend
 HEAD /api/v1/projects/:project/outcome-validation/:caseId/review - onSend
@@ -443,6 +447,7 @@ PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/admin/verification-policy 4096 -
 PATCH /api/v1/admin/volunteer-settings 8192 -
+PATCH /api/v1/admin/volunteer-settings/requirements 4096 -
 PATCH /api/v1/comments/:id 12288 -
 PATCH /api/v1/communities/:key/membership 1024 -
 PATCH /api/v1/communities/:key/moderation/:target/:id 4096 -
@@ -483,6 +488,7 @@ PATCH /api/v1/private/project-outcome-review/:caseId 8192 -
 PATCH /api/v1/projects/:id 28000 -
 PATCH /api/v1/projects/:id/publication 512 -
 PATCH /api/v1/projects/:id/reports/:report 6000 -
+PATCH /api/v1/projects/:id/work/requirements/:opportunity 6144 -
 PATCH /api/v1/projects/:project/outcome-validation/:caseId/publication 8192 -
 PATCH /api/v1/projects/:project/outcome-validation/:caseId/review 16384 -
 PATCH /api/v1/projects/:project/outcome-validation/:id 4096 -

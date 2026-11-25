@@ -772,6 +772,8 @@ Feature-specific local execution unverified. Feature-specific run outcome unveri
 
 ### Volunteer skills and matching
 
+C3.2 adds scoped opportunity requirements and revision history in Project Work, plus Founder preparation in Volunteer settings. The hosted operational gate remains closed. [C3.2 implementation report](../volunteering/C3_2_IMPLEMENTATION_REPORT.md)
+
 C3.1 adds the private self-reported profile and a protected Founder workspace under Platform Settings. The Founder can prepare catalog definitions and versions, supported categories and fields, and inspect the local readiness and authorization history. The workspace cannot read individual volunteer profiles or activate intake. [C3.1 implementation report](../volunteering/C3_1_IMPLEMENTATION_REPORT.md)
 
 **partial** · `mission-gaps.volunteer-matching`

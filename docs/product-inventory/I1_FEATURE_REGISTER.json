@@ -8028,7 +8028,61 @@
         "hostedApplication": "Hosted deployment scope is the database only.",
         "operationalApproval": "Participation and matching are disabled."
       }
+    },
+    {
+      "id": "structured-opportunity-requirements",
+      "domain": "Projects",
+      "name": "Structured project skill requirements",
+      "status": "partial",
+      "currentAndLimits": "Optional native opportunity requirement drafts, exact reviewed publication and immutable applicant terms, with Founder configuration. Hosted intake, structured requirements and matching stay closed.",
+      "dependencies": "Project Work, approved project geography, C3.1 catalog, existing roles and moderation, privacy and safeguarding readiness.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/projects/work/requirements.tsx",
+          "apps/web/src/features/volunteering/requirement-settings.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/opportunity-requirements.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/opportunity-requirements.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125131000_c32_opportunity_requirements.sql"
+        ],
+        "postgresObjects": [
+          "private.c32_requirements",
+          "private.c32_configuration",
+          "public.c32_requirements_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/opportunity-requirements.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/opportunity-requirements.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/opportunity-requirements.spec.ts",
+            "supabase/tests/project_work_rollback.sql"
+          ]
+        },
+        "reports": [
+          "docs/volunteering/C3_2_IMPLEMENTATION_REPORT.md",
+          "docs/volunteering/C3_2_REQUIREMENTS_POLICY.md",
+          "docs/volunteering/C3_2_MATCHING_CONTRACT.md",
+          "docs/volunteering/C3_2_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See the C3.2 implementation report.",
+        "disposableSupabase": "Uses only disposable accounts and projects for structured requirements and native lifecycle.",
+        "hostedDatabase": "Pending exact approval and verification.",
+        "connectedApplication": "See the C3.2 implementation report.",
+        "hostedApplication": "Hosted rollout scope is database only.",
+        "operationalApproval": "Real structured recruitment and matching stay closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C3.1 Skills and Volunteer Profiles"
+  "lastScopeUpdate": "C3.2 Structured Project Skill Requirements"
 }
