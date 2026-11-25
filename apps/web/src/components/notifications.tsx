@@ -14,6 +14,8 @@ import { f24Messages } from "@/lib/f24-i18n";
 import { socialMessages } from "@/lib/social-i18n";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
+import { needLinkWorkspace } from "./need-project-links";
+import { needProjectLabel } from "@/lib/need-project-links-i18n";
 import { publicationLabel } from "@/lib/community-need-publication-i18n";
 import { needReviewLabel } from "@/lib/community-needs-review-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -32,6 +34,7 @@ import { PageHeader } from "./page-header";
 
 function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent, communityNeed }: MemberNotification) {
   if (!available) return null;
+  if (kind === "need_project_notice") return needLinkWorkspace;
   if (kind === "community_need_notice") return communityNeed ? "/communities/intake/needs/" + communityNeed.needId : null;
   if (kind === "event_notice") return communityEvent ? "/events/" + communityEvent.eventId : null;
   if (kind === "poll_event") return pollEvent ? pollEvent.action === "nomination_requested" ? "/polls/nominations" : "/polls/" + pollEvent.pollId : null;
@@ -95,6 +98,7 @@ function notificationMessage(locale: Locale, item: MemberNotification) {
   const t = mediaNotificationMessages[locale];
   if (!item.available || !item.kind) return t.unavailable;
   switch (item.kind) {
+    case "need_project_notice": return needProjectLabel(locale,"notice");
     case "community_need_notice": return item.communityNeed?.action.startsWith("publication_")
       ? publicationLabel(locale,item.communityNeed.action) : needReviewLabel(locale, item.communityNeed?.action ?? "reviewStatus");
     case "appeal_decided": return safetyMessages[locale].appeal_decided;

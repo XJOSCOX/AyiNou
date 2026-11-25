@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { NeedLinkPicker } from "./need-project-links";
+
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { interestCodes, projectOwners, type ProjectDetail, type ProjectIdentityState, type ProjectOwnerKind, type ProjectProposal } from "@ayinou/shared";
@@ -47,6 +49,7 @@ export function ProjectForm({ detail, onSaved, onDirty, awaitingRefresh = false 
   const topics = membershipMessages[locale];
   const router = useRouter();
   const initial = detail?.proposal;
+  const [selectedNeed,setSelectedNeed]=useState("");
   const [kind, setKind] = useState<ProjectOwnerKind>("individual");
   const [country, setCountry] = useState(initial?.country ?? "HT");
   const [department, setDepartment] = useState(initial?.department ?? "");
@@ -82,7 +85,7 @@ export function ProjectForm({ detail, onSaved, onDirty, awaitingRefresh = false 
         creationKey.current ??= crypto.randomUUID();
         const result = await createProject({ kind, owner: kind === "individual" ? null : get(fields, "owner"),
           association: get(fields, "association") || null, proposal }, creationKey.current);
-        router.push(`/projects/${result.id}`);
+        router.push("/projects/"+result.id+(selectedNeed ? "?needLink="+encodeURIComponent(selectedNeed) : ""));
       }
     });
   }
@@ -123,6 +126,7 @@ export function ProjectForm({ detail, onSaved, onDirty, awaitingRefresh = false 
             </select>
           </label>
         </div>
+        <NeedLinkPicker selected={selectedNeed} select={setSelectedNeed} draft />
       </>}
       <div className="grid gap-3 sm:grid-cols-3">
         <label className="min-w-0 text-sm font-semibold">{t.category}

@@ -20,6 +20,7 @@ import { FounderVerifiedMark } from "./founder-verified-badge";
 import { FounderMark, PersonalClaimChecks, institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { ProjectDisclosure, ProjectLoading, ProjectPublicationBadge, ProjectSection, ProjectStatusBadge, ProjectsHeader, projectBadge, projectLink, projectPanel } from "./project-ui";
+import { ProjectNeedLinks } from "./need-project-links";
 import { ProjectForm, ProjectIdentityNotice } from "./project-form";
 import { PublicProjectProgress } from "./project-progress";
 import { ProjectDecisionPanel, ProjectPreviewApproval } from "./project-review";
@@ -241,7 +242,7 @@ const proposalColumns = "grid min-w-0 items-start gap-4 lg:grid-cols-[minmax(0,2
 const factLabel = "text-sm text-[var(--theme-body)]";
 const factValue = "mt-0.5 break-words text-sm font-medium";
 
-export function ProjectDetailScreen({ id, signedIn, reviewPreview = false }: { id: string; signedIn: boolean; reviewPreview?: boolean }) {
+export function ProjectDetailScreen({ id, signedIn, reviewPreview = false, initialNeedLink }: { id: string; signedIn: boolean; reviewPreview?: boolean; initialNeedLink?: string }) {
   const [locale] = useLocale();
   const t = projectMessages[locale];
   const loader = useCallback((signal: AbortSignal) => loadProject(id, signedIn, signal, reviewPreview), [id, signedIn, reviewPreview]);
@@ -271,13 +272,13 @@ export function ProjectDetailScreen({ id, signedIn, reviewPreview = false }: { i
         </div>
       </div>
     </div>}
-    {data && <ProjectDetailContent key={data.id} data={data} signedIn={signedIn} reviewPreview={reviewPreview}
+    {data && <ProjectDetailContent key={data.id} data={data} signedIn={signedIn} reviewPreview={reviewPreview} initialNeedLink={initialNeedLink}
       departmentName={departments.data?.find((item) => item.code === data.department)?.name} refresh={resource.refresh} />}
   </div></ProjectShell>;
 }
 
-function ProjectDetailContent({ data, signedIn, reviewPreview, departmentName, refresh }: {
-  data: ProjectDetail; signedIn: boolean; reviewPreview: boolean; departmentName?: string; refresh: () => void;
+function ProjectDetailContent({ data, signedIn, reviewPreview, initialNeedLink, departmentName, refresh }: {
+  data: ProjectDetail; signedIn: boolean; reviewPreview: boolean; initialNeedLink?: string; departmentName?: string; refresh: () => void;
 }) {
   const [locale] = useLocale();
   const t = projectMessages[locale];
@@ -423,6 +424,7 @@ function ProjectDetailContent({ data, signedIn, reviewPreview, departmentName, r
             </li>)}
           </ul>
         </section>}
+        {signedIn&&!reviewPreview&&<ProjectNeedLinks project={data.id} version={data.version} initial={initialNeedLink} />}
         {data.canReport && <ReportProjectForm id={data.id} />}
       </div>
     </div>}

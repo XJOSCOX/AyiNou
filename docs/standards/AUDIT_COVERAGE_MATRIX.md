@@ -136,3 +136,7 @@ Scoped assignments, private evidence access, triage, corrections, conflicts, fin
 ## C1.3 Community Needs publication
 
 The private publication ledger retains versioned proposals, confirmed audience and attribution, assignments, approval and safe rejection feedback, visibility transitions, and independent challenge decisions. Mutations and recipient-only notices commit together. The community directory receives the current approved snapshot and eligible public attribution. Restricted evidence and reviewer notes stay in the private domain. [Implementation report](../community-needs/C1_3_IMPLEMENTATION_REPORT.md)
+
+## C1.4 Community Needs and project associations
+
+The private association ledger records the organizer and authority, exact need snapshot and project revision, consent, independent assignment and decision, activation, withdrawal and native visibility invalidation. Private recipient notices commit with events. The linked-resource views require native access to both resources and omit protected evidence and rationale. [Implementation report](../community-needs/C1_4_IMPLEMENTATION_REPORT.md)

@@ -6,6 +6,7 @@ import { registerMemberRoutes } from "./routes/members.js";
 import { createAuthVerifier, type AuthVerifier } from "./services/auth.js";
 import { createMemberRepository, type MemberRepository } from "./services/members.js";
 import { createCommunityRepository, type CommunityRepository } from "./services/community.js";
+import { registerNeedProjectLinks } from "./routes/need-project-links.js";
 import { registerCommunityNeedPublication } from "./routes/community-need-publication.js";
 import { registerCommunityNeedsReview } from "./routes/community-needs-review.js";
 import { registerCommunityNeeds } from "./routes/community-needs.js";
@@ -85,6 +86,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerCommunityNeeds(instance, needs));
   app.register((instance) => registerCommunityNeedsReview(instance, needs));
   app.register((instance) => registerCommunityNeedPublication(instance, needs));
+  app.register((instance) => registerNeedProjectLinks(instance, needs));
   app.register((instance) => registerInstitutionRoutes(instance, auth, institutions));
   app.register((instance) => registerAdminRoutes(instance, auth, institutions, config.AYINOU_FOUNDER_BOOTSTRAP_ENABLED === "true"));
   app.register((instance) => registerPrivilegedSetup(instance, auth, institutions, config.AYINOU_FOUNDER_BOOTSTRAP_ENABLED === "true"));

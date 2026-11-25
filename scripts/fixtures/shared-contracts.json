@@ -200,6 +200,8 @@
     "LifecycleSummary": "type:cbde6c9ee37104f070c5681da4580cf98af12a1fb2e0e0deba0ff1082d9ad7f6",
     "LifecycleWarning": "type:09021b7a19b70cd4fb864ef019b7dccedeeb189b5a808b5c056db98e90fb9fbc",
     "lifecycleWarnings": "value:bde744d33d452182af5816ae238d933e123fb2fb644b8634ccd48e4f244ba4be",
+    "LinkNeedOption": "type:e679ab00a9ff432dd6528cd1c7292daaf4cd92ea29d96fd578732c3964a17f6e",
+    "LinkProjectPreview": "type:9e71095092a5e832fabcecddff39530cbb02d136faa413bda7faabb4f28aba02",
     "Locale": "type:cfab49dcd47d920ceea4e43be327db91e984d065ac8cacc2b3b96ed984cfa489",
     "locales": "value:5754755983d2448d8820de92be6a01aa90921ee2c1fb68db7dd90312482ab915",
     "maxSuspensionMinutes": "value:4a30d4629021a811187b8a310566d37f51419c4e055cbce4c4e2388bd793e596",
@@ -211,7 +213,7 @@
     "memberExperienceFlags": "value:02a7687709e3503988502719bbe78abbf3875ab0d0dff572218405c618fd92f6",
     "MemberExperiencePolicy": "type:0c0df4a0db6c24359b943fa702dee911c086f3d57853351a91983ddf6e920331",
     "MemberGroup": "type:237fc2e570d41cefad3bbb9ec69b01d8b091487088c127ea069aaab29a843a76",
-    "MemberNotification": "type:ebf30ed0cc7d773b202ed84ecfee0431f793f5b9a06a0d2a369b584f8abcbd19",
+    "MemberNotification": "type:d1c968918e9d1f217e6d25f7237c41771a42e6d59e307fdcf1dcb8e4a3911adc",
     "MemberProfile": "type:97a2677e28cc4f1404f47731b87afd08260b9c2655ef65148fb9d54ca3cd0e40",
     "MemberSafetyEntry": "type:5008e6ae013e295ea930d305a4fc46830b51993b62f31870ae384c1be8262527",
     "MemberSafetyPage": "type:7d1158d3a5117e6ba989afa2c0c58eb5f1cd9fa07ac79181be8e7547b126c1e6",
@@ -238,6 +240,12 @@
     "MyAffiliations": "type:e9d1a45bb46bfe782eb839867579b3bdccb797ba664a28e17395f98ecd71c801",
     "needClarifications": "value:810778c739c96c86d0f50d25c183f4ab51c22a9c1f8f738cbcbd0d782437e1ec",
     "needFindingSummaries": "value:d2b7c7586a25e449b716fc9d4731d43e40ed004d5ff9600d5bf1f0fc305ca269",
+    "NeedProjectLink": "type:a94021f93d1508e40c8b538e9c23c89d5211e0a38012d6a2d75dd96946475664",
+    "needProjectLinkCommands": "value:b0b05905fb9926e69c05ccd13eca2b7b6d2930bbc3c0914f927224ba8d744d22",
+    "NeedProjectLinkLane": "type:03ecde3150e47a339ce0dd8cd9e1a49aa129df98dc14c04ac7331743a2577435",
+    "NeedProjectLinkPage": "type:be15d92abe85358df1c0b0d43b075231c5de46d5dea6b876f670c2cc5ac83303",
+    "NeedProjectLinkState": "type:292fa01ca1f38b7eb17b551baa67a7e608e6187dd2023f6f42565e3673d487f4",
+    "needProjectLinkStates": "value:34d626d56a2b91a1ee7475c09e5bfb2c7d8e0a7d2fff8b159beeb8716f908107",
     "NeedPublication": "type:b22b61d95507a2f1f3c7e4f3e04273d76691ff637b397af0981bdc3ef323c5b6",
     "NeedPublicationContent": "type:67f23404e3187b3c41aa787ef942cd5c1cf6f6b4fd7457f6c62b261ddb46660e",
     "NeedPublicationLane": "type:35d4ca29d7942f131f7757ffd8921167f43ab678b05bbc78b91ba4d3c3e41558",
@@ -960,6 +968,23 @@
         "conflicting_evidence"
       ]
     },
+    "needProjectLinkCommands": [
+      "consent",
+      "decline",
+      "assign",
+      "approve",
+      "reject",
+      "withdraw"
+    ],
+    "needProjectLinkStates": [
+      "awaiting_consent",
+      "awaiting_review",
+      "approved",
+      "rejected",
+      "declined",
+      "withdrawn",
+      "revoked"
+    ],
     "needPublicationReasons": [
       "privacy",
       "clarity",

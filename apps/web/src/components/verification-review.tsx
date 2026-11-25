@@ -16,6 +16,7 @@ import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { AdminFeedback } from "./admin-workspace";
 import { FounderAppealReview } from "./founder-appeal-review";
+import { NeedLinkQueue } from "./need-project-links";
 import { StaffPublication } from "./community-need-publication";
 import { StaffNeeds } from "./community-needs-review";
 import { StaffAppeals } from "./enforcement-appeals";
@@ -48,7 +49,7 @@ export function VerificationReview({ workspaceAction, workspaceId }: { workspace
           : <p className={institutionCard}>{t.emptyQueue}</p>}
         {access.data?.reviewer && <>
           <StaffAppeals workspace={workspaceId} lane="review" />
-          <><StaffNeeds workspace={workspaceId} lane="review" /><StaffPublication workspace={workspaceId} lane="review" /></>
+          <><StaffNeeds workspace={workspaceId} lane="review" /><StaffPublication workspace={workspaceId} lane="review" /><NeedLinkQueue workspace={workspaceId} lane="review" /></>
           <VerificationAppealReview />
         </>}
         {access.data?.reviewer && !access.data?.founder && <FounderAppealReview workspaceId={workspaceId} />}

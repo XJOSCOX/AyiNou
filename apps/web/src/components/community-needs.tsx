@@ -7,6 +7,7 @@ import { communityNeedCategories, type CommunityNeed, type CommunityNeedContent,
 import { authorizedRequest } from "@/lib/api";
 import { ApiRequestError } from "@/lib/api-errors";
 import { needReviewLabel } from "@/lib/community-needs-review-i18n";
+import { NeedLinkEntry } from "./need-project-links";
 import { MemberPublication } from "./community-need-publication";
 import { MemberReviewStatus, memberNeedReviewPath } from "./community-needs-review";
 import { needsMessages } from "@/lib/community-needs-i18n";
@@ -69,6 +70,7 @@ export function CommunityNeeds({ id, creating = false, initialCommunity }: { id?
     <header className={institutionCard + " flex flex-wrap items-start justify-between gap-3"}>
       <h1 className="text-3xl font-bold">{creating ? copy.newNeed : copy.title}</h1>
       <div className="flex flex-wrap gap-2">
+        {!creating&&<NeedLinkEntry />}
         <Link href={id || creating ? home : "/communities"} className={quietButton}>← {copy.back}</Link>
         {!creating && !id && triageAccess.data?.allowed && <Link href="/communities/intake/triage" className={quietButton}>{needReviewLabel(locale,"access")}</Link>}
         {!creating && !id && !!communities.length && <Link href={home + "/new"} className={institutionAction}>{copy.newNeed}</Link>}

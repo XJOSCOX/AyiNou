@@ -170,6 +170,10 @@ GET /api/v1/private/community-need-publications/:id - -
 GET /api/v1/private/community-needs-review - -
 GET /api/v1/private/community-needs-review/:id - -
 GET /api/v1/private/community-needs-review/triage-access - -
+GET /api/v1/private/need-project-links - -
+GET /api/v1/private/need-project-links/options - -
+GET /api/v1/private/need-project-links/project/:id - -
+GET /api/v1/private/need-project-links/publication/:id - -
 GET /api/v1/profiles/:username - -
 GET /api/v1/projects - -
 GET /api/v1/projects/:id - -
@@ -348,6 +352,10 @@ HEAD /api/v1/private/community-need-publications/:id - onSend
 HEAD /api/v1/private/community-needs-review - onSend
 HEAD /api/v1/private/community-needs-review/:id - onSend
 HEAD /api/v1/private/community-needs-review/triage-access - onSend
+HEAD /api/v1/private/need-project-links - onSend
+HEAD /api/v1/private/need-project-links/options - onSend
+HEAD /api/v1/private/need-project-links/project/:id - onSend
+HEAD /api/v1/private/need-project-links/publication/:id - onSend
 HEAD /api/v1/profiles/:username - onSend
 HEAD /api/v1/projects - onSend
 HEAD /api/v1/projects/:id - onSend
@@ -409,6 +417,7 @@ PATCH /api/v1/polls/:id 10000 -
 PATCH /api/v1/posts/:id 16384 -
 PATCH /api/v1/private/community-need-publications/:id 8192 -
 PATCH /api/v1/private/community-needs-review/:id 8192 -
+PATCH /api/v1/private/need-project-links/:id 8192 -
 PATCH /api/v1/projects/:id 28000 -
 PATCH /api/v1/projects/:id/publication 512 -
 PATCH /api/v1/projects/:id/reports/:report 6000 -
@@ -496,6 +505,7 @@ POST /api/v1/posts/:id/recommendation-feedback 1024 -
 POST /api/v1/posts/:id/reports 4096 -
 POST /api/v1/posts/social 12288 -
 POST /api/v1/private/community-needs-review 8192 -
+POST /api/v1/private/need-project-links 4096 -
 POST /api/v1/projects 28000 -
 POST /api/v1/projects/:id/progress/entries 20000 -
 POST /api/v1/projects/:id/progress/metrics 20000 -

@@ -10,12 +10,12 @@
   },
   "hostedDevelopment": {
     "migrationCount": 133,
-    "pending": 0,
+    "pending": 1,
     "lastMigration": "20261124155200",
     "preservationChecksMatched": 47,
     "applicationRelease": "unverified",
     "providerRecovery": "unverified",
-    "pendingMigration": null
+    "pendingMigration": "20261124155300"
   },
   "webPages": [
     {
@@ -25,6 +25,10 @@
     {
       "path": "apps/web/src/app/(protected)/communities/[slug]/page.tsx",
       "url": "/communities/[slug]"
+    },
+    {
+      "path": "apps/web/src/app/(protected)/communities/intake/links/page.tsx",
+      "url": "/communities/intake/links"
     },
     {
       "path": "apps/web/src/app/(protected)/communities/intake/needs/[id]/page.tsx",
@@ -1678,6 +1682,38 @@
     },
     {
       "method": "GET",
+      "path": "/api/v1/private/need-project-links",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/private/need-project-links/options",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/private/need-project-links/project/:id",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/private/need-project-links/publication/:id",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/api/v1/profiles/:username",
       "fixtureMetadata": [
         "-",
@@ -3102,6 +3138,38 @@
     },
     {
       "method": "HEAD",
+      "path": "/api/v1/private/need-project-links",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/private/need-project-links/options",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/private/need-project-links/project/:id",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/private/need-project-links/publication/:id",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
       "path": "/api/v1/profiles/:username",
       "fixtureMetadata": [
         "-",
@@ -3583,6 +3651,14 @@
     {
       "method": "PATCH",
       "path": "/api/v1/private/community-needs-review/:id",
+      "fixtureMetadata": [
+        "8192",
+        "-"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/private/need-project-links/:id",
       "fixtureMetadata": [
         "8192",
         "-"
@@ -4286,6 +4362,14 @@
     },
     {
       "method": "POST",
+      "path": "/api/v1/private/need-project-links",
+      "fixtureMetadata": [
+        "4096",
+        "-"
+      ]
+    },
+    {
+      "method": "POST",
       "path": "/api/v1/projects",
       "fixtureMetadata": [
         "28000",
@@ -4579,6 +4663,7 @@
     "packages/shared/src/institutions.ts",
     "packages/shared/src/moderation-center.ts",
     "packages/shared/src/moderation-policy.ts",
+    "packages/shared/src/need-project-links.ts",
     "packages/shared/src/notifications.ts",
     "packages/shared/src/organization-onboarding.ts",
     "packages/shared/src/privacy-export.ts",
@@ -7059,7 +7144,7 @@
       "domain": "Mission gaps",
       "name": "Community Needs intake, review and scoped publication",
       "status": "gated",
-      "currentAndLimits": "Private intake and evidence review, independent approval of a scoped publication snapshot, community-only directory and existing discussion integration. Real intake, review, and publication remain closed. Need-to-project links remain future work.",
+      "currentAndLimits": "Private intake and review, community-only publication, and consent-based links to existing project proposals. Live intake, review, publication and associations remain closed.",
       "dependencies": "Scoped community staff, independent review and challenge roster, recent MFA, approved privacy and retention lifecycle, and separate pilot approval.",
       "evidence": {
         "web": [
@@ -7068,22 +7153,27 @@
           "apps/web/src/app/(protected)/communities/intake/needs/[id]/page.tsx",
           "apps/web/src/app/(protected)/communities/intake/triage/page.tsx",
           "apps/web/src/app/(protected)/communities/[slug]/page.tsx",
-          "apps/web/src/components/community-need-publication.tsx"
+          "apps/web/src/components/community-need-publication.tsx",
+          "apps/web/src/app/(protected)/communities/intake/links/page.tsx",
+          "apps/web/src/components/need-project-links.tsx"
         ],
         "api": [
           "apps/api/src/routes/community-needs.ts",
           "apps/api/src/routes/community-needs-review.ts",
-          "apps/api/src/routes/community-need-publication.ts"
+          "apps/api/src/routes/community-need-publication.ts",
+          "apps/api/src/routes/need-project-links.ts"
         ],
         "contracts": [
           "packages/shared/src/community-needs.ts",
           "packages/shared/src/community-needs-review.ts",
-          "packages/shared/src/community-need-publication.ts"
+          "packages/shared/src/community-need-publication.ts",
+          "packages/shared/src/need-project-links.ts"
         ],
         "migrations": [
           "supabase/migrations/20261124155000_c11_community_needs.sql",
           "supabase/migrations/20261124155100_c12_community_needs_review.sql",
-          "supabase/migrations/20261124155200_c13_community_need_publication.sql"
+          "supabase/migrations/20261124155200_c13_community_need_publication.sql",
+          "supabase/migrations/20261124155300_c14_need_project_links.sql"
         ],
         "postgresObjects": [
           "public.c11_needs_for_api",
@@ -7093,7 +7183,10 @@
           "public.c13_publication_for_api",
           "private.c13_publications",
           "private.c13_events",
-          "private.c13_challenges"
+          "private.c13_challenges",
+          "public.c14_links_for_api",
+          "private.c14_links",
+          "private.c14_events"
         ],
         "tests": {
           "api": [
@@ -7102,7 +7195,8 @@
           "browser": [
             "apps/web/e2e/community-needs.spec.ts",
             "apps/web/e2e/community-needs-review.spec.ts",
-            "apps/web/e2e/community-need-publication.spec.ts"
+            "apps/web/e2e/community-need-publication.spec.ts",
+            "apps/web/e2e/need-project-links.spec.ts"
           ],
           "database": [
             "supabase/tests/database/c11_community_needs_test.sql"
@@ -7111,13 +7205,14 @@
         "reports": [
           "docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md",
           "docs/community-needs/C1_2_IMPLEMENTATION_REPORT.md",
-          "docs/community-needs/C1_3_IMPLEMENTATION_REPORT.md"
+          "docs/community-needs/C1_3_IMPLEMENTATION_REPORT.md",
+          "docs/community-needs/C1_4_IMPLEMENTATION_REPORT.md"
         ]
       },
       "verification": {
-        "local": "See C1.3 report for local validation and regressions.",
-        "disposableSupabase": "See C1.3 approval, conflict, audience, and challenge evidence.",
-        "hostedDatabase": "C1.1, C1.2, and C1.3 applied and verified. All three fixture gates are closed.",
+        "local": "See C1.4 report for local authorization and regression evidence.",
+        "disposableSupabase": "See C1.4 association consent, authorization, and invalidation exercises.",
+        "hostedDatabase": "C1.1–C1.3 applied with closed fixture gates. See C1.4 rollout evidence.",
         "connectedApplication": "Connected localhost checks passed after C1.3. Mutation authorization and lifecycle tests used disposable Supabase.",
         "hostedApplication": "Hosted application release unverified.",
         "operationalApproval": "Real intake, review and publication remain disabled. Separate pilot approval required."
@@ -7617,5 +7712,5 @@
       }
     }
   ],
-  "lastScopeUpdate": "C1.3 Community Needs Publication and Participation"
+  "lastScopeUpdate": "C1.4 Connect Reviewed Community Needs to Projects"
 }

@@ -1,0 +1,20 @@
+export const needProjectLinkStates = ["awaiting_consent","awaiting_review","approved","rejected","declined","withdrawn","revoked"] as const;
+export type NeedProjectLinkState = typeof needProjectLinkStates[number];
+export const needProjectLinkCommands = ["consent","decline","assign","approve","reject","withdraw"] as const;
+export type NeedProjectLinkLane = "member" | "admin" | "review";
+export type LinkNeedOption = { id: string; title: string; slug: string; community?: string | null };
+export type LinkProjectPreview = { id: string; title: string };
+export type NeedProjectLink = {
+  id: string;
+  state: NeedProjectLinkState;
+  revision?: number;
+  purpose?: string;
+  project?: LinkProjectPreview | null;
+  need?: LinkNeedOption | null;
+  objective?: string | null;
+  needSummary?: string | null;
+  asAuthor?: boolean;
+  asOrganizer?: boolean;
+  history?: { action: string; at: string; reason?: string | null }[];
+};
+export type NeedProjectLinkPage<T> = { items: T[]; nextCursor: string | null; canRequest?: boolean };

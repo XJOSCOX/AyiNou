@@ -12,6 +12,7 @@ import { publicationLabel } from "@/lib/community-need-publication-i18n";
 import { needsMessages } from "@/lib/community-needs-i18n";
 import { needReviewLabel } from "@/lib/community-needs-review-i18n";
 import { useLocale } from "@/lib/locale-store";
+import { NeedAssociatedProjects } from "./need-project-links";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 
 const staffPath = "/api/v1/private/community-need-publications";
@@ -97,6 +98,7 @@ export function PublishedNeeds({ room, initialId, onDiscuss }: { room: string; i
             className={institutionLink}>{entry.attribution.displayName}</Link> : t("anonymous")}</p>
           <p className="break-all">{t("reference")} · <span className="font-mono">{entry.id}</span></p>
         </div>
+        <NeedAssociatedProjects key={entry.id} publication={entry.id} />
         {onDiscuss && <div className="grid gap-2 justify-items-start">
           <button type="button" className={institutionAction} onClick={() => onDiscuss(entry.id)}>{t("discuss")}</button>
           <p className="text-sm">{t("discussHelp")}</p>

@@ -1,0 +1,41 @@
+const copy: Record<string, [string, string, string, string]> = {
+  title:["Community need associations","Asosyasyon ak bezwen kominote","Associations aux besoins communautaires","Asociaciones con necesidades comunitarias"],
+  need:["Reviewed community need","Bezwen kominote ki revize","Besoin communautaire examiné","Necesidad comunitaria revisada"],
+  projects:["Associated projects","Pwojè ki asosye","Projets associés","Proyectos asociados"],
+  request:["Request an association","Mande yon asosyasyon","Demander une association","Solicitar una asociación"],
+  draft:["Optional need for this draft","Bezwen opsyonèl pou bouyon sa a","Besoin facultatif pour ce brouillon","Necesidad opcional para este borrador"],
+  draftHelp:["Save the draft, then confirm the association request on the proposal page.","Anrejistre bouyon an, epi konfime demann nan sou paj pwopozisyon an.","Enregistrez le brouillon, puis confirmez la demande sur la page de la proposition.","Guarda el borrador y confirma la solicitud en la página de la propuesta."],
+  purpose:["How would this project address the need?","Kijan pwojè a ta reponn ak bezwen an?","Comment le projet répondrait-il au besoin ?","¿Cómo atendería el proyecto esta necesidad?"],
+  purposeHelp:["This summary is shared with the need author and the assigned reviewer. Use general language and leave out private details.","Otè bezwen an ak evalyatè a ap wè rezime sa a. Sèvi ak mo jeneral, san detay prive.","L’auteur du besoin et l’examinateur assigné verront ce résumé. Utilisez des termes généraux et excluez les détails privés.","La autoría de la necesidad y el revisor asignado verán este resumen. Usa términos generales y omite los detalles privados."],
+  meaning:["Approval confirms the association. Project review and publication follow their own process.","Apwobasyon an konfime asosyasyon an. Revizyon ak piblikasyon pwojè a gen pwòp pwosesis pa yo.","L’approbation confirme l’association. L’examen et la publication du projet suivent leur propre procédure.","La aprobación confirma la asociación. La revisión y publicación del proyecto siguen su propio proceso."],
+  selectAction:["Choose an action","Chwazi yon aksyon","Choisir une action","Elige una acción"],
+  select:["Select a need","Chwazi yon bezwen","Sélectionner un besoin","Seleccionar una necesidad"],
+  search:["Find a reviewed need","Chèche yon bezwen ki revize","Chercher un besoin examiné","Buscar una necesidad revisada"],
+  empty:["No associations to show.","Pa gen asosyasyon pou montre.","Aucune association à afficher.","No hay asociaciones para mostrar."],
+  unavailable:["Details are unavailable with your current access.","Detay yo pa disponib ak aksè ou genyen kounye a.","Votre accès actuel ne permet pas de voir les détails.","Tu acceso actual no permite ver los detalles."],
+  awaiting_consent:["Awaiting author consent","Ap tann konsantman otè a","En attente du consentement de l’auteur","Pendiente del consentimiento de la autoría"],
+  awaiting_review:["Awaiting independent review","Ap tann yon revizyon endepandan","En attente d’un examen indépendant","Pendiente de revisión independiente"],
+  approved:["Association approved","Asosyasyon an apwouve","Association approuvée","Asociación aprobada"],
+  rejected:["Association rejected","Asosyasyon an rejte","Association refusée","Asociación rechazada"],
+  declined:["Consent declined","Yo refize bay konsantman","Consentement refusé","Consentimiento denegado"],
+  withdrawn:["Request withdrawn","Yo retire demann nan","Demande retirée","Solicitud retirada"],
+  revoked:["Association revoked","Asosyasyon an revoke","Association révoquée","Asociación revocada"],
+  consent:["Grant consent","Bay konsantman","Donner mon consentement","Dar consentimiento"],
+  decline:["Decline consent","Refize bay konsantman","Refuser mon consentement","Denegar consentimiento"],
+  withdraw:["Withdraw association","Retire asosyasyon an","Retirer l’association","Retirar asociación"],
+  assign:["Assign reviewer","Chwazi evalyatè","Assigner un examinateur","Asignar revisor"],
+  approve:["Approve association","Apwouve asosyasyon an","Approuver l’association","Aprobar asociación"],
+  reject:["Reject association","Rejte asosyasyon an","Refuser l’association","Rechazar asociación"],
+  relationship:["I checked how the project objectives relate to this reviewed need.","Mwen verifye kijan objektif pwojè a gen rapò ak bezwen ki revize a.","J’ai vérifié le lien entre les objectifs du projet et le besoin examiné.","He verificado cómo se relacionan los objetivos del proyecto con la necesidad revisada."],
+  objective:["Project objectives at the requested revision","Objektif pwojè nan vèsyon demann nan","Objectifs du projet dans la version demandée","Objetivos del proyecto en la versión solicitada"],
+  summary:["Approved need summary","Rezime bezwen ki apwouve a","Résumé approuvé du besoin","Resumen aprobado de la necesidad"],
+  history:["Association history","Istwa asosyasyon an","Historique de l’association","Historial de la asociación"],
+  activate:["Association viewable","Asosyasyon an disponib","Association visible","Asociación visible"],
+  invalidate:["Association became unavailable","Asosyasyon an pa disponib ankò","Association devenue indisponible","Asociación dejó de estar disponible"],
+  notice:["Community need association updated","Gen yon mizajou sou asosyasyon bezwen kominote a","Association à un besoin communautaire mise à jour","Asociación con una necesidad comunitaria actualizada"],
+};
+const index={en:0,ht:1,fr:2,es:3} as const;
+
+export function needProjectLabel(locale:keyof typeof index,key:string) {
+  return copy[key]?.[index[locale]] ?? copy.title[index[locale]];
+}

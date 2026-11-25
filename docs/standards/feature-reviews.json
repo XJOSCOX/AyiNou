@@ -2924,6 +2924,100 @@
           "rolloutAndRollback": "Approve the exact migration before any hosted apply. Preflight preservation and keep all gates closed. Use a reviewed forward correction that retains history."
         }
       ]
+    },
+    {
+      "id": "c1-4-need-project-associations",
+      "report": "docs/community-needs/C1_4_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/private/need-project-links",
+          "contract": "GET /api/v1/private/need-project-links - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Uses role-limited projection without a mutation or private needs evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/need-project-links.spec.ts",
+            "denialScenario": "Disabled gates, guest calls, lack of organizer rights or community membership, reviewer conflicts, stale and mismatched workspaces fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/need-project-links/options",
+          "contract": "GET /api/v1/private/need-project-links/options - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Uses role-limited projection without a mutation or private needs evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/need-project-links.spec.ts",
+            "denialScenario": "Disabled gates, guest calls, lack of organizer rights or community membership, reviewer conflicts, stale and mismatched workspaces fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/need-project-links/project/:id",
+          "contract": "GET /api/v1/private/need-project-links/project/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Uses role-limited projection without a mutation or private needs evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/need-project-links.spec.ts",
+            "denialScenario": "Disabled gates, guest calls, lack of organizer rights or community membership, reviewer conflicts, stale and mismatched workspaces fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/need-project-links/publication/:id",
+          "contract": "GET /api/v1/private/need-project-links/publication/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Uses role-limited projection without a mutation or private needs evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/need-project-links.spec.ts",
+            "denialScenario": "Disabled gates, guest calls, lack of organizer rights or community membership, reviewer conflicts, stale and mismatched workspaces fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/private/need-project-links/:id",
+          "contract": "PATCH /api/v1/private/need-project-links/:id 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Association request, consent, assigned review and other decisions commit with native scoped notification receipts."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/need-project-links.spec.ts",
+            "denialScenario": "Disabled gates, guest calls, lack of organizer rights or community membership, reviewer conflicts, stale and mismatched workspaces fail closed."
+          }
+        },
+        {
+          "route": "POST /api/v1/private/need-project-links",
+          "contract": "POST /api/v1/private/need-project-links 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Association request, consent, assigned review and other decisions commit with native scoped notification receipts."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/need-project-links.spec.ts",
+            "denialScenario": "Disabled gates, guest calls, lack of organizer rights or community membership, reviewer conflicts, stale and mismatched workspaces fail closed."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124155300_c14_need_project_links.sql",
+          "rlsAndGrants": "Three private RLS relations, no direct grants, service-only session-bound RPC.",
+          "authorization": "Existing project role and identity, independent review MFA workspace, author consent, exact snapshot and project revision, live originating membership.",
+          "compatibility": "Project and publication triggers only maintain the C1.4 ledger. New notification kind uses the existing inbox without exposing internal case or project details.",
+          "validation": "Disposable SQL grant assertions and browser/API consent, safe visibility, review, and revocation.",
+          "rolloutAndRollback": "Apply only an approved tested checksum after read-only baseline and exact dry run. Leave every hosted gate empty. Prefer additive forward repair preserving the ledger."
+        }
+      ]
     }
   ]
 }
