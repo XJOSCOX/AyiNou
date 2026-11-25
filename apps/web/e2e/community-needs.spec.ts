@@ -30,6 +30,11 @@ test("C1.1 keeps private intake gated and enforces lifecycle, ownership, revisio
   expect(tap).toContain("ok 9");
   expect(tap).not.toContain("not ok");
   expect((await request(signedIn)).status).toBe(404);
+  await page.goto("/communities/intake/needs");
+  await expect(page.getByText(needsMessages.en.closed, { exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Language" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Communities", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: needsMessages.en.newNeed })).toHaveCount(0);
   expect(sql("select not has_table_privilege('authenticated','private.c11_needs','select');")).toBe("t");
   expect(sql("select not has_function_privilege('authenticated','public.c11_needs_for_api(uuid,uuid,boolean,text,uuid,uuid,uuid,integer,jsonb,boolean)','execute');")).toBe("t");
   const peer = await makeMember();

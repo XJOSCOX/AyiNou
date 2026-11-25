@@ -9,6 +9,7 @@ import { ApiRequestError } from "@/lib/api-errors";
 import { needsMessages } from "@/lib/community-needs-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { institutionAction, institutionCard, institutionErrorBox, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
+import { MemberShell } from "./member-shell";
 
 const api = "/api/v1/me/community-needs";
 const home = "/communities/intake/needs";
@@ -58,7 +59,7 @@ export function CommunityNeeds({ id, creating = false, initialCommunity }: { id?
     }
   }
 
-  return <div className="grid min-w-0 gap-4">
+  return <MemberShell><div className="grid min-w-0 gap-4">
     <header className={institutionCard + " flex flex-wrap items-start justify-between gap-3"}>
       <h1 className="text-3xl font-bold">{creating ? copy.newNeed : copy.title}</h1>
       <div className="flex flex-wrap gap-2">
@@ -82,7 +83,7 @@ export function CommunityNeeds({ id, creating = false, initialCommunity }: { id?
       {pageError != null && <p role="alert" className={institutionErrorBox + " mt-3"}>{message(pageError, copy)}</p>}
       {cursor && <button type="button" onClick={more} disabled={paging} className={quietButton + " mt-3"}>{copy.more}</button>}
     </section>}
-  </div>;
+  </div></MemberShell>;
 }
 
 function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
