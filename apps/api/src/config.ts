@@ -11,6 +11,7 @@ const environmentSchema = z.object({
   SUPABASE_PUBLISHABLE_KEY: z.string().min(1).optional(),
   SUPABASE_SECRET_KEY: z.string().min(1).optional(),
   AYINOU_FOUNDER_BOOTSTRAP_ENABLED: z.enum(["true", "false"]).optional(),
+  AYINOU_COMMUNITY_NEEDS: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_PRIVACY_INTAKE: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_PRIVACY_EXPORT: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_PRIVACY_LIFECYCLE: z.enum(["disabled", "synthetic"]).default("disabled").optional(),

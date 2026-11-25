@@ -2642,6 +2642,74 @@
           "rolloutAndRollback": "Apply only after separately authorized scoped preflight. Use a reviewed forward correction to restore compatible definitions if required. No data backfill or destructive recovery."
         }
       ]
+    },
+    {
+      "id": "c1-1-community-needs",
+      "report": "docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/community-needs",
+          "contract": "GET /api/v1/me/community-needs - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Private owner reads have no lifecycle mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs.spec.ts",
+            "denialScenario": "A member cannot use another author’s case as a cursor."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/community-needs/:id",
+          "contract": "GET /api/v1/me/community-needs/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Private owner reads have no lifecycle mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs.spec.ts",
+            "denialScenario": "Another member and a stale session are denied."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/community-needs",
+          "contract": "POST /api/v1/me/community-needs 32000 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The request receipt and created revision commit atomically."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs.spec.ts",
+            "denialScenario": "A nonmember or disabled environment cannot create a draft."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/community-needs/:id",
+          "contract": "PATCH /api/v1/me/community-needs/:id 32000 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Draft edits, submission and withdrawal commit with the revision and receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-needs.spec.ts",
+            "denialScenario": "Stale revisions and unconfirmed submission are denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124155000_c11_community_needs.sql",
+          "rlsAndGrants": "All C1.1 private tables have RLS and no client or service table grants. The backend receives execute on a single session-bound RPC.",
+          "authorization": "The disabled fixture gate, live account/session, onboarding and owner checks protect all requests. Create, edit and submit recheck community membership.",
+          "compatibility": "Additive migration leaves existing community, moderation and profile data and grants unchanged. The new gate starts closed.",
+          "validation": "Disposable database and member-browser tests cover grants, case isolation, stale sessions, quotas, retries and atomic revisions.",
+          "rolloutAndRollback": "Apply the exact version only after separate approval and preflight. Leave both intake gates closed and preserve all history in any reviewed forward correction."
+        }
+      ]
     }
   ]
 }

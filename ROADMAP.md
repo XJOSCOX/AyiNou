@@ -292,7 +292,9 @@ Feature development pauses here for owner review of the engineering results and 
 
 ## Phase 7 — Community reports and evidence-based verification
 
-- [ ] Report local events, needs, and public claims.
+- [x] C1.1 private Community Needs foundation in Communities. Drafts, confirmed submissions, withdrawal, revision receipts and owner-only access are implemented behind a closed real-intake gate. [Implementation report](docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md)
+- [ ] C1.2 independent evidence review, C1.3 publication, C1.4 project linking, and C1.5 authorized pilot activation.
+- [ ] Extend structured reporting to local events and general public claims.
 - [ ] Support confirmations, challenges, credible sources, and safe evidence submission.
 - [ ] Review statuses: unverified, under review, verified, misleading, false, inconclusive.
 - [ ] Separate witness attestations and popularity from editorial verification.

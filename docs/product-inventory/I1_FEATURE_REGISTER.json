@@ -1,20 +1,21 @@
 {
-  "inventoryVersion": 1,
+  "inventoryVersion": 2,
   "baseline": "4cf93b4630db037cea0d6be770e25f97e9e2e4ba",
   "count": 70,
   "counts": {
     "implemented": 48,
     "partial": 4,
-    "missing": 8,
-    "gated": 10
+    "missing": 7,
+    "gated": 11
   },
   "hostedDevelopment": {
     "migrationCount": 130,
-    "pending": 0,
+    "pending": 1,
     "lastMigration": "20261124154000",
     "preservationChecksMatched": 37,
     "applicationRelease": "unverified",
-    "providerRecovery": "unverified"
+    "providerRecovery": "unverified",
+    "pendingMigration": "20261124155000"
   },
   "webPages": [
     {
@@ -24,6 +25,18 @@
     {
       "path": "apps/web/src/app/(protected)/communities/[slug]/page.tsx",
       "url": "/communities/[slug]"
+    },
+    {
+      "path": "apps/web/src/app/(protected)/communities/intake/needs/[id]/page.tsx",
+      "url": "/communities/intake/needs/[id]"
+    },
+    {
+      "path": "apps/web/src/app/(protected)/communities/intake/needs/new/page.tsx",
+      "url": "/communities/intake/needs/new"
+    },
+    {
+      "path": "apps/web/src/app/(protected)/communities/intake/needs/page.tsx",
+      "url": "/communities/intake/needs"
     },
     {
       "path": "apps/web/src/app/(protected)/communities/invitations/page.tsx",
@@ -1014,6 +1027,22 @@
     {
       "method": "GET",
       "path": "/api/v1/me/community-invitations",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/community-needs",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/me/community-needs/:id",
       "fixtureMetadata": [
         "-",
         "-"
@@ -2365,6 +2394,22 @@
     },
     {
       "method": "HEAD",
+      "path": "/api/v1/me/community-needs",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
+      "path": "/api/v1/me/community-needs/:id",
+      "fixtureMetadata": [
+        "-",
+        "onSend"
+      ]
+    },
+    {
+      "method": "HEAD",
       "path": "/api/v1/me/community-recommendation-settings",
       "fixtureMetadata": [
         "-",
@@ -3084,6 +3129,14 @@
       ]
     },
     {
+      "method": "OPTIONS",
+      "path": "*",
+      "fixtureMetadata": [
+        "-",
+        "-"
+      ]
+    },
+    {
       "method": "PATCH",
       "path": "/api/v1/admin/accounts/:id",
       "fixtureMetadata": [
@@ -3272,6 +3325,14 @@
       "path": "/api/v1/me/community-invitations/:id",
       "fixtureMetadata": [
         "1024",
+        "-"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/me/community-needs/:id",
+      "fixtureMetadata": [
+        "32000",
         "-"
       ]
     },
@@ -3736,6 +3797,14 @@
       "path": "/api/v1/institutions/by-handle/:handle/impersonation-reports",
       "fixtureMetadata": [
         "9000",
+        "-"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/me/community-needs",
+      "fixtureMetadata": [
+        "32000",
         "-"
       ]
     },
@@ -4307,6 +4376,7 @@
     "packages/shared/src/ambassadors.ts",
     "packages/shared/src/audit.ts",
     "packages/shared/src/communities.ts",
+    "packages/shared/src/community-needs.ts",
     "packages/shared/src/core.ts",
     "packages/shared/src/department-community-content.ts",
     "packages/shared/src/early-partners.ts",
@@ -6797,39 +6867,51 @@
     {
       "id": "mission-gaps.needs",
       "domain": "Mission gaps",
-      "name": "Structured community needs register",
-      "status": "missing",
-      "currentAndLimits": "No first-class need intake, triage, provenance or reviewed local need record was identified. See proposed C1.",
-      "dependencies": "See the mission alignment and recommended sequence for dependencies.",
+      "name": "Private community needs intake",
+      "status": "gated",
+      "currentAndLimits": "C1.1 adds owner-only drafts, submission, withdrawal, references and revision receipts. Real intake remains disabled. Triage, independent evidence review, publication and need-to-project links remain later work.",
+      "dependencies": "Live member session, onboarding, current membership for intake, explicit M2.3 enforcement decision, privacy lifecycle approval and authorized pilot.",
       "evidence": {
         "web": [
-          "apps/web/src/app/(protected)/communities/page.tsx",
-          "apps/web/src/app/projects/page.tsx"
+          "apps/web/src/app/(protected)/communities/intake/needs/page.tsx",
+          "apps/web/src/app/(protected)/communities/intake/needs/new/page.tsx",
+          "apps/web/src/app/(protected)/communities/intake/needs/[id]/page.tsx"
         ],
         "api": [
-          "apps/api/src/routes/community.ts",
-          "apps/api/src/routes/projects.ts"
+          "apps/api/src/routes/community-needs.ts"
         ],
         "contracts": [
-          "packages/shared/src/communities.ts",
-          "packages/shared/src/projects.ts"
+          "packages/shared/src/community-needs.ts"
         ],
-        "migrations": [],
-        "postgresObjects": [],
+        "migrations": [
+          "supabase/migrations/20261124155000_c11_community_needs.sql"
+        ],
+        "postgresObjects": [
+          "public.c11_needs_for_api",
+          "private.c11_need_revisions"
+        ],
         "tests": {
-          "api": [],
-          "browser": [],
-          "database": []
+          "api": [
+            "apps/api/test/community-needs.test.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/community-needs.spec.ts"
+          ],
+          "database": [
+            "supabase/tests/database/c11_community_needs_test.sql"
+          ]
         },
-        "reports": []
+        "reports": [
+          "docs/community-needs/C1_1_IMPLEMENTATION_REPORT.md"
+        ]
       },
       "verification": {
-        "local": "Feature-specific local execution unverified.",
-        "disposableSupabase": "Feature-specific run outcome unverified in this inventory.",
-        "hostedDatabase": "No implementation identified. Any linked SQL is adjacent functionality.",
-        "connectedApplication": "No per-feature connected behavior verified during I1.",
+        "local": "API test and typed contracts. See implementation report.",
+        "disposableSupabase": "See C1.1 validation in the implementation report.",
+        "hostedDatabase": "Migration unapplied at C1.1 delivery.",
+        "connectedApplication": "Disposable browser/API coverage only.",
         "hostedApplication": "Hosted application release unverified.",
-        "operationalApproval": "Future scope."
+        "operationalApproval": "Real intake disabled. Separate C1.5 approval required."
       }
     },
     {
@@ -7325,5 +7407,6 @@
         "operationalApproval": "Public launch remains gated."
       }
     }
-  ]
+  ],
+  "lastScopeUpdate": "C1.1 Community Needs Foundation"
 }

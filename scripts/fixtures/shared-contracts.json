@@ -65,6 +65,14 @@
     "CommunityEvent": "type:2624c5aeb53e56a78264f3fb0f502bac8bca8a1ba05096678336843ec85c5e49",
     "communityKinds": "value:3292a931ed22ae622f67369781c601ef921e65d596ccca3a1945a803a9e6f8c6",
     "CommunityMembers": "type:2fb1a2b74421e3a21b638364833bf4c0fafc250291685b314ad6f1a24416980d",
+    "CommunityNeed": "type:328e3b830847e679b26db4261f0e0a845a8dec2de63db0740dbadc60bb09fd9d",
+    "communityNeedCategories": "value:3ac3a25c4fa7e8078935843a08d3cd4020155fedaa11dafd53bc329b81ec2e79",
+    "CommunityNeedCategory": "type:ab80481dd5f72a890d2c2ebfd68f490c6f60cdbf2439fb238eb65c7d029db171",
+    "CommunityNeedContent": "type:281399d352b1683287a5690964711dbdcf5b31d1a75212f2b453b691160f3ee9",
+    "CommunityNeedList": "type:0c9a3543bfb5d3f3629eb59881a7ba15d319dea8ee525034e8e7bfa42037c325",
+    "CommunityNeedStatus": "type:e396db19c18d1bc0a67843d0e66f80667ea7e646c939f8d354fe4833a71ab689",
+    "communityNeedStatuses": "value:839b216b674efd1c37fbbe1af5c4c66dcbf48d6cd6ad04939731f31da98b2ac0",
+    "CommunityNeedSummary": "type:e0516855d427ab7a0c2ef7f89592127e5289fc01f8933b6d2ad277e4809923e9",
     "CommunityRecommendation": "type:552bf40879ae8ad083b1e9a6474d6f46ea3a248ec088e0086b582bbee5fdc543",
     "CommunityRecommendationFeedbackAction": "type:b00e42c4b1a0d48a557ac51249b92e529046453cf20b251877f71f7ea8f3156a",
     "communityRecommendationFeedbackActions": "value:00ebcd39c0219d32a66c868ab798562b06d45fcc174ea4e8e773414dfd57754b",
@@ -475,6 +483,19 @@
       "department",
       "diaspora",
       "interest"
+    ],
+    "communityNeedCategories": [
+      "education",
+      "healthcare",
+      "infrastructure",
+      "sanitation",
+      "environment",
+      "other"
+    ],
+    "communityNeedStatuses": [
+      "draft",
+      "submitted",
+      "withdrawn"
     ],
     "communityRecommendationFeedbackActions": [
       "not_interested",

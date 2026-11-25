@@ -124,3 +124,7 @@ The project event writer enforces the existing project-creation restriction befo
 ## P1 production readiness
 
 Account moderation projections reuse proven policy revisions from native events. Legacy and ambiguous initial-policy history retains its original meaning. Media completion rechecks the live lease and access boundary with the existing storage and audit design. [P1 historical audit](../production-readiness/P1_HISTORICAL_AUDIT_REVIEW.md)
+
+## C1.1 Community Needs
+
+Private draft creation, edits, submission and withdrawal append an actor-bound case revision and receipt in the same SQL transaction. Reads expose authorized revision metadata to the author. Snapshots, reference URLs and attribution stay in the private domain. [Implementation report](../community-needs/C1_1_IMPLEMENTATION_REPORT.md)

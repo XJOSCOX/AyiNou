@@ -16,6 +16,7 @@ export * from "./administration-governance";
 export * from "./early-partners";
 export * from "./ambassadors";
 export * from "./communities";
+export * from "./community-needs";
 export * from "./feed";
 export * from "./projects";
 export * from "./project-work";

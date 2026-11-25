@@ -2,6 +2,7 @@
 
 import { communityStaffRoles, departmentCommunityContent, type Community, type CommunityStaffRole, type InterestCode } from "@ayinou/shared";
 import Link from "next/link";
+import { needsMessages } from "@/lib/community-needs-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
@@ -63,6 +64,9 @@ export function DepartmentDirectory() {
         <div className="flex flex-wrap items-center gap-2">
           <Link href="/communities/new" className={institutionAction + " gap-2"}>
             <span aria-hidden="true" className="text-lg leading-none">+</span>{groups.newGroup}
+          </Link>
+          <Link href="/communities/intake/needs" className="inline-flex min-h-10 items-center rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
+            {needsMessages[locale].title}
           </Link>
           <Link href="/communities/invitations" className="inline-flex min-h-10 items-center rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)]">
             {groups.invitations}
@@ -146,6 +150,7 @@ export function DepartmentSpace({ slug }: { slug: string }) {
         {privacy.error !== null && <ApiErrorNotice error={privacy.error} />}
         {community.canModerate && <Link href={`/communities/${slug}/moderation`} className={institutionLink}>{t.moderation}</Link>}
         {community.joined && <Link href={"/polls?scope=community&scopeId=" + community.id} className={institutionLink}>{pollMessages[locale].title}</Link>}
+        {community.joined && <Link href={"/communities/intake/needs/new?community=" + encodeURIComponent(slug)} className={institutionLink}>{needsMessages[locale].newNeed}</Link>}
         {group && group.policy !== "private" && <Link href={`/community-directory/${slug}`} className={institutionLink}>{groups.copyLink}</Link>}
       </header>
       <details className={institutionCard}>

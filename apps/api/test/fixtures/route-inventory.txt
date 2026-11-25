@@ -90,6 +90,8 @@ GET /api/v1/me/blocked - -
 GET /api/v1/me/communities - -
 GET /api/v1/me/community-activity - -
 GET /api/v1/me/community-invitations - -
+GET /api/v1/me/community-needs - -
+GET /api/v1/me/community-needs/:id - -
 GET /api/v1/me/community-recommendation-settings - -
 GET /api/v1/me/enforcement-appeals - -
 GET /api/v1/me/feed-languages - -
@@ -258,6 +260,8 @@ HEAD /api/v1/me/blocked - onSend
 HEAD /api/v1/me/communities - onSend
 HEAD /api/v1/me/community-activity - onSend
 HEAD /api/v1/me/community-invitations - onSend
+HEAD /api/v1/me/community-needs - onSend
+HEAD /api/v1/me/community-needs/:id - onSend
 HEAD /api/v1/me/community-recommendation-settings - onSend
 HEAD /api/v1/me/enforcement-appeals - onSend
 HEAD /api/v1/me/feed-languages - onSend
@@ -373,6 +377,7 @@ PATCH /api/v1/institutions/:id/roles/:roleId/assignments/:assignmentId 512 -
 PATCH /api/v1/institutions/:id/verified-representatives/me 256 -
 PATCH /api/v1/me/ambassadors/:id 6000 -
 PATCH /api/v1/me/community-invitations/:id 1024 -
+PATCH /api/v1/me/community-needs/:id 32000 -
 PATCH /api/v1/me/follow-requests/:id 512 -
 PATCH /api/v1/me/notifications/:id 1024 -
 PATCH /api/v1/me/profile - -
@@ -431,6 +436,7 @@ POST /api/v1/institutions/:id/representatives/:member/revoke 256 -
 POST /api/v1/institutions/:id/roles 4096 -
 POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
+POST /api/v1/me/community-needs 32000 -
 POST /api/v1/me/enforcement-appeals 12288 -
 POST /api/v1/me/founder-bootstrap 256 -
 POST /api/v1/me/founder-identity/:id/actions 1024 -
