@@ -3105,6 +3105,87 @@
           "rolloutAndRollback": "Keep member routing disabled and use a scoped forward fix if needed. Existing Ouest deployment remains supported while the new app uses explicit release-bound calls."
         }
       ]
+    },
+    {
+      "id": "c2-1-project-outcome-requests",
+      "report": "docs/project-outcomes/C2_1_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/projects/:project/outcome-validation",
+          "contract": "GET /api/v1/projects/:project/outcome-validation - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only requester and authorized source projections write no decision or history."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcomes.spec.ts",
+            "denialScenario": "Empty gate, absent session, cross-project actor, mismatched source, stale revisions and concurrent commands fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:project/outcome-validation/sources",
+          "contract": "GET /api/v1/projects/:project/outcome-validation/sources - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only requester and authorized source projections write no decision or history."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcomes.spec.ts",
+            "denialScenario": "Empty gate, absent session, cross-project actor, mismatched source, stale revisions and concurrent commands fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:project/outcome-validation/:id",
+          "contract": "GET /api/v1/projects/:project/outcome-validation/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only requester and authorized source projections write no decision or history."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcomes.spec.ts",
+            "denialScenario": "Empty gate, absent session, cross-project actor, mismatched source, stale revisions and concurrent commands fail closed."
+          }
+        },
+        {
+          "route": "POST /api/v1/projects/:project/outcome-validation",
+          "contract": "POST /api/v1/projects/:project/outcome-validation 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Creates one private revision event, with actor, transition and idempotent receipt in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcomes.spec.ts",
+            "denialScenario": "Empty gate, absent session, cross-project actor, mismatched source, stale revisions and concurrent commands fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/projects/:project/outcome-validation/:id",
+          "contract": "PATCH /api/v1/projects/:project/outcome-validation/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Creates one private revision event, with actor, transition and idempotent receipt in the same transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcomes.spec.ts",
+            "denialScenario": "Empty gate, absent session, cross-project actor, mismatched source, stale revisions and concurrent commands fail closed."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125121000_c21_project_outcome_requests.sql",
+          "rlsAndGrants": "Three new private RLS tables with no direct app access. A single public service-only RPC reaches non-granted helpers.",
+          "authorization": "Uses existing account/session, onboarding, project scope, owner or manager role, restrictions and lifecycle checks. Organizer can access only their case and existing eligible sources.",
+          "compatibility": "Only adds new relations, indexes and routines. It changes no native Phase 6C/C1 tables, records, moderation policies or access.",
+          "validation": "Disposable SQL and API grant and workflow assertions plus browser integration and native Projects regression.",
+          "rolloutAndRollback": "Apply the exact independently approved checksum after a fresh one-file dry run and new preservation baseline. Leave the fixture gate empty and prefer a scoped forward repair."
+        }
+      ]
     }
   ]
 }

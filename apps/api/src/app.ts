@@ -10,6 +10,7 @@ import { registerNeedProjectLinks } from "./routes/need-project-links.js";
 import { registerCommunityNeedPublication } from "./routes/community-need-publication.js";
 import { registerCommunityNeedsReview } from "./routes/community-needs-review.js";
 import { registerCommunityNeedsPilot } from "./routes/community-needs-pilot.js";
+import { registerProjectOutcomes } from "./routes/project-outcomes.js";
 import { registerCommunityNeeds } from "./routes/community-needs.js";
 import { registerCommunityRoutes } from "./routes/community.js";
 import { registerInstitutionRoutes } from "./routes/institutions.js";
@@ -90,6 +91,9 @@ export function createApp(config: ApiConfig, overrides?: {
   };
   app.register((instance) => registerCommunityNeedsPilot(instance, needs, pilotRelease));
   app.register((instance) => registerCommunityNeeds(instance, needs));
+  const syntheticOutcomes = config.AYINOU_PROJECT_OUTCOMES === "synthetic" &&
+    config.SUPABASE_URL === "http://127.0.0.1:55321" && process.env.NODE_ENV !== "production";
+  app.register((instance) => registerProjectOutcomes(instance, syntheticOutcomes, auth, institutions, readBudget));
   app.register((instance) => registerCommunityNeedsReview(instance, needs));
   app.register((instance) => registerCommunityNeedPublication(instance, needs));
   app.register((instance) => registerNeedProjectLinks(instance, needs));

@@ -183,6 +183,9 @@ GET /api/v1/projects/:id/progress - -
 GET /api/v1/projects/:id/progress/entries/:entry/image - -
 GET /api/v1/projects/:id/progress/work - -
 GET /api/v1/projects/:id/work - -
+GET /api/v1/projects/:project/outcome-validation - -
+GET /api/v1/projects/:project/outcome-validation/:id - -
+GET /api/v1/projects/:project/outcome-validation/sources - -
 GET /api/v1/projects/reports - -
 GET /api/v1/projects/review - -
 GET /api/v1/recommendations/settings - -
@@ -366,6 +369,9 @@ HEAD /api/v1/projects/:id/progress - onSend
 HEAD /api/v1/projects/:id/progress/entries/:entry/image - onSend
 HEAD /api/v1/projects/:id/progress/work - onSend
 HEAD /api/v1/projects/:id/work - onSend
+HEAD /api/v1/projects/:project/outcome-validation - onSend
+HEAD /api/v1/projects/:project/outcome-validation/:id - onSend
+HEAD /api/v1/projects/:project/outcome-validation/sources - onSend
 HEAD /api/v1/projects/reports - onSend
 HEAD /api/v1/projects/review - onSend
 HEAD /api/v1/recommendations/settings - onSend
@@ -424,6 +430,7 @@ PATCH /api/v1/private/need-project-links/:id 8192 -
 PATCH /api/v1/projects/:id 28000 -
 PATCH /api/v1/projects/:id/publication 512 -
 PATCH /api/v1/projects/:id/reports/:report 6000 -
+PATCH /api/v1/projects/:project/outcome-validation/:id 4096 -
 PATCH /api/v1/trust/applications/:id/assignment 4096 -
 PATCH /api/v1/trust/impersonation/:id/decision 6000 -
 PATCH /api/v1/trust/verification-appeals/:id/assignment 4096 -
@@ -517,6 +524,7 @@ POST /api/v1/projects/:id/reports 3500 -
 POST /api/v1/projects/:id/review 6000 -
 POST /api/v1/projects/:id/submit 512 -
 POST /api/v1/projects/:id/work 16000 -
+POST /api/v1/projects/:project/outcome-validation 4096 -
 POST /api/v1/referrals/validate 512 -
 POST /api/v1/setup/founder/:id 512 -
 POST /api/v1/verification/founder-appeals/:id 512 -

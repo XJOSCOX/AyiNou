@@ -7755,6 +7755,55 @@
         "hostedApplication": "Hosted application release unverified.",
         "operationalApproval": "Public launch remains gated."
       }
+    },
+    {
+      "id": "projects.independent-outcome-requests",
+      "domain": "Projects",
+      "name": "Independent project outcome validation requests",
+      "status": "partial",
+      "currentAndLimits": "Private versioned draft, submission and withdrawal workflow reuses eligible Phase 6C records. Real intake remains disabled. Independent review, certification and public displays are outside C2.1.",
+      "dependencies": "Native project authorization, Phase 6C sources, private operating session and separate approved live-intake and C2.2 decisions.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/projects/progress/outcome-validation.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/project-outcomes.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/project-outcomes.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125121000_c21_project_outcome_requests.sql"
+        ],
+        "postgresObjects": [
+          "private.c21_outcome_requests",
+          "private.c21_outcome_history",
+          "public.c21_outcomes_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/project-outcomes.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/project-outcomes.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/project-outcomes.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/project-outcomes/C2_1_IMPLEMENTATION_REPORT.md"
+        ]
+      },
+      "verification": {
+        "local": "Disposable validation and native Project Work tests cover the foundation.",
+        "disposableSupabase": "Disposable suite verifies closed gates, role boundaries, preserved source, private history and command concurrency.",
+        "hostedDatabase": "Awaiting the exact migration rollout and postflight.",
+        "connectedApplication": "Awaiting connected authenticated Founder and member browser verification.",
+        "hostedApplication": "Hosted web and API outside the C2.1 deployment.",
+        "operationalApproval": "Live intake is disabled and requires separately approved privacy, authorization and reviewer policies."
+      }
     }
   ],
   "lastScopeUpdate": "C1 Nationwide Community Needs Department Configuration"

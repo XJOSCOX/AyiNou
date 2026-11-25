@@ -2,6 +2,7 @@ import { Entries } from "./entries";
 import { EntryBody } from "./entry-content";
 import { Metrics } from "./metrics";
 import { Milestones } from "./milestones";
+import { OutcomeValidation } from "./outcome-validation";
 import { useProgressText } from "./progress-controls";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { useInstitutionResource, institutionCard, institutionLink } from "@/components/institution-ui";
@@ -76,6 +77,7 @@ export function ProjectProgressWork({ work, tab, refreshWork }: { work: ProjectW
       {tab === "milestones" && <Milestones {...controls} data={data} work={work} />}
       {tab === "updates" && <Entries {...controls} data={data} reports={false} />}
       {tab === "outcomes" && <>
+        {data.canManage && <OutcomeValidation key={id} project={id} />}
         <Metrics {...controls} data={data} />
         <Entries {...controls} data={data} reports />
       </>}

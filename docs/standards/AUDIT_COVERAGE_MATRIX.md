@@ -160,3 +160,7 @@ The same disposable need and project lifecycle passed in all ten departments, wi
 ## C1 nationwide Pilot decisions
 
 Each department has its own policy revision and reasoned audit history. Atomic bulk emergency decisions share an idempotent receipt across their affected departments. Each affected scope records actor, originating workspace, timestamp, reason, and before/after policy. Existing Ouest decisions retain their original payload, actor and timing. [Nationwide implementation](../community-needs/C1_NATIONWIDE_IMPLEMENTATION_REPORT.md)
+
+## C2.1 private project outcome requests
+
+An accepted create, edit, submit or withdraw command appends a private actor-bound revision with the exact case, time, status and idempotent receipt in its transaction. Sources and evidence remain in the existing project workflow. Authorized reads add no audit event. No new Founder authority, reviewer access or outcome certification is recorded. [Implementation report](../project-outcomes/C2_1_IMPLEMENTATION_REPORT.md)

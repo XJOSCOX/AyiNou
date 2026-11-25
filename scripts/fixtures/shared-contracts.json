@@ -291,6 +291,16 @@
     "OrganizationSetupReceipt": "type:08ab42121c3e167c0a4cf7233ede2bb36943a1cf4c96afb53641c6ca072cd86f",
     "OrganizationSetupResult": "type:f7e57f93dbf02291fcac5fbfaecfc4ce50153bc368f0a6c3aa99b88455393324",
     "OrganizationSetupView": "type:a30bfadac835ee0e939456d8bb7fa961a78e8432e6a4d7c4f60414096a741d89",
+    "OutcomeClassification": "type:7ae3ef2af8b087f4c468876081ffd11f7ebd276d111bfe7180b1d56ce0ea02d0",
+    "outcomeClassifications": "value:96c59b0cb84982e0093e89e16bb194d54c619a142a1ab638ae9eb77607fab760",
+    "OutcomePage": "type:649f0d2e50168af73cca4bca8aeb0946364eed09b8144ca0129f6fd3edfdd7cb",
+    "OutcomeRequest": "type:89a741a9e5a57fd96f466a9ba39595ac4fa9d0a369a5caf70542488ba0860b47",
+    "OutcomeRequestStatus": "type:e23eaa44e433e4b7b0f267b44b5f2dedd8039f0589b778a59ddb17ad114e5383",
+    "OutcomeResult": "type:5edcebf0e500165679a15738d6d12637c44c605e7d383514dc38b5b4ef336b59",
+    "OutcomeSource": "type:e4b27ed2ca8f7c924c645f7ccb2e0b75fc6ce9acb5cab84777e73af720eb57c5",
+    "OutcomeSourceKind": "type:d5d2c2b42534cb1f5d8e0c5f3d103696d65360986f1856372d82d29fb107c678",
+    "outcomeSourceKinds": "value:48c0bd4037dcd7444a0d10f13b288986a90f7d3f460372242e92fc6baae489bc",
+    "OutcomeSummary": "type:461db6830f630d0d383b6124ebdf38f60ab6b38e84017510c65edb03cf8bf395",
     "PersonalClaim": "type:bdbeee96d10078674adca30a9968666690fd548f585bf876ed376f7664e94df7",
     "personalClaims": "value:5d06744b14e09be6ba7f284580b31d0d9cf67f5f3ed4e04f69e8a66faf6bc73e",
     "PersonalVerificationRequestState": "type:8df2fb982a00150df1eb93fa0f0e65dd43e022941567774b147a0ce2c3667666",
@@ -1124,6 +1134,17 @@
       "informal_unregistered",
       "pursuing_registration",
       "registered"
+    ],
+    "outcomeClassifications": [
+      "output",
+      "outcome"
+    ],
+    "outcomeSourceKinds": [
+      "milestone",
+      "observation",
+      "progress_report",
+      "final_report",
+      "accomplishment"
     ],
     "personalClaims": [
       "identity",
