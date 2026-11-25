@@ -27,12 +27,29 @@ const policyCommand = z.strictObject({
   ...base, action: z.enum(["grant", "revoke"]), target: z.uuid(), communityId: z.uuid(), role: z.enum(["triage", "review"]),
 });
 
-export function registerCommunityNeedsReview(app: FastifyInstance, options: {
+export type NeedRouteOptions = {
   enabled: boolean; auth: AuthVerifier | null; repo: InstitutionRepository | null; read: ReadBudget;
-}) {
+};
+
+export async function needRequestContext(request: FastifyRequest, { auth, repo, read }: NeedRouteOptions, staff: boolean) {
+  const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
+  if (!token) throw new ApiError(401, "UNAUTHORIZED", "Sign in required");
+  if (!auth?.verifySession || !repo) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Review unavailable");
+  const session = await auth.verifySession(token, staff);
+  if (!session) {
+    if (staff && await auth.verifySession(token)) throw new ApiError(403, "MFA_REQUIRED", "Recent verification required");
+    throw new ApiError(401, "UNAUTHORIZED", "Sign in required");
+  }
+  const workspace = staff ? z.uuid().safeParse(request.headers["x-ayinou-workspace"]) : null;
+  if (workspace?.success === false) throw new ApiError(403, "FORBIDDEN", "Private workspace required");
+  await read(staff ? "audit" : "profile", session.actor, request.ip);
+  return { session, workspace: workspace?.data ?? null, repo };
+}
+
+export function registerCommunityNeedsReview(app: FastifyInstance, options: NeedRouteOptions) {
   const member = "/api/v1/me/community-needs/:id/review";
   const staff = "/api/v1/private/community-needs-review";
-  const { enabled, auth, repo, read } = options;
+  const { enabled } = options;
   app.addHook("onRequest", async (_request, reply) => {
     reply.header("Cache-Control", "private, no-store").header("Referrer-Policy", "no-referrer")
       .header("X-Robots-Tag", "noindex, nofollow");
@@ -40,22 +57,11 @@ export function registerCommunityNeedsReview(app: FastifyInstance, options: {
 
   async function execute<T>(request: FastifyRequest, lane: string, caseId: string | null, command: object | null, after: string | null = null) {
     if (!enabled) throw new ApiError(404, "COMMUNITY_NEEDS_REVIEW_DISABLED", "Community needs review unavailable");
-    const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
-    if (!token) throw new ApiError(401, "UNAUTHORIZED", "Sign in required");
-    if (!auth?.verifySession || !repo) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Review unavailable");
-    const staff = lane !== "member" && lane !== "access";
-    const session = await auth.verifySession(token, staff);
-    if (!session) {
-      if (staff && await auth.verifySession(token)) throw new ApiError(403, "MFA_REQUIRED", "Recent verification required");
-      throw new ApiError(401, "UNAUTHORIZED", "Sign in required");
-    }
-    const workspace = staff ? z.uuid().safeParse(request.headers["x-ayinou-workspace"]) : null;
-    if (workspace?.success === false) throw new ApiError(403, "FORBIDDEN", "Private workspace required");
-    await read(staff ? "audit" : "profile", session.actor, request.ip);
+    const { session, workspace, repo } = await needRequestContext(request, options, lane !== "member" && lane !== "access");
     try {
       const result = await repo.rpc<T & { denied?: boolean }>("c12_needs_for_api", {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2,
-        p_totp: session.totpAt ?? null, p_workspace: workspace?.data ?? null, p_lane: lane,
+        p_totp: session.totpAt ?? null, p_workspace: workspace, p_lane: lane,
         p_id: caseId, p_command: command, p_after: after,
       });
       if (result.denied) throw new ApiError(403, "COMMUNITY_NEEDS_ASSIGNMENT_DENIED", "An eligible independent assignment is required");

@@ -7,6 +7,7 @@ import { communityNeedCategories, type CommunityNeed, type CommunityNeedContent,
 import { authorizedRequest } from "@/lib/api";
 import { ApiRequestError } from "@/lib/api-errors";
 import { needReviewLabel } from "@/lib/community-needs-review-i18n";
+import { MemberPublication } from "./community-need-publication";
 import { MemberReviewStatus, memberNeedReviewPath } from "./community-needs-review";
 import { needsMessages } from "@/lib/community-needs-i18n";
 import { useLocale } from "@/lib/locale-store";
@@ -243,6 +244,7 @@ function NeedEditor({ item, communities = [], initialCommunity, onRefresh }: {
     {record && <aside className={institutionCard + " grid content-start gap-4"}>
       <div><p className="text-sm font-semibold">{copy.ref}</p><p className="break-all font-mono text-xs">{record.id}</p></div>
       {record.status !== "draft" && review && <MemberReviewStatus data={review} onUpdate={setUpdatedReview} />}
+      {record.status !== "draft" && <MemberPublication key={record.id + ":" + (review?.revision ?? 0)} needId={record.id} />}
       {record.status !== "draft" && !review && <p className="text-sm text-[var(--theme-body)]">{copy.unreviewed}</p>}
       {record.status !== "withdrawn" && canWithdraw && <div className="grid gap-3 border-y border-[var(--theme-border)] py-4">
         <label className="flex items-start gap-2 text-sm">

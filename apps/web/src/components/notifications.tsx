@@ -14,6 +14,7 @@ import { f24Messages } from "@/lib/f24-i18n";
 import { socialMessages } from "@/lib/social-i18n";
 import { useState } from "react";
 import { useCursorPage, useFeedMutation } from "@/lib/feed-state";
+import { publicationLabel } from "@/lib/community-need-publication-i18n";
 import { needReviewLabel } from "@/lib/community-needs-review-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
@@ -94,7 +95,8 @@ function notificationMessage(locale: Locale, item: MemberNotification) {
   const t = mediaNotificationMessages[locale];
   if (!item.available || !item.kind) return t.unavailable;
   switch (item.kind) {
-    case "community_need_notice": return needReviewLabel(locale, item.communityNeed?.action ?? "reviewStatus");
+    case "community_need_notice": return item.communityNeed?.action.startsWith("publication_")
+      ? publicationLabel(locale,item.communityNeed.action) : needReviewLabel(locale, item.communityNeed?.action ?? "reviewStatus");
     case "appeal_decided": return safetyMessages[locale].appeal_decided;
     case "verification_decided": return trustMessages[locale].verifyApplicationAlert;
     case "verification_appeal_decided": return trustMessages[locale].verifyAppealAlert;

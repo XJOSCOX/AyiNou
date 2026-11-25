@@ -14,6 +14,7 @@ import { useLocale } from "@/lib/locale-store";
 import { sessionSecurityMessages } from "@/lib/session-security-i18n";
 import { openPrivateFlow, privateFlowPath, workflowsEndpoint } from "@/lib/session-security";
 import { browserSupabase } from "@/lib/supabase/browser";
+import { StaffPublication } from "./community-need-publication";
 import { StaffNeeds } from "./community-needs-review";
 import { AdminWorkspace } from "./admin-workspace";
 import { FeatureEnforcementPanel } from "./feature-enforcement";
@@ -144,7 +145,7 @@ export function SessionWorkspace({ subject, sessionId, flow, initialSection }: {
   </div>;
   if (delegated) return <MemberShell><div className="grid gap-4">
     <PageHeader title={adminMessages[locale].administration} actions={action} />
-    <StaffNeeds workspace={flow.id} lane="triage" />
+    <><StaffNeeds workspace={flow.id} lane="triage" /><StaffPublication workspace={flow.id} lane="triage" /></>
     <FeatureEnforcementPanel workspace={flow.id} />
   </div></MemberShell>;
   return admin ? <AdminWorkspace workspaceId={flow.id} workspaceAction={action} section={section} onSectionChange={setSection} /> : <VerificationReview workspaceAction={action} workspaceId={flow.id} />;

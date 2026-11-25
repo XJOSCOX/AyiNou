@@ -28,3 +28,4 @@ export * from "./privacy-export";
 export * from "./privacy-lifecycle";
 export { departmentCommunityContent, type DepartmentCommunityContent } from "./department-community-content";
 export * from "./events";
+export * from "./community-need-publication";

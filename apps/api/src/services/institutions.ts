@@ -41,6 +41,11 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
       }
       if (["PSF04", "PSF14", "22023"].includes(error.code) && name.startsWith("m24_"))
         throw new InstitutionError(error.code === "22023" ? "INVALID_INPUT" : "APPEAL_INELIGIBLE", error.code === "22023" ? 400 : 404);
+      if (name === "c13_publication_for_api") {
+        if (["C1301", "PGRST202"].includes(error.code)) throw new InstitutionError("COMMUNITY_NEED_PUBLICATION_DISABLED", 404);
+        if (error.code === "C1302") throw new InstitutionError("NOT_FOUND", 404);
+        if (error.code === "C1303") throw new InstitutionError("STALE_VERSION", 409);
+      }
       if (name === "c12_needs_for_api" && ["C1201", "PGRST202"].includes(error.code)) {
         throw new InstitutionError("COMMUNITY_NEEDS_REVIEW_DISABLED", 404);
       }

@@ -42,9 +42,10 @@ function ComposerIcon({ name }: { name: keyof typeof paths }) {
   </svg>;
 }
 
-export function PostComposer({ post, community, groupVersion, onSaved, onCancel, publishers }: {
+export function PostComposer({ post, community, groupVersion, onSaved, onCancel, publishers, needContext }: {
   post?: FeedPost; community?: string; groupVersion?: number; onSaved: (message: SavedPost) => void; onCancel?: () => void;
   publishers?: PublishingAccount[] | null;
+  needContext?: { label: string; path: string };
 }) {
   const [locale] = useLocale();
   const { displayName, memberId, avatarUrl } = useMemberIdentity();
@@ -204,6 +205,9 @@ export function PostComposer({ post, community, groupVersion, onSaved, onCancel,
       <span id={hint} className="sr-only">{t.bodyHint.replace("{max}", String(postBodyLimit))}</span>
     </div>
     <MentionSuggestions value={body} onChange={setBody} />
+    {needContext && community && !post && !body.includes(needContext.path) && <button type="button"
+      className="justify-self-start text-sm font-semibold text-[var(--theme-link)] underline underline-offset-4"
+      onClick={() => setBody((value) => [value.trimEnd(), needContext.path].filter(Boolean).join("\n\n"))}>{needContext.label}</button>}
     {publisher && <div className="grid min-w-0 gap-3 rounded-lg border border-[var(--theme-border)] bg-[var(--theme-control)] p-3">
       {organization ? <>
         <p className="min-w-0 break-words text-sm font-semibold" role="status">

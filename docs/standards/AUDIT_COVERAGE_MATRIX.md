@@ -132,3 +132,7 @@ Private draft creation, edits, submission and withdrawal append an actor-bound c
 ## C1.2 Community Needs review
 
 Scoped assignments, private evidence access, triage, corrections, conflicts, findings, challenges, and closure are recorded in the private case ledger. Member feedback and recipient-only inbox projections expose coded summaries. No narrative, private reviewer note or reference enters a general audit projection. [Implementation report](../community-needs/C1_2_IMPLEMENTATION_REPORT.md)
+
+## C1.3 Community Needs publication
+
+The private publication ledger retains versioned proposals, confirmed audience and attribution, assignments, approval and safe rejection feedback, visibility transitions, and independent challenge decisions. Mutations and recipient-only notices commit together. The community directory receives the current approved snapshot and eligible public attribution. Restricted evidence and reviewer notes stay in the private domain. [Implementation report](../community-needs/C1_3_IMPLEMENTATION_REPORT.md)

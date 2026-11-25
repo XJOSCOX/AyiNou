@@ -2817,6 +2817,113 @@
           "rolloutAndRollback": "Apply only after exact approval, read-only preflight preservation and a fresh dry run. Leave pilot gates empty and prefer additive forward corrections."
         }
       ]
+    },
+    {
+      "id": "c1-3-community-need-publication",
+      "report": "docs/community-needs/C1_3_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/community-needs/:id/publication",
+          "contract": "GET /api/v1/me/community-needs/:id/publication - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Scoped publication projection without a change to case state or a private evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-need-publication.spec.ts",
+            "denialScenario": "Disabled fixtures, unrelated members, forged scope, invalid workspaces and conflicting reviewers are denied as applicable."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/communities/:id/needs",
+          "contract": "GET /api/v1/private/communities/:id/needs - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Scoped publication projection without a change to case state or a private evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-need-publication.spec.ts",
+            "denialScenario": "Disabled fixtures, unrelated members, forged scope, invalid workspaces and conflicting reviewers are denied as applicable."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/communities/:id/needs/:publication",
+          "contract": "GET /api/v1/private/communities/:id/needs/:publication - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Scoped publication projection without a change to case state or a private evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-need-publication.spec.ts",
+            "denialScenario": "Disabled fixtures, unrelated members, forged scope, invalid workspaces and conflicting reviewers are denied as applicable."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/community-need-publications",
+          "contract": "GET /api/v1/private/community-need-publications - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Scoped publication projection without a change to case state or a private evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-need-publication.spec.ts",
+            "denialScenario": "Disabled fixtures, unrelated members, forged scope, invalid workspaces and conflicting reviewers are denied as applicable."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/community-need-publications/:id",
+          "contract": "GET /api/v1/private/community-need-publications/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Scoped publication projection without a change to case state or a private evidence read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-need-publication.spec.ts",
+            "denialScenario": "Disabled fixtures, unrelated members, forged scope, invalid workspaces and conflicting reviewers are denied as applicable."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/community-needs/:id/publication",
+          "contract": "PATCH /api/v1/me/community-needs/:id/publication 16384 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "A scoped C1.3 ledger event and any recipient-only notice commit with the state and snapshot pointers."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-need-publication.spec.ts",
+            "denialScenario": "Disabled fixtures, unrelated members, forged scope, invalid workspaces and conflicting reviewers are denied as applicable."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/private/community-need-publications/:id",
+          "contract": "PATCH /api/v1/private/community-need-publications/:id 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "A scoped C1.3 ledger event and any recipient-only notice commit with the state and snapshot pointers."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/community-need-publication.spec.ts",
+            "denialScenario": "Disabled fixtures, unrelated members, forged scope, invalid workspaces and conflicting reviewers are denied as applicable."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261124155200_c13_community_need_publication.sql",
+          "rlsAndGrants": "All four C1.3 private tables enable RLS with revoked direct grants. One service-only RPC verifies live access.",
+          "authorization": "A current supported finding, exact evidence and publication versions, community membership, consent, reviewer scope and assignment, recent MFA, original workspace and documented conflict exclusions.",
+          "compatibility": "C1.1 and C1.2 remain gated. Preserve their tables, grants, decisions and records. Reuse their read-gated private notice projection and native room discussion.",
+          "validation": "Disposable SQL authorization and invariants, browser localization and responsive views, native community composer and lifecycle regressions.",
+          "rolloutAndRollback": "Approve the exact migration before any hosted apply. Preflight preservation and keep all gates closed. Use a reviewed forward correction that retains history."
+        }
+      ]
     }
   ]
 }

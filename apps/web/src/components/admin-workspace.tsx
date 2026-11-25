@@ -48,6 +48,7 @@ import { verificationCopy } from "@/lib/verification-policy-i18n";
 import { MemberExperienceSettings } from "./member-experience-settings";
 import { authorizedRequest } from "@/lib/api";
 import { needReviewLabel } from "@/lib/community-needs-review-i18n";
+import { StaffPublication } from "./community-need-publication";
 import { StaffNeeds } from "./community-needs-review";
 import { AdminAuditWorkspace } from "./admin-audit-workspace";
 import { AdminSectionContext, useAdminRenewalPath } from "./admin-section-context";
@@ -191,7 +192,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                 </section>
                 <SafetyOverviewPanel />
               </>}
-              {tab === "communityNeeds" && <StaffNeeds workspace={workspaceId} lane="admin" />}
+              {tab === "communityNeeds" && <><StaffNeeds workspace={workspaceId} lane="admin" /><StaffPublication workspace={workspaceId} lane="admin" /></>}
               {tab === "moderationOverview" && <ModerationOverview workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationReports" && <ModerationList key="reports" view="reports" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationContent" && <ModerationList key="content" view="content" workspace={workspaceId} onNavigate={navigate} />}

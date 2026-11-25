@@ -92,6 +92,7 @@ GET /api/v1/me/community-activity - -
 GET /api/v1/me/community-invitations - -
 GET /api/v1/me/community-needs - -
 GET /api/v1/me/community-needs/:id - -
+GET /api/v1/me/community-needs/:id/publication - -
 GET /api/v1/me/community-needs/:id/review - -
 GET /api/v1/me/community-recommendation-settings - -
 GET /api/v1/me/enforcement-appeals - -
@@ -162,6 +163,10 @@ GET /api/v1/posts/:id/attachments/:attachmentId/image - -
 GET /api/v1/posts/:id/comments - -
 GET /api/v1/posts/:id/comments/:commentId - -
 GET /api/v1/posts/:id/reaction - -
+GET /api/v1/private/communities/:id/needs - -
+GET /api/v1/private/communities/:id/needs/:publication - -
+GET /api/v1/private/community-need-publications - -
+GET /api/v1/private/community-need-publications/:id - -
 GET /api/v1/private/community-needs-review - -
 GET /api/v1/private/community-needs-review/:id - -
 GET /api/v1/private/community-needs-review/triage-access - -
@@ -266,6 +271,7 @@ HEAD /api/v1/me/community-activity - onSend
 HEAD /api/v1/me/community-invitations - onSend
 HEAD /api/v1/me/community-needs - onSend
 HEAD /api/v1/me/community-needs/:id - onSend
+HEAD /api/v1/me/community-needs/:id/publication - onSend
 HEAD /api/v1/me/community-needs/:id/review - onSend
 HEAD /api/v1/me/community-recommendation-settings - onSend
 HEAD /api/v1/me/enforcement-appeals - onSend
@@ -335,6 +341,10 @@ HEAD /api/v1/posts/:id/attachments/:attachmentId/image - onSend
 HEAD /api/v1/posts/:id/comments - onSend
 HEAD /api/v1/posts/:id/comments/:commentId - onSend
 HEAD /api/v1/posts/:id/reaction - onSend
+HEAD /api/v1/private/communities/:id/needs - onSend
+HEAD /api/v1/private/communities/:id/needs/:publication - onSend
+HEAD /api/v1/private/community-need-publications - onSend
+HEAD /api/v1/private/community-need-publications/:id - onSend
 HEAD /api/v1/private/community-needs-review - onSend
 HEAD /api/v1/private/community-needs-review/:id - onSend
 HEAD /api/v1/private/community-needs-review/triage-access - onSend
@@ -386,6 +396,7 @@ PATCH /api/v1/institutions/:id/verified-representatives/me 256 -
 PATCH /api/v1/me/ambassadors/:id 6000 -
 PATCH /api/v1/me/community-invitations/:id 1024 -
 PATCH /api/v1/me/community-needs/:id 32000 -
+PATCH /api/v1/me/community-needs/:id/publication 16384 -
 PATCH /api/v1/me/community-needs/:id/review 32000 -
 PATCH /api/v1/me/follow-requests/:id 512 -
 PATCH /api/v1/me/notifications/:id 1024 -
@@ -396,6 +407,7 @@ PATCH /api/v1/moderation/comments/:id 4096 -
 PATCH /api/v1/moderation/posts/:id 4096 -
 PATCH /api/v1/polls/:id 10000 -
 PATCH /api/v1/posts/:id 16384 -
+PATCH /api/v1/private/community-need-publications/:id 8192 -
 PATCH /api/v1/private/community-needs-review/:id 8192 -
 PATCH /api/v1/projects/:id 28000 -
 PATCH /api/v1/projects/:id/publication 512 -

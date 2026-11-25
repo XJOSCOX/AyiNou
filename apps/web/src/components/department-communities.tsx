@@ -21,6 +21,8 @@ import { PostCard } from "./feed-screen";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "./institution-ui";
 import { MemberShell } from "./member-shell";
 import { DiscoverSearchInput } from "./discover-search";
+import { PublishedNeeds, useNeedDirectory } from "./community-need-publication";
+import { publicationLabel } from "@/lib/community-need-publication-i18n";
 import { CommunityCard, CommunityLoading, CommunitySummary, MembershipControl, communityEmpty, communityGrid, communitySearchBar, communitySection, communitySectionMessage } from "./community-card";
 import { MyGroupActivities, RecommendedCommunities } from "./community-discovery";
 import { PostComposer } from "./post-composer";
@@ -111,7 +113,7 @@ const roomAction = "inline-flex min-h-10 items-center gap-2 rounded-md border bo
 
 const membershipTitle = { en: "Membership", ht: "Manm kominote", fr: "Adhésion", es: "Membresía" };
 
-export function DepartmentSpace({ slug }: { slug: string }) {
+export function DepartmentSpace({ slug, initialNeed }: { slug: string; initialNeed?: string }) {
   const router = useRouter();
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
@@ -119,7 +121,8 @@ export function DepartmentSpace({ slug }: { slug: string }) {
   const load = useCallback((signal: AbortSignal) => loadDepartmentCommunity(slug, signal), [slug]);
   const resource = useInstitutionResource(load);
   const [changed, setChanged] = useState<Community | null>(null);
-  const [tab, setTab] = useState<"discussion" | "members" | "manage">("discussion");
+  const [tab, setTab] = useState<"discussion" | "members" | "manage" | "needs">(initialNeed ? "needs" : "discussion");
+  const [discussionNeed, setDiscussionNeed] = useState<string | null>(null);
   const [visitedMembers, setVisitedMembers] = useState(false);
   const [directoryRevision, setDirectoryRevision] = useState(0);
   const privacy = useFeedMutation();
@@ -127,6 +130,8 @@ export function DepartmentSpace({ slug }: { slug: string }) {
   const group = community && community.kind !== "department" ? community : null;
   const canManage = group?.role === "owner" || group?.role === "administrator";
   const canRead = community?.joined || group?.discussionPublic;
+  const needsDirectory = useNeedDirectory(community?.joined ? community.id : null);
+  const showNeeds = Boolean(needsDirectory.data);
   function updateMembership(next: Community | null) {
     if (!next) { router.replace("/communities"); return; }
     setChanged(next);
@@ -153,17 +158,19 @@ export function DepartmentSpace({ slug }: { slug: string }) {
         </div>
 
         {community.joined && <div className="flex flex-wrap gap-1 border-t border-[var(--theme-border)] px-2 py-2 sm:px-4" role="group" aria-label={t.title}>
-          {(["discussion", "members", ...(canManage ? ["manage"] as const : [])] as const).map((entry) => <button key={entry} type="button" aria-pressed={tab === entry}
+          {(["discussion", "members", ...(showNeeds ? ["needs"] as const : []), ...(canManage ? ["manage"] as const : [])] as const).map((entry) => <button key={entry} type="button" aria-pressed={tab === entry}
             className="min-h-11 rounded-md px-3 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]"
-            onClick={() => { setTab(entry); if (entry === "members") setVisitedMembers(true); }}>{entry === "manage" ? groups.manage : t[entry]}</button>)}
+            onClick={() => { setTab(entry); if (entry === "members") setVisitedMembers(true); }}>{entry === "manage" ? groups.manage : entry === "needs" ? publicationLabel(locale,"title") : t[entry]}</button>)}
         </div>}
       </header>
 
       <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,24rem)]">
         <div className="min-w-0">
           {canRead ? <>
-            <div hidden={tab !== "discussion"}><DepartmentDiscussion key={String(community.joined)} slug={slug} joined={community.joined}
-              publicDiscussion={group?.discussionPublic ?? false} groupVersion={group?.version} /></div>
+            <div hidden={tab !== "discussion" && (tab !== "needs" || showNeeds)}><DepartmentDiscussion key={String(community.joined)} slug={slug} joined={community.joined}
+              publicDiscussion={group?.discussionPublic ?? false} groupVersion={group?.version} need={discussionNeed} /></div>
+            {community.joined && showNeeds && tab === "needs" && <PublishedNeeds room={community.id} initialId={initialNeed}
+              onDiscuss={group?.discussionPublic ? undefined : (id) => { setDiscussionNeed(id); setTab("discussion"); }} />}
             {visitedMembers && <div hidden={tab !== "members"}><DepartmentMembers slug={slug} revision={directoryRevision} /></div>}
             {group && canManage && tab === "manage" && <GroupManagement group={group} onSaved={(updated) => { setChanged(updated); setDirectoryRevision((n) => n + 1); }} />}
           </> : <p className={institutionCard}>{group ? groups.restrictedNotice : t.joinRead}</p>}
@@ -204,7 +211,7 @@ export function DepartmentSpace({ slug }: { slug: string }) {
   </div></MemberShell>;
 }
 
-function DepartmentDiscussion({ slug, joined, publicDiscussion, groupVersion }: { slug: string; joined: boolean; publicDiscussion: boolean; groupVersion?: number }) {
+function DepartmentDiscussion({ slug, joined, publicDiscussion, groupVersion, need }: { slug: string; joined: boolean; publicDiscussion: boolean; groupVersion?: number; need?: string | null }) {
   const [locale] = useLocale();
   const t = communityDirectoryMessages[locale];
   const f = feedMessages[locale];
@@ -222,7 +229,8 @@ function DepartmentDiscussion({ slug, joined, publicDiscussion, groupVersion }: 
   return <section className="grid gap-4" aria-label={t.discussion}>
     {joined && <div className={`${institutionCard} max-sm:p-3`} aria-label={f.write}>
       {publicDiscussion && <p className="mb-3 text-sm text-[var(--theme-body)]">{groupMessages[locale].publicNote}</p>}
-      <PostComposer community={slug} groupVersion={groupVersion} onSaved={changed} />
+      <PostComposer community={slug} groupVersion={groupVersion} onSaved={changed}
+        needContext={need && !publicDiscussion ? { label: publicationLabel(locale,"addReference"), path: "/communities/" + slug + "?need=" + need } : undefined} />
     </div>}
     {notice && <p role="status" className="text-sm text-[var(--theme-link)]">{f[notice]}</p>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.retry} />}

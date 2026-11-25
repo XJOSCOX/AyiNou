@@ -238,6 +238,15 @@
     "MyAffiliations": "type:e9d1a45bb46bfe782eb839867579b3bdccb797ba664a28e17395f98ecd71c801",
     "needClarifications": "value:810778c739c96c86d0f50d25c183f4ab51c22a9c1f8f738cbcbd0d782437e1ec",
     "needFindingSummaries": "value:d2b7c7586a25e449b716fc9d4731d43e40ed004d5ff9600d5bf1f0fc305ca269",
+    "NeedPublication": "type:b22b61d95507a2f1f3c7e4f3e04273d76691ff637b397af0981bdc3ef323c5b6",
+    "NeedPublicationContent": "type:67f23404e3187b3c41aa787ef942cd5c1cf6f6b4fd7457f6c62b261ddb46660e",
+    "NeedPublicationLane": "type:35d4ca29d7942f131f7757ffd8921167f43ab678b05bbc78b91ba4d3c3e41558",
+    "NeedPublicationPage": "type:fc51b2e107ce5ed50b2f0c6fe8584d07c5a846cbcbc27b7a983a4b576cb1c22d",
+    "needPublicationReasons": "value:004a47389cd30d58ff63af444a893fe8389e559482695243f792f09c8d8ec43b",
+    "NeedPublicationStaffAction": "type:1771ad6d7d1482c1ad9f4e5d9e621ccf97b34143a1660e2632595f9d8b0a583c",
+    "needPublicationStaffActions": "value:d648c0635a90bbe77684dbc92034d20664b0b5bb124137ad6946b774d45d4744",
+    "NeedPublicationState": "type:0ab36d5b9418a3643e55235dae4dd1573b90ad716187f2996475c8d0436d89af",
+    "needPublicationStates": "value:8f3a889e97aec662edf1d10a052bda5a6dbbcd0568020230b07306c730b1fc48",
     "NeedReviewAction": "type:33b2ff0f35856e1f848ba84fdbb8f02fdbce07553446237d6708c4dd946559fa",
     "needReviewActions": "value:750ea34f104429f7b0e49a78a207f7ebe3de6c3e1a043d19d1378bfa6b88e6f0",
     "NeedReviewCase": "type:87bed023b654e5c0b1927d698ce27503712fcc39036e634a9cef94e16fd08bd0",
@@ -353,6 +362,7 @@
     "protectedOrganizationPermissions": "value:2349d4473522a78d2a140c67e8425c702605dee823f736467000500222c0258c",
     "PublicAmbassador": "type:56de0e00d7a9f5dbbb90cc863965891f93039cb6f0a17d5b2c2ebe20c041029e",
     "publicUsernamePattern": "value:80b23c69141311e9524a5334901e18c866fe50c026e4b1d5d40863e2e346e6c8",
+    "PublishedNeed": "type:3c203710124c3550fea2a84cf9cd80bd3f74d3374bb00fb48fc217059a004cdf",
     "ReactionKind": "type:a38170e353259f45e5c52a41b1557d9c3a78ea5e94dc49830efdd71ed95e7749",
     "reactionKinds": "value:710fc09db62455ee107a2ab3fbcc8c359ee55a7f4ff359ec0503ba043c0bae41",
     "ReactionSummary": "type:97a660fdaee6ef8844bece8da5fab295e5b0a6ccdc2b9c17c1abc4770a2e7eec",
@@ -950,6 +960,34 @@
         "conflicting_evidence"
       ]
     },
+    "needPublicationReasons": [
+      "privacy",
+      "clarity",
+      "evidence"
+    ],
+    "needPublicationStaffActions": [
+      "assign",
+      "assign_challenge",
+      "approve",
+      "reject",
+      "request_correction",
+      "uphold",
+      "return",
+      "hide",
+      "remove"
+    ],
+    "needPublicationStates": [
+      "unrequested",
+      "pending",
+      "published",
+      "rejected",
+      "changes_requested",
+      "challenged",
+      "hidden",
+      "removed",
+      "withdrawn",
+      "stale"
+    ],
     "needReviewActions": [
       "grant",
       "revoke",
