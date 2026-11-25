@@ -175,6 +175,10 @@ GET /api/v1/private/need-project-links - -
 GET /api/v1/private/need-project-links/options - -
 GET /api/v1/private/need-project-links/project/:id - -
 GET /api/v1/private/need-project-links/publication/:id - -
+GET /api/v1/private/project-outcome-publication - -
+GET /api/v1/private/project-outcome-publication/:id - -
+GET /api/v1/private/project-outcome-publication/availability - -
+GET /api/v1/private/project-outcome-publication/roster - -
 GET /api/v1/private/project-outcome-review - -
 GET /api/v1/private/project-outcome-review/:caseId - -
 GET /api/v1/private/project-outcome-review/:caseId/evidence - -
@@ -190,9 +194,11 @@ GET /api/v1/projects/:id/progress/entries/:entry/image - -
 GET /api/v1/projects/:id/progress/work - -
 GET /api/v1/projects/:id/work - -
 GET /api/v1/projects/:project/outcome-validation - -
+GET /api/v1/projects/:project/outcome-validation/:caseId/publication - -
 GET /api/v1/projects/:project/outcome-validation/:caseId/review - -
 GET /api/v1/projects/:project/outcome-validation/:id - -
 GET /api/v1/projects/:project/outcome-validation/sources - -
+GET /api/v1/projects/:project/validated-results - -
 GET /api/v1/projects/reports - -
 GET /api/v1/projects/review - -
 GET /api/v1/recommendations/settings - -
@@ -368,6 +374,10 @@ HEAD /api/v1/private/need-project-links - onSend
 HEAD /api/v1/private/need-project-links/options - onSend
 HEAD /api/v1/private/need-project-links/project/:id - onSend
 HEAD /api/v1/private/need-project-links/publication/:id - onSend
+HEAD /api/v1/private/project-outcome-publication - onSend
+HEAD /api/v1/private/project-outcome-publication/:id - onSend
+HEAD /api/v1/private/project-outcome-publication/availability - onSend
+HEAD /api/v1/private/project-outcome-publication/roster - onSend
 HEAD /api/v1/private/project-outcome-review - onSend
 HEAD /api/v1/private/project-outcome-review/:caseId - onSend
 HEAD /api/v1/private/project-outcome-review/:caseId/evidence - onSend
@@ -383,9 +393,11 @@ HEAD /api/v1/projects/:id/progress/entries/:entry/image - onSend
 HEAD /api/v1/projects/:id/progress/work - onSend
 HEAD /api/v1/projects/:id/work - onSend
 HEAD /api/v1/projects/:project/outcome-validation - onSend
+HEAD /api/v1/projects/:project/outcome-validation/:caseId/publication - onSend
 HEAD /api/v1/projects/:project/outcome-validation/:caseId/review - onSend
 HEAD /api/v1/projects/:project/outcome-validation/:id - onSend
 HEAD /api/v1/projects/:project/outcome-validation/sources - onSend
+HEAD /api/v1/projects/:project/validated-results - onSend
 HEAD /api/v1/projects/reports - onSend
 HEAD /api/v1/projects/review - onSend
 HEAD /api/v1/recommendations/settings - onSend
@@ -441,10 +453,12 @@ PATCH /api/v1/posts/:id 16384 -
 PATCH /api/v1/private/community-need-publications/:id 8192 -
 PATCH /api/v1/private/community-needs-review/:id 8192 -
 PATCH /api/v1/private/need-project-links/:id 8192 -
+PATCH /api/v1/private/project-outcome-publication/:id 4096 -
 PATCH /api/v1/private/project-outcome-review/:caseId 8192 -
 PATCH /api/v1/projects/:id 28000 -
 PATCH /api/v1/projects/:id/publication 512 -
 PATCH /api/v1/projects/:id/reports/:report 6000 -
+PATCH /api/v1/projects/:project/outcome-validation/:caseId/publication 8192 -
 PATCH /api/v1/projects/:project/outcome-validation/:caseId/review 16384 -
 PATCH /api/v1/projects/:project/outcome-validation/:id 4096 -
 PATCH /api/v1/trust/applications/:id/assignment 4096 -
@@ -532,6 +546,8 @@ POST /api/v1/posts/:id/reports 4096 -
 POST /api/v1/posts/social 12288 -
 POST /api/v1/private/community-needs-review 8192 -
 POST /api/v1/private/need-project-links 4096 -
+POST /api/v1/private/project-outcome-publication/roster 4096 -
+POST /api/v1/private/project-outcome-publication/workspace 512 -
 POST /api/v1/private/project-outcome-review/roster 4096 -
 POST /api/v1/private/project-outcome-review/workspace 512 -
 POST /api/v1/projects 28000 -

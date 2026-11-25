@@ -12,15 +12,17 @@ export function useReviewCopy() {
   return { locale, t: outcomeReviewMessages[locale] };
 }
 
-export function ReviewCommand({ action, version, send, after, children, input }: {
-  action: ReviewAction; version: number; send: (body: string) => Promise<unknown>; after: () => void;
+export function ReviewCommand({ action, label, confirmation, version, send, after, children, input }: {
+  action: string; label?: string; confirmation?: string; version: number;
+  send: (body: string) => Promise<unknown>; after: () => void;
   children?: ReactNode; input?: (form: FormData) => object;
 }) {
   const { t } = useReviewCopy();
   const mutation = useFeedMutation();
+  const commandLabel = label ?? t.actions[action as ReviewAction];
   const attempt = useRef<{ content: string; requestId: string } | null>(null);
   return <details className="min-w-0 rounded-lg border border-[var(--theme-border)] p-3">
-    <summary className="cursor-pointer font-medium">{t.actions[action]}</summary>
+    <summary className="cursor-pointer font-medium">{commandLabel}</summary>
     <form className="grid min-w-0 gap-3 pt-3" onSubmit={(event) => {
       event.preventDefault();
       if (mutation.busy) return;
@@ -34,9 +36,9 @@ export function ReviewCommand({ action, version, send, after, children, input }:
       {children}
       <label>{t.note}<textarea className={institutionField} name="note" required minLength={3} maxLength={1200} rows={3} />
         <span className="text-sm">{t.privacy}</span></label>
-      <label className="flex items-start gap-2"><input type="checkbox" name="confirm" required />{t.confirm}</label>
+      <label className="flex items-start gap-2"><input type="checkbox" name="confirm" required />{confirmation ?? t.confirm}</label>
       {mutation.error !== null && <ApiErrorNotice error={mutation.error} signIn />}
-      <div><button className={institutionAction} disabled={mutation.busy}>{mutation.busy ? t.submitting : t.actions[action]}</button></div>
+      <div><button className={institutionAction} disabled={mutation.busy}>{mutation.busy ? t.submitting : commandLabel}</button></div>
     </form>
   </details>;
 }

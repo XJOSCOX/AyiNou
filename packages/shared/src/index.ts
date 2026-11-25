@@ -24,6 +24,7 @@ export * from "./projects";
 export * from "./project-work";
 export * from "./project-outcomes";
 export * from "./project-outcome-review";
+export * from "./project-outcome-publication";
 export * from "./voting";
 export * from "./notifications";
 export * from "./privacy";

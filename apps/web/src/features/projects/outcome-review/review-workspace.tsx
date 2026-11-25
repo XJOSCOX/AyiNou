@@ -11,6 +11,8 @@ import { MemberShell } from "@/components/member-shell";
 import { MfaChallenge } from "@/components/mfa-challenge";
 import { ProjectLoading, ProjectSection, ProjectsHeader } from "@/components/project-ui";
 import { fetchDepartments } from "@/lib/api";
+import { outcomePublicationPath } from "@/lib/project-outcome-publication-api";
+import { usePublicationCopy } from "../outcome-publication/disclosure";
 import { apiErrorCode } from "@/lib/api-errors";
 import { useFeedMutation } from "@/lib/feed-state";
 import { changeOutcomeRoster, loadOutcomeReviewNotices, loadOutcomeReviewQueue, loadOutcomeRoster,
@@ -167,6 +169,7 @@ function ActiveReviewWorkspace({ workspace, lane, onClose }: {
 export function OutcomeReviewWorkspace({ requestedLane, challenge }: { requestedLane: OutcomeStaffLane;
   challenge?: { subject: string; sessionId: string; factorIds: string[] } }) {
   const { t } = useReviewCopy();
+  const { t: publication } = usePublicationCopy();
   const router = useRouter();
   const availability = useInstitutionResource(loadOutcomeReviewNotices);
   const [lane, setLane] = useState(requestedLane);
@@ -178,7 +181,9 @@ export function OutcomeReviewWorkspace({ requestedLane, challenge }: { requested
   const open = () => void mutation.run(async () => { setWorkspace(await openOutcomeReview(lane)); });
   const disabled = apiErrorCode(availability.error) === "PROJECT_OUTCOME_REVIEW_DISABLED";
   return <MemberShell><div className="grid min-w-0 gap-4">
-    <ProjectsHeader title={t.title} description={t.intro} backHref="/projects/review" />
+    <ProjectsHeader title={t.title} description={t.intro} backHref="/projects/review" actions={
+      <Link className={institutionAction} href={outcomePublicationPath + (lane === "admin" ? "?lane=admin" : "")}>{publication.title}</Link>
+    } />
     {disabled ? <ProjectSection title={t.title}><p role="status">{t.closed}</p></ProjectSection> :
       availability.error !== null ? <ApiErrorNotice error={availability.error} retry={availability.refresh} signIn /> :
       !availability.data ? <ProjectLoading cards={1} className="grid" /> :

@@ -168,3 +168,7 @@ An accepted create, edit, submit or withdraw command appends a private actor-bou
 ## C2.2 independent outcome review
 
 Appointments, suspension, revocation, case assignment, release, recusal, clarification, correction, evidence reads, findings and challenge decisions have durable scoped events. Each protected mutation records the actor, department and workspace where applicable and binds to the case revision. Reviewer identity and conflict details stay out of the member projection. Notifications are recipient-filtered and link to an authorized workspace. [Implementation report](../project-outcomes/C2_2_IMPLEMENTATION_REPORT.md)
+
+## C2.3 controlled outcome publication
+
+The restricted publication ledger retains the exact disclosure fingerprint, revision, organizer consent, scoped grant and assignment, reviewer inspection, decision, challenge, withdrawal, and automatic invalidation. Receipts record the actor and originating workspace for protected commands. Public Project Progress exposes only the approved current disclosure. [Implementation report](../project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)

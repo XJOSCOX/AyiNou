@@ -1,4 +1,5 @@
 import { useCallback, useId, useRef, useState, type ReactNode } from "react";
+import { MemberPublication } from "../outcome-publication/member-publication";
 import { MemberReview } from "../outcome-review/member-review";
 import { outcomeSourceKinds, type OutcomeRequest, type OutcomeResult, type OutcomeSourceKind } from "@ayinou/shared";
 import { ApiErrorNotice } from "@/components/api-error-notice";
@@ -153,7 +154,10 @@ function RequestDetails({ project, id, onChanged }: { project: string; id: strin
       {request.status === "draft" && <Confirmation project={project} request={request} action="submit" onSaved={onSaved} />}
       {request.status !== "withdrawn" && <Confirmation project={project} request={request} action="withdraw" onSaved={onSaved} />}
     </div>
-    {request.status !== "draft" && <MemberReview request={request} key={request.revision} />}
+    {request.status !== "draft" && <>
+      <MemberReview request={request} key={request.revision} />
+      {request.mine && <MemberPublication request={request} key={"publication-" + request.revision} />}
+    </> }
     <details><summary className="cursor-pointer font-medium">{t.history}</summary>
       <ol className="grid gap-3 pt-2">{request.history.map((entry) => <li className="break-words text-sm" key={entry.revision}>
         <p>{t[entry.action]} · {t[entry.status]} · {t[entry.classification]} ·{" "}

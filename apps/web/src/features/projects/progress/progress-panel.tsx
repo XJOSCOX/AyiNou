@@ -1,3 +1,4 @@
+import { PublicOutcomeResults, usePublicationCopy } from "../outcome-publication/disclosure";
 import { Entries } from "./entries";
 import { EntryBody } from "./entry-content";
 import { Metrics } from "./metrics";
@@ -27,6 +28,7 @@ function StatusSummary({ data }: { data: ProjectProgress }) {
 
 export function PublicProjectProgress({ id, signedIn }: { id: string; signedIn: boolean }) {
   const { t, locale } = useProgressText();
+  const { t: publication } = usePublicationCopy();
   const loader = useCallback((signal: AbortSignal) => loadProgress(id, false, signedIn, signal), [id, signedIn]);
   const resource = useInstitutionResource(loader);
   if (resource.error !== null && apiErrorCode(resource.error) !== "PROJECT_UNAVAILABLE") {
@@ -37,13 +39,14 @@ export function PublicProjectProgress({ id, signedIn }: { id: string; signedIn: 
   return <section className={institutionCard + " grid gap-4"}>
     <h2 className="text-2xl font-semibold">{t.progress}</h2>
     <StatusSummary data={data} />
+    <PublicOutcomeResults key={id + String(signedIn)} project={id} signedIn={signedIn} />
     {data.status === "archived" && !data.completedOn && <p>{t.archivedUnfinished}</p>}
     {!!data.milestones.length && <ul className="grid gap-2">{data.milestones.map((milestone) => <li key={milestone.id} className="break-words">
       <h3 className="font-semibold" dir="auto">{milestone.title}</h3>
       <p className="text-sm" dir="auto">{milestone.description}</p>
     </li>)}</ul>}
     {data.entries.map((entry) => <article key={entry.id} className="grid gap-2 border-t border-[var(--theme-border)] pt-3" id={"progress-" + entry.id}>
-      <p className="text-sm">{t.kinds[entry.kind]} · {entry.superseded ? t.previousVersion : t.internalReview}
+      <p className="text-sm">{t.kinds[entry.kind]} · {entry.superseded ? t.previousVersion : entry.reviewed ? t.internalReview : publication.self}
         {entry.approvedAt && <> · <time dateTime={entry.approvedAt}>{new Date(entry.approvedAt).toLocaleDateString(locale)}</time></>}</p>
       <h3 className="break-words font-semibold" dir="auto">{entry.content.title}</h3>
       {entry.supersedesId && <a className={institutionLink} href={"#progress-" + entry.supersedesId}>{t.previousVersion}</a>}

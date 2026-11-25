@@ -3345,6 +3345,149 @@
           "rolloutAndRollback": "Apply only the approved checksum on the expected project. Preserve existing catalog and row fingerprints. Keep both C2 gates empty. Prefer scoped forward remediation."
         }
       ]
+    },
+    {
+      "id": "c2-3-controlled-outcome-publication",
+      "report": "docs/project-outcomes/C2_3_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/private/project-outcome-publication",
+          "contract": "GET /api/v1/private/project-outcome-publication - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A read-only projection returns already approved disclosure or minimal metadata to the authorized caller. Exact private review packets use an audited command."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-publication/:id",
+          "contract": "GET /api/v1/private/project-outcome-publication/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A read-only projection returns already approved disclosure or minimal metadata to the authorized caller. Exact private review packets use an audited command."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-publication/availability",
+          "contract": "GET /api/v1/private/project-outcome-publication/availability - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A read-only projection returns already approved disclosure or minimal metadata to the authorized caller. Exact private review packets use an audited command."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/project-outcome-publication/roster",
+          "contract": "GET /api/v1/private/project-outcome-publication/roster - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A read-only projection returns already approved disclosure or minimal metadata to the authorized caller. Exact private review packets use an audited command."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:project/outcome-validation/:caseId/publication",
+          "contract": "GET /api/v1/projects/:project/outcome-validation/:caseId/publication - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "A read-only projection returns already approved disclosure or minimal metadata to the authorized caller. Exact private review packets use an audited command."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/projects/:project/validated-results",
+          "contract": "GET /api/v1/projects/:project/validated-results - -",
+          "access": "public",
+          "audit": {
+            "kind": "exception",
+            "detail": "A read-only projection returns already approved disclosure or minimal metadata to the authorized caller. Exact private review packets use an audited command."
+          },
+          "publicReason": "A public project's approved current result contains only explicitly consented public fields. Native visibility is enforced for each caller."
+        },
+        {
+          "route": "PATCH /api/v1/private/project-outcome-publication/:id",
+          "contract": "PATCH /api/v1/private/project-outcome-publication/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace opening is recorded in the session ledger. Commands and exact disclosure inspection record scoped actor-bound receipts in the publication ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/projects/:project/outcome-validation/:caseId/publication",
+          "contract": "PATCH /api/v1/projects/:project/outcome-validation/:caseId/publication 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace opening is recorded in the session ledger. Commands and exact disclosure inspection record scoped actor-bound receipts in the publication ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "POST /api/v1/private/project-outcome-publication/roster",
+          "contract": "POST /api/v1/private/project-outcome-publication/roster 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace opening is recorded in the session ledger. Commands and exact disclosure inspection record scoped actor-bound receipts in the publication ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        },
+        {
+          "route": "POST /api/v1/private/project-outcome-publication/workspace",
+          "contract": "POST /api/v1/private/project-outcome-publication/workspace 512 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected workspace opening is recorded in the session ledger. Commands and exact disclosure inspection record scoped actor-bound receipts in the publication ledger."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/project-outcome-publication.spec.ts",
+            "denialScenario": "Closed gates, missing session, other authors, mismatched original workspaces, conflicts, stale source, and missing preview fail closed."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125123000_c23_controlled_outcome_publication.sql",
+          "rlsAndGrants": "Seven private RLS tables without direct app privileges. One service-only command RPC and one narrow caller-bound public read RPC.",
+          "authorization": "Current organizer consent and independent departmental reviewer grant; staff recent MFA, original-session workspace, active accepted assignment and exact inspected revision.",
+          "compatibility": "Adds tables, functions and targeted invalidation triggers. No changes to existing function grants or seeds. Existing C1 association data stays private.",
+          "validation": "Use disposable Supabase to verify consent, scope, public projection, source invalidation, appeals and browser layout.",
+          "rolloutAndRollback": "Verify and apply only the separately authorized checksum. Preserve source schemas and records, keep all C2 gates empty, and use audited suppression or an approved forward migration to repair behavior."
+        }
+      ]
     }
   ]
 }

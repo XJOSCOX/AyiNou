@@ -286,6 +286,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [ ] Define independent outcomes validation, retention, fraud escalation, quorum standards, and operational voting governance.
 - [x] C2.1 private outcome validation requests in Project Work. Source revision and evidence binding were verified and the hosted database migration is applied. Live intake remains closed. [Implementation report](docs/project-outcomes/C2_1_IMPLEMENTATION_REPORT.md)
 - [x] C2.2 independent project outcome evidence review. Scoped assignments, private findings, corrections and challenges passed disposable verification. The hosted database migration is verified. Live processing remains closed. [Implementation report](docs/project-outcomes/C2_2_IMPLEMENTATION_REPORT.md)
+- [ ] C2.3 adds controlled publication of current independent findings with exact organizer consent and a separate departmental decision. Hosted rollout and real activation remain gated. [Implementation report](docs/project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
 **Gate:** An initiative can be proposed, reviewed, organized, updated, completed and archived with transparent responsibility.

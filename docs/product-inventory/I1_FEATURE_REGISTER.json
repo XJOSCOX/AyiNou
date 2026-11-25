@@ -7857,6 +7857,59 @@
         "hostedApplication": "Hosted web and API are outside this release.",
         "operationalApproval": "Real intake, review and disclosure remain closed."
       }
+    },
+    {
+      "id": "projects.controlled-outcome-publication",
+      "domain": "Projects",
+      "name": "Controlled publication of independently reviewed project results",
+      "status": "partial",
+      "currentAndLimits": "Private organizer preview, consent, independent publication review, reasoned decisions, one challenge, withdrawal, and narrowly scoped public disclosures. Live operations are closed.",
+      "dependencies": "C2.1 and C2.2, native public Project Progress, verified identity, departmental grants, recent MFA and independent staffing.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/projects/outcome-publication/member-publication.tsx",
+          "apps/web/src/features/projects/outcome-publication/publication-workspace.tsx",
+          "apps/web/src/features/projects/outcome-publication/disclosure.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/project-outcome-publication.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/project-outcome-publication.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125123000_c23_controlled_outcome_publication.sql"
+        ],
+        "postgresObjects": [
+          "private.c23_publications",
+          "private.c23_disclosures",
+          "private.c23_events",
+          "public.c23_publication_for_api",
+          "public.c23_public_results_for_client"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/project-outcome-publication.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/project-outcome-publication.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/project-outcome-publication.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/project-outcomes/C2_3_IMPLEMENTATION_REPORT.md"
+        ]
+      },
+      "verification": {
+        "local": "Tracked in the C2.3 implementation report.",
+        "disposableSupabase": "Synthetic records only.",
+        "hostedDatabase": "Pending exact migration approval and verified deployment.",
+        "connectedApplication": "Use the existing local application with the hosted database for closed-state verification.",
+        "hostedApplication": "Outside this phase.",
+        "operationalApproval": "Live validation, review and publication remain disabled."
+      }
     }
   ],
   "lastScopeUpdate": "C1 Nationwide Community Needs Department Configuration"

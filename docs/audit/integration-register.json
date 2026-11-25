@@ -580,6 +580,23 @@
       "excluded": "Beneficiary, medical and financial information",
       "tests": [],
       "remediation": "Future owner-authorized phases"
+    },
+    {
+      "module": "project_outcome_publication",
+      "requiredEvents": "Record grant changes, workspace opening, consent, exact revision inspection, assignments, decisions, challenges, withdrawal and invalidation.",
+      "observed": "Actor-bound receipts retain the assignment scope, revision, disclosure fingerprint and reasoning; automatic invalidation records the affected revision and time.",
+      "viewers": "The current organizer and scoped coordinator can read permitted case history. Assigned reviewers can read only the current authorized review packet.",
+      "excluded": "No audit metadata, identities or private reasons enter the public result projection.",
+      "remediation": "Investigate suppressed disclosures from the scoped private ledger and use a newly consented, independently approved revision after the source is valid.",
+      "status": "covered",
+      "sources": [
+        "private.c23_events",
+        "private.s2b_security_events"
+      ],
+      "missing": [],
+      "tests": [
+        "apps/web/e2e/project-outcome-publication.spec.ts"
+      ]
     }
   ]
 }

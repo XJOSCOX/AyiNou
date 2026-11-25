@@ -34,6 +34,7 @@ export type OutcomeSummary = {
 
 export type OutcomeRequest = Omit<OutcomeSummary, "title"> & {
   projectId: string;
+  mine?: boolean;
   sourceId: string;
   sourceRevision: number;
   result: OutcomeResult;
