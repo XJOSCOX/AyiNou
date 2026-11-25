@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import type { OutcomePublication, OutcomeRequest } from "@ayinou/shared";
+import { OutcomeImpactMapping } from "@/features/impact/member-controls";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { institutionField, useInstitutionResource } from "@/components/institution-ui";
 import { apiErrorCode } from "@/lib/api-errors";
@@ -73,6 +74,7 @@ export function MemberPublication({ request }: { request: OutcomeRequest }) {
     {appealUntil && publication.available && <ReviewCommand {...common} action="appeal" label={t.appeal}>
       <p>{t.appealUntil} <time dateTime={appealUntil}>{new Date(appealUntil).toLocaleString(locale)}</time></p>
     </ReviewCommand>}
+    {status === "approved" && publication.id && <OutcomeImpactMapping id={publication.id} />}
     <PublicationHistory history={publication.history} />
   </section>;
 }

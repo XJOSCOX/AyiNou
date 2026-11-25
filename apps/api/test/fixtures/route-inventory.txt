@@ -26,6 +26,7 @@ GET /api/v1/admin/founder-blue-verification/:id - -
 GET /api/v1/admin/founder-identity - -
 GET /api/v1/admin/governance - -
 GET /api/v1/admin/homepage/community-statistics - -
+GET /api/v1/admin/impact - -
 GET /api/v1/admin/legal - -
 GET /api/v1/admin/legal/audit - -
 GET /api/v1/admin/member-experience - -
@@ -72,6 +73,7 @@ GET /api/v1/events/notification-preference - -
 GET /api/v1/feed - -
 GET /api/v1/feed/social - -
 GET /api/v1/homepage/community-statistics - -
+GET /api/v1/impact - -
 GET /api/v1/institutions/:id - -
 GET /api/v1/institutions/:id/activity - -
 GET /api/v1/institutions/:id/affiliations/manage - -
@@ -105,6 +107,8 @@ GET /api/v1/me/following - -
 GET /api/v1/me/founder-bootstrap - -
 GET /api/v1/me/founder-identity - -
 GET /api/v1/me/governance-invitations - -
+GET /api/v1/me/impact/mappings/:id - -
+GET /api/v1/me/impact/needs/:id - -
 GET /api/v1/me/institution-accounts - -
 GET /api/v1/me/member-code - -
 GET /api/v1/me/moderation-appeals - -
@@ -171,6 +175,9 @@ GET /api/v1/private/community-need-publications/:id - -
 GET /api/v1/private/community-needs-review - -
 GET /api/v1/private/community-needs-review/:id - -
 GET /api/v1/private/community-needs-review/triage-access - -
+GET /api/v1/private/impact-review - -
+GET /api/v1/private/impact-review/mappings - -
+GET /api/v1/private/impact-review/mappings/:id - -
 GET /api/v1/private/need-project-links - -
 GET /api/v1/private/need-project-links/options - -
 GET /api/v1/private/need-project-links/project/:id - -
@@ -226,6 +233,7 @@ HEAD /api/v1/admin/founder-blue-verification/:id - onSend
 HEAD /api/v1/admin/founder-identity - onSend
 HEAD /api/v1/admin/governance - onSend
 HEAD /api/v1/admin/homepage/community-statistics - onSend
+HEAD /api/v1/admin/impact - onSend
 HEAD /api/v1/admin/legal - onSend
 HEAD /api/v1/admin/legal/audit - onSend
 HEAD /api/v1/admin/member-experience - onSend
@@ -272,6 +280,7 @@ HEAD /api/v1/events/notification-preference - onSend
 HEAD /api/v1/feed - onSend
 HEAD /api/v1/feed/social - onSend
 HEAD /api/v1/homepage/community-statistics - onSend
+HEAD /api/v1/impact - onSend
 HEAD /api/v1/institutions/:id - onSend
 HEAD /api/v1/institutions/:id/activity - onSend
 HEAD /api/v1/institutions/:id/affiliations/manage - onSend
@@ -305,6 +314,8 @@ HEAD /api/v1/me/following - onSend
 HEAD /api/v1/me/founder-bootstrap - onSend
 HEAD /api/v1/me/founder-identity - onSend
 HEAD /api/v1/me/governance-invitations - onSend
+HEAD /api/v1/me/impact/mappings/:id - onSend
+HEAD /api/v1/me/impact/needs/:id - onSend
 HEAD /api/v1/me/institution-accounts - onSend
 HEAD /api/v1/me/member-code - onSend
 HEAD /api/v1/me/moderation-appeals - onSend
@@ -370,6 +381,9 @@ HEAD /api/v1/private/community-need-publications/:id - onSend
 HEAD /api/v1/private/community-needs-review - onSend
 HEAD /api/v1/private/community-needs-review/:id - onSend
 HEAD /api/v1/private/community-needs-review/triage-access - onSend
+HEAD /api/v1/private/impact-review - onSend
+HEAD /api/v1/private/impact-review/mappings - onSend
+HEAD /api/v1/private/impact-review/mappings/:id - onSend
 HEAD /api/v1/private/need-project-links - onSend
 HEAD /api/v1/private/need-project-links/options - onSend
 HEAD /api/v1/private/need-project-links/project/:id - onSend
@@ -418,6 +432,7 @@ PATCH /api/v1/admin/ambassadors/:id 6000 -
 PATCH /api/v1/admin/community-needs-pilot 4096 -
 PATCH /api/v1/admin/feature-policy/:key 4096 -
 PATCH /api/v1/admin/homepage/community-statistics 4096 -
+PATCH /api/v1/admin/impact 12288 -
 PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/moderation-policy 8192 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
@@ -442,6 +457,8 @@ PATCH /api/v1/me/community-needs/:id 32000 -
 PATCH /api/v1/me/community-needs/:id/publication 16384 -
 PATCH /api/v1/me/community-needs/:id/review 32000 -
 PATCH /api/v1/me/follow-requests/:id 512 -
+PATCH /api/v1/me/impact/mappings/:id 4096 -
+PATCH /api/v1/me/impact/needs/:id 4096 -
 PATCH /api/v1/me/notifications/:id 1024 -
 PATCH /api/v1/me/profile - -
 PATCH /api/v1/me/profile/details - -
@@ -452,6 +469,8 @@ PATCH /api/v1/polls/:id 10000 -
 PATCH /api/v1/posts/:id 16384 -
 PATCH /api/v1/private/community-need-publications/:id 8192 -
 PATCH /api/v1/private/community-needs-review/:id 8192 -
+PATCH /api/v1/private/impact-review 4096 -
+PATCH /api/v1/private/impact-review/mappings/:id 4096 -
 PATCH /api/v1/private/need-project-links/:id 8192 -
 PATCH /api/v1/private/project-outcome-publication/:id 4096 -
 PATCH /api/v1/private/project-outcome-review/:caseId 8192 -

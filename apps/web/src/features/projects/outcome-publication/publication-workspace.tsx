@@ -13,6 +13,8 @@ import { ProjectLoading, ProjectSection, ProjectsHeader } from "@/components/pro
 import { fetchDepartments } from "@/lib/api";
 import { apiErrorCode } from "@/lib/api-errors";
 import { useFeedMutation } from "@/lib/feed-state";
+import { impactReviewPath } from "@/lib/impact-api";
+import { impactCopy } from "@/lib/impact-i18n";
 import { outcomeReviewPath } from "@/lib/project-outcome-review-api";
 import { changePublicationRoster, changeStaffPublication, loadPublicationAvailability, loadPublicationQueue,
   loadPublicationRoster, loadStaffPublication, openPublicationWorkspace, outcomePublicationPath } from "@/lib/project-outcome-publication-api";
@@ -201,7 +203,7 @@ function ActivePublicationWorkspace({ workspace, lane, onClose }: {
 export function OutcomePublicationWorkspace({ requestedLane, challenge }: { requestedLane: OutcomeStaffLane;
   challenge?: { subject: string; sessionId: string; factorIds: string[] } }) {
   const { t } = useReviewCopy();
-  const { t: publication } = usePublicationCopy();
+  const { t: publication, locale } = usePublicationCopy();
   const router = useRouter();
   const availability = useInstitutionResource(loadPublicationAvailability);
   const [lane, setLane] = useState(requestedLane);
@@ -213,7 +215,9 @@ export function OutcomePublicationWorkspace({ requestedLane, challenge }: { requ
   const open = () => void mutation.run(async () => { setWorkspace(await openPublicationWorkspace(lane)); });
   const disabled = apiErrorCode(availability.error) === "PROJECT_OUTCOME_PUBLICATION_DISABLED";
   return <MemberShell><div className="grid min-w-0 gap-4">
-    <ProjectsHeader title={publication.title} description={publication.intro} backHref={outcomeReviewPath} />
+    <ProjectsHeader title={publication.title} description={publication.intro} backHref={outcomeReviewPath} actions={
+      <Link className={institutionAction} href={impactReviewPath}>{impactCopy(locale)("reviews")}</Link>
+    } />
     {disabled ? <ProjectSection title={publication.title}><p role="status">{publication.closed}</p></ProjectSection> :
       availability.error !== null ? <ApiErrorNotice error={availability.error} retry={availability.refresh} signIn /> :
       !availability.data ? <ProjectLoading cards={1} className="grid" /> :

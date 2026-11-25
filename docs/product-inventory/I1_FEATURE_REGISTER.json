@@ -7899,7 +7899,9 @@
           ]
         },
         "reports": [
-          "docs/project-outcomes/C2_3_IMPLEMENTATION_REPORT.md"
+          "docs/project-outcomes/C2_3_IMPLEMENTATION_REPORT.md",
+          "docs/project-outcomes/C2_3_PUBLICATION_POLICY.md",
+          "docs/project-outcomes/C2_3_SECURITY_TESTS.md"
         ]
       },
       "verification": {
@@ -7909,6 +7911,65 @@
         "connectedApplication": "The local application connected to hosted Supabase passed 34 read-only checks after rollout. The connected Founder browser showed a closed publication workspace before rollout.",
         "hostedApplication": "Outside this phase.",
         "operationalApproval": "Live validation, review and publication remain disabled."
+      }
+    },
+    {
+      "id": "projects.impact-reporting",
+      "domain": "Projects",
+      "name": "Community and national Impact reporting",
+      "status": "partial",
+      "currentAndLimits": "Fixed national and departmental scopes, reviewed catalog and mapping controls, aggregate consent, complementary suppression and separate report review. Real processing is disabled.",
+      "dependencies": "Native projects and communities, C1 associations, C2.1 sources, C2.2 findings, C2.3 publication, Founder governance and privacy readiness.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/impact/dashboard.tsx",
+          "apps/web/src/features/impact/founder-settings.tsx",
+          "apps/web/src/features/impact/reviewer-workspace.tsx",
+          "apps/web/src/features/impact/member-controls.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/impact.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/impact.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125124000_c24_impact_reporting.sql"
+        ],
+        "postgresObjects": [
+          "private.c24_settings",
+          "private.c24_mappings",
+          "private.c24_releases",
+          "private.c24_events",
+          "public.c24_impact_for_api",
+          "public.c24_manage_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/impact.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/impact.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/impact.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/project-outcomes/C2_4_IMPLEMENTATION_REPORT.md",
+          "docs/project-outcomes/C2_4_MEASUREMENT_CATALOG.md",
+          "docs/project-outcomes/C2_4_AGGREGATION_POLICY.md",
+          "docs/project-outcomes/C2_4_PRIVACY_ANALYSIS.md",
+          "docs/project-outcomes/C2_4_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See the implementation report for checks.",
+        "disposableSupabase": "Uses only synthetic projects, observations, consent and role appointments.",
+        "hostedDatabase": "Pending approval and verified deployment.",
+        "connectedApplication": "See the Impact implementation report.",
+        "hostedApplication": "Deployment scope is the database.",
+        "operationalApproval": "All live C2 workflows and Impact reporting are disabled."
       }
     }
   ],

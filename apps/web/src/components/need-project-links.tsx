@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { NeedImpactConsent } from "@/features/impact/member-controls";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { LinkNeedOption, LinkProjectPreview, NeedProjectLink, NeedProjectLinkLane, NeedProjectLinkPage } from "@ayinou/shared";
 import { authorizedRequest } from "@/lib/api";
@@ -136,6 +137,7 @@ function LinkRecord({ item,lane,workspace,refresh }: {
         {entry.reason&&<p dir="auto" className="break-words">{entry.reason}</p>}
       </li>)}</ul>
     </details>}
+    {lane==="member"&&item.asAuthor&&item.state==="approved"&&<NeedImpactConsent id={item.id} />}
     {!!options.length&&<details open={selected!==""} onToggle={(event)=>{if(!event.currentTarget.open)setCommand("");}}>
       <summary className="cursor-pointer font-semibold">{needReviewLabel(locale,"action")}</summary>
       <label>{needReviewLabel(locale,"action")}<select className={institutionField} value={selected} onChange={event=>setCommand(event.target.value)}>

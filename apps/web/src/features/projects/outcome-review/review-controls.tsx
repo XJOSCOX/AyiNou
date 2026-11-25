@@ -12,8 +12,8 @@ export function useReviewCopy() {
   return { locale, t: outcomeReviewMessages[locale] };
 }
 
-export function ReviewCommand({ action, label, confirmation, version, send, after, children, input }: {
-  action: string; label?: string; confirmation?: string; version: number;
+export function ReviewCommand({ action, label, confirmation, noteField = "note", minNote = 3, version, send, after, children, input }: {
+  action: string; label?: string; confirmation?: string; noteField?: "note" | "reason"; minNote?: number; version: number;
   send: (body: string) => Promise<unknown>; after: () => void;
   children?: ReactNode; input?: (form: FormData) => object;
 }) {
@@ -27,14 +27,14 @@ export function ReviewCommand({ action, label, confirmation, version, send, afte
       event.preventDefault();
       if (mutation.busy) return;
       const form = new FormData(event.currentTarget);
-      const command = { action, expectedVersion: version, confirmed: true, note: String(form.get("note") ?? "").trim(), ...input?.(form) };
+      const command = { action, expectedVersion: version, confirmed: true, [noteField]: String(form.get("note") ?? "").trim(), ...input?.(form) };
       const content = JSON.stringify(command);
       if (attempt.current?.content !== content) attempt.current = { content, requestId: crypto.randomUUID() };
       const requestId = attempt.current.requestId;
       void mutation.run(async () => { await send(JSON.stringify({ ...command, requestId })); attempt.current = null; after(); });
     }}>
       {children}
-      <label>{t.note}<textarea className={institutionField} name="note" required minLength={3} maxLength={1200} rows={3} />
+      <label>{t.note}<textarea className={institutionField} name="note" required minLength={minNote} maxLength={noteField === "reason" ? 500 : 1200} rows={3} />
         <span className="text-sm">{t.privacy}</span></label>
       <label className="flex items-start gap-2"><input type="checkbox" name="confirm" required />{confirmation ?? t.confirm}</label>
       {mutation.error !== null && <ApiErrorNotice error={mutation.error} signIn />}

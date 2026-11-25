@@ -3488,6 +3488,175 @@
           "rolloutAndRollback": "Verify and apply only the separately authorized checksum. Preserve source schemas and records, keep all C2 gates empty, and use audited suppression or an approved forward migration to repair behavior."
         }
       ]
+    },
+    {
+      "id": "c2-4-community-national-impact",
+      "report": "docs/project-outcomes/C2_4_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/impact",
+          "contract": "GET /api/v1/admin/impact - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only approved cells or scoped metadata do not mutate the audit ledger. Private routes require their current session and authority."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/impact",
+          "contract": "GET /api/v1/impact - -",
+          "access": "public",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only approved cells or scoped metadata do not mutate the audit ledger. Private routes require their current session and authority."
+          },
+          "publicReason": "A common audience receives only an independently sealed, currently eligible disclosure after statistical suppression."
+        },
+        {
+          "route": "GET /api/v1/me/impact/mappings/:id",
+          "contract": "GET /api/v1/me/impact/mappings/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only approved cells or scoped metadata do not mutate the audit ledger. Private routes require their current session and authority."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/impact/needs/:id",
+          "contract": "GET /api/v1/me/impact/needs/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only approved cells or scoped metadata do not mutate the audit ledger. Private routes require their current session and authority."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/impact-review",
+          "contract": "GET /api/v1/private/impact-review - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only approved cells or scoped metadata do not mutate the audit ledger. Private routes require their current session and authority."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/impact-review/mappings",
+          "contract": "GET /api/v1/private/impact-review/mappings - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only approved cells or scoped metadata do not mutate the audit ledger. Private routes require their current session and authority."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "GET /api/v1/private/impact-review/mappings/:id",
+          "contract": "GET /api/v1/private/impact-review/mappings/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only approved cells or scoped metadata do not mutate the audit ledger. Private routes require their current session and authority."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/impact",
+          "contract": "PATCH /api/v1/admin/impact 12288 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Actor-bound reasoned settings, mapping, consent, and disclosure decisions commit their immutable receipt with the mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/impact/mappings/:id",
+          "contract": "PATCH /api/v1/me/impact/mappings/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Actor-bound reasoned settings, mapping, consent, and disclosure decisions commit their immutable receipt with the mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/impact/needs/:id",
+          "contract": "PATCH /api/v1/me/impact/needs/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Actor-bound reasoned settings, mapping, consent, and disclosure decisions commit their immutable receipt with the mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/private/impact-review",
+          "contract": "PATCH /api/v1/private/impact-review 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Actor-bound reasoned settings, mapping, consent, and disclosure decisions commit their immutable receipt with the mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/private/impact-review/mappings/:id",
+          "contract": "PATCH /api/v1/private/impact-review/mappings/:id 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Actor-bound reasoned settings, mapping, consent, and disclosure decisions commit their immutable receipt with the mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/impact.spec.ts",
+            "denialScenario": "Closed fixtures, missing and cross-session workspaces, unrelated departments, authors and unappointed reviewers fail closed."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125124000_c24_impact_reporting.sql",
+          "rlsAndGrants": "Eight private RLS tables without direct app privileges. Two narrowly scoped service-only RPCs.",
+          "authorization": "Current organizer and need author ownership, departmental C2.3 grants, integrated Founder MFA and expiring independent governance grants.",
+          "compatibility": "Adds tables, scoped functions and invalidation triggers. The only initial records are implementation-reviewed conservative catalog drafts with no aggregation approval.",
+          "validation": "Use disposable Supabase and Chromium for protected decisions, live projection policy, native work regressions and representative query performance.",
+          "rolloutAndRollback": "Apply only the separately approved exact database checksum on the verified linked project. Verify preserved data and catalog fingerprints and keep all operation gates closed. Forward repairs preserve previous private decisions."
+        }
+      ]
     }
   ]
 }

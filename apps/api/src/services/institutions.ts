@@ -60,10 +60,13 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
         if (["C1101", "PGRST202"].includes(error.code)) throw new InstitutionError("COMMUNITY_NEEDS_DISABLED", 404);
         if (error.code === "C1102") throw new InstitutionError("COMMUNITY_MEMBERSHIP_REQUIRED", 403);
       }
+      if (["c24_manage_for_api", "c24_impact_for_api"].includes(name) && ["C2401", "PGRST202"].includes(error.code)) {
+        throw new InstitutionError("IMPACT_DISABLED", 404);
+      }
       if (name === "c23_publication_for_api" && ["C2301", "PGRST202"].includes(error.code)) {
         throw new InstitutionError("PROJECT_OUTCOME_PUBLICATION_DISABLED", 404);
       }
-      if (["c22_reviews_for_api", "c23_publication_for_api"].includes(name) && error.code === "PFR29") throw new InstitutionError("LIMIT_REACHED", 429);
+      if (["c22_reviews_for_api", "c23_publication_for_api", "c24_manage_for_api"].includes(name) && error.code === "PFR29") throw new InstitutionError("LIMIT_REACHED", 429);
       if (name === "c22_reviews_for_api" && ["C2201", "PGRST202"].includes(error.code)) {
         throw new InstitutionError("PROJECT_OUTCOME_REVIEW_DISABLED", 404);
       }
