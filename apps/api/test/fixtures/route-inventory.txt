@@ -41,6 +41,7 @@ GET /api/v1/admin/registration - -
 GET /api/v1/admin/role-assignments - -
 GET /api/v1/admin/safety - -
 GET /api/v1/admin/verification-policy - -
+GET /api/v1/admin/volunteer-settings - -
 GET /api/v1/administrator-activation/:id - -
 GET /api/v1/ambassadors - -
 GET /api/v1/comments/:id/reaction - -
@@ -146,6 +147,7 @@ GET /api/v1/me/social-privacy 2048 -
 GET /api/v1/me/verification - -
 GET /api/v1/me/verification-badge - -
 GET /api/v1/me/verification/appeals - -
+GET /api/v1/me/volunteer-profile - -
 GET /api/v1/members/:key/follow - -
 GET /api/v1/members/:key/followers - -
 GET /api/v1/members/:key/following - -
@@ -248,6 +250,7 @@ HEAD /api/v1/admin/registration - onSend
 HEAD /api/v1/admin/role-assignments - onSend
 HEAD /api/v1/admin/safety - onSend
 HEAD /api/v1/admin/verification-policy - onSend
+HEAD /api/v1/admin/volunteer-settings - onSend
 HEAD /api/v1/administrator-activation/:id - onSend
 HEAD /api/v1/ambassadors - onSend
 HEAD /api/v1/comments/:id/reaction - onSend
@@ -352,6 +355,7 @@ HEAD /api/v1/me/social-privacy 2048 onSend
 HEAD /api/v1/me/verification - onSend
 HEAD /api/v1/me/verification-badge - onSend
 HEAD /api/v1/me/verification/appeals - onSend
+HEAD /api/v1/me/volunteer-profile - onSend
 HEAD /api/v1/members/:key/follow - onSend
 HEAD /api/v1/members/:key/followers - onSend
 HEAD /api/v1/members/:key/following - onSend
@@ -438,6 +442,7 @@ PATCH /api/v1/admin/moderation-policy 8192 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/admin/verification-policy 4096 -
+PATCH /api/v1/admin/volunteer-settings 8192 -
 PATCH /api/v1/comments/:id 12288 -
 PATCH /api/v1/communities/:key/membership 1024 -
 PATCH /api/v1/communities/:key/moderation/:target/:id 4096 -
@@ -462,6 +467,7 @@ PATCH /api/v1/me/impact/needs/:id 4096 -
 PATCH /api/v1/me/notifications/:id 1024 -
 PATCH /api/v1/me/profile - -
 PATCH /api/v1/me/profile/details - -
+PATCH /api/v1/me/volunteer-profile 8192 -
 PATCH /api/v1/moderation/appeals/:id 4096 -
 PATCH /api/v1/moderation/comments/:id 4096 -
 PATCH /api/v1/moderation/posts/:id 4096 -

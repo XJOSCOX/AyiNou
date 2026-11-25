@@ -329,6 +329,7 @@ Feature development pauses here for owner review of the engineering results and 
 
 ## Phase 9 — Compliant contributions and opportunities
 
+- [ ] C3.1 private volunteer profile, versioned skills catalog, independent consent and Founder preparation. [Implementation report](docs/volunteering/C3_1_IMPLEMENTATION_REPORT.md)
 - [ ] Volunteer and mentorship matching; jobs/education opportunities with anti-fraud checks.
 - [ ] Financial contributions only after legal/compliance review and approved payment-partner integration.
 - [ ] Verified project recipients, budgets, disclosures and transparent expense/milestone reports.

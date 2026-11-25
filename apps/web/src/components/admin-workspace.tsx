@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { FounderVolunteer } from "@/features/volunteering/founder";
+import { volunteerCopy } from "@/lib/volunteer-i18n";
 import { outcomeReviewPath } from "@/lib/project-outcome-review-api";
 import { outcomeReviewMessages } from "@/lib/project-outcome-review-i18n";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
@@ -94,7 +96,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     partners: earlyPartnerMessages[locale].title,
     moderationOverview: moderation.overview, moderationReports: moderation.reports, moderationContent: moderation.content,
     moderationRestrictions: moderation.restrictions, moderationAppeals: moderation.appeals, moderationHistory: moderation.history,
-    communityNeeds: needReviewLabel(locale,"queue"), communityNeedsPilot: pilotLabel(locale,"title"), impactSettings: impactCopy(locale)("settings"),
+    communityNeeds: needReviewLabel(locale,"queue"), communityNeedsPilot: pilotLabel(locale,"title"), impactSettings: impactCopy(locale)("settings"), volunteerSettings: volunteerCopy(locale)("admin"),
     featureRestrictions: featureMessages[locale].features, moderatorDelegation: featureMessages[locale].delegations,
     moderationPolicies: moderationPolicyMessages[locale].title,
     ...verificationCopy[locale].sections,
@@ -239,6 +241,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                 </section>)}
               </div>}
               {tab === "communityNeedsPilot" && access.data?.founder && <CommunityNeedsPilot key={workspaceId} workspace={workspaceId} />}
+              {tab === "volunteerSettings" && access.data?.founder && <FounderVolunteer key={workspaceId} workspace={workspaceId} />}
               {tab === "impactSettings" && access.data?.founder && <FounderImpact key={workspaceId} workspace={workspaceId} />}
               {tab === "moderationPolicies" && access.data?.founder && <ModerationPolicySettings key={workspaceId} workspace={workspaceId} />}
               {tab === "registration" && access.data?.founder && <RegistrationSettings key={workspaceId} workspaceId={workspaceId} />}

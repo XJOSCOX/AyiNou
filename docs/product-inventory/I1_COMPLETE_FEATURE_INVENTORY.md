@@ -772,6 +772,8 @@ Feature-specific local execution unverified. Feature-specific run outcome unveri
 
 ### Volunteer skills and matching
 
+C3.1 adds the private self-reported profile and a protected Founder workspace under Platform Settings. The Founder can prepare catalog definitions and versions, supported categories and fields, and inspect the local readiness and authorization history. The workspace cannot read individual volunteer profiles or activate intake. [C3.1 implementation report](../volunteering/C3_1_IMPLEMENTATION_REPORT.md)
+
 **missing** · `mission-gaps.volunteer-matching`
 
 Project opportunity discovery and applications exist. A structured skills profile and cross-project matching were not identified.

@@ -173,6 +173,10 @@ Appointments, suspension, revocation, case assignment, release, recusal, clarifi
 
 The restricted publication ledger retains the exact disclosure fingerprint, revision, organizer consent, scoped grant and assignment, reviewer inspection, decision, challenge, withdrawal, and automatic invalidation. Receipts record the actor and originating workspace for protected commands. Public Project Progress exposes only the approved current disclosure. [Implementation report](../project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)
 
+## C3.1 skills and volunteer profiles
+
+Founder configuration and catalog decisions record actor, workspace, reason, version and a versioned snapshot in the same transaction. Owner consent keeps the current three separate choices and timestamp. Current private preferences and the latest write receipt commit together. There is no organizer or other member read event because there is no such projection. [C3.1 security checks](../volunteering/C3_1_SECURITY_TESTS.md)
+
 ## C2.4 community and national Impact reporting
 
 The Impact ledger records versioned settings, reviewer appointments, definition and mapping decisions, explicit consent, report approvals and permanent suppression. Protected commands bind to actors and current workspaces. The public report exposes the approved cell and no audit or evidence fields. [Implementation report](../project-outcomes/C2_4_IMPLEMENTATION_REPORT.md) · [C2 final security review](../project-outcomes/C2_FINAL_SECURITY_REVIEW.md) · [C2.6 administrative preparation](../project-outcomes/C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md)

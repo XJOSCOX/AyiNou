@@ -484,7 +484,23 @@
     "verificationPolicyFlags": "value:7afc97a0d0e93eb91add8c32b5ab80ce085efa5636804d860626709b42e8f7e5",
     "VerificationStatus": "type:8ed940092989a0d58bfe3ab2dc780dbe6dcb43f54ad416b090abcad67746580f",
     "VerificationWorkspace": "type:67d19b5717e7e6784a0d9e40ffe5b5c56e6c49635f52ef014da61ae35951eca2",
-    "VerifiedRepresentatives": "type:5c8fb9ec1f272a9e2e4cd7a86ab0ebf9709ce3ac185b3a853f5dff34c6150e4e"
+    "VerifiedRepresentatives": "type:5c8fb9ec1f272a9e2e4cd7a86ab0ebf9709ce3ac185b3a853f5dff34c6150e4e",
+    "VolunteerAdminView": "type:efa560ec6ea48acb9f74079570d4b42d0bb9a86909abe36087bbb4f7e56a99c2",
+    "volunteerCategories": "value:0517df9f4d2cfafe62ae03fc70f1eea2c81f9f7d09a1d47ff0bd1afc302d2320",
+    "VolunteerCategory": "type:003daa10036c64a32287e9e6631ae65f21d4bc42d96fe67adf5f1b01a76ae898",
+    "volunteerCommitments": "value:baf7a5045374af8ad88d71ba53f5dc888d59aa90e082eed8cd637be6fb6130c3",
+    "VolunteerConsent": "type:5fdfa66dea92cceb59102e0cfa49521b106e24233aa07176b7b0527cd3b14fe4",
+    "volunteerDepartments": "value:1dfff9f70e3c522ab6e39b514d0d4c53739955e867f9793c14b1f765f497c693",
+    "VolunteerField": "type:12f92e955d060ae1e7004313c18a54b4acd010f9ad8844f67c91a099bd4c2b42",
+    "volunteerFields": "value:e9a5cc1c53af58eb32a302626d3dd4d96b80020a3806d9854252a2d253bcf282",
+    "volunteerLanguages": "value:3a27bfb2ebb92c202ec59a3061100a301ae784c636025e8167f684879f40adb0",
+    "VolunteerLevel": "type:355fdc3dfdfab42de9c11976aac1c2b2fedec9a53681ce5d131412e8e8a48004",
+    "volunteerLevels": "value:1c6b2c82b9fb088f9e0b9441730b30497ca35c8fba79e64ce414a6782b10f121",
+    "volunteerModes": "value:5a0dc89ba7eb20cc1eb2fc05ae8a44782562bb6141d8f4cc81fedf3e225acaa2",
+    "VolunteerOwnerView": "type:a2e53403843401f1ac4d32e1ba35566ea2bae201377815deb198cddb5d528779",
+    "VolunteerProfile": "type:cf81341f2cdd05ac12965671d48dbb274c212089acce4152eec6e8da8bd65356",
+    "VolunteerSettings": "type:8f7b13242574a6240b1337f0067857fe00665f93389d981d6bd76858ff163d34",
+    "VolunteerSkill": "type:794faf04e8115ad63fea65424c8db1ceb0be73b4ac22f1a9461cb3bd87f8ba28"
   },
   "privateTypes": {
     "AffiliationInvitation": "860e596fca514ead3247be5fc03556d3c67d80f64e03ca927e20795b63bf1a4e",
@@ -1503,6 +1519,67 @@
       "recognitionEnabled",
       "recognitionAwards",
       "recognitionPublic"
+    ],
+    "volunteerCategories": [
+      "education",
+      "healthcare",
+      "engineering",
+      "agriculture",
+      "environment",
+      "technology",
+      "business",
+      "finance",
+      "administration",
+      "community",
+      "logistics",
+      "communications",
+      "arts",
+      "trades",
+      "languages"
+    ],
+    "volunteerCommitments": [
+      "occasional",
+      "one_three",
+      "four_eight",
+      "nine_plus"
+    ],
+    "volunteerDepartments": [
+      "HT-AR",
+      "HT-CE",
+      "HT-GA",
+      "HT-NI",
+      "HT-ND",
+      "HT-NE",
+      "HT-NO",
+      "HT-OU",
+      "HT-SD",
+      "HT-SE"
+    ],
+    "volunteerFields": [
+      "summary",
+      "experience",
+      "languages"
+    ],
+    "volunteerLanguages": [
+      "ht",
+      "fr",
+      "en",
+      "es",
+      "pt",
+      "de",
+      "ar",
+      "zh",
+      "asl"
+    ],
+    "volunteerLevels": [
+      "beginner",
+      "intermediate",
+      "advanced"
+    ],
+    "volunteerModes": [
+      "remote",
+      "on_site",
+      "hybrid"
     ]
   }
 }

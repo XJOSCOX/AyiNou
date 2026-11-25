@@ -3673,6 +3673,74 @@
           "rolloutAndRollback": "Apply only the approved checksum. Compare existing records, routine authorization and activation state. Use a forward repair if needed."
         }
       ]
+    },
+    {
+      "id": "volunteer-skills-and-profiles",
+      "report": "docs/volunteering/C3_1_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/volunteer-settings",
+          "contract": "GET /api/v1/admin/volunteer-settings - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only owner or Founder settings returned by purpose, without recording private profile content."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-profiles.spec.ts",
+            "denialScenario": "Ordinary members and stale or unbound admin workspaces cannot read or change volunteer settings."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/volunteer-settings",
+          "contract": "PATCH /api/v1/admin/volunteer-settings 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The protected configuration snapshots and private current preference or consent receipt commit with the corresponding mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-profiles.spec.ts",
+            "denialScenario": "Ordinary members and stale or unbound admin workspaces cannot read or change volunteer settings."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/volunteer-profile",
+          "contract": "GET /api/v1/me/volunteer-profile - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only owner or Founder settings returned by purpose, without recording private profile content."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-profiles.spec.ts",
+            "denialScenario": "Unsigned and cross-account reads are denied. The closed fixture blocks creation or resume, with valid owner privacy controls remaining available."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/volunteer-profile",
+          "contract": "PATCH /api/v1/me/volunteer-profile 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "The protected configuration snapshots and private current preference or consent receipt commit with the corresponding mutation."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-profiles.spec.ts",
+            "denialScenario": "Unsigned and cross-account reads are denied. The closed fixture blocks creation or resume, with valid owner privacy controls remaining available."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125130000_c31_volunteer_profiles.sql",
+          "rlsAndGrants": "Nine private RLS tables, no app-role direct privilege, one service-only command, and two function helpers with no app grants.",
+          "authorization": "Live actor-bound session, onboarding and standing for normal writes. Recognized Founder, recent MFA and original private admin workflow for administration. Separate private synthetic fixture.",
+          "compatibility": "Additive tables and one independent RPC. No existing data, triggers, account rules or release settings change. Only the baseline skills and reserved terms are seeded.",
+          "validation": "Disposable data tests cover concurrency, independent consents, denied reads and writes, role grants, catalog collisions, and closed and disposable states.",
+          "rolloutAndRollback": "Pin the exact independently approved migration, confirm no unrelated pending versions, compare existing preservation and authorization fingerprints. Close disposable intake and use a reviewed forward repair for any defect."
+        }
+      ]
     }
   ]
 }

@@ -26,6 +26,7 @@ export * from "./project-outcomes";
 export * from "./project-outcome-review";
 export * from "./project-outcome-publication";
 export * from "./impact";
+export * from "./volunteering";
 export * from "./voting";
 export * from "./notifications";
 export * from "./privacy";

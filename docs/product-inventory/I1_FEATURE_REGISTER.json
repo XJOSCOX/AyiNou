@@ -7974,7 +7974,61 @@
         "hostedApplication": "Deployment scope is the database.",
         "operationalApproval": "All live C2 workflows and Impact reporting are disabled."
       }
+    },
+    {
+      "id": "volunteer-skills-and-profiles",
+      "domain": "Projects",
+      "name": "Skills and volunteer profiles",
+      "status": "partial",
+      "currentAndLimits": "Private self-reported skills and consent, nationwide department preferences and Founder catalog preparation. Real intake, organizer discovery, profile skill disclosure and matching are closed.",
+      "dependencies": "Existing member accounts, privacy and blocking, healthy session, onboarding and Project Work. Safeguarding and privacy lifecycle operations must be approved before use.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/volunteering/member.tsx",
+          "apps/web/src/features/volunteering/founder.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/volunteering.ts"
+        ],
+        "contracts": [
+          "packages/shared/src/volunteering.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125130000_c31_volunteer_profiles.sql"
+        ],
+        "postgresObjects": [
+          "private.c31_profiles",
+          "private.c31_selections",
+          "private.c31_consents",
+          "public.c31_volunteer_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/volunteer-profiles.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/volunteer-profiles.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/volunteer-profiles.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/volunteering/C3_1_IMPLEMENTATION_REPORT.md",
+          "docs/volunteering/C3_1_SKILLS_CATALOG.md",
+          "docs/volunteering/C3_1_PRIVACY_POLICY.md",
+          "docs/volunteering/C3_1_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See the implementation report.",
+        "disposableSupabase": "Tested with isolated member and Founder fixtures.",
+        "hostedDatabase": "Pending exact checksum authorization and postflight.",
+        "connectedApplication": "See the implementation report.",
+        "hostedApplication": "Hosted deployment scope is the database only.",
+        "operationalApproval": "Participation and matching are disabled."
+      }
     }
   ],
-  "lastScopeUpdate": "C2.6 Founder Configuration and Activation Separation"
+  "lastScopeUpdate": "C3.1 Skills and Volunteer Profiles"
 }

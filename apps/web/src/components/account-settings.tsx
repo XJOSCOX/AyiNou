@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { volunteerCopy } from "@/lib/volunteer-i18n";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { accountMessages } from "@/lib/account-i18n";
@@ -77,6 +78,7 @@ export function AccountSettings({ subject }: { subject: string }) {
               { href: "/profile#public-profile", title: a.publicProfile, help: a.publicHelp },
               { href: "/profile#privacy", title: a.privacy, help: a.privacyHelp },
               { href: "/settings/privacy-requests", title: privacyMessages[locale].title, help: privacyMessages[locale].settings },
+              { href: "/settings/volunteering", title: volunteerCopy(locale)("title"), help: volunteerCopy(locale)("intro") },
               { href: "/settings/ambassadors", title: ambassadorMessages[locale].myProgram },
             ].map(({ href, title, help }) => (
               <Link key={href} href={href} className="flex min-h-11 min-w-0 items-start justify-between gap-3 px-4 py-3 hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:-outline-offset-2">
