@@ -107,6 +107,10 @@ export function DepartmentDirectory() {
   </div></MemberShell>;
 }
 
+const roomAction = "inline-flex min-h-10 items-center gap-2 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)]";
+
+const membershipTitle = { en: "Membership", ht: "Manm kominote", fr: "Adhésion", es: "Membresía" };
+
 export function DepartmentSpace({ slug }: { slug: string }) {
   const router = useRouter();
   const [locale] = useLocale();
@@ -123,55 +127,79 @@ export function DepartmentSpace({ slug }: { slug: string }) {
   const group = community && community.kind !== "department" ? community : null;
   const canManage = group?.role === "owner" || group?.role === "administrator";
   const canRead = community?.joined || group?.discussionPublic;
-  return <MemberShell><div className="grid gap-4">
-    <Link className={`${institutionLink} justify-self-start`} href="/communities">← {t.title}</Link>
+  function updateMembership(next: Community | null) {
+    if (!next) { router.replace("/communities"); return; }
+    setChanged(next);
+    if (!next.joined) { setTab("discussion"); setVisitedMembers(false); }
+  }
+
+  return <MemberShell><div className="grid min-w-0 gap-4">
+    {!community && <Link className={`${roomAction} justify-self-end`} href="/communities">← {t.title}</Link>}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
-    {!community && resource.error === null && <p role="status">{t.loading}</p>}
+    {!community && resource.error === null && <CommunityLoading single />}
     {community && <>
-      <header className={`${institutionCard} grid gap-3`}>
-        {!group && <p className="text-xs font-semibold text-[var(--theme-link)]">{t.official}</p>}
-        <h1 dir="auto" className="break-words text-3xl font-semibold tracking-tight sm:text-4xl">{community.name}</h1>
-        <CommunitySummary community={community} />
-        <MembershipControl community={community} update={(next) => {
-          if (!next) { router.replace("/communities"); return; }
-          setChanged(next);
-          if (!next.joined) { setTab("discussion"); setVisitedMembers(false); }
-        }} />
-        {community.joined && <label className="flex items-start gap-2 text-sm text-[var(--theme-body)]">
-          <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-[var(--theme-link)]" checked={community.directoryVisible}
-            disabled={privacy.busy} onChange={(event) => {
-              const visible = event.target.checked;
-              void privacy.run(async () => {
-                setChanged((await changeDepartmentPrivacy(slug, visible)).community);
-                setDirectoryRevision((value) => value + 1);
-              });
-            }} />{t.visibility}
-        </label>}
-        {privacy.error !== null && <ApiErrorNotice error={privacy.error} />}
-        {community.canModerate && <Link href={`/communities/${slug}/moderation`} className={institutionLink}>{t.moderation}</Link>}
-        {community.joined && <Link href={"/polls?scope=community&scopeId=" + community.id} className={institutionLink}>{pollMessages[locale].title}</Link>}
-        {community.joined && <Link href={"/communities/intake/needs/new?community=" + encodeURIComponent(slug)} className={institutionLink}>{needsMessages[locale].newNeed}</Link>}
-        {group && group.policy !== "private" && <Link href={`/community-directory/${slug}`} className={institutionLink}>{groups.copyLink}</Link>}
-      </header>
-      <details className={institutionCard}>
-        <summary className="cursor-pointer font-semibold text-[var(--theme-link)]">{t.rules}</summary>
-        {group ? <p dir="auto" className="mt-3 whitespace-pre-wrap break-words text-sm text-[var(--theme-body)]">{group.rules}</p>
-          : <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-[var(--theme-body)]">
-          {departmentCommunityContent(locale, community.name).rules.map((rule) => <li key={rule}>{rule}</li>)}
-        </ul>}
-      </details>
-      {!group && community.canManageRoles && <CommunityStaffForm slug={slug} />}
-      {canRead ? <>
-        {community.joined && <div className="flex flex-wrap gap-2" role="group" aria-label={t.title}>
+      <header className="min-w-0 overflow-hidden rounded-xl border border-[var(--theme-border)] bg-[var(--theme-surface)]">
+        <div className="flex flex-wrap items-start justify-between gap-4 p-4 sm:p-6">
+          <div className="grid w-full min-w-0 flex-1 basis-64 gap-2">
+            <h1 dir="auto" className="break-words text-3xl font-bold tracking-tight sm:text-4xl">{community.name}</h1>
+            {(!group || community.joined) && <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+              {!group && <span className="rounded-md bg-[var(--theme-control)] px-2.5 py-1 text-[var(--theme-body)]">{t.official}</span>}
+              {community.joined && <span className="rounded-md bg-[var(--theme-selected)] px-2.5 py-1 text-[var(--theme-link)]">{t.joined}</span>}
+            </div>}
+            <CommunitySummary community={community} />
+            {!community.joined && <MembershipControl community={community} update={updateMembership} />}
+          </div>
+          <Link className={roomAction + " ms-auto shrink-0"} href="/communities"><span aria-hidden="true">←</span> {t.title}</Link>
+        </div>
+
+        {community.joined && <div className="flex flex-wrap gap-1 border-t border-[var(--theme-border)] px-2 py-2 sm:px-4" role="group" aria-label={t.title}>
           {(["discussion", "members", ...(canManage ? ["manage"] as const : [])] as const).map((entry) => <button key={entry} type="button" aria-pressed={tab === entry}
-            className="min-h-10 rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm font-semibold text-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)]"
+            className="min-h-11 rounded-md px-3 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]"
             onClick={() => { setTab(entry); if (entry === "members") setVisitedMembers(true); }}>{entry === "manage" ? groups.manage : t[entry]}</button>)}
         </div>}
-        <div hidden={tab !== "discussion"}><DepartmentDiscussion key={String(community.joined)} slug={slug} joined={community.joined}
-          publicDiscussion={group?.discussionPublic ?? false} groupVersion={group?.version} /></div>
-        {visitedMembers && <div hidden={tab !== "members"}><DepartmentMembers slug={slug} revision={directoryRevision} /></div>}
-        {group && canManage && tab === "manage" && <GroupManagement group={group} onSaved={(updated) => { setChanged(updated); setDirectoryRevision((n) => n + 1); }} />}
-      </> : <p className={institutionCard}>{group ? groups.restrictedNotice : t.joinRead}</p>}
+      </header>
+
+      <div className="grid min-w-0 items-start gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,24rem)]">
+        <div className="min-w-0">
+          {canRead ? <>
+            <div hidden={tab !== "discussion"}><DepartmentDiscussion key={String(community.joined)} slug={slug} joined={community.joined}
+              publicDiscussion={group?.discussionPublic ?? false} groupVersion={group?.version} /></div>
+            {visitedMembers && <div hidden={tab !== "members"}><DepartmentMembers slug={slug} revision={directoryRevision} /></div>}
+            {group && canManage && tab === "manage" && <GroupManagement group={group} onSaved={(updated) => { setChanged(updated); setDirectoryRevision((n) => n + 1); }} />}
+          </> : <p className={institutionCard}>{group ? groups.restrictedNotice : t.joinRead}</p>}
+        </div>
+        <aside className="grid min-w-0 gap-3">
+          {(community.joined || community.canModerate || (group && group.policy !== "private")) && <nav aria-label={t.title} className={institutionCard + " grid gap-2"}>
+            {community.joined && <Link href={"/polls?scope=community&scopeId=" + community.id} className={roomAction}>{pollMessages[locale].title}</Link>}
+            {community.joined && <Link href="/communities/intake/needs" className={roomAction}>{needsMessages[locale].title}</Link>}
+            {community.canModerate && <Link href={`/communities/${slug}/moderation`} className={roomAction}>{t.moderation}</Link>}
+            {group && group.policy !== "private" && <Link href={`/community-directory/${slug}`} className={roomAction}>{groups.copyLink}</Link>}
+          </nav>}
+          <details className={institutionCard}>
+            <summary className="cursor-pointer font-semibold text-[var(--theme-link)]">{t.rules}</summary>
+            {group ? <p dir="auto" className="mt-3 whitespace-pre-wrap break-words text-sm text-[var(--theme-body)]">{group.rules}</p>
+              : <ul className="mt-3 list-disc space-y-1 ps-5 text-sm text-[var(--theme-body)]">
+                {departmentCommunityContent(locale, community.name).rules.map((rule) => <li key={rule}>{rule}</li>)}
+              </ul>}
+          </details>
+          {community.joined && <details className={institutionCard}>
+            <summary className="cursor-pointer font-semibold text-[var(--theme-link)]">{membershipTitle[locale]}</summary>
+            <label className="mt-3 flex items-start gap-2 text-sm text-[var(--theme-body)]">
+              <input type="checkbox" className="mt-0.5 size-4 shrink-0 accent-[var(--theme-link)]" checked={community.directoryVisible}
+                disabled={privacy.busy} onChange={(event) => {
+                  const visible = event.target.checked;
+                  void privacy.run(async () => {
+                    setChanged((await changeDepartmentPrivacy(slug, visible)).community);
+                    setDirectoryRevision((value) => value + 1);
+                  });
+                }} />{t.visibility}
+            </label>
+            {privacy.error !== null && <ApiErrorNotice error={privacy.error} />}
+            <MembershipControl community={community} update={updateMembership} />
+          </details>}
+          {!group && community.canManageRoles && <CommunityStaffForm slug={slug} />}
+        </aside>
+      </div>
     </>}
   </div></MemberShell>;
 }
