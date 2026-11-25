@@ -7245,8 +7245,8 @@
       "verification": {
         "local": "C1.5 integration test and readiness evidence cover the end-to-end workflow.",
         "disposableSupabase": "See C1.4 association consent, authorization, and invalidation exercises.",
-        "hostedDatabase": "C1.6 preparation is applied. All five pilot tables and four fixture gates are empty, zero migrations are pending, and 51 existing record fingerprints matched.",
-        "connectedApplication": "C1.6 verified Founder Pilot settings are disabled, Test02 is denied Pilot administration, and existing navigation works on the connected local application.",
+        "hostedDatabase": "C1.7 readiness projection applied. Hosted history is 137 applied, zero pending. All five pilot tables and four fixture gates stayed empty and 51 existing record fingerprints matched.",
+        "connectedApplication": "The connected local Founder dashboard showed Ouest-only disabled readiness, six missing attestations and no activation action. Test02 saw closed intake and could not enter Pilot administration. Local health, public reads and closed route probes passed.",
         "hostedApplication": "Hosted application release unverified.",
         "operationalApproval": "C1.7 operations cover all ten departments. Ouest remains the proposed first pilot. Launch is no-go pending independently verified staffing, privacy, recovery and hosted release."
       }
