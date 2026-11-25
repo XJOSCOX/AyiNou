@@ -9,13 +9,13 @@
     "gated": 11
   },
   "hostedDevelopment": {
-    "migrationCount": 131,
-    "pending": 1,
-    "lastMigration": "20261124155000",
-    "preservationChecksMatched": 37,
+    "migrationCount": 132,
+    "pending": 0,
+    "lastMigration": "20261124155100",
+    "preservationChecksMatched": 40,
     "applicationRelease": "unverified",
     "providerRecovery": "unverified",
-    "pendingMigration": "20261124155100"
+    "pendingMigration": null
   },
   "webPages": [
     {
@@ -7009,8 +7009,8 @@
       "verification": {
         "local": "See C1.2 report for the local regression results.",
         "disposableSupabase": "See restricted review workflow coverage in the C1.2 implementation report.",
-        "hostedDatabase": "C1.1 applied and verified. C1.2 pending separate approval.",
-        "connectedApplication": "C1.1 connected checks passed. C1.2 uses disposable validation.",
+        "hostedDatabase": "C1.1 and C1.2 applied and verified. Both hosted fixture gates are closed.",
+        "connectedApplication": "C1.1 and C1.2 passed connected local checks. Mutating authorization and lifecycle tests ran in disposable Supabase.",
         "hostedApplication": "Hosted application release unverified.",
         "operationalApproval": "Real intake and review remain disabled. Separate pilot approval required."
       }
