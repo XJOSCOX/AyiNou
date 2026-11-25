@@ -42,7 +42,7 @@ The linked report separates disposable end-to-end and SQL assertions from connec
 
 ## Documentation and operations
 
-Rollout evidence will be recorded in the test results after verification. The existing code has disposable gates only. A review and launch plan describes the separate production activation, reviewer, privacy and recovery work that a live pilot depends on. Hosting requires a verified target and approved deployment procedure. [Pilot readiness](C1_5_PILOT_READINESS.md) · [Reviewer operations](C1_5_REVIEWER_OPERATIONS.md) · [Privacy and retention](C1_5_PRIVACY_AND_RETENTION_GAPS.md) · [Owner decisions](C1_5_OWNER_DECISIONS.md)
+The hosted database received only the approved cursor repair. Postflight verified 135 applied migrations, zero pending, and all four gates closed. [Rollout evidence](C1_5_TEST_RESULTS.md#hosted-rollout-on-november-24-2026-americachicago) The existing code has disposable gates only. A review and launch plan describes the separate production activation, reviewer, privacy and recovery work that a live pilot depends on. Hosting requires a verified target and approved deployment procedure. [Pilot readiness](C1_5_PILOT_READINESS.md) · [Reviewer operations](C1_5_REVIEWER_OPERATIONS.md) · [Privacy and retention](C1_5_PRIVACY_AND_RETENTION_GAPS.md) · [Owner decisions](C1_5_OWNER_DECISIONS.md)
 
 ## Remaining blockers
 
