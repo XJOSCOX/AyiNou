@@ -7799,8 +7799,8 @@
       "verification": {
         "local": "Disposable validation and native Project Work tests cover the foundation.",
         "disposableSupabase": "Disposable suite verifies closed gates, role boundaries, preserved source, private history and command concurrency.",
-        "hostedDatabase": "Awaiting the exact migration rollout and postflight.",
-        "connectedApplication": "Awaiting connected authenticated Founder and member browser verification.",
+        "hostedDatabase": "The exact C2.1 migration applied. Postflight reported 139 applied, zero pending, 57 matching data fingerprints, three private RLS tables, service-only RPC execution and empty C2.1 tables.",
+        "connectedApplication": "All 31 localhost checks passed after migration. J0SC0X saw its private proposal and empty work roster. Test02 saw its own work and was denied Founder project access. The active Outcomes panel was tested with disposable data.",
         "hostedApplication": "Hosted web and API outside the C2.1 deployment.",
         "operationalApproval": "Live intake is disabled and requires separately approved privacy, authorization and reviewer policies."
       }

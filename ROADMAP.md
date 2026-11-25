@@ -284,7 +284,7 @@ Activation of temporary proof challenges and external evidence delivery remains 
 - [x] Phase 6F.6 improves scoped poll lookups, updates the affected build dependency, bounds remote API calls, and adds main-branch CI. [Performance and reliability validation](docs/audits/PHASE_6E_AUDIT.md#phase-6f6-results)
 - [x] Phase 6F.7 completes the integration, authorization, privacy and release-readiness review. [Final review](docs/audits/PHASE_6F_FINAL_REVIEW.md) · [Data lifecycle inventory](docs/audits/PRIVACY_DATA_INVENTORY.md)
 - [ ] Define independent outcomes validation, retention, fraud escalation, quorum standards, and operational voting governance.
-- [ ] C2.1 private outcome validation requests in Project Work. Bind private requests to existing project results and evidence versions. Keep live intake closed. [Implementation report](docs/project-outcomes/C2_1_IMPLEMENTATION_REPORT.md)
+- [x] C2.1 private outcome validation requests in Project Work. Source revision and evidence binding were verified and the hosted database migration is applied. Live intake remains closed. [Implementation report](docs/project-outcomes/C2_1_IMPLEMENTATION_REPORT.md)
 - [ ] Non-monetary contributions first (time, skills, supplies); no platform-held funds yet.
 
 **Gate:** An initiative can be proposed, reviewed, organized, updated, completed and archived with transparent responsibility.
