@@ -79,6 +79,8 @@ const labels = {
   dismissDays: ["Dismissal duration in days","Dire retrè an jou","Durée du masquage en jours","Duración del descarte en días"],
   readinessNotes: ["Readiness notes","Nòt preparasyon","Notes de préparation","Notas de preparación"],
   activation: ["Activation will be handled separately.","Aktivasyon ap fèt apa.","L’activation sera traitée séparément.","La activación se gestionará por separado."],
+  openPreparation: ["View discovery settings","Gade paramèt dekouvèt","Voir les paramètres de découverte","Ver ajustes de búsqueda"],
+  hidePreparation: ["Hide discovery settings","Kache paramèt dekouvèt","Masquer les paramètres de découverte","Ocultar ajustes de búsqueda"],
   edit: ["Edit preparation","Modifye preparasyon","Modifier la préparation","Editar preparación"],
   different: ["Compensation varies by listing type.","Peman varye selon kalite anons.","Les conditions financières varient selon le type d’annonce.","La compensación varía según el tipo de anuncio."],
   link: ["All opportunities","Tout opòtinite","Toutes les opportunités","Todas las oportunidades"],

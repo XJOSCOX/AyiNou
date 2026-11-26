@@ -41,7 +41,19 @@ test("C4.5 Founder preparation is available while member intake remains closed",
     await solveMfa(page, secret);
     await page.goto("/admin?section=opportunitySettings");
     await page.getByRole("button", { name: "Open administration", exact: true }).click();
-    await expect(page.getByRole("heading", { name: discoveryOpportunityCopy("en")("settings") })).toBeVisible();
+    const founderCopy = discoveryOpportunityCopy("en");
+    await expect(page.getByRole("heading", { name: founderCopy("settings") })).toBeVisible();
+    await page.getByRole("button", { name: founderCopy("openPreparation"), exact: true }).click();
+    await page.getByText(founderCopy("edit"), { exact: true }).click();
+    const preparation = page.locator("#opportunity-discovery-preparation");
+    await expect(preparation.getByLabel(founderCopy("pageLimit"))).toHaveValue("16");
+    await preparation.getByLabel(founderCopy("pageLimit")).fill("15");
+    await preparation.locator("textarea[name=note]").fill("Disposable discovery preparation remains closed.");
+    await preparation.locator("input[name=confirm]").check();
+    await preparation.locator("button[type=submit], form button").click();
+    await expect(preparation.getByText("Revision 1", { exact: true })).toBeVisible();
+    expect(sql("select count(*) from private.c45_fixture;")).toBe("0");
+    sql("delete from private.c45_settings;");
     await page.goto("/opportunities");
     for (const locale of ["en", "ht", "fr", "es"] as const) {
       const t = discoveryOpportunityCopy(locale);

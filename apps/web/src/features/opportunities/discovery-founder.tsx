@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { opportunityDiscoveryCriteria, opportunityDiscoveryDimensions, opportunityPreferenceFields,
   professionalOpportunityTypes, professionalOpportunityScopes, type OpportunityDiscoverySettings } from "@ayinou/shared";
 import { ApiErrorNotice } from "@/components/api-error-notice";
@@ -13,7 +13,7 @@ import { discoveryOpportunityCopy } from "@/lib/opportunity-discovery-i18n";
 import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
-import { OpportunityState, opportunitySettingsCard, opportunitySettingsGroup, opportunityTag } from "./presentation";
+import { OpportunityState, opportunitySecondary, opportunitySettingsCard, opportunitySettingsGroup, opportunityTag } from "./presentation";
 
 const path = "/api/v1/admin/opportunity-settings/discovery";
 const groups = {
@@ -26,8 +26,10 @@ const limitKeys = Object.keys(limits) as (keyof typeof limits)[];
 export function DiscoveryFounder({ workspace }: { workspace: string }) {
   const [locale] = useLocale();
   const t = discoveryOpportunityCopy(locale), o = opportunityCopy(locale), p = publicationCopy(locale), m = mentorshipCopy(locale);
-  const load = useCallback((signal: AbortSignal): Promise<OpportunityDiscoverySettings> =>
-    authorizedSocialRequest(path, { signal, cache: "no-store", headers: { "X-Ayinou-Workspace": workspace } }), [workspace]);
+  const [open, setOpen] = useState(false);
+  const load = useCallback((signal: AbortSignal): Promise<OpportunityDiscoverySettings | null> => open
+    ? authorizedSocialRequest(path, { signal, cache: "no-store", headers: { "X-Ayinou-Workspace": workspace } })
+    : Promise.resolve(null), [open, workspace]);
   const resource = useInstitutionResource(load);
   const data = resource.data;
   const title = { types: o("type"), scopes: t("scopes"), dimensions: t("dimensions"), criteria: t("criteria"), fields: t("fields") };
@@ -53,12 +55,15 @@ export function DiscoveryFounder({ workspace }: { workspace: string }) {
   return <section className={opportunitySettingsCard}>
     <header className="flex flex-wrap items-start justify-between gap-2">
       <h2 className="text-lg font-semibold">{t("settings")}</h2>
-      {data && <span className={opportunityTag}>{o("version")} {data.version}</span>}
+      <button className={opportunitySecondary} type="button" aria-expanded={open} aria-controls="opportunity-discovery-preparation"
+        onClick={() => setOpen(!open)}>{t(open ? "hidePreparation" : "openPreparation")}</button>
     </header>
-    {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
-    {!data && resource.error === null && <OpportunityState>{p("loading")}</OpportunityState>}
-    {data && <>
-      <OpportunityState>{t("closed")} {t("activation")}</OpportunityState>
+    <OpportunityState>{t("closed")} {t("activation")}</OpportunityState>
+    <div id="opportunity-discovery-preparation" hidden={!open} className={open ? "grid gap-3" : undefined}>
+    {open && resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
+    {open && !data && resource.error === null && <OpportunityState>{p("loading")}</OpportunityState>}
+    {open && data && <>
+      <span className={opportunityTag}>{o("version")} {data.version}</span>
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
         {limitKeys.map(key => <div key={key} className={opportunityTag}>{t(key)} · {data.configuration[key]}</div>)}
       </div>
@@ -97,5 +102,6 @@ export function DiscoveryFounder({ workspace }: { workspace: string }) {
           <p>{item.reason}</p></li>)}
       </ol></SettingsHistory>}
     </>}
+    </div>
   </section>;
 }
