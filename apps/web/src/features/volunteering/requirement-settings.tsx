@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { requirementFields, volunteerCategories, volunteerModes } from "@ayinou/shared";
+import { SettingsHistory, SettingsOptions } from "@/components/settings-disclosures";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { institutionField, useInstitutionResource } from "@/components/institution-ui";
 import { ProjectLoading } from "@/components/project-ui";
@@ -9,6 +10,7 @@ import { useLocale } from "@/lib/locale-store";
 import { changeRequirementSettings, loadRequirementSettings } from "@/lib/requirement-api";
 import { requirementCopy } from "@/lib/requirement-i18n";
 import { volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
+import { VolunteerSettingsHeading, VolunteerSettingsSummary, volunteerNumberGrid, volunteerOptionLabel } from "./settings-summary";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
 
 export function FounderRequirementSettings({ workspace }: { workspace: string }) {
@@ -17,19 +19,26 @@ export function FounderRequirementSettings({ workspace }: { workspace: string })
   const loader = useCallback((signal: AbortSignal) => loadRequirementSettings(workspace,signal),[workspace]);
   const resource = useInstitutionResource(loader);
   const [saved, markSaved] = useState(false);
+  const data = resource.data;
   return <section className="grid min-w-0 gap-3">
-    <h3 className="text-xl font-semibold">{t("admin")}</h3>
-    {!resource.data && resource.error === null && <ProjectLoading />}
+    <VolunteerSettingsHeading title={t("admin")}>
+      {data && v("version") + " " + data.settings.version}
+    </VolunteerSettingsHeading>
+    {!data && resource.error === null && <ProjectLoading />}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
-    {resource.data && <>
-      <p role="status">{t("ready")} · {v("version")} {resource.data.settings.version}</p>
-      <p>{t("catalogAvailable")} · {resource.data.availableSkills}</p>
-      <SettingsEditor key={resource.data.settings.version} workspace={workspace} settings={resource.data.settings}
+    {data && <>
+      <VolunteerSettingsSummary values={[
+        [t("skillLimit"), data.settings.maxSkills],
+        [t("languageLimit"), data.settings.maxLanguages],
+        [t("catalogAvailable"), data.availableSkills],
+      ]} />
+      <SettingsEditor key={data.settings.version} workspace={workspace} settings={data.settings}
         after={() => { markSaved(true); resource.refresh(); }} />
       {saved && <p role="status">{v("saved")}</p>}
-      <h4 className="font-semibold">{t("history")}</h4>
-      {resource.data.history.length ? <ul className="grid gap-2">{resource.data.history.map((event) =>
-        <li key={event.version} className="break-words">v{event.version} · {event.reason}</li>)}</ul> : <p>{v("emptyHistory")}</p>}
+      {data.history.length > 0 && <SettingsHistory title={v("recentChanges")}>
+        <ul className="grid gap-2">{data.history.map((event) =>
+          <li key={event.version} className="break-words">v{event.version} · {event.reason}</li>)}</ul>
+      </SettingsHistory>}
     </>}
   </section>;
 }
@@ -39,29 +48,27 @@ function SettingsEditor({ workspace, settings, after }: {
 }) {
   const [locale] = useLocale();
   const t = requirementCopy(locale), v = volunteerCopy(locale);
-  return <ReviewCommand action="configure" label={t("configure")} noteField="reason" minNote={10} disclosureGroup="volunteer-configuration" version={settings.version}
+  return <ReviewCommand action="configure" label={t("configure")} triggerLabel={v("editSettings")} noteField="reason" minNote={10} disclosureGroup="volunteer-configuration" version={settings.version}
     send={(body) => changeRequirementSettings(workspace,body)} after={after}
     input={(form) => ({ categories:form.getAll("categories"),fields:form.getAll("fields"),modes:form.getAll("modes"),
       maxSkills:Number(form.get("maxSkills")),maxLanguages:Number(form.get("maxLanguages")) })}>
-    <fieldset className="grid gap-2"><legend className="font-medium">{v("category")}</legend>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {volunteerCategories.map((category) => <label key={category} className="flex items-start gap-2">
-          <input type="checkbox" name="categories" value={category} defaultChecked={settings.categories.includes(category)} />{volunteerCategory(category,locale)}
-        </label>)}
-      </div>
-    </fieldset>
-    <fieldset className="grid gap-2"><legend className="font-medium">{v("fields")}</legend>
-      {requirementFields.map((field) => <label key={field} className="flex items-start gap-2">
+    <SettingsOptions title={v("category")}>
+      {volunteerCategories.map((category) => <label key={category} className={volunteerOptionLabel}>
+        <input type="checkbox" name="categories" value={category} defaultChecked={settings.categories.includes(category)} />{volunteerCategory(category,locale)}
+      </label>)}
+    </SettingsOptions>
+    <SettingsOptions title={v("fields")}>
+      {requirementFields.map((field) => <label key={field} className={volunteerOptionLabel}>
         <input type="checkbox" name="fields" value={field} defaultChecked={settings.fields.includes(field)} />
         {field === "screening" ? t("screening") : v(field)}
       </label>)}
-    </fieldset>
-    <fieldset className="grid gap-2"><legend className="font-medium">{v("mode")}</legend>
-      {volunteerModes.map((mode) => <label key={mode} className="flex items-start gap-2">
+    </SettingsOptions>
+    <SettingsOptions title={v("mode")}>
+      {volunteerModes.map((mode) => <label key={mode} className={volunteerOptionLabel}>
         <input type="checkbox" name="modes" value={mode} defaultChecked={settings.modes.includes(mode)} />{v(mode)}
       </label>)}
-    </fieldset>
-    <div className="grid gap-2 sm:grid-cols-2">
+    </SettingsOptions>
+    <div className={volunteerNumberGrid}>
       <label>{t("skillLimit")}<input type="number" className={institutionField} name="maxSkills" min={1} max={12} defaultValue={settings.maxSkills} required /></label>
       <label>{t("languageLimit")}<input type="number" className={institutionField} name="maxLanguages" min={0} max={6} defaultValue={settings.maxLanguages} required /></label>
     </div>

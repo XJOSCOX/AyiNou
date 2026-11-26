@@ -152,6 +152,13 @@ test("Founder can prepare catalog and configuration with intake closed", async (
     await expect(page.getByText("Configuration available · Version 1",{ exact: true })).toBeVisible();
     await expect(page.getByRole("combobox",{ name: "Skills catalog" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Volunteer activation controls" })).toHaveCount(0);
+    const profileEditor = page.locator('details[name="volunteer-configuration"]').filter({ hasText: "Edit profile options" });
+    await profileEditor.locator("summary").first().click();
+    const categories = profileEditor.locator("details").filter({ has: page.locator('input[name="categories"]') });
+    await expect(categories).not.toHaveAttribute("open", "");
+    expect(await profileEditor.locator("form").evaluate(form => new FormData(form as HTMLFormElement).getAll("categories"))).toEqual(["education"]);
+    await categories.locator("summary").click();
+    await expect(categories.locator('input[value="education"]')).toBeChecked();
     await page.reload();
     await expect(page.getByRole("button", { name: "Profiles and skills", exact: true })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("combobox",{ name: "Skills catalog" })).toBeVisible();

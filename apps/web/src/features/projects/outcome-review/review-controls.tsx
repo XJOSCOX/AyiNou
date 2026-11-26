@@ -12,8 +12,8 @@ export function useReviewCopy() {
   return { locale, t: outcomeReviewMessages[locale] };
 }
 
-export function ReviewCommand({ action, label, confirmation, noteField = "note", minNote = 3, version, send, after, children, input, disclosureGroup }: {
-  action: string; label?: string; confirmation?: string; noteField?: "note" | "reason"; minNote?: number; version: number;
+export function ReviewCommand({ action, label, triggerLabel, confirmation, noteField = "note", minNote = 3, version, send, after, children, input, disclosureGroup }: {
+  action: string; label?: string; triggerLabel?: string; confirmation?: string; noteField?: "note" | "reason"; minNote?: number; version: number;
   send: (body: string) => Promise<unknown>; after: () => void;
   children?: ReactNode; input?: (form: FormData) => object; disclosureGroup?: string;
 }) {
@@ -27,7 +27,7 @@ export function ReviewCommand({ action, label, confirmation, noteField = "note",
     <summary className={disclosureGroup
       ? "flex min-h-10 cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:-outline-offset-2 [&::-webkit-details-marker]:hidden"
       : "cursor-pointer font-medium"}>
-      <span>{commandLabel}</span>
+      <span>{triggerLabel ?? commandLabel}</span>
       {disclosureGroup && <span aria-hidden="true" className="size-2 shrink-0 rotate-45 border-e border-b group-open/compact:rotate-[225deg]" />}
     </summary>
     <form className={disclosureGroup ? "grid min-w-0 gap-3 border-t border-[var(--theme-border)] p-3 text-sm" : "grid min-w-0 gap-3 pt-3"} onSubmit={(event) => {

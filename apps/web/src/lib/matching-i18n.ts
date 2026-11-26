@@ -2,6 +2,8 @@ import type { Locale } from "@ayinou/shared";
 
 const messages = {
   title: ["Recommended opportunities","Opòtinite yo rekòmande","Opportunités recommandées","Oportunidades recomendadas"],
+  scoringWeights: ["Scoring weights","Pwa pou nòt yo","Pondération des critères","Ponderación de criterios"],
+  resultLimits: ["Result limits","Limit rezilta","Limites de résultats","Límites de resultados"],
   admin: ["Volunteer matching settings","Paramèt asosiyasyon volontè","Paramètres de mise en relation des bénévoles","Configuración de emparejamiento de voluntariado"],
   closed: ["Volunteer matching and organizer discovery are currently closed.","Asosiyasyon volontè ak rechèch òganizatè yo fèmen kounye a.","La mise en relation et la recherche par les organisateurs sont actuellement fermées.","El emparejamiento y la búsqueda por organizadores están cerrados."],
   ready: ["Matching configuration ready","Paramèt asosiyasyon yo pare","Configuration de mise en relation prête","Configuración de emparejamiento lista"],

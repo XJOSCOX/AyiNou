@@ -38,6 +38,8 @@ const messages = {
   settings: ["Recruitment settings","Paramèt rekritman","Paramètres de recrutement","Configuración de voluntariado"],
   ready: ["Recruitment configuration ready","Paramèt rekritman pare","Configuration de recrutement prête","Configuración de voluntariado lista"],
   prepare: ["Save recruitment configuration","Anrejistre paramèt rekritman","Enregistrer les paramètres de recrutement","Guardar configuración de voluntariado"],
+  invitationTiming: ["Invitation timing","Delè envitasyon","Délais des invitations","Plazos de invitación"],
+  dailyLimits: ["Daily limits","Limit pa jou","Limites quotidiennes","Límites diarios"],
   expiryDays: ["Invitation validity in days","Dire envitasyon an an jou","Validité de l’invitation en jours","Validez de la invitación en días"],
   organizerDailyLimit: ["Invitations per organizer in 24 hours","Envitasyon pa òganizatè nan 24 èdtan","Invitations par organisateur en 24 h","Invitaciones por organizador en 24 horas"],
   opportunityDailyLimit: ["Invitations per opportunity in 24 hours","Envitasyon pa opòtinite nan 24 èdtan","Invitations par mission en 24 h","Invitaciones por oportunidad en 24 horas"],
