@@ -8201,7 +8201,7 @@
       "id": "volunteer-activation",
       "domain": "Projects",
       "name": "Founder-controlled volunteer activation and emergency pause",
-      "status": "partial",
+      "status": "implemented",
       "currentAndLimits": "Five independent stages and separately gated operational readiness. Public skills disclosure is deferred.",
       "dependencies": "C3.1–C3.4, native project eligibility, current Founder session and MFA, and separately approved operational readiness.",
       "evidence": {
@@ -8240,8 +8240,8 @@
       "verification": {
         "local": "See the final C3 implementation audit.",
         "disposableSupabase": "Enabled controls and workloads are exercised only with isolated disposable records.",
-        "hostedDatabase": "Pending exact approval and verification.",
-        "connectedApplication": "See the final C3 implementation audit.",
+        "hostedDatabase": "C3.5 applied and verified with 149 migrations, zero pending, 115 preserved data fingerprints, and all gates closed.",
+        "connectedApplication": "59 read-only localhost probes passed after deployment. Test02 was denied Founder controls. J0SC0X saw five disabled controls and incomplete readiness.",
         "hostedApplication": "Next.js and Fastify local.",
         "operationalApproval": "Public launch NO-GO; C3 stages stay closed."
       }
