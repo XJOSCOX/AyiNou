@@ -26,7 +26,7 @@ export function FounderOpportunitySettings({ workspace }: { workspace: string })
   const data = resource.data;
   const groupLabels = {types:t("type"),organizationKinds:t("kinds"),scopes:t("scopes"),modes:t("mode")};
   return <section className="grid min-w-0 gap-3 [overflow-wrap:anywhere]">
-    <header className="grid min-w-0 gap-2">
+    <header className={opportunitySettingsCard}>
       <h2 className="text-xl font-semibold">{t("settings")}</h2>
       <p className="text-sm leading-relaxed text-[var(--theme-body)]">{t("verificationHelp")}</p>
       <OpportunityState>{t("live")}</OpportunityState>

@@ -48,7 +48,18 @@ test("F2.3 scopes announcements, pin capacity and organization post history", as
 
   await inEnglish(page.context());
   await page.goto("/organization/" + handle);
+  const profileNav = page.getByRole("navigation", { name: "Organization profile sections" });
+  await expect(profileNav.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("heading", { name: "About this organization" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Organization posts" })).toHaveCount(0);
+  await profileNav.getByRole("link", { name: "Posts", exact: true }).click();
   await expect(page.getByRole("region", { name: "Organization posts" }).getByText(command.body)).toBeVisible();
+  await page.reload();
+  await expect(profileNav.getByRole("link", { name: "Posts", exact: true })).toHaveAttribute("aria-current", "page");
+  await profileNav.getByRole("link", { name: "Opportunities" }).click();
+  await expect(page.getByRole("heading", { name: "Published opportunities" })).toBeVisible();
+  await profileNav.getByRole("link", { name: "Membership" }).click();
+  await expect(page.getByRole("heading", { name: "Membership", exact: true })).toBeVisible();
   await expect(page.locator("aside nav")).toBeVisible();
   await expect(page.getByRole("banner")).toBeVisible();
   await expect(page.getByRole("contentinfo")).toBeVisible();

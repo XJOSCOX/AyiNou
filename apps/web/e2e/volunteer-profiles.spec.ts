@@ -148,7 +148,12 @@ test("Founder can prepare catalog and configuration with intake closed", async (
     await solveMfa(page,key);
     await page.goto("/admin?section=volunteerSettings");
     await page.getByRole("button",{ name: "Open administration",exact: true }).click();
+    await page.getByRole("button", { name: "Profiles and skills", exact: true }).click();
     await expect(page.getByText("Configuration available · Version 1",{ exact: true })).toBeVisible();
+    await expect(page.getByRole("combobox",{ name: "Skills catalog" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Volunteer activation controls" })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Profiles and skills", exact: true })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("combobox",{ name: "Skills catalog" })).toBeVisible();
     await page.getByRole("button",{ name: "Switch to dark theme",exact: true }).click();
     await expect(page.getByRole("button",{ name: "Switch to light theme",exact: true })).toBeVisible();

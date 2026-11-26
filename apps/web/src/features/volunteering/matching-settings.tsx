@@ -17,23 +17,23 @@ const numberFields = [
   { key:"recommendationLimit",min:1,max:16 },{ key:"discoveryLimit",min:1,max:8 },
 ] as const;
 
-export function FounderMatchingSettings({ workspace, onSaved }: { workspace: string; onSaved: () => void }) {
+export function FounderMatchingSettings({ workspace }: { workspace: string }) {
   const [locale] = useLocale();
   const t = matchingCopy(locale), v = volunteerCopy(locale);
   const loader = useCallback((signal:AbortSignal) => loadMatchingSettings(workspace,signal),[workspace]);
   const resource = useInstitutionResource(loader);
   const [saved,setSaved] = useState(false);
   const data = resource.data;
-  return <section className="grid min-w-0 gap-3 border-t border-[var(--theme-border)] pt-4">
+  return <section className="grid min-w-0 gap-3">
     <h3 className="text-xl font-semibold">{t("admin")}</h3>
     {!data && resource.error===null && <ProjectLoading />}
     {resource.error!==null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {data && <>
       <p role="status">{t("ready")} · {v("version")} {data.settings.version}</p>
-      <ReviewCommand key={data.settings.version} action="configure" label={t("save")} noteField="reason" minNote={10}
+      <ReviewCommand key={data.settings.version} action="configure" label={t("save")} noteField="reason" minNote={10} disclosureGroup="volunteer-configuration"
         version={data.settings.version}
         send={(body) => changeMatchingSettings(workspace,body)}
-        after={() => { setSaved(true); resource.refresh(); onSaved(); }}
+        after={() => { setSaved(true); resource.refresh(); }}
         input={(form) => ({
           criteria:form.getAll("criteria"),departments:form.getAll("departments"),modes:form.getAll("modes"),
           ...Object.fromEntries(numberFields.map(({ key }) => [key,Number(form.get(key))])),

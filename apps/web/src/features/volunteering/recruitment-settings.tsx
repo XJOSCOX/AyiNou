@@ -19,22 +19,22 @@ const numbers = [
   { key: "cooldownDays", min: 7, max: 30 },
 ] as const;
 
-export function FounderRecruitmentSettings({ workspace, onSaved }: { workspace: string; onSaved: () => void }) {
+export function FounderRecruitmentSettings({ workspace }: { workspace: string }) {
   const [locale] = useLocale();
   const t = recruitmentCopy(locale), v = volunteerCopy(locale);
   const load = useCallback((signal: AbortSignal) => loadRecruitmentSettings(workspace, signal), [workspace]);
   const resource = useInstitutionResource(load);
   const [saved, setSaved] = useState(false);
   const data = resource.data;
-  return <section className="grid min-w-0 gap-3 border-t border-[var(--theme-border)] pt-4">
+  return <section className="grid min-w-0 gap-3">
     <h3 className="text-xl font-semibold">{t("settings")}</h3>
     {!data && resource.error === null && <ProjectLoading />}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {data && <>
       <p role="status">{t("ready")} · {v("version")} {data.settings.version}</p>
-      <ReviewCommand key={data.settings.version} action="configure" label={t("prepare")} noteField="reason" minNote={10}
+      <ReviewCommand key={data.settings.version} action="configure" label={t("prepare")} noteField="reason" minNote={10} disclosureGroup="volunteer-configuration"
         version={data.settings.version} send={(body) => changeRecruitmentSettings(workspace, body)}
-        after={() => { setSaved(true); resource.refresh(); onSaved(); }}
+        after={() => { setSaved(true); resource.refresh(); }}
         input={(form) => ({
           departments: form.getAll("departments"), modes: form.getAll("modes"),
           ...Object.fromEntries(numbers.map(({ key }) => [key, Number(form.get(key))])),

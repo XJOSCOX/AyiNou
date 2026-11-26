@@ -11,13 +11,13 @@ import { requirementCopy } from "@/lib/requirement-i18n";
 import { volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
 
-export function FounderRequirementSettings({ workspace, onSaved }: { workspace: string; onSaved: () => void }) {
+export function FounderRequirementSettings({ workspace }: { workspace: string }) {
   const [locale] = useLocale();
   const t = requirementCopy(locale), v = volunteerCopy(locale);
   const loader = useCallback((signal: AbortSignal) => loadRequirementSettings(workspace,signal),[workspace]);
   const resource = useInstitutionResource(loader);
   const [saved, markSaved] = useState(false);
-  return <section className="grid min-w-0 gap-3 border-t border-[var(--theme-border)] pt-4">
+  return <section className="grid min-w-0 gap-3">
     <h3 className="text-xl font-semibold">{t("admin")}</h3>
     {!resource.data && resource.error === null && <ProjectLoading />}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
@@ -25,7 +25,7 @@ export function FounderRequirementSettings({ workspace, onSaved }: { workspace: 
       <p role="status">{t("ready")} · {v("version")} {resource.data.settings.version}</p>
       <p>{t("catalogAvailable")} · {resource.data.availableSkills}</p>
       <SettingsEditor key={resource.data.settings.version} workspace={workspace} settings={resource.data.settings}
-        after={() => { markSaved(true); resource.refresh(); onSaved(); }} />
+        after={() => { markSaved(true); resource.refresh(); }} />
       {saved && <p role="status">{v("saved")}</p>}
       <h4 className="font-semibold">{t("history")}</h4>
       {resource.data.history.length ? <ul className="grid gap-2">{resource.data.history.map((event) =>
@@ -39,7 +39,7 @@ function SettingsEditor({ workspace, settings, after }: {
 }) {
   const [locale] = useLocale();
   const t = requirementCopy(locale), v = volunteerCopy(locale);
-  return <ReviewCommand action="configure" label={t("configure")} noteField="reason" minNote={10} version={settings.version}
+  return <ReviewCommand action="configure" label={t("configure")} noteField="reason" minNote={10} disclosureGroup="volunteer-configuration" version={settings.version}
     send={(body) => changeRequirementSettings(workspace,body)} after={after}
     input={(form) => ({ categories:form.getAll("categories"),fields:form.getAll("fields"),modes:form.getAll("modes"),
       maxSkills:Number(form.get("maxSkills")),maxLanguages:Number(form.get("maxLanguages")) })}>

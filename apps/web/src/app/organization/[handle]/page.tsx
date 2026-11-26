@@ -4,8 +4,12 @@ import { InstitutionPublic } from "@/components/institution-public";
 import { serverSupabase } from "@/lib/supabase/server";
 import { ApiRequestError, requestJson } from "@/lib/api-errors";
 
-export default async function PublicInstitutionPage({ params }: { params: Promise<{ handle: string }> }) {
-  const { handle } = await params;
+export default async function PublicInstitutionPage({ params, searchParams }: {
+  params: Promise<{ handle: string }>;
+  searchParams: Promise<{ section?: string | string[] }>;
+}) {
+  const [{ handle }, { section }] = await Promise.all([params, searchParams]);
+  const activeSection = section === "posts" || section === "opportunities" || section === "membership" ? section : "overview";
   if (!/^[a-z0-9][a-z0-9-]{2,39}$/.test(handle)) notFound();
   const api = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
   const { organization }: { organization: Institution } = await requestJson(`${api}/api/v1/institutions/by-handle/${handle}`)
@@ -15,5 +19,5 @@ export default async function PublicInstitutionPage({ params }: { params: Promis
     });
   const client = await serverSupabase();
   const { data } = await client.auth.getClaims();
-  return <InstitutionPublic organization={organization} signedIn={!!data?.claims.sub && data.claims.is_anonymous !== true} />;
+  return <InstitutionPublic organization={organization} activeSection={activeSection} signedIn={!!data?.claims.sub && data.claims.is_anonymous !== true} />;
 }

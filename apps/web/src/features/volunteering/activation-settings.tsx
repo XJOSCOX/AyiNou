@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { ApiErrorNotice } from "@/components/api-error-notice";
-import { institutionCard, useInstitutionResource } from "@/components/institution-ui";
+import { adminCompactCard } from "@/components/admin-controls";
+import { useInstitutionResource } from "@/components/institution-ui";
 import { ProjectLoading } from "@/components/project-ui";
 import { useLocale } from "@/lib/locale-store";
 import { authorizedSocialRequest } from "@/lib/feed-api";
@@ -18,21 +19,15 @@ type Panel = { version: number; configuration: string; stages: Stage[];
 const path = "/api/v1/admin/volunteer-settings/activation";
 const status = { active: "enabled", paused: "paused", disabled: "disabled" } as const;
 
-export function VolunteerActivation({ workspace, settingsVersion }: { workspace: string; settingsVersion: number }) {
+export function VolunteerActivation({ workspace }: { workspace: string }) {
   const [locale] = useLocale();
   const t = activationCopy(locale);
   const load = useCallback((signal: AbortSignal): Promise<Panel> => authorizedSocialRequest(path, {
     signal, cache: "no-store", headers: { "X-Ayinou-Workspace": workspace },
   }), [workspace]);
   const resource = useInstitutionResource(load);
-  const observedSettings = useRef(settingsVersion);
   const [saved, setSaved] = useState(false);
   const data = resource.data;
-  useEffect(() => {
-    if (observedSettings.current === settingsVersion) return;
-    observedSettings.current = settingsVersion;
-    resource.refresh();
-  }, [resource, settingsVersion]);
   const send = (body: string) => authorizedSocialRequest(path, {
     body, method: "PATCH", cache: "no-store", headers: { "X-Ayinou-Workspace": workspace },
   });
@@ -43,19 +38,18 @@ export function VolunteerActivation({ workspace, settingsVersion }: { workspace:
       input={() => ({ capability, configuration: data.configuration })} send={send}
       after={() => { setSaved(true); resource.refresh(); }} />;
   }
-  return <section className="grid min-w-0 gap-3 border-b border-[var(--theme-border)] pb-4">
+  return <section className="grid min-w-0 gap-3">
     <h3 className="text-xl font-semibold">{t("title")}</h3>
-    <p>{t("intro")}</p>
-    <p className="text-sm">{t("pauseHelp")}</p>
+    <p className="max-w-4xl text-sm leading-relaxed text-[var(--theme-body)]">{t("intro")} {t("pauseHelp")}</p>
     {!data && resource.error === null && <ProjectLoading />}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {saved && <p role="status">{t("updated")}</p>}
     {data && <>
-      <ul className="grid min-w-0 gap-3 xl:grid-cols-2">
+      <ul className="grid min-w-0 gap-2 md:grid-cols-2 2xl:grid-cols-3">
         {data.stages.map(stage => {
           const command = stage.status === "active" ? "pause" : stage.status === "paused" ? "resume" : "enable";
           const controls = stage.status === "active" || (stage.configurationReady && stage.operationalReady && stage.dependenciesReady);
-          return <li key={stage.capability} className={institutionCard + " grid min-w-0 content-start gap-2"}>
+          return <li key={stage.capability} className={adminCompactCard + " grid content-start gap-1.5 text-sm"}>
             <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-x-3">
               <h4 className="font-semibold">{t(stage.capability)}</h4>
               <span className="text-sm font-semibold">{t(status[stage.status])}</span>
@@ -70,7 +64,7 @@ export function VolunteerActivation({ workspace, settingsVersion }: { workspace:
               : <button type="button" className="w-fit rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm opacity-60" disabled>{t(command)}</button>}
           </li>;
         })}
-        <li className={institutionCard + " grid content-start gap-2"}><h4 className="font-semibold">{t("skills")}</h4><p>{t("unimplemented")} · {t("disabled")}</p></li>
+        <li className={adminCompactCard + " grid content-start gap-1.5 text-sm"}><h4 className="font-semibold">{t("skills")}</h4><p>{t("unimplemented")} · {t("disabled")}</p></li>
       </ul>
       {data.stages.some(stage => stage.status === "active") ? action("all","emergency_pause")
         : <button type="button" className="w-fit rounded-md border border-[var(--theme-border)] px-3 py-2 text-sm opacity-60" disabled>{t("emergency_pause")}</button>}

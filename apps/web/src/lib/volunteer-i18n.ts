@@ -2,6 +2,11 @@ import type { Locale, VolunteerCategory } from '@ayinou/shared';
 
 const labels = {
   title: ["Volunteer profile","Pwofil volontè","Profil bénévole","Perfil de voluntariado"],
+  activationTab: ["Activation","Aktivasyon","Activation","Activación"],
+  profilesTab: ["Profiles and skills","Pwofil ak konpetans","Profils et compétences","Perfiles y habilidades"],
+  requirementsTab: ["Requirements","Kondisyon","Exigences","Requisitos"],
+  matchingTab: ["Matching","Asosiyasyon","Mise en relation","Emparejamiento"],
+  recruitmentTab: ["Recruitment","Rekritman","Recrutement","Reclutamiento"],
   admin: ["Volunteer settings","Paramèt volontarya","Paramètres du bénévolat","Configuración de voluntariado"],
   intro: ["Record skills and availability for future volunteering. Your profile is private by default.","Ekri konpetans ou ak disponiblite w pou volontarya alavni. Pwofil ou prive pa defo.","Indiquez vos compétences et disponibilités pour du bénévolat futur. Votre profil est privé par défaut.","Indica tus habilidades y disponibilidad para participar en el futuro. Tu perfil es privado por defecto."],
   closed: ["Volunteer profile intake is currently closed. Organizer discovery and matching are disabled.","Enskripsyon pwofil volontè fèmen kounye a. Òganizatè pa ka chèche volontè epi pa gen sistèm asosiyasyon.","La création de profils bénévoles est fermée. La recherche par les organisateurs et la mise en relation sont désactivées.","La creación de perfiles está cerrada. La búsqueda por organizadores y el emparejamiento están desactivados."],
