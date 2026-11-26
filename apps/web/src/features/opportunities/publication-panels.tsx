@@ -5,13 +5,15 @@ import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "r
 import { professionalOpportunityTypes, opportunityReviewChecks, opportunityReportReasons, volunteerDepartments } from "@ayinou/shared";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { MemberShell } from "@/components/member-shell";
-import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "@/components/institution-ui";
+import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "@/components/institution-ui";
+import { accountMessages } from "@/lib/account-i18n";
 import { useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { departmentNames } from "@/lib/volunteer-i18n";
 import { TypeDetails } from "./detail-fields";
+import { OpportunityPageHeader, OpportunityState, opportunitySecondary, opportunityTag } from "./presentation";
 import { listedOpportunities, workspaceCommand, workspaceRead, type Interest, type InterestPreview, type PublicationCase,
   type PublicationSettingsView, type PublishedOpportunity, type Queue, type ReviewCase } from "./publication-api";
 
@@ -39,9 +41,14 @@ function Command({label,parameters,workspace,children,extract,after,confirmation
       after?.(value);
     });
   }
-  return <details className="min-w-0 rounded-md border border-[var(--theme-border)] p-2">
-    <summary className="cursor-pointer font-semibold">{label}</summary>
-    <form onSubmit={submit} className="grid min-w-0 gap-2 pt-2">
+  return <details className="group/command min-w-0 overflow-hidden rounded-md border border-[var(--theme-border)]">
+    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:-outline-offset-2 [&::-webkit-details-marker]:hidden">
+      <span className="min-w-0 break-words">{label}</span>
+      <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center rounded-full bg-[var(--theme-control)]">
+        <span className="mb-0.5 size-2 rotate-45 border-e-[1.5px] border-b-[1.5px] group-open/command:mt-1 group-open/command:rotate-[225deg]" />
+      </span>
+    </summary>
+    <form onSubmit={submit} className="grid min-w-0 gap-3 border-t border-[var(--theme-border)] p-3 sm:p-4">
       {disclosure && <p>{disclosure}</p>}
       {children}
       {confirmation && <label className="flex gap-2"><input required type="checkbox" />{t("confirmed")}</label>}
@@ -101,13 +108,16 @@ function InterestList({recipient}:{recipient?:{organization:string;opportunity:s
     {...(organization&&opportunity?{organization,opportunity}:{}),...(after?{after}:{})},signal),[organization,opportunity,after]);
   const resource=useInstitutionResource(load);
   if (resource.error!==null) return <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />;
-  if (!resource.data) return <p role="status">{t("loading")}</p>;
-  if (!resource.data.enabled) return <p role="status">{t("disabled")}</p>;
-  if (!resource.data.items.length) return <p>{t("empty")}</p>;
+  if (!resource.data) return <OpportunityState>{t("loading")}</OpportunityState>;
+  if (!resource.data.enabled) return <OpportunityState>{t("disabled")}</OpportunityState>;
+  if (!resource.data.items.length) return <OpportunityState>{t(recipient ? "empty" : "noInterest")}</OpportunityState>;
   return <div className="grid gap-2">
-    {resource.data.items.map(record=><article className={institutionCard+" grid gap-2"} key={record.id}>
-      <h3 className="font-semibold">{record.title ?? record.shared_identity?.displayName} · {t(record.state)===record.state?common(record.state as "withdrawn"):t(record.state)}</h3>
-      {record.shared_identity && <p>@{record.shared_identity.username}</p>}
+    {resource.data.items.map(record=><article className="grid min-w-0 gap-3 rounded-lg border border-[var(--theme-border)] p-4" key={record.id}>
+      <header className="flex flex-wrap items-start justify-between gap-2">
+        <h2 className="min-w-0 break-words font-semibold" dir="auto">{record.title ?? record.shared_identity?.displayName}</h2>
+        <span className={opportunityTag}>{t(record.state)===record.state?common(record.state as "withdrawn"):t(record.state)}</span>
+      </header>
+      {record.shared_identity && <p className="break-words text-sm text-[var(--theme-body)]">@{record.shared_identity.username}</p>}
       {record.statement && <p className="break-words" dir="auto">{record.statement}</p>}
       {!recipient && record.state!=="withdrawn" && <Command label={t("withdraw")}
         parameters={{action:"interest_withdraw",interest:record.id,version:record.version}} after={resource.refresh} disclosure={t("withdrawalNote")} />}
@@ -121,7 +131,12 @@ function InterestList({recipient}:{recipient?:{organization:string;opportunity:s
 }
 export function MyOpportunityInterest() {
   const [locale]=useLocale();
-  return <MemberShell><div className="grid gap-4"><h1 className="text-2xl font-semibold">{publicationCopy(locale)("myInterest")}</h1><InterestList /></div></MemberShell>;
+  const t=publicationCopy(locale);
+  return <MemberShell><div className="grid min-w-0 gap-4">
+    <OpportunityPageHeader title={t("myInterest")} description={t("myInterestHelp")}
+      back={{ href: "/settings", label: accountMessages[locale].settings }} />
+    <section className={institutionCard} aria-label={t("myInterest")}><InterestList /></section>
+  </div></MemberShell>;
 }
 
 function InterestForm({organization,item}:{organization:string;item:PublishedOpportunity}) {
@@ -178,17 +193,25 @@ export function PublicOpportunityList({organization,signedIn}:{organization:stri
     <h2 className="text-xl font-semibold">{t("published")}</h2>
     {resource.error!==null && <ApiErrorNotice error={resource.error} retry={resource.refresh} />}
     {!resource.data && resource.error===null && <p role="status">{t("loading")}</p>}
-    {resource.data?.enabled===false && <p role="status">{t("disabled")}</p>}
-    {resource.data?.enabled && (resource.data.items.length ? resource.data.items.map(item=><article key={item.id+":"+item.version} className={institutionCard+" grid gap-3"}>
+    {resource.data?.enabled===false && <OpportunityState>{t("disabled")}</OpportunityState>}
+    {resource.data?.enabled && (resource.data.items.length ? resource.data.items.map(item=><article key={item.id+":"+item.version} className="grid min-w-0 gap-3 rounded-lg border border-[var(--theme-border)] p-4 sm:p-5">
       <h3 className="text-lg font-semibold break-words" dir="auto">{item.snapshot.title}</h3>
-      <p>{common(item.snapshot.type)} · {item.organization}{item.verified?" · "+t("verified"):""} · {common(item.snapshot.mode)} · {
-        new Intl.DisplayNames([locale],{type:"region"}).of(item.snapshot.country)}{
-        item.snapshot.department?" · "+departmentNames[volunteerDepartments.indexOf(item.snapshot.department as typeof volunteerDepartments[number])]:""}
-        {item.snapshot.closesOn?" · "+common("closes")+" "+item.snapshot.closesOn:""}</p>
+      <div className="flex flex-wrap items-center gap-2 text-sm text-[var(--theme-body)]">
+        <span className={opportunityTag}>{common(item.snapshot.type)}</span>
+        <span className={opportunityTag}>{common(item.snapshot.mode)}</span>
+        <span className="inline-flex min-w-0 items-center gap-1.5"><span className="break-words">{item.organization}</span>
+          {item.verified && <VerifiedCheck label={t("verified")} />}
+        </span>
+      </div>
+      <p className="text-sm text-[var(--theme-body)]">
+        {new Intl.DisplayNames([locale],{type:"region"}).of(item.snapshot.country)}
+        {item.snapshot.department?" · "+departmentNames[volunteerDepartments.indexOf(item.snapshot.department as typeof volunteerDepartments[number])]:""}
+        {item.snapshot.closesOn && <> · {common("closes")} <time dateTime={item.snapshot.closesOn}>{item.snapshot.closesOn}</time></>}
+      </p>
       <p className="whitespace-pre-wrap break-words" dir="auto">{item.snapshot.description}</p>
       <TypeDetails value={item.snapshot.details} />
       <p>{t("reviewNotice")}</p><p>{t("moneyNotice")}</p>
-      {item.methods.event && <Link className={institutionLink} href={"/events/"+item.methods.event}>{t("nativeEvent")}</Link>}
+      {item.methods.event && <Link className={opportunitySecondary+" w-fit"} href={"/events/"+item.methods.event}>{t("nativeEvent")}</Link>}
       {signedIn && <>
         {item.methods.external && <ExternalDestination organization={organization} item={item} />}
         {item.methods.interest && <InterestForm organization={organization} item={item} />}
@@ -216,11 +239,14 @@ export function PublicationStaff({workspace, founder}:{workspace:string;founder:
   const data=configuration.data;
   function after(){resource.refresh();configuration.refresh();}
   return <section className={institutionCard+" grid min-w-0 gap-3"}>
-    <h2 className="text-xl font-semibold">{t(founder?"settings":"reviewQueue")}</h2>
+    <header className="flex flex-wrap items-center justify-between gap-2">
+      <h2 className="text-lg font-semibold">{t(founder?"settings":"reviewQueue")}</h2>
+      {data && <span className={opportunityTag}>{common("version")} {data.version}</span>}
+    </header>
     {configuration.error!==null && <ApiErrorNotice error={configuration.error} retry={configuration.refresh} signIn />}
     {resource.error!==null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {data && <>
-      <p>{t("readiness")}</p><p>{common("version")} {data.version}</p>
+      <p className="text-sm leading-relaxed text-[var(--theme-body)]">{t("readiness")}</p>
       <Command key={data.version} label={common("configuration")} parameters={{action:"configure",version:data.version}} workspace={workspace}
         after={after} extract={form=>({reason:field(form,"reason"),settings:{
           types:form.getAll("type"),methods:form.getAll("method"),submissionsPerDay:Number(field(form,"submissionsPerDay")),
@@ -235,10 +261,12 @@ export function PublicationStaff({workspace, founder}:{workspace:string;founder:
           {(["external","expression_of_interest","event_registration"] as const).map(method=><label className="flex gap-1" key={method}>
             <input name="method" value={method} type="checkbox" defaultChecked={data.settings.methods.includes(method)} />{common(method)}</label>)}
         </fieldset>
+        <div className="grid min-w-0 gap-3 sm:grid-cols-3">
         {([["submissionsPerDay","submissionLimit",20],["interestPerDay","interestLimit",10],["reportsPerDay","reportLimit",8]] as const)
           .map(([name,label,max])=><label key={name}>{t(label)}
             <input className={institutionField} required name={name} type="number" min={1} max={max} defaultValue={data.settings[name]} />
           </label>)}
+        </div>
         <label>{t("staffingPlan")}<input className={institutionField} maxLength={500} name="staffingPlan" defaultValue={data.settings.staffingPlan} /></label>
         <label>{t("readinessNotes")}<input className={institutionField} maxLength={500} name="readinessNotes" defaultValue={data.settings.readinessNotes} /></label>
         <Reason label={t("reason")} />
@@ -248,7 +276,7 @@ export function PublicationStaff({workspace, founder}:{workspace:string;founder:
       </li>)}</ul>}
     </>}
     {!resource.data && resource.error===null && <p role="status">{t("loading")}</p>}
-    {resource.data?.enabled===false && <p role="status">{t("disabled")}</p>}
+    {resource.data?.enabled===false && <OpportunityState>{t("disabled")}</OpportunityState>}
     {resource.data?.enabled && <>
       {founder && <>
         <Command label={t("appoint")} parameters={{action:"appoint"}} workspace={workspace} after={after}
@@ -271,8 +299,13 @@ export function PublicationStaff({workspace, founder}:{workspace:string;founder:
       </>}
       {resource.data.items.length===0 && <p>{t("empty")}</p>}
       {resource.data.items.map(item=><article className={institutionCard+" grid gap-3"} key={item.opportunity+":"+item.revision}>
-        <h3 className="font-semibold break-words">{item.title} · {item.country} {item.department} · {common("version")} {item.revision}</h3>
-        <p>{t(item.state)===item.state?common(item.state as "submitted"):t(item.state)}</p>
+        <header className="flex flex-wrap items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="break-words font-semibold" dir="auto">{item.title}</h3>
+            <p className="mt-1 text-sm text-[var(--theme-body)]">{item.country} {item.department} · {common("version")} {item.revision}</p>
+          </div>
+          <span className={opportunityTag}>{t(item.state)===item.state?common(item.state as "submitted"):t(item.state)}</span>
+        </header>
         {founder && item.state==="assigned" && <Command label={t("release")} workspace={workspace} after={after}
           parameters={{action:"release",opportunity:item.opportunity,version:item.revision}} extract={form=>({reason:field(form,"reason")})}>
           <Reason label={t("reason")} />

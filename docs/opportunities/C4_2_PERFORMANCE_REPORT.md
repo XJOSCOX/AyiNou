@@ -6,6 +6,6 @@ The disposable benchmark seeds 500 publication records, 500 review queue entries
 
 | Read | Median | Range | JSON bytes |
 | --- | ---: | ---: | ---: |
-| Public organization listings | 43 ms | 42–43 ms | 19,010 |
-| Staff review queue | 17 ms | 17–18 ms | 7,073 |
-| Organization interest inbox | 170 ms | 50–188 ms | 5,706 |
+| Public organization listings | 47 ms | 44–53 ms | 19,032 |
+| Staff review queue | 19 ms | 19–20 ms | 7,072 |
+| Organization interest inbox | 182 ms | 177–217 ms | 5,707 |

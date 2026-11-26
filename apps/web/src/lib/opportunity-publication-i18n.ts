@@ -2,6 +2,8 @@ import type { Locale } from "@ayinou/shared";
 const locales={en:0,ht:1,fr:2,es:3} as const;
 const messages: Record<string,readonly [string,string,string,string]> = {
   publication:["Opportunity publication","Piblikasyon opòtinite","Publication des opportunités","Publicación de oportunidades"],
+  myInterestHelp:["Track the interest you’ve shared with organizations and withdraw it when you need to.","Swiv mesaj enterè ou pataje ak òganizasyon yo epi retire yo lè sa nesesè.","Suivez les manifestations d’intérêt envoyées aux organisations et retirez-les au besoin.","Consulta las expresiones de interés que compartiste con organizaciones y retíralas cuando lo necesites."],
+  noInterest:["You haven’t shared interest in any opportunities yet.","Ou poko pataje enterè nan okenn opòtinite.","Vous n’avez encore manifesté votre intérêt pour aucune opportunité.","Todavía no has expresado interés en ninguna oportunidad."],
   interestNotice:["An expression of interest was updated.","Yon mesaj enterè te mete ajou.","Une manifestation d’intérêt a été mise à jour.","Se actualizó una expresión de interés."],
   release:["Release assignment","Lage asiyasyon","Libérer l’affectation","Liberar asignación"],
   verified:["Verified organization","Òganizasyon verifye","Organisation vérifiée","Organización verificada"],

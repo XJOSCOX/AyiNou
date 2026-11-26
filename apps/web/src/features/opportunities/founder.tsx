@@ -3,12 +3,13 @@
 import { useCallback } from "react";
 import type { OpportunityFounderView, OpportunitySettings } from "@ayinou/shared";
 import { ApiErrorNotice } from "@/components/api-error-notice";
-import { institutionField, useInstitutionResource } from "@/components/institution-ui";
+import { institutionCard, institutionField, useInstitutionResource } from "@/components/institution-ui";
 import { authorizedSocialRequest } from "@/lib/feed-api";
 import { useLocale } from "@/lib/locale-store";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
 import { PublicationStaff } from "./publication-panels";
+import { OpportunityState, opportunityTag } from "./presentation";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
 
 const path = "/api/v1/admin/opportunity-settings";
@@ -24,15 +25,20 @@ export function FounderOpportunitySettings({ workspace }: { workspace: string })
   const data = resource.data;
   const groupLabels = {types:t("type"),organizationKinds:t("kinds"),scopes:t("scopes"),modes:t("mode")};
   return <section className="grid min-w-0 gap-4">
-    <h2 className="text-xl font-semibold">{t("settings")}</h2>
-    <p role="status">{t("live")}</p>
-    <p>{t("verificationHelp")}</p><p>{t("readiness")}</p>
-    <p>{[t("name"), t("description"), t("type"), t("language"), t("category"), t("country"), t("department"), t("mode"),
-      t("opens"), t("closes"), t("skills"), t("references"), t("method")].join(" · ")}</p>
+    <header className="grid gap-3">
+      <h2 className="text-xl font-semibold">{t("settings")}</h2>
+      <p className="text-sm leading-relaxed text-[var(--theme-body)]">{t("verificationHelp")}</p>
+      <OpportunityState>{t("live")}</OpportunityState>
+    </header>
+    <div className="grid items-start gap-4 2xl:grid-cols-2">
+    <section className={institutionCard + " grid gap-3"}>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {resource.data === null && resource.error === null && <p role="status" aria-busy="true">…</p>}
     {data && <>
-      <h3 className="font-semibold">{t("ready")} · {t("version")} {data.version}</h3>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-lg font-semibold">{t("ready")}</h3>
+        <span className={opportunityTag}>{t("version")} {data.version}</span>
+      </div>
       <ReviewCommand key={data.version} action="configure" label={t("configuration")} version={data.version}
         noteField="reason" minNote={10}
         input={fields => ({settings:{...Object.fromEntries(groups.map(group => [group, fields.getAll(group)])),
@@ -54,16 +60,13 @@ export function FounderOpportunitySettings({ workspace }: { workspace: string })
           <input className={institutionField} required type="number" min={1} max={50} name="draftLimit" defaultValue={data.settings.draftLimit} />
         </label>
       </ReviewCommand>
-      <h3 className="font-semibold">{t("history")}</h3>
-      <ul>{data.history.map(item => <li className="break-words" key={item.version}>
+      {data.history.length > 0 && <><h3 className="font-semibold">{t("history")}</h3>
+      <ul className="grid gap-2 text-sm">{data.history.map(item => <li className="break-words" key={item.version}>
         {t("version")} {item.version} · <time dateTime={item.registered_at}>{new Date(item.registered_at).toLocaleString(locale)}</time> · {item.reason}
-      </li>)}</ul>
+      </li>)}</ul></>}
     </>}
+    </section>
     <PublicationStaff workspace={workspace} founder />
-    <h3 className="font-semibold">{t("stages")}</h3>
-    <ul className="grid gap-1 sm:grid-cols-2">
-      {(["employment","internship","scholarship","training","expression","mentorship","recommendations"] as const)
-        .map(stage => <li key={stage}>{t(stage)} · {t("unimplemented")}</li>)}
-    </ul>
+    </div>
   </section>;
 }

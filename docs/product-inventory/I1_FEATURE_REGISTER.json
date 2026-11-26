@@ -8300,7 +8300,7 @@
       "id": "opportunity-publication",
       "domain": "Organizations",
       "name": "Reviewed opportunity publication and expressions of interest",
-      "status": "partial",
+      "status": "implemented",
       "currentAndLimits": "Isolated review, published organization listings, reviewed destinations, native Event association, applicant consent and withdrawal. Real operational lanes are closed.",
       "dependencies": "C4.1 versioned opportunity drafts, verified organizations, existing independent reviewer workspaces, native Events and notifications.",
       "evidence": {
@@ -8339,9 +8339,9 @@
       "verification": {
         "local": "See the C4.2 implementation report.",
         "disposableSupabase": "Review, publication and interest run only in isolated environments.",
-        "hostedDatabase": "Awaiting exact authorized rollout and postflight.",
-        "connectedApplication": "Next.js and Fastify remain local.",
-        "hostedApplication": "Local application runtime.",
+        "hostedDatabase": "The approved C4.2 migration is applied. Zero migrations are pending and all 130 existing data fingerprints matched.",
+        "connectedApplication": "66 HTTP checks passed. Connected browser verified Founder preparation, GoXEV eligibility messaging and Test02 closed access.",
+        "hostedApplication": "Next.js and Fastify remain local.",
         "operationalApproval": "C4.2 live operations remain closed."
       }
     }

@@ -2,10 +2,10 @@
 
 import { professionalApplicationMethods, professionalOpportunityCategories, volunteerDepartments,
   type OpportunityDetail, type OpportunityInput, type OpportunityList } from "@ayinou/shared";
-import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent } from "react";
 import { DetailFields, TypeDetails, collectDetails } from "./detail-fields";
 import { OrganizationPublication } from "./publication-panels";
+import { OpportunityPageHeader, OpportunityState, opportunitySecondary, opportunityTag } from "./presentation";
 import { apiErrorCode } from "@/lib/api-errors";
 import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { MemberShell } from "@/components/member-shell";
@@ -39,27 +39,30 @@ export function OpportunityWorkspace({ id }: { id: string }) {
   const listing = useInstitutionResource(load);
 
   return <MemberShell><section className="grid min-w-0 gap-4">
-    <header className={institutionCard + " flex flex-wrap items-start justify-between gap-3"}>
-      <div><h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p>{listing.data?.organizationName} {listing.data && "·"} {t("private")}</p></div>
-      <Link className={institutionLink} href={"/institutions/" + id}>{t("back")}</Link>
-    </header>
+    <OpportunityPageHeader title={t("title")} description={listing.data ? <>{listing.data.organizationName} · {t("private")}</> : t("private")}
+      back={{ href: "/institutions/" + id, label: t("back") }} />
     {listing.error !== null && (apiErrorCode(listing.error)==="VERIFICATION_REQUIRED"
-      ? <p role="alert">{publicationCopy(locale)("identityRequired")}</p> : <ApiErrorNotice error={listing.error} retry={listing.refresh} signIn />)}
-    {listing.data === null && listing.error === null && <p role="status">{authMessages[locale].working}</p>}
+      ? <div className={institutionCard}><OpportunityState tone="attention">{publicationCopy(locale)("identityRequired")}</OpportunityState></div> : <ApiErrorNotice error={listing.error} retry={listing.refresh} signIn />)}
+    {listing.data === null && listing.error === null && <div className={institutionCard}><OpportunityState>{authMessages[locale].working}</OpportunityState></div>}
     {listing.data && <section className={institutionCard + " grid min-w-0 gap-3"}>
-      <p>{t("privateHelp")}</p><p>{t(listing.data.publisherEligible ? "qualified" : "notQualified")}</p>
-      <p>{t("verificationHelp")}</p>
-      {!listing.data.enabled && <p role="status">{t("closedIntake")}</p>}
-      {listing.data.canCreate && selection !== "new" &&
-        <button className={institutionAction + " w-fit"} onClick={() => setSelection("new")}>{t("newDraft")}</button>}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 space-y-2">
+          <p className={opportunityTag}>{t(listing.data.publisherEligible ? "qualified" : "notQualified")}</p>
+          <p className="text-sm leading-relaxed text-[var(--theme-body)]">{t("privateHelp")} {t("verificationHelp")}</p>
+        </div>
+        {listing.data.canCreate && selection !== "new" &&
+          <button className={institutionAction} onClick={() => setSelection("new")}>{t("newDraft")}</button>}
+      </div>
+      {!listing.data.enabled && <OpportunityState>{t("closedIntake")}</OpportunityState>}
       {listing.data.enabled && listing.data.items.length === 0 && <p>{t("empty")}</p>}
       {listing.data.items.length > 0 && <ul className="grid gap-2 sm:grid-cols-2">
         {listing.data.items.map(item => <li key={item.id}>
-          <button className={institutionCard + " w-full text-start"} aria-pressed={item.id === selection}
+          <button className="grid h-full w-full gap-2 rounded-lg border border-[var(--theme-border)] px-4 py-3 text-start hover:bg-[var(--theme-control)] focus-visible:outline-2 aria-pressed:bg-[var(--theme-selected)]" aria-pressed={item.id === selection}
             onClick={() => setSelection(item.id)}>
             <strong className="block break-words">{item.title}</strong>
-            <span>{t(item.type)} · {t(item.status)} · {t("version")} {item.version}</span>
+            <span className="flex flex-wrap items-center gap-2 text-sm text-[var(--theme-body)]">
+              <span className={opportunityTag}>{t(item.status)}</span>{t(item.type)} · {t("version")} {item.version}
+            </span>
           </button>
         </li>)}
       </ul>}
@@ -149,7 +152,7 @@ function DraftForm({ list, path, revision, cancel, saved }: {
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} signIn />}
     <div className="flex flex-wrap gap-3">
       <button className={institutionAction} disabled={mutation.busy}>{t(mutation.busy ? "saving" : "save")}</button>
-      <button type="button" className={institutionLink} onClick={cancel}>{t("cancel")}</button>
+      <button type="button" className={opportunitySecondary} onClick={cancel}>{t("cancel")}</button>
     </div>
   </form>;
 }

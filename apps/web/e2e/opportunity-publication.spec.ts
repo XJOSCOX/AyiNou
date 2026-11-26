@@ -78,6 +78,12 @@ test("C4.2 Founder preparation renders in four languages while live operations a
       await expect(page.getByText(t("readiness"),{exact:true})).toBeVisible();
       expect(await page.locator("body").evaluate(body=>body.scrollWidth)).toBeLessThanOrEqual(width);
     }
+    await page.goto("/settings/opportunities");
+    const spanish=publicationCopy("es");
+    await expect(page.getByRole("heading",{name:spanish("myInterest"),exact:true})).toBeVisible();
+    await expect(page.getByRole("link",{name:"Configuración de la cuenta",exact:true})).toHaveAttribute("href","/settings");
+    await expect(page.getByRole("status").filter({hasText:spanish("noInterest")})).toBeVisible();
+    expect(await page.locator("body").evaluate(body=>body.scrollWidth)).toBeLessThanOrEqual(390);
   } finally { sql("delete from private.platform_bootstrap;"); }
 });
 
