@@ -11,7 +11,7 @@ import { requirementCopy } from "@/lib/requirement-i18n";
 import { volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
 
-export function FounderRequirementSettings({ workspace }: { workspace: string }) {
+export function FounderRequirementSettings({ workspace, onSaved }: { workspace: string; onSaved: () => void }) {
   const [locale] = useLocale();
   const t = requirementCopy(locale), v = volunteerCopy(locale);
   const loader = useCallback((signal: AbortSignal) => loadRequirementSettings(workspace,signal),[workspace]);
@@ -19,14 +19,13 @@ export function FounderRequirementSettings({ workspace }: { workspace: string })
   const [saved, markSaved] = useState(false);
   return <section className="grid min-w-0 gap-3 border-t border-[var(--theme-border)] pt-4">
     <h3 className="text-xl font-semibold">{t("admin")}</h3>
-    <p>{t("activeReadiness")}</p>
     {!resource.data && resource.error === null && <ProjectLoading />}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {resource.data && <>
       <p role="status">{t("ready")} · {v("version")} {resource.data.settings.version}</p>
       <p>{t("catalogAvailable")} · {resource.data.availableSkills}</p>
       <SettingsEditor key={resource.data.settings.version} workspace={workspace} settings={resource.data.settings}
-        after={() => { markSaved(true); resource.refresh(); }} />
+        after={() => { markSaved(true); resource.refresh(); onSaved(); }} />
       {saved && <p role="status">{v("saved")}</p>}
       <h4 className="font-semibold">{t("history")}</h4>
       {resource.data.history.length ? <ul className="grid gap-2">{resource.data.history.map((event) =>

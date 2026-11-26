@@ -41,8 +41,9 @@ export function RecruitmentContact() {
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {mutation.error !== null && <ApiErrorNotice error={mutation.error} signIn />}
     {data?.state === "closed" && <p>{t("closed")}</p>}
+    {data?.state === "ready" && data.outreachActive === false && <p>{t("closed")}</p>}
     {data?.state === "ready" && <label className="flex min-h-10 items-center gap-2">
-      <input type="checkbox" disabled={!data.hasProfile || mutation.busy} checked={data.allowed}
+      <input type="checkbox" disabled={!data.hasProfile || mutation.busy || (data.outreachActive === false && !data.allowed)} checked={data.allowed}
         onChange={(event) => { void update(event.target.checked); }} />{t("consent")}
     </label>}
   </section>;

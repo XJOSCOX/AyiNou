@@ -8196,7 +8196,56 @@
         "hostedApplication": "Database-only rollout, with Next.js and Fastify local.",
         "operationalApproval": "Live participation stays closed and needs separate approval."
       }
+    },
+    {
+      "id": "volunteer-activation",
+      "domain": "Projects",
+      "name": "Founder-controlled volunteer activation and emergency pause",
+      "status": "partial",
+      "currentAndLimits": "Five independent stages and separately gated operational readiness. Public skills disclosure is deferred.",
+      "dependencies": "C3.1–C3.4, native project eligibility, current Founder session and MFA, and separately approved operational readiness.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/volunteering/activation-settings.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/volunteer-activation.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125134000_c35_volunteer_activation.sql"
+        ],
+        "postgresObjects": [
+          "private.c35_fixture",
+          "private.c35_stage",
+          "private.c35_events",
+          "public.c35_activation_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/volunteer-activation.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/volunteer-activation.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/volunteer-activation.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/volunteering/C3_FINAL_IMPLEMENTATION_AUDIT.md",
+          "docs/volunteering/C3_FINAL_COMPLETION_DECISION.md",
+          "docs/volunteering/C3_FINAL_ACTIVATION_POLICY.md"
+        ]
+      },
+      "verification": {
+        "local": "See the final C3 implementation audit.",
+        "disposableSupabase": "Enabled controls and workloads are exercised only with isolated disposable records.",
+        "hostedDatabase": "Pending exact approval and verification.",
+        "connectedApplication": "See the final C3 implementation audit.",
+        "hostedApplication": "Next.js and Fastify local.",
+        "operationalApproval": "Public launch NO-GO; C3 stages stay closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C3.4 Volunteer Coordination and Recruitment Integration"
+  "lastScopeUpdate": "C3.5 Volunteer Activation and Development Verification"
 }

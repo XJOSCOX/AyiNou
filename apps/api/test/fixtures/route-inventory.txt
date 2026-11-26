@@ -42,6 +42,7 @@ GET /api/v1/admin/role-assignments - -
 GET /api/v1/admin/safety - -
 GET /api/v1/admin/verification-policy - -
 GET /api/v1/admin/volunteer-settings - -
+GET /api/v1/admin/volunteer-settings/activation - -
 GET /api/v1/admin/volunteer-settings/matching - -
 GET /api/v1/admin/volunteer-settings/recruitment - -
 GET /api/v1/admin/volunteer-settings/requirements - -
@@ -261,6 +262,7 @@ HEAD /api/v1/admin/role-assignments - onSend
 HEAD /api/v1/admin/safety - onSend
 HEAD /api/v1/admin/verification-policy - onSend
 HEAD /api/v1/admin/volunteer-settings - onSend
+HEAD /api/v1/admin/volunteer-settings/activation - onSend
 HEAD /api/v1/admin/volunteer-settings/matching - onSend
 HEAD /api/v1/admin/volunteer-settings/recruitment - onSend
 HEAD /api/v1/admin/volunteer-settings/requirements - onSend
@@ -463,6 +465,7 @@ PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/admin/verification-policy 4096 -
 PATCH /api/v1/admin/volunteer-settings 8192 -
+PATCH /api/v1/admin/volunteer-settings/activation 4096 -
 PATCH /api/v1/admin/volunteer-settings/matching 4096 -
 PATCH /api/v1/admin/volunteer-settings/recruitment 4096 -
 PATCH /api/v1/admin/volunteer-settings/requirements 4096 -

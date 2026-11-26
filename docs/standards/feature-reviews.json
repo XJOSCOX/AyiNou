@@ -4049,6 +4049,48 @@
           "rolloutAndRollback": "Verify current main, exact hash, pending history and baseline authorization, then apply only with exact owner approval. Leave gates closed and use a forward correction if needed."
         }
       ]
+    },
+    {
+      "id": "volunteer-activation",
+      "report": "docs/volunteering/C3_FINAL_IMPLEMENTATION_AUDIT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/volunteer-settings/activation",
+          "contract": "GET /api/v1/admin/volunteer-settings/activation - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Only current Founder preparation, stages and bounded decision history are read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-activation.spec.ts",
+            "denialScenario": "Anonymous, ordinary member and unrelated Founder workspace cannot read activation."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/volunteer-settings/activation",
+          "contract": "PATCH /api/v1/admin/volunteer-settings/activation 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Each confirmed version-bound stage or emergency pause and its affected set commit with the Founder receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/volunteer-activation.spec.ts",
+            "denialScenario": "Missing readiness and dependencies prevent activation. Stale revisions and ordinary members cannot change the release."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125134000_c35_volunteer_activation.sql",
+          "rlsAndGrants": "Three private RLS tables. One service-only RPC; private helper functions and prior operation grants are preserved.",
+          "authorization": "Revalidates current actor, session, recent MFA, original private workspace, recognized Founder, explicit reason, confirmation, config digest and revision. Fixture readiness stays empty on hosted.",
+          "compatibility": "Additive stage controls revise only reviewed C3 gate points. Existing member data, native application and team state, notification grants and prior C1/C2 gates stay intact.",
+          "validation": "Isolated full workflow, separation, authorization, dependency, invalidation and recovery tests. Local benchmark and read-only hosted preservation.",
+          "rolloutAndRollback": "Apply only exact independently approved migration. Keep operations closed and preserve data. Use a forward fix if needed."
+        }
+      ]
     }
   ]
 }

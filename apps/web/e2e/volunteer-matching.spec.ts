@@ -140,7 +140,7 @@ test("matching reads current consent and returns only scoped native opportunitie
     await request(target.path+"/dismiss",200,member,{revision:1},"POST");
     expect((await personal()).items).toEqual([]);
     sql(`delete from private.c33_dismissed where actor='${member.id}';
-      update private.c31_profiles set expires_on=current_date-1 where actor='${member.id}';`);
+      update private.c31_profiles set expires_on=(now() at time zone 'America/Port-au-Prince')::date-1 where actor='${member.id}';`);
     expect((await personal()).state).toBe("unavailable");
     sql(`update private.c31_profiles set expires_on=current_date+40 where actor='${member.id}';
       update private.c31_skills set status='retired' where code='literacy_tutoring';`);
@@ -188,8 +188,8 @@ test("Founder can prepare matching without activation or privacy overrides", asy
   } finally { sql(`delete from private.platform_bootstrap where user_id='${founder.id}';`); }
 });
 
-test("bounded matching performance at 1000, 10000 and 50000 disposable profiles", async ({ signedIn, makeMember }) => {
-  test.setTimeout(240_000);
+test("bounded matching performance at 1000, 10000, 50000 and 100000 disposable profiles", async ({ signedIn, makeMember }) => {
+  test.setTimeout(360_000);
   const organizer = signedIn, member = await makeMember({visible:true});
   seedOwner(organizer,member);
   profile(member,true,false);
@@ -217,16 +217,15 @@ test("bounded matching performance at 1000, 10000 and 50000 disposable profiles"
     commit;`);
   const target = opportunity(organizer);
   const discover = target.path+"/candidates";
-  const actorPrefix = "33000000-0000-4000-8000-";
   let start = 1;
   sql(gates);
   try {
-    for (const population of [1000,10000,50000]) {
+    for (const population of [1000,10000,50000,100000]) {
       while (start<=population) {
         const end = Math.min(start+1999,population);
         sql(`begin;
           create temporary table c33_batch(id uuid,n int) on commit drop;
-          insert into c33_batch select ('${actorPrefix}'||lpad(g::text,12,'0'))::uuid,g from generate_series(${start},${end}) g;
+          insert into c33_batch select md5('c35-scale-member-'||g)::uuid,g from generate_series(${start},${end}) g;
           insert into auth.users(id,email,email_confirmed_at,invited_at,raw_user_meta_data)
             select id,'scale'||n||'@matching.example.invalid',now(),now(),'{"signup_path":"organization"}' from c33_batch;
           insert into public.profiles(user_id,username,display_name,is_visible)
@@ -236,7 +235,7 @@ test("bounded matching performance at 1000, 10000 and 50000 disposable profiles"
             on conflict(user_id) do update set discoverable=excluded.discoverable;
           insert into private.c31_profiles select id,1,'','[{"code":"ht","proficiency":"advanced"}]',
             case when n%3=0 then 'on_site' else 'hybrid' end,'four_eight','{}',true,
-            case when n%8=0 then 'paused' else 'available' end,current_date+case when n%6=0 then -1 else 45 end from c33_batch;
+            case when n%8=0 then 'paused' else 'available' end,(now() at time zone 'America/Port-au-Prince')::date+case when n%6=0 then -1 else 45 end from c33_batch;
           insert into private.c31_consents(actor,matching,discovery,profile_display) select id,n%5<>0,n%4<>0,false from c33_batch;
           insert into private.c31_selections select id,'literacy_tutoring',case when n%9=0 then 'beginner' else 'advanced' end,3 from c33_batch;
           commit;`);
@@ -254,7 +253,55 @@ test("bounded matching performance at 1000, 10000 and 50000 disposable profiles"
           if (label==="discovery") expect(result.items.length).toBeLessThanOrEqual(6);
         }
       }
+      if (population===100000) {
+        const started=performance.now();
+        const results=await Promise.all(Array.from({length:12},async (_,index) => {
+          const origin=index%2===0 ? api : "http://127.0.0.1:5301";
+          const user=index%3===0 ? organizer : member;
+          const endpoint=index%3===0 ? discover : ownerPath;
+          const time=performance.now();
+          const response=await fetch(origin+endpoint,{headers:{Authorization:"Bearer "+user.token},signal:AbortSignal.timeout(15_000)});
+          return { status:response.status,ms:Math.round(performance.now()-time),bytes:Buffer.byteLength(await response.text()) };
+        }));
+        const total=Math.round(performance.now()-started);
+        expect(results.every(result=>result.status===200)).toBe(true);
+        console.log("C3 concurrent matching "+JSON.stringify({population,concurrency:12,total,results}));
+      }
       if (population===1000) {
+        const recall = sql(`begin;
+          insert into private.c35_fixture values(true,true,true,true);
+          update private.c31_consents c set discovery=false from public.profiles pr
+            where c.actor=pr.user_id and pr.username ~ '^scale_c33_[0-9]+$'
+              and substring(pr.username from '[0-9]+$')::int>192;
+          with context as materialized (
+            select p project,o opportunity,r.snapshot,private.project_visible(p) visible
+              from private.community_projects p join private.project_opportunities o on o.project_id=p.id
+              join private.c32_requirements r on r.opportunity=o.id and r.action='publish'
+              where o.id='${target.id}'
+          ), fits as materialized (
+            select c.actor,private.c33_compare(v,private.c33_skills(c.actor),x.snapshot,private.c33_defaults()) fit
+            from private.c31_consents c join private.c31_profiles v on v.actor=c.actor
+              join public.profiles pr on pr.user_id=c.actor cross join context x
+            where c.discovery and c.actor<>'${organizer.id}' and v.availability='available'
+              and v.expires_on>=(now() at time zone 'America/Port-au-Prince')::date
+              and v.mode in ('remote','hybrid') and feed_data.f24_mode(c.actor)<>'private'
+              and feed_data.f24_identity(pr,'${organizer.id}')
+              and private.c35_viewer(c.actor,x.opportunity,x.project,x.visible)
+          ), exhaustive as (select actor from fits where fit->>'classification'<>'additional'
+            and fit->'reasons' ?| array['skillFit','preferredFit','languageFit']),
+          sample as (select actor from private.c31_consents where discovery order by actor limit 96),
+          pivots as (select md5('c35-recall-'||i)::uuid id from generate_series(1,12) i),
+          measured as (select count(*) matches from pivots p cross join lateral private.c35_discovery_cohort(p.id) c
+            join exhaustive e on e.actor=c.actor group by p.id)
+          select jsonb_build_object('scope','192 mixed fixture profiles','reference',(select count(*) from exhaustive),
+            'fixed',(select count(*) from exhaustive e join sample s on s.actor=e.actor),
+            'rotated',(select jsonb_agg(matches order by matches) from measured))::text;
+          rollback;`).split(/\r?\n/).find(line => line.startsWith("{"));
+        expect(recall).toBeDefined();
+        const report = JSON.parse(recall!);
+        expect(report.reference).toBeGreaterThan(0);
+        expect(report.rotated).toHaveLength(12);
+        console.log("C3 discoverability recall " + JSON.stringify(report));
         const firstPage = await request(ownerPath,200,member);
         expect(typeof firstPage.nextCursor).toBe("string");
         const continuation = "?cursor=" + encodeURIComponent(firstPage.nextCursor);

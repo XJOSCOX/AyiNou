@@ -10,6 +10,7 @@ import { loadVolunteerSettings, saveVolunteerSettings } from "@/lib/volunteer-ap
 import { volunteerCategory, volunteerCopy } from "@/lib/volunteer-i18n";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
 import { departmentNames } from "@/lib/volunteer-i18n";
+import { VolunteerActivation } from "./activation-settings";
 import { FounderRecruitmentSettings } from "./recruitment-settings";
 import { FounderMatchingSettings } from "./matching-settings";
 import { FounderRequirementSettings } from "./requirement-settings";
@@ -59,12 +60,14 @@ export function FounderVolunteer({ workspace }: { workspace: string }) {
   const send = (body: string) => saveVolunteerSettings(workspace,body);
   const [code, select] = useState("");
   const [saved, markSaved] = useState(false);
-  const after = () => { markSaved(true); resource.refresh(); };
+  const [activationVersion, refreshActivation] = useState(0);
+  const onSettingsSaved = () => refreshActivation(version => version + 1);
+  const after = () => { markSaved(true); resource.refresh(); onSettingsSaved(); };
   const data = resource.data;
   const skill = data?.catalog.find((item) => item.code === code);
   return <section className={institutionCard + " grid min-w-0 gap-4 p-4 sm:p-6"} aria-label={t("admin")}>
-    <header className="grid gap-2"><h2 className="text-2xl font-semibold">{t("admin")}</h2>
-      <p>{t("closed")}</p><p>{t("waiting")}</p></header>
+    <h2 className="text-2xl font-semibold">{t("admin")}</h2>
+    <VolunteerActivation workspace={workspace} settingsVersion={activationVersion} />
     {!resource.data && resource.error === null && <ProjectLoading />}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {data && <>
@@ -102,8 +105,8 @@ export function FounderVolunteer({ workspace }: { workspace: string }) {
         </li>)}</ul> : <p>{t("emptyHistory")}</p>}
       </section>
     </>}
-    <FounderRequirementSettings workspace={workspace} />
-    <FounderMatchingSettings workspace={workspace} />
-    <FounderRecruitmentSettings workspace={workspace} />
+    <FounderRequirementSettings workspace={workspace} onSaved={onSettingsSaved} />
+    <FounderMatchingSettings workspace={workspace} onSaved={onSettingsSaved} />
+    <FounderRecruitmentSettings workspace={workspace} onSaved={onSettingsSaved} />
   </section>;
 }

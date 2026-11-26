@@ -11,7 +11,7 @@ export type InvitationDetail = { state: "closed" } | Pick<RecruitmentItem, "id" 
   state: "ready"; terms: RecruitmentTerms | null; message: string | null; handle: string | null;
   project: string | null; opportunity: string | null; recipient: boolean; reported: boolean;
 };
-type Preferences = { state: "closed" } | { state: "ready"; version: number; allowed: boolean; hasProfile: boolean };
+type Preferences = { state: "closed" } | { state: "ready"; version: number; allowed: boolean; hasProfile: boolean; outreachActive?: boolean };
 type Configuration = { version: number; departments: RequirementDepartment[]; modes: RequirementMode[]; expiryDays: number;
   organizerDailyLimit: number; opportunityDailyLimit: number; recipientDailyLimit: number; cooldownDays: number };
 type Admin = { settings: Configuration; history: { version: number; reason: string; at: string }[] };

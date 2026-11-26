@@ -19,7 +19,7 @@ const numbers = [
   { key: "cooldownDays", min: 7, max: 30 },
 ] as const;
 
-export function FounderRecruitmentSettings({ workspace }: { workspace: string }) {
+export function FounderRecruitmentSettings({ workspace, onSaved }: { workspace: string; onSaved: () => void }) {
   const [locale] = useLocale();
   const t = recruitmentCopy(locale), v = volunteerCopy(locale);
   const load = useCallback((signal: AbortSignal) => loadRecruitmentSettings(workspace, signal), [workspace]);
@@ -28,18 +28,13 @@ export function FounderRecruitmentSettings({ workspace }: { workspace: string })
   const data = resource.data;
   return <section className="grid min-w-0 gap-3 border-t border-[var(--theme-border)] pt-4">
     <h3 className="text-xl font-semibold">{t("settings")}</h3>
-    <div className="grid gap-1 rounded-lg border border-[var(--theme-border)] p-3">
-      <h4 className="font-semibold">{t("staged")}</h4>
-      <p>{t("stages")}</p><p>{t("configured")}</p><p>{t("notImplemented")}</p>
-    </div>
-    <p>{t("closed")} {t("safeguard")}</p>
     {!data && resource.error === null && <ProjectLoading />}
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {data && <>
       <p role="status">{t("ready")} · {v("version")} {data.settings.version}</p>
       <ReviewCommand key={data.settings.version} action="configure" label={t("prepare")} noteField="reason" minNote={10}
         version={data.settings.version} send={(body) => changeRecruitmentSettings(workspace, body)}
-        after={() => { setSaved(true); resource.refresh(); }}
+        after={() => { setSaved(true); resource.refresh(); onSaved(); }}
         input={(form) => ({
           departments: form.getAll("departments"), modes: form.getAll("modes"),
           ...Object.fromEntries(numbers.map(({ key }) => [key, Number(form.get(key))])),

@@ -4,11 +4,11 @@ import { expect } from "./fixtures";
 
 const source = "postgres";
 
-function docker(command: string, args: string[], input?: string | Buffer) {
+export function disposableDatabaseCommand(command: string, args: string[], input?: string | Buffer) {
   const project = process.env.AYINOU_E2E_PROJECT;
   if (!/^ayinou-e2e-[a-f0-9-]{12}$/.test(project ?? "") ||
       process.env.AYINOU_E2E_SUPABASE_URL !== "http://127.0.0.1:55321") {
-    throw new Error("C2 rehearsal must use the disposable Supabase runner");
+    throw new Error("Recovery rehearsal must use the disposable Supabase runner");
   }
   const env = { ...process.env };
   for (const key of Object.keys(env)) if (/^DOCKER_(HOST|CONTEXT)$/i.test(key)) delete env[key];
@@ -21,7 +21,7 @@ function docker(command: string, args: string[], input?: string | Buffer) {
   return result.stdout;
 }
 
-export const rehearsalSql = (query: string, db = source) => docker("psql",
+export const rehearsalSql = (query: string, db = source) => disposableDatabaseCommand("psql",
   ["-XqAt", "-U", "supabase_admin", "-d", db, "-v", "ON_ERROR_STOP=1"], query).toString().trim();
 
 const recoveryTables = [
@@ -37,11 +37,11 @@ export function verifyImpactRecovery() {
   const restored = "c25_restore_" + randomBytes(6).toString("hex");
   const snapshot = rehearsalSql(integrity);
   const manifest = rehearsalSql("select count(*)||':'||max(version) from supabase_migrations.schema_migrations;");
-  const backup = docker("pg_dump", ["-U", "supabase_admin", "-d", source, "--format=custom"]);
+  const backup = disposableDatabaseCommand("pg_dump", ["-U", "supabase_admin", "-d", source, "--format=custom"]);
   const checksum = createHash("sha256").update(backup).digest("hex");
-  docker("createdb", ["-U", "supabase_admin", "--template=template0", restored]);
+  disposableDatabaseCommand("createdb", ["-U", "supabase_admin", "--template=template0", restored]);
   try {
-    docker("pg_restore", ["-U", "supabase_admin", "-d", restored, "--exit-on-error", "--single-transaction"], backup);
+    disposableDatabaseCommand("pg_restore", ["-U", "supabase_admin", "-d", restored, "--exit-on-error", "--single-transaction"], backup);
     expect(rehearsalSql(integrity, restored)).toBe(snapshot);
     expect(rehearsalSql("select count(*)||':'||max(version) from supabase_migrations.schema_migrations;", restored)).toBe(manifest);
     expect(rehearsalSql(`select not private.c24_enabled()
@@ -58,7 +58,7 @@ export function verifyImpactRecovery() {
     expect(rehearsalSql(`select public.c24_impact_for_api(2025,'education','national')->>'state';`, restored)).toBe("disabled");
     console.log("C2 disposable backup and isolated restore verified", backup.length, "bytes; SHA-256", checksum);
   } finally {
-    docker("dropdb", ["-U", "supabase_admin", "--if-exists", restored]);
+    disposableDatabaseCommand("dropdb", ["-U", "supabase_admin", "--if-exists", restored]);
     backup.fill(0);
   }
 }

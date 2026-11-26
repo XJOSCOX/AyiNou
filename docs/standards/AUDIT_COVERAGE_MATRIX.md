@@ -173,6 +173,10 @@ Appointments, suspension, revocation, case assignment, release, recusal, clarifi
 
 The restricted publication ledger retains the exact disclosure fingerprint, revision, organizer consent, scoped grant and assignment, reviewer inspection, decision, challenge, withdrawal, and automatic invalidation. Receipts record the actor and originating workspace for protected commands. Public Project Progress exposes only the approved current disclosure. [Implementation report](../project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)
 
+## C3.5 volunteer activation
+
+A Founder activation event records reason, exact configuration, original workspace and receipt, and the set of affected stages. Pending invitation invalidation and dependent pause are transactional with the decision. Configuration changes may pause the affected stages. [Final security review](../volunteering/C3_FINAL_SECURITY_REVIEW.md)
+
 ## C3.4 volunteer recruitment
 
 The scoped ledger commits invitation sends, explicit decisions and automatic invalidations with the state change. Native applications and reports remain in their own ledgers with minimized private references. Consent changes store an owner receipt. Founder preparation records an immutable reason and workspace. The in-app notification emits only an invitation ID and current state. Hosted postflight verified five private RLS tables, service-only execution, unchanged legacy notice grants and empty recruitment records. [Security tests](../volunteering/C3_4_SECURITY_TESTS.md)

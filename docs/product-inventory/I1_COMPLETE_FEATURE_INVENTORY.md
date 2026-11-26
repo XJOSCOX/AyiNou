@@ -772,6 +772,8 @@ Feature-specific local execution unverified. Feature-specific run outcome unveri
 
 ### Volunteer skills and matching
 
+C3.5 tracks the five implemented volunteer stages, operational readiness, individual enable/pause/resume and emergency pause under Platform Settings → Volunteer settings. Public skills disclosure remains deferred. [Final implementation audit](../volunteering/C3_FINAL_IMPLEMENTATION_AUDIT.md)
+
 C3.4 adds opportunity invitations to apply, independent recruitment-contact consent, and staged Founder preparation under Platform Settings → Volunteer settings. Hosted schema and connected role access were verified. Live recruitment stays closed. [Implementation report](../volunteering/C3_4_IMPLEMENTATION_REPORT.md)
 
 C3.3 adds private recommendations in volunteer settings, scoped candidate discovery per native opportunity, and Founder preparation for all ten departments under Platform Settings → Volunteer settings. The hosted schema and protected administration access were verified. Live intake, matching, and discovery stay closed. [C3.3 implementation report](../volunteering/C3_3_IMPLEMENTATION_REPORT.md)

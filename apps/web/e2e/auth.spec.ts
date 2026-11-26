@@ -105,7 +105,11 @@ test("enrolled member completes a real TOTP challenge", async ({ page, context, 
   expect(signUpSize).toMatchObject({ width: signInSize!.width, height: signInSize!.height });
   await login(page, member);
   await expect(page).toHaveURL(/\/mfa/);
-  expect(await shell.boundingBox()).toMatchObject({ width: signInSize!.width, height: signInSize!.height });
+  await expect(page.getByRole("region", { name: accountMessages.en.mfaTitle })).toBeVisible();
+  const challengeSize = (await shell.boundingBox())!;
+  expect(challengeSize.width).toBeLessThan(signInSize!.width);
+  expect(challengeSize.height).toBeLessThan(signInSize!.height);
+  expect(Math.abs(challengeSize.x + challengeSize.width / 2 - 720)).toBeLessThan(1);
   for (const [locale, width] of [["ht", 320], ["fr", 768], ["es", 1440], ["en", 320]] as const) {
     await page.setViewportSize({ width, height: 900 });
     await page.getByRole("combobox").selectOption(locale);
