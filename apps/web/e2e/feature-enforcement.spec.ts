@@ -169,7 +169,14 @@ test("M2.3 enforces authority, scope and duration on live writes @smoke", async 
     const personalEventPath = "/api/v1/events/" + personalEvent.id;
     await apiCall(subject, personalEventPath + "/status", 200, "POST", { version: personalEvent.version, status: "published" });
     const allOtherCapabilities = featureCapabilities.filter((cap) => cap !== "post");
-    const granted = await command(founder, f, 200, payload(subject, { capabilities: allOtherCapabilities }));
+    const granted = [];
+    // Feature commands accept at most 25 capabilities. Preserve the full catalog
+    // coverage as new capabilities are registered.
+    for (let start=0; start<allOtherCapabilities.length; start+=25) {
+      granted.push(...await command(founder, f, 200, payload(subject, {
+        capabilities: allOtherCapabilities.slice(start, start+25),
+      })));
+    }
     expect(granted).toHaveLength(allOtherCapabilities.length);
     expect((await apiCall(subject, socialPath, 403, "POST", orgPost)).error.code).toBe("FEATURE_RESTRICTED");
     await apiCall(other, "/api/v1/posts/" + publishedOrgPost.id, 200);

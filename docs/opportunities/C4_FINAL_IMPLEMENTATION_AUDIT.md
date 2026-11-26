@@ -32,6 +32,12 @@ The test record distinguishes connected browser reads, disposable state changes,
 
 Activation authority and pause dependencies are described in the [activation policy](C4_FINAL_ACTIVATION_POLICY.md). Hosted rollout requires the exact checksum, separate approval, read-only preservation checks and closed gates. Next.js and Fastify remain local.
 
+## Hosted database rollout
+
+The migration `20261126121000_c46_opportunity_activation.sql` was applied to AyiNou project `hcbxulyfmdmuyccgrujs` from implementation commit `97e6ec0dc45526bac6be217c8ff4473d2f6524f1`. The tested and approved SHA-256 was `2b5f50b3933e844a43187d8d8c77fd1a9aef6441eed2c6e9b66928c376dd06ca`. The guarded dry run found one migration and zero seeds or role changes. The hosted history went from 154 to 155 applied migrations. The postflight dry run found zero pending.
+
+All 174 existing record fingerprints matched, including the five Auth accounts and existing community, project, moderation, and C1–C4 data. Existing table RLS and access fingerprints, the 25 recorded RLS policies and 894 unchanged-scope routine fingerprints matched. The nine intentionally updated routines retained their previous ACLs. All 18 earlier fixture gates stayed empty. C3 stage state also stayed empty. The three new private tables are empty, enforce RLS and deny direct access to the application roles. The one new public RPC is service-only. Catalog inspection verified its session, Founder, MFA and activation guards, the dependency definitions and the exact reviewer acceptance requirement. The Founder UI independently reported all ten stages disabled and no activation decisions. No hosted operational records were created during verification.
+
 ## Remaining blockers
 
 Real applicant processing, independent staffing, safeguarding, privacy operations and provider-backed recovery require separate approval. Operational requirements are recorded in the [launch dependencies](C4_FINAL_LAUNCH_DEPENDENCIES.md).

@@ -8545,8 +8545,8 @@
       "verification": {
         "local": "See final C4 test evidence.",
         "disposableSupabase": "Enabled rehearsals use exact synthetic stage controls.",
-        "hostedDatabase": "See the C4.6 deployment report.",
-        "connectedApplication": "See the C4.6 deployment report.",
+        "hostedDatabase": "Migration 20261126121000 applied. Zero pending, all ten stages closed, and existing preservation and access fingerprints verified.",
+        "connectedApplication": "Local web and API checked against hosted Supabase using J0SC0X and Test02. Founder controls visible only to the authorized Founder and live stages closed.",
         "hostedApplication": "Next.js and Fastify remain local.",
         "operationalApproval": "C4 live activation requires an independently authorized release."
       }
