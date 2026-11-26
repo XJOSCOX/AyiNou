@@ -772,6 +772,8 @@ Feature-specific local execution unverified. Feature-specific run outcome unveri
 
 ### Volunteer skills and matching
 
+C4.2 extends Opportunity settings with publication policy, staffing plans, geographically scoped reviewers, assignments and reports. The existing verification workspace hosts independent reviews, and the existing organization profile hosts approved listings. [C4.2 implementation report](../opportunities/C4_2_IMPLEMENTATION_REPORT.md)
+
 C4.1 adds Opportunities to organization management and Opportunity settings to Platform Administration → Platform Settings for the recognized Founder. The administrative inventory covers type, organization categories, geography, participation modes, draft limits, readiness and versioned history. [C4.1 implementation report](../opportunities/C4_1_IMPLEMENTATION_REPORT.md)
 
 C3.5 tracks the five implemented volunteer stages, operational readiness, individual enable/pause/resume and emergency pause under Platform Settings → Volunteer settings. The approved database rollout is verified with all five stages disabled. Public skills disclosure remains deferred. [Final implementation audit](../volunteering/C3_FINAL_IMPLEMENTATION_AUDIT.md)

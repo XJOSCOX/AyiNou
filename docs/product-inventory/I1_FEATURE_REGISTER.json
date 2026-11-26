@@ -8295,7 +8295,56 @@
         "hostedApplication": "Local application runtime.",
         "operationalApproval": "C4 live gates stay closed."
       }
+    },
+    {
+      "id": "opportunity-publication",
+      "domain": "Organizations",
+      "name": "Reviewed opportunity publication and expressions of interest",
+      "status": "partial",
+      "currentAndLimits": "Isolated review, published organization listings, reviewed destinations, native Event association, applicant consent and withdrawal. Real operational lanes are closed.",
+      "dependencies": "C4.1 versioned opportunity drafts, verified organizations, existing independent reviewer workspaces, native Events and notifications.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/opportunities/publication-panels.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/opportunity-publication.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125140000_c42_opportunity_publication.sql"
+        ],
+        "postgresObjects": [
+          "private.c42_cases",
+          "private.c42_publications",
+          "private.c42_interest",
+          "public.c42_opportunities_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/opportunity-publication.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/opportunity-publication.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/opportunity-publication.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/opportunities/C4_2_IMPLEMENTATION_REPORT.md",
+          "docs/opportunities/C4_2_SECURITY_TESTS.md",
+          "docs/opportunities/C4_2_PERFORMANCE_REPORT.md"
+        ]
+      },
+      "verification": {
+        "local": "See the C4.2 implementation report.",
+        "disposableSupabase": "Review, publication and interest run only in isolated environments.",
+        "hostedDatabase": "Awaiting exact authorized rollout and postflight.",
+        "connectedApplication": "Next.js and Fastify remain local.",
+        "hostedApplication": "Local application runtime.",
+        "operationalApproval": "C4.2 live operations remain closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C4.1 Professional and Educational Opportunity Foundation"
+  "lastScopeUpdate": "C4.2 Professional and Educational Opportunity Publication"
 }

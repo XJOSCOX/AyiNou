@@ -10,6 +10,7 @@ import { pollMessages } from "@/lib/poll-i18n";
 import Image from "next/image";
 import Link from "next/link";
 import { recruitmentPath } from "@/lib/recruitment-api";
+import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { recruitmentCopy } from "@/lib/recruitment-i18n";
 import { loadSocialPreferences, saveSocialPreferences, type SocialNoticePreferences } from "@/lib/social-api";
 import { f24Messages } from "@/lib/f24-i18n";
@@ -37,6 +38,7 @@ import { PageHeader } from "./page-header";
 
 function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent, communityNeed, recruitment }: MemberNotification) {
   if (!available) return null;
+  if (kind === "opportunity_interest") return "/settings/opportunities";
   if (kind === "volunteer_recruitment") return recruitment ? recruitmentPath + "/" + recruitment.id : null;
   if (kind === "need_project_notice") return needLinkWorkspace;
   if (kind === "community_need_notice") return communityNeed ? "/communities/intake/needs/" + communityNeed.needId : null;
@@ -102,6 +104,7 @@ function notificationMessage(locale: Locale, item: MemberNotification) {
   const t = mediaNotificationMessages[locale];
   if (!item.available || !item.kind) return t.unavailable;
   switch (item.kind) {
+    case "opportunity_interest": return publicationCopy(locale)("interestNotice");
     case "volunteer_recruitment": return item.recruitment ? recruitmentCopy(locale)("notice") + " · " + recruitmentCopy(locale)(item.recruitment.status) : t.unavailable;
     case "need_project_notice": return needProjectLabel(locale,"notice");
     case "community_need_notice": return item.communityNeed?.action.startsWith("publication_")

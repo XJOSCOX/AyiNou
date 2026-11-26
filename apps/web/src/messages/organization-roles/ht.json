@@ -49,6 +49,18 @@
   "capabilities": {
     "polls.manage": { "label": "Jere sondaj", "detail": "Kreye epi jere sondaj pou yon òganizasyon ki kalifye." },
     "projects.operate": { "label": "Jere pwojè apwouve", "detail": "Aktive pwojè ki kalifye epi delege responsablite nan pwojè a." },
+    "opportunities.submit": {
+      "label": "Soumèt opòtinite",
+      "detail": "Soumèt yon vèsyon bouyon pou revizyon endepandan."
+    },
+    "opportunities.publish": {
+      "label": "Pibliye opòtinite",
+      "detail": "Pibliye yon vèsyon revizyon endepandan apwouve."
+    },
+    "opportunities.interest": {
+      "label": "Jere mesaj enterè",
+      "detail": "Gade epi mete ajou mesaj enterè moun dakò pataje pou anons òganizasyon an."
+    },
     "opportunities.draft": {
       "label": "Kreye bouyon opòtinite",
       "detail": "Kreye bouyon opòtinite prive."
@@ -112,8 +124,7 @@
   "planned": {
     "tasks.assign": "bay travay",
     "volunteers.coordinate": "kowòdone volontè",
-    "opportunities.submit": "soumèt opòtinite",
-    "opportunities.publish": "jere piblikasyon opòtinite",
+
     "recruitment.manage": "jere rekritman",
     "finance.reports": "gade rapò finansye",
     "announcements.publish": "pibliye anons òganizasyon"

@@ -172,6 +172,8 @@ GET /api/v1/moderation/enforcement-appeals - -
 GET /api/v1/moderation/feature-enforcement - -
 GET /api/v1/moderation/feature-enforcement/access - -
 GET /api/v1/moderation/feed - -
+GET /api/v1/opportunity-publication/public/:organization - -
+GET /api/v1/opportunity-publication/workspace - -
 GET /api/v1/polls - -
 GET /api/v1/polls/:id - -
 GET /api/v1/polls/:id/ballot - -
@@ -394,6 +396,8 @@ HEAD /api/v1/moderation/enforcement-appeals - onSend
 HEAD /api/v1/moderation/feature-enforcement - onSend
 HEAD /api/v1/moderation/feature-enforcement/access - onSend
 HEAD /api/v1/moderation/feed - onSend
+HEAD /api/v1/opportunity-publication/public/:organization - onSend
+HEAD /api/v1/opportunity-publication/workspace - onSend
 HEAD /api/v1/polls - onSend
 HEAD /api/v1/polls/:id - onSend
 HEAD /api/v1/polls/:id/ballot - onSend
@@ -599,6 +603,7 @@ POST /api/v1/members/:username/impersonation-reports 9000 -
 POST /api/v1/moderation/actions/:id/appeals 8192 -
 POST /api/v1/moderation/enforcement-appeals 8192 -
 POST /api/v1/moderation/feature-enforcement 8192 -
+POST /api/v1/opportunity-publication/workspace 4096 -
 POST /api/v1/polls 10000 -
 POST /api/v1/polls/:id/ballot 512 -
 POST /api/v1/polls/:id/nominations/:option 512 -

@@ -4185,6 +4185,58 @@
           "rolloutAndRollback": "Verify exact release, file approval and hosted fingerprints. Apply only the scoped migration. Correct forward with processing gates closed."
         }
       ]
+    },
+    {
+      "id": "opportunity-publication",
+      "report": "docs/opportunities/C4_2_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/opportunity-publication/public/:organization",
+          "contract": "GET /api/v1/opportunity-publication/public/:organization - -",
+          "access": "public",
+          "audit": {
+            "kind": "exception",
+            "detail": "Read-only organization scope serves exact published snapshots with redacted destinations and Event metadata."
+          },
+          "publicReason": "Only approved and current opportunities on an explicit organization public profile may be disclosed. Private application records are separate."
+        },
+        {
+          "route": "GET /api/v1/opportunity-publication/workspace",
+          "contract": "GET /api/v1/opportunity-publication/workspace - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Private queue and application reads expose only authorized, paginated projections."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-publication.spec.ts",
+            "denialScenario": "Closed processing, stale revisions, conflicted reviewers, unverified publishers and cross-organization recipients are denied."
+          }
+        },
+        {
+          "route": "POST /api/v1/opportunity-publication/workspace",
+          "contract": "POST /api/v1/opportunity-publication/workspace 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Writes retain transactional versioned receipts. Destination lookup is a read-only, explicit confirmation of the approved snapshot."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-publication.spec.ts",
+            "denialScenario": "Closed processing, stale revisions, conflicted reviewers, unverified publishers and cross-organization recipients are denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125140000_c42_opportunity_publication.sql",
+          "rlsAndGrants": "Seven private RLS tables, one new service-only RPC and private helpers. Existing function grants remain unchanged.",
+          "authorization": "Checks session, personal identity, scoped organization permissions, reviewer scope and original workspace. Runtime has no hosted operational mode.",
+          "compatibility": "Preserves C4.1 stable IDs and all data. Adds three organization permissions and a nullable status-notification reference, with existing access policy retained.",
+          "validation": "Disposable role, review, public projection, Event and consent round-trips. Verify exact migration and full read-only preservation in hosted postflight.",
+          "rolloutAndRollback": "Keep all operational gates closed. Apply one exactly approved migration, compare preservation and correct forward if needed."
+        }
+      ]
     }
   ]
 }

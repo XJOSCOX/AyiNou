@@ -336,6 +336,8 @@ Feature development pauses here for owner review of the engineering results and 
 - [x] C3.5 protected volunteer activation and emergency pause, integration audit and development verification. Database rollout verified with all operational gates closed. [Final decision](docs/volunteering/C3_FINAL_COMPLETION_DECISION.md)
 - [x] C4.1 private, versioned professional and educational opportunities and protected Founder preparation. Hosted database verified with all operational gates closed. [Implementation report](docs/opportunities/C4_1_IMPLEMENTATION_REPORT.md)
 
+- [ ] C4.2 independent opportunity publication, external destination review, native Event association and expressions of interest. [Implementation report](docs/opportunities/C4_2_IMPLEMENTATION_REPORT.md)
+
 ### Approved future milestones
 
 | Milestone | Scope |

@@ -19,6 +19,7 @@ import { FounderAppealReview } from "./founder-appeal-review";
 import { NeedLinkQueue } from "./need-project-links";
 import { StaffPublication } from "./community-need-publication";
 import { StaffNeeds } from "./community-needs-review";
+import { PublicationStaff } from "@/features/opportunities/publication-panels";
 import { StaffAppeals } from "./enforcement-appeals";
 import { VerificationAppealReview } from "./trust-workspace";
 
@@ -49,6 +50,7 @@ export function VerificationReview({ workspaceAction, workspaceId }: { workspace
           : <p className={institutionCard}>{t.emptyQueue}</p>}
         {access.data?.reviewer && <>
           <StaffAppeals workspace={workspaceId} lane="review" />
+          <PublicationStaff workspace={workspaceId} founder={false} />
           <><StaffNeeds workspace={workspaceId} lane="review" /><StaffPublication workspace={workspaceId} lane="review" /><NeedLinkQueue workspace={workspaceId} lane="review" /></>
           <VerificationAppealReview />
         </>}

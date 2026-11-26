@@ -87,10 +87,10 @@ export type AffiliationManagement = {
 };
 export const organizationPermissions = [
   "organization.view", "content.edit", "affiliations.manage", "affiliations.review", "affiliations.invite", "team.view", "roles.assign",
-  "projects.propose", "projects.edit", "projects.submit", "projects.view_private", "projects.operate", "polls.manage", "opportunities.draft", "opportunities.edit",
+  "projects.propose", "projects.edit", "projects.submit", "projects.view_private", "projects.operate", "polls.manage", "opportunities.draft", "opportunities.edit", "opportunities.submit", "opportunities.publish", "opportunities.interest",
 ] as const;
 export const futureOrganizationPermissions = [
-  "tasks.assign", "volunteers.coordinate", "opportunities.submit", "opportunities.publish", "recruitment.manage", "finance.reports", "announcements.publish",
+  "tasks.assign", "volunteers.coordinate", "recruitment.manage", "finance.reports", "announcements.publish",
 ] as const;
 export const protectedOrganizationPermissions = ["ownership", "verification", "platform", "contacts", "membershipPolicy"] as const;
 export type OrganizationPermission = (typeof organizationPermissions)[number];

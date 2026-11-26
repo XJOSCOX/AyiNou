@@ -173,6 +173,10 @@ Appointments, suspension, revocation, case assignment, release, recusal, clarifi
 
 The restricted publication ledger retains the exact disclosure fingerprint, revision, organizer consent, scoped grant and assignment, reviewer inspection, decision, challenge, withdrawal, and automatic invalidation. Receipts record the actor and originating workspace for protected commands. Public Project Progress exposes only the approved current disclosure. [Implementation report](../project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)
 
+## C4.2 professional and educational opportunity publication
+
+Scoped appointment, assignment, challenge, review decision, publication, suppression, moderation and applicant consent transitions record transactional receipts. The public projection contains approved revision data. The in-app interest update contains an opaque receipt and releases no shared statement. [C4.2 security checks](../opportunities/C4_2_SECURITY_TESTS.md)
+
 ## C4.1 professional and educational opportunity preparation
 
 The restricted opportunity revision is the transactional receipt for creation, edits and withdrawal. It preserves exact scope, representative, actor, revision, snapshot and request ID. Prepared Founder settings have a separate versioned history with original workspace and reason. Publication and applicant authority remain future scope. [Security tests](../opportunities/C4_1_SECURITY_TESTS.md)

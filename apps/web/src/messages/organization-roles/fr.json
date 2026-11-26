@@ -49,6 +49,18 @@
   "capabilities": {
     "polls.manage": { "label": "Gérer les sondages", "detail": "Créer et gérer les sondages d’une organisation admissible." },
     "projects.operate": { "label": "Gérer les projets approuvés", "detail": "Activer les projets admissibles et déléguer les responsabilités du projet." },
+    "opportunities.submit": {
+      "label": "Soumettre des opportunités",
+      "detail": "Soumettre une version exacte pour examen indépendant."
+    },
+    "opportunities.publish": {
+      "label": "Publier des opportunités",
+      "detail": "Publier une version approuvée par un examen indépendant."
+    },
+    "opportunities.interest": {
+      "label": "Gérer les manifestations d’intérêt",
+      "detail": "Consulter et actualiser les manifestations consenties pour les annonces de l’organisation."
+    },
     "opportunities.draft": {
       "label": "Créer des brouillons d’opportunités",
       "detail": "Créer des brouillons d’opportunités privés."
@@ -112,8 +124,7 @@
   "planned": {
     "tasks.assign": "attribuer des tâches",
     "volunteers.coordinate": "coordonner les bénévoles",
-    "opportunities.submit": "soumettre des opportunités",
-    "opportunities.publish": "gérer la publication d’opportunités",
+
     "recruitment.manage": "gérer le recrutement",
     "finance.reports": "consulter les rapports financiers",
     "announcements.publish": "publier des annonces d’organisation"

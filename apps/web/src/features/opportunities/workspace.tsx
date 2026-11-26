@@ -1,9 +1,13 @@
 "use client";
 
 import { professionalApplicationMethods, professionalOpportunityCategories, volunteerDepartments,
-  type OpportunityDetail, type OpportunityList } from "@ayinou/shared";
+  type OpportunityDetail, type OpportunityInput, type OpportunityList } from "@ayinou/shared";
 import Link from "next/link";
 import { useCallback, useRef, useState, type FormEvent } from "react";
+import { DetailFields, TypeDetails, collectDetails } from "./detail-fields";
+import { OrganizationPublication } from "./publication-panels";
+import { apiErrorCode } from "@/lib/api-errors";
+import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { MemberShell } from "@/components/member-shell";
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource } from "@/components/institution-ui";
@@ -40,7 +44,8 @@ export function OpportunityWorkspace({ id }: { id: string }) {
         <p>{listing.data?.organizationName} {listing.data && "·"} {t("private")}</p></div>
       <Link className={institutionLink} href={"/institutions/" + id}>{t("back")}</Link>
     </header>
-    {listing.error !== null && <ApiErrorNotice error={listing.error} retry={listing.refresh} signIn />}
+    {listing.error !== null && (apiErrorCode(listing.error)==="VERIFICATION_REQUIRED"
+      ? <p role="alert">{publicationCopy(locale)("identityRequired")}</p> : <ApiErrorNotice error={listing.error} retry={listing.refresh} signIn />)}
     {listing.data === null && listing.error === null && <p role="status">{authMessages[locale].working}</p>}
     {listing.data && <section className={institutionCard + " grid min-w-0 gap-3"}>
       <p>{t("privateHelp")}</p><p>{t(listing.data.publisherEligible ? "qualified" : "notQualified")}</p>
@@ -78,6 +83,7 @@ function DraftForm({ list, path, revision, cancel, saved }: {
   const t = opportunityCopy(locale);
   const [country, setCountry] = useState(revision?.snapshot.country ?? (list.settings.scopes.includes("haiti") ? "HT" : ""));
   const initial = revision?.snapshot;
+  const [kind,setKind]=useState<OpportunityInput["type"]>(initial?.type ?? list.settings.types[0]);
   const regions = new Intl.DisplayNames([locale], { type: "region" });
   const languages = new Intl.DisplayNames([locale], { type: "language" });
   const mutation = useFeedMutation();
@@ -88,7 +94,9 @@ function DraftForm({ list, path, revision, cancel, saved }: {
     if (mutation.busy) return;
     const fields = new FormData(event.currentTarget);
     const field = (name: string) => String(fields.get(name) ?? "");
+    const details=collectDetails(fields,kind);
     const input = {
+      ...(Object.keys(details).length ? {details} : {}),
       title: field("title"), description: field("description").replace(/\r\n/g, "\n"), type: field("type"),
       language: field("language"), category: field("category"), country, department: field("department") || null,
       mode: field("mode"), opensOn: field("opensOn") || null, closesOn: field("closesOn") || null,
@@ -108,7 +116,7 @@ function DraftForm({ list, path, revision, cancel, saved }: {
     <label className={labelClass}>{t("name")}<input name="title" required maxLength={120} defaultValue={initial?.title} className={institutionField} /></label>
     <label className={labelClass}>{t("description")}<textarea name="description" required maxLength={2400} rows={5} defaultValue={initial?.description} className={institutionField} /></label>
     <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      <label className={labelClass}>{t("type")}<select name="type" defaultValue={initial?.type} className={institutionField}>
+      <label className={labelClass}>{t("type")}<select name="type" value={kind} onChange={event=>setKind(event.target.value as OpportunityInput["type"])} className={institutionField}>
         {list.settings.types.map(value => <option key={value} value={value}>{t(value)}</option>)}</select></label>
       <label className={labelClass}>{t("language")}<select name="language" defaultValue={initial?.language ?? locale} className={institutionField}>
         {["ht","fr","en","es"].map(value => <option key={value} value={value}>{languages.of(value)}</option>)}</select></label>
@@ -129,6 +137,7 @@ function DraftForm({ list, path, revision, cancel, saved }: {
       <label className={labelClass}>{t("method")}<select name="method" className={institutionField} defaultValue={initial?.applicationMethod}>
         {professionalApplicationMethods.map(value => <option key={value} value={value}>{t(value)}</option>)}</select></label>
     </div>
+    <DetailFields key={kind} kind={kind} initial={kind===initial?.type?initial.details:undefined} skills={list.skills} />
     <fieldset className="grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-3">
       <legend className="mb-1 font-semibold">{t("skills")}</legend>
       {list.skills.map(skill => <label className="flex gap-2" key={skill.code}>
@@ -177,16 +186,17 @@ function DraftPreview({ path, list, updated }: { path: string; list: Opportunity
     {detail.error !== null && <ApiErrorNotice error={detail.error} retry={detail.refresh} signIn />}
     {data && <div className={institutionCard + " grid gap-3"}>
       <h2 className="text-lg font-semibold">{t("preview")} · {t(data.status)}</h2>
-      {!before && list.canEdit && data.status === "draft" && <div className="flex flex-wrap gap-3">
+      {!before && list.canEdit && ["draft","changes_requested","rejected","approved","published","restricted","expired"].includes(data.status) && <div className="flex flex-wrap gap-3">
         <button type="button" className={institutionAction} onClick={() => setEditing(true)}>{t("edit")}</button>
-        <details><summary className={institutionLink}>{t("withdraw")}</summary>
+        {data.status==="draft" && <details><summary className={institutionLink}>{t("withdraw")}</summary>
           <p className="my-2">{t("withdrawHelp")}</p>
           <button type="button" className={institutionAction} disabled={mutation.busy} onClick={withdraw}>{t("withdraw")}</button>
           {mutation.error !== null && <ApiErrorNotice error={mutation.error} signIn />}
-        </details>
+        </details>}
       </div>}
       {editing && data.history[0]?.version === data.version &&
         <DraftForm key={data.version} list={list} path={path} revision={data.history[0]} cancel={() => setEditing(false)} saved={finish} />}
+      <OrganizationPublication key={data.version+":"+data.status} organization={path.split("/")[4]} opportunity={data.id} updated={finish} />
       <h3 className="font-semibold">{t("history")}</h3>
       {data.history.map(item => <details key={item.version} open={!before && item.version === data.version} className={institutionCard}>
         <summary className="cursor-pointer break-words">{t("version")} {item.version} · {t(item.status)} · {item.snapshot.title}</summary>
@@ -216,6 +226,7 @@ function Snapshot({ item, t, locale }: { item: Revision; t: Copy; locale: string
     <dl className="grid gap-2 sm:grid-cols-2">
       {facts.filter(([,value]) => value).map(([label,value]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{value}</dd></div>)}
     </dl>
+    <TypeDetails value={snapshot.details} />
     {snapshot.references.length > 0 && <div><h4 className="font-semibold">{t("references")}</h4>
       <ul>{snapshot.references.map((reference,index) => <li className="break-all" key={index}>{reference}</li>)}</ul>
     </div>}

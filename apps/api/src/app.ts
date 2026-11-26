@@ -11,6 +11,7 @@ import { registerCommunityNeedPublication } from "./routes/community-need-public
 import { registerCommunityNeedsReview } from "./routes/community-needs-review.js";
 import { registerCommunityNeedsPilot } from "./routes/community-needs-pilot.js";
 import { registerOpportunityRequirements } from "./routes/opportunity-requirements.js";
+import { registerOpportunityPublication } from "./routes/opportunity-publication.js";
 import { registerProfessionalOpportunities } from "./routes/professional-opportunities.js";
 import { registerVolunteerActivation } from "./routes/volunteer-activation.js";
 import { registerVolunteerRecruitment } from "./routes/volunteer-recruitment.js";
@@ -121,6 +122,9 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register(instance => registerProfessionalOpportunities(instance,
     config.AYINOU_PROFESSIONAL_OPPORTUNITIES === "synthetic" && config.SUPABASE_URL === "http://127.0.0.1:55321"
       && process.env.NODE_ENV !== "production", auth, institutions, readBudget));
+  app.register(instance => registerOpportunityPublication(instance,
+    config.AYINOU_OPPORTUNITY_PUBLICATION === "synthetic" && config.SUPABASE_URL === "http://127.0.0.1:55321"
+      && process.env.NODE_ENV !== "production",auth,institutions,readBudget));
   const syntheticImpact = syntheticOutcomePublication && config.AYINOU_IMPACT_REPORTING === "synthetic";
   app.register((instance) => registerImpact(instance, syntheticImpact, auth, institutions, readBudget));
   app.register((instance) => registerCommunityNeedsReview(instance, needs));

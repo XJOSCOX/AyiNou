@@ -23,6 +23,7 @@ const snapshot = z.strictObject({
   country: z.string().regex(/^[A-Z]{2}$/), department: z.enum(volunteerDepartments).nullable(),
   mode: z.enum(professionalOpportunityModes), opensOn: z.iso.date().nullable(), closesOn: z.iso.date().nullable(),
   skills: z.array(z.string().regex(/^[a-z][a-z0-9_]{2,39}$/)).max(12),
+  details: z.record(z.string().max(40),z.unknown()).optional(),
   references: z.array(reference).max(4), applicationMethod: z.enum(professionalApplicationMethods),
 });
 const draft = z.strictObject({ ...request, snapshot });

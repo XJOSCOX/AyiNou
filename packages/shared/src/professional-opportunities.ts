@@ -5,7 +5,7 @@ export const professionalOpportunityModes = ["remote", "on_site", "hybrid"] as c
 export const professionalOpportunityScopes = ["haiti", "international"] as const;
 export const professionalOpportunityCategories = ["professional", "educational"] as const;
 export const professionalApplicationMethods = ["undecided", "external", "expression_of_interest", "event_registration"] as const;
-export const professionalOpportunityStatuses = ["draft", "submitted", "changes_requested", "approved", "published", "closed", "withdrawn", "restricted", "expired", "archived"] as const;
+export const professionalOpportunityStatuses = ["draft", "submitted", "changes_requested", "rejected", "approved", "published", "closed", "withdrawn", "restricted", "expired", "archived"] as const;
 
 type OpportunityLiteral<T extends readonly string[]> = T[number];
 export type OpportunityStatus = OpportunityLiteral<typeof professionalOpportunityStatuses>;
@@ -18,6 +18,7 @@ export type OpportunityInput = {
   title: string; description: string; type: OpportunityLiteral<typeof professionalOpportunityTypes>;
   language: "ht" | "fr" | "en" | "es"; category: OpportunityLiteral<typeof professionalOpportunityCategories>; country: string;
   department: string | null; mode: OpportunityLiteral<typeof professionalOpportunityModes>; opensOn: string | null; closesOn: string | null;
+  details?: Record<string, unknown>;
   skills: string[]; references: string[]; applicationMethod: OpportunityLiteral<typeof professionalApplicationMethods>;
 };
 export type OpportunityList = {

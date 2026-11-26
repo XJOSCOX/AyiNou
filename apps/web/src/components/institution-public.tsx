@@ -14,6 +14,7 @@ import { InstitutionLogo, InstitutionStatus, VerifiedBadge, institutionAction, i
 import { ApiErrorNotice } from "./api-error-notice";
 import { ImpersonationReportForm } from "./trust-workspace";
 import { PublicAffiliationPanel } from "./public-affiliation-panel";
+import { PublicOpportunityList } from "@/features/opportunities/publication-panels";
 import { OrganizationTimeline } from "./organization-timeline";
 import { MemberShell } from "./member-shell";
 import { ProfileFollowPanel } from "./discovery-accounts";
@@ -70,6 +71,7 @@ export function InstitutionPublic({ organization: org, signedIn }: { organizatio
           </section>
           <div className="min-w-0 lg:col-start-2 lg:row-start-1 lg:row-span-2">
             <OrganizationTimeline handle={org.handle} signedIn={signedIn} />
+            <PublicOpportunityList organization={org.id} signedIn={signedIn} />
           </div>
           <aside className="grid min-w-0 gap-4 lg:col-start-1">
             <PublicAffiliationPanel organization={org} signedIn={signedIn} />

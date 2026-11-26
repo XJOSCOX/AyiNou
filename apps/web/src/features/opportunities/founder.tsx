@@ -8,6 +8,7 @@ import { authorizedSocialRequest } from "@/lib/feed-api";
 import { useLocale } from "@/lib/locale-store";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
+import { PublicationStaff } from "./publication-panels";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
 
 const path = "/api/v1/admin/opportunity-settings";
@@ -58,6 +59,7 @@ export function FounderOpportunitySettings({ workspace }: { workspace: string })
         {t("version")} {item.version} · <time dateTime={item.registered_at}>{new Date(item.registered_at).toLocaleString(locale)}</time> · {item.reason}
       </li>)}</ul>
     </>}
+    <PublicationStaff workspace={workspace} founder />
     <h3 className="font-semibold">{t("stages")}</h3>
     <ul className="grid gap-1 sm:grid-cols-2">
       {(["employment","internship","scholarship","training","expression","mentorship","recommendations"] as const)

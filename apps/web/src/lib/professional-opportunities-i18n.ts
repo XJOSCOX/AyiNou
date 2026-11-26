@@ -2,6 +2,7 @@ import type { Locale } from "@ayinou/shared";
 
 const locales = {en: 0, ht: 1, fr: 2, es: 3} as const;
 const labels = {
+  rejected: ["Rejected","Rejte","Refusé","Rechazado"],
   cancel: ["Cancel", "Anile", "Annuler", "Cancelar"],
   title: ["Opportunities","Opòtinite","Opportunités","Oportunidades"],
   settings: ["Opportunity settings","Paramèt opòtinite","Paramètres des opportunités","Configuración de oportunidades"],

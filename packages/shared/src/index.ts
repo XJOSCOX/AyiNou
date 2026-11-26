@@ -29,6 +29,7 @@ export * from "./impact";
 export * from "./volunteering";
 export * from "./opportunity-requirements";
 export * from "./professional-opportunities";
+export * from "./opportunity-publication";
 export * from "./volunteer-matching";
 export * from "./voting";
 export * from "./notifications";

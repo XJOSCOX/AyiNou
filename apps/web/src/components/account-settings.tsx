@@ -14,6 +14,7 @@ import { mediaNotificationMessages } from "@/lib/media-notification-i18n";
 import { safetyMessages } from "@/lib/safety-i18n";
 import { useLocationFragment } from "@/lib/use-location-fragment";
 import { privacyMessages } from "@/lib/privacy-i18n";
+import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { FounderBootstrap } from "./founder-bootstrap";
 import { AccountMfa } from "./account-mfa";
@@ -78,6 +79,7 @@ export function AccountSettings({ subject }: { subject: string }) {
               { href: "/profile#public-profile", title: a.publicProfile, help: a.publicHelp },
               { href: "/profile#privacy", title: a.privacy, help: a.privacyHelp },
               { href: "/settings/privacy-requests", title: privacyMessages[locale].title, help: privacyMessages[locale].settings },
+              { href: "/settings/opportunities", title: publicationCopy(locale)("myInterest"), help: publicationCopy(locale)("interestHelp") },
               { href: "/settings/volunteering", title: volunteerCopy(locale)("title"), help: volunteerCopy(locale)("intro") },
               { href: "/settings/ambassadors", title: ambassadorMessages[locale].myProgram },
             ].map(({ href, title, help }) => (
