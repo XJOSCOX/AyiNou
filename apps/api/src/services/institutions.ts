@@ -36,6 +36,10 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
   async function rpc<T>(name: string, input: Record<string, unknown>): Promise<T> {
     const { data, error } = await client.rpc(name, input);
     if (error) {
+      if (name === "c44_coordination_for_api" || name === "c44_reports_for_api") {
+        if (error.code === "40001") throw new InstitutionError("STALE_VERSION", 409);
+        if (error.code === "PGRST202") throw new InstitutionError("SERVICE_UNAVAILABLE", 503);
+      }
       if (error.code === "PGRST202" && ["founder_identity_read_for_api", "founder_identity_workspace_for_api"].includes(name)) {
         throw new InstitutionError("FOUNDER_IDENTITY_NOT_DEPLOYED", 503);
       }

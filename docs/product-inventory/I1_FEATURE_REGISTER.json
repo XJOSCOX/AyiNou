@@ -8392,7 +8392,61 @@
         "hostedApplication": "Local application runtime.",
         "operationalApproval": "C4.3 live operations are closed."
       }
+    },
+    {
+      "id": "mentorship-coordination",
+      "domain": "Opportunities",
+      "name": "Private mentorship matching and coordination",
+      "status": "implemented",
+      "currentAndLimits": "Closed live stages. Disposable fixtures exercise participant matching, private requests and agreements, capacity, learning and session coordination, and scoped safety triage.",
+      "dependencies": "C4.3 role profiles and identity, C3 skills, native privacy and moderation, in-app notification infrastructure and Founder Opportunity settings.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/opportunities/mentorship-coordination.tsx",
+          "apps/web/src/features/opportunities/mentorship-workspace.tsx",
+          "apps/web/src/features/opportunities/mentorship-coordination-founder.tsx",
+          "apps/web/src/features/opportunities/mentorship-report-triage.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/mentorship.ts",
+          "apps/api/src/routes/mentorship-coordination.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125142000_c44_mentorship_coordination.sql"
+        ],
+        "postgresObjects": [
+          "private.c44_candidate_topics",
+          "private.c44_relationships",
+          "private.c44_reports",
+          "public.c44_coordination_for_api",
+          "public.c44_reports_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/mentorship-coordination.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/mentorship-profiles.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/mentorship-coordination.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/opportunities/C4_4_IMPLEMENTATION_REPORT.md",
+          "docs/opportunities/C4_4_SECURITY_TESTS.md",
+          "docs/opportunities/C4_4_PERFORMANCE_REPORT.md"
+        ]
+      },
+      "verification": {
+        "local": "See C4.4 implementation report.",
+        "disposableSupabase": "Enabled scenarios use isolated synthetic accounts and fixture gates.",
+        "hostedDatabase": "Pending exact migration authorization and postflight.",
+        "connectedApplication": "See implementation report.",
+        "hostedApplication": "Local application runtime only.",
+        "operationalApproval": "All live C4 mentorship stages remain closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C4.3 Mentor and Mentee Profiles"
+  "lastScopeUpdate": "C4.4 Mentorship Matching and Coordination"
 }

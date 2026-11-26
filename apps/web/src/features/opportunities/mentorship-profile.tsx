@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { coordinationCopy } from "@/lib/mentorship-coordination-i18n";
 import { useCallback, useRef, useState, type FormEvent, type ReactNode } from "react";
 import {
   mentorshipConsents, mentorshipRoles, volunteerDepartments, volunteerLanguages, volunteerLevels,
@@ -64,6 +66,7 @@ export function MentorshipProfileScreen() {
   return <MemberShell><div className="grid min-w-0 gap-4">
     <OpportunityPageHeader title={t("title")} description={t("intro")}
       back={{ href: "/settings", label: accountMessages[locale].settings }} />
+    <Link className={opportunitySecondary + " w-fit"} href="/settings/opportunities/mentorship/coordination">{coordinationCopy(locale)("title")}</Link>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {!data && resource.error === null && <OpportunityState>{t("loading")}</OpportunityState>}
     {saved && <OpportunityState>{t("saved")}</OpportunityState>}

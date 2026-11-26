@@ -9,6 +9,7 @@ import { projectProgressMessages } from "@/lib/project-progress-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import Image from "next/image";
 import Link from "next/link";
+import { coordinationCopy } from "@/lib/mentorship-coordination-i18n";
 import { recruitmentPath } from "@/lib/recruitment-api";
 import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { recruitmentCopy } from "@/lib/recruitment-i18n";
@@ -36,8 +37,10 @@ import { OutcomeReviewNotices } from "@/features/projects/outcome-review/member-
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 
-function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent, communityNeed, recruitment }: MemberNotification) {
+function notificationTarget({ available, kind, actor, postId, commentId, appealId, projectOperation, pollEvent, communityEvent, communityNeed, recruitment, mentorship }: MemberNotification) {
   if (!available) return null;
+  if (kind === "mentorship_notice") return mentorship ? "/settings/opportunities/mentorship/coordination/" +
+    (mentorship.relationship ? "relationships/" : "requests/") + mentorship.id : null;
   if (kind === "opportunity_interest") return "/settings/opportunities";
   if (kind === "volunteer_recruitment") return recruitment ? recruitmentPath + "/" + recruitment.id : null;
   if (kind === "need_project_notice") return needLinkWorkspace;
@@ -105,6 +108,7 @@ function notificationMessage(locale: Locale, item: MemberNotification) {
   if (!item.available || !item.kind) return t.unavailable;
   switch (item.kind) {
     case "opportunity_interest": return publicationCopy(locale)("interestNotice");
+    case "mentorship_notice": return coordinationCopy(locale)("notice");
     case "volunteer_recruitment": return item.recruitment ? recruitmentCopy(locale)("notice") + " · " + recruitmentCopy(locale)(item.recruitment.status) : t.unavailable;
     case "need_project_notice": return needProjectLabel(locale,"notice");
     case "community_need_notice": return item.communityNeed?.action.startsWith("publication_")

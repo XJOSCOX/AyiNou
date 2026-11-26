@@ -25,6 +25,7 @@ import { adminActionPanel, adminCompactCard, adminSecondaryAction } from "./admi
 import { MemberShell } from "./member-shell";
 import { PageHeader } from "./page-header";
 import { SafetyOverviewPanel } from "./moderation-appeals";
+import { MentorshipReportTriage } from "@/features/opportunities/mentorship-report-triage";
 import { ModerationAppeals, ModerationList, ModerationOverview } from "./moderation-center";
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { FeatureEnforcementPanel } from "./feature-enforcement";
@@ -205,7 +206,10 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               </>}
               {tab === "communityNeeds" && <><StaffNeeds workspace={workspaceId} lane="admin" /><StaffPublication workspace={workspaceId} lane="admin" /><NeedLinkQueue workspace={workspaceId} lane="admin" /></>}
               {tab === "moderationOverview" && <ModerationOverview workspace={workspaceId} onNavigate={navigate} />}
-              {tab === "moderationReports" && <ModerationList key="reports" view="reports" workspace={workspaceId} onNavigate={navigate} />}
+              {tab === "moderationReports" && <>
+                <ModerationList key="reports" view="reports" workspace={workspaceId} onNavigate={navigate} />
+                <MentorshipReportTriage workspace={workspaceId} />
+              </>}
               {tab === "moderationContent" && <ModerationList key="content" view="content" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationRestrictions" && <ModerationList key="restrictions" view="restrictions" workspace={workspaceId} onNavigate={navigate} />}
               {tab === "moderationHistory" && <ModerationList key={accountFilter ?? "history"} view="history" workspace={workspaceId} target={accountFilter} onNavigate={navigate} />}

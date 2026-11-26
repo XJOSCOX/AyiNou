@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { volunteerDepartments, type MentorshipFounderView, type MentorshipOwnerView, type MentorshipPreferences } from "@ayinou/shared";
 import { mentorshipCopy } from "../src/lib/mentorship-i18n";
+import { coordinationCopy } from "../src/lib/mentorship-coordination-i18n";
 import { volunteerCategory } from "../src/lib/volunteer-i18n";
 import { api, enroll, expect, finishPersonalOnboarding, localClient, login, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 
@@ -165,6 +166,18 @@ test("C4.3 Founder preparation works with live intake closed and member navigati
       body: JSON.stringify({ kind: "admin_workspace" }) });
     expect(opened.status).toBe(200);
     const workspace = (await opened.json()).id;
+    const coordinationPath = adminPath + "/coordination";
+    const preparedCoordination = await call(coordinationPath, 200, elevated, undefined, workspace);
+    expect(preparedCoordination).toMatchObject({ version:0, live:false, stages:{
+      intake:false,matching:false,discovery:false,requests:false,coordination:false,
+    }});
+    const prepareCoordination = { requestId:randomUUID(),expectedVersion:0,confirmed:true,
+      reason:"Prepare the disposable coordination limits.",settings:preparedCoordination.settings };
+    await call(coordinationPath,400,elevated,{...prepareCoordination,enabled:true},workspace);
+    await call(coordinationPath,403,elevated,prepareCoordination,randomUUID());
+    expect(await call(coordinationPath,200,elevated,prepareCoordination,workspace)).toEqual({version:1});
+    expect(await call(coordinationPath,200,elevated,prepareCoordination,workspace)).toEqual({version:1});
+    await call(coordinationPath,409,elevated,{...prepareCoordination,requestId:randomUUID()},workspace);
     const current: MentorshipFounderView = await call(adminPath, 200, elevated, undefined, workspace);
     expect(current).toMatchObject({ version: 0, live: false, history: [] });
     expect(current).not.toHaveProperty("profiles");
@@ -182,9 +195,10 @@ test("C4.3 Founder preparation works with live intake closed and member navigati
     await page.goto("/admin?section=opportunitySettings");
     await page.getByRole("button", { name: "Open administration", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Mentorship preparation", exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: coordinationCopy("en")("founder"), exact: true })).toBeVisible();
     await expect(page.getByText(mentorshipCopy("en")("activation"), { exact: true })).toBeVisible();
     const settingsForms = page.locator('details[name="opportunity-configuration"]');
-    const mentorshipForm = settingsForms.filter({ hasText: "Edit preparation settings" });
+    const mentorshipForm = settingsForms.filter({ hasText: "Supported skill categories" });
     await page.setViewportSize({ width: 390, height: 900 });
     await mentorshipForm.locator(":scope > summary").press("Enter");
     await expect(mentorshipForm.locator("fieldset").first()).toBeHidden();
@@ -206,15 +220,21 @@ test("C4.3 Founder preparation works with live intake closed and member navigati
       await context.addCookies([{ name: "ayinou-locale", value: locale, url: web }]);
       const width = locale === "en" ? 1440 : 390;
       await page.setViewportSize({ width, height: 900 });
-      await page.reload();
+      await page.goto(webPath);
       const t = mentorshipCopy(locale);
       await expect(page.getByRole("heading", { name: t("title"), exact: true })).toBeVisible();
       await expect(page.getByText(t("closed"), { exact: true })).toBeVisible();
       expect(await page.getByRole("button", { name: t("save") }).count()).toBe(0);
+      await page.getByRole("link", { name: coordinationCopy(locale)("title"), exact:true }).click();
+      await expect(page.getByText(coordinationCopy(locale)("closed"), {exact:true})).toBeVisible();
+      await expect(page.getByRole("button", {name:coordinationCopy(locale)("send")})).toHaveCount(0);
+      expect(await page.locator("body").evaluate(body => body.scrollWidth)).toBeLessThanOrEqual(width);
+      await page.getByRole("link", {name:coordinationCopy(locale)("profile"),exact:true}).click();
+      await expect(page).toHaveURL(new RegExp(webPath + "$"));
       expect(await page.locator("body").evaluate(body => body.scrollWidth)).toBeLessThanOrEqual(width);
     }
   } finally {
-    sql("delete from private.c43_admin_history; delete from private.c43_settings; delete from private.platform_bootstrap;");
+    sql("delete from private.c44_preparation; delete from private.c43_admin_history; delete from private.c43_settings; delete from private.platform_bootstrap;");
   }
 });
 

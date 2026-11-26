@@ -4318,6 +4318,152 @@
           "rolloutAndRollback": "Apply only the exactly authorized migration and verify read-only preservation. Correct forward with all live gates closed."
         }
       ]
+    },
+    {
+      "id": "mentorship-coordination",
+      "report": "docs/opportunities/C4_4_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/mentorship/coordination",
+          "contract": "GET /api/v1/me/mentorship/coordination - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Participant-owned request list and minimal consent-bound lifecycle maintenance."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Guests are denied and closed gates return no records."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/mentorship/coordination/matches",
+          "contract": "GET /api/v1/me/mentorship/coordination/matches - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Bounded role and topic projection."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Role consent, native privacy and current compatibility govern candidate projections."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/mentorship/coordination/requests/:id",
+          "contract": "GET /api/v1/me/mentorship/coordination/requests/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Participant-only request projection."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Unrelated accounts are denied and terminal requests omit the introduction."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/mentorship/coordination/relationships/:id",
+          "contract": "GET /api/v1/me/mentorship/coordination/relationships/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Participant-only workspace projection."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Unrelated accounts are denied and safety-restricted content is redacted."
+          }
+        },
+        {
+          "route": "POST /api/v1/me/mentorship/coordination",
+          "contract": "POST /api/v1/me/mentorship/coordination 6000 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Lifecycle transitions and scoped receipts share a transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Foreign selection, stale confirmations and capacity conflicts are denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/opportunity-settings/mentorship/coordination",
+          "contract": "GET /api/v1/admin/opportunity-settings/mentorship/coordination - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Founder-only preparation and bounded history."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-profiles.spec.ts",
+            "denialScenario": "Ordinary or foreign workspace sessions are denied."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/opportunity-settings/mentorship/coordination",
+          "contract": "PATCH /api/v1/admin/opportunity-settings/mentorship/coordination 3200 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Founder preparation revision, reason and idempotency receipt commit atomically."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-profiles.spec.ts",
+            "denialScenario": "Invalid fields and stale preparation revisions are denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/moderation/mentorship",
+          "contract": "GET /api/v1/admin/moderation/mentorship - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Metadata-only scoped triage queue."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Without an active administration workspace, the queue is denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/moderation/mentorship/:id",
+          "contract": "GET /api/v1/admin/moderation/mentorship/:id - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Case-specific evidence projection."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Unassigned staff and participants cannot open the report."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/moderation/mentorship/:id",
+          "contract": "PATCH /api/v1/admin/moderation/mentorship/:id 2600 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Case-specific decisions commit with version, reason and receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-coordination.spec.ts",
+            "denialScenario": "Unauthorized assignments and inconsistent versions are denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125142000_c44_mentorship_coordination.sql",
+          "rlsAndGrants": "Twelve private RLS tables, service-only coordination and triage RPCs, native notification references and an additive mentorship restriction capability.",
+          "authorization": "Session-bound role eligibility and independent scoped consent. Participant isolation, exact mutual revision, serialized capacity and assignment-scoped moderation.",
+          "compatibility": "No gated records are seeded and earlier data and role assignments are preserved. Existing native notifications retain visibility rules.",
+          "validation": "Disposable integration, concurrency, authorization and scale tests, with read-only hosted verification after exact approval.",
+          "rolloutAndRollback": "Apply only the exact authorized migration. Keep both fixture gates empty and correct forward if required."
+        }
+      ]
     }
   ]
 }

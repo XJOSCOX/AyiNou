@@ -134,7 +134,7 @@
     "f25FeaturePolicyKeys": "value:e2ee4fb342be87f4092f3adb5fd8190308bbc4f8814e4284764da329d2f5c6b6",
     "F25PolicyKey": "type:95d6ad7a9452e40b0b4556d51b63259cc01179545ee5c96562f1af085aae8ea7",
     "FeatureAuthority": "type:abfd7beb585efd5deb8246792801582a26d971e7c9c54435af21faf9688f7f7f",
-    "featureCapabilities": "value:cff3d6e05031e240bd4398fc4044c34d77d7911ed0fdcd86b8e61939d4b786af",
+    "featureCapabilities": "value:c50f8d8110714e054db46bb4dfe6ece31500b5f4d8b1a1e9534218bbada49814",
     "FeatureCapability": "type:9c20cce15fbcf4b1e22489bb140b14ee170979185c9af351cf8a70bce9fb9f51",
     "FeatureCommand": "type:49627124805ba83c8b37b67d23cdf7071a5efa8d822b9d4472e55b2726c29c86",
     "featureCommands": "value:a775b600bd8cb7fa10e72a85d87b51e04f0189d70c22ee0b3aed72bd1b12cded",
@@ -238,7 +238,7 @@
     "memberExperienceFlags": "value:02a7687709e3503988502719bbe78abbf3875ab0d0dff572218405c618fd92f6",
     "MemberExperiencePolicy": "type:0c0df4a0db6c24359b943fa702dee911c086f3d57853351a91983ddf6e920331",
     "MemberGroup": "type:237fc2e570d41cefad3bbb9ec69b01d8b091487088c127ea069aaab29a843a76",
-    "MemberNotification": "type:e0203aa6ad2d47de5e25c596389d0890dbf3009a0c9433d1617b4777f37891d5",
+    "MemberNotification": "type:ce405a3daefa62a4fae8cc917517fe1a1dfea7d6d68f6b4cf6921bd217ee6a9b",
     "MemberOutcomeReview": "type:bf77391225fca634f8d062e43b067b53bda4aa1224599772d33cc16a9c183ea0",
     "MemberProfile": "type:97a2677e28cc4f1404f47731b87afd08260b9c2655ef65148fb9d54ca3cd0e40",
     "MemberSafetyEntry": "type:5008e6ae013e295ea930d305a4fc46830b51993b62f31870ae384c1be8262527",
@@ -247,21 +247,36 @@
     "membershipPolicies": "value:417e7e0fe3a3fc411158da2d090601673acb808cdfa0afe5afdb191f429f0920",
     "MembershipPolicy": "type:1d976578610460f8754f78b22beadb03b88f188f4112d5775a3a387803550e77",
     "mentionPolicies": "value:1c1fd116eb9a208747a25f6f8540510b1c5804c721d92cb80c0220732a4989fb",
+    "MentorshipAgreementTerms": "type:becafe600e9a5ef8483aa2d3c5eadb0a98cd30e0cfd08e21c984b06a17627fd8",
+    "MentorshipCandidate": "type:2205661cb9cdb705d2c8acaa985a9c50d2939924d0d9bcef4bcabe873474bc31",
+    "mentorshipCompatibilityReasons": "value:4d40e720b01e48134e88b6f1e3b9f41439ed33a5fdc55f104e338c18ea412d71",
     "MentorshipConfiguration": "type:bd6626c524c47446246fdf79d1281624d1bdb79fe1e451517257ac9b44d9753e",
     "MentorshipConsent": "type:c05ead870860ffe6b90eaa0f5d67a8d768e50f82522a8b0316e2e7b533409dbe",
     "mentorshipConsents": "value:65aec040a22fe25743f5e018ae94634eaf717113b9fa9d23b6991782424ae8b0",
+    "mentorshipConsiderations": "value:38b4349794dd005a2c45520b2faa373feeaf545347fe365e2bcc7757504d798b",
+    "mentorshipCoordinationLimits": "value:6d3731c3370a1ca99572f45fc665ac2686199d42f25cd1b99e0cba90265a77a8",
+    "MentorshipCoordinationPreparation": "type:a8c35a999f9143f19fefac1f1708b8c13d6ef52f54e605dd481abfded47cb749",
+    "MentorshipCoordinationSettings": "type:f24cafc10b4efd13ea2b1486d7f70fcda356550bbe243fc99ef5c3b735867fa0",
     "MentorshipFounderView": "type:6fedbdffd7c16baa7886f761360a2142db226d1c80c4f1354a769e0bcc7e3284",
     "mentorshipGeographies": "value:c779193539a1ff9d4731c8eb2e673f6c958a445b590d1c3f2fc6f3e02726fd9a",
+    "MentorshipItem": "type:ab57b5844543f40de8c0be134cc0831e91f153a5163a7b8aad1793b9628664aa",
+    "MentorshipItemContent": "type:f978c3d2cb5cdc0718cb763abb5ccf8efb8a4f7b4c16ec2644685f02efe27858",
     "mentorshipOptionalFields": "value:7367e2d11bbafe80acafae431c88013f76731fec286a22bfd202bcec934a8b76",
     "MentorshipOwnerView": "type:da847640396a16313b8200269423c36bd776f6d2b9819ef5941ce8e8265b85da",
+    "MentorshipPage": "type:459bcf9d757df61592a8578d08d477af2dceba8fb7b984f5b964c71fcb46e718",
     "MentorshipPreferences": "type:e2f32df84979c1a3c21af3a1d58f8bc2830d8dd993e76db7ae5e322de41e9782",
     "MentorshipProfile": "type:8b7b3e49c6cf32da563f69f05172500f5eb179ecec79bc569e66204b3ec9a536",
+    "mentorshipRelationshipStates": "value:bbb5b04087cd11ac29c42313fae2787c566f860c065e4aec5b8257a4c45ead2d",
+    "mentorshipReportCategories": "value:ebee029cdab04fc019e093a5adba491f18281bdbfc8bdcf41c91fee705c864fc",
+    "MentorshipRequest": "type:b15ee1315e4c6207297f217bd1cfda97d7fc5aa64fda8543db4216e44f6b06ee",
+    "mentorshipRequestStates": "value:122fa4dd9d832aae875e990e5e58a8e31f2c6cd6010d1097c16e1c97cc7f9c3e",
     "MentorshipRole": "type:b16df817a810160fbe0b07c6a693d587f4b2466446396c44d9d3f07165245196",
     "mentorshipRoles": "value:19eb0c8e674eccba4bd3aebca352a892c2384ace8762df710a3ad8f63614a894",
     "MentorshipSkill": "type:225882611149f2480637cfe48830519cb8980841adc49f50b3c590271298f907",
     "MentorshipStatus": "type:8c760cfa97b84d8ca3f470bf9dd55f25c64618ca0ca4810284ce49bd76b64087",
     "MentorshipTopic": "type:e876cf9dee65ed9cabfd1473d7dea546b32a732bcb6dd28068b1eb86fb734955",
     "mentorshipTopics": "value:1fb9177c671d5e8df6a3eaef497295c5f4ba753f8ca8235967d85df401052eea",
+    "MentorshipWorkspace": "type:a79dd4552d5e9f528c6e21b964ae9048ef156687c792fd8bdab0fd7394ab1bf7",
     "ModerationAction": "type:4e9ec83f3339679e9718613ef273ad59a944e41c7e80555ae9d7596e559fbb19",
     "moderationActions": "value:71e818bc8b0fc2f0eb8ded176c70acae75b69097f2f6f2f61080a5d3889f4b65",
     "ModerationAppeal": "type:50dd87949779bc5f68bd52a29776f2732d0cd640cf3bb0a3590296db60ced06d",
@@ -826,6 +841,7 @@
       "community_create",
       "community_publish",
       "community_need_submit",
+      "mentorship_participate",
       "group_manage",
       "project_create",
       "project_update",
@@ -1076,11 +1092,76 @@
       "following",
       "no_one"
     ],
+    "mentorshipCompatibilityReasons": [
+      "topicFit",
+      "topicMismatch",
+      "languageFit",
+      "languageMismatch",
+      "skillMissing",
+      "skillGrowth",
+      "skillFit",
+      "skillMismatch",
+      "modeFit",
+      "modeMismatch",
+      "geographyFit",
+      "geographyMismatch",
+      "timingFit",
+      "timingMismatch",
+      "experienceMissing",
+      "experienceReported"
+    ],
     "mentorshipConsents": [
       "recommendations",
       "discovery",
       "requests"
     ],
+    "mentorshipConsiderations": [
+      "skills",
+      "timing",
+      "experience"
+    ],
+    "mentorshipCoordinationLimits": {
+      "recommendationLimit": [
+        1,
+        12
+      ],
+      "senderDaily": [
+        1,
+        5
+      ],
+      "recipientDaily": [
+        1,
+        5
+      ],
+      "outstanding": [
+        1,
+        5
+      ],
+      "expiryDays": [
+        1,
+        14
+      ],
+      "cooldownDays": [
+        14,
+        90
+      ],
+      "capacity": [
+        1,
+        8
+      ],
+      "agreementWeeks": [
+        1,
+        52
+      ],
+      "sessionDays": [
+        7,
+        90
+      ],
+      "sessionMinutes": [
+        15,
+        120
+      ]
+    },
     "mentorshipGeographies": [
       "haiti_departments",
       "haiti_nationwide",
@@ -1091,6 +1172,32 @@
       "experience",
       "summary",
       "goals"
+    ],
+    "mentorshipRelationshipStates": [
+      "agreement_pending",
+      "active",
+      "paused",
+      "completed",
+      "ended",
+      "safety_restricted"
+    ],
+    "mentorshipReportCategories": [
+      "harassment",
+      "unwanted_contact",
+      "impersonation",
+      "misrepresentation",
+      "solicitation",
+      "exploitation",
+      "unsafe_activity",
+      "privacy"
+    ],
+    "mentorshipRequestStates": [
+      "pending",
+      "accepted",
+      "declined",
+      "withdrawn",
+      "expired",
+      "invalidated"
     ],
     "mentorshipRoles": [
       "mentor",
@@ -1411,6 +1518,7 @@
       "community_create",
       "community_publish",
       "community_need_submit",
+      "mentorship_participate",
       "project_create",
       "project_update",
       "volunteer_apply",

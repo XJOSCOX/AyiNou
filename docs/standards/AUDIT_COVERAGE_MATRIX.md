@@ -177,6 +177,8 @@ The restricted publication ledger retains the exact disclosure fingerprint, revi
 
 Role preferences, current consent timestamps and the latest versioned receipt commit in the same transaction. Founder preparation records actor, original workspace, reason, version and a settings snapshot. Owner and catalog reads have no new durable audit event or third-party recipient. [C4.3 security checks](../opportunities/C4_3_SECURITY_TESTS.md)
 
+C4.4 retains private request, agreement, relationship, session, objective and report events. Restricted event rows preserve evidence revisions and correction details only at the relevant relationship or report. Founder setting versions and case triage actions keep the original workspace, actor, reason and receipt. Minimal in-app references share the transaction. [C4.4 security evidence](../opportunities/C4_4_SECURITY_TESTS.md)
+
 ## C4.2 professional and educational opportunity publication
 
 Scoped appointment, assignment, challenge, review decision, publication, suppression, moderation and applicant consent transitions record transactional receipts. The public projection contains approved revision data. The in-app interest update contains an opaque receipt and releases no shared statement. [C4.2 security checks](../opportunities/C4_2_SECURITY_TESTS.md)

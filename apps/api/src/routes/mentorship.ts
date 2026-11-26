@@ -9,6 +9,10 @@ import type { AuthVerifier } from "../services/auth.js";
 import { InstitutionError, type InstitutionRepository } from "../services/institutions.js";
 import type { ReadBudget } from "../services/read-budget.js";
 
+import {
+  coordinationCandidates, coordinationCommand, coordinationDashboard, coordinationPreparation, coordinationResource, mentorshipModerationCommand,
+} from "./mentorship-coordination.js";
+
 const empty = z.strictObject({});
 const role = z.enum(mentorshipRoles);
 const integer = (min: number, max: number) => z.number().int().min(min).max(max);
@@ -61,28 +65,32 @@ export function registerMentorship(app: FastifyInstance, synthetic: boolean, aut
       .header("Referrer-Policy", "no-referrer");
   });
 
-  async function run(request: FastifyRequest, lane: "owner" | "founder", action: string, input: object = {}) {
+  async function run(request: FastifyRequest, lane: "owner" | "founder" | "moderation", action: string, input: object = {}, coordination = false) {
     const founder = lane === "founder";
+    const staff = lane !== "owner";
     const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
     if (!token) throw new ApiError(401, "UNAUTHORIZED", "Sign in required");
     if (!auth?.verifySession || !repository) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Mentorship unavailable");
-    const session = await auth.verifySession(token, founder);
+    const session = await auth.verifySession(token, staff);
     if (!session) {
-      if (founder && await auth.verifySession(token)) throw new ApiError(403, "MFA_REQUIRED", "Recent verification required");
+      if (staff && await auth.verifySession(token)) throw new ApiError(403, "MFA_REQUIRED", "Recent verification required");
       throw new ApiError(401, "UNAUTHORIZED", "Sign in required");
     }
     const workspace = z.uuid().safeParse(request.headers["x-ayinou-workspace"]);
-    if (founder && !workspace.success) throw new ApiError(403, "FORBIDDEN", "Private workspace required");
-    await budget(founder ? "audit" : "profile", session.actor, request.ip);
+    if (staff && !workspace.success) throw new ApiError(403, "FORBIDDEN", "Private workspace required");
+    await budget(staff ? "audit" : "profile", session.actor, request.ip);
     try {
       if (founder) {
         const access = await repository.rpc<{ founder?: boolean }>("platform_access_for_api", { p_actor: session.actor });
         if (access?.founder !== true) throw new ApiError(403, "FORBIDDEN", "Founder authority required");
       }
-      return await repository.rpc("c43_mentorship_for_api", {
+      const context = {
         p_actor: session.actor, p_session: session.session, p_aal2: session.aal2, p_totp: session.totpAt ?? null,
-        p_workspace: founder ? workspace.data : null, p_fixture: synthetic, p_lane: lane, p_action: action, p_input: input,
-      });
+        p_workspace: staff ? workspace.data : null, p_fixture: synthetic, p_action: action, p_input: input,
+      };
+      if (lane === "moderation") return await repository.rpc("c44_reports_for_api", context);
+      if (coordination) return await repository.rpc("c44_coordination_for_api", context);
+      return await repository.rpc("c43_mentorship_for_api", { ...context, p_lane: lane });
     } catch (error) {
       if (error instanceof InstitutionError) throw new ApiError(error.statusCode, error.code, "Mentorship operation unavailable");
       throw error;
@@ -104,6 +112,41 @@ export function registerMentorship(app: FastifyInstance, synthetic: boolean, aut
     return run(request, "owner", action, input);
   });
 
+  const coordination = member + "/coordination";
+  app.get(coordination, request => run(request, "owner", "dashboard", coordinationDashboard.parse(request.query), true));
+  app.get(coordination + "/matches", request => {
+    const { lane, ...filters } = coordinationCandidates.parse(request.query);
+    return run(request, "owner", lane, filters, true);
+  });
+  app.get(coordination + "/requests/:id", request => {
+    empty.parse(request.query);
+    return run(request, "owner", "open_request", coordinationResource.parse(request.params), true);
+  });
+  app.get(coordination + "/relationships/:id", request => {
+    empty.parse(request.query);
+    return run(request, "owner", "open_relationship", coordinationResource.parse(request.params), true);
+  });
+  app.post(coordination, { bodyLimit: 6000 }, request => {
+    empty.parse(request.query);
+    const { action, ...input } = coordinationCommand.parse(request.body);
+    return run(request, "owner", action, input, true);
+  });
+
+  const reports = "/api/v1/admin/moderation/mentorship";
+  app.get(reports, request => {
+    empty.parse(request.query);
+    return run(request, "moderation", "list");
+  });
+  app.get(reports + "/:id", request => {
+    empty.parse(request.query);
+    return run(request, "moderation", "open", coordinationResource.parse(request.params));
+  });
+  app.patch(reports + "/:id", { bodyLimit: 2600 }, request => {
+    empty.parse(request.query);
+    const { action, ...input } = mentorshipModerationCommand.parse(request.body);
+    return run(request, "moderation", action, { ...input, ...coordinationResource.parse(request.params) });
+  });
+
   const admin = "/api/v1/admin/opportunity-settings/mentorship";
   app.get(admin, request => {
     empty.parse(request.query);
@@ -112,5 +155,13 @@ export function registerMentorship(app: FastifyInstance, synthetic: boolean, aut
   app.patch(admin, { bodyLimit: 5000 }, request => {
     empty.parse(request.query);
     return run(request, "founder", "configure", configure.parse(request.body));
+  });
+  app.get(admin + "/coordination", request => {
+    empty.parse(request.query);
+    return run(request, "founder", "settings", {}, true);
+  });
+  app.patch(admin + "/coordination", { bodyLimit: 3200 }, request => {
+    empty.parse(request.query);
+    return run(request, "founder", "configure", coordinationPreparation.parse(request.body), true);
   });
 }

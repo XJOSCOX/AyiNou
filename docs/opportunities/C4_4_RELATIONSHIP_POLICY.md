@@ -1,0 +1,11 @@
+# C4.4 request and relationship policy
+
+Requests bind an opaque selection to exact mentor and mentee role revisions. Recipients can accept or decline and senders can withdraw. Expiration and changes to eligibility remove pending requests from action. Native privacy and safety changes invalidate open requests. An invalidated request never reopens. Pending messages are cleared at the terminal transition. Reports are separately scoped and do not restore the message or private profile payload.
+
+Default preparation allows three sends and three incoming requests per rolling day, three outstanding sends, seven days for a reply and a 30-day pair cooldown. The small limits reduce unsolicited follow-up and keep review manageable. A repeated decline creates no reputation score or eligibility penalty. Both participants may report a safety issue, and the existing native member safety controls govern blocking and muting.
+
+Request acceptance creates an agreement-pending relationship. Both participants confirm the same agreement revision, including the free participation and safeguarding acknowledgments. A proposed amendment cannot replace the previously confirmed terms. An active or paused relationship occupies one slot. Participant locks serialize the final confirmation against other confirmations for the same mentor. The database keeps one open relationship per role pair.
+
+Either participant can pause, resume an ordinary pause, or end the relationship. Completion requires both participants. Safety restrictions are latched. Restoring eligibility does not reopen coordination or reveal restricted contents, and the relationship can still be ended by a participant. Future discovery preference changes do not stop otherwise safe established mentorship.
+
+Agreements, learning objectives, and session proposals are coordination records. Parties agree to objective changes explicitly. Progress is participant-reported. Session scheduling uses a local date, IANA time zone, bounded duration and a general topic. PostgreSQL resolves ambiguous wall times according to its time zone rules and rejects skipped wall times. Proposals can be declined, countered or cancelled. Acknowledgment follows a session’s scheduled end. No integration creates calls, messages, payments, credentials, or independent outcomes.

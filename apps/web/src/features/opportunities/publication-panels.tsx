@@ -6,6 +6,7 @@ import { professionalOpportunityTypes, opportunityReviewChecks, opportunityRepor
 import { ApiErrorNotice } from "@/components/api-error-notice";
 import { MemberShell } from "@/components/member-shell";
 import { institutionAction, institutionCard, institutionField, institutionLink, useInstitutionResource, VerifiedCheck } from "@/components/institution-ui";
+import { coordinationCopy } from "@/lib/mentorship-coordination-i18n";
 import { mentorshipCopy } from "@/lib/mentorship-i18n";
 import { accountMessages } from "@/lib/account-i18n";
 import { useFeedMutation } from "@/lib/feed-state";
@@ -138,6 +139,7 @@ export function MyOpportunityInterest() {
       back={{ href: "/settings", label: accountMessages[locale].settings }} />
     <nav className="flex flex-wrap gap-2" aria-label={t("publication")}>
       <Link className={opportunitySecondary} href="/settings/opportunities/mentorship">{mentorshipCopy(locale)("title")}</Link>
+      <Link className={opportunitySecondary} href="/settings/opportunities/mentorship/coordination">{coordinationCopy(locale)("title")}</Link>
     </nav>
     <section className={institutionCard} aria-label={t("myInterest")}><InterestList /></section>
   </div></MemberShell>;

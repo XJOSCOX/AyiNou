@@ -32,8 +32,11 @@ GET /api/v1/admin/legal/audit - -
 GET /api/v1/admin/member-experience - -
 GET /api/v1/admin/moderation-center - -
 GET /api/v1/admin/moderation-policy - -
+GET /api/v1/admin/moderation/mentorship - -
+GET /api/v1/admin/moderation/mentorship/:id - -
 GET /api/v1/admin/opportunity-settings - -
 GET /api/v1/admin/opportunity-settings/mentorship - -
+GET /api/v1/admin/opportunity-settings/mentorship/coordination - -
 GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
 GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
@@ -121,6 +124,10 @@ GET /api/v1/me/impact/needs/:id - -
 GET /api/v1/me/institution-accounts - -
 GET /api/v1/me/member-code - -
 GET /api/v1/me/mentorship - -
+GET /api/v1/me/mentorship/coordination - -
+GET /api/v1/me/mentorship/coordination/matches - -
+GET /api/v1/me/mentorship/coordination/relationships/:id - -
+GET /api/v1/me/mentorship/coordination/requests/:id - -
 GET /api/v1/me/mentorship/skills - -
 GET /api/v1/me/moderation-appeals - -
 GET /api/v1/me/muted - -
@@ -260,8 +267,11 @@ HEAD /api/v1/admin/legal/audit - onSend
 HEAD /api/v1/admin/member-experience - onSend
 HEAD /api/v1/admin/moderation-center - onSend
 HEAD /api/v1/admin/moderation-policy - onSend
+HEAD /api/v1/admin/moderation/mentorship - onSend
+HEAD /api/v1/admin/moderation/mentorship/:id - onSend
 HEAD /api/v1/admin/opportunity-settings - onSend
 HEAD /api/v1/admin/opportunity-settings/mentorship - onSend
+HEAD /api/v1/admin/opportunity-settings/mentorship/coordination - onSend
 HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
 HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend
@@ -349,6 +359,10 @@ HEAD /api/v1/me/impact/needs/:id - onSend
 HEAD /api/v1/me/institution-accounts - onSend
 HEAD /api/v1/me/member-code - onSend
 HEAD /api/v1/me/mentorship - onSend
+HEAD /api/v1/me/mentorship/coordination - onSend
+HEAD /api/v1/me/mentorship/coordination/matches - onSend
+HEAD /api/v1/me/mentorship/coordination/relationships/:id - onSend
+HEAD /api/v1/me/mentorship/coordination/requests/:id - onSend
 HEAD /api/v1/me/mentorship/skills - onSend
 HEAD /api/v1/me/moderation-appeals - onSend
 HEAD /api/v1/me/muted - onSend
@@ -477,8 +491,10 @@ PATCH /api/v1/admin/homepage/community-statistics 4096 -
 PATCH /api/v1/admin/impact 12288 -
 PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/moderation-policy 8192 -
+PATCH /api/v1/admin/moderation/mentorship/:id 2600 -
 PATCH /api/v1/admin/opportunity-settings 4096 -
 PATCH /api/v1/admin/opportunity-settings/mentorship 5000 -
+PATCH /api/v1/admin/opportunity-settings/mentorship/coordination 3200 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/admin/verification-policy 4096 -
@@ -588,6 +604,7 @@ POST /api/v1/me/enforcement-appeals 12288 -
 POST /api/v1/me/founder-bootstrap 256 -
 POST /api/v1/me/founder-identity/:id/actions 1024 -
 POST /api/v1/me/governance-invitations/:id/accept 512 -
+POST /api/v1/me/mentorship/coordination 6000 -
 POST /api/v1/me/notifications/read-all 1024 -
 POST /api/v1/me/onboarding-corrections 4608 -
 POST /api/v1/me/onboarding-corrections/:id/withdraw 512 -
