@@ -1,0 +1,9 @@
+# C4.3. Future matching input contract
+
+The owner response exposes the stable mentorship profile ID, role, current revision, current eligibility signals, snapshot of skill identifiers and versions, topic identifiers, availability and expiration, languages, participation mode, geography, capacity and learning objectives. It is an owner view. Its raw contents must not be used as a public or participant-to-participant projection.
+
+C4.4 must obtain a bounded authorized projection derived inside the service and recheck both accounts when seeking recommendations, creating a match candidate, showing any discovery result or accepting a request. Eligibility checks include active account standing, onboarding, adult confirmation under the approved operational policy, mentor identity, native privacy, blocks and mutes, role-specific consent, current catalog and policy constraints, expiry, compatible geography and mode, applicable safeguarding, and capacity. A role revision, configuration change or consent withdrawal makes prior eligibility evidence stale. Consent to receive recommendations does not authorize discovery or contact.
+
+Match only legitimate purpose signals such as preferences, demonstrated interest and relevant skills. Never treat nationality as competence or use protected characteristics, popularity, payment or administrative rank to score availability. A request must not expose private objectives or identity data beyond a future separately authorized projection.
+
+Capacity for an established relationship must be enforced transactionally in the later relationship module. Pausing discovery or changing preferences should preserve that relationship record. This contract contains no matching endpoint, applicant projection, requests, scheduling, communications or relationship states.

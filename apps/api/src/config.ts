@@ -13,6 +13,7 @@ const environmentSchema = z.object({
   AYINOU_FOUNDER_BOOTSTRAP_ENABLED: z.enum(["true", "false"]).optional(),
   AYINOU_COMMUNITY_NEEDS: z.enum(["disabled", "synthetic", "pilot"]).default("disabled").optional(),
   AYINOU_COMMUNITY_NEEDS_RELEASE: z.string().regex(/^[0-9a-f]{40}$/).optional(),
+  AYINOU_MENTORSHIP_PROFILES: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_OPPORTUNITY_PUBLICATION: z.enum(["disabled","synthetic"]).default("disabled").optional(),
   AYINOU_PROFESSIONAL_OPPORTUNITIES: z.enum(["disabled", "synthetic"]).default("disabled").optional(),
   AYINOU_VOLUNTEER_ACTIVATION: z.enum(["disabled", "synthetic"]).default("disabled").optional(),

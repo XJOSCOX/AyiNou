@@ -337,6 +337,7 @@ Feature development pauses here for owner review of the engineering results and 
 - [x] C4.1 private, versioned professional and educational opportunities and protected Founder preparation. Hosted database verified with all operational gates closed. [Implementation report](docs/opportunities/C4_1_IMPLEMENTATION_REPORT.md)
 
 - [x] C4.2 independent opportunity publication, external destination review, native Event association and expressions of interest. Hosted schema verified. Live operations remain closed. [Implementation report](docs/opportunities/C4_2_IMPLEMENTATION_REPORT.md)
+- [ ] C4.3 private mentor and mentee profiles, independent consent and Founder preparation. Live operations remain closed. [Implementation report](docs/opportunities/C4_3_IMPLEMENTATION_REPORT.md)
 
 ### Approved future milestones
 

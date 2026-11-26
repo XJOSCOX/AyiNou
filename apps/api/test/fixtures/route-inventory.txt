@@ -33,6 +33,7 @@ GET /api/v1/admin/member-experience - -
 GET /api/v1/admin/moderation-center - -
 GET /api/v1/admin/moderation-policy - -
 GET /api/v1/admin/opportunity-settings - -
+GET /api/v1/admin/opportunity-settings/mentorship - -
 GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
 GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
@@ -119,6 +120,8 @@ GET /api/v1/me/impact/mappings/:id - -
 GET /api/v1/me/impact/needs/:id - -
 GET /api/v1/me/institution-accounts - -
 GET /api/v1/me/member-code - -
+GET /api/v1/me/mentorship - -
+GET /api/v1/me/mentorship/skills - -
 GET /api/v1/me/moderation-appeals - -
 GET /api/v1/me/muted - -
 GET /api/v1/me/notification-preferences - -
@@ -258,6 +261,7 @@ HEAD /api/v1/admin/member-experience - onSend
 HEAD /api/v1/admin/moderation-center - onSend
 HEAD /api/v1/admin/moderation-policy - onSend
 HEAD /api/v1/admin/opportunity-settings - onSend
+HEAD /api/v1/admin/opportunity-settings/mentorship - onSend
 HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
 HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend
@@ -344,6 +348,8 @@ HEAD /api/v1/me/impact/mappings/:id - onSend
 HEAD /api/v1/me/impact/needs/:id - onSend
 HEAD /api/v1/me/institution-accounts - onSend
 HEAD /api/v1/me/member-code - onSend
+HEAD /api/v1/me/mentorship - onSend
+HEAD /api/v1/me/mentorship/skills - onSend
 HEAD /api/v1/me/moderation-appeals - onSend
 HEAD /api/v1/me/muted - onSend
 HEAD /api/v1/me/notification-preferences - onSend
@@ -472,6 +478,7 @@ PATCH /api/v1/admin/impact 12288 -
 PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/moderation-policy 8192 -
 PATCH /api/v1/admin/opportunity-settings 4096 -
+PATCH /api/v1/admin/opportunity-settings/mentorship 5000 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/admin/verification-policy 4096 -
@@ -502,6 +509,7 @@ PATCH /api/v1/me/community-needs/:id/review 32000 -
 PATCH /api/v1/me/follow-requests/:id 512 -
 PATCH /api/v1/me/impact/mappings/:id 4096 -
 PATCH /api/v1/me/impact/needs/:id 4096 -
+PATCH /api/v1/me/mentorship 10500 -
 PATCH /api/v1/me/notifications/:id 1024 -
 PATCH /api/v1/me/profile - -
 PATCH /api/v1/me/profile/details - -

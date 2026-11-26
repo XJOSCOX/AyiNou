@@ -1099,6 +1099,25 @@ founderTest("Founder grants gold after account confirmation with or without memb
           expect(sql(`select count(*) from private.verification_reviews where application_id='${application}';`)).toBe("0");
         }
         finishPersonalOnboarding(target);
+        if (i === 0) {
+          const route = "/api/v1/me/mentorship";
+          expect(await apiCall(snapshot, route, 200)).toMatchObject({ mentorIdentity: true, intake: false });
+          sql("insert into private.c43_fixture values(true);");
+          try {
+            const profile = await apiCall(snapshot, route, 200, "PATCH", {
+              action: "save", role: "mentor", expectedVersion: 0, requestId: randomUUID(),
+              adult: true, participation: true, safeguarding: true,
+              consent: { recommendations: false, discovery: false, requests: false },
+              preferences: { topics: ["career_development"], skills: [], languages: [{ code: "ht", proficiency: "advanced" }],
+                mode: "remote", geography: "haiti_nationwide", departments: [], countries: [], weeklyHours: 1,
+                sessionMinutes: 30, durationWeeks: 4, capacity: 1, expiresOn: null, summary: "", goals: "",
+                experience: null, learningObjectives: "" },
+            });
+            expect(await apiCall(snapshot, route, 200)).toMatchObject({ profiles: [{ id: profile.id, status: "available" }] });
+          } finally {
+            sql(`delete from private.c43_profiles where actor='${target.id}'; delete from private.c43_fixture;`);
+          }
+        }
         const organization = "/api/v1/me/organization-onboarding";
         const intent = (await apiCall(snapshot, organization, 200, "PUT", {
           id: null, expectedVersion: 0, requestId: randomUUID(), stage: "drafting",

@@ -4237,6 +4237,87 @@
           "rolloutAndRollback": "Keep all operational gates closed. Apply one exactly approved migration, compare preservation and correct forward if needed."
         }
       ]
+    },
+    {
+      "id": "mentorship-profiles",
+      "report": "docs/opportunities/C4_3_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/mentorship",
+          "contract": "GET /api/v1/me/mentorship - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Owner-only role and consent projection."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-profiles.spec.ts",
+            "denialScenario": "Guests and selectors for other accounts are denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/mentorship/skills",
+          "contract": "GET /api/v1/me/mentorship/skills - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Bounded active C3 catalog search serves the current authorized owner."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-profiles.spec.ts",
+            "denialScenario": "Catalog reads are denied if the disposable intake gate is closed."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/mentorship",
+          "contract": "PATCH /api/v1/me/mentorship 10500 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Latest role receipt, version, and independent consent commit with the change."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-profiles.spec.ts",
+            "denialScenario": "Unverified mentors, missing adult consent, cross-account writes, stale revisions and unsupported purposes are denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/opportunity-settings/mentorship",
+          "contract": "GET /api/v1/admin/opportunity-settings/mentorship - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Current settings and bounded restricted history exclude private profiles."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-profiles.spec.ts",
+            "denialScenario": "Ordinary members and sessions without the active Founder original workspace are denied."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/opportunity-settings/mentorship",
+          "contract": "PATCH /api/v1/admin/opportunity-settings/mentorship 5000 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Settings and original-workspace receipts commit together."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/mentorship-profiles.spec.ts",
+            "denialScenario": "Unexpected activation fields, foreign workspace IDs and stale revisions are denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125141000_c43_mentorship_profiles.sql",
+          "rlsAndGrants": "Five new private RLS tables and a single service-only RPC. Existing relation, policy and routine privileges are unchanged.",
+          "authorization": "Owner access is derived from the current session. Mentor identity, adult consent, standing and safeguarding remain mandatory. Founder preparation checks recent MFA and the original workspace.",
+          "compatibility": "Adds no seeds, resource roles or changes to C1 through C4.2. Reuses C3 catalog identifiers and preserves existing scopes and data.",
+          "validation": "Disposable owner and Founder workflows, nullable and retired preference cases, replay and denial tests. Hosted verification checks preservation, grants and closed gates.",
+          "rolloutAndRollback": "Apply only the exactly authorized migration and verify read-only preservation. Correct forward with all live gates closed."
+        }
+      ]
     }
   ]
 }

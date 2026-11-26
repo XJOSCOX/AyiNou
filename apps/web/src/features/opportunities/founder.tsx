@@ -8,6 +8,7 @@ import { authorizedSocialRequest } from "@/lib/feed-api";
 import { useLocale } from "@/lib/locale-store";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
+import { MentorshipFounder } from "./mentorship-founder";
 import { PublicationStaff } from "./publication-panels";
 import { OpportunityState, opportunityTag } from "./presentation";
 import { ReviewCommand } from "../projects/outcome-review/review-controls";
@@ -68,5 +69,6 @@ export function FounderOpportunitySettings({ workspace }: { workspace: string })
     </section>
     <PublicationStaff workspace={workspace} founder />
     </div>
+    <MentorshipFounder workspace={workspace} />
   </section>;
 }

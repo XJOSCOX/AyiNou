@@ -247,6 +247,21 @@
     "membershipPolicies": "value:417e7e0fe3a3fc411158da2d090601673acb808cdfa0afe5afdb191f429f0920",
     "MembershipPolicy": "type:1d976578610460f8754f78b22beadb03b88f188f4112d5775a3a387803550e77",
     "mentionPolicies": "value:1c1fd116eb9a208747a25f6f8540510b1c5804c721d92cb80c0220732a4989fb",
+    "MentorshipConfiguration": "type:bd6626c524c47446246fdf79d1281624d1bdb79fe1e451517257ac9b44d9753e",
+    "MentorshipConsent": "type:c05ead870860ffe6b90eaa0f5d67a8d768e50f82522a8b0316e2e7b533409dbe",
+    "mentorshipConsents": "value:65aec040a22fe25743f5e018ae94634eaf717113b9fa9d23b6991782424ae8b0",
+    "MentorshipFounderView": "type:6fedbdffd7c16baa7886f761360a2142db226d1c80c4f1354a769e0bcc7e3284",
+    "mentorshipGeographies": "value:c779193539a1ff9d4731c8eb2e673f6c958a445b590d1c3f2fc6f3e02726fd9a",
+    "mentorshipOptionalFields": "value:7367e2d11bbafe80acafae431c88013f76731fec286a22bfd202bcec934a8b76",
+    "MentorshipOwnerView": "type:da847640396a16313b8200269423c36bd776f6d2b9819ef5941ce8e8265b85da",
+    "MentorshipPreferences": "type:e2f32df84979c1a3c21af3a1d58f8bc2830d8dd993e76db7ae5e322de41e9782",
+    "MentorshipProfile": "type:8b7b3e49c6cf32da563f69f05172500f5eb179ecec79bc569e66204b3ec9a536",
+    "MentorshipRole": "type:b16df817a810160fbe0b07c6a693d587f4b2466446396c44d9d3f07165245196",
+    "mentorshipRoles": "value:19eb0c8e674eccba4bd3aebca352a892c2384ace8762df710a3ad8f63614a894",
+    "MentorshipSkill": "type:225882611149f2480637cfe48830519cb8980841adc49f50b3c590271298f907",
+    "MentorshipStatus": "type:8c760cfa97b84d8ca3f470bf9dd55f25c64618ca0ca4810284ce49bd76b64087",
+    "MentorshipTopic": "type:e876cf9dee65ed9cabfd1473d7dea546b32a732bcb6dd28068b1eb86fb734955",
+    "mentorshipTopics": "value:1fb9177c671d5e8df6a3eaef497295c5f4ba753f8ca8235967d85df401052eea",
     "ModerationAction": "type:4e9ec83f3339679e9718613ef273ad59a944e41c7e80555ae9d7596e559fbb19",
     "moderationActions": "value:71e818bc8b0fc2f0eb8ded176c70acae75b69097f2f6f2f61080a5d3889f4b65",
     "ModerationAppeal": "type:50dd87949779bc5f68bd52a29776f2732d0cd640cf3bb0a3590296db60ced06d",
@@ -1060,6 +1075,39 @@
       "everyone",
       "following",
       "no_one"
+    ],
+    "mentorshipConsents": [
+      "recommendations",
+      "discovery",
+      "requests"
+    ],
+    "mentorshipGeographies": [
+      "haiti_departments",
+      "haiti_nationwide",
+      "international",
+      "worldwide_remote"
+    ],
+    "mentorshipOptionalFields": [
+      "experience",
+      "summary",
+      "goals"
+    ],
+    "mentorshipRoles": [
+      "mentor",
+      "mentee"
+    ],
+    "mentorshipTopics": [
+      "beginner_guidance",
+      "career_development",
+      "entrepreneurship",
+      "professional_development",
+      "educational_guidance",
+      "technical_development",
+      "leadership",
+      "professional_communication",
+      "business_development",
+      "skilled_trades",
+      "language_learning"
     ],
     "moderationActions": [
       "hide",

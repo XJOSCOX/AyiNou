@@ -8344,7 +8344,55 @@
         "hostedApplication": "Next.js and Fastify remain local.",
         "operationalApproval": "C4.2 live operations remain closed."
       }
+    },
+    {
+      "id": "mentorship-profiles",
+      "domain": "Opportunities",
+      "name": "Private mentor and mentee profiles",
+      "status": "partial",
+      "currentAndLimits": "Owner-only private role preferences and Founder preparation. Operational intake and participant discovery remain closed.",
+      "dependencies": "Existing member profiles, vetted identity policy, indexed C3 skills catalog, Founder Opportunity settings and existing privacy and account standing.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/opportunities/mentorship-profile.tsx",
+          "apps/web/src/features/opportunities/mentorship-founder.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/mentorship.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125141000_c43_mentorship_profiles.sql"
+        ],
+        "postgresObjects": [
+          "private.c43_profiles",
+          "private.c43_skills",
+          "public.c43_mentorship_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/mentorship-profiles.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/mentorship-profiles.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/mentorship-profiles.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/opportunities/C4_3_IMPLEMENTATION_REPORT.md",
+          "docs/opportunities/C4_3_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See the C4.3 implementation report.",
+        "disposableSupabase": "Enabled profiles are confined to fixtures.",
+        "hostedDatabase": "Awaiting exact authorized rollout and verification.",
+        "connectedApplication": "Next.js and Fastify remain local.",
+        "hostedApplication": "Local application runtime.",
+        "operationalApproval": "C4.3 live operations are closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C4.2 Professional and Educational Opportunity Publication"
+  "lastScopeUpdate": "C4.3 Mentor and Mentee Profiles"
 }

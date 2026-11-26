@@ -1,0 +1,11 @@
+# C4.3. Mentorship policy
+
+Adults may voluntarily maintain a mentor profile, a mentee profile or both. Participation has no connection to registration, employment, volunteering or donations. A mentor needs a current verified identity under the existing independent or Founder Verified policy. Bootstrap Founder, Administrator and Moderator authority convey no mentor eligibility. A mentee may keep private preferences without reviewed identity. Both roles require active standing, applicable onboarding, explicit adult self-attestation, participation consent and acknowledgment of the safeguarding rules. Identity verification does not establish professional competence.
+
+Mentorship is free educational and professional guidance. Mentors are responsible for representing their experience accurately. Preferences are self-reported. The initial scope excludes regulated advice, placements, payments, preferential ranking and youth participation.
+
+Mentorship topics are broad guidance aims. The bounded vocabulary includes beginner guidance, career development, entrepreneurship, professional development, education, technology, leadership, communication, business development, skilled trades and language learning. Skills refer to the existing C3 catalog. The member can deliberately select their own volunteer skills in the mentorship editor. This saves new role selections and leaves the volunteer profile and consents intact. Retired definitions cannot be newly selected, and retained selections preserve the original reference and label.
+
+Members select their own geography. Haitian selections support the ten departments or nationwide preferences. International preferences use country or territory identifiers. Worldwide participation is remote. Location is never inferred and is not evidence of travel, immigration or licensing status.
+
+Mentor and mentee availability have independent schedules, expiry and participation state. Mentors set a bounded maximum capacity. Missing setup is distinct from an unavailable role, and an expired role is excluded from future availability. A pause controls availability and leaves future relationship commitments for the separate relationship module to handle.
