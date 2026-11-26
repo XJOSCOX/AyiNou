@@ -8495,8 +8495,8 @@
       "verification": {
         "local": "See C4.5 implementation report.",
         "disposableSupabase": "Separate fixture gates for enabled workflows.",
-        "hostedDatabase": "See the C4.5 deployment record.",
-        "connectedApplication": "See the C4.5 verification record.",
+        "hostedDatabase": "Approved C4.5 migration applied. All 167 existing data fingerprints matched. Seven empty RLS tables, one service-only RPC and zero pending migrations.",
+        "connectedApplication": "Test02 verified addressable closed discovery and was denied Founder preparation. J0SC0X verified private preparation and closed activation.",
         "hostedApplication": "Next.js and Fastify remain local.",
         "operationalApproval": "Live discovery and personalization remain closed."
       }

@@ -51,9 +51,8 @@ test("C4.5 Founder preparation is available while member intake remains closed",
     await preparation.locator("textarea[name=note]").fill("Disposable discovery preparation remains closed.");
     await preparation.locator("input[name=confirm]").check();
     await preparation.locator("button[type=submit], form button").click();
-    await expect(preparation.getByText("Revision 1", { exact: true })).toBeVisible();
+    await expect(preparation.locator(":scope > span").filter({ hasText: "Revision 1" })).toBeVisible();
     expect(sql("select count(*) from private.c45_fixture;")).toBe("0");
-    sql("delete from private.c45_settings;");
     await page.goto("/opportunities");
     for (const locale of ["en", "ht", "fr", "es"] as const) {
       const t = discoveryOpportunityCopy(locale);
@@ -71,7 +70,7 @@ test("C4.5 Founder preparation is available while member intake remains closed",
       await page.goto("/opportunities");
     }
   } finally {
-    sql("delete from private.platform_bootstrap;");
+    sql("delete from private.c45_settings; delete from private.platform_bootstrap;");
   }
 });
 
