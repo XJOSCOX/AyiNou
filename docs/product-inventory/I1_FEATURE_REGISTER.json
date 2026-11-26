@@ -8446,7 +8446,61 @@
         "hostedApplication": "Local application runtime only.",
         "operationalApproval": "All live C4 mentorship stages remain closed."
       }
+    },
+    {
+      "id": "opportunity-discovery",
+      "domain": "Opportunities",
+      "name": "Opportunity directory and private recommendations",
+      "status": "implemented",
+      "currentAndLimits": "Latest, optional For You and private Saved. All live stages remain closed.",
+      "dependencies": "C4.2 approved publications and application flows, C3 catalog, native moderation and private Founder workspace.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/opportunities/discovery.tsx",
+          "apps/web/src/features/opportunities/discovery-preferences.tsx",
+          "apps/web/src/features/opportunities/discovery-founder.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/opportunity-discovery.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261126120000_c45_opportunity_discovery.sql"
+        ],
+        "postgresObjects": [
+          "private.c45_listing_keys",
+          "private.c45_preferences",
+          "private.c45_saved",
+          "public.c45_discovery_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/opportunity-discovery.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/opportunity-discovery.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/opportunity-discovery.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/opportunities/C4_5_IMPLEMENTATION_REPORT.md",
+          "docs/opportunities/C4_5_DISCOVERY_POLICY.md",
+          "docs/opportunities/C4_5_RECOMMENDATION_POLICY.md",
+          "docs/opportunities/C4_5_PRIVACY_AND_FAIRNESS.md",
+          "docs/opportunities/C4_5_PERFORMANCE_REPORT.md",
+          "docs/opportunities/C4_5_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See C4.5 implementation report.",
+        "disposableSupabase": "Separate fixture gates for enabled workflows.",
+        "hostedDatabase": "See the C4.5 deployment record.",
+        "connectedApplication": "See the C4.5 verification record.",
+        "hostedApplication": "Next.js and Fastify remain local.",
+        "operationalApproval": "Live discovery and personalization remain closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C4.4 Mentorship Matching and Coordination"
+  "lastScopeUpdate": "C4.5 Opportunity Discovery and Personalized Recommendations"
 }

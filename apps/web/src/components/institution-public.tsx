@@ -19,9 +19,10 @@ import { OrganizationTimeline } from "./organization-timeline";
 import { MemberShell } from "./member-shell";
 import { ProfileFollowPanel } from "./discovery-accounts";
 
-export function InstitutionPublic({ organization: org, signedIn, activeSection }: {
+export function InstitutionPublic({ organization: org, signedIn, activeSection, opportunity }: {
   organization: Institution;
   signedIn: boolean;
+  opportunity?: string;
   activeSection: "overview" | "posts" | "opportunities" | "membership";
 }) {
   const [locale] = useLocale();
@@ -95,7 +96,7 @@ export function InstitutionPublic({ organization: org, signedIn, activeSection }
           {signedIn && <ImpersonationReportForm institutionHandle={org.handle} />}
         </div>}
         {activeSection === "posts" && <OrganizationTimeline handle={org.handle} signedIn={signedIn} />}
-        {activeSection === "opportunities" && <PublicOpportunityList organization={org.id} signedIn={signedIn} />}
+        {activeSection === "opportunities" && <PublicOpportunityList organization={org.id} signedIn={signedIn} opportunity={opportunity} />}
         {activeSection === "membership" && <div className="grid min-w-0 items-start gap-4 [overflow-wrap:anywhere] xl:grid-cols-[repeat(auto-fit,minmax(min(100%,25rem),1fr))]">
           <PublicAffiliationPanel organization={org} signedIn={signedIn} />
           {signedIn && <VerifiedRepresentativePanel organizationId={org.id} />}

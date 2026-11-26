@@ -36,7 +36,7 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
   async function rpc<T>(name: string, input: Record<string, unknown>): Promise<T> {
     const { data, error } = await client.rpc(name, input);
     if (error) {
-      if (name === "c44_coordination_for_api" || name === "c44_reports_for_api") {
+      if (["c44_coordination_for_api","c44_reports_for_api","c45_discovery_for_api"].includes(name)) {
         if (error.code === "40001") throw new InstitutionError("STALE_VERSION", 409);
         if (error.code === "PGRST202") throw new InstitutionError("SERVICE_UNAVAILABLE", 503);
       }

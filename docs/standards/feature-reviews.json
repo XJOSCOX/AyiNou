@@ -4464,6 +4464,113 @@
           "rolloutAndRollback": "Apply only the exact authorized migration. Keep both fixture gates empty and correct forward if required."
         }
       ]
+    },
+    {
+      "id": "opportunity-discovery",
+      "report": "docs/opportunities/C4_5_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/opportunity-discovery",
+          "contract": "GET /api/v1/me/opportunity-discovery - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Actor-bound directory with closed-state and signed cursor checks."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-discovery.spec.ts",
+            "denialScenario": "Actor-bound directory with closed-state and signed cursor checks."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/opportunity-discovery/preferences",
+          "contract": "GET /api/v1/me/opportunity-discovery/preferences - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Private preferences are derived from the authenticated actor."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-discovery.spec.ts",
+            "denialScenario": "Private preferences are derived from the authenticated actor."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/opportunity-discovery/import",
+          "contract": "GET /api/v1/me/opportunity-discovery/import - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "An owner can preview only current eligible source skills."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-discovery.spec.ts",
+            "denialScenario": "An owner can preview only current eligible source skills."
+          }
+        },
+        {
+          "route": "GET /api/v1/me/opportunity-discovery/skills",
+          "contract": "GET /api/v1/me/opportunity-discovery/skills - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Catalog lookup is bounded and guarded by closed stages."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-discovery.spec.ts",
+            "denialScenario": "Catalog lookup is bounded and guarded by closed stages."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/opportunity-discovery",
+          "contract": "PATCH /api/v1/me/opportunity-discovery 6000 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Explicit consent and private commands require current version and an exact retry receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-discovery.spec.ts",
+            "denialScenario": "Explicit consent and private commands require current version and an exact retry receipt."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/opportunity-settings/discovery",
+          "contract": "GET /api/v1/admin/opportunity-settings/discovery - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Only the recognized Founder can use the recent-MFA original-session workspace."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-discovery.spec.ts",
+            "denialScenario": "Only the recognized Founder can use the recent-MFA original-session workspace."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/opportunity-settings/discovery",
+          "contract": "PATCH /api/v1/admin/opportunity-settings/discovery 3200 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Protected preparation requires explicit confirmation, a reason, and the current version."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-discovery.spec.ts",
+            "denialScenario": "Protected preparation requires explicit confirmation, a reason, and the current version."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261126120000_c45_opportunity_discovery.sql",
+          "rlsAndGrants": "Seven private RLS relations, an exact publication key projection, and one service-only RPC.",
+          "authorization": "Session-derived actor, exact publication authorization, purpose-specific opt-in and original-session Founder workspace.",
+          "compatibility": "Additive index maintenance for C4.2 publications; no member seeds, authority assignments or live activation.",
+          "validation": "Disposable discovery, privacy and publication tests and exact-hash hosted verification.",
+          "rolloutAndRollback": "Apply the separately approved exact migration only. Keep fixtures empty and correct forward."
+        }
+      ]
     }
   ]
 }

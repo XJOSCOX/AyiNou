@@ -35,6 +35,7 @@ GET /api/v1/admin/moderation-policy - -
 GET /api/v1/admin/moderation/mentorship - -
 GET /api/v1/admin/moderation/mentorship/:id - -
 GET /api/v1/admin/opportunity-settings - -
+GET /api/v1/admin/opportunity-settings/discovery - -
 GET /api/v1/admin/opportunity-settings/mentorship - -
 GET /api/v1/admin/opportunity-settings/mentorship/coordination - -
 GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
@@ -135,6 +136,10 @@ GET /api/v1/me/notification-preferences - -
 GET /api/v1/me/notifications - -
 GET /api/v1/me/notifications/unread-count - -
 GET /api/v1/me/onboarding-corrections - -
+GET /api/v1/me/opportunity-discovery - -
+GET /api/v1/me/opportunity-discovery/import - -
+GET /api/v1/me/opportunity-discovery/preferences - -
+GET /api/v1/me/opportunity-discovery/skills - -
 GET /api/v1/me/organization-onboarding - -
 GET /api/v1/me/organization-onboarding/matches - -
 GET /api/v1/me/organization-onboarding/setup - -
@@ -270,6 +275,7 @@ HEAD /api/v1/admin/moderation-policy - onSend
 HEAD /api/v1/admin/moderation/mentorship - onSend
 HEAD /api/v1/admin/moderation/mentorship/:id - onSend
 HEAD /api/v1/admin/opportunity-settings - onSend
+HEAD /api/v1/admin/opportunity-settings/discovery - onSend
 HEAD /api/v1/admin/opportunity-settings/mentorship - onSend
 HEAD /api/v1/admin/opportunity-settings/mentorship/coordination - onSend
 HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
@@ -370,6 +376,10 @@ HEAD /api/v1/me/notification-preferences - onSend
 HEAD /api/v1/me/notifications - onSend
 HEAD /api/v1/me/notifications/unread-count - onSend
 HEAD /api/v1/me/onboarding-corrections - onSend
+HEAD /api/v1/me/opportunity-discovery - onSend
+HEAD /api/v1/me/opportunity-discovery/import - onSend
+HEAD /api/v1/me/opportunity-discovery/preferences - onSend
+HEAD /api/v1/me/opportunity-discovery/skills - onSend
 HEAD /api/v1/me/organization-onboarding - onSend
 HEAD /api/v1/me/organization-onboarding/matches - onSend
 HEAD /api/v1/me/organization-onboarding/setup - onSend
@@ -493,6 +503,7 @@ PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/moderation-policy 8192 -
 PATCH /api/v1/admin/moderation/mentorship/:id 2600 -
 PATCH /api/v1/admin/opportunity-settings 4096 -
+PATCH /api/v1/admin/opportunity-settings/discovery 3200 -
 PATCH /api/v1/admin/opportunity-settings/mentorship 5000 -
 PATCH /api/v1/admin/opportunity-settings/mentorship/coordination 3200 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
@@ -527,6 +538,7 @@ PATCH /api/v1/me/impact/mappings/:id 4096 -
 PATCH /api/v1/me/impact/needs/:id 4096 -
 PATCH /api/v1/me/mentorship 10500 -
 PATCH /api/v1/me/notifications/:id 1024 -
+PATCH /api/v1/me/opportunity-discovery 6000 -
 PATCH /api/v1/me/profile - -
 PATCH /api/v1/me/profile/details - -
 PATCH /api/v1/me/volunteer-matches 512 -

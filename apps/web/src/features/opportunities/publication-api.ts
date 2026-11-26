@@ -22,8 +22,11 @@ export type PublicationSettingsView={version:number;live:false;fixture:boolean;s
   history:{id:number;explanation:string;recorded_at:string;result:{version:number}}[]};
 export type Queue<T>={enabled:boolean;items:T[];next?:string;grants?:ReviewerGrant[]};
 export type InterestPreview={revision:number;identity:{username:string;displayName:string}};
-export function listedOpportunities(organization:string, after:string|null, signal:AbortSignal, signedIn=false):Promise<Queue<PublishedOpportunity>> {
-  return (signedIn?authorizedSocialRequest:publicRequest)("/api/v1/opportunity-publication/public/"+organization+(after?"?after="+encodeURIComponent(after):""),{ signal,cache:"no-store" });
+export function listedOpportunities(organization:string, after:string|null, signal:AbortSignal, signedIn=false, opportunity?:string):Promise<Queue<PublishedOpportunity>> {
+  const query = new URLSearchParams();
+  if (after) query.set("after", after);
+  if (opportunity) query.set("opportunity", opportunity);
+  return (signedIn?authorizedSocialRequest:publicRequest)("/api/v1/opportunity-publication/public/"+organization+(query.size?"?"+query:""),{ signal,cache:"no-store" });
 }
 export function workspaceRead<T>(action:string, parameters:Record<string,string>,signal:AbortSignal,workspace?:string):Promise<T> {
   return authorizedSocialRequest(workspacePath+"?"+new URLSearchParams({action,...parameters}),{

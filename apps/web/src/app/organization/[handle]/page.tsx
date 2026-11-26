@@ -6,9 +6,9 @@ import { ApiRequestError, requestJson } from "@/lib/api-errors";
 
 export default async function PublicInstitutionPage({ params, searchParams }: {
   params: Promise<{ handle: string }>;
-  searchParams: Promise<{ section?: string | string[] }>;
+  searchParams: Promise<{ section?: string | string[]; opportunity?: string | string[] }>;
 }) {
-  const [{ handle }, { section }] = await Promise.all([params, searchParams]);
+  const [{ handle }, { section, opportunity }] = await Promise.all([params, searchParams]);
   const activeSection = section === "posts" || section === "opportunities" || section === "membership" ? section : "overview";
   if (!/^[a-z0-9][a-z0-9-]{2,39}$/.test(handle)) notFound();
   const api = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
@@ -19,5 +19,6 @@ export default async function PublicInstitutionPage({ params, searchParams }: {
     });
   const client = await serverSupabase();
   const { data } = await client.auth.getClaims();
-  return <InstitutionPublic organization={organization} activeSection={activeSection} signedIn={!!data?.claims.sub && data.claims.is_anonymous !== true} />;
+  const selected = typeof opportunity === "string" && /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i.test(opportunity) ? opportunity : undefined;
+  return <InstitutionPublic organization={organization} activeSection={activeSection} opportunity={selected} signedIn={!!data?.claims.sub && data.claims.is_anonymous !== true} />;
 }

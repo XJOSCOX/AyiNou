@@ -12,6 +12,7 @@ import { accountMessages } from "@/lib/account-i18n";
 import { useFeedMutation } from "@/lib/feed-state";
 import { useLocale } from "@/lib/locale-store";
 import { publicationCopy } from "@/lib/opportunity-publication-i18n";
+import { discoveryOpportunityCopy } from "@/lib/opportunity-discovery-i18n";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { departmentNames } from "@/lib/volunteer-i18n";
 import { TypeDetails } from "./detail-fields";
@@ -138,6 +139,7 @@ export function MyOpportunityInterest() {
     <OpportunityPageHeader title={t("myInterest")} description={t("myInterestHelp")}
       back={{ href: "/settings", label: accountMessages[locale].settings }} />
     <nav className="flex flex-wrap gap-2" aria-label={t("publication")}>
+      <Link className={opportunitySecondary} href="/opportunities">{discoveryOpportunityCopy(locale)("link")}</Link>
       <Link className={opportunitySecondary} href="/settings/opportunities/mentorship">{mentorshipCopy(locale)("title")}</Link>
       <Link className={opportunitySecondary} href="/settings/opportunities/mentorship/coordination">{coordinationCopy(locale)("title")}</Link>
     </nav>
@@ -145,7 +147,7 @@ export function MyOpportunityInterest() {
   </div></MemberShell>;
 }
 
-function InterestForm({organization,item}:{organization:string;item:PublishedOpportunity}) {
+export function InterestForm({organization,item,exact=false}:{organization:string;item:Pick<PublishedOpportunity,"id"|"version">;exact?:boolean}) {
   const [locale]=useLocale();
   const t=publicationCopy(locale);
   const [open,setOpen]=useState(false);
@@ -156,7 +158,8 @@ function InterestForm({organization,item}:{organization:string;item:PublishedOpp
     <button type="button" className={institutionAction+" w-fit"} onClick={()=>setOpen(true)}>{t("interest")}</button>
     {resource.error!==null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
     {open && !resource.data && resource.error===null && <p role="status">{t("loading")}</p>}
-    {open && resource.data && <Command label={t("interest")} disclosure={t("interestHelp")} confirmation={false}
+    {open && resource.data && exact && resource.data.revision !== item.version && <OpportunityState>{discoveryOpportunityCopy(locale)("unavailable")}</OpportunityState>}
+    {open && resource.data && (!exact || resource.data.revision === item.version) && <Command label={t("interest")} disclosure={t("interestHelp")} confirmation={false}
       parameters={{action:"express",organization,opportunity:item.id,version:resource.data.revision,identity:resource.data.identity}}
       extract={form=>({statement:field(form,"statement"),consent:form.has("consent"),adult:form.has("adult")})}>
       <p>{resource.data.identity.displayName} · @{resource.data.identity.username}</p>
@@ -167,7 +170,7 @@ function InterestForm({organization,item}:{organization:string;item:PublishedOpp
   </div>;
 }
 
-function ExternalDestination({organization,item}:{organization:string;item:PublishedOpportunity}) {
+export function ExternalDestination({organization,item}:{organization:string;item:Pick<PublishedOpportunity,"id"|"version">}) {
   const [locale]=useLocale();
   const t=publicationCopy(locale);
   const [url,setUrl]=useState<string|null>(null);
@@ -188,12 +191,12 @@ function ExternalDestination({organization,item}:{organization:string;item:Publi
     {mutation.error!==null && <ApiErrorNotice error={mutation.error} signIn />}
   </details>;
 }
-export function PublicOpportunityList({organization,signedIn}:{organization:string;signedIn:boolean}) {
+export function PublicOpportunityList({organization,signedIn,opportunity}:{organization:string;signedIn:boolean;opportunity?:string}) {
   const [locale]=useLocale();
   const t=publicationCopy(locale);
   const common=opportunityCopy(locale);
   const [cursor,setCursor]=useState<string|null>(null);
-  const load=useCallback((signal:AbortSignal)=>listedOpportunities(organization,cursor,signal,signedIn),[organization,cursor,signedIn]);
+  const load=useCallback((signal:AbortSignal)=>listedOpportunities(organization,cursor,signal,signedIn,opportunity),[organization,cursor,signedIn,opportunity]);
   const resource=useInstitutionResource(load);
   return <section className={institutionCard+" grid gap-3"}>
     <h2 className="text-xl font-semibold">{t("published")}</h2>

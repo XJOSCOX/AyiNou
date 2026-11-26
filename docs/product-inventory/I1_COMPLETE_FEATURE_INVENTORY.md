@@ -778,6 +778,8 @@ C4.3 reuses this workspace for private mentorship preparation, eligibility and s
 
 C4.4 adds bounded mentorship matching, private participant coordination, and Founder preparation of matching considerations and limits. Moderation Reports includes assigned-case triage for mentorship safety reports. Live processing stays closed. [C4.4 implementation report](../opportunities/C4_4_IMPLEMENTATION_REPORT.md)
 
+C4.5 adds the Opportunities directory, separate private preference and personalization controls, and Founder discovery preparation. The stage status remains closed. [C4.5 implementation report](../opportunities/C4_5_IMPLEMENTATION_REPORT.md)
+
 C4.1 adds Opportunities to organization management and Opportunity settings to Platform Administration → Platform Settings for the recognized Founder. The administrative inventory covers type, organization categories, geography, participation modes, draft limits, readiness and versioned history. [C4.1 implementation report](../opportunities/C4_1_IMPLEMENTATION_REPORT.md)
 
 C3.5 tracks the five implemented volunteer stages, operational readiness, individual enable/pause/resume and emergency pause under Platform Settings → Volunteer settings. The approved database rollout is verified with all five stages disabled. Public skills disclosure remains deferred. [Final implementation audit](../volunteering/C3_FINAL_IMPLEMENTATION_AUDIT.md)

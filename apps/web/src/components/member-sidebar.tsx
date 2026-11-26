@@ -12,6 +12,7 @@ import { projectMessages } from "@/lib/project-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import { ambassadorMessages } from "@/lib/ambassador-i18n";
 import { eventMessages } from "@/lib/events-i18n";
+import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { impactCopy } from "@/lib/impact-i18n";
 import { messages } from "@/lib/i18n";
 
@@ -22,6 +23,7 @@ const sidebarIcons = {
   "/communities": "M15 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM6 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1M5 7a2.5 2.5 0 0 0 0 5m14-5a2.5 2.5 0 0 1 0 5M3 18v-1a3 3 0 0 1 2-2.8M21 18v-1a3 3 0 0 0-2-2.8",
   "/projects": "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8 13h8",
   "/impact": "M4 4v16h16M8 16v-3m4 3V9m4 7V5",
+  "/opportunities": "M3 8h18v12H3zM8 8V5h8v3M3 12l9 3 9-3m-9 1v4",
   "/events": "M4 6h16v15H4z M8 3v6m8-6v6M4 11h16m-11 5h2m3 0h2",
   "/polls": "M4 4v16h16M8 16v-4m5 4V7m5 9v-6",
   "/ambassadors": "m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z",
@@ -40,6 +42,7 @@ export function MemberSidebar({ id, expanded, toggle, signedIn }: { id: string; 
     { href: "/communities", label: communityDirectoryMessages[locale].title },
     { href: "/projects", label: projectMessages[locale].title },
     { href: "/impact", label: impactCopy(locale)("title") },
+    { href: "/opportunities", label: opportunityCopy(locale)("title") },
     { href: "/events", label: eventMessages[locale].events },
     { href: "/polls", label: pollMessages[locale].title },
     { href: "/ambassadors", label: ambassadorMessages[locale].title },

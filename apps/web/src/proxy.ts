@@ -77,5 +77,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*", "/onboarding/:path*", "/organization-onboarding", "/reset-password", "/settings/:path*", "/institutions/:path*", "/verification", "/feed/:path*", "/discover/:path*", "/communities/:path*", "/members/:path*", "/posts/:path*", "/projects/:path*", "/polls/:path*", "/notifications/:path*", "/ambassadors", "/mfa", "/activate/a/:path*"],
+  matcher: ["/dashboard/:path*", "/profile/:path*", "/onboarding/:path*", "/organization-onboarding", "/reset-password", "/settings/:path*", "/opportunities/:path*", "/institutions/:path*", "/verification", "/feed/:path*", "/discover/:path*", "/communities/:path*", "/members/:path*", "/posts/:path*", "/projects/:path*", "/polls/:path*", "/notifications/:path*", "/ambassadors", "/mfa", "/activate/a/:path*"],
 };
