@@ -8441,8 +8441,8 @@
       "verification": {
         "local": "See C4.4 implementation report.",
         "disposableSupabase": "Enabled scenarios use isolated synthetic accounts and fixture gates.",
-        "hostedDatabase": "Pending exact migration authorization and postflight.",
-        "connectedApplication": "See implementation report.",
+        "hostedDatabase": "Exact C4.4 migration applied. All 155 existing fingerprints matched. Twelve empty private relations, two service-only RPCs and zero pending migrations.",
+        "connectedApplication": "J0SC0X verified five closed stages and Founder preparation. Test02 verified the closed member flow and was denied Founder settings.",
         "hostedApplication": "Local application runtime only.",
         "operationalApproval": "All live C4 mentorship stages remain closed."
       }

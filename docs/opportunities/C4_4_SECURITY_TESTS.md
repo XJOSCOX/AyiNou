@@ -6,4 +6,4 @@ Authorization is enforced in Fastify and in the database RPC. The service-only c
 
 The migration registers a narrowly named mentorship participation capability in existing account moderation. It leaves earlier policy values and assignments untouched. Blocking and muting use the native relationship state. Durable events carry case or relationship references and minimal state. Where relevant, a safe historical read remains available to the participants.
 
-Hosted verification is pending separate exact migration authorization. No hosted fixture may be seeded for testing.
+Hosted postflight verified all 12 C4.4 relations are empty with RLS enabled and no direct application-role access. The two public RPCs are service-only among application roles and private helpers deny direct calls. No hosted fixture, request, agreement, relationship, session, report, or notice was created. Existing data, policies and grants matched preflight.

@@ -338,7 +338,7 @@ Feature development pauses here for owner review of the engineering results and 
 
 - [x] C4.2 independent opportunity publication, external destination review, native Event association and expressions of interest. Hosted schema verified. Live operations remain closed. [Implementation report](docs/opportunities/C4_2_IMPLEMENTATION_REPORT.md)
 - [x] C4.3 private mentor and mentee profiles, independent consent and Founder preparation. Hosted schema verified. Live operations remain closed. [Implementation report](docs/opportunities/C4_3_IMPLEMENTATION_REPORT.md)
-- [ ] C4.4 private mentorship matching, discovery, requests, agreements and coordination. Hosted verification is pending. All live stages remain closed. [Implementation report](docs/opportunities/C4_4_IMPLEMENTATION_REPORT.md)
+- [x] C4.4 private mentorship matching, discovery, requests, agreements and coordination. Hosted schema and connected Founder/member access verified. All live stages remain closed. [Implementation report](docs/opportunities/C4_4_IMPLEMENTATION_REPORT.md)
 
 ### Approved future milestones
 
