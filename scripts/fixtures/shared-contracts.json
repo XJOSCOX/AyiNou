@@ -169,7 +169,7 @@
     "FounderReviewAction": "type:d19c9036da8c98ff1337b7cc540369c2706c7873492f6b31229df5eff06b725d",
     "founderReviewActions": "value:912ce6c4ff2ddac6b980362e28bfbf838f9565a4ec89d2922a07ceb0120c19a4",
     "FounderReviewCase": "type:6ff93df1423b58cac7df75b0bd9c93fa6a766086fde8f4d0510c205177069ca9",
-    "futureOrganizationPermissions": "value:18ab1c44d090af09f19489adc03ea5b63977a6570a7091cbce1e0d58971b5092",
+    "futureOrganizationPermissions": "value:cff46c3e1e76a07aba35a0f89cdcf3d4db4f57ccf25d123bbcbada87d1b8f215",
     "GovernanceProposal": "type:ccd2eafdedce6cb91c269f27479028be31a35b38ccae63e3a9d17c1c9a7db4a0",
     "GovernanceProposalKind": "type:56c4438d2800827faad89124af0d9efa8c19202f56e3f0225981618c7cea48d3",
     "governanceProposalKinds": "value:67fa469ade2c360094eff122642d774cef98665e7f9930b8145c0da69fe12cd2",
@@ -297,9 +297,16 @@
     "OnboardingCorrectionRequest": "type:3e7a703bb9fe9a3c6a7cff032277ae1d477c60a2a6b68ee6d7224263766d46e2",
     "OperationalOrganization": "type:36aae11e957f1068123d1fa7e7ee46c60adc9a45470e9947d47498f21c192506",
     "OpportunityCandidate": "type:101369f5e64f9c1ab1495dbca31f639bd1ac3ca10eb9e27be9d93accb4cdb7e7",
+    "OpportunityDetail": "type:8edd86d5dc8f4658f1de978263d215ffb6417f73316383f34626880677e63d80",
+    "OpportunityFounderView": "type:6f1a0ee8b275d19401a159601d20a77ee4d9c3cff2c7074ecdd70841496ee274",
+    "OpportunityInput": "type:4894960fba5b62f1b762d7cb693177730f5581d1aab45916d1c41a9b488466ba",
+    "OpportunityList": "type:fd340628cb6eb41fd7a0117c8242051e0fff44b6224b8747426112199f6b0f10",
     "OpportunityRequirementRevision": "type:cf49b22ddb242b94df99cfe7a2cbef7f2c0104e8da804f2387f62ddd55d3dddc",
     "OpportunityRequirements": "type:ee06559b40a2f6b80382451b343e3e2b0f15d5413bb6d4fe3347ea073c8be261",
     "OpportunityRequirementsView": "type:026cef3e861ca071e861c607c1d24ae9ec88e11d0b6254c6e3773f4a9eb74c22",
+    "OpportunitySettings": "type:e05c8f5fca6a53bfe0222dfc364b823fb70455985e9315de733b64e85c19efc5",
+    "OpportunitySkill": "type:786b4f00a7e3afbc41408bfb88cdd42bafde3f6ddeda2ae024a6b44a609b6124",
+    "OpportunityStatus": "type:4a5a73ea93d0e95d0bfdbb2405f9a4bd38bae4ae86b01bbb41cedba52cb96ef0",
     "ordinaryModerationCapabilities": "value:aa91f16c39ddc7e0ca44107aeb7a911015e11fc49a412de15c3c30dd0c661a4c",
     "OrganizationCustomRole": "type:2e02c50812007acbf22f7c5166167811f7820bbef870f8d98d0e782489b11491",
     "OrganizationIntentReceipt": "type:0c59badbff381457d5fac18b95b3bdd03d57e35c3fcfed0ffbec8a9985315b32",
@@ -309,7 +316,7 @@
     "organizationKinds": "value:c8bd152ba6fdf18386b9e58fe468155c398054a025625fc4ef526c0418c13272",
     "OrganizationOnboardingIntent": "type:6e263667b90727d7ab1b233e058d1793d4483d47cb40ce987fe6202c8f6cd5b2",
     "OrganizationPermission": "type:9be71c00b90e2f9dd4f03baf8217d099e7f3123601a5ff9e2a980fa9259cfca9",
-    "organizationPermissions": "value:8b3df5ac1980a7c52bc4bce6e1d66f53619c5b649f2adea9dc4ea315d52d5900",
+    "organizationPermissions": "value:0db446f0d4b636bffcfe17a1800700f8b4adebafbb0341d9af5f787a9d0cfd3c",
     "OrganizationRegistration": "type:b782b9c8fa3f893555f34b8e612d81a3ae05e7c0d53c46958d0fdad7751a4058",
     "OrganizationRegistrationStatus": "type:f29040a7aa0b26606a1d76395503cbad7085152b42e3da385a19acf7f0570bef",
     "organizationRegistrationStatuses": "value:460f1fb8a44ddc9693470908ad56bad9e4eafbfac10a9cb6e5e53f48a839220e",
@@ -401,6 +408,12 @@
     "PrivacyRequestSummary": "type:bd5c65e7a41381c6e1c211cd5a089606a10d3e8d43728c7a1036f2e578b2221e",
     "PrivateFlow": "type:b71a2c02df8235e53a5d1039178d60d9b5c1483764ba4c0bfe11dc658857b6fd",
     "PrivateFlowReceipt": "type:a4cd562a1bd06bcde9c2b3ad5148f2045c75adb7e14bfb6644ff07208e609466",
+    "professionalApplicationMethods": "value:15a24be4b265f458e8128c8f0a5f1186f06b56185475f6a5537d6c4165356d8e",
+    "professionalOpportunityCategories": "value:03ef73e73d1a01a937028867fc7bb22d8c6a216dfe9198fff10e8858581da13d",
+    "professionalOpportunityModes": "value:2942d84f7d413e853f6d776f6ef582fdad88528b475f35a9ad9e3d0fa85d5f99",
+    "professionalOpportunityScopes": "value:a94be6ef75cff2b522be9f565921687bd4e04f6baecfbe4b47bbbf6cc975b256",
+    "professionalOpportunityStatuses": "value:d418702f98765b70f72f78aa4fa15013049dea20558fdf8879d197d6c3991628",
+    "professionalOpportunityTypes": "value:1733906b6fd67c68dc2f06e003cd18858659f08b332b2a2636306c7c0015d6b6",
     "ProfileChanges": "type:bc6daa561ab97368385fdbdc334e3cba28b224089906cb718e5caa65b57b6674",
     "profileModes": "value:3f5af297893958ec19d0481a191bdf8172fa7ce166dbd834653a05ea5fd35c54",
     "ProfilePreview": "type:cddf6b05d4f532873143e102f92bcbe139504114c0587be3bb411ed53548c803",
@@ -534,6 +547,7 @@
     "EnforcementRequest": "b3251a98bc3e7802030af9daec26cdf861bed31905281a6e42de0547c7d96b18",
     "FounderCaseEvent": "cfc94ae19ef6b0e89938d47aaff4c18e9266c731635dc0cc33fcd98cf3339872",
     "ModerationPolicyValue": "3c293c434bc8e91682b8b518db123aafb97fab53c37ecccf16c1a6a017c2b017",
+    "OpportunityLiteral": "3b8e993d691c706cf1ecbc55b82869e8fdc2daf1efe51fc09e9ade1023452d24",
     "PollScopeOption": "22e329c97789758409c871c4d6468cc06d4c5408dd12dd84e7ca247e504b9a14"
   },
   "runtime": {
@@ -864,6 +878,8 @@
     "futureOrganizationPermissions": [
       "tasks.assign",
       "volunteers.coordinate",
+      "opportunities.submit",
+      "opportunities.publish",
       "recruitment.manage",
       "finance.reports",
       "announcements.publish"
@@ -1276,7 +1292,9 @@
       "projects.submit",
       "projects.view_private",
       "projects.operate",
-      "polls.manage"
+      "polls.manage",
+      "opportunities.draft",
+      "opportunities.edit"
     ],
     "organizationRegistrationStatuses": [
       "unknown",
@@ -1400,6 +1418,46 @@
       "deletion",
       "restriction",
       "appeal"
+    ],
+    "professionalApplicationMethods": [
+      "undecided",
+      "external",
+      "expression_of_interest",
+      "event_registration"
+    ],
+    "professionalOpportunityCategories": [
+      "professional",
+      "educational"
+    ],
+    "professionalOpportunityModes": [
+      "remote",
+      "on_site",
+      "hybrid"
+    ],
+    "professionalOpportunityScopes": [
+      "haiti",
+      "international"
+    ],
+    "professionalOpportunityStatuses": [
+      "draft",
+      "submitted",
+      "changes_requested",
+      "approved",
+      "published",
+      "closed",
+      "withdrawn",
+      "restricted",
+      "expired",
+      "archived"
+    ],
+    "professionalOpportunityTypes": [
+      "employment",
+      "internship",
+      "scholarship",
+      "training",
+      "education",
+      "apprenticeship",
+      "workshop"
     ],
     "profileModes": [
       "public",

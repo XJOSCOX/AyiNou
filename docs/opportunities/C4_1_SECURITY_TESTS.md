@@ -1,0 +1,7 @@
+# C4.1 Security verification
+
+The disposable test suite uses synthetic representatives and organizations. Its positive and negative cases exercise current organization verification, narrow custom-role grants, removed authority, closed gates, concurrent revision conflicts, duplicate receipts, hostile references, unsupported geography, retired skills, ordinary-member administration denial, and direct database grants. The Founder changes configuration through a recognized session and an original workspace with recent MFA. Verified organizations qualify under existing identity policy while the operational publication endpoint remains unavailable.
+
+Private draft and revision reads are organization-scoped and bounded to 20 and five respectively per request. Write limits include the configured active draft ceiling, 50 creates per organization per rolling day and 100 editable revisions. The organization lock and receipt uniqueness enforce quotas and deduplication across processes. Path identifiers are validated before the service call, and PostgreSQL checks actor, session and relationship before lookup or mutation.
+
+The release procedure records exact checksum, dry run, migration history, preserved row fingerprints, catalog and grants, and closed fixture counts. Connected browser checks use the localhost app, read-only hosted operations and owner-entered Founder MFA where needed. See [implementation and rollout evidence](C4_1_IMPLEMENTATION_REPORT.md).

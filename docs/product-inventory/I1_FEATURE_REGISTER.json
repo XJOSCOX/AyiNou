@@ -8245,7 +8245,57 @@
         "hostedApplication": "Next.js and Fastify local.",
         "operationalApproval": "Public launch NO-GO; C3 stages stay closed."
       }
+    },
+    {
+      "id": "professional-opportunities",
+      "domain": "Organizations",
+      "name": "Private professional and educational opportunities",
+      "status": "partial",
+      "currentAndLimits": "Private versioned preparation and protected Founder settings. Operational use, publication, discovery and applicant workflows stay closed.",
+      "dependencies": "Current organization authority, native account identity, nationwide department vocabulary, C3 skills catalog.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/opportunities/workspace.tsx",
+          "apps/web/src/features/opportunities/founder.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/professional-opportunities.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261125135000_c41_professional_opportunities.sql"
+        ],
+        "postgresObjects": [
+          "private.c41_opportunities",
+          "private.c41_revisions",
+          "public.c41_opportunities_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/professional-opportunities.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/professional-opportunities.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/professional-opportunities.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/opportunities/C4_1_IMPLEMENTATION_REPORT.md",
+          "docs/opportunities/C4_1_PUBLISHER_POLICY.md",
+          "docs/opportunities/C4_1_OPPORTUNITY_FOUNDATION.md",
+          "docs/opportunities/C4_1_SECURITY_TESTS.md"
+        ]
+      },
+      "verification": {
+        "local": "See C4.1 implementation report.",
+        "disposableSupabase": "Enabled drafts and authorization scenarios use isolated disposable records.",
+        "hostedDatabase": "Awaiting exact authorization and postflight.",
+        "connectedApplication": "Local Next.js and Fastify connect to hosted Supabase.",
+        "hostedApplication": "Local application runtime.",
+        "operationalApproval": "C4 live gates stay closed."
+      }
     }
   ],
-  "lastScopeUpdate": "C3.5 Volunteer Activation and Development Verification"
+  "lastScopeUpdate": "C4.1 Professional and Educational Opportunity Foundation"
 }

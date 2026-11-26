@@ -4091,6 +4091,100 @@
           "rolloutAndRollback": "Apply only exact independently approved migration. Keep operations closed and preserve data. Use a forward fix if needed."
         }
       ]
+    },
+    {
+      "id": "professional-opportunities",
+      "report": "docs/opportunities/C4_1_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/opportunity-settings",
+          "contract": "GET /api/v1/admin/opportunity-settings - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Only bounded private configuration history is read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/professional-opportunities.spec.ts",
+            "denialScenario": "An ordinary member or a Founder with an unrelated private workspace is denied."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/opportunity-settings",
+          "contract": "PATCH /api/v1/admin/opportunity-settings 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Versioned Founder settings and the receipt commit in one transaction."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/professional-opportunities.spec.ts",
+            "denialScenario": "Stale revisions and requests containing activation fields are denied."
+          }
+        },
+        {
+          "route": "GET /api/v1/institutions/:organization/opportunities",
+          "contract": "GET /api/v1/institutions/:organization/opportunities - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Private organization draft summaries only, with no public view count."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/professional-opportunities.spec.ts",
+            "denialScenario": "An ordinary nonrepresentative or revoked representative cannot read."
+          }
+        },
+        {
+          "route": "POST /api/v1/institutions/:organization/opportunities",
+          "contract": "POST /api/v1/institutions/:organization/opportunities 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Draft snapshot and scoped idempotency receipt commit together."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/professional-opportunities.spec.ts",
+            "denialScenario": "Closed environment, unsafe reference and unsupported geography deny writes."
+          }
+        },
+        {
+          "route": "GET /api/v1/institutions/:organization/opportunities/:opportunity",
+          "contract": "GET /api/v1/institutions/:organization/opportunities/:opportunity - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Reads exact private versions and stored skill revisions for this scope."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/professional-opportunities.spec.ts",
+            "denialScenario": "Cross-organization readers and unknown opportunity identifiers are denied."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/institutions/:organization/opportunities/:opportunity",
+          "contract": "PATCH /api/v1/institutions/:organization/opportunities/:opportunity 8192 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Updated snapshot and lifecycle status commit with the receipt."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/professional-opportunities.spec.ts",
+            "denialScenario": "Draft-only delegates, stale edits and publication attempts are denied."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261125135000_c41_professional_opportunities.sql",
+          "rlsAndGrants": "Four private RLS tables, one service-only RPC, and private helpers. Existing organization permission catalog grants remain.",
+          "authorization": "Checks current account session and identity, organization standing and representative scope. Founder preparation uses an original private workspace and recent MFA. The draft fixture is isolated.",
+          "compatibility": "Adds two narrow custom-role permissions. Existing roles, organization records, Events, Project Work, and C1–C3 data remain intact. No seed records.",
+          "validation": "Disposable tests exercise native roles, revision races, closed routes and protected preparation. Hosted verification compares preservation and grants.",
+          "rolloutAndRollback": "Verify exact release, file approval and hosted fingerprints. Apply only the scoped migration. Correct forward with processing gates closed."
+        }
+      ]
     }
   ]
 }

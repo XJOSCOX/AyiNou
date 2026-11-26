@@ -11,6 +11,7 @@ import { institutionError, institutionMessages } from "@/lib/institution-i18n";
 import { membershipMessages } from "@/lib/membership-i18n";
 import { useLocale } from "@/lib/locale-store";
 import { trustMessages } from "@/lib/trust-i18n";
+import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { organizationRoleMessages } from "@/lib/organization-role-i18n";
 import { pollMessages } from "@/lib/poll-i18n";
 import { organizationSetupMessages } from "@/lib/organization-setup";
@@ -130,6 +131,7 @@ function InstitutionWorkspace({ detail, refresh }: { detail: InstitutionManageme
         </div>
         <div className="flex flex-wrap gap-2 border-t border-[var(--theme-border)] px-5 py-3 sm:px-7">
           <Link href={`/institutions/${org.id}/roles`} className={workspaceNavLink}>{organizationRoleMessages[locale].title}</Link>
+          <Link href={`/institutions/${org.id}/opportunities`} className={workspaceNavLink}>{opportunityCopy(locale)("title")}</Link>
           {manageTeam && <Link href={`/institutions/${org.id}/affiliations`} className={workspaceNavLink}>{affiliationMessages[locale].management}</Link>}
           {org.verificationStatus === "verified" && <Link href={"/polls?scope=organization&scopeId=" + org.id} className={workspaceNavLink}>{pollMessages[locale].title}</Link>}
         </div>

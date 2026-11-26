@@ -28,6 +28,7 @@ export * from "./project-outcome-publication";
 export * from "./impact";
 export * from "./volunteering";
 export * from "./opportunity-requirements";
+export * from "./professional-opportunities";
 export * from "./volunteer-matching";
 export * from "./voting";
 export * from "./notifications";

@@ -32,6 +32,7 @@ GET /api/v1/admin/legal/audit - -
 GET /api/v1/admin/member-experience - -
 GET /api/v1/admin/moderation-center - -
 GET /api/v1/admin/moderation-policy - -
+GET /api/v1/admin/opportunity-settings - -
 GET /api/v1/admin/organization-onboarding/:id/correction-preview - -
 GET /api/v1/admin/organization-onboarding/corrections - -
 GET /api/v1/admin/overview - -
@@ -87,6 +88,8 @@ GET /api/v1/institutions/:id/roles - -
 GET /api/v1/institutions/:id/verified-representatives - -
 GET /api/v1/institutions/:key/follow - -
 GET /api/v1/institutions/:key/followers - -
+GET /api/v1/institutions/:organization/opportunities - -
+GET /api/v1/institutions/:organization/opportunities/:opportunity - -
 GET /api/v1/institutions/by-handle/:handle - -
 GET /api/v1/institutions/by-handle/:handle/affiliations - -
 GET /api/v1/institutions/by-handle/:handle/posts - -
@@ -252,6 +255,7 @@ HEAD /api/v1/admin/legal/audit - onSend
 HEAD /api/v1/admin/member-experience - onSend
 HEAD /api/v1/admin/moderation-center - onSend
 HEAD /api/v1/admin/moderation-policy - onSend
+HEAD /api/v1/admin/opportunity-settings - onSend
 HEAD /api/v1/admin/organization-onboarding/:id/correction-preview - onSend
 HEAD /api/v1/admin/organization-onboarding/corrections - onSend
 HEAD /api/v1/admin/overview - onSend
@@ -307,6 +311,8 @@ HEAD /api/v1/institutions/:id/roles - onSend
 HEAD /api/v1/institutions/:id/verified-representatives - onSend
 HEAD /api/v1/institutions/:key/follow - onSend
 HEAD /api/v1/institutions/:key/followers - onSend
+HEAD /api/v1/institutions/:organization/opportunities - onSend
+HEAD /api/v1/institutions/:organization/opportunities/:opportunity - onSend
 HEAD /api/v1/institutions/by-handle/:handle - onSend
 HEAD /api/v1/institutions/by-handle/:handle/affiliations - onSend
 HEAD /api/v1/institutions/by-handle/:handle/posts - onSend
@@ -461,6 +467,7 @@ PATCH /api/v1/admin/homepage/community-statistics 4096 -
 PATCH /api/v1/admin/impact 12288 -
 PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/moderation-policy 8192 -
+PATCH /api/v1/admin/opportunity-settings 4096 -
 PATCH /api/v1/admin/privacy-requests/* 512 -
 PATCH /api/v1/admin/registration 4096 -
 PATCH /api/v1/admin/verification-policy 4096 -
@@ -482,6 +489,7 @@ PATCH /api/v1/institutions/:id/affiliations/requests/:requestId 4096 -
 PATCH /api/v1/institutions/:id/roles/:roleId 4096 -
 PATCH /api/v1/institutions/:id/roles/:roleId/assignments/:assignmentId 512 -
 PATCH /api/v1/institutions/:id/verified-representatives/me 256 -
+PATCH /api/v1/institutions/:organization/opportunities/:opportunity 8192 -
 PATCH /api/v1/me/ambassadors/:id 6000 -
 PATCH /api/v1/me/community-invitations/:id 1024 -
 PATCH /api/v1/me/community-needs/:id 32000 -
@@ -561,6 +569,7 @@ POST /api/v1/institutions/:id/logo 2800000 -
 POST /api/v1/institutions/:id/representatives/:member/revoke 256 -
 POST /api/v1/institutions/:id/roles 4096 -
 POST /api/v1/institutions/:id/roles/:roleId/assignments 512 -
+POST /api/v1/institutions/:organization/opportunities 8192 -
 POST /api/v1/institutions/by-handle/:handle/impersonation-reports 9000 -
 POST /api/v1/me/community-needs 32000 -
 POST /api/v1/me/enforcement-appeals 12288 -

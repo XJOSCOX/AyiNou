@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { FounderOpportunitySettings } from "@/features/opportunities/founder";
+import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { FounderVolunteer } from "@/features/volunteering/founder";
 import { volunteerCopy } from "@/lib/volunteer-i18n";
 import { outcomeReviewPath } from "@/lib/project-outcome-review-api";
@@ -96,7 +98,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
     partners: earlyPartnerMessages[locale].title,
     moderationOverview: moderation.overview, moderationReports: moderation.reports, moderationContent: moderation.content,
     moderationRestrictions: moderation.restrictions, moderationAppeals: moderation.appeals, moderationHistory: moderation.history,
-    communityNeeds: needReviewLabel(locale,"queue"), communityNeedsPilot: pilotLabel(locale,"title"), impactSettings: impactCopy(locale)("settings"), volunteerSettings: volunteerCopy(locale)("admin"),
+    communityNeeds: needReviewLabel(locale,"queue"), communityNeedsPilot: pilotLabel(locale,"title"), impactSettings: impactCopy(locale)("settings"), volunteerSettings: volunteerCopy(locale)("admin"), opportunitySettings: opportunityCopy(locale)("settings"),
     featureRestrictions: featureMessages[locale].features, moderatorDelegation: featureMessages[locale].delegations,
     moderationPolicies: moderationPolicyMessages[locale].title,
     ...verificationCopy[locale].sections,
@@ -241,6 +243,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
                 </section>)}
               </div>}
               {tab === "communityNeedsPilot" && access.data?.founder && <CommunityNeedsPilot key={workspaceId} workspace={workspaceId} />}
+              {tab === "opportunitySettings" && access.data?.founder && <FounderOpportunitySettings key={workspaceId} workspace={workspaceId} />}
               {tab === "volunteerSettings" && access.data?.founder && <FounderVolunteer key={workspaceId} workspace={workspaceId} />}
               {tab === "impactSettings" && access.data?.founder && <FounderImpact key={workspaceId} workspace={workspaceId} />}
               {tab === "moderationPolicies" && access.data?.founder && <ModerationPolicySettings key={workspaceId} workspace={workspaceId} />}

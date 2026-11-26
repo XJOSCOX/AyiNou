@@ -49,6 +49,14 @@
   "capabilities": {
     "polls.manage": { "label": "Gestionar encuestas", "detail": "Crear y gestionar encuestas de una organización habilitada." },
     "projects.operate": { "label": "Gestionar proyectos aprobados", "detail": "Activa proyectos elegibles y delega responsabilidades limitadas al proyecto." },
+    "opportunities.draft": {
+      "label": "Crear borradores de oportunidades",
+      "detail": "Crear borradores privados de oportunidades."
+    },
+    "opportunities.edit": {
+      "label": "Editar oportunidades",
+      "detail": "Editar o retirar borradores privados de oportunidades."
+    },
     "projects.propose": {
       "label": "Crear propuestas",
       "detail": "Crear una propuesta en nombre de la organización."
@@ -104,6 +112,8 @@
   "planned": {
     "tasks.assign": "asignar tareas",
     "volunteers.coordinate": "coordinar voluntarios",
+    "opportunities.submit": "enviar oportunidades",
+    "opportunities.publish": "gestionar la publicación de oportunidades",
     "recruitment.manage": "gestionar contratación",
     "finance.reports": "consultar informes financieros",
     "announcements.publish": "publicar anuncios de la organización"

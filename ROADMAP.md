@@ -334,12 +334,20 @@ Feature development pauses here for owner review of the engineering results and 
 - [x] C3.3 private volunteer recommendations, scoped organizer discovery and Founder matching preparation. Hosted schema verified with live matching and discovery closed. [Implementation report](docs/volunteering/C3_3_IMPLEMENTATION_REPORT.md)
 - [x] C3.4 recruitment invitations, separate contact consent, and native application integration. Hosted schema verified with live recruitment closed. [Implementation report](docs/volunteering/C3_4_IMPLEMENTATION_REPORT.md)
 - [x] C3.5 protected volunteer activation and emergency pause, integration audit and development verification. Database rollout verified with all operational gates closed. [Final decision](docs/volunteering/C3_FINAL_COMPLETION_DECISION.md)
-- [ ] Volunteer and mentorship matching; jobs/education opportunities with anti-fraud checks.
-- [ ] Financial contributions only after legal/compliance review and approved payment-partner integration.
-- [ ] Verified project recipients, budgets, disclosures and transparent expense/milestone reports.
-- [ ] Refund/dispute and donor-privacy workflows; do not hold money directly without required permissions.
+- [ ] C4.1 private, versioned professional and educational opportunities and protected Founder preparation. [Implementation report](docs/opportunities/C4_1_IMPLEMENTATION_REPORT.md)
 
-**Gate:** Legal/payment risk review signed off; partner transaction and audit flows validated.
+### Approved future milestones
+
+| Milestone | Scope |
+| --- | --- |
+| C4 | Mentorship, Education and Opportunities |
+| C5 | Trusted Haitian Media and Information |
+| C6 | Donor Connections, Resource Assistance and Organization Donor Recognition |
+| C7 | Mobile Access and Expansion |
+| C8 | Recognition, Honors and Annual Awards |
+| G-Series | Governance and Operational Readiness |
+
+Integrated project payments, financial custody, fund distribution, and escrow are deferred indefinitely. Each future release requires its own protections, readiness evidence and approval.
 
 ## Phase 10 — Native apps and expansion
 

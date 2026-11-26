@@ -173,6 +173,10 @@ Appointments, suspension, revocation, case assignment, release, recusal, clarifi
 
 The restricted publication ledger retains the exact disclosure fingerprint, revision, organizer consent, scoped grant and assignment, reviewer inspection, decision, challenge, withdrawal, and automatic invalidation. Receipts record the actor and originating workspace for protected commands. Public Project Progress exposes only the approved current disclosure. [Implementation report](../project-outcomes/C2_3_IMPLEMENTATION_REPORT.md)
 
+## C4.1 professional and educational opportunity preparation
+
+The restricted opportunity revision is the transactional receipt for creation, edits and withdrawal. It preserves exact scope, representative, actor, revision, snapshot and request ID. Prepared Founder settings have a separate versioned history with original workspace and reason. Publication and applicant authority remain future scope. [Security tests](../opportunities/C4_1_SECURITY_TESTS.md)
+
 ## C3.5 volunteer activation
 
 A Founder activation event records reason, exact configuration, original workspace and receipt, and the set of affected stages. Pending invitation invalidation and dependent pause are transactional with the decision. Configuration changes may pause the affected stages. [Final security review](../volunteering/C3_FINAL_SECURITY_REVIEW.md)

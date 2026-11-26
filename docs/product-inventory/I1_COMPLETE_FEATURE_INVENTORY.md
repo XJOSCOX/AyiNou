@@ -772,6 +772,8 @@ Feature-specific local execution unverified. Feature-specific run outcome unveri
 
 ### Volunteer skills and matching
 
+C4.1 adds Opportunities to organization management and Opportunity settings to Platform Administration → Platform Settings for the recognized Founder. The administrative inventory covers type, organization categories, geography, participation modes, draft limits, readiness and versioned history. [C4.1 implementation report](../opportunities/C4_1_IMPLEMENTATION_REPORT.md)
+
 C3.5 tracks the five implemented volunteer stages, operational readiness, individual enable/pause/resume and emergency pause under Platform Settings → Volunteer settings. The approved database rollout is verified with all five stages disabled. Public skills disclosure remains deferred. [Final implementation audit](../volunteering/C3_FINAL_IMPLEMENTATION_AUDIT.md)
 
 C3.4 adds opportunity invitations to apply, independent recruitment-contact consent, and staged Founder preparation under Platform Settings → Volunteer settings. Hosted schema and connected role access were verified. Live recruitment stays closed. [Implementation report](../volunteering/C3_4_IMPLEMENTATION_REPORT.md)

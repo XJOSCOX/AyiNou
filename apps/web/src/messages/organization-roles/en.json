@@ -49,6 +49,14 @@
   "capabilities": {
     "polls.manage": { "label": "Manage polls", "detail": "Create and manage polls for an eligible organization." },
     "projects.operate": { "label": "Operate approved projects", "detail": "Activate eligible projects and delegate project-scoped responsibilities." },
+    "opportunities.draft": {
+      "label": "Draft opportunities",
+      "detail": "Create private opportunity drafts."
+    },
+    "opportunities.edit": {
+      "label": "Edit opportunities",
+      "detail": "Edit or withdraw private opportunity drafts."
+    },
     "projects.propose": {
       "label": "Create proposals",
       "detail": "Create a proposal in the organization’s name."
@@ -104,6 +112,8 @@
   "planned": {
     "tasks.assign": "assign tasks",
     "volunteers.coordinate": "coordinate volunteers",
+    "opportunities.submit": "submit opportunities",
+    "opportunities.publish": "manage opportunity publication",
     "recruitment.manage": "manage recruitment",
     "finance.reports": "access financial reports",
     "announcements.publish": "publish organization announcements"
