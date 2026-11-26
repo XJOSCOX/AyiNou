@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       { key: "Referrer-Policy", value: "no-referrer" },
       { key: "X-Robots-Tag", value: "noindex, nofollow" },
     ];
-    return ["/admin", "/verification/review", "/s/:path*", "/settings/volunteering/:path*", "/settings/opportunities", "/institutions/:id/opportunities/:path*", "/communities/intake/needs/:path*", "/communities/intake/triage", "/communities/intake/links", "/communities/:slug"].map(source => ({ source, headers }));
+    return ["/admin", "/verification/review", "/s/:path*", "/settings/volunteering/:path*", "/settings/opportunities/:path*", "/institutions/:id/opportunities/:path*", "/communities/intake/needs/:path*", "/communities/intake/triage", "/communities/intake/links", "/communities/:slug"].map(source => ({ source, headers }));
   },
 };
 

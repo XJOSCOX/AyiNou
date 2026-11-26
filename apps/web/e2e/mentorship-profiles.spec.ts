@@ -42,6 +42,11 @@ test("C4.3 isolates mentor and mentee profiles, consent, import and concurrent r
   sql(`insert into public.verification_records(user_id,verification_type,status,source,reviewed_by,verified_at)
     values('${independent.id}','identity','verified','review','${outsider.id}',now());`);
   await call(ownerPath, 401);
+  const guestPage = await fetch(web + webPath, { redirect: "manual" });
+  expect(guestPage.status).toBe(307);
+  expect(guestPage.headers.get("cache-control")).toContain("no-store");
+  expect(guestPage.headers.get("x-robots-tag")).toContain("noindex");
+  expect(guestPage.headers.get("referrer-policy")).toBe("no-referrer");
   await call(adminPath, 403, ordinary);
   expect(await call(ownerPath, 200, ordinary)).toMatchObject({ intake: false, profiles: [], volunteerSkills: [] });
   await call(ownerPath + "/skills?q=reading", 403, ordinary);

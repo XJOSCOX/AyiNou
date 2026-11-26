@@ -8349,7 +8349,7 @@
       "id": "mentorship-profiles",
       "domain": "Opportunities",
       "name": "Private mentor and mentee profiles",
-      "status": "partial",
+      "status": "implemented",
       "currentAndLimits": "Owner-only private role preferences and Founder preparation. Operational intake and participant discovery remain closed.",
       "dependencies": "Existing member profiles, vetted identity policy, indexed C3 skills catalog, Founder Opportunity settings and existing privacy and account standing.",
       "evidence": {
@@ -8387,8 +8387,8 @@
       "verification": {
         "local": "See the C4.3 implementation report.",
         "disposableSupabase": "Enabled profiles are confined to fixtures.",
-        "hostedDatabase": "Awaiting exact authorized rollout and verification.",
-        "connectedApplication": "Next.js and Fastify remain local.",
+        "hostedDatabase": "Approved migration applied. Zero pending migrations and all 137 existing data fingerprints preserved.",
+        "connectedApplication": "71 HTTP checks passed. Test02 verified closed intake and denied Founder access. J0SC0X verified preparation controls.",
         "hostedApplication": "Local application runtime.",
         "operationalApproval": "C4.3 live operations are closed."
       }
