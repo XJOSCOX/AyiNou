@@ -30,6 +30,7 @@ export * from "./volunteering";
 export * from "./opportunity-requirements";
 export * from "./professional-opportunities";
 export * from "./opportunity-publication";
+export * from "./opportunity-activation";
 export * from "./mentorship";
 export * from "./volunteer-matching";
 export * from "./voting";

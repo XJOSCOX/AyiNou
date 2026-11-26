@@ -33,6 +33,7 @@
     "protected_evidence": "Les dossiers ouverts ou les preuves protégées doivent être préservés.",
     "shared_media": "Les médias ou transferts liés exigent un contrôle des références et des preuves.",
     "voting_integrity": "L’intégrité des données de vote doit être vérifiée.",
+    "c4_privacy_review": "Les dossiers partagés d’opportunités, de candidatures ou de mentorat nécessitent un examen de confidentialité.",
     "inventory_limit": "L’aperçu a atteint sa limite d’inventaire.",
     "evidence_hold": "Une mesure active de conservation des preuves bloque la procédure."
   }

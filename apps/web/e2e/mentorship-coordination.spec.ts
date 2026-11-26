@@ -1,7 +1,8 @@
 
 import { randomUUID } from "node:crypto";
+import { clearActivation, prepareMentorshipActivation, stageControls } from "./opportunity-activation-fixtures";
 import { volunteerDepartments } from "@ayinou/shared";
-import { api, enroll, expect, finishPersonalOnboarding, localClient, sql, test, totp, type Member } from "./fixtures";
+import { api, enroll, expect, finishPersonalOnboarding, localClient, rehearseDatabaseRecovery, sql, test, totp, type Member } from "./fixtures";
 
 const member = "/api/v1/me/mentorship";
 const path = member + "/coordination";
@@ -49,12 +50,13 @@ const save = (role: "mentor" | "mentee", expectedVersion = 0, discovery = true, 
   command("save",{role,expectedVersion,adult:true,participation:true,safeguarding:true,
     consent:{recommendations,discovery,requests},preferences:pref(role)});
 
-test("C4.4 gates private discovery and request-to-relationship coordination", async ({ signedIn: mentee, makeMember }) => {
-  test.setTimeout(150_000);
+test("C4.6 stages full private discovery and request-to-relationship coordination", async ({ signedIn: mentee, makeMember }) => {
+  test.setTimeout(210_000);
   const mentor = await makeMember();
   const outsider = await makeMember();
   const second = await makeMember();
-  for (const user of [mentor,mentee,outsider,second]) finishPersonalOnboarding(user);
+  const founder = await makeMember();
+  for (const user of [mentor,mentee,outsider,second,founder]) finishPersonalOnboarding(user);
   expect(await request(path)).toMatchObject({status:401});
   expect(await request(path,mentee)).toMatchObject({status:200,data:{state:"closed",items:[]}});
   expect(await request("/api/v1/admin/opportunity-settings/mentorship/coordination",mentee)).toMatchObject({status:403});
@@ -66,6 +68,15 @@ test("C4.4 gates private discovery and request-to-relationship coordination", as
     on conflict(user_id) do update set discoverable=true;
     update public.profiles set is_visible=true where user_id='${user.id}';`);
   try {
+    sql(`insert into private.platform_bootstrap(user_id) values('${founder.id}');
+      insert into private.platform_admin_audit(actor_id,subject_id,event,reason)
+        values('${founder.id}','${founder.id}','first_account_bootstrapped','Disposable mentorship activation');`);
+    const lead=await staffWorkspace(founder);
+    prepareMentorshipActivation(lead.staff,lead.workspace);
+    const controls=await stageControls(lead.staff,lead.workspace);
+    for (const stage of ["mentorship_intake","mentorship_matching","mentorship_requests","mentorship_coordination"] as const) {
+      await controls.command(stage,"enable");
+    }
     sql("insert into public.verification_records(user_id,verification_type,status,source,reviewed_by,verified_at) values('" + mentor.id + "','identity','verified','review','" + outsider.id + "',now());");
     for (const [user,role] of [[mentor,"mentor"],[mentee,"mentee"],[second,"mentee"],[mentor,"mentee"]] as const) {
       expect(await request(member,user,save(role), "PATCH")).toMatchObject({status:200});
@@ -124,9 +135,14 @@ test("C4.4 gates private discovery and request-to-relationship coordination", as
       expect(await request(path,second,command("end",{id:secondRel,expectedVersion:4,confirmed:true}))).toMatchObject({status:200});
       expect(await request(path,mentee,finishFirst)).toMatchObject({status:200,data:{state:"active",version:4}});
     }
+    await controls.command("mentorship_requests","pause");
+    expect(await request(detail,mentee)).toMatchObject({status:200,data:{state:"active",coordinationPaused:false}});
+    expect(await request(path,mentee,command("send",{selection:pick,introduction:""}))).toMatchObject({status:403});
     const objective = await request(path,mentee,command("propose_item",{id:rel,expectedVersion:4,kind:"objective",content:{text:"Prepare a sample lesson"}}));
     expect(objective).toMatchObject({status:200,data:{state:"proposed"}});
     expect(await request(path,mentor,command("agree_item",{id:rel,expectedVersion:4,item:objective.data.id,itemVersion:1}))).toMatchObject({status:200,data:{state:"agreed"}});
+    expect(await request(path,mentee,command("propose_item",{id:rel,expectedVersion:4,kind:"progress",objective:objective.data.id,
+      content:{text:"I drafted a short reading lesson."}}))).toMatchObject({status:200,data:{state:"recorded"}});
     const tomorrow = new Date(Date.now()+86400000).toISOString().slice(0,10);
     const session=await request(path,mentor,command("propose_item",{id:rel,expectedVersion:4,kind:"session",
       content:{localStart:tomorrow+"T15:30", timeZone:"America/Port-au-Prince",minutes:30,topic:"Sample exercises"}}));
@@ -135,6 +151,15 @@ test("C4.4 gates private discovery and request-to-relationship coordination", as
     expect(await request(detail,mentor)).toMatchObject({status:200,data:{items:expect.arrayContaining([
       expect.objectContaining({id:session.data.id,accepted:expect.objectContaining({startsAt:tomorrow+"T20:30:00+00:00"})}),
     ])}});
+    expect(await request(path,mentee,command("propose_agreement",{id:rel,expectedVersion:4,terms:{...terms,title:"Revised reading practice"}}))).toMatchObject({status:200,data:{version:5}});
+    expect(await request(path,mentor,command("confirm_agreement",{id:rel,expectedVersion:5,revision:2,confirmed:true}))).toMatchObject({status:200,data:{version:6}});
+    expect(await request(path,mentee,command("confirm_agreement",{id:rel,expectedVersion:6,revision:2,confirmed:true}))).toMatchObject({status:200,data:{version:7}});
+    await controls.command("mentorship","emergency_pause");
+    expect(await request(detail,mentee)).toMatchObject({status:200,data:{state:"paused",coordinationPaused:true}});
+    expect(await request(path,mentee,command("resume",{id:rel,expectedVersion:8,confirmed:true}))).toMatchObject({status:403});
+    await controls.command("mentorship_coordination","resume");
+    expect(await request(detail,mentee)).toMatchObject({status:200,data:{state:"paused",coordinationPaused:false}});
+    expect(await request(path,mentee,command("resume",{id:rel,expectedVersion:8,confirmed:true}))).toMatchObject({status:200,data:{state:"active",version:9}});
     expect(await request(member,mentee,command("withdraw",{role:"mentee",expectedVersion:1,purpose:"discovery"}),"PATCH")).toMatchObject({status:200});
     expect(await request(detail,mentee)).toMatchObject({status:200,data:{state:"active"}});
     sql("insert into feed_data.member_blocks(actor_id,target_id) values('" + mentee.id + "','" + mentor.id + "');");
@@ -144,17 +169,18 @@ test("C4.4 gates private discovery and request-to-relationship coordination", as
     sql("delete from feed_data.member_blocks where actor_id='" + mentee.id + "' and target_id='" + mentor.id + "';");
     expect(await request(detail,mentee)).toMatchObject({status:200,data:{state:"safety_restricted"}});
     expect(await request(path,mentee,command("report",{id,category:"unsafe_activity",explanation:"I want to report an unsafe arrangement."}))).toMatchObject({status:200});
-    expect(await request(path,mentee,command("end",{id:rel,expectedVersion:5,confirmed:true}))).toMatchObject({status:200,data:{state:"ended"}});
+    expect(await request(path,mentee,command("end",{id:rel,expectedVersion:10,confirmed:true}))).toMatchObject({status:200,data:{state:"ended"}});
     expect((await request(detail,mentee)).data).not.toHaveProperty("items");
+    rehearseDatabaseRecovery(restored=>{
+      expect(restored(`select state='ended' and safety_restricted_at is not null from private.c44_relationships where id='${rel}';`)).toBe("t");
+      expect(restored(`select count(*) from private.c44_agreements where relationship='${rel}';`)).toBe("2");
+      expect(restored(`select count(*)>=2 from private.c44_items where relationship='${rel}';`)).toBe("t");
+      expect(restored("select not private.c46_gate('mentorship_coordination',true);")).toBe("t");
+    });
     expect(await request(moderation,mentee)).toMatchObject({status:403});
-    const founder = await makeMember();
     const assignee = await makeMember();
     for (const member of [founder,assignee]) finishPersonalOnboarding(member);
-    sql(`insert into private.platform_bootstrap(user_id) values('${founder.id}');
-      insert into private.platform_admin_audit(actor_id,subject_id,event,reason)
-        values('${founder.id}','${founder.id}','first_account_bootstrapped','Disposable mentorship triage');
-      insert into public.role_assignments(user_id,role) values('${assignee.id}','administrator');`);
-    const lead = await staffWorkspace(founder);
+    sql(`insert into public.role_assignments(user_id,role) values('${assignee.id}','administrator');`);
     const reviewer = await staffWorkspace(assignee);
     const listed = await request(moderation,lead.staff,undefined,"GET",api,lead.workspace);
     expect(listed).toMatchObject({status:200,data:{items:[{state:"open"}]}});
@@ -173,7 +199,10 @@ test("C4.4 gates private discovery and request-to-relationship coordination", as
       delete from private.platform_bootstrap where user_id='${founder.id}';`);
     console.log("C4.4 lifecycle loopback milliseconds",JSON.stringify(lifecycleTimings));
   } finally {
-    sql(`delete from private.c43_profiles where actor in ('${mentor.id}','${mentee.id}','${second.id}');
+    clearActivation();
+    sql(`delete from private.c44_preparation; delete from private.c43_settings;
+      delete from private.platform_bootstrap where user_id='${founder.id}';
+      delete from private.c43_profiles where actor in ('${mentor.id}','${mentee.id}','${second.id}');
       delete from private.c44_fixture;
       delete from private.c43_fixture;`);
   }

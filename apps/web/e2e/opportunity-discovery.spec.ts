@@ -76,8 +76,8 @@ test("C4.5 Founder preparation is available while member intake remains closed",
 
 test("C4.5 lists exact eligible revisions and isolates recommendations, saves and consent", async ({ signedIn, makeMember }) => {
   test.setTimeout(240000);
-  const owner = await makeMember(), other = await makeMember(), member = signedIn;
-  [owner, other, member].forEach(finishPersonalOnboarding);
+  const owner = await makeMember(), other = await makeMember(), loadMember = await makeMember(), member = signedIn;
+  [owner, other, member, loadMember].forEach(finishPersonalOnboarding);
   const organization = randomUUID();
   const tag = "discoveryc45" + organization.slice(0, 8);
   const caseRows = [...volunteerDepartments.map((department, index) => ({ department, type: professionalOpportunityTypes[index % 7] })),
@@ -193,7 +193,7 @@ test("C4.5 lists exact eligible revisions and isolates recommendations, saves an
     expect((await query("")).items).toEqual([]);
     await command({ action: "unsave", id: caseRows[0].id });
     expect((await read(directory + "?view=saved", member)).items).toEqual([]);
-    await benchmark(other, organization, owner);
+    await benchmark(other, organization, owner, loadMember);
     expect(sql(`select has_function_privilege('service_role','public.c45_discovery_for_api(uuid,uuid,boolean,bigint,uuid,boolean,text,jsonb)','execute')
       and not has_function_privilege('authenticated','public.c45_discovery_for_api(uuid,uuid,boolean,bigint,uuid,boolean,text,jsonb)','execute')
       and not has_table_privilege('service_role','private.c45_preferences','select');`)).toBe("t");
@@ -202,7 +202,7 @@ test("C4.5 lists exact eligible revisions and isolates recommendations, saves an
   }
 });
 
-async function benchmark(member: Member, organization: string, owner: Member) {
+async function benchmark(member: Member, organization: string, owner: Member, loadMember: Member) {
   const keyword = "latencyc45";
   const preferences = (await read(directory + "/preferences", member)).preferences;
   await read(directory, member, 200, { action: "save_preferences", expiresOn: null, requestId: randomUUID(),
@@ -282,4 +282,25 @@ async function benchmark(member: Member, organization: string, owner: Member) {
     });
   }
   console.log("C4.5 disposable scale " + JSON.stringify(table));
+  const start = performance.now();
+  const timings: number[] = [];
+  for (let round=0; round<10; round++) {
+    await Promise.all(["", "?keyword=rare", "?type=employment&country=CA&sort=closing"].map(async (suffix, index) => {
+      const requestedAt = performance.now();
+      const backend = index === 0 ? api : "http://127.0.0.1:5301";
+      const response = await fetch(backend + directory + suffix, {
+        headers: { Authorization: "Bearer " + loadMember.token }, signal: AbortSignal.timeout(12000),
+      });
+      const data = await response.json();
+      expect(response.status, JSON.stringify(data)).toBe(200);
+      expect(data.items.length).toBeGreaterThan(0);
+      timings.push(Math.round(performance.now() - requestedAt));
+    }));
+  }
+  const elapsed = (performance.now()-start)/1000;
+  timings.sort((a,b)=>a-b);
+  const percentile = (p: number) => timings[Math.ceil(p*timings.length)-1];
+  console.log("C4.6 mixed discovery workload " + JSON.stringify({requests:timings.length,
+    concurrency:3,elapsedSeconds:Number(elapsed.toFixed(2)),requestsPerSecond:Number((timings.length/elapsed).toFixed(2)),
+    medianMs:percentile(0.5),p95Ms:percentile(0.95),maxMs:timings.at(-1)}));
 }

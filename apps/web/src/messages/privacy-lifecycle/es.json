@@ -33,6 +33,7 @@
     "protected_evidence": "Los casos abiertos o las pruebas protegidas requieren preservación.",
     "shared_media": "Los medios o archivos vinculados requieren revisar referencias y pruebas.",
     "voting_integrity": "Los registros de votación requieren una revisión de integridad.",
+    "c4_privacy_review": "Los registros compartidos de oportunidades, solicitantes o mentoría requieren una revisión de privacidad.",
     "inventory_limit": "La vista previa alcanzó el límite de inventario.",
     "evidence_hold": "Una orden activa de preservación de pruebas bloquea el proceso."
   }

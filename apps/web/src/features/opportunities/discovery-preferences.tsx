@@ -9,6 +9,7 @@ import { MemberShell } from "@/components/member-shell";
 import { SettingsOptions } from "@/components/settings-disclosures";
 import { useLocale } from "@/lib/locale-store";
 import { mentorshipCopy } from "@/lib/mentorship-i18n";
+import { opportunityActivationCopy } from "@/lib/opportunity-activation-i18n";
 import { discoveryOpportunityCopy } from "@/lib/opportunity-discovery-i18n";
 import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
@@ -63,7 +64,8 @@ function PreferenceEditor({ data, refresh }: { data: OpportunityPreferenceView; 
   const fields = data.fields;
   const stored = data.preferences;
   const selectionCount = new Set([...skills, ...copied].map(item => item.code)).size;
-  const legalChoices = data.consent ? [data.paused ? "resume" : "pause", "withdraw", "reset", "clear"] as const : ["opt_in", "reset", "clear"] as const;
+  const choices = data.consent ? [data.paused ? "resume" : "pause", "withdraw", "reset", "clear"] as const : ["opt_in", "reset", "clear"] as const;
+  const legalChoices = choices.filter(action => data.personalizationAvailable !== false || (action !== "resume" && action !== "opt_in"));
 
   function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -179,6 +181,7 @@ function PreferenceEditor({ data, refresh }: { data: OpportunityPreferenceView; 
       <h2 className="text-lg font-semibold">{t("forYou")}</h2>
       <span className={opportunityTag}>{t(data.consent ? data.paused ? "paused" : "active" : "personalization_disabled")}</span>
       <p>{t("consentHelp")}</p><p>{t("advisory")}</p>
+      {data.personalizationAvailable === false && <OpportunityState>{opportunityActivationCopy(locale)("pausedPersonalization")}</OpportunityState>}
       {legalChoices.map(action => <details className="rounded-md border border-[var(--theme-border)] p-3" key={action}>
         <summary className="cursor-pointer font-semibold" onClick={() => setChoice("")}>{t(action)}</summary>
         <label className="mt-2 flex items-start gap-2">

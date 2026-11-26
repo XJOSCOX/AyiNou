@@ -181,6 +181,8 @@ C4.4 retains private request, agreement, relationship, session, objective and re
 
 C4.5 stores Founder preparation versions with workspace, actor, time and reason. Member commands retain only the latest owner-scoped receipt. Recommendations and ordinary reads create no individual audit history. [C4.5 security evidence](../opportunities/C4_5_SECURITY_TESTS.md)
 
+C4.6 records activation, pause, resumption and dependency changes with the effective configuration digest and target state. Founder commands preserve actor, original workspace, reason and exact retry receipt in the same transaction. Reviewer assignment acceptance uses the existing case receipt, bound to the exact revision, current grant, assignment deadline and unique assignment receipt. Readiness views do not collect per-view audit records. [Final security review](../opportunities/C4_FINAL_SECURITY_REVIEW.md)
+
 ## C4.2 professional and educational opportunity publication
 
 Scoped appointment, assignment, challenge, review decision, publication, suppression, moderation and applicant consent transitions record transactional receipts. The public projection contains approved revision data. The in-app interest update contains an opaque receipt and releases no shared statement. [C4.2 security checks](../opportunities/C4_2_SECURITY_TESTS.md)

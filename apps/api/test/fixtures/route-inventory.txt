@@ -35,6 +35,7 @@ GET /api/v1/admin/moderation-policy - -
 GET /api/v1/admin/moderation/mentorship - -
 GET /api/v1/admin/moderation/mentorship/:id - -
 GET /api/v1/admin/opportunity-settings - -
+GET /api/v1/admin/opportunity-settings/activation - -
 GET /api/v1/admin/opportunity-settings/discovery - -
 GET /api/v1/admin/opportunity-settings/mentorship - -
 GET /api/v1/admin/opportunity-settings/mentorship/coordination - -
@@ -275,6 +276,7 @@ HEAD /api/v1/admin/moderation-policy - onSend
 HEAD /api/v1/admin/moderation/mentorship - onSend
 HEAD /api/v1/admin/moderation/mentorship/:id - onSend
 HEAD /api/v1/admin/opportunity-settings - onSend
+HEAD /api/v1/admin/opportunity-settings/activation - onSend
 HEAD /api/v1/admin/opportunity-settings/discovery - onSend
 HEAD /api/v1/admin/opportunity-settings/mentorship - onSend
 HEAD /api/v1/admin/opportunity-settings/mentorship/coordination - onSend
@@ -503,6 +505,7 @@ PATCH /api/v1/admin/member-experience 4096 -
 PATCH /api/v1/admin/moderation-policy 8192 -
 PATCH /api/v1/admin/moderation/mentorship/:id 2600 -
 PATCH /api/v1/admin/opportunity-settings 4096 -
+PATCH /api/v1/admin/opportunity-settings/activation 4096 -
 PATCH /api/v1/admin/opportunity-settings/discovery 3200 -
 PATCH /api/v1/admin/opportunity-settings/mentorship 5000 -
 PATCH /api/v1/admin/opportunity-settings/mentorship/coordination 3200 -

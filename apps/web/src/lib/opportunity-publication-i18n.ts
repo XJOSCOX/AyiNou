@@ -94,6 +94,7 @@ const messages: Record<string,readonly [string,string,string,string]> = {
   changes:["Request changes","Mande chanjman","Demander des modifications","Solicitar cambios"],
   recuse:["Recuse","Retire tèt ou","Se récuser","Abstenerse"],
   ownership:["Official destination ownership evidence","Prèv kontwòl adrès ofisyèl","Justificatif de contrôle de la destination","Prueba de control del destino oficial"],
+  acceptAssignment:["Accept this review assignment","Aksepte travay revizyon sa a","Accepter cette mission de révision","Aceptar esta asignación de revisión"],
   assign:["Assign reviewer","Bay yon revizè","Affecter un examinateur","Asignar revisor"],
   appoint:["Appoint eligible reviewer","Nonmen revizè elijib","Nommer un examinateur admissible","Nombrar a un revisor elegible"],
   reviewer:["Reviewer account identifier","Idantifyan kont revizè","Identifiant du compte examinateur","Identificador de cuenta del revisor"],

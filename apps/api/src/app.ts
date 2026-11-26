@@ -12,6 +12,7 @@ import { registerCommunityNeedsReview } from "./routes/community-needs-review.js
 import { registerCommunityNeedsPilot } from "./routes/community-needs-pilot.js";
 import { registerOpportunityRequirements } from "./routes/opportunity-requirements.js";
 import { registerMentorship } from "./routes/mentorship.js";
+import { registerOpportunityActivation } from "./routes/opportunity-activation.js";
 import { registerOpportunityDiscovery } from "./routes/opportunity-discovery.js";
 import { registerOpportunityPublication } from "./routes/opportunity-publication.js";
 import { registerProfessionalOpportunities } from "./routes/professional-opportunities.js";
@@ -128,6 +129,8 @@ export function createApp(config: ApiConfig, overrides?: {
     config.SUPABASE_URL === "http://127.0.0.1:55321" && process.env.NODE_ENV !== "production";
   app.register(instance => registerOpportunityPublication(instance, syntheticOpportunityPublication, auth, institutions, readBudget));
   app.register(instance => registerOpportunityDiscovery(instance, syntheticOpportunityPublication, auth, institutions, readBudget));
+  app.register(instance => registerOpportunityActivation(instance,
+    syntheticOpportunityPublication && config.AYINOU_OPPORTUNITY_ACTIVATION === "synthetic", auth, institutions, readBudget));
   app.register(instance => registerMentorship(instance,
     config.AYINOU_MENTORSHIP_PROFILES === "synthetic" && config.SUPABASE_URL === "http://127.0.0.1:55321"
       && process.env.NODE_ENV !== "production", auth, institutions, readBudget));

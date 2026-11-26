@@ -53,7 +53,7 @@ export function OpportunityWorkspace({ id }: { id: string }) {
         {listing.data.canCreate && selection !== "new" &&
           <button className={institutionAction} onClick={() => setSelection("new")}>{t("newDraft")}</button>}
       </div>
-      {!listing.data.enabled && <OpportunityState>{t("closedIntake")}</OpportunityState>}
+      {(!listing.data.enabled || listing.data.intakePaused) && <OpportunityState>{t("closedIntake")}</OpportunityState>}
       {listing.data.enabled && listing.data.items.length === 0 && <p>{t("empty")}</p>}
       {listing.data.items.length > 0 && <ul className="grid gap-2 sm:grid-cols-2">
         {listing.data.items.map(item => <li key={item.id}>

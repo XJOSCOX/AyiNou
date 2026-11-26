@@ -780,6 +780,8 @@ C4.4 adds bounded mentorship matching, private participant coordination, and Fou
 
 C4.5 adds the Opportunities directory, separate private preference and personalization controls, and Founder discovery preparation. The stage status remains closed. [C4.5 implementation report](../opportunities/C4_5_IMPLEMENTATION_REPORT.md)
 
+C4.6 adds ten independently governed stages in Opportunity settings, readiness reasons, and emergency pause for each domain or the entire program. Review decisions require exact independent assignment acceptance. [Final C4 audit](../opportunities/C4_FINAL_IMPLEMENTATION_AUDIT.md)
+
 C4.1 adds Opportunities to organization management and Opportunity settings to Platform Administration → Platform Settings for the recognized Founder. The administrative inventory covers type, organization categories, geography, participation modes, draft limits, readiness and versioned history. [C4.1 implementation report](../opportunities/C4_1_IMPLEMENTATION_REPORT.md)
 
 C3.5 tracks the five implemented volunteer stages, operational readiness, individual enable/pause/resume and emergency pause under Platform Settings → Volunteer settings. The approved database rollout is verified with all five stages disabled. Public skills disclosure remains deferred. [Final implementation audit](../volunteering/C3_FINAL_IMPLEMENTATION_AUDIT.md)

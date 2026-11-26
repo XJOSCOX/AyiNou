@@ -37,6 +37,27 @@ export function sql(statement: string) {
   }).trim();
 }
 
+export function rehearseDatabaseRecovery(verify: (restoredSql: (statement: string) => string) => void) {
+  const container = "supabase_db_" + localProject();
+  const database = "c46_restore_" + randomUUID().replaceAll("-", "").slice(0, 12);
+  const local = (args: string[], input?: string | Buffer) => execFileSync("docker", ["exec", "-i", container, ...args], {
+    input, timeout: 45000, maxBuffer: 48 * 1024 * 1024, stdio: ["pipe", "pipe", "pipe"],
+  });
+  const restoredSql = (statement: string) =>
+    local(["psql", "-U", "postgres", "-d", database, "-v", "ON_ERROR_STOP=1", "-At"], statement).toString("utf8").trim();
+  const dump = local(["pg_dump", "-U", "supabase_admin", "-d", "postgres", "-Fc"]);
+  local(["createdb", "-U", "supabase_admin", "-T", "template0", database]);
+  try {
+    local(["pg_restore", "-U", "supabase_admin", "--exit-on-error", "-d", database], dump);
+    // The scratch database is never registered with PostgREST. Quarantine its
+    // restored release before any application traffic or stage verification.
+    restoredSql("update private.c46_fixture set release_authorized=false where singleton;");
+    verify(restoredSql);
+  } finally {
+    local(["dropdb", "-U", "supabase_admin", database]);
+  }
+}
+
 export function finishPersonalOnboarding(member: Member) {
   sql(`update public.member_private set onboarding_step=4,first_name='Synthetic',last_name='Member',
     membership_category='haitian' where user_id='${member.id}';`);

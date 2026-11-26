@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { opportunityReviewChecks, volunteerDepartments } from "@ayinou/shared";
+import { activationReason, callActivation, clearActivation, prepareOpportunityActivation, stageControls } from "./opportunity-activation-fixtures";
 import { publicationCopy } from "../src/lib/opportunity-publication-i18n";
-import { api, enroll, expect, finishPersonalOnboarding, localClient, login, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
+import { api, enroll, expect, finishPersonalOnboarding, localClient, login, rehearseDatabaseRecovery, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 
 const workspace="/api/v1/opportunity-publication/workspace";
 const publicRoot="/api/v1/opportunity-publication/public/";
@@ -87,8 +88,8 @@ test("C4.2 Founder preparation renders in four languages while live operations a
   } finally { sql("delete from private.platform_bootstrap;"); }
 });
 
-test("C4.2 binds independent review, destination and consent to exact revisions",async({signedIn,makeMember})=>{
-  test.setTimeout(130000);
+test("C4.6 integrates staged publication, exact review and applications with discovery",async({signedIn,makeMember,page})=>{
+  test.setTimeout(210000);
   const owner=signedIn, founder=await makeMember(), reviewer=await makeMember(), challenger=await makeMember(),
     applicant=await makeMember({visible:true}), other=await makeMember();
   for (const member of [owner,founder,reviewer,challenger,applicant,other]) finishPersonalOnboarding(member);
@@ -107,7 +108,7 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
   const settings=await call(workspace+"?action=settings",a.member,200,"GET",undefined,a.workspace);
   expect(settings).toMatchObject({version:0,live:false,fixture:false});
   await call(workspace+"?action=settings",applicant,403);
-  await admin({action:"configure",version:0,...request(),...acknowledged,settings:settings.settings});
+  await admin({action:"configure",version:0,...request(),...acknowledged,settings:{...settings.settings,submissionsPerDay:20}});
   await admin({action:"configure",version:0,...request(),...acknowledged,settings:settings.settings},409);
   expect(await call(publicRoot+organization,undefined,200)).toEqual({enabled:false,items:[]});
   expect(sql("select not has_function_privilege('authenticated','public.c42_opportunities_for_api(uuid,uuid,boolean,bigint,uuid,boolean,uuid,uuid,text,jsonb)','execute') and not has_table_privilege('service_role','private.c42_interest','select');")).toBe("t");
@@ -117,6 +118,24 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
       (await admin({action:"appoint",...request(),...acknowledged,reviewer:member.id,country,department,
         expiresAt:new Date(Date.now()+86400000*5).toISOString()})).grant as string;
     const reviewGrant=await grant(reviewer), challengeGrant=await grant(challenger), foreignGrant=await grant(reviewer,"CA",null);
+    prepareOpportunityActivation(a.member,a.workspace);
+    const controls=await stageControls(a.member,a.workspace);
+    await controls.command("publication","enable",403);
+    const initialControl=await controls.refresh();
+    const enableDrafts={capability:"drafts",action:"enable",configuration:initialControl.stages.find(stage=>stage.capability==="drafts")!.digest,
+      expectedVersion:initialControl.version,reason:activationReason,confirmed:true,...request()};
+    expect((await callActivation(a.member,randomUUID(),enableDrafts)).status).toBe(403);
+    const replicated=await Promise.all([
+      callActivation(a.member,a.workspace,enableDrafts),callActivation(a.member,a.workspace,enableDrafts,"http://127.0.0.1:5301"),
+    ]);
+    expect(replicated[0]).toMatchObject({status:200,data:{affected:["drafts"]}});
+    expect(replicated[0].data.version).toBeGreaterThan(initialControl.version);
+    expect(replicated[1]).toEqual(replicated[0]);
+    expect((await callActivation(a.member,a.workspace,{...enableDrafts,...request()})).status).toBe(409);
+    await controls.refresh();
+    for (const stage of ["publication","external","interest","discovery","personalization"] as const) {
+      await controls.command(stage,"enable");
+    }
     const unowned=await create(other,unverified,base);
     await command(other,{action:"submit",...request(),confirmed:true,organization:unverified,opportunity:unowned.id,version:1},403);
     const draft=await create(owner,organization,base);
@@ -133,11 +152,23 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
     const decision=(actor:typeof r,result:string,opportunity=draft.id,status=200,version=1)=>
       command(actor.member,{action:"decide",opportunity,version,...request(),...acknowledged,decision:result,
         checks:[...opportunityReviewChecks]},status,actor.workspace);
+    const acceptReview=(actor:typeof r, opportunity:string, status=200)=>command(actor.member,
+      {action:"accept_assignment",opportunity,version:1,confirmed:true,...request()},status,actor.workspace);
     await decision(c,"approved",draft.id,403);
+    await decision(r,"changes_requested",draft.id,403);
+    expect(await acceptReview(r,draft.id)).toMatchObject({accepted:true});
+    await admin({action:"release",opportunity:draft.id,version:1,...request(),...acknowledged});
+    await admin({...assignment,...request()});
+    await decision(r,"changes_requested",draft.id,403);
+    expect(await acceptReview(r,draft.id)).toMatchObject({accepted:true});
+    sql(`insert into private.organization_memberships(organization_id,user_id,role) values('${organization}','${reviewer.id}','viewer');`);
+    await decision(r,"changes_requested",draft.id,403);
+    sql(`delete from private.organization_memberships where organization_id='${organization}' and user_id='${reviewer.id}';`);
     await decision(r,"changes_requested");
     await command(owner,{action:"challenge",...target,...request(),...acknowledged});
     await admin({...assignment,...request()},403);
     await admin({...assignment,...request(),grant:challengeGrant});
+    await acceptReview(c,draft.id);
     await decision(c,"approved");
     const publish={action:"publish",...target,...request(),confirmed:true};
     const [published, repeatedPublication]=await Promise.all([
@@ -148,6 +179,25 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
     expect(publicData.items).toHaveLength(1);
     expect(publicData.items[0]).toMatchObject({id:draft.id,version:1,methods:{interest:true}});
     expect(publicData.items[0].snapshot).not.toHaveProperty("references");
+    const discovery="/api/v1/me/opportunity-discovery";
+    const browse=discovery+"?keyword=Synthetic+learning&department=HT-OU";
+    const matching=await call(browse,applicant,200);
+    expect(matching.items).toEqual([expect.objectContaining({id:draft.id,revision:1})]);
+    const preference=await call(discovery+"/preferences",applicant,200);
+    await call(discovery,applicant,200,"PATCH",{action:"save",id:draft.id,revision:1,expectedVersion:0,...request()});
+    await call(discovery,applicant,200,"PATCH",{action:"save_preferences",expiresOn:null,expectedVersion:1,...request(),
+      preferences:{...preference.preferences,types:["workshop"],modes:["remote"],departments:["HT-OU"]}});
+    await call(discovery,applicant,200,"PATCH",{action:"opt_in",confirmed:true,expectedVersion:2,...request()});
+    expect((await call(browse+"&view=forYou&sort=relevance",applicant,200)).items).toEqual([
+      expect.objectContaining({id:draft.id,reasons:expect.arrayContaining(["typeFit","remoteFit","locationFit"])}),
+    ]);
+    await controls.command("personalization","pause");
+    expect((await call(discovery+"?view=forYou",applicant,200)).state).toBe("personalization_disabled");
+    expect((await call(browse,applicant,200)).items).toHaveLength(1);
+    expect((await call(discovery+"?view=saved",applicant,200)).items).toHaveLength(1);
+    await call(discovery,applicant,200,"PATCH",{action:"withdraw",confirmed:true,expectedVersion:3,...request()});
+    await controls.command("personalization","resume");
+    expect((await call(discovery+"?view=forYou",applicant,200)).state).toBe("personalization_disabled");
     const preview=await call(workspace+"?action=interest_preview&organization="+organization+"&opportunity="+draft.id,applicant,200);
     const expression={action:"express",...target,...request(),identity:preview.identity,statement:"I would like more information about the training.",consent:true,adult:true};
     await command(applicant,{...expression,adult:false},400);
@@ -172,10 +222,15 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
     const ext={organization,opportunity:external.id,version:1};
     await submit(ext,"Verified disposable ownership evidence for the exact address.");
     await admin({...assignment,...request(),opportunity:external.id});
+    await acceptReview(r,external.id);
     await decision(r,"approved",external.id);
     const publishExternal={action:"publish",...ext,...request(),confirmed:true};
     await command(owner,publishExternal);
     expect(await command(applicant,{action:"destination",...ext,confirmed:true})).toEqual({url:"https://example.org/apply"});
+    await controls.command("external","pause");
+    await command(applicant,{action:"destination",...ext,confirmed:true},403);
+    expect((await call(publicRoot+organization+"?opportunity="+external.id,undefined,200)).items[0].methods.external).toBe(false);
+    await controls.command("external","resume");
     const amended=await call(draftRoot(organization)+"/"+external.id,owner,200,"PATCH",
       {action:"edit",...request(),expectedVersion:1,snapshot:{...base,applicationMethod:"external",references:["https://example.org/changed"]}});
     expect(amended).toMatchObject({version:2,status:"draft"});
@@ -183,9 +238,24 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
     await command(owner,{...publishExternal,...request(),version:2},403);
 
     for (const [type,typed] of Object.entries(details)) {
-      const record=await create(owner,organization,{...base,type,details:typed,applicationMethod:"undecided"});
-      await submit({organization,opportunity:record.id,version:1});
+      const record=await create(owner,organization,{...base,type,details:typed});
+      const typedTarget={organization,opportunity:record.id,version:1};
+      await submit(typedTarget);
+      await admin({...assignment,...request(),opportunity:record.id});
+      await acceptReview(r,record.id);
+      await decision(r,"approved",record.id);
+      await command(owner,{action:"publish",...typedTarget,...request(),confirmed:true});
+      expect((await call(publicRoot+organization+"?opportunity="+record.id,undefined,200)).items[0].snapshot.type).toBe(type);
     }
+    const international=await create(owner,organization,{...base,title:"International reading workshop",country:"CA",department:null});
+    const internationalTarget={organization,opportunity:international.id,version:1};
+    await submit(internationalTarget);
+    await admin({...assignment,...request(),opportunity:international.id,grant:reviewGrant},403);
+    await admin({...assignment,...request(),opportunity:international.id,grant:foreignGrant});
+    await acceptReview(r,international.id);
+    await decision(r,"approved",international.id);
+    await command(owner,{action:"publish",...internationalTarget,...request(),confirmed:true});
+    expect((await call(discovery+"?country=CA",applicant,200)).items).toEqual([expect.objectContaining({id:international.id})]);
     for (const department of volunteerDepartments) {
       const record=await create(owner,organization,{...base,department,mode:"hybrid",details:{...base.details,format:"hybrid"}});
       expect(record.version).toBe(1);
@@ -198,9 +268,25 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
     const eventTarget={organization,opportunity:association.id,version:1};
     await submit(eventTarget);
     await admin({...assignment,...request(),opportunity:association.id});
+    await acceptReview(r,association.id);
     await decision(r,"approved",association.id);
     await command(owner,{action:"publish",...eventTarget,...request(),confirmed:true});
     expect((await call(publicRoot+organization+"?opportunity="+association.id,undefined,200)).items[0].methods.event).toBe(event);
+    await page.context().clearCookies();
+    await page.context().addCookies([{name:"ayinou-locale",value:"en",url:web}]);
+    await login(page,applicant);
+    await expect(page).toHaveURL(/\/dashboard/);
+    const handle="c42-"+organization.slice(0,8);
+    await page.goto("/organization/"+handle+"?section=opportunities&opportunity="+association.id);
+    await expect(page.getByRole("heading",{name:base.title,exact:true})).toBeVisible();
+    const nativeEvent=page.getByRole("link",{name:publicationCopy("en")("nativeEvent"),exact:true});
+    await expect(nativeEvent).toHaveAttribute("href","/events/"+event);
+    await nativeEvent.click();
+    await expect(page.getByRole("heading",{name:"Practice workshop event",exact:true})).toBeVisible();
+    const rsvp=await fetch(api+"/api/v1/events/"+event+"/rsvp",{method:"PUT",
+      headers:{Authorization:"Bearer "+applicant.token,"Content-Type":"application/json"},
+      body:JSON.stringify({response:"going",listMe:false})});
+    expect(rsvp.status,await rsvp.text()).toBe(200);
     sql(`update feed_data.events set status='canceled' where id='${event}';`);
     expect((await call(publicRoot+organization+"?opportunity="+association.id,undefined,200)).items[0].methods.event).toBeNull();
 
@@ -257,9 +343,33 @@ test("C4.2 binds independent review, destination and consent to exact revisions"
     expect((await call(publicRoot+organization+"?opportunity="+association.id,undefined,200)).items).toEqual([]);
     const expired=await create(owner,organization,{...base,closesOn:"2024-02-02"});
     await command(owner,{action:"submit",organization,opportunity:expired.id,version:1,...request(),confirmed:true},403);
+    await controls.command("publication","pause");
+    expect((await call(publicRoot+organization,undefined,200)).items).toEqual([]);
+    expect((await call(discovery+"?view=saved",applicant,200)).items).toEqual([{id:draft.id,unavailable:true,saved:true}]);
+    expect((await call(workspace+"?action=my_interest",applicant,200)).items).toEqual([expect.objectContaining({id:interest.id,state:"withdrawn"})]);
+    await controls.command("publication","resume");
+    expect((await controls.refresh()).stages.find(stage=>stage.capability==="discovery")?.status).toBe("paused");
+    expect((await call(publicRoot+organization,undefined,200)).items).toEqual([]);
+    expect(sql(`select (private.lifecycle_inventory('${applicant.id}')->'dependencies') @> '[{"kind":"c4_privacy_review","disposition":"block"}]'::jsonb;`)).toBe("t");
+    const historyFingerprint=sql(`select md5(string_agg(to_jsonb(i)::text,',' order by i.id))
+      from private.c42_interest i where i.member='${applicant.id}';`);
+    rehearseDatabaseRecovery(restored=>{
+      expect(restored(`select md5(string_agg(to_jsonb(i)::text,',' order by i.id))
+        from private.c42_interest i where i.member='${applicant.id}';`)).toBe(historyFingerprint);
+      expect(restored(`select count(*) from private.c45_saved where actor='${applicant.id}' and opportunity='${draft.id}';`)).toBe("1");
+      expect(restored(`select published_at<=private.c46_publication_cutoff() from private.c42_publications where opportunity='${draft.id}' and revision=1;`)).toBe("t");
+      expect(restored("select not private.c46_gate('publication',true) and exists(select from private.c46_history where action='readiness_changed');")).toBe("t");
+    });
+    await controls.command("drafts","pause");
+    expect((await call(draftRoot(organization),owner,200)).canCreate).toBe(false);
+    expect((await call(draftRoot(organization)+"/"+draft.id,owner,200)).history).toHaveLength(1);
+    await call(draftRoot(organization),owner,403,"POST",{...request(),expectedVersion:0,snapshot:base});
     sql(`update private.organizations set verification_status='revoked' where id='${organization}';
       update private.organizations set verification_status='verified' where id='${organization}';`);
     expect((await call(publicRoot+organization,undefined,200)).items).toEqual([]);
 
-  } finally { sql("delete from private.c42_fixture; delete from private.c41_fixture; delete from private.platform_bootstrap;"); }
+  } finally {
+    clearActivation();
+    sql("delete from private.c45_fixture; delete from private.c45_settings; delete from private.c41_settings; delete from private.c42_fixture; delete from private.c41_fixture; delete from private.platform_bootstrap;");
+  }
 });

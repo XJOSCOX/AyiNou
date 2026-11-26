@@ -15,7 +15,7 @@ export type PublicationCase={
 export type Interest={id:string;revision:number;version:number;state:string;title?:string;
   shared_identity?:{username:string;displayName:string};statement?:string};
 export type ReviewCase={opportunity:string;revision:number;state:string;authority?:string;title:string;country:string;department?:string;
-  assigned_until?:string;snapshot?:PublishedOpportunity["snapshot"]&{references?:string[]};ownership?:string;challenge_reason?:string};
+  assigned_until?:string;assignment_accepted?:boolean;snapshot?:PublishedOpportunity["snapshot"]&{references?:string[]};ownership?:string;challenge_reason?:string};
 export type ReviewerGrant={id:string;reviewer?:string;username?:string;country:string;department?:string;expires_at:string};
 export type PublicationSettings={types:string[];methods:string[];submissionsPerDay:number;interestPerDay:number;reportsPerDay:number;staffingPlan?:string;readinessNotes?:string};
 export type PublicationSettingsView={version:number;live:false;fixture:boolean;settings:PublicationSettings;

@@ -338,7 +338,9 @@ export function PublicationStaff({workspace, founder}:{workspace:string;founder:
           {item.snapshot?.references?.map(url=><p className="break-all" key={url}>{url}</p>)}
           {item.ownership && <p className="break-words">{t("ownership")} · {item.ownership}</p>}
           {item.challenge_reason && <p className="break-words">{t("challenge")} · {item.challenge_reason}</p>}
-          {([["approved","approve"],["changes_requested","changes"],["rejected","reject"]] as const).map(([decision,label])=>
+          {item.assignment_accepted === false && <Command label={t("acceptAssignment")} workspace={workspace} after={after}
+            parameters={{action:"accept_assignment",opportunity:item.opportunity,version:item.revision}} />}
+          {item.assignment_accepted !== false && ([["approved","approve"],["changes_requested","changes"],["rejected","reject"]] as const).map(([decision,label])=>
             <Command key={decision} label={t(label)} workspace={workspace} after={after}
               parameters={{action:"decide",opportunity:item.opportunity,version:item.revision,decision}}
               extract={form=>({reason:field(form,"reason"),checks:form.getAll("checks")})}>

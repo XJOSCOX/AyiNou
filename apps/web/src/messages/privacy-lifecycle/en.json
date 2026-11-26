@@ -33,6 +33,7 @@
     "protected_evidence": "Open cases or protected evidence need preservation.",
     "shared_media": "Linked media or uploads need reference and evidence checks.",
     "voting_integrity": "Voting records require an integrity review.",
+    "c4_privacy_review": "Shared opportunity, applicant, or mentorship records need a privacy review.",
     "inventory_limit": "The preview reached its inventory limit.",
     "evidence_hold": "An active evidence hold blocks progress."
   }

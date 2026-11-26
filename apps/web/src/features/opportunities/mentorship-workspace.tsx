@@ -11,6 +11,7 @@ import { authorizedSocialRequest } from "@/lib/feed-api";
 import { useLocale } from "@/lib/locale-store";
 import { coordinationCopy } from "@/lib/mentorship-coordination-i18n";
 import { mentorshipCopy } from "@/lib/mentorship-i18n";
+import { opportunityActivationCopy } from "@/lib/opportunity-activation-i18n";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import {
   CoordinationHeader, CoordinationSafety, coordinationApi, coordinationField, coordinationGrid, coordinationPage, useCoordinationCommand,
@@ -46,7 +47,7 @@ function Workspace({ workspace, refresh }: { workspace: MentorshipWorkspace; ref
   const loadPeer = useCallback((signal: AbortSignal): Promise<MentorshipRequest> =>
     authorizedSocialRequest(coordinationApi + "/requests/" + request, { signal, cache:"no-store" }), [request]);
   const peer = useInstitutionResource(loadPeer);
-  const states = [
+  const states = workspace.coordinationPaused ? (!closed ? ["end"] as const : []) : [
     ...(state === "active" ? ["pause"] as const : []),
     ...(state === "paused" ? ["resume"] as const : []),
     ...((state === "active" || state === "paused") && workspace.completion !== "mine" ? ["complete"] as const : []),
@@ -58,6 +59,7 @@ function Workspace({ workspace, refresh }: { workspace: MentorshipWorkspace; ref
         <h2 className="text-lg font-semibold">{workspace.agreedTerms?.title ?? workspace.agreement?.terms.title ?? t("openWorkspace")}</h2>
         <span className={opportunityTag} role="status">{t(state)}</span>
       </header>
+      {workspace.coordinationPaused && <OpportunityState>{opportunityActivationCopy(locale)("pausedCoordination")}</OpportunityState>}
       {workspace.completion === "mine" && <OpportunityState>{t("completionWaiting")}</OpportunityState>}
       {states.length > 0 && <div className="grid min-w-0 items-start gap-2 md:grid-cols-2">
         {states.map(action => <SettingsHistory key={action} title={t(action)}>
@@ -75,8 +77,8 @@ function Workspace({ workspace, refresh }: { workspace: MentorshipWorkspace; ref
     {workspace.agreedTerms && <section className={opportunitySettingsCard}><h2 className="text-lg font-semibold">{t("agreedTerms")}</h2>
       <Terms terms={workspace.agreedTerms} locale={locale} />
     </section>}
-    {available && <Agreement workspace={workspace} command={command} />}
-    {workspace.items && (workspace.items.length > 0 || state === "active") &&
+    {available && !workspace.coordinationPaused && <Agreement workspace={workspace} command={command} />}
+    {!workspace.coordinationPaused && workspace.items && (workspace.items.length > 0 || state === "active") &&
       <CoordinationItems workspace={workspace} command={command} />}
     {!!workspace.history?.length && <SettingsHistory title={t("history")}>
       <ol className="grid gap-2">{workspace.history.map((event,index) => <li key={event.at + index}>

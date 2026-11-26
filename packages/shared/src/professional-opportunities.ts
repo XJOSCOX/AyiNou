@@ -22,7 +22,7 @@ export type OpportunityInput = {
   skills: string[]; references: string[]; applicationMethod: OpportunityLiteral<typeof professionalApplicationMethods>;
 };
 export type OpportunityList = {
-  enabled: boolean; organizationName: string; canCreate: boolean; canEdit: boolean; verified: boolean; publisherEligible: boolean;
+  enabled: boolean; intakePaused?: boolean; organizationName: string; canCreate: boolean; canEdit: boolean; verified: boolean; publisherEligible: boolean;
   settings: OpportunitySettings; skills: OpportunitySkill[]; next: string | null;
   items: { id: string; version: number; status: OpportunityStatus; title: string; type: OpportunityInput["type"] }[];
 };
@@ -78,6 +78,7 @@ export type OpportunityPreferenceView = {
   enabled:boolean; version:number; preferences:OpportunityDiscoveryPreferences;
   fields:OpportunityDiscoveryConfiguration["fields"]; types:OpportunityDiscoveryConfiguration["types"];
   scopes:OpportunityDiscoveryConfiguration["scopes"]; expiresOn:string|null; consent:boolean; paused:boolean;
+  personalizationAvailable?: boolean;
 };
 
 export type OpportunityFounderView = {

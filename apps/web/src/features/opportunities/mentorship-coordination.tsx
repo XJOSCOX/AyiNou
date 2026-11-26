@@ -122,16 +122,17 @@ function CandidatesPage({ lane }: { lane: "recommendations" | "discovery" }) {
       <div><button className={institutionAction}>{t("apply")}</button></div>
     </form>
     {resource.error !== null && <ApiErrorNotice error={resource.error} retry={resource.refresh} signIn />}
+    {resource.data?.state === "closed" && <OpportunityState>{t("closed")}</OpportunityState>}
     {resource.data?.state === "unavailable" && <OpportunityState>{t("unavailable")}</OpportunityState>}
     {resource.data?.state === "available" && resource.data.items.length === 0 && <p>{t("none")}</p>}
     <div className="grid min-w-0 gap-3 xl:grid-cols-2">
-      {resource.data?.items.map(item => <Candidate key={item.username} item={item} refresh={resource.refresh} />)}
+      {resource.data?.items.map(item => <Candidate key={item.username} item={item} requestsOpen={resource.data?.requestsOpen !== false} refresh={resource.refresh} />)}
     </div>
     {resource.data?.next && <button type="button" className={opportunitySecondary + " w-fit"} onClick={() => setCursor(resource.data?.next ?? undefined)}>{t("more")}</button>}
   </section>;
 }
 
-function Candidate({ item, refresh }: { item: MentorshipCandidate; refresh: () => void }) {
+function Candidate({ item, requestsOpen, refresh }: { item: MentorshipCandidate; requestsOpen: boolean; refresh: () => void }) {
   const [locale] = useLocale();
   const t = coordinationCopy(locale);
   const [sent, setSent] = useState(false);
@@ -148,7 +149,7 @@ function Candidate({ item, refresh }: { item: MentorshipCandidate; refresh: () =
     <div className="flex flex-wrap items-start gap-2">
       <button type="button" className={opportunitySecondary} disabled={command.busy}
         onClick={() => void command.send({ action:"dismiss", selection:item.selection })}>{t("dismiss")}</button>
-      {item.canRequest && !sent && <SettingsHistory title={t("send")}>
+      {requestsOpen && item.canRequest && !sent && <SettingsHistory title={t("send")}>
         <form className="grid min-w-0 gap-2" onSubmit={event => {
           event.preventDefault();
           const introduction = coordinationField(new FormData(event.currentTarget),"introduction");

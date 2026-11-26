@@ -12,7 +12,7 @@ const shortText = z.string().trim().min(1).max(500).refine(value => !/\p{Cc}/u.t
 const reason = shortText.refine(value => value.length >= 10);
 const method = z.enum(["external","expression_of_interest","event_registration"]);
 const founderActions = new Set(["settings","configure","appoint","revoke","assign","release","admin_queue","reports"]);
-const reviewerActions = new Set(["review_queue","review_reports","decide","recuse","restrict"]);
+const reviewerActions = new Set(["review_queue","review_reports","accept_assignment","decide","recuse","restrict"]);
 const scoped = z.strictObject({ organization: id });
 const resource = z.strictObject({ organization: id, opportunity: id });
 const paging = { after: id.optional() };
@@ -43,6 +43,7 @@ const command = z.discriminatedUnion("action",[
   z.strictObject({action:z.literal("assign"),opportunity:id,...noted,grant:id}),
   z.strictObject({action:z.literal("release"),opportunity:id,...noted}),
   resource.extend({action:z.literal("submit"),...confirm,ownership:shortText.optional()}),
+  z.strictObject({action:z.literal("accept_assignment"),opportunity:id,...confirm}),
   z.strictObject({action:z.literal("decide"),opportunity:id,...noted,decision:z.enum(["approved","changes_requested","rejected"]),
     checks:z.array(z.enum(opportunityReviewChecks)).max(8).optional()}),
   z.strictObject({action:z.literal("recuse"),opportunity:id,...revised,reason}),

@@ -8500,7 +8500,57 @@
         "hostedApplication": "Next.js and Fastify remain local.",
         "operationalApproval": "Live discovery and personalization remain closed."
       }
+    },
+    {
+      "id": "opportunity-activation",
+      "domain": "Opportunities",
+      "name": "C4 final integration and stage activation controls",
+      "status": "implemented",
+      "currentAndLimits": "Ten independently controlled stages, separate preparation and runtime release, and three emergency pause scopes. Hosted live processing is outside this release.",
+      "dependencies": "C4.1–C4.5, C3 catalog, C3.5 staged activation pattern, verified session scope, independent review, member privacy and existing moderation.",
+      "evidence": {
+        "web": [
+          "apps/web/src/features/opportunities/activation-founder.tsx"
+        ],
+        "api": [
+          "apps/api/src/routes/opportunity-activation.ts"
+        ],
+        "migrations": [
+          "supabase/migrations/20261126121000_c46_opportunity_activation.sql"
+        ],
+        "postgresObjects": [
+          "private.c46_stage",
+          "private.c46_history",
+          "private.c46_fixture",
+          "public.c46_activation_for_api"
+        ],
+        "tests": {
+          "api": [
+            "apps/web/e2e/opportunity-activation.spec.ts",
+            "apps/web/e2e/opportunity-publication.spec.ts"
+          ],
+          "browser": [
+            "apps/web/e2e/opportunity-activation.spec.ts"
+          ],
+          "database": [
+            "apps/web/e2e/opportunity-publication.spec.ts",
+            "apps/web/e2e/mentorship-coordination.spec.ts"
+          ]
+        },
+        "reports": [
+          "docs/opportunities/C4_FINAL_IMPLEMENTATION_AUDIT.md",
+          "docs/opportunities/C4_FINAL_COMPLETION_DECISION.md"
+        ]
+      },
+      "verification": {
+        "local": "See final C4 test evidence.",
+        "disposableSupabase": "Enabled rehearsals use exact synthetic stage controls.",
+        "hostedDatabase": "See the C4.6 deployment report.",
+        "connectedApplication": "See the C4.6 deployment report.",
+        "hostedApplication": "Next.js and Fastify remain local.",
+        "operationalApproval": "C4 live activation requires an independently authorized release."
+      }
     }
   ],
-  "lastScopeUpdate": "C4.5 Opportunity Discovery and Personalized Recommendations"
+  "lastScopeUpdate": "C4.6 Final Integration, Security, Performance and Activation Controls"
 }

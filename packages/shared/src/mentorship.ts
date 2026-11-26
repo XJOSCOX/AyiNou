@@ -102,7 +102,7 @@ export type MentorshipRequest = {
   relationship: string | null; introduction: string | null; reported: boolean;
   peer: Pick<MentorshipCandidate, "name" | "username" | "identityVerified"> | null;
 };
-export type MentorshipPage<T> = { state: "closed" | "unavailable" | "available"; items: T[]; next: string | null };
+export type MentorshipPage<T> = { state: "closed" | "unavailable" | "available"; items: T[]; next: string | null; requestsOpen?: boolean };
 export type MentorshipAgreementTerms = {
   title: string; objectives: string; expectations: string;
   weeks: number; frequency: number; minutes: number;
@@ -126,6 +126,7 @@ export type MentorshipWorkspace = {
   };
   agreement?: { revision: number; terms: MentorshipAgreementTerms; mine: boolean; peer: boolean } | null;
   agreedTerms?: MentorshipAgreementTerms | null;
+  coordinationPaused?: boolean;
   items?: MentorshipItem[];
   history?: { action: string; state: string; version: number; at: string; mine: boolean; item: string | null; correction: MentorshipItemContent | null }[];
 };

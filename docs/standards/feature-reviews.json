@@ -4571,6 +4571,48 @@
           "rolloutAndRollback": "Apply the separately approved exact migration only. Keep fixtures empty and correct forward."
         }
       ]
+    },
+    {
+      "id": "opportunity-activation",
+      "report": "docs/opportunities/C4_FINAL_IMPLEMENTATION_AUDIT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/admin/opportunity-settings/activation",
+          "contract": "GET /api/v1/admin/opportunity-settings/activation - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Founder-only aggregate stage readiness and bounded activation history."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-activation.spec.ts",
+            "denialScenario": "An ordinary member or a session without recent MFA is denied."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/opportunity-settings/activation",
+          "contract": "PATCH /api/v1/admin/opportunity-settings/activation 4096 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "An activation or pause and its scoped receipt commit atomically with the affected stages."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/opportunity-publication.spec.ts",
+            "denialScenario": "Ordinary members, stale workspaces, stale digests and unprepared stages cannot open processing."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261126121000_c46_opportunity_activation.sql",
+          "rlsAndGrants": "Three private RLS tables and a single new service-only public RPC. Existing private grants and signatures are preserved.",
+          "authorization": "Recognized Founder, current session and standing, original MFA workspace, exact stage digest, checks, confirmation, reason and idempotent receipt.",
+          "compatibility": "Additive closed stage controls for C4.1–C4.5, exact reviewer acceptance via existing receipts, and an isolated synthetic shared privacy planning blocker.",
+          "validation": "Disposable authorization, lifecycle, stage, recovery and read-only hosted preservation checks.",
+          "rolloutAndRollback": "Only the separately authorized exact migration may apply. Keep hosted releases closed and use a reviewed forward correction."
+        }
+      ]
     }
   ]
 }
