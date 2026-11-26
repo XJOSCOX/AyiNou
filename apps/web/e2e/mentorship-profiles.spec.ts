@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { volunteerDepartments, type MentorshipFounderView, type MentorshipOwnerView, type MentorshipPreferences } from "@ayinou/shared";
 import { mentorshipCopy } from "../src/lib/mentorship-i18n";
+import { volunteerCategory } from "../src/lib/volunteer-i18n";
 import { api, enroll, expect, finishPersonalOnboarding, localClient, login, solveMfa, sql, test, totp, web, type Member } from "./fixtures";
 
 const ownerPath = "/api/v1/me/mentorship";
@@ -182,6 +183,19 @@ test("C4.3 Founder preparation works with live intake closed and member navigati
     await page.getByRole("button", { name: "Open administration", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Mentorship preparation", exact: true })).toBeVisible();
     await expect(page.getByText(mentorshipCopy("en")("activation"), { exact: true })).toBeVisible();
+    const settingsForms = page.locator('details[name="opportunity-configuration"]');
+    const mentorshipForm = settingsForms.filter({ hasText: "Edit preparation settings" });
+    await page.setViewportSize({ width: 390, height: 900 });
+    await mentorshipForm.locator(":scope > summary").press("Enter");
+    await expect(mentorshipForm.locator("fieldset").first()).toBeHidden();
+    await mentorshipForm.locator("summary").filter({ hasText: "Supported skill categories" }).click();
+    await expect(mentorshipForm.getByRole("checkbox", { name: volunteerCategory("education", "en"), exact: true })).toBeVisible();
+    expect(await mentorshipForm.locator("form").evaluate(form => new FormData(form as HTMLFormElement).getAll("roles")))
+      .toEqual(["mentor", "mentee"]);
+    expect(await page.locator("body").evaluate(body => body.scrollWidth)).toBeLessThanOrEqual(390);
+    await settingsForms.first().locator(":scope > summary").click();
+    await expect(mentorshipForm).not.toHaveAttribute("open");
+    await expect(settingsForms.first()).toHaveAttribute("open", "");
 
     await page.goto("/settings");
     await page.getByRole("link", { name: /Mentorship profiles/ }).click();

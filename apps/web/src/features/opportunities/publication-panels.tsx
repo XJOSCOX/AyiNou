@@ -14,15 +14,15 @@ import { publicationCopy } from "@/lib/opportunity-publication-i18n";
 import { opportunityCopy } from "@/lib/professional-opportunities-i18n";
 import { departmentNames } from "@/lib/volunteer-i18n";
 import { TypeDetails } from "./detail-fields";
-import { OpportunityPageHeader, OpportunityState, opportunitySecondary, opportunityTag } from "./presentation";
+import { OpportunityPageHeader, OpportunitySettingsOptions, OpportunityState, opportunitySecondary, opportunitySettingsCard, opportunitySettingsGroup, opportunityTag } from "./presentation";
 import { listedOpportunities, workspaceCommand, workspaceRead, type Interest, type InterestPreview, type PublicationCase,
   type PublicationSettingsView, type PublishedOpportunity, type Queue, type ReviewCase } from "./publication-api";
 
 function field(form:FormData,name:string) { return String(form.get(name) ?? "").trim(); }
 
-function Command({label,parameters,workspace,children,extract,after,confirmation=true,disclosure}:{
+function Command({label,parameters,workspace,children,extract,after,confirmation=true,disclosure,disclosureGroup}:{
   label:string;parameters:object;workspace?:string;children?:ReactNode;extract?:(form:FormData)=>object;
-  after?:(result:unknown)=>void;confirmation?:boolean;disclosure?:string;
+  after?:(result:unknown)=>void;confirmation?:boolean;disclosure?:string;disclosureGroup?:string;
 }) {
   const [locale]=useLocale();
   const t=publicationCopy(locale);
@@ -42,14 +42,14 @@ function Command({label,parameters,workspace,children,extract,after,confirmation
       after?.(value);
     });
   }
-  return <details className="group/command min-w-0 overflow-hidden rounded-md border border-[var(--theme-border)]">
+  return <details name={disclosureGroup} className="group/command min-w-0 overflow-hidden rounded-md border border-[var(--theme-border)] [overflow-wrap:anywhere]">
     <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-3 py-2 text-sm font-semibold text-[var(--theme-link)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:-outline-offset-2 [&::-webkit-details-marker]:hidden">
       <span className="min-w-0 break-words">{label}</span>
       <span aria-hidden="true" className="grid size-6 shrink-0 place-items-center rounded-full bg-[var(--theme-control)]">
         <span className="mb-0.5 size-2 rotate-45 border-e-[1.5px] border-b-[1.5px] group-open/command:mt-1 group-open/command:rotate-[225deg]" />
       </span>
     </summary>
-    <form onSubmit={submit} className="grid min-w-0 gap-3 border-t border-[var(--theme-border)] p-3 sm:p-4">
+    <form onSubmit={submit} className={"grid min-w-0 gap-3 border-t border-[var(--theme-border)] p-3 " + (disclosureGroup ? "text-sm" : "sm:p-4")}>
       {disclosure && <p>{disclosure}</p>}
       {children}
       {confirmation && <label className="flex gap-2"><input required type="checkbox" />{t("confirmed")}</label>}
@@ -242,7 +242,7 @@ export function PublicationStaff({workspace, founder}:{workspace:string;founder:
   const configuration=useInstitutionResource(read);
   const data=configuration.data;
   function after(){resource.refresh();configuration.refresh();}
-  return <section className={institutionCard+" grid min-w-0 gap-3"}>
+  return <section className={founder ? opportunitySettingsCard : institutionCard+" grid min-w-0 gap-3"}>
     <header className="flex flex-wrap items-center justify-between gap-2">
       <h2 className="text-lg font-semibold">{t(founder?"settings":"reviewQueue")}</h2>
       {data && <span className={opportunityTag}>{common("version")} {data.version}</span>}
@@ -252,27 +252,32 @@ export function PublicationStaff({workspace, founder}:{workspace:string;founder:
     {data && <>
       <p className="text-sm leading-relaxed text-[var(--theme-body)]">{t("readiness")}</p>
       <Command key={data.version} label={common("configuration")} parameters={{action:"configure",version:data.version}} workspace={workspace}
+        disclosureGroup={opportunitySettingsGroup}
         after={after} extract={form=>({reason:field(form,"reason"),settings:{
           types:form.getAll("type"),methods:form.getAll("method"),submissionsPerDay:Number(field(form,"submissionsPerDay")),
           interestPerDay:Number(field(form,"interestPerDay")),reportsPerDay:Number(field(form,"reportsPerDay")),
           staffingPlan:field(form,"staffingPlan"),readinessNotes:field(form,"readinessNotes"),
         }})}>
-        <fieldset className="flex flex-wrap gap-3"><legend>{common("type")}</legend>
-          {professionalOpportunityTypes.map(type=><label className="flex gap-1" key={type}><input name="type" value={type} type="checkbox"
+        <div className="grid min-w-0 items-start gap-2 sm:grid-cols-2">
+        <OpportunitySettingsOptions title={common("type")}>
+          {professionalOpportunityTypes.map(type=><label className="flex min-w-0 items-start gap-2 py-1 [&>input]:mt-0.5 [&>input]:shrink-0" key={type}><input name="type" value={type} type="checkbox"
             defaultChecked={data.settings.types.includes(type)} />{common(type)}</label>)}
-        </fieldset>
-        <fieldset className="flex flex-wrap gap-3"><legend>{common("method")}</legend>
-          {(["external","expression_of_interest","event_registration"] as const).map(method=><label className="flex gap-1" key={method}>
+        </OpportunitySettingsOptions>
+        <OpportunitySettingsOptions title={common("method")}>
+          {(["external","expression_of_interest","event_registration"] as const).map(method=><label className="flex min-w-0 items-start gap-2 py-1 [&>input]:mt-0.5 [&>input]:shrink-0" key={method}>
             <input name="method" value={method} type="checkbox" defaultChecked={data.settings.methods.includes(method)} />{common(method)}</label>)}
-        </fieldset>
-        <div className="grid min-w-0 gap-3 sm:grid-cols-3">
+        </OpportunitySettingsOptions>
+        </div>
+        <div className="grid min-w-0 gap-2 sm:grid-cols-3">
         {([["submissionsPerDay","submissionLimit",20],["interestPerDay","interestLimit",10],["reportsPerDay","reportLimit",8]] as const)
-          .map(([name,label,max])=><label key={name}>{t(label)}
+          .map(([name,label,max])=><label key={name} className="min-w-0">{t(label)}
             <input className={institutionField} required name={name} type="number" min={1} max={max} defaultValue={data.settings[name]} />
           </label>)}
         </div>
-        <label>{t("staffingPlan")}<input className={institutionField} maxLength={500} name="staffingPlan" defaultValue={data.settings.staffingPlan} /></label>
-        <label>{t("readinessNotes")}<input className={institutionField} maxLength={500} name="readinessNotes" defaultValue={data.settings.readinessNotes} /></label>
+        <div className="grid min-w-0 gap-2 sm:grid-cols-2">
+          <label className="min-w-0">{t("staffingPlan")}<input className={institutionField} maxLength={500} name="staffingPlan" defaultValue={data.settings.staffingPlan} /></label>
+          <label className="min-w-0">{t("readinessNotes")}<input className={institutionField} maxLength={500} name="readinessNotes" defaultValue={data.settings.readinessNotes} /></label>
+        </div>
         <Reason label={t("reason")} />
       </Command>
       {data.history.length>0 && <ul>{data.history.map(item=><li key={item.id}>
