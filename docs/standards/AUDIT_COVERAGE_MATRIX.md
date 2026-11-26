@@ -175,7 +175,7 @@ The restricted publication ledger retains the exact disclosure fingerprint, revi
 
 ## C3.4 volunteer recruitment
 
-The scoped ledger commits invitation sends, explicit decisions and automatic invalidations with the state change. Native applications and reports remain in their own ledgers with minimized private references. Consent changes store an owner receipt. Founder preparation records an immutable reason and workspace. The in-app notification emits only an invitation ID and current state. [Security tests](../volunteering/C3_4_SECURITY_TESTS.md)
+The scoped ledger commits invitation sends, explicit decisions and automatic invalidations with the state change. Native applications and reports remain in their own ledgers with minimized private references. Consent changes store an owner receipt. Founder preparation records an immutable reason and workspace. The in-app notification emits only an invitation ID and current state. Hosted postflight verified five private RLS tables, service-only execution, unchanged legacy notice grants and empty recruitment records. [Security tests](../volunteering/C3_4_SECURITY_TESTS.md)
 
 ## C3.3 volunteer matching
 

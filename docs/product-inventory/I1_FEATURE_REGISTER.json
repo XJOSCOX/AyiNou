@@ -8191,8 +8191,8 @@
       "verification": {
         "local": "See the C3.4 implementation report.",
         "disposableSupabase": "All enabled workflows use isolated profiles, projects and invitations.",
-        "hostedDatabase": "Pending exact approval and verification.",
-        "connectedApplication": "See the C3.4 implementation report.",
+        "hostedDatabase": "C3.4 applied and verified with 148 migrations, zero pending, 110 preserved data fingerprints, and all gates closed.",
+        "connectedApplication": "Test02 verified the closed inbox and Founder-settings denial. J0SC0X inspected version-zero controls and all ten departments. All 58 connected read-only checks passed.",
         "hostedApplication": "Database-only rollout, with Next.js and Fastify local.",
         "operationalApproval": "Live participation stays closed and needs separate approval."
       }
