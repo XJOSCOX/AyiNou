@@ -334,7 +334,7 @@ Feature development pauses here for owner review of the engineering results and 
 - [x] C3.3 private volunteer recommendations, scoped organizer discovery and Founder matching preparation. Hosted schema verified with live matching and discovery closed. [Implementation report](docs/volunteering/C3_3_IMPLEMENTATION_REPORT.md)
 - [x] C3.4 recruitment invitations, separate contact consent, and native application integration. Hosted schema verified with live recruitment closed. [Implementation report](docs/volunteering/C3_4_IMPLEMENTATION_REPORT.md)
 - [x] C3.5 protected volunteer activation and emergency pause, integration audit and development verification. Database rollout verified with all operational gates closed. [Final decision](docs/volunteering/C3_FINAL_COMPLETION_DECISION.md)
-- [ ] C4.1 private, versioned professional and educational opportunities and protected Founder preparation. [Implementation report](docs/opportunities/C4_1_IMPLEMENTATION_REPORT.md)
+- [x] C4.1 private, versioned professional and educational opportunities and protected Founder preparation. Hosted database verified with all operational gates closed. [Implementation report](docs/opportunities/C4_1_IMPLEMENTATION_REPORT.md)
 
 ### Approved future milestones
 

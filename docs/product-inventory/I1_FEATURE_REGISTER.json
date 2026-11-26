@@ -8250,7 +8250,7 @@
       "id": "professional-opportunities",
       "domain": "Organizations",
       "name": "Private professional and educational opportunities",
-      "status": "partial",
+      "status": "implemented",
       "currentAndLimits": "Private versioned preparation and protected Founder settings. Operational use, publication, discovery and applicant workflows stay closed.",
       "dependencies": "Current organization authority, native account identity, nationwide department vocabulary, C3 skills catalog.",
       "evidence": {
@@ -8290,8 +8290,8 @@
       "verification": {
         "local": "See C4.1 implementation report.",
         "disposableSupabase": "Enabled drafts and authorization scenarios use isolated disposable records.",
-        "hostedDatabase": "Awaiting exact authorization and postflight.",
-        "connectedApplication": "Local Next.js and Fastify connect to hosted Supabase.",
+        "hostedDatabase": "150 applied, zero pending, 126 preserved fingerprints and four empty private C4.1 relations.",
+        "connectedApplication": "63 read-only localhost probes passed. J0SC0X verified protected settings at revision 0. Test02 was denied Founder settings and private GoXEV drafts.",
         "hostedApplication": "Local application runtime.",
         "operationalApproval": "C4 live gates stay closed."
       }
