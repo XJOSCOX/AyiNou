@@ -906,3 +906,7 @@ Repository test coverage identified. Individual rerun status unverified. Feature
 ## C2 development closure evidence
 
 C2 covers exact-source requests, independent findings and challenges, consented result publication, measurement mapping and governed Impact reports. C1 associations and native Project Work remain authoritative for their own records. The [capability and integration audit](../project-outcomes/C2_FINAL_IMPLEMENTATION_AUDIT.md) records current coverage, production database verification, and gated behavior. The [C2 completion decision](../project-outcomes/C2_FINAL_COMPLETION_DECISION.md) distinguishes verified development from live launch readiness. The [C2.6 administrative inventory](../project-outcomes/C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md) records access to configuration, draft definitions, rosters, staffing plans and oversight history while live processing is closed.
+
+### D1 member Dashboard
+
+The shared member Dashboard presents owner-only counts, bounded existing Event and Project cards, joined Communities, official Founder announcements, and only active C2/C4 projections. Members control optional section visibility and order. Platform Administration → Platform Settings → Dashboard settings governs availability, defaults, item limits, announcement publication and statistic disclosure without changing underlying feature gates. [D1 report](../dashboard/D1_MEMBER_DASHBOARD_IMPLEMENTATION_REPORT.md).

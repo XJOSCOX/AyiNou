@@ -486,3 +486,5 @@ The direct proof workflow adds the recognized Founder’s session-bound authorit
 ## FV-FINAL — Founder Verified development release
 
 FV-FINAL adds an exact approved development cohort and policy window, independent appeal review and live gold eligibility for eligible new nongovernment organizations. The hosted development schema is deployed and verified. Operational activation remains closed and requires a separate approval. See the [implementation report](docs/identity/FOUNDER_VERIFIED_FINAL_IMPLEMENTATION_REPORT.md) and [operations policy](docs/identity/FOUNDER_VERIFIED_ACTIVATION_POLICY.md).
+
+- [x] D1 shared member Dashboard, private overview and customization, Founder settings and official announcements: hosted database deployed with preservation checks; connected Test02 local application and disposable Founder browser verified. Hosted web/API deployment remains separate. [Implementation report](docs/dashboard/D1_MEMBER_DASHBOARD_IMPLEMENTATION_REPORT.md)

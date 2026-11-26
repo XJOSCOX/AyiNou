@@ -20,6 +20,7 @@ GET /api/v1/admin/audit/events - -
 GET /api/v1/admin/audit/events/:reference - -
 GET /api/v1/admin/audit/policies - -
 GET /api/v1/admin/community-needs-pilot - -
+GET /api/v1/admin/dashboard-settings - -
 GET /api/v1/admin/early-partners - -
 GET /api/v1/admin/feature-policy/:key - -
 GET /api/v1/admin/founder-blue-verification/:id - -
@@ -112,6 +113,7 @@ GET /api/v1/me/community-needs/:id - -
 GET /api/v1/me/community-needs/:id/publication - -
 GET /api/v1/me/community-needs/:id/review - -
 GET /api/v1/me/community-recommendation-settings - -
+GET /api/v1/me/dashboard - -
 GET /api/v1/me/enforcement-appeals - -
 GET /api/v1/me/feed-languages - -
 GET /api/v1/me/feed-moderation - -
@@ -261,6 +263,7 @@ HEAD /api/v1/admin/audit/events - onSend
 HEAD /api/v1/admin/audit/events/:reference - onSend
 HEAD /api/v1/admin/audit/policies - onSend
 HEAD /api/v1/admin/community-needs-pilot - onSend
+HEAD /api/v1/admin/dashboard-settings - onSend
 HEAD /api/v1/admin/early-partners - onSend
 HEAD /api/v1/admin/feature-policy/:key - onSend
 HEAD /api/v1/admin/founder-blue-verification/:id - onSend
@@ -353,6 +356,7 @@ HEAD /api/v1/me/community-needs/:id - onSend
 HEAD /api/v1/me/community-needs/:id/publication - onSend
 HEAD /api/v1/me/community-needs/:id/review - onSend
 HEAD /api/v1/me/community-recommendation-settings - onSend
+HEAD /api/v1/me/dashboard - onSend
 HEAD /api/v1/me/enforcement-appeals - onSend
 HEAD /api/v1/me/feed-languages - onSend
 HEAD /api/v1/me/feed-moderation - onSend
@@ -498,6 +502,7 @@ OPTIONS * - -
 PATCH /api/v1/admin/accounts/:id 4096 -
 PATCH /api/v1/admin/ambassadors/:id 6000 -
 PATCH /api/v1/admin/community-needs-pilot 4096 -
+PATCH /api/v1/admin/dashboard-settings 12288 -
 PATCH /api/v1/admin/feature-policy/:key 4096 -
 PATCH /api/v1/admin/homepage/community-statistics 4096 -
 PATCH /api/v1/admin/impact 12288 -
@@ -536,6 +541,7 @@ PATCH /api/v1/me/community-invitations/:id 1024 -
 PATCH /api/v1/me/community-needs/:id 32000 -
 PATCH /api/v1/me/community-needs/:id/publication 16384 -
 PATCH /api/v1/me/community-needs/:id/review 32000 -
+PATCH /api/v1/me/dashboard/preferences 2048 -
 PATCH /api/v1/me/follow-requests/:id 512 -
 PATCH /api/v1/me/impact/mappings/:id 4096 -
 PATCH /api/v1/me/impact/needs/:id 4096 -

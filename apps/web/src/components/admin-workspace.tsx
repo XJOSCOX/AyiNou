@@ -46,6 +46,7 @@ import { governanceMessages } from "@/lib/governance-i18n";
 import { earlyPartnerMessages } from "@/lib/early-partner-i18n";
 import { AdminEarlyPartners } from "./early-partner-workspace";
 import { HomepageSettings } from "./homepage-settings";
+import { DashboardFounderSettings } from "./dashboard-founder-settings";
 import { pilotLabel } from "@/lib/community-needs-pilot-i18n";
 import { FounderImpact } from "@/features/impact/founder-settings";
 import { impactCopy } from "@/lib/impact-i18n";
@@ -92,7 +93,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
   const [accountFilter, setAccountFilter] = useState<string>();
   const content = useRef<HTMLElement>(null);
   const labels: Record<AdminTab, string> = {
-    overview: t.overview, homepage: t.homepage, eventFeedSettings: feedLanguageMessages[locale].settings, registration: t.registrationPolicy.title, memberExperience: t.memberExperience.title, accounts: t.accounts, audit: t.audit,
+    overview: t.overview, homepage: t.homepage, dashboardSettings: ({en:"Dashboard settings",ht:"Paramèt tablodbò",fr:"Paramètres du tableau de bord",es:"Configuración del panel"} as const)[locale], eventFeedSettings: feedLanguageMessages[locale].settings, registration: t.registrationPolicy.title, memberExperience: t.memberExperience.title, accounts: t.accounts, audit: t.audit,
     trust: trustMessages[locale].trustWorkspace, ambassadors: ambassadorMessages[locale].title,
     legal: legalAdminMessages[locale].title, founder: founderMessages[locale].adminTitle,
     corrections: governanceMessages[locale].corrections, governance: governanceMessages[locale].governance,
@@ -238,6 +239,7 @@ export function AdminWorkspace({ workspaceAction, workspaceId, section, onSectio
               {access.data?.founder && (tab === "recognitionBadges" || tab === "recognitionHistory") &&
                 <RecognitionAdmin key={tab} section={tab} workspaceId={workspaceId} />}
               {tab === "homepage" && access.data?.founder && <HomepageSettings key={workspaceId} workspaceId={workspaceId} />}
+              {tab === "dashboardSettings" && access.data?.founder && <DashboardFounderSettings key={workspaceId} workspaceId={workspaceId} />}
               {tab === "eventFeedSettings" && access.data?.founder && <div className="grid min-w-0 items-start gap-3 xl:grid-cols-2">
                 {(["events", "feed"] as const).map((group) => <section key={group} className={`${adminCompactCard} grid gap-2`} aria-labelledby={`admin-policy-${group}`}>
                   <h2 id={`admin-policy-${group}`} className="border-b border-[var(--theme-border)] pb-2 text-lg font-semibold">{moderation[group]}</h2>

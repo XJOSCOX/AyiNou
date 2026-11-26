@@ -36,6 +36,12 @@ export function createInstitutionRepository(config: ApiConfig): InstitutionRepos
   async function rpc<T>(name: string, input: Record<string, unknown>): Promise<T> {
     const { data, error } = await client.rpc(name, input);
     if (error) {
+      if (name === "d1_dashboard_for_api") {
+        if (error.code === "PGRST202") throw new InstitutionError("DASHBOARD_UNAVAILABLE", 503);
+        if (error.code === "40001" || error.code === "23505") throw new InstitutionError("STALE_VERSION", 409);
+        if (error.code === "42501") throw new InstitutionError("FORBIDDEN", 403);
+        if (error.code === "23514") throw new InstitutionError("INVALID_INPUT", 400);
+      }
       if (["c44_coordination_for_api","c44_reports_for_api","c45_discovery_for_api","c46_activation_for_api"].includes(name)) {
         if (error.code === "40001") throw new InstitutionError("STALE_VERSION", 409);
         if (error.code === "PGRST202") throw new InstitutionError("SERVICE_UNAVAILABLE", 503);

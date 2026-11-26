@@ -42,6 +42,19 @@ export function DepartmentDirectory() {
   const [search, setSearch] = useState("");
   const [topic, setTopic] = useState<InterestCode | "">("");
   const [category, setCategory] = useState<"recommended" | "official" | "diaspora" | "interest" | "mine">("recommended");
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("category");
+    if (requested === "official" || requested === "diaspora" || requested === "interest" || requested === "mine") {
+      queueMicrotask(() => setCategory(requested));
+    }
+  }, []);
+  function selectCategory(next: typeof category) {
+    setCategory(next);
+    const url = new URL(window.location.href);
+    if (next === "recommended") url.searchParams.delete("category");
+    else url.searchParams.set("category", next);
+    window.history.replaceState(window.history.state, "", url);
+  }
   const membershipsOnly = category === "mine";
   const [changed, setChanged] = useState<Record<string, Community>>({});
   useEffect(() => {
@@ -78,7 +91,7 @@ export function DepartmentDirectory() {
       <div className="flex flex-wrap gap-1 border-t border-[var(--theme-border)] px-2 py-2 sm:px-3" role="group" aria-label={t.title}>
         {(["recommended", "official", "diaspora", "interest", "mine"] as const).map((value) => <button key={value} type="button" aria-pressed={category === value}
           className="min-h-11 rounded-md px-3 py-1.5 text-sm font-semibold text-[var(--theme-body)] hover:bg-[var(--theme-control)] focus-visible:outline-2 focus-visible:outline-[var(--theme-link)] aria-pressed:bg-[var(--theme-selected)] aria-pressed:text-[var(--theme-link)]"
-          onClick={() => setCategory(value)}>{value === "recommended" ? discovery.recommended : value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
+          onClick={() => selectCategory(value)}>{value === "recommended" ? discovery.recommended : value === "official" ? groups.officialDepartments : value === "mine" ? t.mine : groups[value]}</button>)}
       </div>
     </section>
     {category === "recommended" && <RecommendedCommunities search={search} searchControl={searchControl} onMembership={(next) =>
@@ -86,7 +99,7 @@ export function DepartmentDirectory() {
       setQuery("");
       setSearch("");
       setTopic(next);
-      setCategory("interest");
+      selectCategory("interest");
     }} />}
     {(category === "official" || membershipsOnly) && <>
       <div className={communitySearchBar}>{searchControl}</div>

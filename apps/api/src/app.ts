@@ -43,6 +43,7 @@ import { registerRegistrationPolicyRoutes } from "./routes/registration-policy.j
 import { registerVerificationPolicy } from "./routes/verification-policy.js";
 import { registerMemberExperiencePolicy } from "./routes/member-experience-policy.js";
 import { registerHomepagePolicyRoutes } from "./routes/homepage-policy.js";
+import { registerDashboardRoutes } from "./routes/dashboard.js";
 import { registerPublicLegalRoutes } from "./routes/legal-publication.js";
 import { ApiError, registerErrorHandling, requestIdentification } from "./services/api-error.js";
 import { registerFeedRoutes } from "./routes/feed.js";
@@ -151,6 +152,7 @@ export function createApp(config: ApiConfig, overrides?: {
   app.register((instance) => registerFeatureEnforcement(instance, auth, institutions, readBudget, config.SUPABASE_SECRET_KEY));
   app.register((instance) => registerFounderIdentity(instance, auth, institutions));
   app.register((instance) => registerHomepagePolicyRoutes(instance, auth, institutions));
+  app.register((instance) => registerDashboardRoutes(instance, auth, institutions, readBudget));
   app.register((instance) => registerMemberExperiencePolicy(instance, auth, institutions));
   app.register((instance) => registerVerificationPolicy(instance, auth, institutions));
   app.register((instance) => registerModerationPolicyRoutes(instance, auth, institutions, readBudget));

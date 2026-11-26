@@ -4613,6 +4613,74 @@
           "rolloutAndRollback": "Only the separately authorized exact migration may apply. Keep hosted releases closed and use a reviewed forward correction."
         }
       ]
+    },
+    {
+      "id": "d1-member-dashboard",
+      "report": "docs/dashboard/D1_MEMBER_DASHBOARD_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/dashboard",
+          "contract": "GET /api/v1/me/dashboard - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Owner-only read; no mutation or third-party disclosure. Authentication and database session guards apply on every read."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/dashboard-roles.spec.ts",
+            "denialScenario": "A member cannot read Founder settings; the SQL projection is bound to the verified session actor."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/me/dashboard/preferences",
+          "contract": "PATCH /api/v1/me/dashboard/preferences 2048 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "An actor-scoped idempotent receipt commits with the versioned preference change; the current preference is the owner record."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/dashboard-roles.spec.ts",
+            "denialScenario": "A stale revision or reused request ID with different input fails; another member cannot act for the owner."
+          }
+        },
+        {
+          "route": "GET /api/v1/admin/dashboard-settings",
+          "contract": "GET /api/v1/admin/dashboard-settings - -",
+          "access": "restricted",
+          "audit": {
+            "kind": "exception",
+            "detail": "Founder workspace read; no durable event for viewing settings and bounded announcement metadata."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/dashboard-roles.spec.ts",
+            "denialScenario": "An ordinary member or invalid workspace cannot read the Founder configuration."
+          }
+        },
+        {
+          "route": "PATCH /api/v1/admin/dashboard-settings",
+          "contract": "PATCH /api/v1/admin/dashboard-settings 12288 -",
+          "access": "restricted",
+          "audit": {
+            "kind": "durable",
+            "detail": "Configuration, publication and withdrawal commit with Founder, workspace, reason, exact request receipt and before/after audit data."
+          },
+          "authorization": {
+            "file": "apps/web/e2e/dashboard-roles.spec.ts",
+            "denialScenario": "An ordinary member, invalid workspace or stale revision cannot change settings or announcements."
+          }
+        }
+      ],
+      "migrations": [
+        {
+          "file": "supabase/migrations/20261126122000_d1_member_dashboard.sql",
+          "rlsAndGrants": "All five new private tables have RLS and no direct anon, authenticated or service-role grants. The sole public-schema RPC is granted only to service_role.",
+          "authorization": "The RPC binds actor and session, rechecks active standing and onboarding, and requires recognized Founder authority, recent MFA and original private workspace for protected settings, publication and withdrawal.",
+          "compatibility": "Additive tables and one RPC. Existing C1-C4 gates, accounts, posts, memberships, events, projects and announcements remain unchanged.",
+          "validation": "Disposable Supabase member and Founder tests cover private counts, preference persistence, Founder denial, settings revisions, idempotency, publication, withdrawal and audit history.",
+          "rolloutAndRollback": "Apply only after exact project, checksum and pending-migration preflight and separate approval. Roll back behavior with a forward correction while preserving audit and announcement history."
+        }
+      ]
     }
   ]
 }
