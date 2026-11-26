@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PrivateFlow } from "@ayinou/shared";
 import { needReviewLabel } from "@/lib/community-needs-review-i18n";
-import { adminEntryPath, type AdminTab } from "@/lib/admin-navigation";
+import { adminEntryPath, carryImpactSettingsPath, type AdminTab } from "@/lib/admin-navigation";
 import { adminMessages } from "@/lib/admin-i18n";
 import { featureMessages } from "@/lib/feature-enforcement-i18n";
 import { institutionMessages } from "@/lib/institution-i18n";
@@ -41,7 +41,7 @@ export function WorkspaceEntry({ subject, sessionId, kind, totp, factorIds, veri
     setError(null);
     try {
       const flow = await openPrivateFlow(kind, subject, sessionId);
-      const path = privateFlowPath(flow, section);
+      const path = carryImpactSettingsPath(privateFlowPath(flow, section), section, new URL(window.location.href));
       if (afterVerification) router.replace(path);
       else router.push(path);
     } catch (cause) {

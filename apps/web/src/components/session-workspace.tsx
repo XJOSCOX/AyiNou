@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import type { PrivateFlow } from "@ayinou/shared";
 import { adminMessages } from "@/lib/admin-i18n";
-import { adminEntryPath, type AdminTab } from "@/lib/admin-navigation";
+import { adminEntryPath, carryImpactSettingsPath, type AdminTab } from "@/lib/admin-navigation";
 import { authorizedRequest } from "@/lib/api";
 import { apiErrorCode } from "@/lib/api-errors";
 import { institutionMessages } from "@/lib/institution-i18n";
@@ -83,11 +83,11 @@ export function SessionWorkspace({ subject, sessionId, flow, initialSection }: {
     void openPrivateFlow(delegated ? "moderation_workspace" : "admin_workspace", subject, sessionId, signal).then((replacement) => {
       if (active.signal.aborted) return;
       if (replacement.id === flow.id) setState("closed");
-      else router.replace(privateFlowPath(replacement, section));
+      else router.replace(carryImpactSettingsPath(privateFlowPath(replacement, section), section, new URL(window.location.href)));
     }).catch((cause) => {
       if (active.signal.aborted) return;
       const code = apiErrorCode(cause);
-      if (code === "MFA_REQUIRED") router.replace(adminEntryPath(section, true));
+      if (code === "MFA_REQUIRED") router.replace(carryImpactSettingsPath(adminEntryPath(section, true), section, new URL(window.location.href)));
       else setState(code === "UNAUTHORIZED" || code === "SESSION_CHANGED" ? "signedOut" : "closed");
     });
     return () => active.abort();

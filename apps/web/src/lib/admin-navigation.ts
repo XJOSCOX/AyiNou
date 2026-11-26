@@ -13,6 +13,24 @@ export function adminTab(value: unknown): AdminTab {
   return tabs.find((tab) => tab === value) ?? "overview";
 }
 
+const impactReviewAnchors = ["#staffing", "#evidence", "#publication", "#governance"] as const;
+export const impactSettingsSections = ["reporting", "measurements", "reviewers", "history"] as const;
+
+export function carryImpactSettingsPath(destination: string, section: AdminTab, current: URL) {
+  if (section !== "impactSettings") return destination;
+
+  const next = new URL(destination, current.origin);
+  const reviewAnchor = impactReviewAnchors.find((anchor) => anchor === current.hash);
+  const selected = impactSettingsSections.find((item) => item === current.searchParams.get("impactSection"));
+  if (reviewAnchor) {
+    next.searchParams.set("impactSection", "reviewers");
+    next.hash = reviewAnchor;
+  } else if (selected) {
+    next.searchParams.set("impactSection", selected);
+  }
+  return next.pathname + next.search + next.hash;
+}
+
 export function adminEntryPath(tab: AdminTab, verify = false) {
   const search = new URLSearchParams();
   if (verify) search.set("verify", "1");

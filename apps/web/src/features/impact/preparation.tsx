@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { impactDepartments, impactStaffingRoles, type ImpactPreparation, type ImpactStaffingRole } from "@ayinou/shared";
-import { institutionCard, institutionField, institutionLink } from "@/components/institution-ui";
+import { adminCompactCard } from "@/components/admin-controls";
+import { SettingsHistory } from "@/components/settings-disclosures";
+import { institutionField, institutionLink } from "@/components/institution-ui";
 import { impactCopy } from "@/lib/impact-i18n";
 import { impactPreparationCopy } from "@/lib/impact-preparation-copy";
 import { useLocale } from "@/lib/locale-store";
@@ -15,7 +17,7 @@ export function FounderPreparationLink({ focus = "staffing" }: { focus?: "eviden
   const { founder } = useMemberIdentity();
   const [locale] = useLocale();
   if (!founder) return null;
-  return <Link href={`/admin?section=impactSettings#${focus}`} className={institutionLink + " mt-2 inline-flex"}>
+  return <Link href={`/admin?section=impactSettings&impactSection=reviewers#${focus}`} className={institutionLink + " mt-2 inline-flex"}>
     {impactPreparationCopy(locale).open}
   </Link>;
 }
@@ -35,23 +37,22 @@ export function ReviewerPreparation({ data, departmentLabel, send, after }: {
   const scope = role === "governance" ? "national" : department;
   const selected = data.plans.find((plan) => plan.scope === scope && plan.role === role);
   const roleLabel = (key: ImpactStaffingRole) => key === "publication" ? copy.publication : copy[key];
-  return <section id="staffing" className={institutionCard + " grid gap-5 scroll-mt-24"}>
+  return <section id="staffing" className={adminCompactCard + " grid gap-3 scroll-mt-24"}>
     <h3 className="text-lg font-semibold">{copy.staffing}</h3>
-    <div className="grid gap-3 xl:grid-cols-3">
-      <section id="evidence" className="rounded-md border border-[var(--theme-border)] p-4 scroll-mt-24">
-        <h4 className="font-semibold">{copy.evidence}</h4><p className="mt-2 text-sm">{copy.reviewRules}</p>
-      </section>
-      <section id="publication" className="rounded-md border border-[var(--theme-border)] p-4 scroll-mt-24">
-        <h4 className="font-semibold">{copy.publication}</h4><p className="mt-2 text-sm">{copy.publicationRules}</p>
-      </section>
-      <section id="governance" className="rounded-md border border-[var(--theme-border)] p-4 scroll-mt-24">
-        <h4 className="font-semibold">{copy.governance}</h4><p className="mt-2 text-sm">{copy.governanceRules}</p>
-      </section>
+    <div className="grid min-w-0 items-start gap-2 xl:grid-cols-3">
+      <div id="evidence" className="min-w-0 scroll-mt-24">
+        <SettingsHistory title={copy.evidence}><p>{copy.reviewRules}</p></SettingsHistory>
+      </div>
+      <div id="publication" className="min-w-0 scroll-mt-24">
+        <SettingsHistory title={copy.publication}><p>{copy.publicationRules}</p></SettingsHistory>
+      </div>
+      <div id="governance" className="min-w-0 scroll-mt-24">
+        <SettingsHistory title={copy.governance}><p>{copy.governanceRules}</p></SettingsHistory>
+      </div>
     </div>
     <div className="grid gap-3">
       <h4 className="font-semibold">{copy.arrangements}</h4>
-      <p className="text-sm">{copy.slotsHelp}</p>
-      <div className="grid gap-2 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-2 sm:grid-cols-2">
         <label>{review.purpose}<select value={role} className={institutionField} onChange={(event) => setRole(event.target.value as ImpactStaffingRole)}>
           {impactStaffingRoles.map((item) => <option value={item} key={item}>{roleLabel(item)}</option>)}
         </select></label>
@@ -61,15 +62,20 @@ export function ReviewerPreparation({ data, departmentLabel, send, after }: {
         </select></label>
       </div>
       <ReviewCommand {...impactReceipt} send={send} after={after} action="plan_reviewer" label={copy.plan}
+        triggerLabel={copy.editStaffing} disclosureGroup="impact-staffing"
         key={scope + role + (selected?.version ?? 0)} version={selected?.version ?? 0}
         input={(form) => ({ scope, role, slots: Number(form.get("slots")) })}>
-        <label>{copy.slots}<input className={institutionField} name="slots" required type="number" min={0} max={10}
-          defaultValue={selected?.slots ?? 0} /></label>
+        <div className="grid min-w-0 gap-2">
+          <p>{copy.slotsHelp}</p>
+          <label>{copy.slots}<input className={institutionField} name="slots" required type="number" min={0} max={10}
+            defaultValue={selected?.slots ?? 0} /></label>
+        </div>
       </ReviewCommand>
       {data.plans.length === 0 ? <p className="text-sm">{copy.nonePlanned}</p> :
+        <SettingsHistory title={copy.savedPlans}>
         <ul className="grid gap-1 text-sm">{data.plans.map((plan) => <li key={plan.scope + plan.role}>
           {departmentLabel(plan.scope)} · {roleLabel(plan.role)} · {plan.slots}
-        </li>)}</ul>}
+        </li>)}</ul></SettingsHistory>}
     </div>
     <section>
       <h4 className="font-semibold">{copy.appointments}</h4>
@@ -83,13 +89,11 @@ export function ReviewerPreparation({ data, departmentLabel, send, after }: {
         </li>)}</ul>}
       {data.appointments.length >= 100 && <p className="mt-2 text-sm">{copy.returned}</p>}
     </section>
-    <section>
-      <h4 className="font-semibold">{copy.history}</h4>
-      {data.rosterHistory.length === 0 ? <p className="mt-2 text-sm">{copy.noHistory}</p> :
+    {data.rosterHistory.length > 0 && <SettingsHistory title={copy.history}>
         <ol className="mt-2 grid gap-2">{data.rosterHistory.map((event) => <li key={event.id} className="break-words text-sm">
           <time dateTime={event.at}>{new Date(event.at).toLocaleString(locale)}</time> · {copy[event.track]} · {departmentLabel(event.scope)}
           <p>{event.reason}</p>
-        </li>)}</ol>}
-    </section>
+        </li>)}</ol>
+    </SettingsHistory>}
   </section>;
 }

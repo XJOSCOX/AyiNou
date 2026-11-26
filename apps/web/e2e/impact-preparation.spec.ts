@@ -105,7 +105,11 @@ test("Founder preparation stays available with every live C2 gate closed", async
       if (locale !== "en") await page.reload();
       await expect(page.getByText(copy.prepared, { exact: true })).toBeVisible();
       await expect(page.getByText(copy.disabled, { exact: true })).toBeVisible();
+      const reviewerTab = page.getByRole("navigation").getByRole("button", { name: copy.reviewersTab, exact: true });
+      await reviewerTab.click();
       await expect(page.getByText(copy.noAppointments, { exact: true })).toBeVisible();
+      await page.getByRole("navigation").getByRole("button", { name: copy.reportingTab, exact: true }).click();
+      await expect(page.getByText(copy.editPreferences, { exact: true })).toBeVisible();
       expect(await page.locator("body").evaluate((body) => body.scrollWidth)).toBeLessThanOrEqual(width);
       if (locale === "en") {
         await page.getByRole("button", { name: "Switch to dark theme", exact: true }).click();
