@@ -72,7 +72,7 @@ test("reserved Founder bootstrap requires confirmed email, fresh MFA and one ato
     expect(sql(`select count(*) from public.verification_records where user_id='${owner.id}';`)).toBe("0");
 
     await page.goto("/dashboard");
-    const founderMark = page.locator('main [data-designation="founder"]');
+    const founderMark = page.getByRole("banner").locator('[data-designation="founder"]');
     await expect(founderMark).toHaveCSS("color", "rgb(159, 36, 51)");
     await expect(founderMark.locator("img")).toHaveAttribute("src", "/founder.png");
     await expect(founderMark.locator("img")).toHaveJSProperty("naturalWidth", 100);

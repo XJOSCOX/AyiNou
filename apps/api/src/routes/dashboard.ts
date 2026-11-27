@@ -75,7 +75,10 @@ export function registerDashboardRoutes(app: FastifyInstance, auth: AuthVerifier
   });
   app.patch("/api/v1/admin/dashboard-settings", { bodyLimit: 12_288 }, (request) => {
     empty.parse(request.query);
-    const { action, confirmed: _confirmed, ...input } = adminCommand.parse(request.body);
-    return run(request, action, input, true);
+    const command = adminCommand.parse(request.body);
+    const input: Record<string, unknown> = { ...command };
+    delete input.action;
+    delete input.confirmed;
+    return run(request, command.action, input, true);
   });
 }

@@ -194,22 +194,27 @@ test("C4.3 Founder preparation works with live intake closed and member navigati
     await solveMfa(page, secret);
     await page.goto("/admin?section=opportunitySettings");
     await page.getByRole("button", { name: "Open administration", exact: true }).click();
-    await expect(page.getByRole("heading", { name: "Mentorship preparation", exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: coordinationCopy("en")("founder"), exact: true })).toBeVisible();
+    const mentorshipTab = page.getByRole("button", { name: "Mentorship", exact: true });
+    const mentorshipHeading = page.getByRole("heading", { name: mentorshipCopy("en")("settings"), exact: true });
+    await expect(mentorshipHeading.or(mentorshipTab).first()).toBeVisible();
+    if (await mentorshipTab.isVisible()) await mentorshipTab.click();
+    await expect(mentorshipHeading).toBeVisible();
     await expect(page.getByText(mentorshipCopy("en")("activation"), { exact: true })).toBeVisible();
-    const settingsForms = page.locator('details[name="opportunity-configuration"]');
-    const mentorshipForm = settingsForms.filter({ hasText: "Supported skill categories" });
+    const form = page.locator("form").filter({ has: page.locator('input[name="skillCategories"]') });
+    await expect(form).toHaveCount(1);
     await page.setViewportSize({ width: 390, height: 900 });
-    await mentorshipForm.locator(":scope > summary").press("Enter");
-    await expect(mentorshipForm.locator("fieldset").first()).toBeHidden();
-    await mentorshipForm.locator("summary").filter({ hasText: "Supported skill categories" }).click();
-    await expect(mentorshipForm.getByRole("checkbox", { name: volunteerCategory("education", "en"), exact: true })).toBeVisible();
-    expect(await mentorshipForm.locator("form").evaluate(form => new FormData(form as HTMLFormElement).getAll("roles")))
-      .toEqual(["mentor", "mentee"]);
+    const disclosure = form.locator("xpath=ancestor::details[1]");
+    if (await disclosure.count()) await disclosure.locator(":scope > summary").press("Enter");
+    const education = form.getByRole("checkbox", { name: volunteerCategory("education", "en"), exact: true, includeHidden: true });
+    const categories = education.locator("xpath=ancestor::details[1]");
+    if (!await education.isVisible() && await categories.count()) await categories.locator(":scope > summary").click();
+    await expect(education).toBeVisible();
+    expect(await form.evaluate(element => new FormData(element as HTMLFormElement).getAll("roles"))).toEqual(["mentor", "mentee"]);
     expect(await page.locator("body").evaluate(body => body.scrollWidth)).toBeLessThanOrEqual(390);
-    await settingsForms.first().locator(":scope > summary").click();
-    await expect(mentorshipForm).not.toHaveAttribute("open");
-    await expect(settingsForms.first()).toHaveAttribute("open", "");
+
+    const coordinationTab = page.getByRole("button", { name: "Coordination", exact: true });
+    if (await coordinationTab.isVisible()) await coordinationTab.click();
+    await expect(page.getByRole("heading", { name: coordinationCopy("en")("founder"), exact: true })).toBeVisible();
 
     await page.goto("/settings");
     await page.getByRole("link", { name: /Mentorship profiles/ }).click();

@@ -33,7 +33,7 @@ function fallbackCode(status: number) {
   }
 }
 
-export function registerErrorHandling(app: FastifyInstance) {
+export function registerErrorHandling(app: FastifyInstance, quietHealth = false) {
   app.addHook("onRequest", async (request, reply) => { reply.header("X-Request-ID", request.id); });
   app.addHook("onSend", async (request, reply, payload) => {
     if (reply.statusCode < 400) return payload;
@@ -50,6 +50,7 @@ export function registerErrorHandling(app: FastifyInstance) {
     return JSON.stringify({ error: { ...error, requestId: request.id, retryable: status === 429 || status === 503 } });
   });
   app.addHook("onResponse", async (request, reply) => {
+    if (quietHealth && request.routeOptions.url === "/health" && reply.statusCode < 400) return;
     const metadata = { method: request.method, route: request.routeOptions.url ?? "unmatched", status: reply.statusCode };
     if (reply.statusCode >= 500) request.log.error(metadata, "Request finished");
     else request.log.info(metadata, "Request finished");

@@ -357,6 +357,7 @@ Integrated project payments, financial custody, fund distribution, and escrow ar
 
 ## Phase 10 — Native apps and expansion
 
+- [x] A0 restricted Render API preparation and local verification. Manual deployment and shared registration closure are pending. [Setup guide](docs/deployment/A0_RENDER_BACKEND_SETUP.md)
 - [ ] Determine Android/iOS architecture and shared API/data contracts.
 - [ ] Push notifications, efficient networking, offline/low-bandwidth modes.
 - [ ] Accessibility and device testing; App Store / Play policy review.

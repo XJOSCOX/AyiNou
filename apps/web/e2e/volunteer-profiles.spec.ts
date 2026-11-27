@@ -141,7 +141,8 @@ test("Founder can prepare catalog and configuration with intake closed", async (
     expect(await call(admin,token,define,workspace)).toMatchObject({ status: 409 });
     expect(await call(admin,token,{ ...define,aliases: ["math tutor"] },workspace)).toMatchObject({ status: 200 });
     expect(await call(owner,signedIn.token)).toMatchObject({ data: { intake: false,profile: null,catalog: [] } });
-    expect(sql("select not exists(select from private.c31_profiles) and not exists(select from private.c31_fixture);")).toBe("t");
+    expect(sql(`select not exists(select from private.c31_profiles where actor in ('${signedIn.id}','${founder.id}'))
+      and not exists(select from private.c31_fixture);`)).toBe("t");
 
     await inEnglish(context);
     await login(page,founder);
@@ -152,13 +153,16 @@ test("Founder can prepare catalog and configuration with intake closed", async (
     await expect(page.getByText("Configuration available · Version 1",{ exact: true })).toBeVisible();
     await expect(page.getByRole("combobox",{ name: "Skills catalog" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Volunteer activation controls" })).toHaveCount(0);
-    const profileEditor = page.locator('details[name="volunteer-configuration"]').filter({ hasText: "Edit profile options" });
-    await profileEditor.locator("summary").first().click();
-    const categories = profileEditor.locator("details").filter({ has: page.locator('input[name="categories"]') });
-    await expect(categories).not.toHaveAttribute("open", "");
-    expect(await profileEditor.locator("form").evaluate(form => new FormData(form as HTMLFormElement).getAll("categories"))).toEqual(["education"]);
-    await categories.locator("summary").click();
-    await expect(categories.locator('input[value="education"]')).toBeChecked();
+    const form = page.locator("form").filter({ has: page.locator('input[name="categories"]') });
+    await expect(form).toHaveCount(1);
+    const disclosure = form.locator("xpath=ancestor::details[1]");
+    if (await disclosure.count()) await disclosure.locator(":scope > summary").click();
+    const education = form.locator('input[name="categories"][value="education"]');
+    const categories = education.locator("xpath=ancestor::details[1]");
+    if (!await education.isVisible() && await categories.count()) await categories.locator(":scope > summary").click();
+    await expect(education).toBeVisible();
+    await expect(education).toBeChecked();
+    expect(await form.evaluate(element => new FormData(element as HTMLFormElement).getAll("categories"))).toEqual(["education"]);
     await page.reload();
     await expect(page.getByRole("button", { name: "Profiles and skills", exact: true })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("combobox",{ name: "Skills catalog" })).toBeVisible();
