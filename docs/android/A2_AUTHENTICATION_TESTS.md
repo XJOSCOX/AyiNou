@@ -19,4 +19,4 @@ A2 has no physical-device result or manual screen-reader walkthrough. Compose se
 
 ## Request counts
 
-Sign-in normally makes four requests. They are the password grant, user lookup, self profile and verification badge. Restoration with a valid stored grant normally makes three. A successful proactive refresh adds one. The disposable refresh request rotated the token in 21 ms. A cold debug startup measured 2,274 ms. Idle emulator PSS was 79,211 KiB and the default APK was 14,334,908 bytes. These single-run local figures do not establish hosted capacity or a physical-device baseline.
+Sign-in normally makes four requests. They are the password grant, user lookup, self profile and verification badge. Restoration with a valid stored grant normally makes three. A successful proactive refresh adds one. The disposable refresh request rotated the token in 21 ms. A cold debug startup measured 2,274 ms. Idle emulator PSS was 79,211 KiB and the final default APK was 14,338,565 bytes. Its SHA-256 is 90b4298dfd7785442d9de622fb08e53490a5642f30977f4cebb21a803dda5025. These single-run local figures do not establish hosted capacity or a physical-device baseline.
