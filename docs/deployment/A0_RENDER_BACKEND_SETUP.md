@@ -2,7 +2,7 @@
 
 ## Scope
 
-This is an owner-operated, read-only Android development API for existing AyiNou test accounts. It uses the existing Fastify application and hosted Supabase project. The web application and the coming-soon site at ayinou.com stay on their existing infrastructure. The owner has deployed the Render service and configured the custom domain. The public health endpoint was independently verified. Member access remains blocked pending the findings below.
+This is an owner-operated, read-only Android development API for existing AyiNou test accounts. It uses the existing Fastify application and hosted Supabase project. The web application and the coming-soon site at ayinou.com stay on their existing infrastructure. The owner has deployed the Render service and configured the custom domain. The corrected deployment and secure read-only access for Test02 are verified. The earlier blocked rollout is retained below as historical evidence.
 
 ## Data model and API
 
@@ -197,6 +197,27 @@ The authenticated profile details PATCH returned 404. Administration, Founder bo
 
 Supabase rotated the refresh token and Render status accepted the refreshed session with HTTP 200 in 205 ms. A new browser tab restored that session and repeated the successful reads. Warm status reads took 205–280 ms. Warm dashboard, feed, community, organization, project and event reads took 358–1,562 ms across the recorded successful requests. The temporary local verification route was removed after testing.
 
-## Remaining blockers
+## Final session verification and Android handoff
 
-Live expiry, revocation and valid non-allowlisted denial still need an independent test session and an existing non-allowlisted test account. The isolated backend regression covers the denial paths. Remote Android authentication and the separate APK remain gated on the remaining live checks.
+**A0 is complete for the authorized read-only remote development environment.** The live Render revision remains `302bf317a180355352a383264e8fdc10ef621a33`.
+
+| Dedicated live check | Verified result |
+| --- | --- |
+| Test02 native and HTTPS access | Owner-entered sign-in reached the Test02 account screen. An independent session also returned HTTP 200 for its own profile. |
+| Malformed bearer and natural expiry | Both returned HTTP 401. The expiry check used the original signed token after its provider-issued deadline. |
+| Refresh and dedicated revocation | Refresh restored HTTP 200 on the same session. Local-scope provider logout revoked the dedicated session, and its subsequent read returned HTTP 401. |
+| Existing valid non-allowlisted account | Authenticated separately and received HTTP 403 with the development access denial. Its verification session was signed out separately. |
+| Android cold restoration and storage | The Pixel 10 Pro XL emulator on API 36 restored the member screen after process restart. Instrumentation confirmed the no-backup AES-GCM file held neither token in plaintext. |
+| Android refresh and sign-out | A second cold start with expired local scheduling metadata triggered real provider refresh and restored the account. Native sign-out cleared the encrypted file. The same app session's refreshed token then received HTTP 401. |
+
+Owner credentials were entered directly into masked prompts or the emulator. The browser session was independent of these dedicated sessions. Registration, platform writes, administration and C1–C4 activation remain closed. The Render application, website and DNS were untouched. Client-IP sanitization remains unverified, so the shared request quota still applies. The APK was installed on the emulator. Physical phone testing remains outside this verification.
+
+The remote debug app uses its own Android application ID `com.ayinou.app.remote`, a fixed HTTPS Render origin, the fixed hosted Supabase Auth issuer, and read-only application transport. The default local APK still requires disposable Auth configuration. The release variant remains disabled.
+
+With `AYINOU_ANDROID_REMOTE_PUBLISHABLE_KEY` set to the hosted project's public `sb_publishable_` key, run from `apps/android`:
+
+```powershell
+.\gradlew.bat assembleDebug '-PayinouEnvironment=remote' --offline --console=plain
+```
+
+The regular Gradle output is `app/build/outputs/apk/debug/app-debug.apk`. The verified handoff copy is `app/build/outputs/apk/remote-development/ayinou-remote-dev.apk`, 14,352,204 bytes, SHA-256 `60c53794be6d501ce0f4b969efd79e21188d28134cfc36a0e3b76f407658c31e`. The public key is the only provider configuration packaged into the app. Keep all privileged credentials server-side.

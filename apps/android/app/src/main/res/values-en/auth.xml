@@ -1,6 +1,5 @@
 <resources>
-    <string name="auth_welcome">Welcome to AyiNou</string>
-    <string name="auth_intro">Sign in with your AyiNou account.</string>
+    <string name="auth_welcome">Welcome back</string>
     <string name="auth_disabled">Sign-in is unavailable in this build.</string>
     <string name="auth_registration_closed">Individual and organization registration are closed.</string>
     <string name="auth_recovery_unavailable">Password recovery is unavailable in this environment.</string>
@@ -56,4 +55,7 @@
     <string name="auth_account_help">See Account access on AyiNou for more information.</string>
     <string name="auth_test_email">Use an address ending in @example.test for a local test account.</string>
     <string name="auth_legal_unavailable">Legal documents are unavailable in this environment.</string>
+    <string name="auth_signing_in">Signing in…</string>
+    <string name="auth_help">Account help</string>
+    <string name="auth_hide_help">Hide account help</string>
 </resources>

@@ -67,7 +67,7 @@ sealed interface ConnectivityResult {
 
 private val wireJson = Json { ignoreUnknownKeys = true }
 
-internal fun guardedClient(origin: HttpUrl, publishableKey: String? = null): OkHttpClient =
+internal fun guardedClient(origin: HttpUrl, publishableKey: String? = null, readOnly: Boolean = false): OkHttpClient =
     OkHttpClient.Builder()
         .connectTimeout(8, TimeUnit.SECONDS)
         .readTimeout(12, TimeUnit.SECONDS)
@@ -79,6 +79,7 @@ internal fun guardedClient(origin: HttpUrl, publishableKey: String? = null): OkH
             val request = chain.request()
             if (request.url.host != origin.host || request.url.scheme != origin.scheme ||
                 request.url.port != origin.port) throw IOException("Unexpected API origin")
+            if (readOnly && request.method !in setOf("GET", "HEAD")) throw IOException("Read-only API")
             val outgoing = request.newBuilder().removeHeader("apikey")
             if (request.url.encodedPath == "/health") outgoing.removeHeader("Authorization")
             if (publishableKey != null) outgoing.header("apikey", publishableKey)

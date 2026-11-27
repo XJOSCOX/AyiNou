@@ -34,6 +34,18 @@ object FoundationModule {
     )
 
     @Provides @Singleton fun accounts(endpoint: Endpoint, credentials: CredentialStore): AccountRepository {
+        if (BuildConfig.DEBUG && endpoint.environment == ApiEnvironment.REMOTE) {
+            val key = BuildConfig.REMOTE_AUTH_KEY
+            val origin = "https://hcbxulyfmdmuyccgrujs.supabase.co/".toHttpUrl()
+            val enabled = key.startsWith("sb_publishable_")
+            return AccountRepository(
+                if (enabled) authApi(origin, key) else null,
+                if (enabled) accountApi(endpoint) else null,
+                credentials,
+                origin.resolve("auth/v1").toString(),
+                remoteReadOnly = true,
+            )
+        }
         val key = BuildConfig.DISPOSABLE_AUTH_KEY
         val port = BuildConfig.DISPOSABLE_AUTH_PORT
         val enabled = BuildConfig.DEBUG && endpoint.environment == ApiEnvironment.LOCAL &&

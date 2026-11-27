@@ -30,8 +30,12 @@ sealed interface SessionState {
     data class Member(val displayName: String?, val username: String?, val verified: Boolean) : SessionState
 }
 
-internal fun isDisposableEmail(email: String): Boolean =
-    email.trim().matches(Regex("[A-Za-z0-9._+-]{1,64}@example\\.test", RegexOption.IGNORE_CASE))
+internal fun isSignInEmail(email: String, remote: Boolean): Boolean {
+    val address = email.trim()
+    if (address.length > 254) return false
+    return if (remote) address.matches(Regex("[^@\\s]+@[^@\\s]+"))
+    else address.matches(Regex("[A-Za-z0-9._+-]{1,64}@example\\.test", RegexOption.IGNORE_CASE))
+}
 
 enum class AuthNotice { INVALID_SIGN_IN, EMAIL_UNCONFIRMED, INVALID_CODE, REMOTE_SIGN_OUT_UNCONFIRMED, STORAGE_UNAVAILABLE }
 
@@ -40,6 +44,7 @@ class AccountRepository internal constructor(
     private val platform: AccountApi?,
     private val store: CredentialStore,
     private val issuer: String,
+    private val remoteReadOnly: Boolean = false,
     private val clock: () -> Long = { System.currentTimeMillis() / 1000 },
 ) {
     private val lock = Mutex()
@@ -85,7 +90,7 @@ class AccountRepository internal constructor(
         if (!enabled || storageLocked || credentials != null) return@withLock
         feedback.value = null
         message.value = null
-        if (!isDisposableEmail(email)) {
+        if (!isSignInEmail(email, remoteReadOnly)) {
             message.value = AuthNotice.INVALID_SIGN_IN
             return@withLock
         }
@@ -180,7 +185,7 @@ class AccountRepository internal constructor(
         }
         val experience = profile.experience
         session.value = if (!experience.memberAccess) {
-            SessionState.Onboarding(profile, experience.applies && experience.policy.onboardingEnabled &&
+            SessionState.Onboarding(profile, !remoteReadOnly && experience.applies && experience.policy.onboardingEnabled &&
                 experience.policy.profilesEnabled && experience.policy.profileEdits &&
                 profile.onboardingStep in 0..3)
         } else {

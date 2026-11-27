@@ -54,12 +54,16 @@ class MainActivity : ComponentActivity() {
             }
             androidx.compose.runtime.SideEffect {
                 WindowCompat.getInsetsController(window, window.decorView).apply {
-                    isAppearanceLightStatusBars = !dark
                     isAppearanceLightNavigationBars = !dark
                 }
             }
             CompositionLocalProvider(LocalContext provides localized, LocalConfiguration provides localized.resources.configuration) {
-                AyiNouTheme(dark) { AyiNou(state, model) }
+                AyiNouTheme(dark) {
+                    AyiNou(state, model) { darkHeader ->
+                        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+                            !dark && !darkHeader
+                    }
+                }
             }
         }
     }

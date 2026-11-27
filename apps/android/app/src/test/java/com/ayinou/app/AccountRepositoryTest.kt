@@ -4,8 +4,12 @@ import com.ayinou.app.core.auth.*
 import com.ayinou.app.core.network.ApiEnvironment
 import com.ayinou.app.core.network.Endpoint
 import com.ayinou.app.core.network.FailureKind
+import com.ayinou.app.core.network.guardedClient
+import java.io.IOException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.SocketPolicy
@@ -172,13 +176,40 @@ class AccountRepositoryTest {
         assertNull(storage.value)
     }
 
-    private fun fixture(test: suspend Fixture.() -> Unit) = runBlocking {
+    @Test fun remoteAccountCanSignInButCannotWriteOnboarding() = fixture(remoteReadOnly = true) {
+        auth.enqueue(response(grant()))
+        auth.enqueue(response(user))
+        api.enqueue(response(profile(access = false)))
+
+        repository.signIn("member@ayinou.com", "fixture")
+        assertFalse((repository.state.value as SessionState.Onboarding).editable)
+        assertEquals(2, auth.requestCount)
+        repository.saveOnboarding(kotlinx.serialization.json.JsonObject(emptyMap()))
+        assertEquals(1, api.requestCount)
+    }
+
+    @Test fun readOnlyTransportStopsWritesBeforeSending() {
+        MockWebServer().use { server ->
+            val origin = server.url("/")
+            val client = guardedClient(origin, readOnly = true)
+            val write = Request.Builder().url(origin).patch("{}".toRequestBody()).build()
+            assertThrows(IOException::class.java) { client.newCall(write).execute().close() }
+            assertEquals(0, server.requestCount)
+
+            server.enqueue(response("{}"))
+            val read = Request.Builder().url(origin).build()
+            client.newCall(read).execute().use { assertEquals(200, it.code) }
+            assertEquals(1, server.requestCount)
+        }
+    }
+
+    private fun fixture(remoteReadOnly: Boolean = false, test: suspend Fixture.() -> Unit) = runBlocking {
         MockWebServer().use { auth ->
             MockWebServer().use { api ->
                 val storage = MemoryStore()
                 val endpoint = Endpoint(ApiEnvironment.LOCAL, api.url("/").newBuilder().host("127.0.0.1").build(), true)
                 val repository = AccountRepository(authApi(auth.url("/"), "sb_publishable_fixture_only"),
-                    accountApi(endpoint), storage, issuer) { 100 }
+                    accountApi(endpoint), storage, issuer, remoteReadOnly) { 100 }
                 Fixture(auth, api, storage, repository).test()
             }
         }

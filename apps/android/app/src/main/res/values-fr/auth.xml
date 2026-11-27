@@ -1,6 +1,5 @@
 <resources>
-    <string name="auth_welcome">Bienvenue sur AyiNou</string>
-    <string name="auth_intro">Connectez-vous avec votre compte AyiNou.</string>
+    <string name="auth_welcome">Bon retour</string>
     <string name="auth_disabled">La connexion est indisponible dans cette version.</string>
     <string name="auth_registration_closed">Les inscriptions individuelles et d’organisations sont fermées.</string>
     <string name="auth_recovery_unavailable">La récupération du mot de passe est indisponible dans cet environnement.</string>
@@ -56,4 +55,7 @@
     <string name="auth_account_help">Consultez la page Accès au compte sur AyiNou pour en savoir plus.</string>
     <string name="auth_test_email">Utilisez une adresse qui se termine par @example.test pour le compte de test local.</string>
     <string name="auth_legal_unavailable">Les documents juridiques sont indisponibles dans cet environnement.</string>
+    <string name="auth_signing_in">Connexion en cours…</string>
+    <string name="auth_help">Aide avec le compte</string>
+    <string name="auth_hide_help">Masquer l’aide</string>
 </resources>

@@ -6,27 +6,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.ContentType
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,7 +30,6 @@ import androidx.navigation.compose.rememberNavController
 import com.ayinou.app.BuildConfig
 import com.ayinou.app.R
 import com.ayinou.app.core.auth.AuthNotice
-import com.ayinou.app.core.auth.isDisposableEmail
 import com.ayinou.app.core.auth.SessionState
 import com.ayinou.app.core.network.ConnectivityResult
 import com.ayinou.app.core.network.FailureKind
@@ -44,10 +38,12 @@ import com.ayinou.app.core.preferences.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun AyiNou(state: FoundationState, model: FoundationViewModel) {
+internal fun AyiNou(state: FoundationState, model: FoundationViewModel, onDarkHeader: (Boolean) -> Unit) {
     val nav = rememberNavController()
     val route by nav.currentBackStackEntryAsState()
     val settings = route?.destination?.route == "settings"
+    val signIn = !settings && (state.session == SessionState.SignedOut || state.session == SessionState.Expired)
+    SideEffect { onDarkHeader(signIn) }
     val snackbar = remember { SnackbarHostState() }
     val storageError = stringResource(R.string.storage_error)
     LaunchedEffect(state.preferenceError, storageError) {
@@ -60,10 +56,21 @@ internal fun AyiNou(state: FoundationState, model: FoundationViewModel) {
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
+                colors = if (signIn) {
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = SignInNavy,
+                        titleContentColor = Color.White,
+                        actionIconContentColor = Color.White,
+                    )
+                } else {
+                    TopAppBarDefaults.topAppBarColors()
+                },
                 title = {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Image(painterResource(R.drawable.brand_mark), null, Modifier.size(30.dp))
-                        Text(if (settings) stringResource(R.string.settings) else stringResource(R.string.app_name))
+                    if (!signIn) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Image(painterResource(R.drawable.brand_mark), null, Modifier.size(30.dp))
+                            Text(if (settings) stringResource(R.string.settings) else stringResource(R.string.app_name))
+                        }
                     }
                 },
                 navigationIcon = {
@@ -89,29 +96,30 @@ internal fun AyiNou(state: FoundationState, model: FoundationViewModel) {
 
 @Composable
 private fun AccountScreen(state: FoundationState, model: FoundationViewModel) {
+    if (state.session == SessionState.SignedOut || state.session == SessionState.Expired) {
+        SignInScreen(
+            enabled = state.authEnabled,
+            busy = state.busy,
+            onSubmit = model::signIn,
+            feedback = {
+                if (state.session == SessionState.Expired) {
+                    Notice(stringResource(R.string.auth_expired), R.drawable.ic_lock)
+                }
+                AuthFeedback(state)
+            },
+        )
+        return
+    }
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         Column(Modifier.widthIn(max = 540.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            state.authNotice?.let { notice ->
-                val label = when (notice) {
-                    AuthNotice.INVALID_SIGN_IN -> R.string.auth_invalid
-                    AuthNotice.EMAIL_UNCONFIRMED -> R.string.auth_email_unconfirmed
-                    AuthNotice.INVALID_CODE -> R.string.auth_invalid_code
-                    AuthNotice.REMOTE_SIGN_OUT_UNCONFIRMED -> R.string.auth_signout_unconfirmed
-                    AuthNotice.STORAGE_UNAVAILABLE -> R.string.auth_storage_unavailable
-                }
-                Notice(stringResource(label), R.drawable.ic_report, true)
-            }
-            state.authFailure?.let { Notice(stringResource(it.kind.label()), R.drawable.ic_report, true) }
+            AuthFeedback(state)
             when (val session = state.session) {
                 SessionState.Loading -> Panel {
                     ScreenTitle(R.string.auth_loading)
                     LinearProgressIndicator(Modifier.fillMaxWidth())
                 }
-                SessionState.SignedOut, SessionState.Expired -> {
-                    if (session == SessionState.Expired) Notice(stringResource(R.string.auth_expired), R.drawable.ic_lock)
-                    Welcome(state, model::signIn)
-                }
+                SessionState.SignedOut, SessionState.Expired -> Unit
                 SessionState.Denied -> Panel {
                     ScreenTitle(R.string.auth_denied_title)
                     Text(stringResource(R.string.auth_denied))
@@ -157,56 +165,18 @@ internal fun SignOut(busy: Boolean, action: () -> Unit) {
 }
 
 @Composable
-private fun Welcome(state: FoundationState, signIn: (String, String) -> Unit) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var visible by remember { mutableStateOf(false) }
-    val focus = LocalFocusManager.current
-    val valid = isDisposableEmail(email) && password.isNotEmpty()
-    val submit = {
-        if (valid && !state.busy && state.authEnabled) {
-            val submitted = password
-            password = ""
-            visible = false
-            focus.clearFocus()
-            signIn(email, submitted)
+private fun AuthFeedback(state: FoundationState) {
+    state.authNotice?.let { notice ->
+        val label = when (notice) {
+            AuthNotice.INVALID_SIGN_IN -> R.string.auth_invalid
+            AuthNotice.EMAIL_UNCONFIRMED -> R.string.auth_email_unconfirmed
+            AuthNotice.INVALID_CODE -> R.string.auth_invalid_code
+            AuthNotice.REMOTE_SIGN_OUT_UNCONFIRMED -> R.string.auth_signout_unconfirmed
+            AuthNotice.STORAGE_UNAVAILABLE -> R.string.auth_storage_unavailable
         }
+        Notice(stringResource(label), R.drawable.ic_report, true)
     }
-    Panel {
-        Image(painterResource(R.drawable.brand_mark), null, Modifier.size(56.dp))
-        ScreenTitle(R.string.auth_welcome)
-        Text(stringResource(R.string.auth_intro))
-        if (state.authEnabled) {
-            Text(stringResource(R.string.auth_test_email), style = MaterialTheme.typography.bodyMedium)
-            OutlinedTextField(email, { email = it.take(254) }, Modifier.fillMaxWidth()
-                .semantics { contentType = ContentType.Username + ContentType.EmailAddress },
-                label = { Text(stringResource(R.string.auth_email)) }, singleLine = true, enabled = !state.busy,
-                isError = email.isNotBlank() && !isDisposableEmail(email),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next))
-            OutlinedTextField(password, { password = it.take(1024) }, Modifier.fillMaxWidth()
-                .semantics { contentType = ContentType.Password }, enabled = !state.busy, singleLine = true,
-                label = { Text(stringResource(R.string.auth_password)) },
-                visualTransformation = if (visible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { submit() }),
-                trailingIcon = {
-                    TextButton(onClick = { visible = !visible }) {
-                        Text(stringResource(if (visible) R.string.auth_hide else R.string.auth_show))
-                    }
-                })
-            Button(onClick = submit, enabled = valid && !state.busy, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.auth_sign_in))
-            }
-            if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-        } else {
-            Notice(stringResource(R.string.auth_disabled), R.drawable.ic_lock)
-        }
-    }
-    Panel {
-        Text(stringResource(R.string.auth_registration_closed))
-        Text(stringResource(R.string.auth_recovery_unavailable), style = MaterialTheme.typography.bodyMedium)
-        Text(stringResource(R.string.auth_legal_unavailable), style = MaterialTheme.typography.bodyMedium)
-    }
+    state.authFailure?.let { Notice(stringResource(it.kind.label()), R.drawable.ic_report, true) }
 }
 
 @Composable

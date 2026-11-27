@@ -2,6 +2,7 @@ package com.ayinou.app
 
 import android.security.NetworkSecurityPolicy
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
@@ -14,17 +15,27 @@ import com.ayinou.app.core.auth.KeystoreCredentialStore
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
+import org.junit.Assume.assumeTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class FoundationUiTest {
+    @org.junit.Before fun excludesRemoteAccountStorage() {
+        assumeTrue(BuildConfig.API_ENVIRONMENT != "remote")
+    }
+
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
     @Test fun navigatesAndRestoresThemeAndAllLanguageChoices() {
-        show("Byenveni sou AyiNou").assertIsDisplayed()
+        useCreole()
+        show("Nou kontan wè w ankò").assertIsDisplayed()
         compose.onNodeWithText("Manm egzanp").assertDoesNotExist()
+        show("Èd pou kont ou").performClick()
+        show("Ou pa ka rekipere modpas nan anviwònman sa a.").assertIsDisplayed()
+        show("Kache èd la").performClick()
+        compose.onNodeWithText("Ou pa ka rekipere modpas nan anviwònman sa a.").assertDoesNotExist()
         compose.onNodeWithTag("open-settings").performClick()
         show("Lang · Kreyòl ayisyen").performClick()
         show("Français").performClick()
@@ -35,7 +46,8 @@ class FoundationUiTest {
         show("Language · English").performClick()
         show("Español").performClick()
         show("Idioma · Español").assertIsDisplayed()
-        show("Tema · Seguir al sistema").performClick()
+        val themeSelector = compose.onNode(hasText("Tema ·", substring = true))
+        themeSelector.performClick()
         show("Oscuro").performClick()
         show("Tema · Oscuro").assertIsDisplayed()
 
@@ -51,7 +63,22 @@ class FoundationUiTest {
         show("Kreyòl ayisyen").performClick()
         show("Lang · Kreyòl ayisyen").assertIsDisplayed()
         compose.onNodeWithTag("navigate-back").performClick()
-        show("Byenveni sou AyiNou").assertIsDisplayed()
+        show("Nou kontan wè w ankò").assertIsDisplayed()
+    }
+
+    private fun useCreole() {
+        val creole = "Nou kontan wè w ankò"
+        val welcome = hasText(creole) or hasText("Welcome back") or
+            hasText("Bon retour") or hasText("Qué gusto verte de nuevo")
+        compose.waitUntil(timeoutMillis = 8_000) { compose.onAllNodes(welcome).fetchSemanticsNodes().size == 1 }
+        if (compose.onAllNodesWithText(creole).fetchSemanticsNodes().isNotEmpty()) return
+
+        compose.onNodeWithTag("open-settings").performClick()
+        val language = hasText("Language ·", substring = true) or
+            hasText("Langue ·", substring = true) or hasText("Idioma ·", substring = true)
+        compose.onNode(language).performClick()
+        show("Kreyòl ayisyen").performClick()
+        compose.onNodeWithTag("navigate-back").performClick()
     }
 
     private fun show(label: String): androidx.compose.ui.test.SemanticsNodeInteraction {

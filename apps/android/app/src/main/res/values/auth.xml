@@ -1,6 +1,5 @@
 <resources>
-    <string name="auth_welcome">Byenveni sou AyiNou</string>
-    <string name="auth_intro">Konekte ak kont AyiNou ou.</string>
+    <string name="auth_welcome">Nou kontan wè w ankò</string>
     <string name="auth_disabled">Ou pa ka konekte nan vèsyon sa a.</string>
     <string name="auth_registration_closed">Enskripsyon pou moun ak òganizasyon fèmen.</string>
     <string name="auth_recovery_unavailable">Ou pa ka rekipere modpas nan anviwònman sa a.</string>
@@ -56,4 +55,7 @@
     <string name="auth_account_help">Gade paj aksè kont ou sou AyiNou pou plis enfòmasyon.</string>
     <string name="auth_test_email">Nan vèsyon lokal sa a, imel kont tès la dwe fini ak @example.test.</string>
     <string name="auth_legal_unavailable">Dokiman legal yo pa disponib nan anviwònman sa a.</string>
+    <string name="auth_signing_in">Koneksyon an ap fèt…</string>
+    <string name="auth_help">Èd pou kont ou</string>
+    <string name="auth_hide_help">Kache èd la</string>
 </resources>

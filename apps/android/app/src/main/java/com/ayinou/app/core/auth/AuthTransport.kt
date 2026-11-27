@@ -1,5 +1,6 @@
 package com.ayinou.app.core.auth
 
+import com.ayinou.app.core.network.ApiEnvironment
 import com.ayinou.app.core.network.Endpoint
 import com.ayinou.app.core.network.Failure
 import com.ayinou.app.core.network.FailureKind
@@ -127,10 +128,11 @@ internal interface AccountApi {
 internal fun authApi(origin: HttpUrl, publishableKey: String): AuthApi =
     retrofit(origin, publishableKey).create(AuthApi::class.java)
 
-internal fun accountApi(endpoint: Endpoint): AccountApi = retrofit(endpoint.url).create(AccountApi::class.java)
+internal fun accountApi(endpoint: Endpoint): AccountApi =
+    retrofit(endpoint.url, readOnly = endpoint.environment == ApiEnvironment.REMOTE).create(AccountApi::class.java)
 
-private fun retrofit(origin: HttpUrl, publishableKey: String? = null): Retrofit =
-    Retrofit.Builder().baseUrl(origin).client(guardedClient(origin, publishableKey))
+private fun retrofit(origin: HttpUrl, publishableKey: String? = null, readOnly: Boolean = false): Retrofit =
+    Retrofit.Builder().baseUrl(origin).client(guardedClient(origin, publishableKey, readOnly))
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType())).build()
 
 internal class RequestFailure(val failure: Failure, val code: String? = null) : Exception()

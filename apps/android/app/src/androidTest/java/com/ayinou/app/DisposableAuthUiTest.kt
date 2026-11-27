@@ -31,7 +31,7 @@ class DisposableAuthUiTest {
         compose.activityRule.scenario.recreate()
         signedIn()
         compose.onNodeWithText("Dekonekte", substring = false).performClick()
-        compose.waitUntil(15_000) { compose.onAllNodesWithText("Byenveni sou AyiNou").fetchSemanticsNodes().size == 1 }
+        compose.waitUntil(15_000) { compose.onAllNodesWithText("Nou kontan wè w ankò").fetchSemanticsNodes().size == 1 }
     }
 
     @Test fun mandatoryOnboardingAfterTotp() {
@@ -72,21 +72,21 @@ class DisposableAuthUiTest {
         signedIn()
         println("A2 disposable cold instrumentation restore ms=${android.os.SystemClock.elapsedRealtime() - start}")
         waitFor("Dekonekte").performScrollTo().performClick()
-        waitFor("Byenveni sou AyiNou").assertIsDisplayed()
+        waitFor("Nou kontan wè w ankò").assertIsDisplayed()
     }
 
     private fun useCreole() {
-        val welcome = hasText("Byenveni sou AyiNou") or hasText("Welcome to AyiNou") or
-            hasText("Bienvenue sur AyiNou") or hasText("Te damos la bienvenida a AyiNou")
+        val welcome = hasText("Nou kontan wè w ankò") or hasText("Welcome back") or
+            hasText("Bon retour") or hasText("Qué gusto verte de nuevo")
         compose.waitUntil(15_000) { compose.onAllNodes(welcome).fetchSemanticsNodes().size == 1 }
-        if (compose.onAllNodesWithText("Byenveni sou AyiNou").fetchSemanticsNodes().isNotEmpty()) return
+        if (compose.onAllNodesWithText("Nou kontan wè w ankò").fetchSemanticsNodes().isNotEmpty()) return
         compose.onNodeWithTag("open-settings").performClick()
         val languagePreference = hasText("Language ·", substring = true) or
             hasText("Langue ·", substring = true) or hasText("Idioma ·", substring = true)
         compose.onNode(languagePreference).performClick()
         waitFor("Kreyòl ayisyen").performClick()
         compose.onNodeWithTag("navigate-back").performClick()
-        waitFor("Byenveni sou AyiNou")
+        waitFor("Nou kontan wè w ankò")
     }
 
     private fun field(label: String, value: String) {
