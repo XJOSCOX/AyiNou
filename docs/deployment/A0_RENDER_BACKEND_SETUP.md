@@ -102,7 +102,7 @@ The public baseline returned 401 for anonymous profile, Dashboard, Feed, Communi
 
 The clean staged source passed API typecheck, targeted lint, the API build and all 68 API tests. The disposable Supabase integration verified behavior for allowed, non-allowlisted, restricted and revoked sessions, token refresh, MFA, HSTS and direct signup denial.
 
-Hosted authenticated verification and the separate remote Android debug build are pending manual deployment and post-deployment checks. Treat the client-IP header as unverified until controlled evidence establishes sanitization on every ingress path. Record Test02 and non-allowlisted account results, refresh and revocation, all approved read routes, disabled writes and activation routes, response timings and available Render metrics after the owner deploys the reviewed release.
+Hosted authenticated verification and the separate remote Android debug build are pending post-deployment checks. Treat the client-IP header as unverified until controlled evidence establishes sanitization on every ingress path. Record Test02 and non-allowlisted account results, refresh and revocation, all approved read routes, disabled writes and activation routes, response timings and available Render metrics after the owner deploys the reviewed release.
 
 ## Documentation and operations
 
@@ -174,6 +174,21 @@ For resource expectations, use a single process under a 256 MiB V8 old-space cap
 
 Suspend the Render service if access controls or verification are unexpected. If a previously verified release exists, select it in Render Deploys and roll back to that release with Auto-Deploy off. Confirm its environment and its same restrictive route, registration and account boundary. If this is the first release, keep it suspended until a corrected release passes. Revoke any development sessions or rotate keys if they were exposed. Rollback requires no database migration or website change. [Render manual deploys](https://render.com/docs/deploys) · [Render rollbacks](https://render.com/docs/rollbacks)
 
+## Live corrected revision
+
+The Render Deploys page identified `302bf317a180355352a383264e8fdc10ef621a33` as the live manual deploy for the Free instance. The owner reported the exact Free ingress setting `127.0.0.0/8`. The corrected build refuses alternative proxy settings at startup. [Live Render deploy](https://dashboard.render.com/web/srv-dc4d1duc6qcc73d6n5kg/deploys/dep-dc4evenf3r2c73b64cvg)
+
+| Live check | Result |
+| --- | --- |
+| Public transport | HTTPS health returned 200 with HSTS. Plain HTTP health redirected with 301. The default Render hostname returned 404. |
+| Protected transport | HTTPS anonymous status and standing returned 401 with HSTS. The status request kept the same result with conflicting forwarded scheme and hostname headers. A malformed bearer token also returned 401. |
+| Closed routes | Anonymous registration policy, admin overview and sampled Volunteer and Opportunity activation paths returned 404. |
+| Registration | Founder registration was disabled and closed. Individual and organization registration were disabled. Supabase Auth reported direct signup disabled. |
+| C1–C4 | Read-only hosted counts returned zero active Community Needs departments, enabled Impact settings, active Volunteer or Opportunity stages, and zero rows across the 19 sampled fixture tables. |
+| Traffic and resources | The warm anonymous checks took 107–135 ms. Render showed a 512 MB memory allocation and 0.15 CPU. Actual utilization graphs required a paid plan. Cold and authenticated latency remain unmeasured. |
+
+Client-IP overwrite is still unproven. The live release uses the shared 60-request quota. Eight local fixtures passed on recheck, covering malformed or conflicting forwarded values, untrusted socket peers, quota behavior and account standing.
+
 ## Remaining blockers
 
-The owner must manually deploy the corrected commit with the confirmed Free ingress range. Verify HTTP redirection, HTTPS 401 and HSTS on the corrected revision before authenticated reads. Complete the remote Test02 and non-allowlisted checks, including a refreshed session, expired and revoked sessions, and the standing endpoint's scope. Document the unauthenticated client-IP provenance check and retain the shared quota if it stays inconclusive. Remote mobile authentication and a separate debug APK follow those checks. A0 stays open until Test02 can securely use the remote API.
+Complete the live Test02 and non-allowlisted account checks, including refreshed, expired and revoked sessions, authenticated read availability and the standing endpoint's scope. Remote mobile authentication and a separate debug APK follow those checks. A0 stays open until Test02 can securely use the remote API.

@@ -18,4 +18,4 @@
 | A13 | Offline capabilities, performance and push notifications |
 | A14 | Final integration, security and Android release preparation |
 
-A3 and later phases require separate authorization. Render confirmed Free instance ingress. A0 remains open pending manual deployment and authenticated verification. A paid instance requires a separate ingress and proxy security review. C5 Trusted Haitian Media and Information and C6 Donor Connections remain deferred.
+A3 and later phases require separate authorization. Render confirmed Free instance ingress. The A0 correction is live. A0 remains open pending authenticated verification. A paid instance requires a separate ingress and proxy security review. C5 Trusted Haitian Media and Information and C6 Donor Connections remain deferred.
