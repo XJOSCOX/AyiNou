@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.AyiNou" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">#F0F5FB</item>
+    </style>
+    <style name="Theme.AyiNou.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#F0F5FB</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/brand_mark</item>
+        <item name="postSplashScreenTheme">@style/Theme.AyiNou</item>
+    </style>
+</resources>

@@ -1,6 +1,12 @@
 {
   "features": [
     {
+      "id": "android-foundation",
+      "report": "docs/android/A1_FOUNDATION_IMPLEMENTATION_REPORT.md",
+      "routes": [],
+      "migrations": []
+    },
+    {
       "id": "founder-verified-individual-proposals",
       "report": "docs/identity/FOUNDER_VERIFIED_PROJECTS_IMPLEMENTATION_REPORT.md",
       "routes": [

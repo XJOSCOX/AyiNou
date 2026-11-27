@@ -68,6 +68,9 @@ No confirmed asleep-to-ready request or corresponding startup log was available,
 
 ## A0.1 HTTPS correction and verification
 
+A1 registration recheck on November 26, 2026 confirmed the Founder policy is disabled and closed, both signup pathways are disabled, and direct Supabase Auth reports `disable_signup=true`. The checks were read-only. A0 remains open pending provider confirmation of Render ingress and authenticated remote verification.
+
+
 On November 26, 2026, the owner’s changes were verified read-only. The Founder policy is disabled and closed, both signup pathways are disabled, and the direct Supabase Auth settings endpoint reports `disable_signup=true`. Existing accounts remain the only eligible sign-in path. The currently deployed public `/health` returns 200. Anonymous HTTPS `/api/v1/status` still returned `403 HTTPS required` without HSTS.
 
 In the deployed guard, an anonymous 401 means HTTPS recognition succeeded and the request reached the bearer-token check. `403 HTTPS required` occurs earlier. The reported 401 and the later 403 therefore passed different transport checks. Public DNS and TLS results cannot show whether the service accepted the immediate peer or what the last forwarded scheme was. The difference between those requests remains unexplained until their Render-side conditions can be compared.
