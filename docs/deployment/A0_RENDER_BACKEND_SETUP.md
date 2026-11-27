@@ -2,7 +2,7 @@
 
 ## Scope
 
-This is an owner-operated, read-only Android development API for existing AyiNou test accounts. It uses the existing Fastify application and hosted Supabase project. The web application and the coming-soon site at ayinou.com stay on their existing infrastructure. The Render service, domain and DNS changes are pending owner action.
+This is an owner-operated, read-only Android development API for existing AyiNou test accounts. It uses the existing Fastify application and hosted Supabase project. The web application and the coming-soon site at ayinou.com stay on their existing infrastructure. The owner has deployed the Render service and configured the custom domain. The public health endpoint was independently verified. Member access remains blocked pending the findings below.
 
 ## Data model and API
 
@@ -14,7 +14,7 @@ A positive list of existing route templates allows GET and HEAD for member profi
 
 The API takes the account identity only from the existing verified Supabase bearer token and live session check. Token issuer, audience, role, expiry, session and enrolled MFA checks still apply. The server compares the verified Auth UUID against the environment allowlist. It checks the existing registration policy on each allowlisted request and returns a generic 503 if the policy permits registration, cannot be read, or has an unexpected shape. An alternate host cannot access member routes, even with a token or forwarded Host header. No new authorization role, audit event, or test account is created.
 
-The project currently permits public registration. This was verified via a read-only catalog check. **Before deploying, the owner must close or disable registration using the existing Founder Registration settings.** Fastify cannot change the direct Supabase Auth signup policy. Existing sign-ins still use the existing Auth flow, MFA and session controls. Reopening registration disables protected Render API access. The existing project policies remain responsible for direct Auth, Storage and Data API requests.
+Close the shared registration policy in Founder settings and disable new-user signups in the Supabase Auth configuration before admitting test accounts. Existing accounts continue to sign in. Fastify checks the Founder policy, and the shared Supabase Auth setting governs direct signup requests. [Supabase Auth configuration](https://supabase.com/docs/guides/auth/general-configuration)
 
 ## Privacy and lifecycle
 
@@ -28,7 +28,7 @@ This backend-only change uses the existing structured error envelope with safe, 
 
 ## Reliability and recovery
 
-Render terminates TLS and redirects public HTTP to HTTPS. Fastify trusts forwarded metadata only from the immediate trusted ingress peer. Configure the Render ingress CIDRs before first protected use. The documented private CIDRs below assume this Free Web Service receives traffic only from Render ingress, since the Free service does not accept inbound private-network traffic. Narrow them to the confirmed ingress range when available. Do not use outbound Render ranges, wildcard CIDRs, public client ranges or trust-all. Unknown peers cannot assert HTTPS through forwarded headers. The internal process probe is exempt from the host and HTTPS checks.
+Render terminates TLS and redirects public HTTP to HTTPS. Fastify trusts forwarded metadata only from the immediate trusted ingress peer. Configure the Render ingress CIDRs before first protected use. Obtain the exact immediate ingress peer ranges from Render or verified service-side evidence before setting the allowlist. Choose the least-privilege confirmed ranges. Broad private ranges, Render outbound IPs, public client ranges and wildcard trust do not establish trusted ingress. [Render TLS termination](https://render.com/docs/web-services) · [Render outbound IP addresses](https://render.com/docs/outbound-ip-addresses) Unknown peers cannot assert HTTPS through forwarded headers. The internal process probe is exempt from the host and HTTPS checks.
 
 On the single instance, the process permits 60 protected attempts per IP per minute, 90 authenticated reads per allowed member per minute, 300 attempts per minute globally and 12 simultaneous protected requests. Existing endpoint-specific limits continue to apply. Upstream access requires a valid token, and denied or malformed requests do not reach the handler. Render mode sets a 16 KiB default body limit, rejects bodies on its read-only HTTP surface, limits the request URL to 2 KiB, and uses 10-second request, 18-second handler and 20-second connection timeouts. An orderly Render shutdown closes the listener. [Fastify server options](https://fastify.dev/docs/latest/Reference/Server/)
 
@@ -37,6 +37,34 @@ The process starts no task scheduler, migration, worker, recurring cleanup or op
 ## Validation and CI
 
 The API fixtures cover missing and invalid configuration, invalid and non-allowlisted tokens, alternate hosts and preview paths, privileged and registration routes, trusted proxy matching, and rate limits. The disposable Auth integration exercises refresh, MFA, revocation and signup denial. The clean release passed typecheck, lint, the routine test suite, dependency audit, legal checks, engineering standards and local production builds. The Auth integration passed against a fresh disposable Supabase, including rejection by the direct signup endpoint. Separate disposable databases passed both volunteer-profile C3 tests and both C4.2 and C4.3 Founder preparation cases. These reruns resolve the outstanding D1 cases. Both immediate-signup checks passed in a separate disposable stack. The 70-case Chromium smoke run passed 69 cases. Its only failure was a stale Founder badge locator, corrected to check the account header and verified in a fresh disposable rerun. See [Render API tests](../../apps/api/test/render-development.test.ts), [Auth integration](../../apps/web/e2e/render-development.spec.ts) and [D1 regression status](../dashboard/D1_MEMBER_DASHBOARD_IMPLEMENTATION_REPORT.md).
+
+## Final remote verification
+
+Verified on November 26, 2026. The owner reported deploying `da2df9235b5fede141743d6f9def208c28a7bba6`. The custom host was independently reachable and its CNAME resolved to `ayinou-api-dev.onrender.com`. The default hostname returned 404 for `/health`. The Render dashboard required sign-in, so the deploy record, actual service environment and resource metrics could not be inspected independently.
+
+**Result: blocked.** The remote API is serving its public health probe. Secure use by Test02 has not been established.
+
+| Check | Result |
+| --- | --- |
+| Shared registration and direct Auth | The hosted policy reports `enabled=true` and `mode=public`, with individual and organization signup enabled. The signup trigger on `auth.users` is enabled and the hosted bootstrap already exists. The read-only Supabase `/auth/v1/settings` endpoint returned `disable_signup=false` and email Auth enabled. No signup was attempted. |
+| HTTPS at the edge | TLS certificate validation succeeded for `api-dev.ayinou.com`. HTTP `/health` redirected with 301 to the HTTPS URL and HTTPS `/health` returned 200. |
+| Security response headers | Observed `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, restrictive CSP and Permissions Policy. `Strict-Transport-Security` was absent on the sampled HTTPS health and protected responses. |
+| Trusted ingress and protected reads | Over both HTTP/1.1 and HTTP/2, `GET /api/v1/status` returned `403 FORBIDDEN` with `HTTPS required`. Unauthenticated profile, Dashboard, Feed, Communities, Organization accounts, Projects and Events reads returned 403. The deployed code checks the derived HTTPS scheme before token validation. This observation differs from the owner's earlier anonymous 401. It is consistent with the trust configuration or forwarded scheme failing for the observed requests. The configured CIDRs, immediate peer and proxy header behavior remain unconfirmed. |
+| Authenticated Test02, non-allowlisted account, missing, expired and invalid tokens | No authenticated remote check was possible with the two deployment blockers, and no live credential was sent. Missing and malformed bearer samples reached the same HTTPS guard and returned 403. This did not establish the expected token-layer 401 or non-allowlisted 403. A genuinely expired hosted token was not exercised. |
+| Write, registration, admin and activation routes | Anonymous, empty PATCH requests to member profile and Dashboard preferences returned 404. Registration policy, admin overview, Founder bootstrap, Community Needs Pilot, Impact settings, Volunteer activation and Opportunity activation reads each returned 404. Privileged-token denial and the authenticated mutation boundary could not be independently sampled. |
+| C1–C4 operational gates | Read-only queries on `hcbxulyfmdmuyccgrujs` found zero active Community Needs configurations, enabled Impact settings, active Volunteer stages and active Opportunity stages. All 19 checked C1–C4 fixture tables were empty. |
+| Android contract | Existing-account sign-in and token refresh go to Supabase. The bearer JWT goes to the HTTPS Fastify API. Enrolled MFA, live-session checks and application role checks still apply. The disposable integration previously verified fresh and refreshed tokens, MFA, revocation and non-allowlisted denial. Hosted sign-in and refresh followed by successful remote reads remain unverified. |
+
+### Remote response timings
+
+Fresh HTTPS connections from one desktop network. Each warm sample includes connection establishment, TLS, and HTTP response time. The first observed health request took 274 ms total and 274 ms to first byte. Its server startup state was unknown. The warm denial series measures the ingress guard response and cannot estimate authenticated member processing.
+
+| Request | Samples | Min | Median | Max |
+| --- | ---: | ---: | ---: | ---: |
+| GET `/health` (200) | 8 | 107 ms | 124 ms | 213 ms |
+| GET `/api/v1/status` (403) | 8 | 106 ms | 122 ms | 208 ms |
+
+No confirmed asleep-to-ready request or corresponding startup log was available, so genuine cold-start latency remains unmeasured. Actual Render CPU and memory require access to the service Metrics page. The 113 MiB peak and 8.2-second startup recorded in this guide came from the earlier local Linux rehearsal. [Render Free behavior](https://render.com/docs/free) · [Render service metrics](https://render.com/docs/service-metrics)
 
 ## Documentation and operations
 
@@ -71,7 +99,7 @@ The root workspace lockfile is required. The build installs the API and shared w
 | `PORT` | `10000`, supplied by Render unless overridden |
 | `LOG_LEVEL` | `info` |
 | `SUPABASE_URL` | `https://hcbxulyfmdmuyccgrujs.supabase.co` |
-| `AYINOU_RENDER_PROXY_CIDRS` | `10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` for the private-ingress assumption above |
+| `AYINOU_RENDER_PROXY_CIDRS` | Comma-separated immediate ingress CIDRs confirmed for this service. Verification is pending. |
 | `AYINOU_RENDER_TEST_USER_IDS` | Comma-separated Auth UUIDs for up to ten approved test accounts. Enter privately in the service environment. |
 | `SUPABASE_PUBLISHABLE_KEY` | Copy the publishable key for this exact project into the service environment. |
 | `SUPABASE_SECRET_KEY` | Copy a server-only secret/service-role key for this exact project into the service environment. Never place it in an app or browser. |
@@ -110,4 +138,4 @@ Suspend the Render service if access controls or verification are unexpected. If
 
 ## Remaining blockers
 
-The owner's exact test-account UUIDs, shared registration closure, Render ingress CIDR verification and the first hosted smoke test are pending. Render and DNS have not been changed. No hosted website or Android work is part of A0.
+The owner must disable shared and direct Auth signup, confirm the immediate Render ingress ranges and resolve forwarded HTTPS recognition, then check for HSTS and repeat the tested routes with approved existing accounts. Confirm a live allowed session and a refreshed token return 200, a valid non-allowlisted account returns 403, and missing, invalid and expired tokens return 401 after the HTTPS check succeeds. Confirm protected writes, administration and activation remain closed. Capture verified cold-start and Metrics data when Render access is available. A0 remains open until Test02 can securely use the remote read API. This verification changed no hosted data, infrastructure, website or Android code.
