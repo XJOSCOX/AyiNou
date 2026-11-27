@@ -189,6 +189,14 @@ The Render Deploys page identified `302bf317a180355352a383264e8fdc10ef621a33` as
 
 Client-IP overwrite is still unproven. The live release uses the shared 60-request quota. Eight local fixtures passed on recheck, covering malformed or conflicting forwarded values, untrusted socket peers, quota behavior and account standing.
 
+## Authenticated Test02 verification
+
+The existing signed-in Test02 account was verified through AyiNou's normal server-side browser session. HTTPS returned 200 with HSTS for status, own profile, verification badge, Dashboard, Feed, Communities, organization accounts, Projects and Events. The active account's standing request returned 401, the intended result when there is no active restriction notice.
+
+The authenticated profile details PATCH returned 404. Administration, Founder bootstrap, Community Needs, Volunteer activation and Opportunity activation samples also returned 404 with Test02's valid session.
+
+Supabase rotated the refresh token and Render status accepted the refreshed session with HTTP 200 in 205 ms. A new browser tab restored that session and repeated the successful reads. Warm status reads took 205–280 ms. Warm dashboard, feed, community, organization, project and event reads took 358–1,562 ms across the recorded successful requests. The temporary local verification route was removed after testing.
+
 ## Remaining blockers
 
-Complete the live Test02 and non-allowlisted account checks, including refreshed, expired and revoked sessions, authenticated read availability and the standing endpoint's scope. Remote mobile authentication and a separate debug APK follow those checks. A0 stays open until Test02 can securely use the remote API.
+Live expiry, revocation and valid non-allowlisted denial still need an independent test session and an existing non-allowlisted test account. The isolated backend regression covers the denial paths. Remote Android authentication and the separate APK remain gated on the remaining live checks.
