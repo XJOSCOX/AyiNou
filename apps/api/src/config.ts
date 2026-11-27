@@ -15,6 +15,7 @@ const closedRenderFlags = [
 const environmentSchema = z.object({
   AYINOU_API_MODE: z.enum(["local", "render-dev"]).optional(),
   AYINOU_RENDER_PROXY_CIDRS: z.string().max(400).optional(),
+  AYINOU_RENDER_INGRESS_PROBE_KEY: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   AYINOU_RENDER_TEST_USER_IDS: z.string().max(600).optional(),
   API_HOST: z.string().min(1).default("127.0.0.1"),
   API_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
@@ -48,7 +49,11 @@ const environmentSchema = z.object({
 });
 
 export type ApiConfig = z.infer<typeof environmentSchema> & {
-  renderDevelopment?: { testUserIds: readonly string[]; trustProxy(address: string, hop: number): boolean };
+  renderDevelopment?: {
+    testUserIds: readonly string[];
+    trustProxy(address: string, hop: number): boolean;
+    ingressProbeKey?: string;
+  };
 };
 
 function renderProxyTrust(value: string | undefined) {
@@ -99,7 +104,7 @@ export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiCon
       throw new Error("Invalid API environment configuration. Check the restricted Render development settings.");
     }
     return { ...config, API_HOST: "0.0.0.0", API_PORT: port.data, WEB_ORIGINS: [],
-      renderDevelopment: { testUserIds: ids.data, trustProxy } };
+      renderDevelopment: { testUserIds: ids.data, trustProxy, ingressProbeKey: config.AYINOU_RENDER_INGRESS_PROBE_KEY } };
   }
   if (result.data.AYINOU_PRIVACY_INTAKE === "synthetic" &&
       (environment.NODE_ENV === "production" || result.data.SUPABASE_URL !== "http://127.0.0.1:55321")) {

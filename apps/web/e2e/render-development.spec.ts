@@ -21,8 +21,8 @@ test("restricted API accepts refreshed test sessions and preserves signup, MFA a
   });
   const app = createApp({ ...config, SUPABASE_URL: process.env.AYINOU_E2E_SUPABASE_URL });
   const headers = { host: "api-dev.ayinou.com", "x-forwarded-proto": "https" };
-  const read = async (token: string) => app.inject({
-    url: "/api/v1/me/profile", headers: { ...headers, authorization: `Bearer ${token}` },
+  const read = async (token: string, url = "/api/v1/me/profile") => app.inject({
+    url, headers: { ...headers, authorization: `Bearer ${token}` },
   });
   const previous = sql("select mode from private.registration_policy where singleton;");
   if (!["closed", "public", "invitation_only"].includes(previous)) throw new Error("Unexpected fixture registration policy");
@@ -38,7 +38,11 @@ test("restricted API accepts refreshed test sessions and preserves signup, MFA a
     expect((await read(signed.data.session!.access_token)).statusCode).toBe(200);
     const refreshed = await ordinary.auth.refreshSession();
     expect(Boolean(refreshed.data.session)).toBe(true);
-    expect((await read(refreshed.data.session!.access_token)).statusCode).toBe(200);
+    for (const route of ["/api/v1/status", "/api/v1/me/profile", "/api/v1/me/dashboard", "/api/v1/feed"]) {
+      const response = await read(refreshed.data.session!.access_token, route);
+      expect(response.statusCode, route).toBe(200);
+      expect(response.headers["strict-transport-security"], route).toBe("max-age=31536000");
+    }
 
     const mfaSecret = await enroll(mfaMember);
     const elevated = localClient("AYINOU_E2E_SUPABASE_PUBLIC");

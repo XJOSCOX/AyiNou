@@ -71,7 +71,8 @@ export function createApp(config: ApiConfig, overrides?: {
     ...requestIdentification(),
     logger: {
       level: config.LOG_LEVEL,
-      redact: ["req.headers.authorization", "req.headers.cookie", "headers.authorization", "headers.cookie"],
+      redact: ["req.headers.authorization", "req.headers.cookie", "headers.authorization", "headers.cookie",
+        'req.headers["x-ayinou-ingress-probe"]', 'headers["x-ayinou-ingress-probe"]'],
     },
   });
   registerErrorHandling(app, Boolean(render));
@@ -85,7 +86,7 @@ export function createApp(config: ApiConfig, overrides?: {
   const privacyEnabled = config.AYINOU_PRIVACY_INTAKE === "synthetic" &&
     config.SUPABASE_URL === "http://127.0.0.1:55321" && process.env.NODE_ENV !== "production";
 
-  if (render) registerRenderDevelopment(app, auth, institutions, render.testUserIds);
+  if (render) registerRenderDevelopment(app, auth, institutions, render);
   else app.register(cors, {
     origin: config.WEB_ORIGINS,
     methods: ["GET", "PATCH", "POST", "PUT", "DELETE"],

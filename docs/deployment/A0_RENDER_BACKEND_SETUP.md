@@ -18,7 +18,7 @@ Close the shared registration policy in Founder settings and disable new-user si
 
 ## Privacy and lifecycle
 
-API responses use private, no-store caching, no-referrer, frame denial, no-sniff and restrictive content and permissions policies. HTTPS responses carry HSTS for the API host. The browser CORS plugin is disabled in Render mode. Request logs contain only the server-generated request ID, method, route template and status. The API never logs credentials, tokens, request bodies or query strings. Existing account restrictions, privacy projections and participant visibility still apply. The Render API does not expose evidence or privacy exports, and this deployment makes no changes to retention, legal holds or exports.
+API responses use private, no-store caching, no-referrer, frame denial, no-sniff and restrictive content and permissions policies. Responses whose HTTPS scheme is recognized carry HSTS for the API host. The browser CORS plugin is disabled in Render mode. Standard request logs contain only the server-generated request ID, method, route template and status. The optional A0.1 ingress probe has a separate bounded private event. The API never logs credentials, tokens, request bodies or query strings. Existing account restrictions, privacy projections and participant visibility still apply. The Render API does not expose evidence or privacy exports, and this deployment makes no changes to retention, legal holds or exports.
 
 Use the existing owner-designated test accounts only and enter their immutable Auth user UUIDs on Render. Do not use real-member credentials or add a Founder account unless the owner explicitly intends that account to test the ordinary read path. No privileged endpoints become available when an allowed member has Founder authority.
 
@@ -65,6 +65,38 @@ Fresh HTTPS connections from one desktop network. Each warm sample includes conn
 | GET `/api/v1/status` (403) | 8 | 106 ms | 122 ms | 208 ms |
 
 No confirmed asleep-to-ready request or corresponding startup log was available, so genuine cold-start latency remains unmeasured. Actual Render CPU and memory require access to the service Metrics page. The 113 MiB peak and 8.2-second startup recorded in this guide came from the earlier local Linux rehearsal. [Render Free behavior](https://render.com/docs/free) · [Render service metrics](https://render.com/docs/service-metrics)
+
+## A0.1 HTTPS correction and verification
+
+On November 26, 2026, the owner’s changes were verified read-only. The Founder policy is disabled and closed, both signup pathways are disabled, and the direct Supabase Auth settings endpoint reports `disable_signup=true`. Existing accounts remain the only eligible sign-in path. The currently deployed public `/health` returns 200. Anonymous HTTPS `/api/v1/status` still returned `403 HTTPS required` without HSTS.
+
+In the deployed guard, an anonymous 401 means HTTPS recognition succeeded and the request reached the bearer-token check. `403 HTTPS required` occurs earlier. The reported 401 and the later 403 therefore passed different transport checks. Public DNS and TLS results cannot show whether the service accepted the immediate peer or what the last forwarded scheme was. The difference between those requests remains unexplained until their Render-side conditions can be compared.
+
+Fastify checks the actual socket peer at hop zero, then uses the last `X-Forwarded-Proto` value. Its proxy address walk starts at that same socket peer and stops before trusting a second hop, even when that address also matches a configured range. Local Node tests confirmed IPv4 and IPv4-mapped IPv6 matching, including equivalent hexadecimal forms. A local regression reproduced 403 and missing HSTS when a trusted peer supplied the legal scheme `HTTPS`. A0.1 compares the case-normalized Fastify scheme for both HTTPS enforcement and HSTS. This fixes the reproduced casing defect. The live cause has yet to be confirmed.
+
+Render documents TLS termination at the load balancer and HTTP from the load balancer to the service. Its public guidance does not establish the exact immediate peer CIDRs for this service or guarantee how the deployed path handles an incoming forwarded scheme list. Obtain written confirmation for `ayinou-api-dev`, covering stable immediate peer ranges, whether each forwarded header is replaced or appended, and which entry Render vouches for. Compare that answer with privately observed requests. Render’s outbound ranges and Cloudflare public edge IPs are different boundaries. [Render Web Services](https://render.com/docs/web-services) · [Render proxy guidance](https://render.com/articles/fastapi-production-best-practices) · [Fastify Request](https://fastify.dev/docs/latest/Reference/Request/)
+
+Local API typecheck, lint and all six focused tests passed. Disposable Supabase accepted refreshed sessions for status, profile, Dashboard and Feed and preserved non-allowlisted denial, MFA, revocation and direct signup denial. The live C1–C4 operational settings still returned zero active rows in read-only checks.
+
+### Temporary private ingress probe
+
+Deploy the reviewed A0.1 commit manually. For diagnostics, set `AYINOU_RENDER_INGRESS_PROBE_KEY` in the Render service to a temporary secret with exactly 64 lowercase hexadecimal characters generated by a trusted password manager. Keep `LOG_LEVEL=info` while sampling. Leave the existing `AYINOU_RENDER_PROXY_CIDRS` unchanged for this measurement. Set it to the narrow, provider-confirmed immediate peer ranges after comparing private samples. If no reliable boundary is available, keep remote protected access closed. The probe does not participate in access control.
+
+Run the probe without a bearer token from the owner’s network and from another available client network. Enter the key locally through a hidden prompt. The command prints the status, response request ID and HSTS header only.
+
+```sh
+read -rs -p 'Temporary Render ingress key: ' probe_key
+printf '\n'
+printf 'header = "X-AyiNou-Ingress-Probe: %s"\n' "$probe_key" |
+  curl --config - -sS -o /dev/null \
+    -w 'status=%{http_code} request_id=%header{x-request-id} hsts=%header{strict-transport-security}\n' \
+    https://api-dev.ayinou.com/api/v1/status
+unset probe_key
+```
+
+Find the request ID in the private Render logs under `Temporary Render ingress probe`. Only an exact, keyed GET at the custom-host status path is sampled, up to eight times per process. The private event records the socket peer and family, whether its CIDR matched, derived scheme, and forwarded-header counts and scheme categories. It omits the probe key, bearer token, cookies, raw forwarded addresses, path parameters and query data. The public response carries no diagnostic fields. Keep the log record and the exact peer addresses private. Share the status, HSTS, peer trust decision and scheme categories for comparison.
+
+Once provider and runtime evidence agree, repeat the public and authorized checks from this guide. Use an existing Test02 session and a valid existing non-allowlisted account, and test a genuinely expired token separately from a malformed token. Confirm token refresh and 200 reads for status, profile, Dashboard and Feed, then repeat the mutation, admin and activation denials. Remove the Render probe key as soon as sampling finishes. Remove the temporary probe code in the follow-up commit and manually deploy the cleanup release. No authenticated hosted verification or probe cleanup is claimed yet.
 
 ## Documentation and operations
 
@@ -138,4 +170,4 @@ Suspend the Render service if access controls or verification are unexpected. If
 
 ## Remaining blockers
 
-The owner must disable shared and direct Auth signup, confirm the immediate Render ingress ranges and resolve forwarded HTTPS recognition, then check for HSTS and repeat the tested routes with approved existing accounts. Confirm a live allowed session and a refreshed token return 200, a valid non-allowlisted account returns 403, and missing, invalid and expired tokens return 401 after the HTTPS check succeeds. Confirm protected writes, administration and activation remain closed. Capture verified cold-start and Metrics data when Render access is available. A0 remains open until Test02 can securely use the remote read API. This verification changed no hosted data, infrastructure, website or Android code.
+Shared and direct Auth signup are closed. The owner must manually deploy A0.1, confirm the immediate Render ingress ranges and forwarded HTTPS behavior, then check for HSTS and repeat the tested routes with approved existing accounts. Confirm a live allowed session and a refreshed token return 200, a valid non-allowlisted account returns 403, and missing, invalid and expired tokens return 401 after the HTTPS check succeeds. Confirm protected writes, administration and activation remain closed. Capture verified cold-start and Metrics data when Render access is available. A0 remains open until Test02 can securely use the remote read API. This verification changed no hosted data, infrastructure, website or Android code.

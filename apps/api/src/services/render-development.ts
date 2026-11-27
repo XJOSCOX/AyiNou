@@ -1,5 +1,8 @@
+import { timingSafeEqual } from "node:crypto";
+import { isIP } from "node:net";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import type { ApiConfig } from "../config.js";
 import { ApiError } from "./api-error.js";
 import type { AuthVerifier } from "./auth.js";
 import type { InstitutionRepository } from "./institutions.js";
@@ -22,10 +25,55 @@ const registration = z.object({ enabled: z.boolean(), mode: z.enum(["closed", "i
 const developmentHost = "api-dev.ayinou.com";
 const windowMs = 60_000;
 
+type RenderDevelopmentConfig = NonNullable<ApiConfig["renderDevelopment"]>;
+
+function schemeCategory(value: string | undefined) {
+  const scheme = value?.trim().toLowerCase();
+  if (scheme === undefined) return "missing";
+  return scheme === "https" || scheme === "http" ? scheme : "other";
+}
+
+function registerIngressProbe(app: FastifyInstance, { ingressProbeKey, trustProxy }: RenderDevelopmentConfig) {
+  if (!ingressProbeKey) return;
+  const key = Buffer.from(ingressProbeKey, "hex");
+  let remaining = 8;
+  app.addHook("onRequest", async (request) => {
+    if (remaining === 0 || request.method !== "GET" || request.url !== "/api/v1/status"
+      || request.headers.host !== developmentHost) return;
+    const probe = request.headers["x-ayinou-ingress-probe"];
+    if (typeof probe !== "string" || !/^[a-f0-9]{64}$/.test(probe)
+      || !timingSafeEqual(Buffer.from(probe, "hex"), key)) return;
+
+    remaining--;
+    const peer = request.raw.socket.remoteAddress ?? "";
+    const peerFamily = isIP(peer);
+    const proto = request.headers["x-forwarded-proto"];
+    const chain = request.headers["x-forwarded-for"];
+    const forwarded = typeof proto === "string" ? proto.split(",") : [];
+    const forwardedForEntries = typeof chain === "string" ? chain.split(",").length : 0;
+    const lastScheme = forwarded.at(-1)?.trim();
+    const lastCategory = schemeCategory(lastScheme);
+    // The keyed sample goes to private service logs. Never log the raw header values or application data.
+    app.log.info({
+      reqId: request.id,
+      peerAddress: peerFamily ? peer : null,
+      peerFamily,
+      peerTrusted: trustProxy(peer, 0),
+      protocol: schemeCategory(request.protocol),
+      forwardedProtocolFirst: schemeCategory(forwarded[0]),
+      forwardedProtocolLast: lastCategory,
+      forwardedProtocolLastCaseChanged: (lastCategory === "https" || lastCategory === "http") && lastScheme !== lastCategory,
+      forwardedProtocolEntries: forwarded.length,
+      forwardedForEntries,
+    }, "Temporary Render ingress probe");
+  });
+}
+
 export function registerRenderDevelopment(
-  app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null, testUserIds: readonly string[],
+  app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null, config: RenderDevelopmentConfig,
 ) {
-  const allowedUsers = new Set(testUserIds);
+  registerIngressProbe(app, config);
+  const allowedUsers = new Set(config.testUserIds);
   const perAddress = new Map<string, number>();
   const perMember = new Map<string, number>();
   const active = new WeakSet<object>();
@@ -50,7 +98,9 @@ export function registerRenderDevelopment(
     reply.header("X-Frame-Options", "DENY");
     reply.header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
     reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-    if (request.protocol === "https") reply.header("Strict-Transport-Security", "max-age=31536000");
+    // Fastify derives the scheme using the immediate peer allowlist. Scheme names are case-insensitive.
+    const secure = request.protocol?.toLowerCase() === "https";
+    if (secure) reply.header("Strict-Transport-Security", "max-age=31536000");
 
     const read = request.method === "GET" || request.method === "HEAD";
     if (request.url.length > 2048) throw new ApiError(414, "INVALID_INPUT", "Request URL is too long");
@@ -63,7 +113,7 @@ export function registerRenderDevelopment(
     if (!read || !memberReads.has(request.routeOptions.url ?? "") || request.headers.host !== developmentHost) {
       throw new ApiError(404, "NOT_FOUND", "Route not found");
     }
-    if (request.protocol !== "https") throw new ApiError(403, "FORBIDDEN", "HTTPS required");
+    if (!secure) throw new ApiError(403, "FORBIDDEN", "HTTPS required");
     const query = new URLSearchParams(request.url.split("?").slice(1).join("?"));
     if (query.has("review") || query.has("preview")) throw new ApiError(404, "NOT_FOUND", "Route not found");
 

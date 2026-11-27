@@ -15,7 +15,7 @@ const env = {
 const https = { host: "api-dev.ayinou.com", "x-forwarded-proto": "https" };
 const bearer = { ...https, authorization: "Bearer ey.test.signature" };
 
-function setup(initial: unknown = { enabled: false, mode: "closed" }) {
+function setup(initial: unknown = { enabled: false, mode: "closed" }, overrides: NodeJS.ProcessEnv = {}) {
   let verified = 0;
   let checked = 0;
   let policy = initial;
@@ -29,7 +29,7 @@ function setup(initial: unknown = { enabled: false, mode: "closed" }) {
       return policy as T;
     },
   };
-  const app = createApp(readConfig(env), {
+  const app = createApp(readConfig({ ...env, ...overrides }), {
     institutions,
     auth: {
       async verify(token) {
@@ -56,6 +56,7 @@ test("Render refuses missing, invalid and unsafe configuration while local defau
     { SUPABASE_SECRET_KEY: undefined }, { AYINOU_COMMUNITY_NEEDS: "pilot" },
     { AYINOU_MENTORSHIP_PROFILES: "synthetic" }, { AYINOU_VOLUNTEER_MATCHING: "synthetic" },
     { AYINOU_IMPACT_REPORTING: "synthetic" }, { AYINOU_FOUNDER_BOOTSTRAP_ENABLED: "true" },
+    { AYINOU_RENDER_INGRESS_PROBE_KEY: "invalid" },
   ]) assert.throws(() => readConfig({ ...env, ...override }), /Invalid API environment/);
 });
 
@@ -123,4 +124,77 @@ test("client-supplied forwarded addresses do not evade the per-address limit", a
   assert.equal(response.headers["retry-after"], "60");
   assert.deepEqual(counts(), { verified: 0, checked: 0 });
   assert.equal((await app.inject("/health")).statusCode, 200);
+});
+
+test("recognizes HTTPS scheme casing only from the immediate trusted peer", async (t) => {
+  const { app, counts } = setup();
+  t.after(() => app.close());
+  const url = "/api/v1/status";
+  for (const peer of ["127.0.0.1", "::ffff:127.0.0.1", "::ffff:7f00:1"]) {
+    const accepted = await app.inject({ url, remoteAddress: peer, headers: { ...https, "x-forwarded-proto": " HTTPS " } });
+    assert.equal(accepted.statusCode, 401, peer);
+    assert.equal(accepted.headers["strict-transport-security"], "max-age=31536000");
+  }
+  for (const sample of [
+    { peer: "198.51.100.77", scheme: "https" },
+    { peer: "127.0.0.1", scheme: "https, http" },
+    { peer: "127.0.0.1", scheme: "https, unknown" },
+  ]) {
+    const denied = await app.inject({
+      url, remoteAddress: sample.peer, headers: { ...bearer, "x-forwarded-proto": sample.scheme },
+    });
+    assert.equal(denied.statusCode, 403);
+    assert.equal(denied.headers["strict-transport-security"], undefined);
+  }
+  assert.deepEqual(counts(), { verified: 0, checked: 0 });
+});
+
+test("temporary probe requires its key, keeps responses unchanged and bounds private logging", async (t) => {
+  const key = "c".repeat(64);
+  const { app, counts } = setup(undefined, { AYINOU_RENDER_INGRESS_PROBE_KEY: key });
+  t.after(() => app.close());
+  const logged = t.mock.method(app.log, "info", () => undefined);
+  const probes = () => logged.mock.calls.map((call) => call.arguments)
+    .filter((args) => args[1] === "Temporary Render ingress probe");
+  const url = "/api/v1/status";
+  for (const sample of [
+    { url, headers: https },
+    { url, headers: { ...https, "x-ayinou-ingress-probe": "d".repeat(64) } },
+    { url: "/health", headers: { ...https, "x-ayinou-ingress-probe": key } },
+    { url, headers: { ...https, host: "example.invalid", "x-ayinou-ingress-probe": key } },
+  ]) await app.inject(sample);
+  assert.equal(probes().length, 0);
+  for (let index = 0; index < 9; index++) {
+    const result = await app.inject({
+      url,
+      remoteAddress: "198.51.100.77",
+      headers: {
+        ...https, "x-ayinou-ingress-probe": key, "x-forwarded-proto": "https, unlogged-scheme",
+        "x-forwarded-for": "192.0.2.55, 192.0.2.56", cookie: "session=unlogged-cookie",
+        authorization: "Bearer ey.unlogged.token",
+      },
+    });
+    assert.equal(result.statusCode, 403);
+    assert.equal(result.headers["strict-transport-security"], undefined);
+    assert.equal(result.json().error.message, "HTTPS required");
+    assert.ok(!result.body.includes("198.51.100.77"));
+  }
+  assert.equal(probes().length, 8);
+  const [fields, event] = probes()[0];
+  assert.equal(event, "Temporary Render ingress probe");
+  assert.deepEqual({ ...(fields as object), reqId: "fixture-request" }, {
+    reqId: "fixture-request",
+    peerAddress: "198.51.100.77",
+    peerFamily: 4,
+    peerTrusted: false,
+    protocol: "http",
+    forwardedProtocolFirst: "https",
+    forwardedProtocolLast: "other",
+    forwardedProtocolLastCaseChanged: false,
+    forwardedProtocolEntries: 2,
+    forwardedForEntries: 2,
+  });
+  const log = JSON.stringify(probes());
+  for (const sample of [key, "unlogged", "192.0.2.55", "192.0.2.56"]) assert.ok(!log.includes(sample));
+  assert.deepEqual(counts(), { verified: 0, checked: 0 });
 });
