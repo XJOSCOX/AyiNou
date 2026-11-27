@@ -14,7 +14,7 @@ test("restricted API accepts refreshed test sessions and preserves signup, MFA a
   const config = readConfig({
     RENDER: "true", NODE_ENV: "production", PORT: "10000", LOG_LEVEL: "silent",
     AYINOU_API_MODE: "render-dev", AYINOU_RENDER_TEST_USER_IDS: `${signedIn.id},${mfaMember.id}`,
-    AYINOU_RENDER_PROXY_CIDRS: "127.0.0.1/32",
+    AYINOU_RENDER_PROXY_CIDRS: "127.0.0.0/8",
     SUPABASE_URL: "https://hcbxulyfmdmuyccgrujs.supabase.co",
     SUPABASE_PUBLISHABLE_KEY: process.env.AYINOU_E2E_SUPABASE_PUBLIC,
     SUPABASE_SECRET_KEY: process.env.AYINOU_E2E_SUPABASE_SECRET,
@@ -24,13 +24,19 @@ test("restricted API accepts refreshed test sessions and preserves signup, MFA a
   const read = async (token: string, url = "/api/v1/me/profile") => app.inject({
     url, headers: { ...headers, authorization: `Bearer ${token}` },
   });
-  const previous = sql("select mode from private.registration_policy where singleton;");
-  if (!["closed", "public", "invitation_only"].includes(previous)) throw new Error("Unexpected fixture registration policy");
+  const [mode, enabled, individual, organization] = sql(
+    "select concat_ws(':',mode,enabled,individual_enabled,organization_enabled) from private.registration_policy where singleton;",
+  ).split(":");
+  if (!["closed", "public", "invitation_only"].includes(mode) ||
+      [enabled, individual, organization].some((value) => !["t", "f", "true", "false"].includes(value))) {
+    throw new Error("Unexpected fixture registration policy");
+  }
+  const sqlBoolean = (value: string) => value === "t" || value === "true" ? "true" : "false";
 
   try {
     sql("update private.registration_policy set mode='public' where singleton;");
     expect((await read(signedIn.token)).statusCode).toBe(503);
-    sql("update private.registration_policy set mode='closed' where singleton;");
+    sql("update private.registration_policy set mode='closed', enabled=false, individual_enabled=false, organization_enabled=false where singleton;");
     expect((await read(outsider.token)).statusCode).toBe(403);
     const ordinary = localClient("AYINOU_E2E_SUPABASE_PUBLIC");
     const signed = await ordinary.auth.signInWithPassword({ email: signedIn.email, password: signedIn.password });
@@ -64,10 +70,19 @@ test("restricted API accepts refreshed test sessions and preserves signup, MFA a
     expect(Boolean(denied.error)).toBe(true);
     expect(sql("select count(*) from auth.users;")).toBe(count);
 
+    sql(`insert into private.account_restrictions(user_id,status,reason)
+      values ('${signedIn.id}','suspended','Disposable Render standing test');`);
+    const standingPath = "/api/v1/me/account-standing";
+    expect((await read(refreshed.data.session!.access_token)).statusCode).toBe(401);
+    const standing = await read(refreshed.data.session!.access_token, standingPath);
+    expect(standing.statusCode).toBe(200);
+    expect(standing.json()).toEqual({ restriction: "suspended" });
     sql(`delete from auth.sessions where user_id='${signedIn.id}';`);
+    expect((await read(refreshed.data.session!.access_token, standingPath)).statusCode).toBe(401);
     expect((await read(refreshed.data.session!.access_token)).statusCode).toBe(401);
   } finally {
     await app.close();
-    sql(`update private.registration_policy set mode='${previous}' where singleton;`);
+    sql(`update private.registration_policy set mode='${mode}', enabled=${sqlBoolean(enabled)},
+      individual_enabled=${sqlBoolean(individual)}, organization_enabled=${sqlBoolean(organization)} where singleton;`);
   }
 });

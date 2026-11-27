@@ -15,7 +15,6 @@ const closedRenderFlags = [
 const environmentSchema = z.object({
   AYINOU_API_MODE: z.enum(["local", "render-dev"]).optional(),
   AYINOU_RENDER_PROXY_CIDRS: z.string().max(400).optional(),
-  AYINOU_RENDER_INGRESS_PROBE_KEY: z.string().regex(/^[a-f0-9]{64}$/).optional(),
   AYINOU_RENDER_TEST_USER_IDS: z.string().max(600).optional(),
   API_HOST: z.string().min(1).default("127.0.0.1"),
   API_PORT: z.coerce.number().int().min(1).max(65535).default(3000),
@@ -52,25 +51,13 @@ export type ApiConfig = z.infer<typeof environmentSchema> & {
   renderDevelopment?: {
     testUserIds: readonly string[];
     trustProxy(address: string, hop: number): boolean;
-    ingressProbeKey?: string;
   };
 };
 
 function renderProxyTrust(value: string | undefined) {
+  if (value !== "127.0.0.0/8") return null;
   const allowed = new BlockList();
-  if (!value) return null;
-  const cidrs = value.split(",").map((part) => part.trim());
-  if (cidrs.length > 10) return null;
-  for (const cidr of cidrs) {
-    const match = /^([^/]+)\/(\d{1,3})$/.exec(cidr);
-    if (!match) return null;
-    const [, address, bits] = match;
-    const family = isIP(address);
-    const prefix = Number(bits);
-    // Require an explicit network. Never trust all IPv4 or IPv6 peers.
-    if (!family || prefix < (family === 4 ? 8 : 32) || prefix > (family === 4 ? 32 : 128)) return null;
-    allowed.addSubnet(address, prefix, family === 4 ? "ipv4" : "ipv6");
-  }
+  allowed.addSubnet("127.0.0.0", 8, "ipv4");
   return (address: string, hop: number) => {
     const family = isIP(address);
     return hop === 0 && family !== 0 && allowed.check(address, family === 6 ? "ipv6" : "ipv4");
@@ -104,7 +91,7 @@ export function readConfig(environment: NodeJS.ProcessEnv = process.env): ApiCon
       throw new Error("Invalid API environment configuration. Check the restricted Render development settings.");
     }
     return { ...config, API_HOST: "0.0.0.0", API_PORT: port.data, WEB_ORIGINS: [],
-      renderDevelopment: { testUserIds: ids.data, trustProxy, ingressProbeKey: config.AYINOU_RENDER_INGRESS_PROBE_KEY } };
+      renderDevelopment: { testUserIds: ids.data, trustProxy } };
   }
   if (result.data.AYINOU_PRIVACY_INTAKE === "synthetic" &&
       (environment.NODE_ENV === "production" || result.data.SUPABASE_URL !== "http://127.0.0.1:55321")) {

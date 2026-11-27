@@ -25,14 +25,16 @@ export function createReadBudget(config: ApiConfig): ReadBudget {
   return async (category, actor, ip) => {
     const now = Date.now();
     if (now >= windowEnds) { counts.clear(); windowEnds = now + 60_000; }
-    const key = `${category}:${actor ? `member:${actor}` : `guest:${ip}`}`;
+    // Match the shared pre-authentication quota when Render client IP is unverified.
+    const address = config.renderDevelopment ? "render-unverified-client" : ip;
+    const key = `${category}:${actor ? `member:${actor}` : `guest:${address}`}`;
     const count = counts.get(key) ?? 0;
     if (count >= thresholds[category][actor ? 1 : 0] || (!counts.has(key) && counts.size >= 10_000)) throw limited();
     counts.set(key, count + 1);
     if (!config.SUPABASE_URL) return;
     if (!client || !secret) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Read service unavailable");
 
-    const bucket = actor ? null : createHmac("sha256", secret).update(`read-budget:${ip}`).digest().readUInt16BE(0) % 4096;
+    const bucket = actor ? null : createHmac("sha256", secret).update(`read-budget:${address}`).digest().readUInt16BE(0) % 4096;
     const { data, error } = await client.rpc("consume_safety_read_for_api", { p_actor: actor, p_bucket: bucket, p_category: category });
     if (error) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Read service unavailable");
     if (data !== true) throw limited();

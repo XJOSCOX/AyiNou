@@ -50,7 +50,7 @@ import { registerFeedRoutes } from "./routes/feed.js";
 import { createFeedRepository, type FeedRepository } from "./services/feed.js";
 import { createPostMediaService, type PostMediaService } from "./services/post-media.js";
 import { registerRenderDevelopment } from "./services/render-development.js";
-import { createReadBudget } from "./services/read-budget.js";
+import { createReadBudget, type ReadBudget } from "./services/read-budget.js";
 import { registerPrivacyRoutes } from "./routes/privacy.js";
 import { createPrivacyRepository, type PrivacyRepository } from "./services/privacy.js";
 import { createPrivacyExport } from "./services/privacy-export.js";
@@ -60,19 +60,18 @@ import { registerPrivacyLifecycleRoutes } from "./routes/privacy-lifecycle.js";
 
 export function createApp(config: ApiConfig, overrides?: {
   auth?: AuthVerifier; members?: MemberRepository; community?: CommunityRepository; institutions?: InstitutionRepository; feed?: FeedRepository;
-  media?: PostMediaService; privacy?: PrivacyRepository;
+  media?: PostMediaService; privacy?: PrivacyRepository; readBudget?: ReadBudget;
 }) {
   const render = config.renderDevelopment;
   const app = Fastify({
     ...(render ? {
-      trustProxy: render.trustProxy, bodyLimit: 16_384, connectionTimeout: 20_000, requestTimeout: 10_000,
+      bodyLimit: 16_384, connectionTimeout: 20_000, requestTimeout: 10_000,
       handlerTimeout: 18_000, maxRequestsPerSocket: 100,
     } : {}),
     ...requestIdentification(),
     logger: {
       level: config.LOG_LEVEL,
-      redact: ["req.headers.authorization", "req.headers.cookie", "headers.authorization", "headers.cookie",
-        'req.headers["x-ayinou-ingress-probe"]', 'headers["x-ayinou-ingress-probe"]'],
+      redact: ["req.headers.authorization", "req.headers.cookie", "headers.authorization", "headers.cookie"],
     },
   });
   registerErrorHandling(app, Boolean(render));
@@ -82,7 +81,7 @@ export function createApp(config: ApiConfig, overrides?: {
   const institutions = overrides?.institutions ?? createInstitutionRepository(config);
   const feed = overrides?.feed ?? createFeedRepository(config);
   const media = overrides?.media ?? createPostMediaService(config);
-  const readBudget = createReadBudget(config);
+  const readBudget = overrides?.readBudget ?? createReadBudget(config);
   const privacyEnabled = config.AYINOU_PRIVACY_INTAKE === "synthetic" &&
     config.SUPABASE_URL === "http://127.0.0.1:55321" && process.env.NODE_ENV !== "production";
 

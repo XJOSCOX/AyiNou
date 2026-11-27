@@ -15,7 +15,7 @@ The default local build uses `http://10.0.2.2:3000/`. A physical-device developm
 
 Use an isolated Supabase CLI stack on API port 55321 with direct signup disabled. Configure Fastify with its disposable credentials on host loopback port 5300. The isolated Auth issuer must be `http://127.0.0.1:55321/auth/v1`. Create a synthetic address ending in `@example.test` with the disposable administrator.
 
-Set `AYINOU_ANDROID_DISPOSABLE_PUBLISHABLE_KEY` in the build process to the disposable publishable key. Build with `-PayinouLocalUrl=http://10.0.2.2:5300`. The Auth URL is fixed to `http://10.0.2.2:55321`. Omit the environment variable for the ordinary health-only debug APK. The remote debug target remains health-only pending A0.
+Set `AYINOU_ANDROID_DISPOSABLE_PUBLISHABLE_KEY` in the build process to the disposable publishable key. Build with `-PayinouLocalUrl=http://10.0.2.2:5300`. The Auth URL is fixed to `http://10.0.2.2:55321`. Omit the environment variable for the ordinary health-only debug APK. The remote debug target remains health-only while the owner manually deploys and verifies the A0 Final correction. The existing disposable build instructions apply to local authenticated development. [A0 deployment status](../deployment/A0_RENDER_BACKEND_SETUP.md)
 
 Run `clean testDebugUnitTest lintDebug assembleDebug connectedDebugAndroidTest` for the default build. The opted-in Compose smoke test uses a disposable account supplied via instrumentation arguments. Disable Gradle's configuration cache when passing fixture values, and stop and remove the isolated stack after testing.
 

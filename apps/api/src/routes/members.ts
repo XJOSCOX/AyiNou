@@ -108,8 +108,10 @@ export async function registerMemberRoutes(
     const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
     if (!token || token.length > 8192) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
     await read("profile", null, request.ip);
-    if (!auth?.ownAccountRestriction) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account standing unavailable"));
-    const restriction = await auth.ownAccountRestriction(token);
+    if (!auth?.ownAccountRestriction && !request.renderAccountRestriction) {
+      return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account standing unavailable"));
+    }
+    const restriction = request.renderAccountRestriction ?? await auth?.ownAccountRestriction?.(token);
     if (!restriction) return reply.code(401).send(error("UNAUTHORIZED", "Session unavailable"));
     return { restriction };
   });

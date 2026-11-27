@@ -10,12 +10,13 @@ const env = {
   RENDER: "true", NODE_ENV: "production", PORT: "10000", AYINOU_API_MODE: "render-dev", LOG_LEVEL: "silent",
   SUPABASE_URL: "https://hcbxulyfmdmuyccgrujs.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "fixture-public", SUPABASE_SECRET_KEY: "fixture-private",
-  AYINOU_RENDER_TEST_USER_IDS: tester, AYINOU_RENDER_PROXY_CIDRS: "127.0.0.1/32",
+  AYINOU_RENDER_TEST_USER_IDS: tester, AYINOU_RENDER_PROXY_CIDRS: "127.0.0.0/8",
 };
 const https = { host: "api-dev.ayinou.com", "x-forwarded-proto": "https" };
 const bearer = { ...https, authorization: "Bearer ey.test.signature" };
 
-function setup(initial: unknown = { enabled: false, mode: "closed" }, overrides: NodeJS.ProcessEnv = {}) {
+const closed = { enabled: false, mode: "closed", individualEnabled: false, organizationEnabled: false };
+function setup(initial: unknown = closed, hold?: Promise<void>) {
   let verified = 0;
   let checked = 0;
   let policy = initial;
@@ -29,12 +30,20 @@ function setup(initial: unknown = { enabled: false, mode: "closed" }, overrides:
       return policy as T;
     },
   };
-  const app = createApp(readConfig({ ...env, ...overrides }), {
+  const app = createApp(readConfig(env), {
     institutions,
+    readBudget: async (category) => assert.equal(category, "profile"),
     auth: {
       async verify(token) {
         verified++;
+        await hold;
         return token === "ey.test.signature" ? tester : token === "ey.other.signature" ? other : null;
+      },
+      async ownAccountRestriction() { return null; },
+      async verifyRestrictedAccount(token) {
+        if (token === "ey.restricted.signature") return { actor: tester, restriction: "suspended" };
+        if (token === "ey.outsideRestriction.signature") return { actor: other, restriction: "banned" };
+        return null;
       },
     },
   });
@@ -56,15 +65,17 @@ test("Render refuses missing, invalid and unsafe configuration while local defau
     { SUPABASE_SECRET_KEY: undefined }, { AYINOU_COMMUNITY_NEEDS: "pilot" },
     { AYINOU_MENTORSHIP_PROFILES: "synthetic" }, { AYINOU_VOLUNTEER_MATCHING: "synthetic" },
     { AYINOU_IMPACT_REPORTING: "synthetic" }, { AYINOU_FOUNDER_BOOTSTRAP_ENABLED: "true" },
-    { AYINOU_RENDER_INGRESS_PROBE_KEY: "invalid" },
+    { AYINOU_RENDER_PROXY_CIDRS: "127.0.0.1/32" }, { AYINOU_RENDER_PROXY_CIDRS: "10.0.0.0/8" },
+    { AYINOU_RENDER_PROXY_CIDRS: "127.0.0.0/8,::1/128" },
   ]) assert.throws(() => readConfig({ ...env, ...override }), /Invalid API environment/);
 });
 
 test("health is cheap and public; alternate hosts, privileged routes and writes stay closed", async (t) => {
   const { app, counts } = setup();
   t.after(() => app.close());
-  const health = await app.inject("/health");
+  const health = await app.inject({ url: "/health", headers: { host: https.host } });
   assert.equal(health.statusCode, 200);
+  assert.equal((await app.inject({ url: "/health", headers: { host: "alternate.invalid" } })).statusCode, 404);
   assert.equal(health.headers["cache-control"], "private, no-store");
   assert.equal(health.headers["x-content-type-options"], "nosniff");
   assert.equal(health.headers["x-frame-options"], "DENY");
@@ -104,16 +115,22 @@ test("only live allowlisted accounts can read, and reopening shared registration
     setPolicy(policy);
     assert.equal((await app.inject({ url, headers: bearer })).statusCode, 503);
   }
-  setPolicy({ enabled: true, mode: "closed" });
+  setPolicy({ ...closed, individualEnabled: true });
+  assert.equal((await app.inject({ url, headers: bearer })).statusCode, 503);
+  setPolicy({ ...closed, organizationEnabled: true });
+  assert.equal((await app.inject({ url, headers: bearer })).statusCode, 503);
+  setPolicy(closed);
   assert.equal((await app.inject({ url, headers: bearer })).statusCode, 200);
 });
 
-test("client-supplied forwarded addresses do not evade the per-address limit", async (t) => {
+test("unverified client address metadata uses the same conservative quota", async (t) => {
   const { app, counts } = setup();
   t.after(() => app.close());
   for (let index = 0; index < 60; index++) {
+    const address = [undefined, `192.0.2.${index}`, "192.0.2.1, 192.0.2.2", "malformed", "::ffff:192.0.2.1"][index % 5];
     const response = await app.inject({
-      url: "/api/v1/status", headers: { ...https, "x-forwarded-for": `192.0.2.${index}, 198.51.100.10` },
+      url: "/api/v1/status", headers: { ...https, "x-forwarded-for": `192.0.2.${index}, 198.51.100.10`,
+        ...(address === undefined ? {} : { "cf-connecting-ip": address }) },
     });
     assert.equal(response.statusCode, 401);
   }
@@ -123,20 +140,24 @@ test("client-supplied forwarded addresses do not evade the per-address limit", a
   assert.equal(response.statusCode, 429);
   assert.equal(response.headers["retry-after"], "60");
   assert.deepEqual(counts(), { verified: 0, checked: 0 });
-  assert.equal((await app.inject("/health")).statusCode, 200);
+  assert.equal((await app.inject({ url: "/health", headers: { host: https.host } })).statusCode, 200);
 });
 
 test("recognizes HTTPS scheme casing only from the immediate trusted peer", async (t) => {
   const { app, counts } = setup();
   t.after(() => app.close());
   const url = "/api/v1/status";
-  for (const peer of ["127.0.0.1", "::ffff:127.0.0.1", "::ffff:7f00:1"]) {
+  for (const peer of ["127.0.0.1", "127.2.3.4", "::ffff:127.0.0.1", "::ffff:7f00:1"]) {
     const accepted = await app.inject({ url, remoteAddress: peer, headers: { ...https, "x-forwarded-proto": " HTTPS " } });
     assert.equal(accepted.statusCode, 401, peer);
     assert.equal(accepted.headers["strict-transport-security"], "max-age=31536000");
   }
   for (const sample of [
     { peer: "198.51.100.77", scheme: "https" },
+    { peer: "::1", scheme: "https" },
+    { peer: "::ffff:198.51.100.77", scheme: "https" },
+    { peer: "127.0.0.1", scheme: "http, https" },
+    { peer: "127.0.0.1", scheme: "https, https" },
     { peer: "127.0.0.1", scheme: "https, http" },
     { peer: "127.0.0.1", scheme: "https, unknown" },
   ]) {
@@ -149,52 +170,41 @@ test("recognizes HTTPS scheme casing only from the immediate trusted peer", asyn
   assert.deepEqual(counts(), { verified: 0, checked: 0 });
 });
 
-test("temporary probe requires its key, keeps responses unchanged and bounds private logging", async (t) => {
-  const key = "c".repeat(64);
-  const { app, counts } = setup(undefined, { AYINOU_RENDER_INGRESS_PROBE_KEY: key });
+test("standing permits only a live allowlisted restricted member and excludes other reads", async (t) => {
+  const { app } = setup();
   t.after(() => app.close());
-  const logged = t.mock.method(app.log, "info", () => undefined);
-  const probes = () => logged.mock.calls.map((call) => call.arguments)
-    .filter((args) => args[1] === "Temporary Render ingress probe");
-  const url = "/api/v1/status";
-  for (const sample of [
-    { url, headers: https },
-    { url, headers: { ...https, "x-ayinou-ingress-probe": "d".repeat(64) } },
-    { url: "/health", headers: { ...https, "x-ayinou-ingress-probe": key } },
-    { url, headers: { ...https, host: "example.invalid", "x-ayinou-ingress-probe": key } },
-  ]) await app.inject(sample);
-  assert.equal(probes().length, 0);
-  for (let index = 0; index < 9; index++) {
-    const result = await app.inject({
-      url,
-      remoteAddress: "198.51.100.77",
-      headers: {
-        ...https, "x-ayinou-ingress-probe": key, "x-forwarded-proto": "https, unlogged-scheme",
-        "x-forwarded-for": "192.0.2.55, 192.0.2.56", cookie: "session=unlogged-cookie",
-        authorization: "Bearer ey.unlogged.token",
-      },
-    });
-    assert.equal(result.statusCode, 403);
-    assert.equal(result.headers["strict-transport-security"], undefined);
-    assert.equal(result.json().error.message, "HTTPS required");
-    assert.ok(!result.body.includes("198.51.100.77"));
+  const url = "/api/v1/me/account-standing";
+  const restricted = { ...https, authorization: "Bearer ey.restricted.signature" };
+  const result = await app.inject({ url: url + "?subject=" + other, headers: restricted });
+  assert.equal(result.statusCode, 200);
+  assert.deepEqual(result.json(), { restriction: "suspended" });
+  assert.equal(result.headers["cache-control"], "private, no-store");
+  assert.equal((await app.inject({ url: "/api/v1/me/profile", headers: restricted })).statusCode, 401);
+  assert.equal((await app.inject({ method: "PATCH", url, headers: restricted })).statusCode, 404);
+  assert.equal((await app.inject({ url, headers: bearer })).statusCode, 401);
+  assert.equal((await app.inject({ url, headers: https })).statusCode, 401);
+  for (const name of ["revoked", "expired", "mfaRequired"]) {
+    assert.equal((await app.inject({ url, headers: { ...https, authorization: `Bearer ey.${name}.signature` } })).statusCode, 401);
   }
-  assert.equal(probes().length, 8);
-  const [fields, event] = probes()[0];
-  assert.equal(event, "Temporary Render ingress probe");
-  assert.deepEqual({ ...(fields as object), reqId: "fixture-request" }, {
-    reqId: "fixture-request",
-    peerAddress: "198.51.100.77",
-    peerFamily: 4,
-    peerTrusted: false,
-    protocol: "http",
-    forwardedProtocolFirst: "https",
-    forwardedProtocolLast: "other",
-    forwardedProtocolLastCaseChanged: false,
-    forwardedProtocolEntries: 2,
-    forwardedForEntries: 2,
-  });
-  const log = JSON.stringify(probes());
-  for (const sample of [key, "unlogged", "192.0.2.55", "192.0.2.56"]) assert.ok(!log.includes(sample));
-  assert.deepEqual(counts(), { verified: 0, checked: 0 });
+  assert.equal((await app.inject({ url, headers: { ...https, authorization: "Bearer ey.outsideRestriction.signature" } })).statusCode, 403);
+});
+
+test("Render limits concurrency and releases capacity after a response", async (t) => {
+  let release = () => {};
+  const pending = new Promise<void>((resolve) => { release = resolve; });
+  const { app, counts } = setup(closed, pending);
+  t.after(() => app.close());
+  const url = "/api/v1/status";
+  const held = Array.from({ length: 12 }, () => app.inject({ url, headers: bearer }));
+  try {
+    for (let tick = 0; tick < 100 && counts().verified !== 12; tick++) {
+      await new Promise((done) => setImmediate(done));
+    }
+    assert.equal(counts().verified, 12);
+    assert.equal((await app.inject({ url, headers: bearer })).statusCode, 429);
+  } finally {
+    release();
+    await Promise.all(held);
+  }
+  assert.equal((await app.inject({ url, headers: bearer })).statusCode, 200);
 });

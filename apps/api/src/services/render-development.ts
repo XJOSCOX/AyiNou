@@ -1,14 +1,17 @@
-import { timingSafeEqual } from "node:crypto";
-import { isIP } from "node:net";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { ApiConfig } from "../config.js";
 import { ApiError } from "./api-error.js";
-import type { AuthVerifier } from "./auth.js";
+import type { AccountRestriction, AuthVerifier } from "./auth.js";
 import type { InstitutionRepository } from "./institutions.js";
 
+declare module "fastify" {
+  interface FastifyRequest { renderAccountRestriction?: AccountRestriction | null }
+}
+
+const accountStanding = "/api/v1/me/account-standing";
 const memberReads = new Set([
-  "/api/v1/status",
+  "/api/v1/status", accountStanding,
   "/api/v1/me/profile", "/api/v1/me/dashboard", "/api/v1/me/platform-access", "/api/v1/me/verification-badge",
   "/api/v1/me/sessions", "/api/v1/me/notifications", "/api/v1/me/notifications/unread-count",
   "/api/v1/me/communities", "/api/v1/me/projects", "/api/v1/me/project-work", "/api/v1/me/following",
@@ -21,60 +24,24 @@ const memberReads = new Set([
   "/api/v1/events", "/api/v1/events/:id", "/api/v1/polls", "/api/v1/polls/:id",
   "/api/v1/polls/:id/ballot", "/api/v1/polls/:id/results", "/api/v1/institutions/by-handle/:handle",
 ]);
-const registration = z.object({ enabled: z.boolean(), mode: z.enum(["closed", "invitation_only", "public"]) });
+const registration = z.object({
+  enabled: z.literal(false),
+  mode: z.literal("closed"),
+  individualEnabled: z.literal(false),
+  organizationEnabled: z.literal(false),
+});
 const developmentHost = "api-dev.ayinou.com";
 const windowMs = 60_000;
+const globalLimit = 300;
+const sharedClientLimit = 60;
 
 type RenderDevelopmentConfig = NonNullable<ApiConfig["renderDevelopment"]>;
-
-function schemeCategory(value: string | undefined) {
-  const scheme = value?.trim().toLowerCase();
-  if (scheme === undefined) return "missing";
-  return scheme === "https" || scheme === "http" ? scheme : "other";
-}
-
-function registerIngressProbe(app: FastifyInstance, { ingressProbeKey, trustProxy }: RenderDevelopmentConfig) {
-  if (!ingressProbeKey) return;
-  const key = Buffer.from(ingressProbeKey, "hex");
-  let remaining = 8;
-  app.addHook("onRequest", async (request) => {
-    if (remaining === 0 || request.method !== "GET" || request.url !== "/api/v1/status"
-      || request.headers.host !== developmentHost) return;
-    const probe = request.headers["x-ayinou-ingress-probe"];
-    if (typeof probe !== "string" || !/^[a-f0-9]{64}$/.test(probe)
-      || !timingSafeEqual(Buffer.from(probe, "hex"), key)) return;
-
-    remaining--;
-    const peer = request.raw.socket.remoteAddress ?? "";
-    const peerFamily = isIP(peer);
-    const proto = request.headers["x-forwarded-proto"];
-    const chain = request.headers["x-forwarded-for"];
-    const forwarded = typeof proto === "string" ? proto.split(",") : [];
-    const forwardedForEntries = typeof chain === "string" ? chain.split(",").length : 0;
-    const lastScheme = forwarded.at(-1)?.trim();
-    const lastCategory = schemeCategory(lastScheme);
-    // The keyed sample goes to private service logs. Never log the raw header values or application data.
-    app.log.info({
-      reqId: request.id,
-      peerAddress: peerFamily ? peer : null,
-      peerFamily,
-      peerTrusted: trustProxy(peer, 0),
-      protocol: schemeCategory(request.protocol),
-      forwardedProtocolFirst: schemeCategory(forwarded[0]),
-      forwardedProtocolLast: lastCategory,
-      forwardedProtocolLastCaseChanged: (lastCategory === "https" || lastCategory === "http") && lastScheme !== lastCategory,
-      forwardedProtocolEntries: forwarded.length,
-      forwardedForEntries,
-    }, "Temporary Render ingress probe");
-  });
-}
 
 export function registerRenderDevelopment(
   app: FastifyInstance, auth: AuthVerifier | null, repo: InstitutionRepository | null, config: RenderDevelopmentConfig,
 ) {
-  registerIngressProbe(app, config);
+  app.decorateRequest("renderAccountRestriction", null);
   const allowedUsers = new Set(config.testUserIds);
-  const perAddress = new Map<string, number>();
   const perMember = new Map<string, number>();
   const active = new WeakSet<object>();
   let pending = 0;
@@ -98,9 +65,12 @@ export function registerRenderDevelopment(
     reply.header("X-Frame-Options", "DENY");
     reply.header("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
     reply.header("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-    // Fastify derives the scheme using the immediate peer allowlist. Scheme names are case-insensitive.
-    const secure = request.protocol?.toLowerCase() === "https";
-    if (secure) reply.header("Strict-Transport-Security", "max-age=31536000");
+    const peer = request.raw.socket.remoteAddress ?? "";
+    const forwardedProtocol = request.headers["x-forwarded-proto"];
+    const expectedHost = request.headers.host === developmentHost;
+    const secure = config.trustProxy(peer, 0) && typeof forwardedProtocol === "string" &&
+      forwardedProtocol.trim().toLowerCase() === "https";
+    if (expectedHost && secure) reply.header("Strict-Transport-Security", "max-age=31536000");
 
     const read = request.method === "GET" || request.method === "HEAD";
     if (request.url.length > 2048) throw new ApiError(414, "INVALID_INPUT", "Request URL is too long");
@@ -108,9 +78,9 @@ export function registerRenderDevelopment(
       throw new ApiError(400, "INVALID_INPUT", "Request body is not allowed");
     }
     // The Render health probe uses the internal HTTP listener. Only its exact process check is public.
-    if (read && request.routeOptions.url === "/health" && request.url === "/health") return;
+    if (expectedHost && read && request.routeOptions.url === "/health" && request.url === "/health") return;
 
-    if (!read || !memberReads.has(request.routeOptions.url ?? "") || request.headers.host !== developmentHost) {
+    if (!read || !memberReads.has(request.routeOptions.url ?? "") || !expectedHost) {
       throw new ApiError(404, "NOT_FOUND", "Route not found");
     }
     if (!secure) throw new ApiError(403, "FORBIDDEN", "HTTPS required");
@@ -120,14 +90,12 @@ export function registerRenderDevelopment(
     const now = Date.now();
     if (now >= windowEnd) {
       windowEnd = now + windowMs;
-      perAddress.clear();
       perMember.clear();
       total = 0;
     }
-    const addressCount = perAddress.get(request.ip) ?? 0;
-    if (total >= 300 || addressCount >= 60 || pending >= 12) throw limited();
+    // Without a verified client-IP trust chain, one conservative bucket covers every request.
+    if (total >= Math.min(globalLimit, sharedClientLimit) || pending >= 12) throw limited();
     total++;
-    perAddress.set(request.ip, addressCount + 1);
     pending++;
     active.add(request);
 
@@ -135,17 +103,25 @@ export function registerRenderDevelopment(
     const token = raw && raw.length <= 8192 ? /^Bearer ([\w-]+\.[\w-]+\.[\w-]+)$/.exec(raw)?.[1] : null;
     if (!token) throw new ApiError(401, "UNAUTHORIZED", "Sign-in required");
     if (!auth || !repo) throw new ApiError(503, "SERVICE_UNAVAILABLE", "Development access unavailable");
-    const actor = await auth.verify(token);
+    // The standing read can run with a live restricted session. Its signed actor
+    // still has to pass the exact same Render allowlist.
+    let actor = await auth.verify(token);
+    if (!actor && request.routeOptions.url === accountStanding) {
+      const proof = await auth.verifyRestrictedAccount?.(token);
+      actor = proof?.actor ?? null;
+      request.renderAccountRestriction = proof?.restriction ?? null;
+    }
     if (!actor) throw new ApiError(401, "UNAUTHORIZED", "Invalid or expired session");
-    if (!allowedUsers.has(actor.toLowerCase())) throw new ApiError(403, "FORBIDDEN", "Development access required");
-    const memberCount = perMember.get(actor) ?? 0;
+    const member = actor.toLowerCase();
+    if (!allowedUsers.has(member)) throw new ApiError(403, "FORBIDDEN", "Development access required");
+    const memberCount = perMember.get(member) ?? 0;
     if (memberCount >= 90) throw limited();
-    perMember.set(actor, memberCount + 1);
+    perMember.set(member, memberCount + 1);
 
-    // The native client signs in directly with Supabase. Its direct signup policy must also fail closed.
+    // Keep the API closed unless all Founder registration controls agree.
     const policy = await repo.rpc<unknown>("registration_policy_for_api", {}).catch(() => null);
     const parsed = registration.safeParse(policy);
-    if (!parsed.success || (parsed.data.enabled && parsed.data.mode !== "closed")) {
+    if (!parsed.success) {
       throw new ApiError(503, "SERVICE_UNAVAILABLE", "Development access unavailable");
     }
   });

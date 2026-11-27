@@ -8,8 +8,11 @@ export interface AuthVerifier {
   verify(token: string, requireMfa?: boolean): Promise<string | null>;
   verifySession?(token: string, requireMfa?: boolean): Promise<VerifiedSession | null>;
   memberFeatureAccess?(token: string): Promise<boolean | null>;
-  ownAccountRestriction?(token: string): Promise<"suspended" | "banned" | null>;
+  ownAccountRestriction?(token: string): Promise<AccountRestriction | null>;
+  verifyRestrictedAccount?(token: string): Promise<{ actor: string; restriction: AccountRestriction } | null>;
 }
+
+export type AccountRestriction = "suspended" | "banned";
 
 export interface VerifiedSession {
   actor: string;
@@ -31,22 +34,27 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
   const issuer = `${config.SUPABASE_URL.replace(/\/$/, "")}/auth/v1`;
   const unavailable = () => new ApiError(503, "SERVICE_UNAVAILABLE", "Authentication service unavailable");
 
+  async function readClaims(token: string) {
+    const { data, error } = await supabase.auth.getClaims(token);
+    if (isAuthRetryableFetchError(error)) throw unavailable();
+    if (error || !data) return null;
+    const claims = data.claims;
+    if (
+      claims.iss !== issuer ||
+      !(claims.aud === "authenticated" || (Array.isArray(claims.aud) && claims.aud.includes("authenticated"))) ||
+      claims.role !== "authenticated" ||
+      claims.is_anonymous === true ||
+      typeof claims.exp !== "number" || claims.exp <= Date.now() / 1000 ||
+      !z.uuid().safeParse(claims.session_id).success ||
+      !z.uuid().safeParse(claims.sub).success
+    ) return null;
+    return claims;
+  }
+
   async function verifySession(token: string, requireMfa = false): Promise<VerifiedSession | null> {
     try {
-      const { data, error } = await supabase.auth.getClaims(token);
-      if (isAuthRetryableFetchError(error)) throw unavailable();
-      if (error || !data) return null;
-      const claims = data.claims;
-      if (
-        claims.iss !== issuer ||
-        !(claims.aud === "authenticated" || (Array.isArray(claims.aud) && claims.aud.includes("authenticated"))) ||
-        claims.role !== "authenticated" ||
-        claims.is_anonymous === true ||
-        (requireMfa && claims.aal !== "aal2") ||
-        typeof claims.exp !== "number" || claims.exp <= Date.now() / 1000 ||
-        !z.uuid().safeParse(claims.session_id).success ||
-        !z.uuid().safeParse(claims.sub).success
-      ) return null;
+      const claims = await readClaims(token);
+      if (!claims || (requireMfa && claims.aal !== "aal2")) return null;
       let totpAt: number | undefined;
       const now = Date.now() / 1000;
       for (const entry of Array.isArray(claims.amr) ? claims.amr : []) {
@@ -80,20 +88,33 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
     });
   }
 
+  async function ownAccountRestriction(token: string): Promise<AccountRestriction | null> {
+    const member = asMember(token);
+    // This existing self-only RPC validates the signed session and its absolute deadline.
+    const { data, error, status } = await member.rpc("m22_my_account_enforcement");
+    if (status === 401 || status === 403) return null;
+    if (error) throw unavailable();
+    if (data === null) return null;
+    const result = z.object({ notices: z.array(z.object({ kind: z.string(), status: z.string() })) }).safeParse(data);
+    if (!result.success) throw unavailable();
+    const active = result.data.notices.filter((notice) => notice.status === "active");
+    if (active.some((notice) => notice.kind === "banned")) return "banned";
+    return active.some((notice) => notice.kind === "suspended") ? "suspended" : null;
+  }
+
   return {
     verifySession,
-    async ownAccountRestriction(token) {
-      const member = asMember(token);
-      // This existing self-only RPC validates the signed session and its absolute deadline.
-      const { data, error, status } = await member.rpc("m22_my_account_enforcement");
-      if (status === 401 || status === 403) return null;
-      if (error) throw unavailable();
-      if (data === null) return null;
-      const result = z.object({ notices: z.array(z.object({ kind: z.string(), status: z.string() })) }).safeParse(data);
-      if (!result.success) throw unavailable();
-      const active = result.data.notices.filter((notice) => notice.status === "active");
-      if (active.some((notice) => notice.kind === "banned")) return "banned";
-      return active.some((notice) => notice.kind === "suspended") ? "suspended" : null;
+    ownAccountRestriction,
+    async verifyRestrictedAccount(token) {
+      const claims = await readClaims(token);
+      if (!claims) return null;
+      if (claims.aal !== "aal2") {
+        const { data, error } = await asMember(token).auth.getUser(token);
+        if (isAuthRetryableFetchError(error)) throw unavailable();
+        if (error || data.user?.id !== claims.sub || data.user.factors?.some((factor) => factor.status === "verified")) return null;
+      }
+      const restriction = await ownAccountRestriction(token);
+      return restriction ? { actor: claims.sub, restriction } : null;
     },
     async memberFeatureAccess(token) {
       const member = asMember(token);
