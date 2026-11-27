@@ -27,6 +27,11 @@ import java.util.Locale
 class MainActivity : ComponentActivity() {
     private val model by viewModels<FoundationViewModel>()
 
+    override fun onResume() {
+        super.onResume()
+        model.foreground()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -54,7 +59,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
             CompositionLocalProvider(LocalContext provides localized, LocalConfiguration provides localized.resources.configuration) {
-                AyiNouTheme(dark) { AyiNou(state, model::language, model::theme, model::checkNetwork, model::dismissNotice) }
+                AyiNouTheme(dark) { AyiNou(state, model) }
             }
         }
     }

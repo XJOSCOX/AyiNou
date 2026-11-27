@@ -103,6 +103,17 @@ export async function registerMemberRoutes(
     }
   });
 
+  app.get("/api/v1/me/account-standing", async (request, reply) => {
+    reply.header("Cache-Control", "private, no-store");
+    const token = /^Bearer ([^\s]+)$/.exec(request.headers.authorization ?? "")?.[1];
+    if (!token || token.length > 8192) return reply.code(401).send(error("UNAUTHORIZED", "Authentication required"));
+    await read("profile", null, request.ip);
+    if (!auth?.ownAccountRestriction) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Account standing unavailable"));
+    const restriction = await auth.ownAccountRestriction(token);
+    if (!restriction) return reply.code(401).send(error("UNAUTHORIZED", "Session unavailable"));
+    return { restriction };
+  });
+
   app.get("/api/v1/departments", async (_request, reply) => {
     if (!members) return reply.code(503).send(error("SERVICE_UNAVAILABLE", "Database unavailable"));
     return { departments: await members.departments() };

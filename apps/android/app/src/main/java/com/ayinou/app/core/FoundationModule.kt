@@ -1,7 +1,9 @@
 package com.ayinou.app.core
 
 import com.ayinou.app.BuildConfig
-import com.ayinou.app.core.auth.AccessTokenSource
+import com.ayinou.app.core.auth.AccountRepository
+import com.ayinou.app.core.auth.accountApi
+import com.ayinou.app.core.auth.authApi
 import com.ayinou.app.core.auth.CredentialStore
 import com.ayinou.app.core.auth.KeystoreCredentialStore
 import com.ayinou.app.core.network.ApiEnvironment
@@ -31,6 +33,20 @@ object FoundationModule {
         BuildConfig.API_BASE_URL.toHttpUrl(), BuildConfig.DEBUG,
     )
 
+    @Provides @Singleton fun accounts(endpoint: Endpoint, credentials: CredentialStore): AccountRepository {
+        val key = BuildConfig.DISPOSABLE_AUTH_KEY
+        val port = BuildConfig.DISPOSABLE_AUTH_PORT
+        val enabled = BuildConfig.DEBUG && endpoint.environment == ApiEnvironment.LOCAL &&
+            endpoint.url.host == "10.0.2.2" && port == 55321 && key.startsWith("sb_publishable_")
+        val origin = "http://10.0.2.2:$port/".toHttpUrl()
+        return AccountRepository(
+            if (enabled) authApi(origin, key) else null,
+            if (enabled) accountApi(endpoint) else null,
+            credentials,
+            "http://127.0.0.1:$port/auth/v1",
+        )
+    }
+
     @Provides @Singleton fun health(endpoint: Endpoint): HealthRepository =
-        HealthRepository(platformApi(endpoint, AccessTokenSource { null }), endpoint.environment)
+        HealthRepository(platformApi(endpoint), endpoint.environment)
 }

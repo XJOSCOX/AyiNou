@@ -1,6 +1,39 @@
 {
   "features": [
     {
+      "id": "android-authentication",
+      "report": "docs/android/A2_AUTHENTICATION_IMPLEMENTATION_REPORT.md",
+      "routes": [
+        {
+          "route": "GET /api/v1/me/account-standing",
+          "contract": "GET /api/v1/me/account-standing - -",
+          "audit": {
+            "kind": "exception",
+            "detail": "This self-only read returns a restriction category. Existing enforcement actions retain durable audit."
+          },
+          "access": "restricted",
+          "authorization": {
+            "file": "apps/api/test/android-account-standing.test.ts",
+            "denialScenario": "Missing and revoked sessions cannot read standing. Request parameters cannot select another subject."
+          }
+        },
+        {
+          "route": "HEAD /api/v1/me/account-standing",
+          "contract": "HEAD /api/v1/me/account-standing - onSend",
+          "audit": {
+            "kind": "exception",
+            "detail": "This self-only read returns a restriction category. Existing enforcement actions retain durable audit."
+          },
+          "access": "restricted",
+          "authorization": {
+            "file": "apps/api/test/android-account-standing.test.ts",
+            "denialScenario": "Missing and revoked sessions cannot read standing. Request parameters cannot select another subject."
+          }
+        }
+      ],
+      "migrations": []
+    },
+    {
       "id": "android-foundation",
       "report": "docs/android/A1_FOUNDATION_IMPLEMENTATION_REPORT.md",
       "routes": [],

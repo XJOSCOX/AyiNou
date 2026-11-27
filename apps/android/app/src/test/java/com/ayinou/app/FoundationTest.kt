@@ -1,6 +1,5 @@
 package com.ayinou.app
 
-import com.ayinou.app.core.auth.AccessTokenSource
 import com.ayinou.app.core.network.*
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
@@ -84,6 +83,6 @@ class FoundationTest {
 
     private fun repository(server: MockWebServer): HealthRepository {
         val endpoint = Endpoint(ApiEnvironment.LOCAL, server.url("/").newBuilder().host("127.0.0.1").build(), true)
-        return HealthRepository(platformApi(endpoint, AccessTokenSource { error("Health must not ask for a token") }), endpoint.environment)
+        return HealthRepository(platformApi(endpoint), endpoint.environment)
     }
 }

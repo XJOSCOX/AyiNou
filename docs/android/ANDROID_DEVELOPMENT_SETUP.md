@@ -9,7 +9,15 @@ Set the SDK path from Android Studio or with an ignored `local.properties`. Inst
 .\gradlew.bat :app:connectedDebugAndroidTest
 ```
 
-The default local build uses `http://10.0.2.2:3000/`. A physical-device development configuration can set `-PayinouLocalUrl=http://192.168.1.20:3000/` to an exact private IPv4 host supplied by the developer. Use the correct physical test host in place of the example. The separate debug build `-PayinouEnvironment=remote` uses `https://api-dev.ayinou.com/`. Its only implemented request is the public health route. Production is reserved at `https://api.ayinou.com/` and the release variant is disabled at A1.
+The default local build uses `http://10.0.2.2:3000/`. A physical-device development configuration can set `-PayinouLocalUrl=http://192.168.1.20:3000/` to an exact private IPv4 host supplied by the developer. Use the correct physical test host in place of the example. The separate debug build `-PayinouEnvironment=remote` uses `https://api-dev.ayinou.com/`. Its only implemented request is the public health route. Production is reserved at `https://api.ayinou.com/` and the release variant remains disabled.
+
+## Disposable Android authentication
+
+Use an isolated Supabase CLI stack on API port 55321 with direct signup disabled. Configure Fastify with its disposable credentials on host loopback port 5300. The isolated Auth issuer must be `http://127.0.0.1:55321/auth/v1`. Create a synthetic address ending in `@example.test` with the disposable administrator.
+
+Set `AYINOU_ANDROID_DISPOSABLE_PUBLISHABLE_KEY` in the build process to the disposable publishable key. Build with `-PayinouLocalUrl=http://10.0.2.2:5300`. The Auth URL is fixed to `http://10.0.2.2:55321`. Omit the environment variable for the ordinary health-only debug APK. The remote debug target remains health-only pending A0.
+
+Run `clean testDebugUnitTest lintDebug assembleDebug connectedDebugAndroidTest` for the default build. The opted-in Compose smoke test uses a disposable account supplied via instrumentation arguments. Disable Gradle's configuration cache when passing fixture values, and stop and remove the isolated stack after testing.
 
 ## APK installation
 

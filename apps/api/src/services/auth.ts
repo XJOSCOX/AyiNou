@@ -8,6 +8,7 @@ export interface AuthVerifier {
   verify(token: string, requireMfa?: boolean): Promise<string | null>;
   verifySession?(token: string, requireMfa?: boolean): Promise<VerifiedSession | null>;
   memberFeatureAccess?(token: string): Promise<boolean | null>;
+  ownAccountRestriction?(token: string): Promise<"suspended" | "banned" | null>;
 }
 
 export interface VerifiedSession {
@@ -73,12 +74,29 @@ export function createAuthVerifier(config: ApiConfig): AuthVerifier | null {
     }
   }
 
+  function asMember(token: string) {
+    return createClient(config.SUPABASE_URL!, config.SUPABASE_PUBLISHABLE_KEY!, {
+      ...options, global: { ...options.global, headers: { Authorization: `Bearer ${token}` } },
+    });
+  }
+
   return {
     verifySession,
+    async ownAccountRestriction(token) {
+      const member = asMember(token);
+      // This existing self-only RPC validates the signed session and its absolute deadline.
+      const { data, error, status } = await member.rpc("m22_my_account_enforcement");
+      if (status === 401 || status === 403) return null;
+      if (error) throw unavailable();
+      if (data === null) return null;
+      const result = z.object({ notices: z.array(z.object({ kind: z.string(), status: z.string() })) }).safeParse(data);
+      if (!result.success) throw unavailable();
+      const active = result.data.notices.filter((notice) => notice.status === "active");
+      if (active.some((notice) => notice.kind === "banned")) return "banned";
+      return active.some((notice) => notice.kind === "suspended") ? "suspended" : null;
+    },
     async memberFeatureAccess(token) {
-      const member = createClient(config.SUPABASE_URL!, config.SUPABASE_PUBLISHABLE_KEY!, {
-        ...options, global: { ...options.global, headers: { Authorization: `Bearer ${token}` } },
-      });
+      const member = asMember(token);
       const { data, error, status } = await member.rpc("member_feature_access_for_client");
       if (status === 401 || status === 403) return null;
       if (error) throw unavailable();

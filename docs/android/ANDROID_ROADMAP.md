@@ -4,7 +4,7 @@
 | --- | --- |
 | A0 | Backend deployment and remote API readiness |
 | A1 | Native Android foundation |
-| A2 | Authentication, registration and onboarding |
+| A2 | Native authentication and required onboarding for disposable local testing. Remote access depends on A0. |
 | A3 | Dashboard and member profiles |
 | A4 | Feed, posts, media, comments and reactions |
 | A5 | Discovery, following and notifications |
@@ -18,4 +18,4 @@
 | A13 | Offline capabilities, performance and push notifications |
 | A14 | Final integration, security and Android release preparation |
 
-A2 and later phases require separate authorization. A0 remains open while Render confirms the ingress boundary and authenticated verification remains pending. C5 Trusted Haitian Media and Information and C6 Donor Connections remain deferred.
+A3 and later phases require separate authorization. A0 remains open while Render confirms the ingress boundary and authenticated verification remains pending. C5 Trusted Haitian Media and Information and C6 Donor Connections remain deferred.

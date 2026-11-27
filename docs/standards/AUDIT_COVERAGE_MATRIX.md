@@ -215,6 +215,10 @@ Founder configuration and catalog decisions record actor, workspace, reason, ver
 
 The Impact ledger records versioned settings, reviewer appointments, definition and mapping decisions, explicit consent, report approvals and permanent suppression. Protected commands bind to actors and current workspaces. The public report exposes the approved cell and no audit or evidence fields. [Implementation report](../project-outcomes/C2_4_IMPLEMENTATION_REPORT.md) · [C2 final security review](../project-outcomes/C2_FINAL_SECURITY_REVIEW.md) · [C2.6 administrative preparation](../project-outcomes/C2_6_CONFIGURATION_ACTIVATION_SEPARATION.md)
 
+## A2 Android account standing
+
+The self-only Fastify standing read has a bounded request budget and sends no case narrative or identifiers. The existing account enforcement action retains its durable audit. Android sign-out uses the existing provider session contract. [A2 report](../android/A2_AUTHENTICATION_IMPLEMENTATION_REPORT.md)
+
 ## D1 member Dashboard
 
 Owner preference saves keep a versioned actor-scoped retry receipt; the current preference is authoritative. Founder configuration, announcement publication and withdrawal commit the actor, original workspace, reason, target, exact request ID and before/after values to a private ledger with the mutation. Dashboard reads and native Event/Project discovery do not create durable audit events. [D1 report](../dashboard/D1_MEMBER_DASHBOARD_IMPLEMENTATION_REPORT.md).

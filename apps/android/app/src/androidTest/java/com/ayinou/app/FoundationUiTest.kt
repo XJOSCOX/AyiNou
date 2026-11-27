@@ -23,10 +23,9 @@ class FoundationUiTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
     @Test fun navigatesAndRestoresThemeAndAllLanguageChoices() {
-        compose.onNodeWithTag("tab-Feed").performClick()
-        show("Manm egzanp").assertIsDisplayed()
-        compose.onNodeWithTag("tab-More").performClick()
-        show("Anviwònman").performClick()
+        show("Byenveni sou AyiNou").assertIsDisplayed()
+        compose.onNodeWithText("Manm egzanp").assertDoesNotExist()
+        compose.onNodeWithTag("open-settings").performClick()
         show("Lang · Kreyòl ayisyen").performClick()
         show("Français").performClick()
         show("Langue · Français").assertIsDisplayed()
@@ -52,7 +51,7 @@ class FoundationUiTest {
         show("Kreyòl ayisyen").performClick()
         show("Lang · Kreyòl ayisyen").assertIsDisplayed()
         compose.onNodeWithTag("navigate-back").performClick()
-        compose.onNodeWithTag("tab-More").assertIsDisplayed()
+        show("Byenveni sou AyiNou").assertIsDisplayed()
     }
 
     private fun show(label: String): androidx.compose.ui.test.SemanticsNodeInteraction {
@@ -72,6 +71,8 @@ class FoundationUiTest {
             val sealed = File(context.noBackupFilesDir, "session.aesgcm").readBytes()
             assertFalse(sealed.decodeToString().contains("fixture-access"))
             assertEquals("fixture-refresh", store.read()?.refreshToken)
+            File(context.noBackupFilesDir, "session.aesgcm").writeBytes(sealed.copyOf(18))
+            assertNull(store.read())
         } finally {
             store.clear()
         }

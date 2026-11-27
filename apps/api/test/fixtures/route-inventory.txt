@@ -101,6 +101,7 @@ GET /api/v1/institutions/by-handle/:handle - -
 GET /api/v1/institutions/by-handle/:handle/affiliations - -
 GET /api/v1/institutions/by-handle/:handle/posts - -
 GET /api/v1/legal/availability - -
+GET /api/v1/me/account-standing - -
 GET /api/v1/me/activity - -
 GET /api/v1/me/affiliations - -
 GET /api/v1/me/ambassadors - -
@@ -344,6 +345,7 @@ HEAD /api/v1/institutions/by-handle/:handle - onSend
 HEAD /api/v1/institutions/by-handle/:handle/affiliations - onSend
 HEAD /api/v1/institutions/by-handle/:handle/posts - onSend
 HEAD /api/v1/legal/availability - onSend
+HEAD /api/v1/me/account-standing - onSend
 HEAD /api/v1/me/activity - onSend
 HEAD /api/v1/me/affiliations - onSend
 HEAD /api/v1/me/ambassadors - onSend

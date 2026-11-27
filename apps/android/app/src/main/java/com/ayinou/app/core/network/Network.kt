@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import com.ayinou.app.core.auth.AccessTokenSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -68,8 +67,8 @@ sealed interface ConnectivityResult {
 
 private val wireJson = Json { ignoreUnknownKeys = true }
 
-fun platformApi(endpoint: Endpoint, tokenSource: AccessTokenSource): PlatformApi {
-    val client = OkHttpClient.Builder()
+internal fun guardedClient(origin: HttpUrl, publishableKey: String? = null): OkHttpClient =
+    OkHttpClient.Builder()
         .connectTimeout(8, TimeUnit.SECONDS)
         .readTimeout(12, TimeUnit.SECONDS)
         .callTimeout(15, TimeUnit.SECONDS)
@@ -78,16 +77,16 @@ fun platformApi(endpoint: Endpoint, tokenSource: AccessTokenSource): PlatformApi
         .retryOnConnectionFailure(false)
         .addInterceptor(Interceptor { chain ->
             val request = chain.request()
-            if (request.url.host != endpoint.url.host || request.url.scheme != endpoint.url.scheme ||
-                request.url.port != endpoint.url.port) throw IOException("Unexpected API origin")
-            val outgoing = request.newBuilder().removeHeader("Authorization")
-            // This seam is unused in A1. There is no live token source or refresh across environments.
-            if (endpoint.environment == ApiEnvironment.PRODUCTION && request.url.encodedPath != "/health") {
-                tokenSource.currentAccessToken()?.let { outgoing.header("Authorization", "Bearer $it") }
-            }
+            if (request.url.host != origin.host || request.url.scheme != origin.scheme ||
+                request.url.port != origin.port) throw IOException("Unexpected API origin")
+            val outgoing = request.newBuilder().removeHeader("apikey")
+            if (request.url.encodedPath == "/health") outgoing.removeHeader("Authorization")
+            if (publishableKey != null) outgoing.header("apikey", publishableKey)
             chain.proceed(outgoing.build())
         }).build()
-    return Retrofit.Builder().baseUrl(endpoint.url).client(client)
+
+fun platformApi(endpoint: Endpoint): PlatformApi {
+    return Retrofit.Builder().baseUrl(endpoint.url).client(guardedClient(endpoint.url))
         .addConverterFactory(wireJson.asConverterFactory("application/json".toMediaType()))
         .build().create(PlatformApi::class.java)
 }

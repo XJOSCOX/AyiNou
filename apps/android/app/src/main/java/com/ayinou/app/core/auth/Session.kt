@@ -16,29 +16,12 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-
-sealed interface SessionState {
-    data object SignedOut : SessionState
-    data object Expired : SessionState
-    data object MfaRequired : SessionState
-    data class Member(val subject: String) : SessionState
-}
-
-interface AuthenticationRepository {
-    val state: StateFlow<SessionState>
-    suspend fun signOut()
-    suspend fun revokeSession()
-}
-
-fun interface AccessTokenSource { fun currentAccessToken(): String? }
-fun interface TokenRefreshCoordinator { suspend fun refresh(rejectedAccessToken: String): Boolean }
 
 @Serializable
 class Credentials(val accessToken: String, val refreshToken: String, val expiresAtEpochSeconds: Long) {
@@ -60,13 +43,17 @@ class KeystoreCredentialStore @Inject constructor(@ApplicationContext context: C
     override suspend fun read(): Credentials? = withContext(Dispatchers.IO) {
         mutex.withLock {
             try {
-                if (!file.baseFile.exists() || file.baseFile.length() !in 29..65536) return@withLock null
-                val bytes = file.readFully()
-                if (bytes[0] != 1.toByte()) return@withLock null
-                val key = keyStore().getKey(alias, null) as? SecretKey ?: return@withLock null
-                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-                cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, bytes.copyOfRange(1, 13)))
-                Json.decodeFromString<Credentials>(cipher.doFinal(bytes, 13, bytes.size - 13).decodeToString())
+                file.openRead().use { input ->
+                    val size = input.channel.size()
+                    if (size !in 29L..65_536L) return@withLock null
+                    val bytes = input.readBytes()
+                    if (bytes.size != size.toInt()) return@withLock null
+                    if (bytes[0] != 1.toByte()) return@withLock null
+                    val key = keyStore().getKey(alias, null) as? SecretKey ?: return@withLock null
+                    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                    cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(128, bytes.copyOfRange(1, 13)))
+                    Json.decodeFromString<Credentials>(cipher.doFinal(bytes, 13, bytes.size - 13).decodeToString())
+                }
             } catch (_: GeneralSecurityException) {
                 null
             } catch (_: IOException) {
@@ -97,9 +84,9 @@ class KeystoreCredentialStore @Inject constructor(@ApplicationContext context: C
 
     override suspend fun clear() = withContext(Dispatchers.IO) {
         mutex.withLock {
+            file.delete()
             val store = keyStore()
             if (store.containsAlias(alias)) store.deleteEntry(alias)
-            file.delete()
         }
     }
 

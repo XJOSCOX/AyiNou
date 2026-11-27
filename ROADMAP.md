@@ -358,6 +358,7 @@ Integrated project payments, financial custody, fund distribution, and escrow ar
 ## Phase 10 — Native apps and expansion
 
 - [ ] A0 remote API readiness. Render is deployed and signup is closed. Provider ingress confirmation and authenticated checks remain pending. [Setup guide](docs/deployment/A0_RENDER_BACKEND_SETUP.md)
+- [x] A2 native Android authentication and required onboarding verified locally. Authenticated Render access remains blocked on A0. [A2 report](docs/android/A2_AUTHENTICATION_IMPLEMENTATION_REPORT.md)
 - [x] A1 native Android foundation and local development APK. [Implementation report](docs/android/A1_FOUNDATION_IMPLEMENTATION_REPORT.md)
 - [ ] Determine Android/iOS architecture and shared API/data contracts.
 - [ ] Push notifications, efficient networking, offline/low-bandwidth modes.

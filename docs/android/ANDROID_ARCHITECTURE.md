@@ -1,17 +1,15 @@
 # AyiNou Android architecture
 
-A1 reuses the Android Studio Empty Activity scaffold in `apps/android`. Its single Gradle module builds independently of Next.js and Fastify. App startup and the Activity compose the UI. Hilt builds the app-scoped graph. The ViewModel combines ordinary preferences and connectivity into immutable StateFlow state. Compose observes it with lifecycle-aware collection and sends user intents back to the ViewModel.
+The single Gradle app in `apps/android` builds separately from Next.js and Fastify. Hilt supplies app-scoped services. A ViewModel exposes lifecycle-aware state to Compose. Navigation Compose hosts the account and preferences screens.
 
 | Area | Responsibility |
 | --- | --- |
-| `core/auth` | Session states, sign-out and revocation contracts, token and refresh seams, and an encrypted credential store |
-| `core/preferences` | Separate DataStore for language and theme |
-| `core/network` | Exact API origin, Retrofit DTOs and Fastify errors, bounded health reads, connectivity state |
-| `ui` | Compose screens, route registry, reusable controls, previews and startup state |
-| `res` | Native locale resources, brand assets, and backup and network policy |
+| `core/auth` | Auth and platform DTOs, encrypted session storage, serial refresh, MFA, standing, onboarding and sign-out |
+| `core/preferences` | Independent DataStore for language and theme |
+| `core/network` | Exact API origin, bounded health and account requests, connectivity state |
+| `ui` | Native sign-in, session and onboarding forms, account shell and settings |
+| `res` | Four locales, branding, theme, backup and network policy |
 
-Navigation Compose restores tab stacks and saved search input. Secondary routes use the same domain names as the existing web navigation. Dashboard follows the member D1 presentation. Feed presents a labeled local post illustration. Signup, session acquisition, token refresh, and server-backed feature navigation begin with separately authorized work.
+A2 replaces A1 demonstration routes with an authorized account shell. A3 will extend navigation to the real Dashboard and profile. Supabase Auth issues grants. Fastify and SQL determine access. Android does not read private platform tables. See [session management](A2_SESSION_MANAGEMENT.md).
 
-Fastify remains the resource authority. Review the shared [core API](../../packages/shared/src/core.ts), [profile and membership](../../packages/shared/src/accounts.ts) and [account enforcement](../../packages/shared/src/account-enforcement.ts) contracts before mapping live models. Future member, organization and Founder Verified indicators must use their existing projections. Account standing, blocking, muting, privacy, consent, participation rules and C1–C4 availability come from server responses. The client should reflect denials and gate state returned by the API. The app uses the existing Supabase project through its future publishable-client Auth flow and Fastify for platform resources.
-
-The sole implemented network operation is an explicit health check. Retrofit handles cancellation when its calling scope ends. A single eligible retry follows a short delay or a bounded Retry-After seconds value. Larger or non-numeric Retry-After values defer to the user. Production redirect and origin rules remain strict. No background workers, database cache, or offline mutation queue are required.
+Remote debug can check public health. Authenticated Render access and production variants remain unavailable. An explicit local debug configuration supports disposable Auth. See [development setup](ANDROID_DEVELOPMENT_SETUP.md).

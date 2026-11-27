@@ -37,7 +37,13 @@ val privateIpv4 = octets.size == 4 && octets.all { it.matches(Regex("0|[1-9][0-9
     hostParts.size == 4 && hostParts.all { it in 0..255 } &&
     (hostParts[0] == 10 || hostParts[0] == 127 || hostParts.take(2) == listOf(192, 168) ||
         (hostParts[0] == 172 && hostParts[1] in 16..31))
-require(environment in setOf("local", "remote")) { "Choose local or remote for an A1 debug build." }
+require(environment in setOf("local", "remote")) { "Choose local or remote for a debug build." }
+val disposableAuthKey = providers.environmentVariable("AYINOU_ANDROID_DISPOSABLE_PUBLISHABLE_KEY").orNull.orEmpty()
+require(disposableAuthKey.isEmpty() || (environment == "local" && local.host == "10.0.2.2" &&
+    disposableAuthKey.matches(Regex("sb_publishable_[A-Za-z0-9_-]{10,200}")))) {
+    "Disposable authentication requires the emulator loopback and a local Supabase publishable key."
+}
+val disposableAuthPort = 55321
 require(localOverride == null || environment == "local") { "Local overrides apply only to local development." }
 require(local.scheme == "http" && privateIpv4 && local.port in 1..65535 &&
     local.userInfo == null && local.rawQuery == null && local.rawFragment == null &&
@@ -61,10 +67,14 @@ android {
             versionNameSuffix = "-dev"
             buildConfigField("String", "API_BASE_URL", "\"$debugUrl\"")
             buildConfigField("String", "API_ENVIRONMENT", "\"$environment\"")
+            buildConfigField("String", "DISPOSABLE_AUTH_KEY", "\"$disposableAuthKey\"")
+            buildConfigField("int", "DISPOSABLE_AUTH_PORT", "$disposableAuthPort")
         }
         release {
             buildConfigField("String", "API_BASE_URL", "\"https://api.ayinou.com/\"")
             buildConfigField("String", "API_ENVIRONMENT", "\"production\"")
+            buildConfigField("String", "DISPOSABLE_AUTH_KEY", "\"\"")
+            buildConfigField("int", "DISPOSABLE_AUTH_PORT", "0")
         }
     }
     compileOptions {
